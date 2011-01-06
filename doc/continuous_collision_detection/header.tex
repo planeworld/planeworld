@@ -1,0 +1,139 @@
+%\documentclass[11pt,%%draft,
+%a4paper,liststotoc,bibtotocnumbered,tablecaptionabove,titlepage,headsepline,2.1headlines, headinclude]{scrreprt} %% mit Kapiteln
+
+%
+%  Einbinden der Pakete
+% ======================
+%
+\usepackage{amsmath}                % zusätzliche Mathematische Zeichen
+\usepackage{amssymb}                % zusätzliche Mathematische Symbole
+\usepackage{float}                  % weitere Möglichkeit zur Plazierung von Floatobjekten mittels "H", das Floatobjekt wird an genau die Stelle gesetzt, die angegeben wird. 
+\usepackage{graphicx,color}         % Einbinden von Bildformaten wie jpeg
+\usepackage[hyperindex]{hyperref}   % Hyperlinks fuer die elektronische Version
+\usepackage{subfigure}              % Erstellen von Unterabbildungen mit eigenen Unterschriften
+
+%  Index (Stichwortverzeichnis)
+% ==============================
+
+%\usepackage{index}
+%\newindex{default}{idx}{ind}{Namen- und Sachverzeichnis}
+
+%  weitere Pakete, hier nicht verwendet
+% ======================================
+
+%\usepackage{a4wide}                % die Seiten nicht im letter Format machen
+%\usepackage{amscd}
+%\usepackage{array}
+%\usepackage[ngerman]{babel}         % damit z.B. Abbildungen dt. sind
+%\usepackage[hang]{caption}         % Layoutänderungen von Caption's
+%\usepackage{colortab}
+%\usepackage{ecltree}               % Zeichnen von Baumdiagrammen
+%\usepackage{enumerate}             % Neudefinition der enumerate-Umgebung
+%\usepackage[dvips]{epsfig}          % Einbinden von EPS Bildern
+%\usepackage{fancyhdr}              % fancyheadings
+%\usepackage{floatfig}
+%\usepackage[T1]{fontenc}
+%\usepackage{hhline}                % Tabellenformatierung
+%\usepackage[breaklinks=true]{hyperref} % Hyperrefs in PDF Dokumenten
+%\usepackage[hyperindex]{hyperref}  % Hyperlinks fuer die gedruckte Version
+%\usepackage{indentfirst}           % 1. Zeile nach Überschrift einrücken
+%\usepackage[latin1]{inputenc}       % deutsche Umlaute
+%\usepackage{latexsym}              % Einbinden von Latex-Symbolen
+%\usepackage{letterspace}
+%\usepackage[norules]{lgrind}       % Programmcode Darstellung
+%\usepackage{longtable}             % für Tabellen die größer als eine Seite sind
+%\usepackage{lscape}                % für einzelne Seiten Landscape
+%\usepackage{mathrsfs}
+%\usepackage{moreverb}              % verbatim Umgebung nutzen können
+%\usepackage{nassi}                 % Nassi-Schneidermann Diagramme
+%\usepackage{ngerman}                % neue deutsche Rechtschreibung, z.B. für Silbentrennung
+%\usepackage{psfrag}                % Beschriftungen in EPS Bildern austauschen, nur mit dem Package graphicx moeglich
+%\usepackage[]{scrpage2}            % fuer die Kopf- und Fusszeilen erforderlich (KOMA-Script)
+%\usepackage{setspace}              % fuer größere Zeilenabstände
+%\usepackage{supertabular}          % Tabelle über mehrere Seiten zulassen
+%\usepackage{tabularx}              % automatisches Berechnen der Spaltenbreite
+%\usepackage{theorem}
+%\usepackage{thumbpdf}              % pdf-Thumbnails
+%\usepackage{times}                 % Schriftart Times
+%\usepackage{wrapfig}
+%\usepackage[arc,web,arrow]{xy}     % xy-pic Umgebung für einfache Bilder
+
+%  Einzug und Zeilenabstand verändern
+% ====================================
+
+%\typearea[1.5cm]{11}                %% gibt den beschreibbaren Textbereich an. (KOMA-Script)
+%\setlength{\parindent}{1em}         %% Einzug bei neuem Absatz auf 0 setzen
+%\setlength{\parskip}{0mm}          %% Abstand zwischen Absätzen auf 0 setzen
+%   1.5-fachen Zeilenabstand
+%\onehalfspacing
+%   2-fachen Zeilenabstand
+%\doublespacing
+
+%  Ränder definieren
+% ===================
+
+%\headheight1cm
+%\oddsidemargin0cm                      %% linker Rand
+%\evensidemargin0cm                     %% linker Rand
+%\textwidth15.5cm                       %% Textbreite
+%\textheight24.4cm                      %% Gesamthöhe für den Seitentext
+%\topmargin-1cm                         %% Oberer Rand bis Oberkante Kopfzeile
+
+%\setlength{\oddsidemargin}{-5mm}
+%\setlength{\voffset}{-25mm}
+%\setlength{\hoffset}{0mm}
+%\setlength{\topmargin}{-15mm}
+%\setlength{\linewidth}{160mm}
+%\setlength{\textheight}{225mm}
+%\setlength{\headsep}{10mm}
+%\setlength{\footskip}{15mm}
+
+%  Pfade und Dateinamenerweiterung für Bilder
+% ============================================
+
+% \graphicspath{{./Bilder/}{../../Projekt/Ergebnisse/}}
+%\DeclareGraphicsExtensions{.eps,.jpg}
+
+
+%  Alternatives Headerformat, für Reports sinnvoll
+% =================================================
+
+%\pagestyle{fancy}
+%\pagestyle{headings}
+%
+%\renewcommand{\chaptermark}[1]{\markboth{\thechapter\ #1}{}}
+%\renewcommand{\sectionmark}[1]{\markright{#1}}
+%\renewcommand{\chapterpagestyle}{fancy}         %% definiert den Seitenstil bei Kapitelanfängen neu
+%\lhead[]{\leftmark}
+%\chead{}
+%\rhead[]{\thepage}
+%\lfoot[]{}
+%\cfoot[]{}
+%\rfoot[]{}
+%\renewcommand{\headrulewidth}{0.2pt}
+%\renewcommand{\footrulewidth}{0.2pt}
+
+%  Schrift im mathematischen Modus in verschiedenen Größen
+% =========================================================
+
+\newcommand{\mathtiny}[1]{\text{\tiny\ensuremath{#1}}}
+\newcommand{\mathscriptsize}[1]{\text{\scriptsize\ensuremath{#1}}}
+\newcommand{\mathfootnotesize}[1]{\text{\footnotesize\ensuremath{#1}}}
+\newcommand{\mathsmall}[1]{\text{\small\ensuremath{#1}}}
+\newcommand{\mathnormalsize}[1]{\text{\normalsize\ensuremath{#1}}}
+\newcommand{\mathlarge}[1]{\text{\large\ensuremath{#1}}}
+\newcommand{\mathLarge}[1]{\text{\Large\ensuremath{#1}}}
+\newcommand{\mathLARGE}[1]{\text{\LARGE\ensuremath{#1}}}
+\newcommand{\mathhuge}[1]{\text{\huge\ensuremath{#1}}}
+\newcommand{\mathHuge}[1]{\text{\Huge\ensuremath{#1}}}
+\newcommand{\mathframe}[1]{\text{\frame{\ensuremath{#1}}}}
+
+%  Einige trigonometrische Funktionen als Operatoren
+% ===================================================
+
+\newcommand{\arcsinh}{\operatorname{arcsinh}}
+\newcommand{\arccosh}{\operatorname{arccosh}}
+\newcommand{\arctanh}{\operatorname{arctanh}}
+\newcommand{\arccot}{\operatorname{arccot}}
+\newcommand{\arccoth}{\operatorname{arccoth}}
+

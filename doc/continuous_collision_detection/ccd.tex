@@ -1,0 +1,273 @@
+\documentclass[a4paper,10pt]{scrartcl}
+
+\input{header}
+\newcommand{\abs}[1]{\vert{#1}\vert}
+\newcommand{\norm}[1]{\left\Vert {#1} \right\Vert}
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+
+\begin{document}
+
+% \tableofcontents
+% \listoffigures
+% \addcontentsline{toc}{chapter}{\listfigurename}
+
+\section{Circle--Circle Collision}
+
+% \begin{figure}[htb]
+%     \centering
+%     \input{circ_circ_01.pdf_t}
+% \end{figure}
+\noindent
+\textbf{Definitions:}\\
+
+\noindent
+Position circle A: $\vec{p}_A$ \\
+Position circle B: $\vec{p}_B$ \\
+$\vec{p}_{A0} = \vec{p}_A(t=0)$ \\
+$\vec{p}_{A1} = \vec{p}_A(t=1)$ \\
+$\vec{p}_{B0} = \vec{p}_B(t=0)$ \\
+$\vec{p}_{B1} = \vec{p}_B(t=1)$ \\
+Radius circle 1: $r_1$ \\
+Radius circle 2: $r_2$ \\
+
+\noindent
+For Circle--Circle collsion detection two cases are need to be
+evaluated:
+\begin{enumerate}
+    \item Circles do not cover a common area
+    \item One circle is inside the other
+\end{enumerate}
+For the calculation, this only changes the way the radii are
+handled. For case 1, the following definition is used
+\begin{equation}
+    r = r_1+r_2
+\end{equation}
+Case 2 implies
+\begin{equation}
+    r = \abs{r_1-r_2}
+\end{equation}
+With~$t$ being the time of collision factor ($t \in [0,1]]$) the following equation must be solved:
+\begin{equation}
+    \norm{\vec{p}_{A0} + ( \vec{p}_{A1} - \vec{p}_{A0} ) \cdot t -
+    (
+    \vec{p}_{B0} + ( \vec{p}_{B1} - \vec{p}_{B0} ) \cdot t
+    )
+    }
+    = r
+\end{equation}
+\begin{equation}
+    \norm{\vec{p}_{A0} + \vec{p}_{\Delta A} \cdot t -
+    (
+    \vec{p}_{B0} + \vec{p}_{\Delta B} \cdot t
+    )
+    }
+    = r
+\end{equation}
+\begin{equation}
+    \norm{(\vec{p}_{A0} - \vec{p}_{B0}) +
+    (
+     \vec{p}_{\Delta A} - \vec{p}_{\Delta B}
+    )
+    \cdot t
+    }
+    = r
+\end{equation}
+\begin{equation}
+    [(\vec{p}_{A0} - \vec{p}_{B0}) +
+    (
+     \vec{p}_{\Delta A} - \vec{p}_{\Delta B}
+    )
+    \cdot t
+    ]^2
+    = r^2
+\end{equation}
+\begin{equation}
+    [U + V \cdot t]^2
+    = r^2
+\end{equation}
+\begin{equation}
+    U^2 + 2 UVt + V^2 t^2
+    = r^2
+\end{equation}
+\begin{equation}
+    t^2 + 2\frac{UV}{V^2} t + \frac{U^2-r^2}{V^2} = 0
+\end{equation}
+\begin{equation}
+    t_{1/2} = -\frac{p}{2} \qquad\stackrel{+}{-} \qquad\sqrt{\left(\frac{p}{2}\right)^2 - q}
+\end{equation}
+with
+\begin{equation}
+    \frac{p}{2} = \frac{UV}{V^2}
+\end{equation}
+and
+\begin{equation}
+    q = \frac{U^2-r^2}{V^2}
+\end{equation}
+If the square root is complex or~$t$ is negative, there is no collsion. If the square root is zero,
+there is one collision.
+Otherwise, there are two solutions for~$t$, first collision appears for the smaller~$t$.
+
+\section{Polygon--Polygon Collision}
+
+For polygon--polygon collision every vertex~$v_n$ of polygon~$B$ is tested for collision
+with every line between vertex~$v_n$ and~$v_{n+1}$ of polygon~$A$.\\
+
+\noindent
+\textbf{Definitions:}\\
+
+\noindent
+Point on line between vertex~$v_n$ and~$v_{n+1}$ of polygon~$A$ for each dimension: $p_A$ \\
+Vertex~$v_n$ of polygon~$B$ for each dimension: $p_B$ \\
+$p_{A0} = p_A(t=0)$ \\
+$p_{A1} = p_A(t=1)$ \\
+$p_{B0} = p_B(t=0)$ \\
+$p_{B1} = p_B(t=1)$ \\
+
+\subsection{Version 1 -- Point--Line}
+
+The line between vertices of polygon~$A$ is defined by the accordant vertices~$p_{A00} = 
+p_{A_0}(t=0)$ and~$p_{A10} = p_{A_1}(t=0)$
+\begin{equation}
+    p_{A0} = p_{A00} + \alpha (p_{A10} - p_{A00} )
+\end{equation}
+\begin{equation}
+    p_{A1} = p_{A01} + \alpha (p_{A11} - p_{A01} )
+\end{equation}
+\begin{equation}
+    p_{A0} + ( p_{A1} - p_{A0} ) \cdot t = 
+    p_{B0} + ( p_{B1} - p_{B0} ) \cdot t
+\end{equation}
+\begin{equation}
+    \frac{p_{A0} - p_{B0}}
+    {(p_{B1} - p_{B0}) -
+     (p_{A1} - p_{A0})}
+     = t
+\end{equation}
+\begin{equation}
+    \frac{p_{A00} + \alpha (p_{A10} - p_{A00} ) -
+          p_{B0}}
+    {(p_{B1} - p_{B0}) -
+     [(p_{A01} + \alpha (p_{A11} - p_{A01} )) -
+      (p_{A00} + \alpha (p_{A10} - p_{A00} ))]
+    }
+     = t
+\end{equation}
+\begin{equation}
+    \frac{p_{A00} - p_{B0} + 
+          \alpha (p_{A10} - p_{A00} )
+         }
+         {(p_{B1} - p_{B0}) -
+            (p_{A01} - p_{A00}) +
+            \alpha [(p_{A10} - p_{A00} ) - 
+                    (p_{A11} - p_{A01} )
+                   ]
+         }
+     = t
+\end{equation}
+Substitution of constants:
+\begin{equation}
+    f(\alpha) = 
+    \frac{a + \alpha b}
+         {c + \alpha d}
+     = t
+\end{equation}
+This is true for coordinates~$x,y$. For both dimensions, time~$t$ must be equal. Hence, $\alpha$
+can be calculated by solving the following equation:
+\begin{equation}
+    \frac{a_x + \alpha b_x}
+         {c_x + \alpha d_x}
+     =
+    \frac{a_y + \alpha b_y}
+         {c_y + \alpha d_y}
+\end{equation}
+After some rearranging we get
+\begin{equation}
+    \alpha^2 ( b_x d_y - b_y d_x) + 
+    \alpha   ( a_x d_y + b_x c_y - a_y d_x - b_y c_x) +
+             ( a_x c_y - a_y c_x) = 0
+\end{equation}
+which is a simple quadratic equation. All valid~$\alpha \in [0,1]$ result in a
+time~$t$, that is also only valid for $t \in [0,1]$.
+
+\subsection{Version 1 -- Point--Line/Circle--Line}
+
+\subsubsection{Testing the end points}
+The first part is to test the end points of the line for collsion when dealing with a
+circle.\\
+\begin{equation}
+    \norm{
+      (\vec{p}_{A0} + t\cdot (\vec{p}_{A1} - \vec{p}_{A0})) -
+      (\vec{p}_{B0} + t\cdot (\vec{p}_{B1} - \vec{p}_{B0}))
+    }
+    = r
+\end{equation}
+\begin{equation}
+    \norm{
+      (\vec{p}_{A0}-\vec{p}_{B0} + t\cdot
+      (\vec{p}_{A1} - \vec{p}_{A0} - \vec{p}_{B1} + \vec{p}_{B0})
+    }
+    = r
+\end{equation}
+\begin{equation}
+    \norm{ a + t\cdot b } = r
+\end{equation}
+\begin{equation}
+    b^2 t^2 + 2abt + a^2-r^2 = 0
+\end{equation}
+This is a simple quadratic equation which must be solved for~$t$.
+
+\subsubsection{Testing the lines between end points}
+In this second part, collision is handled by the distance~$d_i$ of a point to the line between
+two points. For point--line collision distance~$d_i=0$ is sufficient.
+In case of a circle, $d_i=r$ with $r$ being the radius of the circle.\\
+The distance to the line is calculated similar to using a plane in Hessian Normal Form in 3D.\\
+One approximation is very important: Since a simple interpolation is used, lines do not neccessarily
+keep their length. Hence, the norm of a vector between to points might change for this model,
+while in reality, it would stay the same. For easier calculation, the unchanged length
+is used for calculation, which slightly disagrees with the model.
+\begin{equation}
+    \norm{\vec{p}_{A10} - \vec{p}_{A00}}
+    \approx
+    \norm{(\vec{p}_{A10} + t\cdot (\vec{p}_{A11} - \vec{p}_{A10})) -
+          (\vec{p}_{A00} + t\cdot (\vec{p}_{A01} - \vec{p}_{A00}))}
+\end{equation}
+With this, the distance is calculated as follows:
+\begin{eqnarray}
+    \frac{(\vec{p}_{A10} + t\cdot (\vec{p}_{A11} - \vec{p}_{A10})) -
+          (\vec{p}_{A00} + t\cdot (\vec{p}_{A01} - \vec{p}_{A00}))}
+         {\norm{\vec{p}_{A10} - \vec{p}_{A00}}} & \times & \\
+    \frac{(\vec{p}_{B0} + t \cdot (\vec{p}_{B1} - \vec{p}_{B0})) -
+          (\vec{p}_{A00} + t\cdot (\vec{p}_{A01} - \vec{p}_{A00}))}
+         {\norm{\vec{p}_{A10} - \vec{p}_{A00}}} & = & d_i
+\end{eqnarray}
+\begin{eqnarray}
+    [(\vec{p}_{A10}-\vec{p}_{A00}) + 
+     t\cdot (\vec{p}_{A11} - \vec{p}_{A10} - \vec{p}_{A01} + \vec{p}_{A00})]
+          & \times & \\
+    \left[(\vec{p}_{B0} - \vec{p}_{A00}) +
+          t\cdot (\vec{p}_{B1} - \vec{p}_{B0} - \vec{p}_{A01} + \vec{p}_{A00})\right]
+          & = & d_i \norm{\vec{p}_{A10} - \vec{p}_{A00}}
+\end{eqnarray}
+\begin{equation}
+    (a + t\cdot b) \times (c + t\cdot d) = d_i e
+\end{equation}
+\begin{equation}
+    (b \times d)t^2 + (b \times c + a \times d)t + (a \times c - d_i e) = 0
+\end{equation}
+This is a simple quadratic equation which must be solved for~$t$. There is a
+special case: If the line does not move in time, then $b=0$. Hence, the resulting
+equation is simplified to:
+\begin{equation}
+    (a \times d)t + (a \times c - d_i e) = 0
+\end{equation}
+\begin{equation}
+    t = \frac{d_i e -  a \times c}{a \times d}
+\end{equation}
+In both cases, the order of operands of the cross product must also be changed,
+so there are several solutions for time~$t$ to test for the smallest value.
+If a time is found, it has to be validated. By using the time and the dot product,
+it is tested, if the point of collsion lies within the line.\\
+
+\end{document}

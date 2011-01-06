@@ -1,0 +1,37 @@
+PROJECT (planeworld)
+
+FIND_PACKAGE(Qt4 REQUIRED)
+FIND_PACKAGE(OpenGL REQUIRED)
+SET(QT_USE_OPENGL TRUE)
+INCLUDE(${QT_USE_FILE})
+
+INCLUDE_DIRECTORIES (
+	 ${QT_INCLUDE_DIR}
+	 ${QT_QTOPENGL_INCLUDE_DIR}
+	../inc
+	../../inc
+)
+
+SET(SRCS
+	glwidget.cpp
+# 	graphics.cpp
+	main.cpp
+)
+# SET(MOC_SRCS
+# 	glwidget.cpp
+# )
+# SET(MOC_HDRS
+# 	../inc/glwidget.h
+# )
+
+# QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS})
+
+# ADD_EXECUTABLE (qttest ${MOC_SRCS} ${SRCS})
+ADD_EXECUTABLE (qttest ${SRCS})
+
+TARGET_LINK_LIBRARIES (qttest
+	${QT_LIBRARIES}
+	${QT_QTOPENGL_LIBRARY_RELEASE}
+)
+
+INSTALL (TARGETS qttest DESTINATION bin)

@@ -1,0 +1,142 @@
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \file       contact.h
+/// \brief      Prototype of class "CContact"
+///
+/// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
+/// \date       2010-03-25
+///
+////////////////////////////////////////////////////////////////////////////////
+
+#ifndef CONTACT_H
+#define CONTACT_H
+
+//--- Program header ---------------------------------------------------------//
+#include "log.h"
+
+//--- Standard header --------------------------------------------------------//
+#include <list>
+
+//--- Misc header ------------------------------------------------------------//
+#include "eigen2/Eigen/Core"
+
+using namespace Eigen;
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Class to return contact information
+///
+////////////////////////////////////////////////////////////////////////////////
+class CContact
+{
+    
+    public:
+    
+        //--- Constructor/Destructor -----------------------------------------//
+        CContact();
+
+        //--- Constant methods -----------------------------------------------//
+        std::list<Vector2d> getPointsOfContact() const;
+        bool occurred() const;
+
+        //--- Methods --------------------------------------------------------//
+        void setOccurred(const bool&);
+        void setPointsOfContact(const std::list<Vector2d>&);
+        
+    private:
+        
+        bool                m_bContact; ///< Flags if contact occurred
+        std::list<Vector2d> m_POCList;  ///< Points of contact
+
+};
+
+/// Type definition of a list of contacts
+typedef std::list<CContact> ContactList;
+
+//--- Implementation is done here for inlining optimisation ------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Constructor
+///
+////////////////////////////////////////////////////////////////////////////////
+inline CContact::CContact():m_bContact(false)
+{
+    METHOD_ENTRY("CContact::CContact")
+    CTOR_CALL("CContact::CContact")
+
+    METHOD_EXIT("CContact::CContact")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the list of contacts
+///
+/// \return Contact list
+///
+////////////////////////////////////////////////////////////////////////////////
+inline std::list<Vector2d> CContact::getPointsOfContact() const
+{
+    METHOD_ENTRY("CContact::getPointsOfContact")
+
+    METHOD_EXIT("CContact::getPointsOfContact")
+    return m_POCList;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines, where the contact occurred
+///
+/// \return Flag if contact occurred
+///
+////////////////////////////////////////////////////////////////////////////////
+inline bool CContact::occurred() const
+{
+    METHOD_ENTRY("CContact::occurred")
+
+    METHOD_EXIT("CContact::occurred")
+    return m_bContact;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines, where the contact occurred
+///
+/// \param _bContact Flags if contact occurred
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CContact::setOccurred(const bool& _bContact)
+{
+    METHOD_ENTRY("CContact::setOccurred")
+
+    m_bContact = _bContact;
+    
+    METHOD_EXIT("CContact::setOccurred")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines, where the contact occurred
+///
+/// \param _vecPOC Point of contact
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CContact::setPointsOfContact(const std::list<Vector2d>& _POCList)
+{
+    METHOD_ENTRY("CContact::setPointsOfContact")
+
+    m_POCList = _POCList;
+    
+    METHOD_EXIT("CContact::setPointsOfContact")
+}
+
+#endif
