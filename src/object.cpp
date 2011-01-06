@@ -109,65 +109,6 @@ IObject::~IObject()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Test object for collision
-///
-/// \param _pObject Other object of collision
-///
-/// \return Contacts
-///
-///////////////////////////////////////////////////////////////////////////////
-const CContact IObject::collidesWith(IObject* _pObject)
-{
-    METHOD_ENTRY("IObject::collidesWith")
-
-    // No need to do something here, collidesWith is
-    // called again when parameter is known.
-    
-    METHOD_EXIT("IObject::collidesWith")
-    // Call object specific collision detection
-    return this->myCollidesWith(_pObject);
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Test object for collision
-///
-/// \param _pBody Other object of collision
-///
-/// \return Contacts
-///
-///////////////////////////////////////////////////////////////////////////////
-const CContact IObject::collidesWith(CBody* _pBody)
-{
-    METHOD_ENTRY("IObject::collidesWith")
-
-    METHOD_EXIT("IObject::collidesWith")
-    // Call object specific collision detection
-    return this->myCollidesWith(_pBody);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Test object for collision
-///
-/// \param _pPointMass Other object of collision
-///
-/// \return Contacts
-///
-///////////////////////////////////////////////////////////////////////////////
-const CContact IObject::collidesWith(CPointMass* _pPointMass)
-{
-    METHOD_ENTRY("IObject::collidesWith")
-
-    METHOD_EXIT("IObject::collidesWith")
-    
-    // Call object specific collision detection
-    return this->myCollidesWith(_pPointMass);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Calculate dynamics of object
 ///
 /// \param _fTimeStep Time between two frames

@@ -55,12 +55,6 @@ class CPointMass : public IObject
 
     protected:
 
-        const CContact myCollidesWith(IObject*);
-        const CContact myCollidesWith(CBody*);
-        const CContact myCollidesWith(CPointMass*);
-//      void myDynamics(const double&){}
-//      void mySetNewIntegrator(const IntegratorType&){}
-//      void myInit(){}
         void myTransform();
 
         //--- Protected Variables --------------------------------------------//

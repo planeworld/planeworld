@@ -55,9 +55,6 @@ class CBody : public IObject
 
     protected:
 
-        const CContact myCollidesWith(IObject*);
-        const CContact myCollidesWith(CBody*);
-        const CContact myCollidesWith(CPointMass*);
         void myInit();
         void mySetNewIntegrator(const IntegratorType&);
         void myTransform();

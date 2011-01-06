@@ -91,10 +91,6 @@ class IObject
         void                enableDynamics();
         void                disableDynamics();
         
-        const CContact      collidesWith(IObject*);
-        const CContact      collidesWith(CBody*);
-        const CContact      collidesWith(CPointMass*);
-
         void                dynamics(const double&);
         void                init();
         void                setNewIntegrator(const IntegratorType&);
@@ -103,10 +99,6 @@ class IObject
     protected:
 
         //--- Abstract methods [protected] -----------------------------------//
-        virtual const CContact myCollidesWith(IObject*) = 0;        ///< Test masses for collision
-        virtual const CContact myCollidesWith(CBody*) = 0;          ///< Test masses for collision
-        virtual const CContact myCollidesWith(CPointMass*) = 0;     ///< Test masses for collision
-        
         virtual void myDynamics(const double&) = 0;                 ///< Calculate dynamics from forces
         virtual void myInit() = 0;                                  ///< Initialise object -> total reset
         virtual void mySetNewIntegrator(const IntegratorType&) = 0; ///< Change type of integrator 
