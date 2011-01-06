@@ -45,22 +45,22 @@ class IJoint
         //--- Constant methods -----------------------------------------------//
         virtual void react() const = 0;
         
-        uint        getAnchorIDA() const;
-        uint        getAnchorIDB() const;
-        IObject*    getObjectA() const;
-        IObject*    getObjectB() const;
+        AnchorIDType    getAnchorIDA() const;
+        AnchorIDType    getAnchorIDB() const;
+        IObject*        getObjectA() const;
+        IObject*        getObjectB() const;
 
         //--- Methods --------------------------------------------------------//
-        void attachObjectA(IObject*, const uint&);
-        void attachObjectB(IObject*, const uint&);
+        void attachObjectA(IObject*, const AnchorIDType&);
+        void attachObjectB(IObject*, const AnchorIDType&);
 
     protected:
         
         IObject* m_pObjectA;        ///< Pointer to attached object
         IObject* m_pObjectB;        ///< Pointer to attached object
         
-        uint        m_unAnchorIDA;  ///< Anchor ID of first attached object
-        uint        m_unAnchorIDB;  ///< Anchor ID of second attached object
+        AnchorIDType    m_AnchorIDA;  ///< Anchor ID of first attached object
+        AnchorIDType    m_AnchorIDB;  ///< Anchor ID of second attached object
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -72,12 +72,12 @@ class IJoint
 /// \return Anchor ID
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline uint IJoint::getAnchorIDA() const
+inline AnchorIDType IJoint::getAnchorIDA() const
 {
     METHOD_ENTRY("IJoint::getAnchorIDA()");
 
     METHOD_EXIT("IJoint::getAnchorIDA()");
-    return (m_unAnchorIDA);
+    return (m_AnchorIDA);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,12 +87,12 @@ inline uint IJoint::getAnchorIDA() const
 /// \return Anchor ID
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline uint IJoint::getAnchorIDB() const
+inline AnchorIDType IJoint::getAnchorIDB() const
 {
     METHOD_ENTRY("IJoint::getAnchorIDB()");
 
     METHOD_EXIT("IJoint::getAnchorIDB()");
-    return (m_unAnchorIDB);
+    return (m_AnchorIDB);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,17 +130,17 @@ inline IObject* IJoint::getObjectB() const
 /// \brief Attach the first object to joint
 ///
 /// \param _pA First object 
-/// \param _unAnchorID Anchor ID
+/// \param _AnchorID Anchor ID
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void IJoint::attachObjectA(IObject* _pA, const uint& _unAnchorID)
+inline void IJoint::attachObjectA(IObject* _pA, const AnchorIDType& _AnchorID)
 {
-    METHOD_ENTRY("IJoint::attachObjectA(IObject*, const Vector2d&)");
+    METHOD_ENTRY("IJoint::attachObjectA")
 
     m_pObjectA = _pA;
-    m_unAnchorIDA = _unAnchorID;
+    m_AnchorIDA = _AnchorID;
     
-    METHOD_EXIT("IJoint::attachObjectA(IObject*, const Vector2d&)");
+    METHOD_EXIT("IJoint::attachObjectA")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -148,17 +148,17 @@ inline void IJoint::attachObjectA(IObject* _pA, const uint& _unAnchorID)
 /// \brief Attach the second object to joint
 ///
 /// \param _pB Second object 
-/// \param _unAnchorID Anchor ID
+/// \param _AnchorID Anchor ID
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void IJoint::attachObjectB(IObject* _pB, const uint& _unAnchorID)
+inline void IJoint::attachObjectB(IObject* _pB, const AnchorIDType& _AnchorID)
 {
-    METHOD_ENTRY("IJoint::attachObjectA(IObject*, const Vector2d&)");
+    METHOD_ENTRY("IJoint::attachObjectA")
 
     m_pObjectB = _pB;
-    m_unAnchorIDB = _unAnchorID;
+    m_AnchorIDB = _AnchorID;
     
-    METHOD_EXIT("IJoint::attachObjectA(IObject*, const Vector2d&)");
+    METHOD_EXIT("IJoint::attachObjectA")
 }
 
 #endif

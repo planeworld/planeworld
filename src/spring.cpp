@@ -64,12 +64,12 @@ void CSpring::react() const
 {
     METHOD_ENTRY("CSpring::react()");
 
-    Vector2d vecTmp =   m_pObjectB->getAnchor(m_unAnchorIDB) -
-                        m_pObjectA->getAnchor(m_unAnchorIDA);
+    Vector2d vecTmp =   m_pObjectB->getAnchor(m_AnchorIDB) -
+                        m_pObjectA->getAnchor(m_AnchorIDA);
     Vector2d vecF = vecTmp.normalized()*(vecTmp.norm()-m_fLength)*m_fC;
 
-    m_pObjectA->addForce( vecF, m_pObjectA->getAnchor(m_unAnchorIDA));
-    m_pObjectB->addForce(-vecF, m_pObjectB->getAnchor(m_unAnchorIDB));
+    m_pObjectA->addForce( vecF, m_pObjectA->getAnchor(m_AnchorIDA));
+    m_pObjectB->addForce(-vecF, m_pObjectB->getAnchor(m_AnchorIDB));
     
     METHOD_EXIT("CSpring::react()");
 }

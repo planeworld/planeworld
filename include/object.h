@@ -36,6 +36,9 @@
 class CBody;
 class CPointMass;
 
+/// Type definition for the AnchorIDs
+typedef uint AnchorIDType;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Base class for general objects
@@ -74,7 +77,7 @@ class IObject
         virtual void clearForces() = 0;                                 ///< Clear forces acting on object
         
         void                addAcceleration(const Vector2d&);
-        unsigned int        addAnchor(const Vector2d&);
+        AnchorIDType        addAnchor(const Vector2d&);
         void                addVisuals(IVisuals*);
         void                disableGravitation();
         void                enableGravitation();
@@ -281,7 +284,7 @@ inline const Vector2d IObject::getVelocity() const
 /// \return ID of anchor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline unsigned int IObject::addAnchor(const Vector2d& _vecV)
+inline AnchorIDType IObject::addAnchor(const Vector2d& _vecV)
 {
     METHOD_ENTRY("IObject::addAnchor")
 
