@@ -337,7 +337,7 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
             Vector2d vecC = vecA0 - (*ciB00);
             Vector2d vecD = vecA1 - vecA0 - (*ciB01) + (*ciB00);
             
-            double fTTmp = fT;
+            double fTTmp = 2.0;
             
             if (vecB.isZero())
             {
@@ -390,24 +390,38 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
                     }
                 }
             }
-            double fPOC =
-                 (((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
-                  ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))).dot(
-                  (  vecA0  + fTTmp*(  vecA1  -   vecA0)) - 
-                  ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))) / fLength;
-            if ((fPOC >= 0.0) && (fPOC <= fLength))
+            if (fTTmp < fT)
             {
-                fT = fTTmp;
-                vecPOC =   (*ciB00) + fTTmp*((*ciB01) - (*ciB00)) + fPOC *
-                         (
-                          ((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
-                          ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))
-                         ) /
-                         (
-                          ((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
-                          ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))
-                         ).norm();
+                Vector2d vecSeg0 = (*ciB00) + fTTmp*((*ciB01) - (*ciB00));
+                Vector2d vecSeg1 = (*ciB10) + fTTmp*((*ciB11) - (*ciB10));
+                double fPOC = (vecSeg1 - vecSeg0).dot(
+                            (vecA0 + fTTmp*(vecA1-vecA0)) - vecSeg0
+                            ) / fLength;
+                if ((fPOC >= 0.0) && (fPOC <= fLength))
+                {
+                    fT = fTTmp;
+                    Vector2d vecSeg = vecSeg1 - vecSeg0;
+                    vecPOC = vecSeg0 + fPOC * vecSeg / vecSeg.norm();                        
+                }
             }
+//             double fPOC =
+//                  (((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
+//                   ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))).dot(
+//                   (  vecA0  + fTTmp*(  vecA1  -   vecA0)) - 
+//                   ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))) / fLength;
+//             if ((fPOC >= 0.0) && (fPOC <= fLength))
+//             {
+//                 fT = fTTmp;
+//                 vecPOC =   (*ciB00) + fTTmp*((*ciB01) - (*ciB00)) + fPOC *
+//                          (
+//                           ((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
+//                           ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))
+//                          ) /
+//                          (
+//                           ((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
+//                           ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))
+//                          ).norm();
+//             }
         }
         
         ++ciB00;
@@ -463,7 +477,7 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
             Vector2d vecC = vecA0 - (*ciB00);
             Vector2d vecD = vecA1 - vecA0 - (*ciB01) + (*ciB00);
             
-            double fTTmp = fT;
+            double fTTmp = 2.0;
             
             if (vecB.isZero())
             {
@@ -516,40 +530,36 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
                     }
                 }
             }
-            double fPOC =
-                 (((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
-                  ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))).dot(
-                  (  vecA0  + fTTmp*(  vecA1  -   vecA0)) - 
-                  ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))) / fLength;
-            if ((fPOC >= 0.0) && (fPOC <= fLength))
+            if (fTTmp < fT)
             {
-                fT = fTTmp;
-                vecPOC =   (*ciB00) + fTTmp*((*ciB01) - (*ciB00)) + fPOC *
-                         (
-                          ((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
-                          ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))
-                         ) /
-                         (
-                          ((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
-                          ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))
-                         ).norm();
+                Vector2d vecSeg0 = (*ciB00) + fTTmp*((*ciB01) - (*ciB00));
+                Vector2d vecSeg1 = (*ciB10) + fTTmp*((*ciB11) - (*ciB10));
+                double fPOC = (vecSeg1 - vecSeg0).dot(
+                            (vecA0 + fTTmp*(vecA1-vecA0)) - vecSeg0
+                            ) / fLength;
+                if ((fPOC >= 0.0) && (fPOC <= fLength))
+                {
+                    fT = fTTmp;
+                    Vector2d vecSeg = vecSeg1 - vecSeg0;
+                    vecPOC = vecSeg0 + fPOC * vecSeg / vecSeg.norm();                        
+                }
             }
         }
     }
     
     if (fT<=1.0)
     {
-//         // Colliding objects
-//         m_Graphics.setColor(0.0, 0.8, 0.0);
-//         m_Graphics.rect(_p1->getGeometry().getBoundingBox().getLowerLeft(),
-//                         _p1->getGeometry().getBoundingBox().getUpperRight());
-//         m_Graphics.rect(_p2->getGeometry().getBoundingBox().getLowerLeft(),
-//                         _p2->getGeometry().getBoundingBox().getUpperRight());
-// 
-//         // Point of collision
-//         m_Graphics.setColor(0.8, 0.0, 0.0);
-//         m_Graphics.dot(vecPOC);
-//         m_Graphics.setColor(1.0, 1.0, 1.0);
+        // Colliding objects
+        m_Graphics.setColor(0.0, 0.8, 0.0);
+        m_Graphics.rect(_p1->getGeometry().getBoundingBox().getLowerLeft(),
+                        _p1->getGeometry().getBoundingBox().getUpperRight());
+        m_Graphics.rect(_p2->getGeometry().getBoundingBox().getLowerLeft(),
+                        _p2->getGeometry().getBoundingBox().getUpperRight());
+
+        // Point of collision
+        m_Graphics.setColor(0.8, 0.0, 0.0);
+        m_Graphics.dot(vecPOC);
+        m_Graphics.setColor(1.0, 1.0, 1.0);
 
 //         _p1->disableDynamics();
 //         _p1->getGeometry().update();
