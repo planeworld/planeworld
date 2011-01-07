@@ -40,6 +40,9 @@
 
 //--- Misc-Header ------------------------------------------------------------//
 #include "SDL/SDL.h"
+
+#include <boost/thread.hpp> 
+
 // 
 extern "C" {
 #include "lua.h"
@@ -90,7 +93,7 @@ int main(int argc, char *argv[])
     CRigidBody*         pBody2;
     CRigidBody*         pBody3;
     CRigidBody*         pBody4;
-    CEngineManager*     pEngineManager;
+    CPhysicsManager*    pPhysicsManager;
     CVisualsManager*    pVisualsManager;
     CXFigLoader         XFigLoader;
     CSpring*            pSpring;
@@ -101,12 +104,12 @@ int main(int argc, char *argv[])
     srand(SDL_GetTicks());
 
     //--- Initialisation -----------------------------------------------------//
-    pEngineManager = new CEngineManager;
-    MEM_ALLOC("pEngineManager")
+    pPhysicsManager = new CPhysicsManager;
+    MEM_ALLOC("pPhysicsManager")
     pVisualsManager = new CVisualsManager;
     MEM_ALLOC("pVisualsManager")
     
-    pEngineManager->setVisualsManager(pVisualsManager);
+    pPhysicsManager->setVisualsManager(pVisualsManager);
         
     int nNumberOfBoxes = 0;
     
@@ -170,7 +173,7 @@ int main(int argc, char *argv[])
         
 //         pVisualsManager->addVisuals(pRectVisuals);
         pPointMass->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
-        pEngineManager->addObject(pPointMass);
+        pPhysicsManager->addObject(pPointMass);
     }
 
     //--- Initialize Rigidbody ----------------------------------------------//
@@ -187,7 +190,7 @@ int main(int argc, char *argv[])
 //     pBody1->disableGravitation();
 
     pBody1->addVisualsIDList(pVisualsManager->addVisualsList(XFigLoader.getVisuals()));
-    pEngineManager->addObject(pBody1);
+    pPhysicsManager->addObject(pBody1);
     
     //--- Initialize Rigidbody ----------------------------------------------//
     pBody2 = new CRigidBody;
@@ -253,7 +256,7 @@ int main(int argc, char *argv[])
     pBody2->getGeometry().addShape(pRect);
     pBody2->addVisualsID(pVisualsManager->addVisuals(pRectVisuals));
 
-    pEngineManager->addObject(pBody2);
+    pPhysicsManager->addObject(pBody2);
 
     //--- Initialize Rigidbody ----------------------------------------------//
     pPolyLine = new CPolyLine();
@@ -279,7 +282,7 @@ int main(int argc, char *argv[])
     pBody3->getGeometry().addShape(pPolyLine);
     pBody3->addVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
 
-    pEngineManager->addObject(pBody3);
+    pPhysicsManager->addObject(pBody3);
     
     //--- Initialise Rigidbody ----------------------------------------------//
     pBody4 = new CRigidBody;
@@ -303,7 +306,7 @@ int main(int argc, char *argv[])
     pBody4->getGeometry().addShape(pCircle);
     pBody3->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
-    pEngineManager->addObject(pBody4);
+    pPhysicsManager->addObject(pBody4);
     
     //--- Initialise Rigidbody ----------------------------------------------//
     pBody4 = new CRigidBody;
@@ -328,7 +331,7 @@ int main(int argc, char *argv[])
     pBody4->getGeometry().addShape(pCircle);
     pBody4->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
-    pEngineManager->addObject(pBody4);
+    pPhysicsManager->addObject(pBody4);
 
     //--- Initialize Spring -------------------------------------------------//
     pSpring = new CSpring();
@@ -341,7 +344,7 @@ int main(int argc, char *argv[])
     pSpring->setC(150.0);
     pSpring->setLength(20.0);
 
-    pEngineManager->addJoint(pSpring);
+    pPhysicsManager->addJoint(pSpring);
     pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
 
     pSpring = new CSpring();
@@ -354,7 +357,7 @@ int main(int argc, char *argv[])
     pSpring->setC(125.0);
     pSpring->setLength(15.0);
 
-    pEngineManager->addJoint(pSpring);
+    pPhysicsManager->addJoint(pSpring);
     pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
 
     pSpring = new CSpring();
@@ -367,7 +370,7 @@ int main(int argc, char *argv[])
     pSpring->setC(120.0);
     pSpring->setLength(18.0);
 
-    pEngineManager->addJoint(pSpring);
+    pPhysicsManager->addJoint(pSpring);
     pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
     
     //--- Initialize graphics ------------------------------------------------//
@@ -375,8 +378,8 @@ int main(int argc, char *argv[])
     // SDL_WM_GrabInput(SDL_GRAB_ON);
 
     // Set initialisation state of all objects
-    pEngineManager->initObjects();
-//  pEngineManager->setConstantGravitation(Vector2d(0.0, -9.81));
+    pPhysicsManager->initObjects();
+//  pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
 
     pBody4->setVelocity(Vector2d(1023.0, 0.0));
     
@@ -391,15 +394,15 @@ int main(int argc, char *argv[])
                 case SDL_KEYDOWN:
                     if (event.key.keysym.sym == SDLK_KP_PLUS)
                     {
-                        pEngineManager->accelerateTime();
+                        pPhysicsManager->accelerateTime();
                     }
                     if (event.key.keysym.sym == SDLK_KP_MINUS)
                     {
-                        pEngineManager->decelerateTime();
+                        pPhysicsManager->decelerateTime();
                     }
                     if (event.key.keysym.sym == SDLK_KP_ENTER)
                     {
-                        pEngineManager->resetTime();
+                        pPhysicsManager->resetTime();
                     }
                     if (event.key.keysym.sym == SDLK_b)
                     {
@@ -410,7 +413,7 @@ int main(int argc, char *argv[])
                         pVisualsManager->toggleVisualisations(VISUALS_OBJECT_INTERSECTIONS);
                     }
                     if (event.key.keysym.sym == SDLK_r)
-                        pEngineManager->initObjects();
+                        pPhysicsManager->initObjects();
                     if (event.key.keysym.sym == SDLK_t)
                         pRandomLine->init(-160.0, 160.0, 0.0, 50.0, 0.95, 20, 4);
                     if (event.key.keysym.sym == SDLK_ESCAPE)
@@ -455,19 +458,24 @@ int main(int argc, char *argv[])
             
         }
         Graphics.applyCamMovement();
-        pEngineManager->addGlobalForces();
-        pEngineManager->moveMasses();
-        pEngineManager->collisionDetection();
+        pPhysicsManager->addGlobalForces();
+        pPhysicsManager->moveMasses();
+        pPhysicsManager->collisionDetection();
+        
+        // Test threading
+//         boost::thread VisualsThread(&CVisualsManager::drawWorld, pVisualsManager);
+        
+//         VisualsThread.join();        
 //         if (nFrames % 2 == 0)
-        {
-            pEngineManager->drawWorld();
+//         {
+            pPhysicsManager->drawWorld();
             Graphics.swapBuffers();
-        }
+//         }
         //if (bIsActive)
         {
         // Use Fixed Framerate
         Timer.stop();
-        double fFrametime = 1.0/pEngineManager->getFrequency()-Timer.getTime();
+        double fFrametime = 1.0/pPhysicsManager->getFrequency()-Timer.getTime();
         if (fFrametime > 0.0)
         {
             unsigned int unFrametime = static_cast<unsigned int>(fFrametime*1e6);
@@ -494,11 +502,11 @@ int main(int argc, char *argv[])
 //          }
 //      }
     }
-    if (pEngineManager != 0)
+    if (pPhysicsManager != 0)
     {
-        delete pEngineManager;
-        pEngineManager = 0;
-        MEM_FREED("pEngineManager")
+        delete pPhysicsManager;
+        pPhysicsManager = 0;
+        MEM_FREED("pPhysicsManager")
     }
     if (pVisualsManager != 0)
     {

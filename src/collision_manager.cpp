@@ -29,6 +29,7 @@ void CCollisionManager::detectCollisions()
     METHOD_ENTRY("CCollisionManager::detectCollisions")
 
     std::list< IObject* >::const_iterator cj;
+    
     for (std::list< IObject* >::const_iterator ci = m_ObjList.begin();
         ci != m_ObjList.end(); ++ci)
     {

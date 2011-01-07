@@ -24,8 +24,7 @@
 // #include <list>
 
 //--- Program header ---------------------------------------------------------//
-#include "collision_manager.h"
-#include "joint.h"
+#include "physics_manager.h"
 #include "visuals_manager.h"
 
 const double ENGINE_DEFAULT_FREQUENCY = 30.0;
@@ -34,7 +33,7 @@ const double ENGINE_DEFAULT_FREQUENCY = 30.0;
 ///
 /// \brief Class for managing the engine(s)
 ///
-/// This class manages the lists for displaying objects etc.
+/// This class manages the the different engine modules, like physics, graphics.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CEngineManager
@@ -47,73 +46,35 @@ class CEngineManager
         ~CEngineManager();
         
         //--- Constant Methods -----------------------------------------------//
-        const double getFrequency() const;
-
-        void drawWorld() const;
+        void runPhysics() const;
+        void runGraphics() const;
         
         //--- Methods --------------------------------------------------------//
-        void setConstantGravitation(const Vector2d&);
-        void addGlobalForces();
-        void addJoint(IJoint*);
-        void addObject(IObject*);
-        void collisionDetection();
-        void initObjects();
-        void moveMasses();
+        void setPhysicsManager(CPhysicsManager*);
         void setVisualsManager(CVisualsManager*);
         
-        void accelerateTime();
-        void decelerateTime();
-        void resetTime();
-        
-
     private:
         
-        CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
-        CVisualsManager*    m_pVisualsManager;      ///< Instance for graphical representation
-
-        CTimer m_Timer;                             ///< Timer for physics
-        double m_fFrequency;                        ///< Frequency of physics calculation
-        double m_fTimeAccel;                        ///< Factor for global acceleration
-
-        Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
-
-        std::list<IJoint*>  m_JointList;            ///< List of joints
-        std::list<IObject*> m_ObjList;              ///< List of objects
-        
-        ContactList         m_ContactList;          ///< List of contacts
+        CPhysicsManager*    m_pPhysicsManager;      ///< Instance for handling physics
+        CVisualsManager*    m_pVisualsManager;      ///< Instance for handling graphics
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns frequency of physics calculations
+/// \brief Sets up instance for physics
 ///
-/// \return Frequency in Hertz
+/// \param _pPhys Pointer to physic manager instance
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CEngineManager::getFrequency() const
+inline void CEngineManager::setPhysicsManager(CPhysicsManager* _pPhys)
 {
-    METHOD_ENTRY("CEngineManager::getFrequency()")
+    METHOD_ENTRY("CEngineManager::setPhysicsManager")
 
-    METHOD_EXIT("CEngineManager::getFrequency()")
-    return (m_fFrequency);
-}
+    m_pPhysicsManager = _pPhys;
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Set vector for a constant gravitation
-///
-/// \param _vecG Gravity vector
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CEngineManager::setConstantGravitation(const Vector2d& _vecG)
-{
-    METHOD_ENTRY("CEngineManager::setConstantGravitation")
-
-    m_vecConstantGravitation = _vecG;
-
-    METHOD_EXIT("CEngineManager::setConstantGravitation")
+    METHOD_EXIT("CEngineManager::setPhysicsManager")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,49 +91,6 @@ inline void CEngineManager::setVisualsManager(CVisualsManager* _pVis)
     m_pVisualsManager = _pVis;
 
     METHOD_EXIT("CEngineManager::setVisualsManager")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Accelerates time by factor 2
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CEngineManager::accelerateTime()
-{
-    METHOD_ENTRY("CEngineManager::accelerateTime")
-    
-    if (m_fTimeAccel < 16.0)
-        m_fTimeAccel *= 2.0;
-
-    METHOD_EXIT("CEngineManager::accelerateTime")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Decelerates time by factor 2
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CEngineManager::decelerateTime()
-{
-    METHOD_ENTRY("CEngineManager::decelerateTime")
-
-    m_fTimeAccel /= 2.0;
-
-    METHOD_EXIT("CEngineManager::decelerateTime")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Resets time acceleration factor
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CEngineManager::resetTime()
-{
-    METHOD_ENTRY("CEngineManager::resetTime")
-
-    m_fTimeAccel = 1.0;
-
-    METHOD_EXIT("CEngineManager::resetTime")
 }
 
 #endif
