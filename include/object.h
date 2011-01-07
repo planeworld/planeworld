@@ -124,8 +124,8 @@ class IObject
         double                  m_fMass;                            ///< Mass of object in kg
         int                     m_nDepthlayers;                     ///< Depths in which shape exists
         
-        IIntegrator*            m_pIntPos;                          ///< Position integrator
-        IIntegrator*            m_pIntVel;                          ///< Velocity integrator
+        IIntegrator<Vector2d>*  m_pIntPos;                          ///< Position integrator
+        IIntegrator<Vector2d>*  m_pIntVel;                          ///< Velocity integrator
 
         std::string             m_strName;                          ///< Object's name
 

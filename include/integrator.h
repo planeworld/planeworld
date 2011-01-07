@@ -39,24 +39,23 @@ typedef enum
 /// \brief Abstract class representing an integrator
 /// 
 ////////////////////////////////////////////////////////////////////////////////
+template <class T>
 class IIntegrator
 {
     
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        IIntegrator() {};                               ///< Constructor
         virtual ~IIntegrator(){};                       ///< Destructor
         
         //--- Constant Methods -----------------------------------------------//
-        virtual const Vector2d  getPrevValue() const = 0;
-        virtual const Vector2d  getValue() const = 0;
+        virtual const T getPrevValue() const = 0;
+        virtual const T getValue() const = 0;
 
         //--- Methods --------------------------------------------------------//
-        virtual const Vector2d  integrate(const Vector2d&, const double&) = 0;
-        virtual const double    integrate(const double&, const double&) = 0;
-        virtual void            init(const Vector2d&) = 0;
-        virtual void            reset() = 0;
+        virtual const T integrate(const T&, const double&) = 0;
+        virtual void    init(const T&) = 0;
+        virtual void    reset() = 0;
 
     protected:
 

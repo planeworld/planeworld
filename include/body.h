@@ -46,8 +46,8 @@ class CBody : public IObject
         virtual ~CBody();                               ///< Destructor
 
         //--- Constant Methods -----------------------------------------------//
-        const Vector2d getAnchor(const int&) const;
-        const Vector2d getAngleVelocity() const;
+        const Vector2d  getAnchor(const int&) const;
+        const double    getAngleVelocity() const;
         
         //--- Methods --------------------------------------------------------//
         void rotBy(const double&);
@@ -64,8 +64,8 @@ class CBody : public IObject
         double              m_fInertia;                 ///< The body's inertia
         double              m_fTorque;                  ///< Resulting torque on body
         
-        IIntegrator*        m_pIntAng;                  ///< Angle integrator
-        IIntegrator*        m_pIntAngVel;               ///< Angle velocity integrator
+        IIntegrator<double>*    m_pIntAng;              ///< Angle integrator
+        IIntegrator<double>*    m_pIntAngVel;           ///< Angle velocity integrator
 
 };
 
@@ -78,7 +78,7 @@ class CBody : public IObject
 /// \return Angle velocity
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d CBody::getAngleVelocity() const
+inline const double CBody::getAngleVelocity() const
 {
     METHOD_ENTRY("CBody::getAngleVelocity")
 

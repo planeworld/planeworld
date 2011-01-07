@@ -20,14 +20,14 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/shapes/random_line.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/shapes/rectangle.cpp
     
-    adams_bashforth_integrator.cpp
-    adams_moulton_integrator.cpp
+#     adams_bashforth_integrator.cpp
+#     adams_moulton_integrator.cpp
     body.cpp
     bounding_box.cpp
     circle_visuals.cpp
     collision_manager.cpp
     engine_manager.cpp
-    euler_integrator.cpp
+#     euler_integrator.cpp
     geometry.cpp
     graphics.cpp
     object.cpp

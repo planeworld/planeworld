@@ -29,9 +29,9 @@ CBody::CBody() : m_fAngle(0.0), m_fInertia(1.0), m_fTorque(0.0)
     METHOD_ENTRY("CBody::CBody");
     CTOR_CALL("CBody::CBody");
     
-    m_pIntAng = new CAdamsMoultonIntegrator();
+    m_pIntAng = new CAdamsMoultonIntegrator<double>;
     MEM_ALLOC("m_pIntAng");
-    m_pIntAngVel = new CAdamsBashforthIntegrator();
+    m_pIntAngVel = new CAdamsBashforthIntegrator<double>;
     MEM_ALLOC("m_pIntAngVel");
 
     // Default name for any body:
@@ -169,20 +169,20 @@ void CBody::mySetNewIntegrator(const IntegratorType& _IntType)
     switch (_IntType)
     {
         case INTEGRATOR_EULER:
-            m_pIntAng = new CEulerIntegrator;
-            m_pIntAngVel = new CEulerIntegrator;
+            m_pIntAng = new CEulerIntegrator<double>;
+            m_pIntAngVel = new CEulerIntegrator<double>;
             MEM_ALLOC("m_pIntAng")
             MEM_ALLOC("m_pIntAngVel")
             break;
         case INTEGRATOR_ADAMS_BASHFORTH:
-            m_pIntAng = new CAdamsBashforthIntegrator;
-            m_pIntAngVel = new CAdamsBashforthIntegrator;
+            m_pIntAng = new CAdamsBashforthIntegrator<double>;
+            m_pIntAngVel = new CAdamsBashforthIntegrator<double>;
             MEM_ALLOC("m_pIntAng")
             MEM_ALLOC("m_pIntAngVel")
             break;
         case INTEGRATOR_ADAMS_MOULTON:
-            m_pIntAng = new CAdamsMoultonIntegrator;
-            m_pIntAngVel = new CAdamsMoultonIntegrator;
+            m_pIntAng = new CAdamsMoultonIntegrator<double>;
+            m_pIntAngVel = new CAdamsMoultonIntegrator<double>;
             MEM_ALLOC("m_pIntAng")
             MEM_ALLOC("m_pIntAngVel")
             break;

@@ -34,9 +34,9 @@ IObject::IObject(): m_bGravitation(true),
     METHOD_ENTRY("IObject::IObject")
     CTOR_CALL("IObject::IObject")
     
-    m_pIntPos = new CAdamsMoultonIntegrator();
+    m_pIntPos = new CAdamsMoultonIntegrator<Vector2d>;
     MEM_ALLOC("m_pIntPos")
-    m_pIntVel = new CAdamsBashforthIntegrator();
+    m_pIntVel = new CAdamsBashforthIntegrator<Vector2d>;
     MEM_ALLOC("m_pIntVel")
 
     m_Lifetime.start();
@@ -60,9 +60,9 @@ IObject::IObject(const double& _fM):
     METHOD_ENTRY("IObject::IObject")
     CTOR_CALL("IObject::IObject")
     
-    m_pIntPos = new CAdamsMoultonIntegrator();
+    m_pIntPos = new CAdamsMoultonIntegrator<Vector2d>;
     MEM_ALLOC("m_pIntPos")
-    m_pIntVel = new CAdamsBashforthIntegrator();
+    m_pIntVel = new CAdamsBashforthIntegrator<Vector2d>;
     MEM_ALLOC("m_pIntVel")
 
     m_Lifetime.start();
@@ -180,20 +180,20 @@ void IObject::setNewIntegrator(const IntegratorType& _IntType)
     switch (_IntType)
     {
         case INTEGRATOR_EULER:
-            m_pIntPos = new CEulerIntegrator;
-            m_pIntVel = new CEulerIntegrator;
+            m_pIntPos = new CEulerIntegrator<Vector2d>;
+            m_pIntVel = new CEulerIntegrator<Vector2d>;
             MEM_ALLOC("m_pIntPos")
             MEM_ALLOC("m_pIntVel")
             break;
         case INTEGRATOR_ADAMS_BASHFORTH:
-            m_pIntPos = new CAdamsBashforthIntegrator;
-            m_pIntVel = new CAdamsBashforthIntegrator;
+            m_pIntPos = new CAdamsBashforthIntegrator<Vector2d>;
+            m_pIntVel = new CAdamsBashforthIntegrator<Vector2d>;
             MEM_ALLOC("m_pIntPos")
             MEM_ALLOC("m_pIntVel")
             break;
         case INTEGRATOR_ADAMS_MOULTON:
-            m_pIntPos = new CAdamsMoultonIntegrator;
-            m_pIntVel = new CAdamsMoultonIntegrator;
+            m_pIntPos = new CAdamsMoultonIntegrator<Vector2d>;
+            m_pIntVel = new CAdamsMoultonIntegrator<Vector2d>;
             MEM_ALLOC("m_pIntPos")
             MEM_ALLOC("m_pIntVel")
             break;

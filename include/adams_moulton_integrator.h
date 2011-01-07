@@ -31,33 +31,31 @@
 /// past. In this case, the 4th order Adams-Moulton integrator is used.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CAdamsMoultonIntegrator : public IIntegrator
+template <class T>
+class CAdamsMoultonIntegrator : public IIntegrator<T>
 {
     
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        CAdamsMoultonIntegrator();
         ~CAdamsMoultonIntegrator();
 
         //--- Constant Methods -----------------------------------------------//
-        const Vector2d  getPrevValue() const;
-        const Vector2d  getValue() const;
+        const T getPrevValue() const;
+        const T getValue() const;
 
         //--- Methods --------------------------------------------------------//
-        const Vector2d  integrate(const Vector2d&, const double&);
-        const double    integrate(const double&, const double&);
+        const T integrate(const T&, const double&);
 
-        void            init(const Vector2d&);
-        void            init(const double&);
-        void            reset();
+        void    init(const T&);
+        void    reset();
 
     protected:
 
         //--- Protected Variables --------------------------------------------//
-        Vector2d    m_vecDeriv[5];      ///< Derivatives of previous timesteps
-        Vector2d    m_vecPrevValue;     ///< Calculated value of previous timestep
-        Vector2d    m_vecValue;         ///< Calculated value
+        T   m_Deriv[5];      ///< Derivatives of previous timesteps
+        T   m_PrevValue;     ///< Calculated value of previous timestep
+        T   m_Value;         ///< Calculated value
 
 };
 
@@ -70,11 +68,12 @@ class CAdamsMoultonIntegrator : public IIntegrator
 /// \return Value of previous timestep
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d CAdamsMoultonIntegrator::getPrevValue() const
+template <class T>
+inline const T CAdamsMoultonIntegrator<T>::getPrevValue() const
 {
     METHOD_ENTRY("CAdamsMoultonIntegrator::getPrevValue")
     METHOD_EXIT("CAdamsMoultonIntegrator::getPrevValue")
-    return m_vecPrevValue;
+    return m_PrevValue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -84,11 +83,16 @@ inline const Vector2d CAdamsMoultonIntegrator::getPrevValue() const
 /// \return Value of integral
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d CAdamsMoultonIntegrator::getValue() const
+template <class T>
+inline const T CAdamsMoultonIntegrator<T>::getValue() const
 {
     METHOD_ENTRY("CAdamsMoultonIntegrator::getValue")
     METHOD_EXIT("CAdamsMoultonIntegrator::getValue")
-    return m_vecValue;
+    return m_Value;
 }
+
+//--- Implementation of template members -------------------------------------//
+
+#include "adams_moulton_integrator.tpp"
 
 #endif

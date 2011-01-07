@@ -28,32 +28,30 @@
 /// \brief Class representing an integrator using Euler.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CEulerIntegrator : public IIntegrator
+template <class T>
+class CEulerIntegrator : public IIntegrator<T>
 {
     
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        CEulerIntegrator();
         ~CEulerIntegrator();
 
         //--- Constant Methods -----------------------------------------------//
-        const Vector2d  getPrevValue() const;
-        const Vector2d  getValue() const;
+        const T getPrevValue() const;
+        const T getValue() const;
 
         //--- Methods --------------------------------------------------------//
-        const Vector2d  integrate(const Vector2d&, const double&);
-        const double    integrate(const double&, const double&);
+        const T integrate(const T&, const double&);
 
-        void            init(const Vector2d&);
-        void            init(const double&);
-        void            reset();
+        void    init(const T&);
+        void    reset();
 
     protected:
 
         //--- Protected Variables --------------------------------------------//
-        Vector2d    m_vecPrevValue;     ///< Calculated value of previous timestep
-        Vector2d    m_vecValue;         ///< Calculated value
+        T   m_PrevValue;     ///< Calculated value of previous timestep
+        T   m_Value;         ///< Calculated value
 
 };
 
@@ -66,12 +64,13 @@ class CEulerIntegrator : public IIntegrator
 /// \return Value of previous timestep
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline const Vector2d CEulerIntegrator::getPrevValue() const
+template <class T>
+inline const T CEulerIntegrator<T>::getPrevValue() const
 {
     METHOD_ENTRY("CEulerIntegrator::getPrevValue()");
     METHOD_EXIT("CEulerIntegrator::getPrevValue()");
 
-    return m_vecPrevValue;
+    return m_PrevValue;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,12 +80,16 @@ inline const Vector2d CEulerIntegrator::getPrevValue() const
 /// \return Value of integral
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline const Vector2d CEulerIntegrator::getValue() const
+template <class T>
+inline const T CEulerIntegrator<T>::getValue() const
 {
     METHOD_ENTRY("CEulerIntegrator::getValue()");
     METHOD_EXIT("CEulerIntegrator::getValue()");
 
-    return m_vecValue;
+    return m_Value;
 }
+
+//--- Implementation of template members -------------------------------------//
+#include "euler_integrator.tpp"
 
 #endif

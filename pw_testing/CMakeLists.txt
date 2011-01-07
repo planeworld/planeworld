@@ -16,14 +16,14 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/shapes/polyline.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/shapes/rectangle.cpp
 
-    ${CMAKE_HOME_DIRECTORY}/src/adams_bashforth_integrator.cpp
-    ${CMAKE_HOME_DIRECTORY}/src/adams_moulton_integrator.cpp
+#     ${CMAKE_HOME_DIRECTORY}/src/adams_bashforth_integrator.cpp
+#     ${CMAKE_HOME_DIRECTORY}/src/adams_moulton_integrator.cpp
     ${CMAKE_HOME_DIRECTORY}/src/bounding_box.cpp
     ${CMAKE_HOME_DIRECTORY}/src/body.cpp
     ${CMAKE_HOME_DIRECTORY}/src/circle_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/src/collision_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/src/engine_manager.cpp
-    ${CMAKE_HOME_DIRECTORY}/src/euler_integrator.cpp
+#     ${CMAKE_HOME_DIRECTORY}/src/euler_integrator.cpp
     ${CMAKE_HOME_DIRECTORY}/src/geometry.cpp
     ${CMAKE_HOME_DIRECTORY}/src/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/src/object.cpp
