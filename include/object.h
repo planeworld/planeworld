@@ -78,7 +78,8 @@ class IObject
         
         void                addAcceleration(const Vector2d&);
         AnchorIDType        addAnchor(const Vector2d&);
-        void                addVisuals(IVisuals*);
+        void                addVisualsID(const VisualsIDType&);
+        void                addVisualsIDList(const VisualsIDListType&);
         void                disableGravitation();
         void                enableGravitation();
         CGeometry&          getGeometry();
@@ -115,8 +116,7 @@ class IObject
         double                  m_fTimeFac;                         ///< Factor of realtime
 
         CGeometry               m_Geometry;                         ///< Geometry of object
-        VisualsListType         m_Visuals;                          ///< Visuals of object
-        /// \todo Just store visuals id
+        VisualsIDListType       m_VisualsIDs;                       ///< Visuals of object
 
         Vector2d                m_vecCOM0;                          ///< Initial center of mass
         Vector2d                m_vecForce;                         ///< Resulting force applied
@@ -296,18 +296,21 @@ inline AnchorIDType IObject::addAnchor(const Vector2d& _vecV)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Adds visuals of an object to list
+/// \brief Adds an ID of objects visuals to list
 ///
-/// \param _pVisuals Visuals that should be added to list
+/// The object just stores ID's to visuals. The visuals itself are handled by 
+/// the visualsmanager.
+///
+/// \param _VisualsID ID of visuals that should be added to list
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::addVisuals(IVisuals* _pVisuals)
+inline void IObject::addVisualsID(const VisualsIDType& _VisualsID)
 {
-    METHOD_ENTRY("IObject::addVisuals")
+    METHOD_ENTRY("IObject::addVisualsID")
     
-    m_Visuals.push_back(_pVisuals);
+    m_VisualsIDs.push_back(_VisualsID);
 
-    METHOD_EXIT("IObject::addVisuals")
+    METHOD_EXIT("IObject::addVisualsID")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

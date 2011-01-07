@@ -51,11 +51,11 @@ class CVisualsManager : virtual public CGraphicsBase
         const double    getFrequency() const;
         
         //--- Methods --------------------------------------------------------//
-        int  addVisuals(IVisuals*);
-        void addVisualsList(const VisualsListType&);
-        void setVisualisations(const int&);
-        void toggleVisualisations(const int&);
-        void unsetVisualisations(const int&);
+        VisualsIDType       addVisuals(IVisuals*);
+        VisualsIDListType   addVisualsList(const VisualsListType&);
+        void                setVisualisations(const int&);
+        void                toggleVisualisations(const int&);
+        void                unsetVisualisations(const int&);
 
     private:
 

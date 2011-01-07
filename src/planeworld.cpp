@@ -164,12 +164,12 @@ int main(int argc, char *argv[])
         pCircle->setRadius(1.0);
 
         pPointMass->getGeometry().addShape(pCircle);
-        pPointMass->addVisuals(pCircleVisuals);
+        
 //         pPointMass->getGeometry().addShape(pRect);
 //         pPointMass->addVisuals(pRectVisuals);
         
 //         pVisualsManager->addVisuals(pRectVisuals);
-        pVisualsManager->addVisuals(pCircleVisuals);
+        pPointMass->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
         pEngineManager->addObject(pPointMass);
     }
 
@@ -186,9 +186,9 @@ int main(int argc, char *argv[])
 //  pBody1->disableDynamics();
 //     pBody1->disableGravitation();
 
+    pBody1->addVisualsIDList(pVisualsManager->addVisualsList(XFigLoader.getVisuals()));
     pEngineManager->addObject(pBody1);
-    pVisualsManager->addVisualsList(XFigLoader.getVisuals());
-
+    
     //--- Initialize Rigidbody ----------------------------------------------//
     pBody2 = new CRigidBody;
     MEM_ALLOC("pBody2")
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
     pCircle->setRadius(3.0);
 
     pBody2->getGeometry().addShape(pCircle);
-    pVisualsManager->addVisuals(pCircleVisuals);
+    pBody2->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
     pCircle = new CCircle();
     MEM_ALLOC("pCircle")
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
     pCircle->setRadius(2.0);
 
     pBody2->getGeometry().addShape(pCircle);
-    pVisualsManager->addVisuals(pCircleVisuals);
+    pBody2->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
     pPolyLine = new CPolyLine;
     MEM_ALLOC("pPolyLine")
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
     pPolyLine->addVertex(-5.0, 5.0);
 
     pBody2->getGeometry().addShape(pPolyLine);
-    pVisualsManager->addVisuals(pPolylineVisuals);
+    pBody2->addVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
 
 //  pRandomLine = new CRandomLine;
 //  MEM_ALLOC("pRandomLine")
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
     pRect->setLR(Vector2d(0.4, 2.0));
 
     pBody2->getGeometry().addShape(pRect);
-    pVisualsManager->addVisuals(pRectVisuals);
+    pBody2->addVisualsID(pVisualsManager->addVisuals(pRectVisuals));
 
     pEngineManager->addObject(pBody2);
 
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
     pBody3->setName("Box");
     
     pBody3->getGeometry().addShape(pPolyLine);
-    pVisualsManager->addVisuals(pPolylineVisuals);
+    pBody3->addVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
 
     pEngineManager->addObject(pBody3);
     
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
     pCircle->setRadius(6378.16e3);
     
     pBody4->getGeometry().addShape(pCircle);
-    pVisualsManager->addVisuals(pCircleVisuals);
+    pBody3->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
     pEngineManager->addObject(pBody4);
     
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
     pCircle->setRadius(1738.0e3);
     
     pBody4->getGeometry().addShape(pCircle);
-    pVisualsManager->addVisuals(pCircleVisuals);
+    pBody4->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
     pEngineManager->addObject(pBody4);
 
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
     pSpring->setLength(20.0);
 
     pEngineManager->addJoint(pSpring);
-    pVisualsManager->addVisuals(pSpringVisuals);
+    pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
 
     pSpring = new CSpring();
     MEM_ALLOC("pSpring")
@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
     pSpring->setLength(15.0);
 
     pEngineManager->addJoint(pSpring);
-    pVisualsManager->addVisuals(pSpringVisuals);
+    pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
 
     pSpring = new CSpring();
     MEM_ALLOC("pSpring")
@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
     pSpring->setLength(18.0);
 
     pEngineManager->addJoint(pSpring);
-    pVisualsManager->addVisuals(pSpringVisuals);
+    pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
     
     //--- Initialize graphics ------------------------------------------------//
     Graphics.init();
@@ -458,7 +458,7 @@ int main(int argc, char *argv[])
         pEngineManager->addGlobalForces();
         pEngineManager->moveMasses();
         pEngineManager->collisionDetection();
-        if (nFrames % 2 == 0)
+//         if (nFrames % 2 == 0)
         {
             pEngineManager->drawWorld();
             Graphics.swapBuffers();
@@ -471,7 +471,7 @@ int main(int argc, char *argv[])
         if (fFrametime > 0.0)
         {
             unsigned int unFrametime = static_cast<unsigned int>(fFrametime*1e6);
-            std::cout << 1/Timer.getTime() << std::endl;
+//             std::cout << 1/Timer.getTime() << std::endl;
             usleep(unFrametime);
         }
         Timer.start();

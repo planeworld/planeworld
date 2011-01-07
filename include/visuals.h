@@ -23,6 +23,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "key_map.h"
 #include "log.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +46,9 @@ class IVisuals : virtual public CGraphicsBase
 
 };
 
+typedef KeyType VisualsIDType;
 typedef std::list<IVisuals*> VisualsListType;
+typedef std::list<VisualsIDType> VisualsIDListType;
 
 //--- Implementation is done here for inline optimisation --------------------//
 

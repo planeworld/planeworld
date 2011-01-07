@@ -129,15 +129,15 @@ void CVisualsManager::drawWorld() const
 ///
 /// \param _pVisuals Visuals that should be added to list
 ///
+/// \return Unique ID
+///
 ////////////////////////////////////////////////////////////////////////////////
-int CVisualsManager::addVisuals(IVisuals* _pVisuals)
+KeyType CVisualsManager::addVisuals(IVisuals* _pVisuals)
 {
     METHOD_ENTRY("CVisualsManager::addVisuals")
     
-    m_VisualsMap.insert(_pVisuals);
-    
     METHOD_EXIT("CVisualsManager::addVisuals")
-    return 0;
+    return m_VisualsMap.insert(_pVisuals);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,16 +146,20 @@ int CVisualsManager::addVisuals(IVisuals* _pVisuals)
 ///
 /// \param _VisualsList Visuals that should be added to list
 ///
+/// \return List of unique IDs
+///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::addVisualsList(const VisualsListType& _VisualsList)
+VisualsIDListType CVisualsManager::addVisualsList(const VisualsListType& _VisualsList)
 {
     METHOD_ENTRY("CVisualsManager::addVisualsList")
     
+    std::list<VisualsIDType> VisualsIDList;
     for (VisualsListType::const_iterator it  = _VisualsList.begin();
                                          it != _VisualsList.end(); ++it)
     {
-        m_VisualsMap.insert((*it));
+        VisualsIDList.push_back(m_VisualsMap.insert((*it)));
     }
 
     METHOD_EXIT("CVisualsManager::addVisualsList")
+    return VisualsIDList;
 }

@@ -28,7 +28,7 @@
 #include "joint.h"
 #include "visuals_manager.h"
 
-const double ENGINE_DEFAULT_FREQUENCY = 80.0;
+const double ENGINE_DEFAULT_FREQUENCY = 30.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
