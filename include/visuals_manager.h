@@ -29,6 +29,8 @@
 #include "key_map.h"
 #include "visuals.h"
 
+const double VISUALS_DEFAULT_FREQUENCY = 30.0;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the visualisation
@@ -46,10 +48,11 @@ class CVisualsManager : virtual public CGraphicsBase
         //--- Constant Methods -----------------------------------------------//
         void            drawBoundingBox(const CBoundingBox&) const;
         void            drawWorld() const;
+        const double    getFrequency() const;
         const bool      getVisualisation(const int&) const;
         const int       getVisualisations() const;
-        const double    getFrequency() const;
-        
+        bool            initGraphics() const;
+                
         //--- Methods --------------------------------------------------------//
         VisualsIDType       addVisuals(IVisuals*);
         VisualsIDListType   addVisualsList(const VisualsListType&);
@@ -59,11 +62,27 @@ class CVisualsManager : virtual public CGraphicsBase
 
     private:
 
+        double              m_fFrequency;           ///< Frequency of visuals update
         int                 m_nVisualisations;      ///< Additional graphical output
         CKeyMap<IVisuals*>  m_VisualsMap;           ///< Map of visuals and keys
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns frequency of visuals update
+///
+/// \return Frequency in Hertz
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double CVisualsManager::getFrequency() const
+{
+    METHOD_ENTRY("CVisualsManager::getFrequency()")
+
+    METHOD_EXIT("CVisualsManager::getFrequency()")
+    return (m_fFrequency);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -78,6 +97,21 @@ inline const int CVisualsManager::getVisualisations() const
 
     METHOD_EXIT("CVisualsManager::getVisualisations")
     return (m_nVisualisations);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Initialises the Graphics
+///
+/// \return Success
+///
+////////////////////////////////////////////////////////////////////////////////
+inline bool CVisualsManager::initGraphics() const
+{
+    METHOD_ENTRY("CVisualsManager::getVisualisations")
+
+    METHOD_EXIT("CVisualsManager::getVisualisations")
+    return (m_Graphics.init());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

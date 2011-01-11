@@ -27,7 +27,7 @@
 #include "physics_manager.h"
 #include "visuals_manager.h"
 
-const double ENGINE_DEFAULT_FREQUENCY = 30.0;
+const double ENGINE_DEFAULT_FREQUENCY = 100.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -46,14 +46,20 @@ class CEngineManager
         ~CEngineManager();
         
         //--- Constant Methods -----------------------------------------------//
-        void runPhysics() const;
-        void runGraphics() const;
-        
+                
         //--- Methods --------------------------------------------------------//
+        void runGraphics();
+        void runPhysics();
         void setPhysicsManager(CPhysicsManager*);
         void setVisualsManager(CVisualsManager*);
+        void stop();
         
     private:
+        
+        bool                m_bDone;                ///< Stop threads if program ends
+        
+        CTimer              m_PhysicsTimer;         ///< Timer for physics updates
+        CTimer              m_VisualsTimer;         ///< Timer for physics updates
         
         CPhysicsManager*    m_pPhysicsManager;      ///< Instance for handling physics
         CVisualsManager*    m_pVisualsManager;      ///< Instance for handling graphics
@@ -91,6 +97,20 @@ inline void CEngineManager::setVisualsManager(CVisualsManager* _pVis)
     m_pVisualsManager = _pVis;
 
     METHOD_EXIT("CEngineManager::setVisualsManager")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Stop the whole engine, i.e. stop all event loops
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CEngineManager::stop()
+{
+    METHOD_ENTRY("CEngineManager::stop")
+
+    m_bDone = true;
+
+    METHOD_EXIT("CEngineManager::stop")
 }
 
 #endif

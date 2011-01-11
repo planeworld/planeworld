@@ -551,16 +551,16 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
     if (fT<=1.0)
     {
         // Colliding objects
-        m_Graphics.setColor(0.0, 0.8, 0.0);
-        m_Graphics.rect(_p1->getGeometry().getBoundingBox().getLowerLeft(),
-                        _p1->getGeometry().getBoundingBox().getUpperRight());
-        m_Graphics.rect(_p2->getGeometry().getBoundingBox().getLowerLeft(),
-                        _p2->getGeometry().getBoundingBox().getUpperRight());
-
-        // Point of collision
-        m_Graphics.setColor(0.8, 0.0, 0.0);
-        m_Graphics.dot(vecPOC);
-        m_Graphics.setColor(1.0, 1.0, 1.0);
+//         m_Graphics.setColor(0.0, 0.8, 0.0);
+//         m_Graphics.rect(_p1->getGeometry().getBoundingBox().getLowerLeft(),
+//                         _p1->getGeometry().getBoundingBox().getUpperRight());
+//         m_Graphics.rect(_p2->getGeometry().getBoundingBox().getLowerLeft(),
+//                         _p2->getGeometry().getBoundingBox().getUpperRight());
+// 
+//         // Point of collision
+//         m_Graphics.setColor(0.8, 0.0, 0.0);
+//         m_Graphics.dot(vecPOC);
+//         m_Graphics.setColor(1.0, 1.0, 1.0);
 
 //         _p1->disableDynamics();
 //         _p1->getGeometry().update();

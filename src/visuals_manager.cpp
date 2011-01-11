@@ -24,7 +24,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CVisualsManager::CVisualsManager() : m_nVisualisations(0)
+CVisualsManager::CVisualsManager() : m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
+                                     m_nVisualisations(0)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -114,11 +115,15 @@ void CVisualsManager::drawWorld() const
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
+    m_Graphics.applyCamMovement();
+    
     for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
          ci != m_VisualsMap.end(); ++ci)
     {
         (*ci)->draw();
     }
+    
+    m_Graphics.swapBuffers();
 
     METHOD_EXIT("CVisualsManager::drawWorld")
 }

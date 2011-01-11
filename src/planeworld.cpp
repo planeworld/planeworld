@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
     CRigidBody*         pBody2;
     CRigidBody*         pBody3;
     CRigidBody*         pBody4;
+    CEngineManager      EngineManager;
     CPhysicsManager*    pPhysicsManager;
     CVisualsManager*    pVisualsManager;
     CXFigLoader         XFigLoader;
@@ -104,13 +105,13 @@ int main(int argc, char *argv[])
     srand(SDL_GetTicks());
 
     //--- Initialisation -----------------------------------------------------//
+//     pEngineManager = new CEngineManager;
+//     MEM_ALLOC("pEngineManager")
     pPhysicsManager = new CPhysicsManager;
     MEM_ALLOC("pPhysicsManager")
     pVisualsManager = new CVisualsManager;
     MEM_ALLOC("pVisualsManager")
     
-    pPhysicsManager->setVisualsManager(pVisualsManager);
-        
     int nNumberOfBoxes = 0;
     
     lua_State *L = lua_open();
@@ -374,17 +375,23 @@ int main(int argc, char *argv[])
     pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
     
     //--- Initialize graphics ------------------------------------------------//
-    Graphics.init();
-    // SDL_WM_GrabInput(SDL_GRAB_ON);
+//     SDL_WM_GrabInput(SDL_GRAB_ON);
 
     // Set initialisation state of all objects
     pPhysicsManager->initObjects();
-//  pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
+//     pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
+    
+    EngineManager.setPhysicsManager(pPhysicsManager);
+    EngineManager.setVisualsManager(pVisualsManager);
 
     pBody4->setVelocity(Vector2d(1023.0, 0.0));
     
+    // Test threading
+    boost::thread PhysicsThread(&CEngineManager::runPhysics, &EngineManager);
+    boost::thread VisualsThread(&CEngineManager::runGraphics, &EngineManager);
+    
+    sleep(1);
     Timer.start();
-    int nFrames = 0;
     while (false == bDone)
     {
         while (SDL_PollEvent(&event) != 0)
@@ -414,13 +421,13 @@ int main(int argc, char *argv[])
                     }
                     if (event.key.keysym.sym == SDLK_r)
                         pPhysicsManager->initObjects();
-                    if (event.key.keysym.sym == SDLK_t)
-                        pRandomLine->init(-160.0, 160.0, 0.0, 50.0, 0.95, 20, 4);
                     if (event.key.keysym.sym == SDLK_ESCAPE)
                     {
                         bDone = true;
+                        std::cout << "QUIT" << std::endl;
+                        EngineManager.stop();
                     }
-                    //break;
+//                     break;
                 case SDL_ACTIVEEVENT:
                     if (0 == event.active.gain)
                         bIsActive = false;
@@ -429,27 +436,30 @@ int main(int argc, char *argv[])
                     break;
                 case SDL_MOUSEMOTION:
                     if (event.motion.state == SDL_BUTTON(1))
+                    {
                         Graphics.transCamBy(Vector3d(double(event.motion.xrel)/
                                             (Graphics.getCamZoom()),
                                             double(event.motion.yrel)/
                                             (Graphics.getCamZoom()), 0.0));
+                    }
                     if (event.motion.state == SDL_BUTTON(3))
                     {
                         Graphics.rotCamBy(-double(event.motion.xrel)/2);
                         Graphics.zoomCamBy(1.0-double(event.motion.yrel)/100);
                     }
-//                     pPointMass->disableDynamics();
-//                     pPointMass->init();
-//                     pPointMass->setCOM(Graphics.screen2World(event.motion.x, double(event.motion.y)));
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_MIDDLE)
+                    {
                         Graphics.resetCam();
+                    }
                     break;
                 case SDL_VIDEORESIZE:
                     Graphics.resizeWindow(event.resize.w, event.resize.h);
                     break;
                 case SDL_QUIT:
+                    std::cout << "QUIT" << std::endl;
+                    EngineManager.stop();
                     bDone = true;
                     break;
                 default:
@@ -457,51 +467,27 @@ int main(int argc, char *argv[])
             }
             
         }
-        Graphics.applyCamMovement();
-        pPhysicsManager->addGlobalForces();
-        pPhysicsManager->moveMasses();
-        pPhysicsManager->collisionDetection();
         
-        // Test threading
-//         boost::thread VisualsThread(&CVisualsManager::drawWorld, pVisualsManager);
-        
-//         VisualsThread.join();        
-//         if (nFrames % 2 == 0)
-//         {
-            pPhysicsManager->drawWorld();
-            Graphics.swapBuffers();
-//         }
-        //if (bIsActive)
-        {
-        // Use Fixed Framerate
         Timer.stop();
-        double fFrametime = 1.0/pPhysicsManager->getFrequency()-Timer.getTime();
+        double fFrametime = 1.0/30.0-Timer.getTime();
         if (fFrametime > 0.0)
         {
             unsigned int unFrametime = static_cast<unsigned int>(fFrametime*1e6);
-//             std::cout << 1/Timer.getTime() << std::endl;
             usleep(unFrametime);
         }
         Timer.start();
-        ++nFrames;
-        }
-//      {
-//          int nT = SDL_GetTicks();
-//          if (nT - nT0 >= 100)
-//          {
-//              double              fSeconds = (nT - nT0) / 1000.0;
-//              double              fFPS = nFrames / fSeconds;
-//              std::stringstream   ostrMessage;
-//              
-//              ostrMessage << nFrames << " frames in " << 
-//                              fSeconds << " seconds = " << 
-//                              fFPS << " fps";
-//              INFO_MSG(Log,"main", ostrMessage.str(), LOG_DOMAIN_NONE);
-//              nT0 = nT;
-//              nFrames = 0;
-//          }
-//      }
     }
+    
+    PhysicsThread.join();
+    VisualsThread.join();
+    
+//     if (pEngineManager != 0)
+//     {
+//         delete pEngineManager;
+//         pEngineManager = 0;
+//         MEM_FREED("pEngineManager")
+//     }
+    
     if (pPhysicsManager != 0)
     {
         delete pPhysicsManager;
