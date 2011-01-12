@@ -121,8 +121,6 @@ const LogColourSchemeType CLog::stringToColourScheme(const std::string& _strSche
 /// \param _Level State of message
 /// \param _Domain Domain the message should be associated with
 ///
-/// \bug Domains appear in logfile, even if loglevel is below DEBUG
-///
 ///////////////////////////////////////////////////////////////////////////////
 void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                 const LogLevelType& _Level, const LogDomainType& _Domain)

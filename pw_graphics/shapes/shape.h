@@ -15,9 +15,7 @@
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2009-10-18
 ///
-/// \todo Return class intersection. This class must provide a type of
-///       intersection, so that a contact point can be created. It depends on
-///       the implementation of the various shapes, that may intersect.
+/// \todo Implement shape CDot
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -34,8 +32,6 @@
 // #include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
-
-/// \todo Implement shape CDot
 
 using namespace Eigen;
 

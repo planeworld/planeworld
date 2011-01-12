@@ -60,8 +60,6 @@ extern "C" {
 /// \param  argv array, storing the arguments
 /// \return exit code
 ///
-/// \todo Testsuite for new integrator
-///
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {

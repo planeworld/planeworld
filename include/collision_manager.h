@@ -28,9 +28,6 @@
 #include "circle.h"
 #include "object.h"
 
-// For testing
-#include "graphics.h"
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing collisions

@@ -23,6 +23,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "graphics.h"
 #include "key_map.h"
 #include "log.h"
 

@@ -25,8 +25,6 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "engine_common.h"
-#include "graphics.h"
-#include "key_map.h"
 #include "visuals.h"
 
 const double VISUALS_DEFAULT_FREQUENCY = 30.0;

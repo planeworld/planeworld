@@ -70,7 +70,6 @@ class IObject
         const double                getMass() const;
         const std::string           getName() const;
         const Vector2d              getVelocity() const;
-//         const VisualsListType&      getVisuals() const;
 
         //--- Methods --------------------------------------------------------//
         virtual void addForce(const Vector2d&,  const Vector2d&) = 0;   ///< Add a force
@@ -259,21 +258,6 @@ inline const Vector2d IObject::getVelocity() const
     METHOD_EXIT("IObject::getVelocity")
     return (m_pIntVel->getValue());
 }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Returns the visuals of an object
-// ///
-// /// \return Velocity of the object
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// inline const VisualsListType& IObject::getVisuals() const
-// {
-//     METHOD_ENTRY("IObject::getVisuals")
-// 
-//     METHOD_EXIT("IObject::getVisuals")
-//     return (m_Visuals);
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
