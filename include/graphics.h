@@ -66,7 +66,7 @@ typedef enum
 /// initialization and providing methods for drawing lines. The class is built
 /// on top of OpenGL and the SDL. The class is implemented as a meyers-singleton
 /// to provide easy access to its methods for graphics abstraction classes like
-/// CShape.
+/// IShape.
 ///
 /// \todo Implement frustum culling
 /// \todo Perhaps moving the camera towards z-axis is better than scaling, see
