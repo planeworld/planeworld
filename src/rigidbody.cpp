@@ -61,9 +61,9 @@ void CRigidBody::addForce(const Vector2d& _vecF, const Vector2d& _vecPOC)
     METHOD_ENTRY("CRigidBody::addForce")
 
     m_vecForce  +=  _vecF;
-    m_fTorque   +=  (_vecPOC - m_pIntPos->getValue())[0] * _vecF[1] -
-                    (_vecPOC - m_pIntPos->getValue())[1] * _vecF[0];
-
+    m_fTorque   +=  (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[0] * _vecF[1] -
+                    (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[1] * _vecF[0];
+                    
     METHOD_EXIT("CRigidBody::addForce")
 }
 
@@ -100,7 +100,7 @@ void CRigidBody::myDynamics(const double& _fStep)
             
     double fAngleAccel = m_fTorque / m_fInertia;
     double fAngleVel = m_pIntAngVel->integrate(fAngleAccel, _fStep*m_fTimeFac);
-    m_fAngle = m_pIntAng->integrate(fAngleVel, _fStep*m_fTimeFac);
-
+    m_fAngle = m_pIntAng->integrateClip(fAngleVel, _fStep*m_fTimeFac, 2.0*std::acos(-1.0));
+    
     METHOD_EXIT("CRigidBody::myDynamics")
 }

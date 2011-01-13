@@ -82,8 +82,8 @@ class IObject
         void                disableGravitation();
         void                enableGravitation();
         CGeometry&          getGeometry();
-        void                setCOM(const Vector2d&);
-        void                setCOM(const double&, const double&);
+        void                setOrigin(const Vector2d&);
+        void                setOrigin(const double&, const double&);
         void                setDepths(const int&);
         void                setMass(const double&);
         void                setName(const std::string&);
@@ -117,7 +117,8 @@ class IObject
         CGeometry               m_Geometry;                         ///< Geometry of object
         VisualsIDListType       m_VisualsIDs;                       ///< Visuals of object
 
-        Vector2d                m_vecCOM0;                          ///< Initial center of mass
+        Vector2d                m_vecOrigin0;                       ///< Initial orgin of object
+        Vector2d                m_vecCOM;                           ///< Center of mass
         Vector2d                m_vecForce;                         ///< Resulting force applied
         
         double                  m_fMass;                            ///< Mass of object in kg
@@ -144,8 +145,8 @@ inline void IObject::addAcceleration(const Vector2d& _vecV)
 {
     METHOD_ENTRY("IObject::addAcceleration")
 
-    this->addForce(_vecV*m_fMass, m_pIntPos->getValue());
-
+    this->addForce(_vecV*m_fMass, m_pIntPos->getValue()+m_vecCOM);
+    
     METHOD_EXIT("IObject::addAcceleration")
 }
 
@@ -176,7 +177,7 @@ inline const Vector2d IObject::getCOM() const
     METHOD_ENTRY("IObject::getCOM")
 
     METHOD_EXIT("IObject::getCOM")
-    return (m_pIntPos->getValue());
+    return (m_vecCOM+m_pIntPos->getValue());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -354,39 +355,39 @@ inline CGeometry& IObject::getGeometry()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set the center of mass (COM)
+/// \brief Set the origin of mass
 ///
-/// \param _vecCOM Center of mass 
+/// \param _vecOrigin Origin of mass 
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setCOM(const Vector2d& _vecCOM)
+inline void IObject::setOrigin(const Vector2d& _vecOrigin)
 {
-    METHOD_ENTRY("IObject::setCOM")
+    METHOD_ENTRY("IObject::setOrigin")
 
-    m_vecCOM0 = _vecCOM;
-    m_pIntPos->init(_vecCOM);
+    m_vecOrigin0 = _vecOrigin;
+    m_pIntPos->init(_vecOrigin);
 
-    METHOD_EXIT("IObject::setCOM")
+    METHOD_EXIT("IObject::setOrigin")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set the center of mass (COM)
+/// \brief Set the origin of mass
 ///
-/// \param _fX X-position of center of mass 
-/// \param _fY Y-position of center of mass 
+/// \param _fX X-position of origin of mass 
+/// \param _fY Y-position of origin of mass 
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setCOM(const double& _fX, const double& _fY)
+inline void IObject::setOrigin(const double& _fX, const double& _fY)
 {
-    METHOD_ENTRY("IObject::setCOM")
+    METHOD_ENTRY("IObject::setOrigin")
 
-    m_vecCOM0[0] = _fX;
-    m_vecCOM0[1] = _fY;
+    m_vecOrigin0[0] = _fX;
+    m_vecOrigin0[1] = _fY;
 
-    m_pIntPos->init(m_vecCOM0);
+    m_pIntPos->init(m_vecOrigin0);
 
-    METHOD_EXIT("IObject::setCOM")
+    METHOD_EXIT("IObject::setOrigin")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

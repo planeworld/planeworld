@@ -165,10 +165,10 @@ void IObject::init()
 
     // Initialise bounding box
     // Center of mass (position vector) is always inside AABB
-    m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue());
-    m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue());
+    m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue()+m_vecCOM);
+    m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue()+m_vecCOM);
 
-    m_pIntPos->init(m_vecCOM0);
+    m_pIntPos->init(m_vecOrigin0);
     m_vecForce.setZero();
     m_pIntVel->reset();
 
@@ -245,8 +245,8 @@ void IObject::transform()
     {
         // Initialise bounding box
         // Center of mass (position vector) is always inside AABB
-        m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue());
-        m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue());
+        m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue() + m_vecCOM);
+        m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue() + m_vecCOM);
 
         // Call object specific transformation
         this->myTransform();

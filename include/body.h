@@ -50,7 +50,7 @@ class CBody : public IObject
         const double    getAngleVelocity() const;
         
         //--- Methods --------------------------------------------------------//
-        void rotBy(const double&);
+//         void rotBy(const double&);
         void setInertia(const double&);
 
     protected:

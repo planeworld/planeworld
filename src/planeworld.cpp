@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 //         double fRad = (rand()%2) + 0.5;
         DEBUG_MSG("Main", "Stopping randomization.")
         pPointMass->setMass(1.0e12);
-        pPointMass->setCOM(nX, nY);
+        pPointMass->setOrigin(nX, nY);
         pPointMass->setInertia(2000.0);
 
         std::stringstream test;
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 //         pRect->setUL(Vector2d(-1.0, +1.0));
 //         pRect->setLR(Vector2d(+1.0, -1.0));
         pCircle->setDepths(SHAPE_DEPTH_ALL);
-        pCircle->setCenter(0.0, 0.0);
+        pCircle->setCenter(1.0, 0.0);
         pCircle->setRadius(1.0);
 
         pPointMass->getGeometry().addShape(pCircle);
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
     pBody1->getGeometry().setShapes(XFigLoader.getShapes());
     pBody1->setMass(150.0);
     pBody1->setInertia(2000.0);
-    pBody1->setCOM(Vector2d(3.0, 5.0));
+    pBody1->setOrigin(Vector2d(3.0, 5.0));
     pBody1->setName("Rigidbody from .fig");
 //  pBody1->disableDynamics();
 //     pBody1->disableGravitation();
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 
     pBody2->setMass(100.0);
     pBody2->setInertia(2000.0);
-    pBody2->setCOM(Vector2d(-20.0,-10.0));
+    pBody2->setOrigin(Vector2d(-20.0,-10.0));
 //     pBody2->disableGravitation();
 //  pBody2->setTimeFac(5.0);
     pBody2->setName("Rigidbody");
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
 
     pBody3->setMass(250.0);
     pBody3->setInertia(3000.0);
-    pBody3->setCOM(Vector2d(15.0,-8.0));
+    pBody3->setOrigin(Vector2d(15.0,-8.0));
 //     pBody3->disableGravitation();
     pBody3->setName("Box");
     
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
 
     pBody4->setMass(5.974e24);
     pBody4->setInertia(3000.0);
-    pBody4->setCOM(Vector2d(0.0,-6378.27e3));
+    pBody4->setOrigin(Vector2d(0.0,-6378.27e3));
     pBody4->disableGravitation();
     pBody4->disableDynamics();
     pBody4->setName("Earth");
@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
     
     pBody4->setMass(7.349e22);
     pBody4->setInertia(3000.0);
-    pBody4->setCOM(Vector2d(0.0, -384.4e6));
+    pBody4->setOrigin(Vector2d(0.0, -384.4e6));
     pBody4->setTimeFac(1e5);
     pBody4->disableGravitation();
     pBody4->disableDynamics();
@@ -377,11 +377,10 @@ int main(int argc, char *argv[])
 
     // Set initialisation state of all objects
     pPhysicsManager->initObjects();
-//     pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
+    pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
     
     EngineManager.setPhysicsManager(pPhysicsManager);
     EngineManager.setVisualsManager(pVisualsManager);
-
     pBody4->setVelocity(Vector2d(1023.0, 0.0));
     
     // Test threading
