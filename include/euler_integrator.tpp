@@ -33,24 +33,99 @@ CEulerIntegrator<T>::~CEulerIntegrator()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Integrates the next timestep
+/// \brief Integrates the next timestep 
 ///
-/// \param _Value Integration value
+/// \param _V Integration value
 /// \param _fStep Timestep
 ///
 /// \return New value
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template <class T>
-const T CEulerIntegrator<T>::integrate(const T& _V, const double& _fStep)
+const T CEulerIntegrator<T>::integrate(const T& _V,
+                                       const double& _fStep)
+{
+    METHOD_ENTRY("CEulerIntegrator::integrate")
+
+    m_PrevValue = m_Value;
+    m_Value += _V * _fStep;
+
+    METHOD_EXIT("CEulerIntegrator::integrate")
+    return m_Value;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Integrates the next timestep with clipping
+///
+/// This method integrates but also clips the result with respect to support
+/// point. Thus, values like angles may be integrated without overflow
+/// problems.
+///
+/// \param _V Integration value
+/// \param _fStep Timestep
+/// \param _Clip Min/Max Value to clip
+///
+/// \return New value
+///
+///////////////////////////////////////////////////////////////////////////////
+template <class T>
+const T CEulerIntegrator<T>::integrateClip(const T& _V,
+                                           const double& _fStep,
+                                           const T& _Clip)
+{
+    METHOD_ENTRY("CEulerIntegrator::integrate")
+
+    m_PrevValue = m_Value;
+    m_Value += _V * _fStep;
+
+    int nF = floor(m_Value / _Clip);
+    if (nF >= 1)
+        m_Value -= nF*_Clip;
+    else if (nF <= -2)
+        m_Value -= (nF+1)*_Clip;
+    
+    METHOD_EXIT("CEulerIntegrator::integrate")
+    return m_Value;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Integrates the next timestep with clipping
+///
+/// This method integrates but also clips the result with respect to support
+/// point. Thus, values like angles may be integrated without overflow
+/// problems.
+///
+/// \param _V Integration vector
+/// \param _fStep Timestep
+/// \param _Clip Min/Max Value to clip
+///
+/// \return New value
+///
+///////////////////////////////////////////////////////////////////////////////
+template <>
+inline const Vector2d CEulerIntegrator<Vector2d>::integrateClip(const Vector2d& _V,
+                                                                const double& _fStep,
+                                                                const Vector2d& _Clip)
 {
     METHOD_ENTRY("CEulerIntegrator::integrate")
 
     m_Value = m_Value;
     m_Value += _V * _fStep;
 
-    METHOD_EXIT("CEulerIntegrator::integrate")
+    int nF = floor(m_Value[0] / _Clip[0]);
+    if (nF >= 1)
+        m_Value[0] -= nF*_Clip[0];
+    else if (nF <= -2)
+        m_Value[0] -= (nF+1)*_Clip[0];
+    nF = floor(m_Value[1] / _Clip[1]);
+    if (nF >= 1)
+        m_Value[1] -= nF*_Clip[1];
+    else if (nF <= -2)
+        m_Value[1] -= (nF+1)*_Clip[1];
     
+    METHOD_EXIT("CEulerIntegrator::integrate")
     return m_Value;
 }
 

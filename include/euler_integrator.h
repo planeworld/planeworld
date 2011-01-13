@@ -43,6 +43,7 @@ class CEulerIntegrator : public IIntegrator<T>
 
         //--- Methods --------------------------------------------------------//
         const T integrate(const T&, const double&);
+        const T integrateClip(const T&, const double&, const T&);
 
         void    init(const T&);
         void    reset();
