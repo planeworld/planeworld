@@ -120,6 +120,8 @@ class IObject
         Vector2d                m_vecOrigin0;                       ///< Initial orgin of object
         Vector2d                m_vecCOM;                           ///< Center of mass
         Vector2d                m_vecForce;                         ///< Resulting force applied
+        Vector2i                m_vecGrid;                          ///< Position in large scale grid
+                                                                    ///  \todo Implement grid handling
         
         double                  m_fMass;                            ///< Mass of object in kg
         int                     m_nDepthlayers;                     ///< Depths in which shape exists
