@@ -42,6 +42,20 @@ CEngineManager::~CEngineManager()
     METHOD_ENTRY("CEngineManager::~CEngineManager")
     DTOR_CALL("CEngineManager::~CEngineManager")
 
+    // Free memory if pointer is still existent
+    if (m_pPhysicsManager != 0)
+    {
+        delete m_pPhysicsManager;
+        m_pPhysicsManager = 0;
+        MEM_FREED("m_pPhysicsManager");
+    }
+    if (m_pVisualsManager != 0)
+    {
+        delete m_pVisualsManager;
+        m_pVisualsManager = 0;
+        MEM_FREED("m_pVisualsManager");
+    }
+
     METHOD_EXIT("CEngineManager::~CEngineManager")
 }
 
@@ -90,6 +104,7 @@ void CEngineManager::runGraphics()
     while (!m_bDone)
     {
         m_pVisualsManager->drawWorld();
+        m_pVisualsManager->drawBoundingBoxes();
         
         m_VisualsTimer.stop();
         double fFrametime = 1.0/m_pVisualsManager->getFrequency()-m_VisualsTimer.getTime();

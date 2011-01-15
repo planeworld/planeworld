@@ -78,9 +78,10 @@ int main(int argc, char *argv[])
     
     //--- Major instances ----------------------------------------------------//
     CGraphics&          Graphics = CGraphics::getInstance();
+    CCamera*            pCamera;
     CCircle*            pCircle;
     CCircleVisuals*     pCircleVisuals;
-//  CPointMass*         pPointMass;
+//     CPointMass*         pPointMass;
     CRigidBody*         pPointMass;
     CPolyLine*          pPolyLine;
     CPolylineVisuals*   pPolylineVisuals;
@@ -103,12 +104,14 @@ int main(int argc, char *argv[])
     srand(SDL_GetTicks());
 
     //--- Initialisation -----------------------------------------------------//
-//     pEngineManager = new CEngineManager;
-//     MEM_ALLOC("pEngineManager")
+    pCamera = new CCamera;
+    MEM_ALLOC("pCamera")
     pPhysicsManager = new CPhysicsManager;
     MEM_ALLOC("pPhysicsManager")
     pVisualsManager = new CVisualsManager;
     MEM_ALLOC("pVisualsManager")
+    
+    pVisualsManager->setCamera(pCamera);
     
     int nNumberOfBoxes = 0;
     
@@ -147,6 +150,7 @@ int main(int argc, char *argv[])
         pPointMass->setName(test.str());
 
 //         pPointMass->disableGravitation();
+//         pPointMass->disableDynamics();
 //         pPointMass->setTimeFac(1e-10);
         pPointMass->setDepths(SHAPE_DEPTH_ALL);
         
@@ -377,7 +381,7 @@ int main(int argc, char *argv[])
 
     // Set initialisation state of all objects
     pPhysicsManager->initObjects();
-    pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
+//     pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
     
     EngineManager.setPhysicsManager(pPhysicsManager);
     EngineManager.setVisualsManager(pVisualsManager);
@@ -434,25 +438,32 @@ int main(int argc, char *argv[])
                 case SDL_MOUSEMOTION:
                     if (event.motion.state == SDL_BUTTON(1))
                     {
-                        Graphics.transCamBy(Vector3d(double(event.motion.xrel)/
-                                            (Graphics.getCamZoom()),
-                                            double(event.motion.yrel)/
-                                            (Graphics.getCamZoom()), 0.0));
+//                         Graphics.transCamBy(Vector3d(double(event.motion.xrel)/
+//                                               Graphics.getCamZoom(),
+//                                              double(event.motion.yrel)/
+//                                               Graphics.getCamZoom(),0.0));
+                        pCamera->translateBy(Vector2d(double(event.motion.xrel)/
+                                              pCamera->getZoom(),
+                                             double(event.motion.yrel)/
+                                              pCamera->getZoom()));
                     }
                     if (event.motion.state == SDL_BUTTON(3))
                     {
-                        Graphics.rotCamBy(-double(event.motion.xrel)/2);
-                        Graphics.zoomCamBy(1.0-double(event.motion.yrel)/100);
+//                         Graphics.rotCamBy(-double(event.motion.xrel)*0.01);
+//                         Graphics.zoomCamBy(1.0-double(event.motion.yrel)/100);
+                        pCamera->rotateBy(-double(event.motion.xrel)*0.01);
+                        pCamera->zoomBy(1.0-double(event.motion.yrel)/100);
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_MIDDLE)
                     {
-                        Graphics.resetCam();
+//                         Graphics.resetCam();
+                        pCamera->reset();
                     }
                     break;
                 case SDL_VIDEORESIZE:
-                    Graphics.resizeWindow(event.resize.w, event.resize.h);
+//                     Graphics.resizeWindow(event.resize.w, event.resize.h);
                     break;
                 case SDL_QUIT:
                     std::cout << "QUIT" << std::endl;
@@ -485,19 +496,6 @@ int main(int argc, char *argv[])
 //         MEM_FREED("pEngineManager")
 //     }
     
-    if (pPhysicsManager != 0)
-    {
-        delete pPhysicsManager;
-        pPhysicsManager = 0;
-        MEM_FREED("pPhysicsManager")
-    }
-    if (pVisualsManager != 0)
-    {
-        delete pVisualsManager;
-        pVisualsManager = 0;
-        MEM_FREED("pVisualsManager")
-    }
-
     SDL_Quit();
     return 0;
 }

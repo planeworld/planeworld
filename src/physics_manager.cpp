@@ -30,6 +30,8 @@ CPhysicsManager::CPhysicsManager() : m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
 {
     METHOD_ENTRY("CPhysicsManager::CPhysicsManager")
     CTOR_CALL("CPhysicsManager::CPhysicsManager")
+    
+    m_vecConstantGravitation.setZero();
 
     METHOD_EXIT("CPhysicsManager::CPhysicsManager")
 }
