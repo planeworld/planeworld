@@ -538,7 +538,7 @@ void CGraphics::dot(const Vector2d& _vecV) const
 {
     METHOD_ENTRY("CGraphics::dot")
 
-    glPointSize(7.0);
+    glPointSize(1.0);
     glBegin(GL_POINTS);
         glVertex3d( _vecV[0], _vecV[1], -10.0);
     glEnd();

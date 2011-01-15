@@ -151,7 +151,15 @@ void CVisualsManager::drawWorld() const
         if ((((*ci)->getBoundingBox().getWidth() * m_pCamera->getZoom()) > 0.01) && 
             (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) > 0.01))
             if ((*ci)->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
-                (*ci)->draw();
+                if ((((*ci)->getBoundingBox().getWidth() * m_pCamera->getZoom()) <  0.1) && 
+                    (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) < 0.1))
+                {
+                    m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft());
+                }
+                else
+                {
+                    (*ci)->draw();
+                }
     }
     
     METHOD_EXIT("CVisualsManager::drawWorld")
