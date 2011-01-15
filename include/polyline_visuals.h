@@ -41,7 +41,8 @@ class CPolylineVisuals : public IVisuals
         ~CPolylineVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void draw() const;
+        virtual void                draw() const;
+        virtual const CBoundingBox& getBoundingBox() const;
         
         //--- Methods --------------------------------------------------------//
         void attach(CPolyLine*);
@@ -55,6 +56,21 @@ class CPolylineVisuals : public IVisuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the bounding box of given shape of visual
+///
+/// \return Bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CBoundingBox& CPolylineVisuals::getBoundingBox() const
+{
+    METHOD_ENTRY("CPolyLineVisuals::getBoundingBox")
+
+    METHOD_EXIT("CPolyLineVisuals::getBoundingBox")
+    return m_pPolyline->getBoundingBox();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

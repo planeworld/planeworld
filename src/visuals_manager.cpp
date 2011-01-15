@@ -25,7 +25,8 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CVisualsManager::CVisualsManager() : m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
-                                     m_nVisualisations(0)
+                                     m_nVisualisations(0),
+                                     m_pCamera(0)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -54,6 +55,14 @@ CVisualsManager::~CVisualsManager()
         }
     }
     
+    // Free memory if pointer is still existent
+    if (m_pCamera != 0)
+    {
+        delete m_pCamera;
+        m_pCamera = 0;
+        MEM_FREED("m_pCamera");
+    }
+    
     METHOD_EXIT("CVisualsManager::~CVisualsManager")
 }
     
@@ -61,22 +70,28 @@ CVisualsManager::~CVisualsManager()
 ///
 /// \brief Draws bounding box of objects
 ///
-/// \param _BBox The bounding box that should be drawn
-///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawBoundingBox(const CBoundingBox& _BBox) const
+void CVisualsManager::drawBoundingBoxes() const
 {
     METHOD_ENTRY("CVisualsManager::drawBoundingBox")
 
     if (m_nVisualisations & VISUALS_OBJECT_BBOXES)
     {
-        m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
-        m_Graphics.rect(_BBox.getLowerLeft(), _BBox.getUpperRight());
-        m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
-        m_Graphics.filledRect(_BBox.getLowerLeft(),
-                              _BBox.getUpperRight());
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
+            ci != m_VisualsMap.end(); ++ci)
+        {
+    
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
+            m_Graphics.rect((*ci)->getBoundingBox().getLowerLeft(),
+                            (*ci)->getBoundingBox().getUpperRight());
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
+            m_Graphics.filledRect((*ci)->getBoundingBox().getLowerLeft(),
+                                  (*ci)->getBoundingBox().getUpperRight());
+            m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        }
     }
+
+    m_Graphics.swapBuffers();
 
     METHOD_EXIT("CVisualsManager::drawBoundingBox")
 }
@@ -115,6 +130,11 @@ void CVisualsManager::drawWorld() const
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
+    m_Graphics.transCamTo(Vector3d(m_pCamera->getPosition()[0],
+                                   m_pCamera->getPosition()[1],
+                                   0.0));
+    m_Graphics.rotCamTo(m_pCamera->getAngle());
+    m_Graphics.zoomCamTo(m_pCamera->getZoom());
     m_Graphics.applyCamMovement();
     
     for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
@@ -123,8 +143,6 @@ void CVisualsManager::drawWorld() const
         (*ci)->draw();
     }
     
-    m_Graphics.swapBuffers();
-
     METHOD_EXIT("CVisualsManager::drawWorld")
 }
 

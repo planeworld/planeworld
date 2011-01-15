@@ -41,7 +41,8 @@ class CCircleVisuals : public IVisuals
         ~CCircleVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void draw() const;
+        virtual void                draw() const;
+        virtual const CBoundingBox& getBoundingBox() const;
         
         //--- Methods --------------------------------------------------------//
         void attach(CCircle*);
@@ -70,6 +71,21 @@ inline void CCircleVisuals::attach(CCircle* _pCirc)
     m_pCircle = _pCirc;
 
     METHOD_EXIT("CCircleVisuals::attach")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the bounding box of given shape of visual
+///
+/// \return Bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CBoundingBox& CCircleVisuals::getBoundingBox() const
+{
+    METHOD_ENTRY("CCircleVisuals::getBoundingBox")
+
+    METHOD_EXIT("CCircleVisuals::getBoundingBox")
+    return m_pCircle->getBoundingBox();
 }
 
 #endif

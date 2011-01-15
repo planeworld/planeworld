@@ -41,7 +41,8 @@ class CSpringVisuals : public IVisuals
         ~CSpringVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void draw() const;
+        virtual void                draw() const;
+        virtual const CBoundingBox& getBoundingBox() const;
         
         //--- Methods --------------------------------------------------------//
         void attach(CSpring*);
@@ -55,6 +56,23 @@ class CSpringVisuals : public IVisuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the bounding box of given shape of visual
+///
+/// \return Bounding box
+///
+/// \todo Return valid bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CBoundingBox& CSpringVisuals::getBoundingBox() const
+{
+    METHOD_ENTRY("CSpringVisuals::getBoundingBox")
+
+    METHOD_EXIT("CSpringVisuals::getBoundingBox")
+    return CBoundingBox();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

@@ -24,6 +24,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
+#include "camera.h"
 #include "engine_common.h"
 #include "visuals.h"
 
@@ -44,7 +45,7 @@ class CVisualsManager : virtual public CGraphicsBase
         ~CVisualsManager();
         
         //--- Constant Methods -----------------------------------------------//
-        void            drawBoundingBox(const CBoundingBox&) const;
+        void            drawBoundingBoxes() const;
         void            drawWorld() const;
         const double    getFrequency() const;
         const bool      getVisualisation(const int&) const;
@@ -54,6 +55,7 @@ class CVisualsManager : virtual public CGraphicsBase
         //--- Methods --------------------------------------------------------//
         VisualsIDType       addVisuals(IVisuals*);
         VisualsIDListType   addVisualsList(const VisualsListType&);
+        void                setCamera(CCamera*);
         void                setVisualisations(const int&);
         void                toggleVisualisations(const int&);
         void                unsetVisualisations(const int&);
@@ -63,6 +65,7 @@ class CVisualsManager : virtual public CGraphicsBase
         double              m_fFrequency;           ///< Frequency of visuals update
         int                 m_nVisualisations;      ///< Additional graphical output
         CKeyMap<IVisuals*>  m_VisualsMap;           ///< Map of visuals and keys
+        CCamera*            m_pCamera;              ///< Camera for player view
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -110,6 +113,22 @@ inline bool CVisualsManager::initGraphics() const
 
     METHOD_EXIT("CVisualsManager::getVisualisations")
     return (m_Graphics.init());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets camera for visualisation
+///
+/// \param _pCamera Camera
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CVisualsManager::setCamera(CCamera* _pCamera)
+{
+    METHOD_ENTRY("CVisualsManager::setCamera")
+
+    m_pCamera = _pCamera;
+
+    METHOD_EXIT("CVisualsManager::setCamera")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

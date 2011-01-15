@@ -41,7 +41,8 @@ class CRectangleVisuals : public IVisuals
         ~CRectangleVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void draw() const;
+        virtual void                draw() const;
+        virtual const CBoundingBox& getBoundingBox() const;
         
         //--- Methods --------------------------------------------------------//
         void attach(CRectangle*);
@@ -55,6 +56,21 @@ class CRectangleVisuals : public IVisuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the bounding box of given shape of visual
+///
+/// \return Bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CBoundingBox& CRectangleVisuals::getBoundingBox() const
+{
+    METHOD_ENTRY("CRectangleVisuals::getBoundingBox")
+
+    METHOD_EXIT("CRectangleVisuals::getBoundingBox")
+    return m_pRectangle->getBoundingBox();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
