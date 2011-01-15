@@ -47,9 +47,9 @@ const T CAdamsMoultonIntegrator<T>::integrate(const T& _V,
 {
     METHOD_ENTRY("CAdamsMoultonIntegrator::integrate(const double&, const double&)");
 
-    m_Deriv[4] = m_Deriv[0];
-    m_Deriv[3] = m_Deriv[0];
-    m_Deriv[2] = m_Deriv[0];
+    m_Deriv[4] = m_Deriv[3];
+    m_Deriv[3] = m_Deriv[2];
+    m_Deriv[2] = m_Deriv[1];
     m_Deriv[1] = m_Deriv[0];
     m_Deriv[0] = _V;
 
@@ -87,9 +87,9 @@ const T CAdamsMoultonIntegrator<T>::integrateClip(const T& _V,
 {
     METHOD_ENTRY("CAdamsMoultonIntegrator::integrate(const double&, const double&)");
 
-    m_Deriv[4] = m_Deriv[0];
-    m_Deriv[3] = m_Deriv[0];
-    m_Deriv[2] = m_Deriv[0];
+    m_Deriv[4] = m_Deriv[3];
+    m_Deriv[3] = m_Deriv[2];
+    m_Deriv[2] = m_Deriv[1];
     m_Deriv[1] = m_Deriv[0];
     m_Deriv[0] = _V;
 
@@ -133,9 +133,9 @@ inline const Vector2d CAdamsMoultonIntegrator<Vector2d>::integrateClip(const Vec
 {
     METHOD_ENTRY("CAdamsMoultonIntegrator::integrate(const double&, const double&)");
 
-    m_Deriv[4] = m_Deriv[0];
-    m_Deriv[3] = m_Deriv[0];
-    m_Deriv[2] = m_Deriv[0];
+    m_Deriv[4] = m_Deriv[3];
+    m_Deriv[3] = m_Deriv[2];
+    m_Deriv[2] = m_Deriv[1];
     m_Deriv[1] = m_Deriv[0];
     m_Deriv[0] = _V;
 
