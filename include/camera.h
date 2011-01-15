@@ -23,6 +23,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "bounding_box.h"
 #include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -46,11 +47,15 @@ class CCamera
         virtual ~CCamera();                         ///< Destructor
 
         //--- Constant Methods -----------------------------------------------//
+        const CBoundingBox getBoundingBox() const;
+        
         Vector2d    getPosition() const;
         double      getAngle() const;
         double      getZoom() const;
         
         //--- Methods --------------------------------------------------------//
+        void setViewport(const double&, const double&);
+        
         void reset();
         void rotateBy(const double&);
         void rotateTo(const double&);
@@ -60,14 +65,39 @@ class CCamera
         void zoomTo(const double&);
 
     protected:
+        
+        //--- Methods [protected] --------------------------------------------//
+        void updateBoundingBox();
 
         //--- Variables [protected] ------------------------------------------//
-        Vector2d        m_vecPosition;             ///< Camera position
-        double          m_fAngle;                  ///< Camera angle
-        double          m_fZoom;                   ///< Camera zoom
+        CBoundingBox    m_BoundingBox;              ///< Cameras bounding box (for culling)
+        Vector2d        m_vecPosition;              ///< Camera position
+        Vector2d        m_vecCorners[4];            ///< Viewport corners
+        double          m_fViewportWidth;           ///< Half of viewport width in m
+        double          m_fViewportHeight;          ///< Half of viewport height in m
+        double          m_fAngle;                   ///< Camera angle
+        double          m_fZoom;                    ///< Camera zoom
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns cameras bounding box
+///
+/// The bounding box of the camera is returned. It surrounds the viewport and
+/// can be used for culling.
+///
+/// \return The bounding box
+///
+///////////////////////////////////////////////////////////////////////////////
+inline const CBoundingBox CCamera::getBoundingBox() const
+{
+    METHOD_ENTRY("CCamera::getBoundingBox")
+
+    METHOD_EXIT("CCamera::getBoundingBox")
+    return m_BoundingBox;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -112,104 +142,6 @@ inline double CCamera::getZoom() const
 
     METHOD_EXIT("CCamera::getZoom")
     return m_fZoom;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Rotates the camera by a given angle
-///
-/// \param _fAngle Angle to rotate camera by
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CCamera::rotateBy(const double& _fAngle)
-{
-    METHOD_ENTRY("CCamera::rotateBy")
-
-    m_fAngle += _fAngle;
-
-    METHOD_EXIT("CCamera::rotateBy")
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Rotates the camera to a given angle
-///
-/// \param _fAngle Angle to rotate camera to
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CCamera::rotateTo(const double& _fAngle)
-{
-    METHOD_ENTRY("CCamera::rotateTo")
-
-    m_fAngle = _fAngle;
-
-    METHOD_EXIT("CCamera::rotateTo")
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Translates the camera by a given position
-///
-/// \param _vecV Vector to move camera
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CCamera::translateBy(const Vector2d& _vecV)
-{
-    METHOD_ENTRY("CCamera::translateBy")
-
-    Rotation2Dd Rotation(-m_fAngle);
-
-    m_vecPosition += Rotation * _vecV;
-
-    METHOD_EXIT("CCamera::translateBy")
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Translates the camera to a given position
-///
-/// \param _vecV Vector to move camera by
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CCamera::translateTo(const Vector2d& _vecV)
-{
-    METHOD_ENTRY("CCamera::translateTo")
-
-    m_vecPosition = _vecV;
-
-    METHOD_EXIT("CCamera::translateTo")
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Zooms the camera by a given factor
-///
-/// \param _fZoom Zoom factor
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CCamera::zoomBy(const double& _fZoom)
-{
-    METHOD_ENTRY("CCamera::zoomBy")
-
-    m_fZoom *= _fZoom;
-
-    METHOD_EXIT("CCamera::zoomBy")
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Zooms the camera to a given factor
-///
-/// \param _fZoom Zoom factor
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CCamera::zoomTo(const double& _fZoom)
-{
-    METHOD_ENTRY("CCamera::zoomTo")
-
-    m_fZoom = _fZoom;
-
-    METHOD_EXIT("CCamera::zoomTo")
 }
 
 #endif
