@@ -111,8 +111,9 @@ int main(int argc, char *argv[])
     pVisualsManager = new CVisualsManager;
     MEM_ALLOC("pVisualsManager")
     
+    pCamera->setViewport(200.0, 100.0);
     pVisualsManager->setCamera(pCamera);
-    
+        
     int nNumberOfBoxes = 0;
     
     lua_State *L = lua_open();

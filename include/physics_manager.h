@@ -27,7 +27,7 @@
 #include "collision_manager.h"
 #include "joint.h"
 
-const double PHYSICS_DEFAULT_FREQUENCY = 1000.0;
+const double PHYSICS_DEFAULT_FREQUENCY = 300.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

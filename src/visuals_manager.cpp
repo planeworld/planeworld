@@ -89,6 +89,14 @@ void CVisualsManager::drawBoundingBoxes() const
                                   (*ci)->getBoundingBox().getUpperRight());
             m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         }
+        
+        m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
+        m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft(),
+                        m_pCamera->getBoundingBox().getUpperRight());
+        m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
+        m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft(),
+                            m_pCamera->getBoundingBox().getUpperRight());
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
 
     m_Graphics.swapBuffers();
@@ -140,7 +148,8 @@ void CVisualsManager::drawWorld() const
     for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
          ci != m_VisualsMap.end(); ++ci)
     {
-        (*ci)->draw();
+        if ((*ci)->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
+            (*ci)->draw();
     }
     
     METHOD_EXIT("CVisualsManager::drawWorld")

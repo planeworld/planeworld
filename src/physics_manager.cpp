@@ -159,10 +159,10 @@ void CPhysicsManager::addGlobalForces()
                     vecG = vecCC.normalized() * ((*ci)->getMass() * (*cj)->getMass()) / fCCSqr
 //                             * 6.6742e+0;
                          * 6.6742e-11;
-//                     if ((*cj)->getGravitationState() == true)
-//                         (*ci)->addForce(-vecG, (*ci)->getCOM());
-//                     if ((*ci)->getGravitationState() == true)
-//                         (*cj)->addForce(vecG, (*cj)->getCOM());
+                    if ((*cj)->getGravitationState() == true)
+                        (*ci)->addForce(-vecG, (*ci)->getCOM());
+                    if ((*ci)->getGravitationState() == true)
+                        (*cj)->addForce(vecG, (*cj)->getCOM());
                 }
             }
             ++cj;
