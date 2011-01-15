@@ -42,9 +42,9 @@ class IVisuals : virtual public CGraphicsBase
         
         //--- Constant Methods -----------------------------------------------//
         virtual void                draw() const = 0;
-        virtual const CBoundingBox& getBoundingBox() const = 0;
-        
+                
         //--- Methods --------------------------------------------------------//
+        virtual const CBoundingBox& getBoundingBox() = 0;
 
 };
 

@@ -42,37 +42,21 @@ class CSpringVisuals : public IVisuals
         
         //--- Constant Methods -----------------------------------------------//
         virtual void                draw() const;
-        virtual const CBoundingBox& getBoundingBox() const;
-        
+                
         //--- Methods --------------------------------------------------------//
-        void attach(CSpring*);
+                void                attach(CSpring*);
+        virtual const CBoundingBox& getBoundingBox();
         
     private:
         
-        CSpringVisuals();       ///< Constructor is private, copy constructor must be used
+        CSpringVisuals(); ///< Constructor is private, copy constructor must be used
         
-        CSpring* m_pSpring;
+        CBoundingBox    m_BoundingBox; ///< Bounding box of spring
+        CSpring*        m_pSpring;     ///< Pointer to physical object
 
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the bounding box of given shape of visual
-///
-/// \return Bounding box
-///
-/// \todo Return valid bounding box
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& CSpringVisuals::getBoundingBox() const
-{
-    METHOD_ENTRY("CSpringVisuals::getBoundingBox")
-
-    METHOD_EXIT("CSpringVisuals::getBoundingBox")
-    return CBoundingBox();
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

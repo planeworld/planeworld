@@ -42,10 +42,10 @@ class CPolylineVisuals : public IVisuals
         
         //--- Constant Methods -----------------------------------------------//
         virtual void                draw() const;
-        virtual const CBoundingBox& getBoundingBox() const;
-        
+                
         //--- Methods --------------------------------------------------------//
         void attach(CPolyLine*);
+        virtual const CBoundingBox& getBoundingBox();
         
     private:
         
@@ -64,7 +64,7 @@ class CPolylineVisuals : public IVisuals
 /// \return Bounding box
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& CPolylineVisuals::getBoundingBox() const
+inline const CBoundingBox& CPolylineVisuals::getBoundingBox()
 {
     METHOD_ENTRY("CPolyLineVisuals::getBoundingBox")
 

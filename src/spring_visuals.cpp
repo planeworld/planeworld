@@ -76,6 +76,34 @@ void CSpringVisuals::draw() const
 
     m_Graphics.addVertex(vec2);
     m_Graphics.endLine();
-
+    
     METHOD_EXIT("CSpringVisuals::draw()");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the bounding box of spring
+///
+/// \return Bounding box
+///
+/// \todo Return valid bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+const CBoundingBox& CSpringVisuals::getBoundingBox()
+{
+    METHOD_ENTRY("CSpringVisuals::getBoundingBox")
+    
+    Vector2d vec1 = m_pSpring->getObjectA()->getAnchor(m_pSpring->getAnchorIDA());
+    Vector2d vec2 = m_pSpring->getObjectB()->getAnchor(m_pSpring->getAnchorIDB());
+    Vector2d vec21 = vec2 - vec1;
+    Vector2d vecOrth = Vector2d(-vec21[1], vec21[0]).normalized()*2.0;
+    
+    m_BoundingBox.setLowerLeft(vec1-vecOrth);
+    m_BoundingBox.setUpperRight(vec1-vecOrth);
+    m_BoundingBox.update(vec1+vecOrth);
+    m_BoundingBox.update(vec2-vecOrth);
+    m_BoundingBox.update(vec2+vecOrth);
+
+    METHOD_EXIT("CSpringVisuals::getBoundingBox")
+    return m_BoundingBox;
 }

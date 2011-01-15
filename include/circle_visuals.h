@@ -42,10 +42,10 @@ class CCircleVisuals : public IVisuals
         
         //--- Constant Methods -----------------------------------------------//
         virtual void                draw() const;
-        virtual const CBoundingBox& getBoundingBox() const;
-        
+                
         //--- Methods --------------------------------------------------------//
         void attach(CCircle*);
+        virtual const CBoundingBox& getBoundingBox();
         
     private:
         
@@ -80,7 +80,7 @@ inline void CCircleVisuals::attach(CCircle* _pCirc)
 /// \return Bounding box
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& CCircleVisuals::getBoundingBox() const
+inline const CBoundingBox& CCircleVisuals::getBoundingBox()
 {
     METHOD_ENTRY("CCircleVisuals::getBoundingBox")
 

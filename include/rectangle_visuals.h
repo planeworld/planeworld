@@ -42,10 +42,10 @@ class CRectangleVisuals : public IVisuals
         
         //--- Constant Methods -----------------------------------------------//
         virtual void                draw() const;
-        virtual const CBoundingBox& getBoundingBox() const;
-        
+                
         //--- Methods --------------------------------------------------------//
         void attach(CRectangle*);
+        virtual const CBoundingBox& getBoundingBox();
         
     private:
         
@@ -64,7 +64,7 @@ class CRectangleVisuals : public IVisuals
 /// \return Bounding box
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& CRectangleVisuals::getBoundingBox() const
+inline const CBoundingBox& CRectangleVisuals::getBoundingBox()
 {
     METHOD_ENTRY("CRectangleVisuals::getBoundingBox")
 
