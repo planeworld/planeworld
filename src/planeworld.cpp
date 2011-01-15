@@ -28,10 +28,8 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "circle_visuals.h"
 #include "engine_manager.h"
 #include "pointmass.h"
-#include "polyline_visuals.h"
 #include "random_line.h"
 #include "rectangle_visuals.h"
 #include "rigidbody.h"

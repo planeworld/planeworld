@@ -24,10 +24,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
-#include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include "eigen2/Eigen/Core"
 #include "eigen2/Eigen/Geometry"
 
 using namespace Eigen;

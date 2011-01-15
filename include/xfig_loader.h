@@ -29,11 +29,9 @@
 // #include <string>
 
 // program-header
-#include "circle.h"
 #include "circle_visuals.h"
 // #include "log.h"
 #include "parzival.h"
-#include "polyline.h"
 #include "polyline_visuals.h"
 
 ////////////////////////////////////////////////////////////////////////////////
