@@ -71,8 +71,8 @@ Vector2d CGraphics::screen2World(const Vector2d& _vecV) const
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (90.0-m_fCamAng)*GRAPHICS_DEG2RAD)+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (90.0-m_fCamAng)*GRAPHICS_DEG2RAD)- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (GRAPHICS_PI/2.0-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (GRAPHICS_PI/2.0-m_fCamAng))- m_vecCamPos[1];
 
     METHOD_EXIT("CGraphics::screen2World")
     return vecResult;
@@ -107,8 +107,8 @@ Vector2d CGraphics::screen2World(const double& _fX, const double& _fY) const
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (90.0-m_fCamAng)*GRAPHICS_DEG2RAD)+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (90.0-m_fCamAng)*GRAPHICS_DEG2RAD)- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (GRAPHICS_PI/2.0-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (GRAPHICS_PI/2.0-m_fCamAng))- m_vecCamPos[1];
 
     METHOD_EXIT("CGraphics::screen2World")
     return vecResult;
@@ -368,12 +368,12 @@ void CGraphics::applyCamMovement()
     METHOD_ENTRY("CGraphics::applyCamMovement")
 
     glScaled(m_fCamZoom, m_fCamZoom, 1.0);
-    glRotated(-m_fCamAng, 0.0, 0.0, 1.0);
+    glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
     glTranslated(-m_vecCamPos[0], m_vecCamPos[1], 0.0);
     
-    GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0f, 1.0f };
+//     GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0f, 1.0f };
 //     glLightf (GL_LIGHT1, GL_SPOT_CUTOFFB, 15.f);
-    glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
+//     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
 
     METHOD_EXIT("CGraphics::applyCamMovement")
 }
@@ -442,10 +442,10 @@ void CGraphics::transCamBy(const Vector3d& _vecInc)
 {
     METHOD_ENTRY("CGraphics::transCamBy")
 
-    Rotation2Dd Rotation(-m_fCamAng*GRAPHICS_DEG2RAD);
+    Rotation2Dd Rotation(-m_fCamAng);
 
     m_vecCamPos.segment<2>(0) += Rotation * _vecInc.segment<2>(0);
-
+    
     METHOD_EXIT("CGraphics::transCamBy")
 }
 

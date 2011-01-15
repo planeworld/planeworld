@@ -46,7 +46,7 @@ const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn
 
 const double GRAPHICS_PI = std::acos(-1.0);             ///< Constant pi
 const double GRAPHICS_DEG2RAD = GRAPHICS_PI / 180.0;    ///< Converts degree to radiant values
-const double GRAPHICS_RAD2DEG = GRAPHICS_PI * 180.0;    ///< Converts radiant to degree values
+const double GRAPHICS_RAD2DEG = 180.0 / GRAPHICS_PI;    ///< Converts radiant to degree values
 const unsigned short GRAPHICS_WIDTH_DEFAULT = 1440u;    ///< Default x-resolution
 const unsigned short GRAPHICS_HEIGHT_DEFAULT = 900u;    ///< Default y-resolution
 
@@ -386,7 +386,7 @@ inline double CGraphics::getCamAng() const
     METHOD_ENTRY("CGraphics::getCamAngle()");
 
     METHOD_EXIT("CGraphics::getCamAngle()");
-    return m_fCamAng*GRAPHICS_DEG2RAD;
+    return m_fCamAng;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
