@@ -73,7 +73,7 @@ void CRectangle::transform(const double& _fAngle, const Vector2d& _vecV)
     m_AABB.setUpperRight(m_vecVerts[0]);
 
     // Update bounding box
-    for (int i=0; i<4; ++i)
+    for (int i=1; i<4; ++i)
     {
         m_AABB.update(m_vecVerts[i]);
     }

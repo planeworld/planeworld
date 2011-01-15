@@ -65,6 +65,10 @@ void CPolyLine::transform(const double& _fAngle, const Vector2d& _vecV)
     m_AABB.setLowerLeft( Rotation * (*ci) + _vecV);
     m_AABB.setUpperRight(Rotation * (*ci) + _vecV);
     
+    (*it) = Rotation * (*ci) + _vecV;
+    ++it;
+    ++ci;
+    
     while (ci != m_VertList0.end())
     {
         (*it) = Rotation * (*ci) + _vecV;
