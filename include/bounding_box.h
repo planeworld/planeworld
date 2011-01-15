@@ -46,6 +46,8 @@ class CBoundingBox
         //--- Constant Methods -----------------------------------------------//
         const Vector2d& getLowerLeft() const;
         const Vector2d& getUpperRight() const;
+        const double    getHeight() const;
+        const double    getWidth() const;
         
         bool overlaps(const CBoundingBox&) const;
 
@@ -94,6 +96,36 @@ inline const Vector2d& CBoundingBox::getUpperRight() const
 
     METHOD_EXIT("CBoundingBox::getUpperRight")
     return m_vecUpperRight;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the height of Axis Aligned Bounding Box 
+///
+/// \return Returns height of bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double CBoundingBox::getHeight() const
+{
+    METHOD_ENTRY("CBoundingBox::getHeight")
+
+    METHOD_EXIT("CBoundingBox::getHeight")
+    return m_vecUpperRight[1] - m_vecLowerLeft[1];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the width of Axis Aligned Bounding Box 
+///
+/// \return Returns width of bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double CBoundingBox::getWidth() const
+{
+    METHOD_ENTRY("CBoundingBox::getWidth")
+
+    METHOD_EXIT("CBoundingBox::getWidth")
+    return m_vecUpperRight[0] - m_vecLowerLeft[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

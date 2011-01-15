@@ -148,8 +148,10 @@ void CVisualsManager::drawWorld() const
     for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
          ci != m_VisualsMap.end(); ++ci)
     {
-        if ((*ci)->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
-            (*ci)->draw();
+        if ((((*ci)->getBoundingBox().getWidth() * m_pCamera->getZoom()) > 0.01) && 
+            (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) > 0.01))
+            if ((*ci)->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
+                (*ci)->draw();
     }
     
     METHOD_EXIT("CVisualsManager::drawWorld")
