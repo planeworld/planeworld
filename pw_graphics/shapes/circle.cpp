@@ -29,6 +29,8 @@ CCircle::CCircle() : m_fAngle(0.0),m_fRadius(1.0)
     METHOD_ENTRY ( "CCircle::CCircle()" );
     CTOR_CALL ( "CCircle::CCircle()" );
     
+    m_vecCenter0.setZero();
+    
     METHOD_EXIT ( "CCircle::CCircle()" );
 }
 

@@ -21,6 +21,22 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+CBoundingBox::CBoundingBox()
+{
+    METHOD_ENTRY("CBoundingBox::CBoundingBox")
+    CTOR_CALL("CBoundingBox::CBoundingBox")
+    
+    m_vecLowerLeft.setZero();
+    m_vecUpperRight.setZero();
+    
+    METHOD_EXIT("CBoundingBox::CBoundingBox")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Tests two bounding boxes for overlap
 ///
 /// \param _BBox Second bounding box for overlap test

@@ -40,6 +40,9 @@ CGraphics::CGraphics() : m_fCamAng(0.0),
 {
     METHOD_ENTRY("CGraphics::CGraphics")
     CTOR_CALL("CGraphics::CGraphics")
+    
+    m_vecCamPos.setZero();
+    
     METHOD_EXIT("CGraphics::CGraphics")
 }
 

@@ -29,6 +29,11 @@ CRectangle::CRectangle()
     METHOD_ENTRY("CRectangle::CRectangle()");
     CTOR_CALL("CRectangle::CRectangle()");
     
+    m_vecLL0.setZero();
+    m_vecLR0.setZero();
+    m_vecUL0.setZero();
+    m_vecUR0.setZero();
+    
     METHOD_EXIT("CRectangle::CRectangle()");
 }
 ///////////////////////////////////////////////////////////////////////////////

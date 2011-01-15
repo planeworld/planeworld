@@ -41,6 +41,7 @@ class CBoundingBox
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
+        CBoundingBox();
         
         //--- Constant Methods -----------------------------------------------//
         const Vector2d& getLowerLeft() const;

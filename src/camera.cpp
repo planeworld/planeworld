@@ -29,6 +29,8 @@ CCamera::CCamera() : m_fAngle(0.0), m_fZoom(1.0)
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
     
+    m_vecPosition.setZero();
+    
     METHOD_EXIT("CCamera::CCamera");
 }
 
