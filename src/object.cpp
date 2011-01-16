@@ -178,6 +178,7 @@ void IObject::init()
     m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue()+m_vecCOM);
     m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue()+m_vecCOM);
    
+    m_vecForce.setZero();
     m_pIntPos->init(m_vecOrigin0);
     m_pIntVel->reset();
 
