@@ -157,7 +157,8 @@ void CCamera::translateBy(const Vector2d& _vecV)
 
     Rotation2Dd Rotation(-m_fAngle);
 
-    m_vecPosition += Rotation * _vecV;
+    m_vecPosition += Vector2d( (Rotation * _vecV)[0],
+                              -(Rotation * _vecV)[1]);
     
     this->updateBoundingBox();
 
@@ -228,7 +229,7 @@ void CCamera::updateBoundingBox()
     METHOD_ENTRY("CCamera::updateBoundingBox")
 
     Rotation2Dd Rotation(-m_fAngle);
-    Vector2d vecPosition(m_vecPosition[0], -m_vecPosition[1]);
+    Vector2d vecPosition(m_vecPosition[0], m_vecPosition[1]);
     
     m_BoundingBox.setLowerLeft(( Rotation * m_vecCorners[0])/m_fZoom+vecPosition);
     m_BoundingBox.setUpperRight((Rotation * m_vecCorners[0])/m_fZoom+vecPosition);
