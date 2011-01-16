@@ -41,7 +41,7 @@ class CRectangleVisuals : public IVisuals
         ~CRectangleVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void                draw() const;
+        virtual void draw(const CCamera* const) const;
                 
         //--- Methods --------------------------------------------------------//
         void attach(CRectangle*);

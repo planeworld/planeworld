@@ -23,6 +23,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "camera.h"
 #include "graphics.h"
 #include "key_map.h"
 
@@ -40,7 +41,7 @@ class IVisuals : virtual public CGraphicsBase
         virtual ~IVisuals(){}
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void                draw() const = 0;
+        virtual void draw(const CCamera* const) const = 0;
                 
         //--- Methods --------------------------------------------------------//
         virtual const CBoundingBox& getBoundingBox() = 0;

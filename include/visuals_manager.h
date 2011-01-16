@@ -24,7 +24,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
-#include "camera.h"
 #include "engine_common.h"
 #include "visuals.h"
 

@@ -51,8 +51,10 @@ CPolylineVisuals::~CPolylineVisuals()
 ///
 /// \brief Draw the polyline
 ///
+/// \param _pCamera Active camera for drawing visuals
+///
 ///////////////////////////////////////////////////////////////////////////////
-void CPolylineVisuals::draw() const
+void CPolylineVisuals::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CPolylineVisuals::draw")
 
@@ -61,7 +63,7 @@ void CPolylineVisuals::draw() const
     std::list<Vector2d>::const_iterator ci = m_pPolyline->getVertices().begin();
     while (ci != m_pPolyline->getVertices().end())
     {
-        m_Graphics.addVertex((*ci));
+        m_Graphics.addVertex((*ci)-_pCamera->getPosition());
         ++ci;
     }
 

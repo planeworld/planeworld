@@ -41,7 +41,7 @@ class CSpringVisuals : public IVisuals
         ~CSpringVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void                draw() const;
+        virtual void                draw(const CCamera* const) const;
                 
         //--- Methods --------------------------------------------------------//
                 void                attach(CSpring*);

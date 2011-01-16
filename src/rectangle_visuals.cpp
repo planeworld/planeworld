@@ -51,16 +51,18 @@ CRectangleVisuals::~CRectangleVisuals()
 ///
 /// \brief Draw the rectangle
 ///
+/// \param _pCamera Active camera for drawing visuals
+///
 ///////////////////////////////////////////////////////////////////////////////
-void CRectangleVisuals::draw() const
+void CRectangleVisuals::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CRectangleVisuals::draw()");
 
     m_Graphics.beginLine(GRAPHICS_LINETYPE_LOOP, SHAPE_DEFAULT_DEPTH);
-        m_Graphics.addVertex(m_pRectangle->getVertices()[0]);
-        m_Graphics.addVertex(m_pRectangle->getVertices()[1]);
-        m_Graphics.addVertex(m_pRectangle->getVertices()[2]);
-        m_Graphics.addVertex(m_pRectangle->getVertices()[3]);
+        m_Graphics.addVertex(m_pRectangle->getVertices()[0]-_pCamera->getPosition());
+        m_Graphics.addVertex(m_pRectangle->getVertices()[1]-_pCamera->getPosition());
+        m_Graphics.addVertex(m_pRectangle->getVertices()[2]-_pCamera->getPosition());
+        m_Graphics.addVertex(m_pRectangle->getVertices()[3]-_pCamera->getPosition());
     m_Graphics.endLine();
 
     METHOD_EXIT("CRectangleVisuals::draw()");

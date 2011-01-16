@@ -82,20 +82,28 @@ void CVisualsManager::drawBoundingBoxes() const
         {
     
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
-            m_Graphics.rect((*ci)->getBoundingBox().getLowerLeft(),
-                            (*ci)->getBoundingBox().getUpperRight());
+            m_Graphics.rect((*ci)->getBoundingBox().getLowerLeft() -
+                            m_pCamera->getPosition(),
+                            (*ci)->getBoundingBox().getUpperRight()-
+                            m_pCamera->getPosition());
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
-            m_Graphics.filledRect((*ci)->getBoundingBox().getLowerLeft(),
-                                  (*ci)->getBoundingBox().getUpperRight());
+            m_Graphics.filledRect((*ci)->getBoundingBox().getLowerLeft() -
+                                  m_pCamera->getPosition(),
+                                  (*ci)->getBoundingBox().getUpperRight()-
+                                  m_pCamera->getPosition());
             m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         }
         
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
-        m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft(),
-                        m_pCamera->getBoundingBox().getUpperRight());
+        m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
+                        m_pCamera->getPosition(),
+                        m_pCamera->getBoundingBox().getUpperRight()-
+                        m_pCamera->getPosition());
         m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
-        m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft(),
-                            m_pCamera->getBoundingBox().getUpperRight());
+        m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
+                              m_pCamera->getPosition(),
+                              m_pCamera->getBoundingBox().getUpperRight()-
+                              m_pCamera->getPosition());
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
 
@@ -138,9 +146,9 @@ void CVisualsManager::drawWorld() const
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
-    m_Graphics.transCamTo(Vector3d(m_pCamera->getPosition()[0],
-                                   m_pCamera->getPosition()[1],
-                                   0.0));
+//     m_Graphics.transCamTo(Vector3d(0.0,
+//                                    0.0,
+//                                    0.0));
     m_Graphics.rotCamTo(m_pCamera->getAngle());
     m_Graphics.zoomCamTo(m_pCamera->getZoom());
     m_Graphics.applyCamMovement();
@@ -154,11 +162,12 @@ void CVisualsManager::drawWorld() const
                 if ((((*ci)->getBoundingBox().getWidth() * m_pCamera->getZoom()) <  0.3) && 
                     (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) < 0.3))
                 {
-                    m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft());
+                    m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() -
+                                   m_pCamera->getPosition());
                 }
                 else
                 {
-                    (*ci)->draw();
+                    (*ci)->draw(m_pCamera);
                 }
     }
     

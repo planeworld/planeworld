@@ -41,7 +41,7 @@ class CPolylineVisuals : public IVisuals
         ~CPolylineVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void                draw() const;
+        virtual void draw(const CCamera* const) const;
                 
         //--- Methods --------------------------------------------------------//
         void attach(CPolyLine*);
