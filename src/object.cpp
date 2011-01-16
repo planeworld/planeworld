@@ -39,6 +39,11 @@ IObject::IObject(): m_bGravitation(true),
     m_pIntVel = new CAdamsBashforthIntegrator<Vector2d>;
     MEM_ALLOC("m_pIntVel")
 
+    m_vecOrigin0.setZero();
+    m_vecCOM.setZero();
+    m_vecForce.setZero();
+    m_vecGrid.setZero();
+
     m_Lifetime.start();
 
     METHOD_EXIT("IObject::IObject")
@@ -64,6 +69,11 @@ IObject::IObject(const double& _fM):
     MEM_ALLOC("m_pIntPos")
     m_pIntVel = new CAdamsBashforthIntegrator<Vector2d>;
     MEM_ALLOC("m_pIntVel")
+
+    m_vecOrigin0.setZero();
+    m_vecCOM.setZero();
+    m_vecForce.setZero();
+    m_vecGrid.setZero();
 
     m_Lifetime.start();
 
@@ -167,9 +177,8 @@ void IObject::init()
     // Center of mass (position vector) is always inside AABB
     m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue()+m_vecCOM);
     m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue()+m_vecCOM);
-
+   
     m_pIntPos->init(m_vecOrigin0);
-    m_vecForce.setZero();
     m_pIntVel->reset();
 
     this->myInit();
