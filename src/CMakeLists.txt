@@ -36,6 +36,8 @@ SET(SRCS
     object.cpp
     parzival.cpp
     physics_manager.cpp
+    planet.cpp
+    planet_visuals.cpp
     planeworld.cpp
     pointmass.cpp
     polyline_visuals.cpp

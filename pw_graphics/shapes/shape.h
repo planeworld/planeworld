@@ -40,6 +40,7 @@ typedef enum
 {
     SHAPE_NONE,
     SHAPE_CIRCLE,
+    SHAPE_PLANET,
     SHAPE_POLYLINE,
     SHAPE_RECTANGLE
 } ShapeType;

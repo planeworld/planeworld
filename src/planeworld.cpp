@@ -29,6 +29,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "engine_manager.h"
+#include "planet.h"
+#include "planet_visuals.h"
 #include "pointmass.h"
 #include "random_line.h"
 #include "rectangle_visuals.h"
@@ -81,6 +83,8 @@ int main(int argc, char *argv[])
     CCircleVisuals*     pCircleVisuals;
 //     CPointMass*         pPointMass;
     CRigidBody*         pPointMass;
+    CPlanet*            pPlanet;
+    CPlanetVisuals*     pPlanetVisuals;
     CPolyLine*          pPolyLine;
     CPolylineVisuals*   pPolylineVisuals;
     CRandomLine*        pRandomLine;
@@ -90,6 +94,9 @@ int main(int argc, char *argv[])
     CRigidBody*         pBody2;
     CRigidBody*         pBody3;
     CRigidBody*         pBody4;
+    CRigidBody*         pEarth;
+    CRigidBody*         pMoon;
+    CRigidBody*         pSun;
     CEngineManager      EngineManager;
     CPhysicsManager*    pPhysicsManager;
     CVisualsManager*    pVisualsManager;
@@ -109,7 +116,7 @@ int main(int argc, char *argv[])
     pVisualsManager = new CVisualsManager;
     MEM_ALLOC("pVisualsManager")
     
-    pCamera->setViewport(200.0, 100.0);
+    pCamera->setViewport(300.0, 180.0);
     pVisualsManager->setCamera(pCamera);
         
     int nNumberOfBoxes = 0;
@@ -287,40 +294,42 @@ int main(int argc, char *argv[])
     pPhysicsManager->addObject(pBody3);
     
     //--- Initialise Rigidbody ----------------------------------------------//
-    pBody4 = new CRigidBody;
-    MEM_ALLOC("pBody4")
+    pEarth = new CRigidBody;
+    MEM_ALLOC("pEarth")
 
-    pBody4->setMass(5.974e24);
-    pBody4->setInertia(3000.0);
-    pBody4->setOrigin(Vector2d(0.0,-6378.27e3));
-    pBody4->disableGravitation();
-    pBody4->disableDynamics();
-    pBody4->setName("Earth");
+    pEarth->setMass(5.974e24);
+    pEarth->setInertia(3000.0);
+    pEarth->setOrigin(Vector2d(0.0,-6378.27e3));
+    pEarth->disableGravitation();
+    pEarth->disableDynamics();
+//     pEarth->setTimeFac(1.0e5);
+    pEarth->setName("Earth");
     
-    pCircle = new CCircle();
-    MEM_ALLOC("pCircle")
-    pCircleVisuals = new CCircleVisuals(pCircle);
-    MEM_ALLOC("pCircleVisuals")
-    pCircle->setDepths(SHAPE_DEPTH_ALL);
-    pCircle->setCenter( Vector2d(0.0,0.0) );
-    pCircle->setRadius(6378.16e3);
+    pPlanet = new CPlanet();
+    MEM_ALLOC("pPlanet")
+    pPlanetVisuals = new CPlanetVisuals(pPlanet);
+    MEM_ALLOC("pPlanetVisuals")
+    pPlanet->setDepths(SHAPE_DEPTH_ALL);
+    pPlanet->setCenter( Vector2d(0.0,0.0) );
+    pPlanet->setRadius(6378.16e3);
+    pPlanet->setHeight(8000.0);
     
-    pBody4->getGeometry().addShape(pCircle);
-    pBody3->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+    pEarth->getGeometry().addShape(pPlanet);
+    pEarth->addVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
 
-    pPhysicsManager->addObject(pBody4);
+    pPhysicsManager->addObject(pEarth);
     
     //--- Initialise Rigidbody ----------------------------------------------//
-    pBody4 = new CRigidBody;
-    MEM_ALLOC("pBody4")
+    pMoon = new CRigidBody;
+    MEM_ALLOC("pMoon")
     
-    pBody4->setMass(7.349e22);
-    pBody4->setInertia(3000.0);
-    pBody4->setOrigin(Vector2d(0.0, -384.4e6));
-    pBody4->setTimeFac(1e5);
-    pBody4->disableGravitation();
-    pBody4->disableDynamics();
-    pBody4->setName("Moon");
+    pMoon->setMass(7.349e22);
+    pMoon->setInertia(3000.0);
+    pMoon->setOrigin(Vector2d(0.0, -384.4e6));
+//     pMoon->setTimeFac(1e5);
+    pMoon->disableGravitation();
+    pMoon->disableDynamics();
+    pMoon->setName("Moon");
     
     pCircle = new CCircle();
     MEM_ALLOC("pCircle")
@@ -330,10 +339,35 @@ int main(int argc, char *argv[])
     pCircle->setCenter( Vector2d(0.0,0.0) );
     pCircle->setRadius(1738.0e3);
     
-    pBody4->getGeometry().addShape(pCircle);
-    pBody4->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+    pMoon->getGeometry().addShape(pCircle);
+    pMoon->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
-    pPhysicsManager->addObject(pBody4);
+    pPhysicsManager->addObject(pMoon);
+    
+    //--- Initialise Rigidbody ----------------------------------------------//
+    pSun = new CRigidBody;
+    MEM_ALLOC("pSun")
+    
+    pSun->setMass(1.989e30);
+    pSun->setInertia(3000.0);
+    pSun->setOrigin(Vector2d(0.0, 149.6e9+6378.27e3));
+//     pSun->setTimeFac(1e5);
+//     pSun->disableGravitation();
+    pSun->disableDynamics();
+    pSun->setName("Sun");
+    
+    pCircle = new CCircle();
+    MEM_ALLOC("pCircle")
+    pCircleVisuals = new CCircleVisuals(pCircle);
+    MEM_ALLOC("pCircleVisuals")
+    pCircle->setDepths(SHAPE_DEPTH_ALL);
+    pCircle->setCenter( Vector2d(0.0,0.0) );
+    pCircle->setRadius(0.6957e9);
+    
+    pSun->getGeometry().addShape(pCircle);
+    pSun->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+
+    pPhysicsManager->addObject(pSun);
 
     //--- Initialize Spring -------------------------------------------------//
     pSpring = new CSpring();
@@ -381,11 +415,13 @@ int main(int argc, char *argv[])
     // Set initialisation state of all objects
     pPhysicsManager->initObjects();
 //     pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
+
+    pEarth->setVelocity(Vector2d(29.78e3, 0.0));
+    pMoon->setVelocity(Vector2d(29.78e3+1.023e3, 0.0));
     
     EngineManager.setPhysicsManager(pPhysicsManager);
     EngineManager.setVisualsManager(pVisualsManager);
-    pBody4->setVelocity(Vector2d(1023.0, 0.0));
-    
+        
     // Test threading
     boost::thread PhysicsThread(&CEngineManager::runPhysics, &EngineManager);
     boost::thread VisualsThread(&CEngineManager::runGraphics, &EngineManager);
