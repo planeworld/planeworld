@@ -84,9 +84,9 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
         int m_nRandom = rand()%int(fHeight);
         double fH = 0.0;
         double fFac     = 1.0;
-        double fFreq    = 0.0001;
-        double fFreqFac = 2.0;
-        double fPers    = 0.9;
+        double fFreq    = 0.01;
+        double fFreqFac = 1.93926598;
+        double fPers    = 0.6;
         
         for (int i=0; i<10; ++i)
         {
@@ -102,13 +102,13 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             fFac    *= fPers;
         }
  
-        m_Graphics.addVertex(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+fH*8000.0),
-                                      vecCenter[1]+std::cos(fAng)*(fRad+fH*8000.0)));
+        m_Graphics.addVertex(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+fH*15000.0),
+                                      vecCenter[1]+std::cos(fAng)*(fRad+fH*15000.0)));
 //         m_Graphics.addVertex(Vector2d(vecCenter[0]+fAng*30-100.0,
 //                                       vecCenter[1]+fRad+fH*10.0));
 //         m_Graphics.dot(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+fH*4000.0),
 //                                       vecCenter[1]+std::cos(fAng)*(fRad+fH*4000.0)));
-        fAng += 0.00003141;
+        fAng += 0.0003141;
         ++nAng;
     }
 
