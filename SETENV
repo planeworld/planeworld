@@ -1,0 +1,13 @@
+#!/bin/bash
+
+PKGDIR=$(cd $(dirname $BASH_ARGV) 2>/dev/null && pwd)
+#echo $PKGDIR
+#export QTDIR=$PKGDIR
+export PATH=$PKGDIR/bin:/usr/bin/:$PATH
+export LD_LIBRARY_PATH=$PKGDIR/lib/otb:$PKGDIR/lib:/usr/X11R6/lib:$LD_LIBRARY_PATH
+export LIBRARY_PATH=$PKGDIR/lib:/usr/X11R6/lib:$LIBRARY_PATH
+export C_INCLUDE_PATH=$PKGDIR/include:$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=$PKGDIR/include:$CPLUS_INCLUDE_PATH
+export PYTHONPATH=$PKGDIR/python:$PKGDIR/lib/python:$PYTHONPATH
+export GA_DATADIR=$PKGDIR/tmp/$USER/gda
+
