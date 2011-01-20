@@ -21,6 +21,7 @@
 #define CAMERA_H
 
 //--- Standard header --------------------------------------------------------//
+#include <vector>
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
@@ -45,7 +46,8 @@ class CCamera
         virtual ~CCamera();                         ///< Destructor
 
         //--- Constant Methods -----------------------------------------------//
-        const CBoundingBox getBoundingBox() const;
+        const CBoundingBox           getBoundingBox() const;
+        const std::vector<Vector2d>& getFrame() const;
         
         Vector2d    getPosition() const;
         double      getAngle() const;
@@ -65,12 +67,13 @@ class CCamera
     protected:
         
         //--- Methods [protected] --------------------------------------------//
-        void updateBoundingBox();
+        void update();
 
         //--- Variables [protected] ------------------------------------------//
+        std::vector<Vector2d>  m_vecFrame0;         ///< Initial camera frame
+        std::vector<Vector2d>  m_vecFrame;          ///< Camera frame
         CBoundingBox    m_BoundingBox;              ///< Cameras bounding box (for culling)
         Vector2d        m_vecPosition;              ///< Camera position
-        Vector2d        m_vecCorners[4];            ///< Viewport corners
         double          m_fViewportWidth;           ///< Half of viewport width in m
         double          m_fViewportHeight;          ///< Half of viewport height in m
         double          m_fAngle;                   ///< Camera angle
@@ -95,6 +98,21 @@ inline const CBoundingBox CCamera::getBoundingBox() const
 
     METHOD_EXIT("CCamera::getBoundingBox")
     return m_BoundingBox;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns camera frame (viewport) in world coordinates
+///
+/// \return The camera frame
+///
+///////////////////////////////////////////////////////////////////////////////
+inline const std::vector<Vector2d>& CCamera::getFrame() const
+{
+    METHOD_ENTRY("CCamera::getFrame")
+
+    METHOD_EXIT("CCamera::getFrame")
+    return m_vecFrame;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

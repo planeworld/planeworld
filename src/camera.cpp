@@ -29,6 +29,9 @@ CCamera::CCamera() : m_fViewportWidth(320.0), m_fViewportHeight(200.0)
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
     
+    m_vecFrame0.resize(4);
+    m_vecFrame.resize(4);
+    
     this->reset();
     
     METHOD_EXIT("CCamera::CCamera");
@@ -62,14 +65,14 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
     m_fViewportWidth  = _fW*0.5;
     m_fViewportHeight = _fH*0.5;
     
-    m_vecCorners[0][0] = -m_fViewportWidth;
-    m_vecCorners[0][1] = -m_fViewportHeight;
-    m_vecCorners[1][0] =  m_fViewportWidth;
-    m_vecCorners[1][1] = -m_fViewportHeight;
-    m_vecCorners[2][0] =  m_fViewportWidth;
-    m_vecCorners[2][1] =  m_fViewportHeight;
-    m_vecCorners[3][0] = -m_fViewportWidth;
-    m_vecCorners[3][1] =  m_fViewportHeight;
+    m_vecFrame0[0][0] = -m_fViewportWidth;
+    m_vecFrame0[0][1] = -m_fViewportHeight;
+    m_vecFrame0[1][0] =  m_fViewportWidth;
+    m_vecFrame0[1][1] = -m_fViewportHeight;
+    m_vecFrame0[2][0] =  m_fViewportWidth;
+    m_vecFrame0[2][1] =  m_fViewportHeight;
+    m_vecFrame0[3][0] = -m_fViewportWidth;
+    m_vecFrame0[3][1] =  m_fViewportHeight;
     
     m_BoundingBox.setLowerLeft (Vector2d(-m_fViewportWidth, 
                                          -m_fViewportHeight));
@@ -91,19 +94,16 @@ void CCamera::reset()
     m_vecPosition.setZero();
     m_fAngle = 0.0;
     m_fZoom  = 1.0;
-    m_vecCorners[0][0] = -m_fViewportWidth;
-    m_vecCorners[0][1] = -m_fViewportHeight;
-    m_vecCorners[1][0] =  m_fViewportWidth;
-    m_vecCorners[1][1] = -m_fViewportHeight;
-    m_vecCorners[2][0] =  m_fViewportWidth;
-    m_vecCorners[2][1] =  m_fViewportHeight;
-    m_vecCorners[3][0] = -m_fViewportWidth;
-    m_vecCorners[3][1] =  m_fViewportHeight;
+    m_vecFrame0[0][0] = -m_fViewportWidth;
+    m_vecFrame0[0][1] = -m_fViewportHeight;
+    m_vecFrame0[1][0] =  m_fViewportWidth;
+    m_vecFrame0[1][1] = -m_fViewportHeight;
+    m_vecFrame0[2][0] =  m_fViewportWidth;
+    m_vecFrame0[2][1] =  m_fViewportHeight;
+    m_vecFrame0[3][0] = -m_fViewportWidth;
+    m_vecFrame0[3][1] =  m_fViewportHeight;
     
-    m_BoundingBox.setLowerLeft (Vector2d(-m_fViewportWidth, 
-                                         -m_fViewportHeight));
-    m_BoundingBox.setUpperRight(Vector2d( m_fViewportWidth, 
-                                          m_fViewportHeight));
+    this->update();
 
     METHOD_EXIT("CCamera::reset")
 }
@@ -121,7 +121,7 @@ void CCamera::rotateBy(const double& _fAngle)
 
     m_fAngle += _fAngle;
     
-    this->updateBoundingBox();
+    this->update();
 
     METHOD_EXIT("CCamera::rotateBy")
 }
@@ -139,7 +139,7 @@ void CCamera::rotateTo(const double& _fAngle)
 
     m_fAngle = _fAngle;
     
-    this->updateBoundingBox();
+    this->update();
 
     METHOD_EXIT("CCamera::rotateTo")
 }
@@ -160,7 +160,7 @@ void CCamera::translateBy(const Vector2d& _vecV)
     m_vecPosition += Vector2d( (Rotation * _vecV)[0],
                               -(Rotation * _vecV)[1]);
     
-    this->updateBoundingBox();
+    this->update();
 
     METHOD_EXIT("CCamera::translateBy")
 }
@@ -178,7 +178,7 @@ void CCamera::translateTo(const Vector2d& _vecV)
 
     m_vecPosition = _vecV;
     
-    this->updateBoundingBox();
+    this->update();
 
     METHOD_EXIT("CCamera::translateTo")
 }
@@ -196,7 +196,7 @@ void CCamera::zoomBy(const double& _fZoom)
 
     m_fZoom *= _fZoom;
     
-    this->updateBoundingBox();
+    this->update();
 
     METHOD_EXIT("CCamera::zoomBy")
 }
@@ -214,28 +214,32 @@ void CCamera::zoomTo(const double& _fZoom)
 
     m_fZoom = _fZoom;
     
-    this->updateBoundingBox();
+    this->update();
     
     METHOD_EXIT("CCamera::zoomTo")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Update of the bounding box with respect to position, angle and zoom.
+/// \brief Update of the bounding box and frame with respect to position, angle and zoom.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCamera::updateBoundingBox()
+void CCamera::update()
 {
-    METHOD_ENTRY("CCamera::updateBoundingBox")
+    METHOD_ENTRY("CCamera::update")
 
-    Rotation2Dd Rotation(-m_fAngle);
-    Vector2d vecPosition(m_vecPosition[0], m_vecPosition[1]);
+    Rotation2Dd Rotation(m_fAngle);
+
+    m_vecFrame[0] = (Rotation * m_vecFrame0[0])/m_fZoom+m_vecPosition;
+    m_vecFrame[1] = (Rotation * m_vecFrame0[1])/m_fZoom+m_vecPosition;
+    m_vecFrame[2] = (Rotation * m_vecFrame0[2])/m_fZoom+m_vecPosition;
+    m_vecFrame[3] = (Rotation * m_vecFrame0[3])/m_fZoom+m_vecPosition;
     
-    m_BoundingBox.setLowerLeft(( Rotation * m_vecCorners[0])/m_fZoom+vecPosition);
-    m_BoundingBox.setUpperRight((Rotation * m_vecCorners[0])/m_fZoom+vecPosition);
-    m_BoundingBox.update((Rotation * m_vecCorners[1])/m_fZoom+vecPosition);
-    m_BoundingBox.update((Rotation * m_vecCorners[2])/m_fZoom+vecPosition);
-    m_BoundingBox.update((Rotation * m_vecCorners[3])/m_fZoom+vecPosition);
-
-    METHOD_EXIT("CCamera::updateBoundingBox")
+    m_BoundingBox.setLowerLeft( m_vecFrame[0]);
+    m_BoundingBox.setUpperRight(m_vecFrame[0]);
+    m_BoundingBox.update(m_vecFrame[1]);
+    m_BoundingBox.update(m_vecFrame[2]);
+    m_BoundingBox.update(m_vecFrame[3]);
+    
+    METHOD_EXIT("CCamera::update")
 }
