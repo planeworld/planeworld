@@ -382,15 +382,15 @@ int main(int argc, char *argv[])
             switch(event.type)
             {
                 case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_KP_PLUS)
+                    if (event.key.keysym.sym == SDLK_KP_PLUS || event.key.keysym.sym == SDLK_PLUS)
                     {
                         pPhysicsManager->accelerateTime();
                     }
-                    if (event.key.keysym.sym == SDLK_KP_MINUS)
+                    if (event.key.keysym.sym == SDLK_KP_MINUS || event.key.keysym.sym == SDLK_MINUS)
                     {
                         pPhysicsManager->decelerateTime();
                     }
-                    if (event.key.keysym.sym == SDLK_KP_ENTER)
+                    if (event.key.keysym.sym == SDLK_KP_ENTER || event.key.keysym.sym == SDLK_RETURN)
                     {
                         pPhysicsManager->resetTime();
                     }
