@@ -348,6 +348,7 @@ int main(int argc, char *argv[])
                             break;
                         }
                         case sf::Keyboard::Subtract:
+                        case sf::Keyboard::Dash:
                         {
                             pPhysicsManager->decelerateTime();
                             break;
