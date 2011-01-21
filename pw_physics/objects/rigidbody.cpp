@@ -100,8 +100,7 @@ void CRigidBody::myDynamics(const double& _fStep)
     
     double fAngleAccel = m_fTorque / m_fInertia;
     double fAngleVel = m_pIntAngVel->integrate(fAngleAccel, _fStep*m_fTimeFac);
-    m_fAngle = m_pIntAng->integrateClip(fAngleVel, _fStep*m_fTimeFac, 2.0*std::acos(-1.0));
-    /// \todo Replace 2 Pi by constant
+    m_fAngle = m_pIntAng->integrateClip(fAngleVel, _fStep*m_fTimeFac, 2.0*M_PI);
     
     METHOD_EXIT("CRigidBody::myDynamics")
 }
