@@ -26,6 +26,8 @@
 #include "planet.h"
 #include "visuals.h"
 
+//--- Misc header ------------------------------------------------------------//
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the visualisation of a planet
@@ -44,9 +46,9 @@ class CPlanetVisuals : public IVisuals
         virtual void draw(const CCamera* const) const;
                 
         //--- Methods --------------------------------------------------------//
-                void                attach(CPlanet*);
-        virtual const CBoundingBox& getBoundingBox();
-        
+        void                attach(CPlanet*);
+        const CBoundingBox& getBoundingBox();
+                
     private:
         
         //--- Constant Methods [private] -------------------------------------//
@@ -58,7 +60,6 @@ class CPlanetVisuals : public IVisuals
         CPlanetVisuals();       ///< Constructor is private
         
         CPlanet* m_pPlanet;
-
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

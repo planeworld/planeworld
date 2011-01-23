@@ -63,6 +63,7 @@ TARGET_LINK_LIBRARIES (planeworld
     ${LUA_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${Boost_LIBRARIES}
+    noise
 )
 
 INSTALL (TARGETS planeworld

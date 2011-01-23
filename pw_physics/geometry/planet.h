@@ -27,6 +27,9 @@
 
 //--- Misc header ------------------------------------------------------------//
 #include "eigen2/Eigen/Geometry"
+#include "noise/noise.h"
+
+using namespace noise;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -43,15 +46,16 @@ class CPlanet : public IShape
         virtual ~CPlanet();
         
         //--- Constant Methods -----------------------------------------------//
-        const double&       getAngle() const;
-        const Vector2d&     getCenter() const;
-        const double&       getHeight() const;
-        const int&          getNrOfSamplingPoints() const;
-        const double&       getRadius() const;
-        const int&          getSeed() const;
-        const double&       getSmoothness() const;
+        const double&           getAngle() const;
+        const Vector2d&         getCenter() const;
+        const double&           getHeight() const;
+        const int&              getNrOfSamplingPoints() const;
+        const double&           getRadius() const;
+        const int&              getSeed() const;
+        const double&           getSmoothness() const;
+        const module::Select    getSurface() const;
         
-        const ShapeType     getShapeType() const;
+        const ShapeType         getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
         void transform(const double&, const Vector2d&);
@@ -73,6 +77,7 @@ class CPlanet : public IShape
         double              m_fSmoothness;          ///< Smoothness of planet landscape
         int                 m_nNrOfSamplingPoints;  ///< Number of sampling points for terrain generation
         int                 m_nSeed;                ///< Unique seed for terrain generation
+        module::Select      m_Surface;              ///< Surface noise function of planet
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -180,6 +185,21 @@ inline const double& CPlanet::getSmoothness() const
 
     METHOD_EXIT("CPlanet::getSmoothness")
     return m_fSmoothness;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return surface noise module of the planet
+///
+/// \return Surface noise module
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const module::Select CPlanet::getSurface() const
+{
+    METHOD_ENTRY("CPlanet::getSmoothness")
+
+    METHOD_EXIT("CPlanet::getSmoothness")
+    return m_Surface;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
