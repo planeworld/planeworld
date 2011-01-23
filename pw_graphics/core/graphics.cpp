@@ -508,7 +508,7 @@ void CGraphics::zoomCamTo(const double& _fFac)
 /// \param _fR      Radius of circle
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::circle(const Vector3d& _vecC, const double& _fR) const
+void CGraphics::circle(const Vector2d& _vecC, const double& _fR) const
 {
     METHOD_ENTRY("CGraphics::circle")
 
@@ -519,7 +519,7 @@ void CGraphics::circle(const Vector3d& _vecC, const double& _fR) const
         {
             glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
                         _vecC[1]+std::cos(fAng)*_fR,
-                        _vecC[2]);
+                        -10.0);
             fAng += 2*GRAPHICS_PI / 100;
         }
     glEnd();

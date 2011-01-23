@@ -133,7 +133,7 @@ class CGraphics
         //
 
         //--- Constant methods -----------------------------------------------//
-        void circle(const Vector3d&, const double&) const;
+        void circle(const Vector2d&, const double&) const;
         void dot(const Vector2d&) const;
         void filledRect(const Vector2d&, const Vector2d&) const;
         void rect(const Vector2d&, const Vector2d&) const;
