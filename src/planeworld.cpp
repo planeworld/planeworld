@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     pVisualsManager = new CVisualsManager;
     MEM_ALLOC("pVisualsManager")
     
-    pCamera->setViewport(300.0, 180.0);
+    pCamera->setViewport(200.0, 100.0);
     pVisualsManager->setCamera(pCamera);
         
     int nNumberOfBoxes = 0;
@@ -473,10 +473,6 @@ int main(int argc, char *argv[])
                 case SDL_MOUSEMOTION:
                     if (event.motion.state == SDL_BUTTON(1))
                     {
-//                         Graphics.transCamBy(Vector3d(double(event.motion.xrel)/
-//                                               Graphics.getCamZoom(),
-//                                              double(event.motion.yrel)/
-//                                               Graphics.getCamZoom(),0.0));
                         pCamera->translateBy(Vector2d(double(event.motion.xrel)/
                                               pCamera->getZoom(),
                                              double(event.motion.yrel)/
@@ -484,8 +480,6 @@ int main(int argc, char *argv[])
                     }
                     if (event.motion.state == SDL_BUTTON(3))
                     {
-//                         Graphics.rotCamBy(-double(event.motion.xrel)*0.01);
-//                         Graphics.zoomCamBy(1.0-double(event.motion.yrel)/100);
                         pCamera->rotateBy(-double(event.motion.xrel)*0.01);
                         pCamera->zoomBy(1.0-double(event.motion.yrel)/100);
                     }
@@ -493,7 +487,6 @@ int main(int argc, char *argv[])
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_MIDDLE)
                     {
-//                         Graphics.resetCam();
                         pCamera->reset();
                     }
                     break;
