@@ -64,7 +64,7 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
 
     m_fViewportWidth  = _fW*0.5;
     m_fViewportHeight = _fH*0.5;
-    
+        
     m_vecFrame0[0][0] = -m_fViewportWidth;
     m_vecFrame0[0][1] = -m_fViewportHeight;
     m_vecFrame0[1][0] =  m_fViewportWidth;
@@ -240,6 +240,9 @@ void CCamera::update()
     m_BoundingBox.update(m_vecFrame[1]);
     m_BoundingBox.update(m_vecFrame[2]);
     m_BoundingBox.update(m_vecFrame[3]);
+    
+    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
+                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
     
     METHOD_EXIT("CCamera::update")
 }

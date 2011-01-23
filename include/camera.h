@@ -43,10 +43,11 @@ class CCamera
 
         //--- Constructor/Destructor -----------------------------------------//
         CCamera();
-        virtual ~CCamera();                         ///< Destructor
+        virtual ~CCamera();
 
         //--- Constant Methods -----------------------------------------------//
         const CBoundingBox           getBoundingBox() const;
+        const double&                getBoundingCircleRadius() const;
         const std::vector<Vector2d>& getFrame() const;
         
         Vector2d    getPosition() const;
@@ -74,6 +75,7 @@ class CCamera
         std::vector<Vector2d>  m_vecFrame;          ///< Camera frame
         CBoundingBox    m_BoundingBox;              ///< Cameras bounding box (for culling)
         Vector2d        m_vecPosition;              ///< Camera position
+        double          m_fBoundingCircleRadius;    ///< Radius of Bounding circle
         double          m_fViewportWidth;           ///< Half of viewport width in m
         double          m_fViewportHeight;          ///< Half of viewport height in m
         double          m_fAngle;                   ///< Camera angle
@@ -98,6 +100,24 @@ inline const CBoundingBox CCamera::getBoundingBox() const
 
     METHOD_EXIT("CCamera::getBoundingBox")
     return m_BoundingBox;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns radius of cameras bounding circle
+///
+/// The radius of the bounding circle of the camera is returned. The bounding
+/// circle surrounds the viewport and can be used for culling like the bbox.
+///
+/// \return The bounding circle's radius
+///
+///////////////////////////////////////////////////////////////////////////////
+inline const double& CCamera::getBoundingCircleRadius() const
+{
+    METHOD_ENTRY("CCamera::BoundingCircleRadius")
+
+    METHOD_EXIT("CCamera::BoundingCircleRadius")
+    return m_fBoundingCircleRadius;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
