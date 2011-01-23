@@ -105,6 +105,11 @@ void CVisualsManager::drawBoundingBoxes() const
                               m_pCamera->getBoundingBox().getUpperRight()-
                               m_pCamera->getPosition());
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        
+        m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
+        m_Graphics.circle(Vector2d(0.0,0.0),m_pCamera->getBoundingCircleRadius());
+       m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        
     }
 
     m_Graphics.swapBuffers();
