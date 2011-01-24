@@ -51,15 +51,15 @@ class CPlanetVisuals : public IVisuals
                 
     private:
         
+        CPlanetVisuals();       ///< Constructor is private
+        
         //--- Constant Methods [private] -------------------------------------//
         const uint32_t hashUInt32(const uint32_t) const;
         const double   hashDouble(const int) const;
         const double   interpolate(const double&, const double&, const double&) const;
         
         //--- Variables [private] --------------------------------------------//
-        CPlanetVisuals();       ///< Constructor is private
-        
-        CPlanet* m_pPlanet;
+        CPlanet*            m_pPlanet;          ///< Pointer to corresponding shape
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

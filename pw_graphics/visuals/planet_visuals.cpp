@@ -30,12 +30,6 @@ CPlanetVisuals::CPlanetVisuals(CPlanet* _pPlanet): m_pPlanet(_pPlanet)
 {
     METHOD_ENTRY("CPlanetVisuals::CPlanetVisuals")
     CTOR_CALL("CPlanetVisuals::CPlanetVisuals")
-        
-//     m_Surface.SetSeed(5);
-//     m_Surface.SetFrequency(0.000006);
-//     m_Surface.SetLacunarity(13.9346918734);
-//     m_Surface.SetOctaveCount(3);
-//     m_Surface.SetNoiseQuality(QUALITY_BEST);
     
     METHOD_EXIT("CPlanetVisuals::CPlanetVisuals")
 }
@@ -70,64 +64,40 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
     int      nSeed     = m_pPlanet->getSeed();
     double   fSmooth   = m_pPlanet->getSmoothness();
     Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getPosition();
-//     module::Select Surface = m_pPlanet->getSurface();
-    
-    module::RidgedMulti mountainTerrain;
-    mountainTerrain.SetFrequency(0.000025);
-    mountainTerrain.SetLacunarity(1.9737346);
-    mountainTerrain.SetNoiseQuality(QUALITY_BEST);
-    mountainTerrain.SetOctaveCount(20);
-
-    module::Billow baseFlatTerrain;
-    baseFlatTerrain.SetFrequency (0.00001);
-    baseFlatTerrain.SetLacunarity(1.793947);
-    baseFlatTerrain.SetNoiseQuality(QUALITY_BEST);
-
-    module::ScaleBias flatTerrain;
-    flatTerrain.SetSourceModule (0, baseFlatTerrain);
-    flatTerrain.SetScale (0.25);
-    flatTerrain.SetBias (-0.75);
-    
-    module::Perlin terrainType;
-    terrainType.SetFrequency (0.000001);
-    terrainType.SetPersistence (0.25);
-    terrainType.SetLacunarity(2.12358986);
-    terrainType.SetNoiseQuality(QUALITY_BEST);
-
-    module::Select Surface;
-    Surface.SetSourceModule (0, flatTerrain);
-    Surface.SetSourceModule (1, mountainTerrain);
-    Surface.SetControlModule (terrainType);
-    Surface.SetBounds (0.0, 100000.0);
-    Surface.SetEdgeFalloff (0.125);
         
-    double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / 
-                                   vecCenter.norm()));
-                                   
     Vector2d vecEx(1.0, 0.0);
     double fAng;    
     double fAngEnd;
-    
-    if (std::isnan(fAlpha))
+
+    double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
+    if (isnan(fAlpha))
     {
-        fAng = m_pPlanet->getAngle();
-        fAngEnd = 2.0*M_PI + m_pPlanet->getAngle();
+        fAng = 0.0;
+        fAngEnd = 2.0*M_PI;
     }
     else
     {
         double fAng0 = std::acos((- vecCenter.dot(vecEx)) / vecCenter.norm());
-        fAng = fAng0-fAlpha + m_pPlanet->getAngle()-M_PI*0.5;
-        fAngEnd = fAng0+fAlpha + m_pPlanet->getAngle()-M_PI*0.5;
+        
+        if (vecCenter[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
+        
+        fAng = fAng0-fAlpha;
+        fAngEnd = fAng0+fAlpha;
     }
+    
+    if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
     
     m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
 
         while ( fAng <= fAngEnd)
         {
-            m_Graphics.addVertex(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+Surface.GetValue(std::sin(fAng)*fRad, std::cos(fAng)*fRad,0.0)*fHeight),
-                                          vecCenter[1]+std::cos(fAng)*(fRad+Surface.GetValue(std::sin(fAng)*fRad, std::cos(fAng)*fRad,0.0)*fHeight)));
-//                 m_Graphics.dot(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+Surface.GetValue(std::sin(fAng)*fRad, std::cos(fAng)*fRad,0.0)*fHeight),
-//                                                 vecCenter[1]+std::cos(fAng)*(fRad+Surface.GetValue(std::sin(fAng)*fRad, std::cos(fAng)*fRad,0.0)*fHeight)));
+            double fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng+m_pPlanet->getAngle())*fRad, std::sin(fAng+m_pPlanet->getAngle())*fRad,0.0);
+            
+            m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+                                          vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+//             m_Graphics.dot(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+fHght*fHeight),
+//                                     vecCenter[1]+std::cos(fAng)*(fRad+fHght*fHeight)));
+
             fAng += 2.0*M_PI * 2.0e-8 / _pCamera->getZoom();
         }
 

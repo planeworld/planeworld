@@ -36,34 +36,29 @@ CPlanet::CPlanet() : m_fAngle(0.0),
     
     m_vecCenter0.setZero();
     
-    module::RidgedMulti mountainTerrain;
-    mountainTerrain.SetFrequency(0.000025);
-    mountainTerrain.SetLacunarity(1.9737346);
-    mountainTerrain.SetNoiseQuality(QUALITY_BEST);
-    mountainTerrain.SetOctaveCount(10);
-
-    module::Billow baseFlatTerrain;
-    baseFlatTerrain.SetFrequency (0.00001);
-    baseFlatTerrain.SetLacunarity(1.793947);
-    baseFlatTerrain.SetNoiseQuality(QUALITY_BEST);
-
-    module::ScaleBias flatTerrain;
-    flatTerrain.SetSourceModule (0, baseFlatTerrain);
-    flatTerrain.SetScale (0.25);
-    flatTerrain.SetBias (-0.75);
+    m_MountainTerrain.SetFrequency(0.000025);
+    m_MountainTerrain.SetLacunarity(1.9737346);
+    m_MountainTerrain.SetNoiseQuality(QUALITY_BEST);
+    m_MountainTerrain.SetOctaveCount(16);
     
-    module::Perlin terrainType;
-    terrainType.SetFrequency (0.000001);
-    terrainType.SetPersistence (0.25);
-    terrainType.SetLacunarity(2.12358986);
-    terrainType.SetNoiseQuality(QUALITY_BEST);
+    m_BaseFlatTerrain.SetFrequency(0.00001);
+    m_BaseFlatTerrain.SetLacunarity(1.793947);
+    m_BaseFlatTerrain.SetNoiseQuality(QUALITY_BEST);
+    
+    m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
+    m_FlatTerrain.SetScale(0.25);
+    m_FlatTerrain.SetBias(-0.75);
+    
+    m_TerrainType.SetFrequency (0.000001);
+    m_TerrainType.SetPersistence (0.25);
+    m_TerrainType.SetLacunarity(2.12358986);
+    m_TerrainType.SetNoiseQuality(QUALITY_BEST);
 
-    module::Select m_Surface;
-    m_Surface.SetSourceModule (0, flatTerrain);
-    m_Surface.SetSourceModule (1, mountainTerrain);
-    m_Surface.SetControlModule (terrainType);
-    m_Surface.SetBounds (0.0, 100000.0);
-    m_Surface.SetEdgeFalloff (0.125);
+    m_Surface.SetSourceModule(0,m_FlatTerrain);
+    m_Surface.SetSourceModule(1,m_MountainTerrain);
+    m_Surface.SetControlModule(m_TerrainType);
+    m_Surface.SetBounds(0.0,100.0);
+    m_Surface.SetEdgeFalloff(0.25);
     
     METHOD_EXIT("CPlanet::CPlanet()")
 }

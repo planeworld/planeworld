@@ -53,7 +53,7 @@ class CPlanet : public IShape
         const double&           getRadius() const;
         const int&              getSeed() const;
         const double&           getSmoothness() const;
-        const module::Select    getSurface() const;
+        const module::Select&   getSurface() const;
         
         const ShapeType         getShapeType() const;
 
@@ -77,7 +77,12 @@ class CPlanet : public IShape
         double              m_fSmoothness;          ///< Smoothness of planet landscape
         int                 m_nNrOfSamplingPoints;  ///< Number of sampling points for terrain generation
         int                 m_nSeed;                ///< Unique seed for terrain generation
-        module::Select      m_Surface;              ///< Surface noise function of planet
+        
+        module::Select      m_Surface;          ///< Final surface noise function
+        module::RidgedMulti m_MountainTerrain;  ///< Main mountain
+        module::Billow      m_BaseFlatTerrain;  ///< Base terrain
+        module::ScaleBias   m_FlatTerrain;      ///< Base terrain scaler
+        module::Perlin      m_TerrainType;      ///< Terrain type decision function
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -194,7 +199,7 @@ inline const double& CPlanet::getSmoothness() const
 /// \return Surface noise module
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const module::Select CPlanet::getSurface() const
+inline const module::Select& CPlanet::getSurface() const
 {
     METHOD_ENTRY("CPlanet::getSmoothness")
 
