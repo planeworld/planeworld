@@ -49,7 +49,7 @@ class CBody : public IObject
         const double    getAngleVelocity() const;
         
         //--- Methods --------------------------------------------------------//
-//         void rotBy(const double&);
+        void setAngleVelocity(const double&);
         void setInertia(const double&);
 
     protected:
@@ -83,6 +83,22 @@ inline const double CBody::getAngleVelocity() const
 
     METHOD_EXIT("CBody::getAngleVelocity")
     return m_pIntAngVel->getValue();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set the angle velocity of the body
+///
+/// \param _fV Angle velocity of body
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CBody::setAngleVelocity(const double& _fV)
+{
+    METHOD_ENTRY("CBody::setAngleVelocity")
+
+    m_pIntAngVel->init(_fV);
+
+    METHOD_EXIT("CBody::setAngleVelocity")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

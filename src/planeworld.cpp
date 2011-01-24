@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
     pEarth->setInertia(3000.0);
     pEarth->setOrigin(Vector2d(0.0,-6378.27e3));
     pEarth->disableGravitation();
-    pEarth->disableDynamics();
+//     pEarth->disableDynamics();
 //     pEarth->setTimeFac(1.0e5);
     pEarth->setName("Earth");
     
@@ -416,7 +416,8 @@ int main(int argc, char *argv[])
     pPhysicsManager->initObjects();
 //     pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
 
-    pEarth->setVelocity(Vector2d(29.78e3, 0.0));
+//     pEarth->setVelocity(Vector2d(29.78e3, 0.0));
+    pEarth->setAngleVelocity(0.0001);
     pMoon->setVelocity(Vector2d(29.78e3+1.023e3, 0.0));
     
     EngineManager.setPhysicsManager(pPhysicsManager);
