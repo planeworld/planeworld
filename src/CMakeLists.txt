@@ -31,6 +31,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/polyline_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/rectangle_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/spring_visuals.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/circle.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/geometry.cpp
@@ -53,7 +54,6 @@ SET(SRCS
     parzival.cpp
     physics_manager.cpp
     planeworld.cpp
-    visuals_manager.cpp
 )
 
 ADD_EXECUTABLE (planeworld ${SRCS})
