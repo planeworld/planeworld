@@ -48,8 +48,8 @@ class CPlanet : public IShape
         //--- Constant Methods -----------------------------------------------//
         const double&           getAngle() const;
         const Vector2d&         getCenter() const;
+        const double&           getGroundResolution() const;
         const double&           getHeight() const;
-        const int&              getNrOfSamplingPoints() const;
         const double&           getRadius() const;
         const int&              getSeed() const;
         const double&           getSmoothness() const;
@@ -58,24 +58,27 @@ class CPlanet : public IShape
         const ShapeType         getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
-        void transform(const double&, const Vector2d&);
+        void initTerrain();
+        
         void setCenter(const Vector2d&);
         void setCenter(const double&, const double&);
+        void setGroundResolution(const double&);
         void setHeight(const double&);
-        void setNrOfSamplingPoints(const int&);
         void setRadius(const double&);
         void setSeed(const int&);
         void setSmoothness(const double&);
+        
+        void transform(const double&, const Vector2d&);
                         
     protected:
 
         Vector2d            m_vecCenter;            ///< Center of planet
         Vector2d            m_vecCenter0;           ///< Initial center of planet
         double              m_fAngle;               ///< Angle, just for optical reasons
+        double              m_fGroundResolution;    ///< Ground resolution in m
         double              m_fHeightMax;           ///< Maximum height of terrain
         double              m_fRadius;              ///< Minimum radius of planet
         double              m_fSmoothness;          ///< Smoothness of planet landscape
-        int                 m_nNrOfSamplingPoints;  ///< Number of sampling points for terrain generation
         int                 m_nSeed;                ///< Unique seed for terrain generation
         
         module::Select      m_Surface;          ///< Final surface noise function
@@ -119,6 +122,24 @@ inline const Vector2d& CPlanet::getCenter() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Return the ground resolution of the terrain
+///
+/// The ground resolution defines the length of a minimum segment between two
+/// support points.
+///
+/// \return Ground resolution in m
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CPlanet::getGroundResolution() const
+{
+    METHOD_ENTRY("CPlanet::getNrOfSamplingPoints")
+
+    METHOD_EXIT("CPlanet::getNrOfSamplingPoints")
+    return m_fGroundResolution;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Return the height of planets terrain
 ///
 /// \return Height
@@ -130,21 +151,6 @@ inline const double& CPlanet::getHeight() const
 
     METHOD_EXIT("CPlanet::getHeight")
     return m_fHeightMax;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return the number of sampling points for terrain generation
-///
-/// \return Number of sampling points
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const int& CPlanet::getNrOfSamplingPoints() const
-{
-    METHOD_ENTRY("CPlanet::getNrOfSamplingPoints")
-
-    METHOD_EXIT("CPlanet::getNrOfSamplingPoints")
-    return m_nNrOfSamplingPoints;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -262,6 +268,25 @@ inline void CPlanet::setCenter(const double& _fX, const double& _fY)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Sets the ground resolution of the terrain
+///
+/// The ground resolution defines the length of a minimum segment between two
+/// support points.
+///
+/// \param _fGRes Ground resolution in m
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPlanet::setGroundResolution(const double& _fGRes)
+{
+    METHOD_ENTRY("CPlanet::setGroundResolution")
+
+    m_fGroundResolution = _fGRes;
+
+    METHOD_EXIT("CPlanet::setGroundResolution")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Defines the maximum terrain height of the planet
 ///
 /// \param _fH Maximum terrain height
@@ -275,23 +300,6 @@ inline void CPlanet::setHeight(const double& _fH)
 
     METHOD_EXIT("CPlanet::setHeight")
 }
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the number of sampling points for terrain generation
-///
-/// \param _nNrOSP Number of sampling points
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPlanet::setNrOfSamplingPoints(const int& _nNrOSP)
-{
-    METHOD_ENTRY("CPlanet::setNrOfSamplingPoints")
-
-    m_nNrOfSamplingPoints = _nNrOSP;
-
-    METHOD_EXIT("CPlanet::setNrOfSamplingPoints")
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

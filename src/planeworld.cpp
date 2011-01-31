@@ -145,6 +145,8 @@ int main(int argc, char *argv[])
         DEBUG_MSG("Main", "Starting randomization...")
         nX = (rand()%200) - 100;
         nY = (rand()%200) - 100;
+//         nX = (rand()%2000000) - 1000000;
+//         nY = (rand()%2000000) - 1000000;
 //         double fRad = (rand()%2) + 0.5;
         DEBUG_MSG("Main", "Stopping randomization.")
         pPointMass->setMass(1.0e12);
@@ -162,9 +164,11 @@ int main(int argc, char *argv[])
         
 //         pRect = new CRectangle();
         pCircle = new CCircle();
+//         pPlanet = new CPlanet();
         MEM_ALLOC("pRectangle")
 //         pRectVisuals = new CRectangleVisuals(pRect);
         pCircleVisuals = new CCircleVisuals(pCircle);
+//         pPlanetVisuals = new CPlanetVisuals(pPlanet);
         MEM_ALLOC("pRectangleVisuals")
 
 
@@ -174,14 +178,21 @@ int main(int argc, char *argv[])
         pCircle->setDepths(SHAPE_DEPTH_ALL);
         pCircle->setCenter(1.0, 0.0);
         pCircle->setRadius(1.0);
+//         pPlanet->setDepths(SHAPE_DEPTH_ALL);
+//         pPlanet->setCenter(0.0, 0.0);
+//         pPlanet->setRadius(100.0);
+//         pPlanet->setHeight(1.0);
+//         pPlanet->initTerrain();
 
         pPointMass->getGeometry().addShape(pCircle);
+//         pPointMass->getGeometry().addShape(pPlanet);
         
 //         pPointMass->getGeometry().addShape(pRect);
 //         pPointMass->addVisuals(pRectVisuals);
         
 //         pVisualsManager->addVisuals(pRectVisuals);
         pPointMass->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+//         pPointMass->addVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
         pPhysicsManager->addObject(pPointMass);
     }
 
@@ -297,6 +308,8 @@ int main(int argc, char *argv[])
     pEarth = new CRigidBody;
     MEM_ALLOC("pEarth")
 
+    INFO_MSG("Main", "Creating earth.")
+
     pEarth->setMass(5.974e24);
     pEarth->setInertia(3000.0);
     pEarth->setOrigin(Vector2d(0.0,-6378.27e3));
@@ -313,7 +326,7 @@ int main(int argc, char *argv[])
     pPlanet->setCenter( Vector2d(0.0,0.0) );
     pPlanet->setRadius(6378.16e3);
     pPlanet->setHeight(8000.0);
-    
+    pPlanet->initTerrain();
     pEarth->getGeometry().addShape(pPlanet);
     pEarth->addVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
 
@@ -323,24 +336,28 @@ int main(int argc, char *argv[])
     pMoon = new CRigidBody;
     MEM_ALLOC("pMoon")
     
+    INFO_MSG("Main", "Creating moon.")
+    
     pMoon->setMass(7.349e22);
     pMoon->setInertia(3000.0);
     pMoon->setOrigin(Vector2d(0.0, -384.4e6));
 //     pMoon->setTimeFac(1e5);
     pMoon->disableGravitation();
-    pMoon->disableDynamics();
+//     pMoon->disableDynamics();
     pMoon->setName("Moon");
     
-    pCircle = new CCircle();
-    MEM_ALLOC("pCircle")
-    pCircleVisuals = new CCircleVisuals(pCircle);
+    pPlanet = new CPlanet();
+    MEM_ALLOC("pPlanet")
+    pPlanetVisuals = new CPlanetVisuals(pPlanet);
     MEM_ALLOC("pCircleVisuals")
-    pCircle->setDepths(SHAPE_DEPTH_ALL);
-    pCircle->setCenter( Vector2d(0.0,0.0) );
-    pCircle->setRadius(1738.0e3);
+    pPlanet->setDepths(SHAPE_DEPTH_ALL);
+    pPlanet->setCenter( Vector2d(0.0,0.0) );
+    pPlanet->setRadius(1738.0e3);
+    pPlanet->setHeight(1000.0);
+    pPlanet->initTerrain();
     
-    pMoon->getGeometry().addShape(pCircle);
-    pMoon->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+    pMoon->getGeometry().addShape(pPlanet);
+    pMoon->addVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
 
     pPhysicsManager->addObject(pMoon);
     
@@ -417,8 +434,8 @@ int main(int argc, char *argv[])
 //     pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
 
 //     pEarth->setVelocity(Vector2d(29.78e3, 0.0));
-    pEarth->setAngleVelocity(0.0001);
-    pMoon->setVelocity(Vector2d(29.78e3+1.023e3, 0.0));
+    pEarth->setAngleVelocity(0.000);
+//     pMoon->setVelocity(Vector2d(29.78e3+1.023e3, 0.0));
     
     EngineManager.setPhysicsManager(pPhysicsManager);
     EngineManager.setVisualsManager(pVisualsManager);

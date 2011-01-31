@@ -102,6 +102,9 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             pCircB0 = static_cast<CCircle*>((*cj0));
                             this->test(pCircA1, pCircA0, pCircB1, pCircB0, _p1, _p2);
                             break;
+                        case SHAPE_PLANET:
+                            this->getSurfaceOfInterest();
+                            break;
                         case SHAPE_POLYLINE:
                             CCircle* pCirc1;
                             CCircle* pCirc0;
@@ -118,6 +121,40 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             break;
                     }
                     break;
+                case SHAPE_PLANET:
+                    switch((*cj)->getShapeType())
+                    {
+                        case SHAPE_CIRCLE:
+                            CCircle* pCirc1;
+                            CCircle* pCirc0;
+                            CPolyLine* pPoly1;
+                            CPolyLine* pPoly0;
+                            pCirc1 = static_cast<CCircle*>((*cj));
+                            pCirc0 = static_cast<CCircle*>((*cj0));
+                            pPoly1 = static_cast<CPolyLine*>((*ci));
+                            pPoly0 = static_cast<CPolyLine*>((*ci0));
+                            this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
+                            break;
+                        case SHAPE_PLANET:
+                            this->getSurfaceOfInterest();
+                            break;
+                        case SHAPE_POLYLINE:
+                            CPolyLine* pPolyA1;
+                            CPolyLine* pPolyB1;
+                            CPolyLine* pPolyA0;
+                            CPolyLine* pPolyB0;
+                            pPolyA1 = static_cast<CPolyLine*>((*ci));
+                            pPolyB1 = static_cast<CPolyLine*>((*cj));
+                            pPolyA0 = static_cast<CPolyLine*>((*ci0));
+                            pPolyB0 = static_cast<CPolyLine*>((*cj0));
+                            this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
+                            this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
+                            break;
+                        case SHAPE_RECTANGLE:
+    //                             this->test((*ci),(*cj));
+                            break;
+                    }
+                    break;
                 case SHAPE_POLYLINE:
                     switch((*cj)->getShapeType())
                     {
@@ -131,6 +168,9 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             pPoly1 = static_cast<CPolyLine*>((*ci));
                             pPoly0 = static_cast<CPolyLine*>((*ci0));
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
+                            break;
+                        case SHAPE_PLANET:
+                            this->getSurfaceOfInterest();
                             break;
                         case SHAPE_POLYLINE:
                             CPolyLine* pPolyA1;
@@ -155,6 +195,9 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                         case SHAPE_CIRCLE:
 //                             this->test((*cj),(*ci));
                             break;
+                        case SHAPE_PLANET:
+                            this->getSurfaceOfInterest();
+                            break;
                         case SHAPE_POLYLINE:
 //                             this->test((*cj),(*ci));
                             break;
@@ -172,6 +215,22 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
     }
         
     METHOD_EXIT("CCollisionManager::test")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Calculates the possible collision angle on planet's surface
+///
+/// Since the surface of the planet is a function, the is exactly one height
+/// value for each angle. Thus, mapping the object (or its bounding box) on the
+/// planets surface, one can determine the possible collision area.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCollisionManager::getSurfaceOfInterest()
+{
+    METHOD_ENTRY("CCollisionManager::getSurfaceOfInterest")
+    
+    METHOD_EXIT("CCollisionManager::getSurfaceOfInterest")
 }
 
 ///////////////////////////////////////////////////////////////////////////////

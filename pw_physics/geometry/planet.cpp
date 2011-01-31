@@ -23,12 +23,15 @@
 ///
 /// \brief Constructor, initialising members
 ///
+/// The constructor creates a default planet that is similar to earth in
+/// dimensions and landscape.
+///
 ///////////////////////////////////////////////////////////////////////////////
 CPlanet::CPlanet() : m_fAngle(0.0),
-                     m_fHeightMax(1.0e3),
-                     m_fRadius(1.0e5),
+                     m_fHeightMax(8000.0),
+                     m_fRadius(6378.16e3),
                      m_fSmoothness(1.0),
-                     m_nNrOfSamplingPoints(20),
+                     m_fGroundResolution(0.1),
                      m_nSeed(2)
 {
     METHOD_ENTRY("CPlanet::CPlanet()");
@@ -78,12 +81,65 @@ CPlanet::~CPlanet()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Initialises the planets terrain
+///
+/// For initialisation, some parameters depend on others. Radius times 2 Pi
+/// is important for the maximum frequency, depending on the ground resolution.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPlanet::initTerrain()
+{
+    METHOD_ENTRY("CPlanet::initTerrain")
+    
+    double fNrOfPoints = 2.0 * M_PI * m_fRadius / m_fGroundResolution;
+    double fNrOfMountains = 2.0 * M_PI * m_fRadius / (m_fHeightMax*M_PI_2) / 2.0;
+    
+    double fMinF = 0.5*fNrOfMountains/(2.0*M_PI*m_fRadius);
+    double fMaxF = 1.0;
+    
+    int nMaxOctave = std::log(fMaxF/(0.5 * fNrOfMountains / fNrOfPoints));
+    
+    INFO_MSG("Planet", "Generating Terrain (Mountains)")
+    DOM_VAR(INFO_MSG("Planet", "Number of Mountains: " << fNrOfMountains))
+    DOM_VAR(INFO_MSG("Planet", "Number of Points:    " << fNrOfPoints))
+    DOM_VAR(INFO_MSG("Planet", "Minimum Frequency:   " << fMinF))
+    DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:   " << fMaxF))
+    DOM_VAR(INFO_MSG("Planet", "Maximum Octaves:     " << nMaxOctave))
+
+    m_MountainTerrain.SetFrequency(fMinF);
+    m_MountainTerrain.SetLacunarity(1.937);
+    m_MountainTerrain.SetNoiseQuality(QUALITY_BEST);
+    m_MountainTerrain.SetOctaveCount(nMaxOctave);
+    
+    m_BaseFlatTerrain.SetFrequency(fMinF/*0.5*12/(2.0*M_PI*m_fRadius)*/);
+    m_BaseFlatTerrain.SetLacunarity(1.93947);
+    m_BaseFlatTerrain.SetNoiseQuality(QUALITY_BEST);
+    m_BaseFlatTerrain.SetOctaveCount(nMaxOctave);
+    
+    m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
+    m_FlatTerrain.SetScale(0.25);
+    m_FlatTerrain.SetBias(-0.75);
+    
+    m_TerrainType.SetFrequency (0.5*80/(2.0*M_PI*m_fRadius));
+    m_TerrainType.SetPersistence (0.5);
+    m_TerrainType.SetLacunarity(2.137);
+    m_TerrainType.SetNoiseQuality(QUALITY_BEST);
+
+    m_Surface.SetSourceModule(0,m_FlatTerrain);
+    m_Surface.SetSourceModule(1,m_MountainTerrain);
+    m_Surface.SetControlModule(m_TerrainType);
+    m_Surface.SetBounds(0.0,100.0);
+    m_Surface.SetEdgeFalloff(0.5);
+
+    METHOD_EXIT("CPlanet::initTerrain")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Transforms the shape
 ///
 /// \param _fAngle Rotation angle
 /// \param _vecV Translation vector
-///
-/// \todo Add maximum height to radius for bounding box calculation
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CPlanet::transform( const double& _fAngle, const Vector2d& _vecV )

@@ -47,6 +47,8 @@ class CCollisionManager : virtual public CGraphicsBase
         
     private:
         
+        void getSurfaceOfInterest();
+        
         void test(CBody*, CBody*);
         void test(CCircle*, CCircle*, CCircle*, CCircle*, CBody*, CBody*);
         void test(CCircle*, CCircle*, CPolyLine*, CPolyLine*, CBody*, CBody*);

@@ -60,7 +60,6 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
 
     double   fRad      = m_pPlanet->getRadius();
     double   fHeight   = m_pPlanet->getHeight();
-    int      nNrOSP    = m_pPlanet->getNrOfSamplingPoints();
     int      nSeed     = m_pPlanet->getSeed();
     double   fSmooth   = m_pPlanet->getSmoothness();
     Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getPosition();
@@ -87,18 +86,21 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
     
     if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
     
+    double fInc = /*m_pPlanet->getGroundResolution()*/ 0.1 / m_pPlanet->getRadius();
+    
     m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
 
         while ( fAng <= fAngEnd)
         {
             double fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng+m_pPlanet->getAngle())*fRad, std::sin(fAng+m_pPlanet->getAngle())*fRad,0.0);
+//             double fHght = m_pPlanet->getSurface().GetValue((fAng+m_pPlanet->getAngle())*fRad,0.5,0.2);
             
             m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
                                           vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 //             m_Graphics.dot(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+fHght*fHeight),
 //                                     vecCenter[1]+std::cos(fAng)*(fRad+fHght*fHeight)));
 
-            fAng += 2.0*M_PI * 2.0e-8 / _pCamera->getZoom();
+            fAng += fInc / _pCamera->getZoom();
         }
 
     m_Graphics.endLine();
