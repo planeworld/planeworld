@@ -109,6 +109,8 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
 ///
 /// \brief Update of the bounding box, frame and position
 ///
+/// \todo Replace dynamic cast and catch bad hooks on point masses.
+///
 ///////////////////////////////////////////////////////////////////////////////
 void CCamera::update()
 {
