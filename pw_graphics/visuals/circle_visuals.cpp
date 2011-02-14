@@ -60,7 +60,7 @@ void CCircleVisuals::draw(const CCamera* const _pCamera) const
 
     double fAng = m_pCircle->getAngle();
     double fRad = m_pCircle->getRadius();
-    Vector2d vecCenter = m_pCircle->getCenter()-_pCamera->getPosition();
+    Vector2d vecCenter = m_pCircle->getCenter()-_pCamera->getOrigin();
 //  double fAngInc =    2.0 * GRAPHICS_PI /
 //                      ceil((100.0 * 2.0 * GRAPHICS_PI * m_fRadius * m_Graphics.getCamZoom()) /
 //                      (GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT));

@@ -59,9 +59,9 @@ void CSpringVisuals::draw(const CCamera* const _pCamera) const
     METHOD_ENTRY("CSpringVisuals::draw()");
 
     Vector2d vec1 = m_pSpring->getObjectA()->getAnchor(m_pSpring->getAnchorIDA()) -
-                     _pCamera->getPosition();
+                     _pCamera->getOrigin();
     Vector2d vec2 = m_pSpring->getObjectB()->getAnchor(m_pSpring->getAnchorIDB()) -
-                     _pCamera->getPosition();
+                     _pCamera->getOrigin();
     Vector2d vec21 = vec2 - vec1;
     Vector2d vecOrth = Vector2d(-vec21[1], vec21[0]).normalized()*2.0;
 

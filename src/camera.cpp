@@ -19,18 +19,24 @@
 
 #include "camera.h"
 
+//--- Program header ---------------------------------------------------------//
+#include "body.h"
+// #include "object.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CCamera::CCamera() : m_fViewportWidth(320.0), m_fViewportHeight(200.0)
+CCamera::CCamera() : m_fViewportWidth(320.0), m_fViewportHeight(200.0),
+                     m_fHookAng(0.0), m_pHook(0)
 {
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
     
     m_vecFrame0.resize(4);
     m_vecFrame.resize(4);
+    m_vecHook.setZero();
     
     this->reset();
     
@@ -48,6 +54,23 @@ CCamera::~CCamera()
     DTOR_CALL("CCamera::~CCamera")
     
     METHOD_EXIT("CCamera::~CCamera")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the object the camera is hooked to
+///
+/// \param _pHook Object to be hooked on
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCamera::setHook(IObject* _pHook)
+{
+    METHOD_ENTRY("CCamera::setHook")
+
+    m_pHook = _pHook;
+    m_vecHook = m_pHook->getCOM();
+
+    METHOD_EXIT("CCamera::setHook")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,6 +107,74 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Update of the bounding box, frame and position
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCamera::update()
+{
+    METHOD_ENTRY("CCamera::update")
+
+    if (m_pHook != 0)
+    {
+        m_vecHook = m_pHook->getCOM();
+        m_fHookAng = dynamic_cast<CBody*>(m_pHook)->getAngle();
+    }
+    
+    m_Graphics.rotCamTo(m_fAngle);
+    m_Graphics.transCamTo(m_vecPosition*m_fZoom);
+    m_Graphics.rotCamTo(m_fHookAng);
+    m_Graphics.zoomCamTo(m_fZoom);
+
+    Rotation2Dd CameraRotation(m_fAngle);
+    Rotation2Dd HookRotation(m_fHookAng);
+    
+    m_vecFrame[0] = HookRotation * (CameraRotation * m_vecFrame0[0]/m_fZoom+
+                                       Vector2d(m_vecPosition[0],-m_vecPosition[1]))
+                                      +m_vecHook;
+    m_vecFrame[1] = HookRotation * (CameraRotation * m_vecFrame0[1]/m_fZoom+
+                                       Vector2d(m_vecPosition[0],-m_vecPosition[1]))
+                                      +m_vecHook;
+    m_vecFrame[2] = HookRotation * (CameraRotation * m_vecFrame0[2]/m_fZoom+
+                                       Vector2d(m_vecPosition[0],-m_vecPosition[1]))
+                                      +m_vecHook;
+    m_vecFrame[3] = HookRotation * (CameraRotation * m_vecFrame0[3]/m_fZoom+
+                                       Vector2d(m_vecPosition[0],-m_vecPosition[1]))
+                                      +m_vecHook;
+//     Rotation2Dd CameraRotation(-m_fAngle-m_fHookAng);
+//     
+//     m_vecFrame[0] = (CameraRotation * (m_vecFrame0[0]/m_fZoom+
+//                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
+//                                       )+m_vecHook;
+//     m_vecFrame[1] = (CameraRotation * (m_vecFrame0[1]/m_fZoom+
+//                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
+//                                       )+m_vecHook;
+//     m_vecFrame[2] = (CameraRotation * (m_vecFrame0[2]/m_fZoom+
+//                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
+//                                       )+m_vecHook;
+//     m_vecFrame[3] = (CameraRotation * (m_vecFrame0[3]/m_fZoom+
+//                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
+//                                       )+m_vecHook;
+    
+    m_BoundingBox.setLowerLeft( m_vecFrame[0]);
+    m_BoundingBox.setUpperRight(m_vecFrame[0]);
+    m_BoundingBox.update(m_vecFrame[1]);
+    m_BoundingBox.update(m_vecFrame[2]);
+    m_BoundingBox.update(m_vecFrame[3]);
+    
+//     Rotation2Dd CameraRotation2(-m_fAngle);
+//     Rotation2Dd HookRotation2(m_fHookAng);
+    
+    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
+                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
+    m_vecCenter = HookRotation * (Vector2d(m_vecPosition[0], -m_vecPosition[1]))
+                   + m_vecHook;
+//     m_vecCenter = m_vecHook + m_vecPosition;
+    
+    METHOD_EXIT("CCamera::update")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Resets the camera to default values
 ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,6 +183,7 @@ void CCamera::reset()
     METHOD_ENTRY("CCamera::reset")
 
     m_vecPosition.setZero();
+    m_vecCenter.setZero();
     m_fAngle = 0.0;
     m_fZoom  = 1.0;
     m_vecFrame0[0][0] = -m_fViewportWidth;
@@ -103,8 +195,6 @@ void CCamera::reset()
     m_vecFrame0[3][0] = -m_fViewportWidth;
     m_vecFrame0[3][1] =  m_fViewportHeight;
     
-    this->update();
-
     METHOD_EXIT("CCamera::reset")
 }
 
@@ -121,8 +211,6 @@ void CCamera::rotateBy(const double& _fAngle)
 
     m_fAngle += _fAngle;
     
-    this->update();
-
     METHOD_EXIT("CCamera::rotateBy")
 }
 
@@ -139,8 +227,6 @@ void CCamera::rotateTo(const double& _fAngle)
 
     m_fAngle = _fAngle;
     
-    this->update();
-
     METHOD_EXIT("CCamera::rotateTo")
 }
 
@@ -157,10 +243,10 @@ void CCamera::translateBy(const Vector2d& _vecV)
 
     Rotation2Dd Rotation(-m_fAngle);
 
-    m_vecPosition += Vector2d( (Rotation * _vecV)[0],
-                              -(Rotation * _vecV)[1]);
+    m_vecPosition += Rotation * Vector2d( _vecV[0],
+                                          _vecV[1]);
     
-    this->update();
+//     m_vecPosition += _vecV;
 
     METHOD_EXIT("CCamera::translateBy")
 }
@@ -178,8 +264,6 @@ void CCamera::translateTo(const Vector2d& _vecV)
 
     m_vecPosition = _vecV;
     
-    this->update();
-
     METHOD_EXIT("CCamera::translateTo")
 }
 
@@ -196,8 +280,6 @@ void CCamera::zoomBy(const double& _fZoom)
 
     m_fZoom *= _fZoom;
     
-    this->update();
-
     METHOD_EXIT("CCamera::zoomBy")
 }
 
@@ -214,35 +296,5 @@ void CCamera::zoomTo(const double& _fZoom)
 
     m_fZoom = _fZoom;
     
-    this->update();
-    
     METHOD_EXIT("CCamera::zoomTo")
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Update of the bounding box and frame with respect to position, angle and zoom.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CCamera::update()
-{
-    METHOD_ENTRY("CCamera::update")
-
-    Rotation2Dd Rotation(m_fAngle);
-
-    m_vecFrame[0] = (Rotation * m_vecFrame0[0])/m_fZoom+m_vecPosition;
-    m_vecFrame[1] = (Rotation * m_vecFrame0[1])/m_fZoom+m_vecPosition;
-    m_vecFrame[2] = (Rotation * m_vecFrame0[2])/m_fZoom+m_vecPosition;
-    m_vecFrame[3] = (Rotation * m_vecFrame0[3])/m_fZoom+m_vecPosition;
-    
-    m_BoundingBox.setLowerLeft( m_vecFrame[0]);
-    m_BoundingBox.setUpperRight(m_vecFrame[0]);
-    m_BoundingBox.update(m_vecFrame[1]);
-    m_BoundingBox.update(m_vecFrame[2]);
-    m_BoundingBox.update(m_vecFrame[3]);
-    
-    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
-                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
-    
-    METHOD_EXIT("CCamera::update")
 }

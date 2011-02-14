@@ -83,32 +83,33 @@ void CVisualsManager::drawBoundingBoxes() const
     
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
             m_Graphics.rect((*ci)->getBoundingBox().getLowerLeft() -
-                            m_pCamera->getPosition(),
+                            m_pCamera->getOrigin(),
                             (*ci)->getBoundingBox().getUpperRight()-
-                            m_pCamera->getPosition());
+                            m_pCamera->getOrigin());
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
             m_Graphics.filledRect((*ci)->getBoundingBox().getLowerLeft() -
-                                  m_pCamera->getPosition(),
+                                  m_pCamera->getOrigin(),
                                   (*ci)->getBoundingBox().getUpperRight()-
-                                  m_pCamera->getPosition());
+                                  m_pCamera->getOrigin());
             m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         }
         
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
         m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
-                        m_pCamera->getPosition(),
+                        m_pCamera->getOrigin(),
                         m_pCamera->getBoundingBox().getUpperRight()-
-                        m_pCamera->getPosition());
+                        m_pCamera->getOrigin());
         m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
         m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
-                              m_pCamera->getPosition(),
+                              m_pCamera->getOrigin(),
                               m_pCamera->getBoundingBox().getUpperRight()-
-                              m_pCamera->getPosition());
+                              m_pCamera->getOrigin());
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
-        m_Graphics.circle(Vector2d(0.0,0.0),m_pCamera->getBoundingCircleRadius());
-       m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getOrigin(),
+                          m_pCamera->getBoundingCircleRadius());
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         
     }
 
@@ -150,14 +151,9 @@ const bool CVisualsManager::getVisualisation(const int& _nVis) const
 void CVisualsManager::drawWorld() const
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
-    
-//     m_Graphics.transCamTo(Vector3d(0.0,
-//                                    0.0,
-//                                    0.0));
-    m_Graphics.rotCamTo(m_pCamera->getAngle());
-    m_Graphics.zoomCamTo(m_pCamera->getZoom());
-    m_Graphics.applyCamMovement();
-    
+
+    m_pCamera->update();
+        
     for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
          ci != m_VisualsMap.end(); ++ci)
     {
@@ -168,7 +164,7 @@ void CVisualsManager::drawWorld() const
                     (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) < 0.3))
                 {
                     m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() -
-                                   m_pCamera->getPosition());
+                                   m_pCamera->getOrigin());
                 }
                 else
                 {

@@ -25,18 +25,22 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
+#include "graphics.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "eigen2/Eigen/Geometry"
 
 using namespace Eigen;
 
+///< Forward declaration of object class
+class IObject;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class representing a camera for a view on the scene
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CCamera
+class CCamera : public CGraphicsBase
 {
 
     public:
@@ -50,13 +54,16 @@ class CCamera
         const double&                getBoundingCircleRadius() const;
         const std::vector<Vector2d>& getFrame() const;
         
-        Vector2d    getPosition() const;
-        double      getAngle() const;
-        double      getZoom() const;
+        const Vector2d&    getCenter() const;
+        const Vector2d&    getOrigin() const;
+        const double       getAngle() const;
+        const double&      getZoom() const;
         
         //--- Methods --------------------------------------------------------//
+        void setHook(IObject*);
         void setViewport(const double&, const double&);
         
+        void update();
         void reset();
         void rotateBy(const double&);
         void rotateTo(const double&);
@@ -68,18 +75,22 @@ class CCamera
     protected:
         
         //--- Methods [protected] --------------------------------------------//
-        void update();
 
         //--- Variables [protected] ------------------------------------------//
         std::vector<Vector2d>  m_vecFrame0;         ///< Initial camera frame
         std::vector<Vector2d>  m_vecFrame;          ///< Camera frame
         CBoundingBox    m_BoundingBox;              ///< Cameras bounding box (for culling)
         Vector2d        m_vecPosition;              ///< Camera position
+        Vector2d        m_vecHook;                  ///< Hook position
+        Vector2d        m_vecCenter;                ///< Center of camera
+        double          m_fHookAng;                 ///< Hook angle
         double          m_fBoundingCircleRadius;    ///< Radius of Bounding circle
         double          m_fViewportWidth;           ///< Half of viewport width in m
         double          m_fViewportHeight;          ///< Half of viewport height in m
         double          m_fAngle;                   ///< Camera angle
         double          m_fZoom;                    ///< Camera zoom
+        
+        IObject*        m_pHook;                    ///< Object to hook camera on
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -100,6 +111,21 @@ inline const CBoundingBox CCamera::getBoundingBox() const
 
     METHOD_EXIT("CCamera::getBoundingBox")
     return m_BoundingBox;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns center of camera
+///
+/// \return The camera's center
+///
+///////////////////////////////////////////////////////////////////////////////
+inline const Vector2d& CCamera::getCenter() const
+{
+    METHOD_ENTRY("CCamera::getCenter")
+
+    METHOD_EXIT("CCamera::getCenter")
+    return m_vecCenter;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -137,17 +163,17 @@ inline const std::vector<Vector2d>& CCamera::getFrame() const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns the camera position
+/// \brief Returns the camera coordinates origin
 ///
-/// \return The camera position
+/// \return Camera coordinate system origin
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline Vector2d CCamera::getPosition() const
+inline const Vector2d& CCamera::getOrigin() const
 {
-    METHOD_ENTRY("CCamera::getPosition")
-
-    METHOD_EXIT("CCamera::getPosition")
-    return m_vecPosition;
+    METHOD_ENTRY("CCamera::getOrigin")
+    
+    METHOD_EXIT("CCamera::getOrigin")
+    return m_vecHook;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,12 +183,12 @@ inline Vector2d CCamera::getPosition() const
 /// \return The camera angle
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline double CCamera::getAngle() const
+inline const double CCamera::getAngle() const
 {
     METHOD_ENTRY("CCamera::getAngle")
 
     METHOD_EXIT("CCamera::getAngle")
-    return m_fAngle;
+    return (m_fAngle+m_fHookAng);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -172,7 +198,7 @@ inline double CCamera::getAngle() const
 /// \return The camera zoom
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline double CCamera::getZoom() const
+inline const double& CCamera::getZoom() const
 {
     METHOD_ENTRY("CCamera::getZoom")
 

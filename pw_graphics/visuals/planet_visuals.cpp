@@ -62,48 +62,53 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
     double   fHeight   = m_pPlanet->getHeight();
     int      nSeed     = m_pPlanet->getSeed();
     double   fSmooth   = m_pPlanet->getSmoothness();
-    Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getPosition();
-        
-    Vector2d vecEx(1.0, 0.0);
-    double fAng;    
-    double fAngEnd;
+    Vector2d vecDist   = m_pPlanet->getCenter()-_pCamera->getCenter();
+    Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getOrigin();
 
-    double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
-    if (isnan(fAlpha))
+    if (vecDist.norm() > fRad-_pCamera->getBoundingCircleRadius())
     {
-        fAng = 0.0;
-        fAngEnd = 2.0*M_PI;
-    }
-    else
-    {
-        double fAng0 = std::acos((- vecCenter.dot(vecEx)) / vecCenter.norm());
-        
-        if (vecCenter[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
-        
-        fAng = fAng0-fAlpha;
-        fAngEnd = fAng0+fAlpha;
-    }
-    
-    if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
-    
-    double fInc = /*m_pPlanet->getGroundResolution()*/ 0.1 / m_pPlanet->getRadius();
-    
-    m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
+        Vector2d vecEx(1.0, 0.0);
+        double fAng;    
+        double fAngEnd;
 
-        while ( fAng <= fAngEnd)
+        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecDist.norm()));
+        if (isnan(fAlpha))
         {
-            double fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng+m_pPlanet->getAngle())*fRad, std::sin(fAng+m_pPlanet->getAngle())*fRad,0.0);
-//             double fHght = m_pPlanet->getSurface().GetValue((fAng+m_pPlanet->getAngle())*fRad,0.5,0.2);
-            
-            m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
-                                          vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
-//             m_Graphics.dot(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+fHght*fHeight),
-//                                     vecCenter[1]+std::cos(fAng)*(fRad+fHght*fHeight)));
-
-            fAng += fInc / _pCamera->getZoom();
+            fAng = 0.0;
+            fAngEnd = 2.0*M_PI;
         }
+        else
+        {
+            double fAng0 = std::acos((- vecDist.dot(vecEx)) / vecDist.norm());
+            
+            if (vecDist[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
+            
+            fAng = fAng0-fAlpha;
+            fAngEnd = fAng0+fAlpha;
+        }
+        
+        if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+        
+        double fInc = /*m_pPlanet->getGroundResolution()*/ 0.1 / m_pPlanet->getRadius();
+        
+        m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
 
-    m_Graphics.endLine();
+            while ( fAng <= fAngEnd)
+            {
+                double fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-m_pPlanet->getAngle())*fRad,
+                                                                std::sin(fAng-m_pPlanet->getAngle())*fRad,0.0);
+    //             double fHght = m_pPlanet->getSurface().GetValue((fAng+m_pPlanet->getAngle())*fRad,0.5,0.2);
+                
+                m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+                                              vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+    //             m_Graphics.dot(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+fHght*fHeight),
+    //                                     vecCenter[1]+std::cos(fAng)*(fRad+fHght*fHeight)));
+
+                fAng += fInc / _pCamera->getZoom();
+            }
+
+        m_Graphics.endLine();
+    }
 
     METHOD_EXIT("CPlanetVisuals::draw()");
 }
@@ -125,7 +130,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
 //     int      nNrOSP    = m_pPlanet->getNrOfSamplingPoints();
 //     int      nSeed     = m_pPlanet->getSeed();
 //     double   fSmooth   = m_pPlanet->getSmoothness();
-//     Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getPosition();
+//     Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getOrigin();
 // 
 // //     double fAngInc = 2.0 * GRAPHICS_PI /
 // //                      ceil (

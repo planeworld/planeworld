@@ -59,10 +59,10 @@ void CRectangleVisuals::draw(const CCamera* const _pCamera) const
     METHOD_ENTRY("CRectangleVisuals::draw()");
 
     m_Graphics.beginLine(GRAPHICS_LINETYPE_LOOP, SHAPE_DEFAULT_DEPTH);
-        m_Graphics.addVertex(m_pRectangle->getVertices()[0]-_pCamera->getPosition());
-        m_Graphics.addVertex(m_pRectangle->getVertices()[1]-_pCamera->getPosition());
-        m_Graphics.addVertex(m_pRectangle->getVertices()[2]-_pCamera->getPosition());
-        m_Graphics.addVertex(m_pRectangle->getVertices()[3]-_pCamera->getPosition());
+        m_Graphics.addVertex(m_pRectangle->getVertices()[0]-_pCamera->getOrigin());
+        m_Graphics.addVertex(m_pRectangle->getVertices()[1]-_pCamera->getOrigin());
+        m_Graphics.addVertex(m_pRectangle->getVertices()[2]-_pCamera->getOrigin());
+        m_Graphics.addVertex(m_pRectangle->getVertices()[3]-_pCamera->getOrigin());
     m_Graphics.endLine();
 
     METHOD_EXIT("CRectangleVisuals::draw()");

@@ -433,9 +433,11 @@ int main(int argc, char *argv[])
     pPhysicsManager->initObjects();
 //     pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
 
-//     pEarth->setVelocity(Vector2d(29.78e3, 0.0));
-    pEarth->setAngleVelocity(0.000);
+    pEarth->setVelocity(Vector2d(29.78e3, 0.0));
+    pEarth->setAngleVelocity(0.001);
 //     pMoon->setVelocity(Vector2d(29.78e3+1.023e3, 0.0));
+    
+    pCamera->setHook(pEarth);
     
     EngineManager.setPhysicsManager(pPhysicsManager);
     EngineManager.setVisualsManager(pVisualsManager);
