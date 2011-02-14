@@ -60,11 +60,12 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
 
     double   fRad      = m_pPlanet->getRadius();
     double   fHeight   = m_pPlanet->getHeight();
+    double   fPAng     = m_pPlanet->getAngle();
     int      nSeed     = m_pPlanet->getSeed();
     double   fSmooth   = m_pPlanet->getSmoothness();
     Vector2d vecDist   = m_pPlanet->getCenter()-_pCamera->getCenter();
-    Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getOrigin();
-
+    Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getCenter();
+    
     if (vecDist.norm() > fRad-_pCamera->getBoundingCircleRadius())
     {
         Vector2d vecEx(1.0, 0.0);
@@ -95,9 +96,8 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
 
             while ( fAng <= fAngEnd)
             {
-                double fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-m_pPlanet->getAngle())*fRad,
-                                                                std::sin(fAng-m_pPlanet->getAngle())*fRad,0.0);
-    //             double fHght = m_pPlanet->getSurface().GetValue((fAng+m_pPlanet->getAngle())*fRad,0.5,0.2);
+                double fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
+                                                                std::sin(fAng-fPAng)*fRad,0.0);
                 
                 m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));

@@ -83,31 +83,31 @@ void CVisualsManager::drawBoundingBoxes() const
     
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
             m_Graphics.rect((*ci)->getBoundingBox().getLowerLeft() -
-                            m_pCamera->getOrigin(),
+                            m_pCamera->getCenter(),
                             (*ci)->getBoundingBox().getUpperRight()-
-                            m_pCamera->getOrigin());
+                            m_pCamera->getCenter());
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
             m_Graphics.filledRect((*ci)->getBoundingBox().getLowerLeft() -
-                                  m_pCamera->getOrigin(),
+                                  m_pCamera->getCenter(),
                                   (*ci)->getBoundingBox().getUpperRight()-
-                                  m_pCamera->getOrigin());
+                                  m_pCamera->getCenter());
             m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         }
         
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
         m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
-                        m_pCamera->getOrigin(),
+                        m_pCamera->getCenter(),
                         m_pCamera->getBoundingBox().getUpperRight()-
-                        m_pCamera->getOrigin());
+                        m_pCamera->getCenter());
         m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
         m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
-                              m_pCamera->getOrigin(),
+                              m_pCamera->getCenter(),
                               m_pCamera->getBoundingBox().getUpperRight()-
-                              m_pCamera->getOrigin());
+                              m_pCamera->getCenter());
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
-        m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getOrigin(),
+        m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
                           m_pCamera->getBoundingCircleRadius());
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         
@@ -164,7 +164,7 @@ void CVisualsManager::drawWorld() const
                     (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) < 0.3))
                 {
                     m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() -
-                                   m_pCamera->getOrigin());
+                                   m_pCamera->getCenter());
                 }
                 else
                 {

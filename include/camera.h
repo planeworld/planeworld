@@ -55,7 +55,6 @@ class CCamera : public CGraphicsBase
         const std::vector<Vector2d>& getFrame() const;
         
         const Vector2d&    getCenter() const;
-        const Vector2d&    getOrigin() const;
         const double       getAngle() const;
         const double&      getZoom() const;
         
@@ -159,21 +158,6 @@ inline const std::vector<Vector2d>& CCamera::getFrame() const
 
     METHOD_EXIT("CCamera::getFrame")
     return m_vecFrame;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the camera coordinates origin
-///
-/// \return Camera coordinate system origin
-///
-///////////////////////////////////////////////////////////////////////////////
-inline const Vector2d& CCamera::getOrigin() const
-{
-    METHOD_ENTRY("CCamera::getOrigin")
-    
-    METHOD_EXIT("CCamera::getOrigin")
-    return m_vecHook;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

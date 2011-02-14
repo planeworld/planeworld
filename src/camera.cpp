@@ -120,9 +120,7 @@ void CCamera::update()
         m_fHookAng = dynamic_cast<CBody*>(m_pHook)->getAngle();
     }
     
-    m_Graphics.rotCamTo(m_fAngle);
-    m_Graphics.transCamTo(m_vecPosition*m_fZoom);
-    m_Graphics.rotCamTo(m_fHookAng);
+    m_Graphics.rotCamTo(m_fHookAng+m_fAngle);
     m_Graphics.zoomCamTo(m_fZoom);
 
     Rotation2Dd CameraRotation(m_fAngle);
@@ -140,20 +138,6 @@ void CCamera::update()
     m_vecFrame[3] = HookRotation * (CameraRotation * m_vecFrame0[3]/m_fZoom+
                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
                                       +m_vecHook;
-//     Rotation2Dd CameraRotation(-m_fAngle-m_fHookAng);
-//     
-//     m_vecFrame[0] = (CameraRotation * (m_vecFrame0[0]/m_fZoom+
-//                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
-//                                       )+m_vecHook;
-//     m_vecFrame[1] = (CameraRotation * (m_vecFrame0[1]/m_fZoom+
-//                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
-//                                       )+m_vecHook;
-//     m_vecFrame[2] = (CameraRotation * (m_vecFrame0[2]/m_fZoom+
-//                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
-//                                       )+m_vecHook;
-//     m_vecFrame[3] = (CameraRotation * (m_vecFrame0[3]/m_fZoom+
-//                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
-//                                       )+m_vecHook;
     
     m_BoundingBox.setLowerLeft( m_vecFrame[0]);
     m_BoundingBox.setUpperRight(m_vecFrame[0]);
@@ -161,14 +145,10 @@ void CCamera::update()
     m_BoundingBox.update(m_vecFrame[2]);
     m_BoundingBox.update(m_vecFrame[3]);
     
-//     Rotation2Dd CameraRotation2(-m_fAngle);
-//     Rotation2Dd HookRotation2(m_fHookAng);
-    
     m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
                                    m_fViewportHeight*m_fViewportHeight)/m_fZoom;
     m_vecCenter = HookRotation * (Vector2d(m_vecPosition[0], -m_vecPosition[1]))
                    + m_vecHook;
-//     m_vecCenter = m_vecHook + m_vecPosition;
     
     METHOD_EXIT("CCamera::update")
 }
@@ -243,11 +223,8 @@ void CCamera::translateBy(const Vector2d& _vecV)
 
     Rotation2Dd Rotation(-m_fAngle);
 
-    m_vecPosition += Rotation * Vector2d( _vecV[0],
-                                          _vecV[1]);
+    m_vecPosition += Rotation * _vecV;
     
-//     m_vecPosition += _vecV;
-
     METHOD_EXIT("CCamera::translateBy")
 }
 
