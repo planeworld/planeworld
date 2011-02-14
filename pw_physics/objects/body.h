@@ -46,6 +46,7 @@ class CBody : public IObject
 
         //--- Constant Methods -----------------------------------------------//
         const Vector2d  getAnchor(const int&) const;
+        const double    getAngle() const;
         const double    getAngleVelocity() const;
         
         //--- Methods --------------------------------------------------------//
@@ -69,6 +70,21 @@ class CBody : public IObject
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the angle of object
+///
+/// \return Angle
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double CBody::getAngle() const
+{
+    METHOD_ENTRY("CBody::getAngle")
+
+    METHOD_EXIT("CBody::getAngle")
+    return m_pIntAng->getValue();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
