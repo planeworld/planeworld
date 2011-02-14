@@ -123,8 +123,8 @@ class CGraphics
         void resetCam();
         void rotCamBy(const double&);
         void rotCamTo(const double&);
-        void transCamBy(const Vector3d&);
-        void transCamTo(const Vector3d&);
+        void transCamBy(const Vector2d&);
+        void transCamTo(const Vector2d&);
         void zoomCamBy(const double&);
         void zoomCamTo(const double&);
 

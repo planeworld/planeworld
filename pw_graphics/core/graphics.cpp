@@ -410,6 +410,8 @@ void CGraphics::rotCamBy(const double& _fInc)
     METHOD_ENTRY("CGraphics::rotCamBy")
 
     m_fCamAng += _fInc;
+    
+    glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
 
     METHOD_EXIT("CGraphics::rotCamBy")
 }
@@ -426,6 +428,8 @@ void CGraphics::rotCamTo(const double& _fAng)
     METHOD_ENTRY("CGraphics::rotCamTo")
 
     m_fCamAng = _fAng;
+    
+    glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
 
     METHOD_EXIT("CGraphics::rotCamTo")
 }
@@ -441,13 +445,15 @@ void CGraphics::rotCamTo(const double& _fAng)
 ///         method "applyCamMovement" but that's not easily possible.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::transCamBy(const Vector3d& _vecInc)
+void CGraphics::transCamBy(const Vector2d& _vecInc)
 {
     METHOD_ENTRY("CGraphics::transCamBy")
 
     Rotation2Dd Rotation(-m_fCamAng);
 
-    m_vecCamPos.segment<2>(0) += Rotation * _vecInc.segment<2>(0);
+    m_vecCamPos.segment<2>(0) += Rotation * _vecInc;
+    
+    glTranslated(-m_vecCamPos[0], m_vecCamPos[1], 0.0);
     
     METHOD_EXIT("CGraphics::transCamBy")
 }
@@ -459,11 +465,13 @@ void CGraphics::transCamBy(const Vector3d& _vecInc)
 /// \param _vecPos position in x-,y- and z-direction
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::transCamTo(const Vector3d& _vecPos)
+void CGraphics::transCamTo(const Vector2d& _vecPos)
 {
     METHOD_ENTRY("CGraphics::transCamTo")
 
-    m_vecCamPos = _vecPos;
+    m_vecCamPos.segment<2>(0) = _vecPos;
+    
+    glTranslated(-m_vecCamPos[0], m_vecCamPos[1], 0.0);
 
     METHOD_EXIT("CGraphics::transCamTo")
 }
@@ -480,6 +488,8 @@ void CGraphics::zoomCamBy(const double& _fFac)
     METHOD_ENTRY("CGraphics::zoomCamBy")
 
     m_fCamZoom *= _fFac;
+    
+    glScaled(m_fCamZoom, m_fCamZoom, 1.0);
 
     METHOD_EXIT("CGraphics::zoomCamBy")
 }
@@ -496,6 +506,8 @@ void CGraphics::zoomCamTo(const double& _fFac)
     METHOD_ENTRY("CGraphics::zoomCamTo")
 
     m_fCamZoom = _fFac;
+    
+    glScaled(m_fCamZoom, m_fCamZoom, 1.0);
 
     METHOD_EXIT("CGraphics::zoomCamTo")
 }
