@@ -32,10 +32,6 @@
 //--- Standard header --------------------------------------------------------//
 #include <vector>
 
-// Forward declarations
-class CBody;
-class CPointMass;
-
 /// Type definition for the AnchorIDs
 typedef uint AnchorIDType;
 

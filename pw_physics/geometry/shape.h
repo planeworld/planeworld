@@ -45,9 +45,6 @@ typedef enum
     SHAPE_RECTANGLE
 } ShapeType;
 
-/// Type definition of a list of intersections
-typedef std::list<Vector2d> IntersectionList;
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Abstract class representing a simple shape
