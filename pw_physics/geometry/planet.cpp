@@ -41,12 +41,12 @@ CPlanet::CPlanet() : m_fAngle(0.0),
     
     m_MountainTerrain.SetFrequency(0.000025);
     m_MountainTerrain.SetLacunarity(1.9737346);
-    m_MountainTerrain.SetNoiseQuality(QUALITY_BEST);
+    m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
     m_MountainTerrain.SetOctaveCount(16);
     
     m_BaseFlatTerrain.SetFrequency(0.00001);
     m_BaseFlatTerrain.SetLacunarity(1.793947);
-    m_BaseFlatTerrain.SetNoiseQuality(QUALITY_BEST);
+    m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
     
     m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
     m_FlatTerrain.SetScale(0.25);
@@ -55,7 +55,7 @@ CPlanet::CPlanet() : m_fAngle(0.0),
     m_TerrainType.SetFrequency (0.000001);
     m_TerrainType.SetPersistence (0.25);
     m_TerrainType.SetLacunarity(2.12358986);
-    m_TerrainType.SetNoiseQuality(QUALITY_BEST);
+    m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
 
     m_Surface.SetSourceModule(0,m_FlatTerrain);
     m_Surface.SetSourceModule(1,m_MountainTerrain);
@@ -108,12 +108,12 @@ void CPlanet::initTerrain()
 
     m_MountainTerrain.SetFrequency(fMinF);
     m_MountainTerrain.SetLacunarity(1.937);
-    m_MountainTerrain.SetNoiseQuality(QUALITY_BEST);
+    m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
     m_MountainTerrain.SetOctaveCount(nMaxOctave);
     
     m_BaseFlatTerrain.SetFrequency(fMinF/*0.5*12/(2.0*M_PI*m_fRadius)*/);
     m_BaseFlatTerrain.SetLacunarity(1.93947);
-    m_BaseFlatTerrain.SetNoiseQuality(QUALITY_BEST);
+    m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
     m_BaseFlatTerrain.SetOctaveCount(nMaxOctave);
     
     m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
@@ -123,7 +123,7 @@ void CPlanet::initTerrain()
     m_TerrainType.SetFrequency (0.5*80/(2.0*M_PI*m_fRadius));
     m_TerrainType.SetPersistence (0.5);
     m_TerrainType.SetLacunarity(2.137);
-    m_TerrainType.SetNoiseQuality(QUALITY_BEST);
+    m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
 
     m_Surface.SetSourceModule(0,m_FlatTerrain);
     m_Surface.SetSourceModule(1,m_MountainTerrain);

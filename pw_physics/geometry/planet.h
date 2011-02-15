@@ -29,8 +29,6 @@
 #include "eigen2/Eigen/Geometry"
 #include "noise/noise.h"
 
-using namespace noise;
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class representing a procedural created planet shape.
@@ -46,16 +44,16 @@ class CPlanet : public IShape
         virtual ~CPlanet();
         
         //--- Constant Methods -----------------------------------------------//
-        const double&           getAngle() const;
-        const Vector2d&         getCenter() const;
-        const double&           getGroundResolution() const;
-        const double&           getHeight() const;
-        const double&           getRadius() const;
-        const int&              getSeed() const;
-        const double&           getSmoothness() const;
-        const module::Select&   getSurface() const;
+        const double&                   getAngle() const;
+        const Vector2d&                 getCenter() const;
+        const double&                   getGroundResolution() const;
+        const double&                   getHeight() const;
+        const double&                   getRadius() const;
+        const int&                      getSeed() const;
+        const double&                   getSmoothness() const;
+        const noise::module::Select&    getSurface() const;
         
-        const ShapeType         getShapeType() const;
+        const ShapeType                 getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
         void initTerrain();
@@ -72,20 +70,20 @@ class CPlanet : public IShape
                         
     protected:
 
-        Vector2d            m_vecCenter;            ///< Center of planet
-        Vector2d            m_vecCenter0;           ///< Initial center of planet
-        double              m_fAngle;               ///< Angle, just for optical reasons
-        double              m_fGroundResolution;    ///< Ground resolution in m
-        double              m_fHeightMax;           ///< Maximum height of terrain
-        double              m_fRadius;              ///< Minimum radius of planet
-        double              m_fSmoothness;          ///< Smoothness of planet landscape
-        int                 m_nSeed;                ///< Unique seed for terrain generation
+        Vector2d            m_vecCenter;                ///< Center of planet
+        Vector2d            m_vecCenter0;               ///< Initial center of planet
+        double              m_fAngle;                   ///< Angle, just for optical reasons
+        double              m_fGroundResolution;        ///< Ground resolution in m
+        double              m_fHeightMax;               ///< Maximum height of terrain
+        double              m_fRadius;                  ///< Minimum radius of planet
+        double              m_fSmoothness;              ///< Smoothness of planet landscape
+        int                 m_nSeed;                    ///< Unique seed for terrain generation
         
-        module::Select      m_Surface;          ///< Final surface noise function
-        module::RidgedMulti m_MountainTerrain;  ///< Main mountain
-        module::Billow      m_BaseFlatTerrain;  ///< Base terrain
-        module::ScaleBias   m_FlatTerrain;      ///< Base terrain scaler
-        module::Perlin      m_TerrainType;      ///< Terrain type decision function
+        noise::module::Select      m_Surface;           ///< Final surface noise function
+        noise::module::RidgedMulti m_MountainTerrain;   ///< Main mountain
+        noise::module::Billow      m_BaseFlatTerrain;   ///< Base terrain
+        noise::module::ScaleBias   m_FlatTerrain;       ///< Base terrain scaler
+        noise::module::Perlin      m_TerrainType;       ///< Terrain type decision function
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -205,7 +203,7 @@ inline const double& CPlanet::getSmoothness() const
 /// \return Surface noise module
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const module::Select& CPlanet::getSurface() const
+inline const noise::module::Select& CPlanet::getSurface() const
 {
     METHOD_ENTRY("CPlanet::getSmoothness")
 
