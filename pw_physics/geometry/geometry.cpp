@@ -171,6 +171,8 @@ void CGeometry::setShapes(const std::list<IShape*> _ShapeList)
 ///
 /// \brief Copy current shapelist as shapes of previous time step
 ///
+/// \todo Better swap than copy shapelist
+///
 ///////////////////////////////////////////////////////////////////////////////
 void CGeometry::update()
 {

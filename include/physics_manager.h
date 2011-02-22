@@ -53,6 +53,7 @@ class CPhysicsManager
         void addGlobalForces();
         void addJoint(IJoint*);
         void addObject(IObject*);
+        void addObjects(std::list<IObject*>);
         void collisionDetection();
         void initObjects();
         void moveMasses();

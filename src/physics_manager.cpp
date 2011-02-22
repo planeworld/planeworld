@@ -81,44 +81,6 @@ CPhysicsManager::~CPhysicsManager()
     METHOD_EXIT("CPhysicsManager::~CPhysicsManager")
 }
 
-// ///////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Displays all visible objects
-// ///
-// /// This method calls the draw method of every object.
-// ///
-// /// \todo Pass new structure bbox instead of object to visuals
-// ///
-// ///////////////////////////////////////////////////////////////////////////////
-// void CPhysicsManager::drawWorld() const
-// {
-//     METHOD_ENTRY("CPhysicsManager::drawWorld")
-// 
-//     m_pVisualsManager->drawWorld();
-// 
-//     for (std::list< IObject* >::const_iterator ci = m_ObjList.begin();
-//         ci != m_ObjList.end(); ++ci)
-//     {
-//         m_pVisualsManager->drawBoundingBox((*ci)->getGeometry().getBoundingBox());
-//     };
-//     
-// //     if (m_nVisualisations & VISUALS_OBJECT_INTERSECTIONS)
-// //     {
-// //         for (ContactList::const_iterator ci = m_ContactList.begin();
-// //             ci != m_ContactList.end(); ++ci)
-// //         {
-// //             m_Graphics.setColor(0.0, 1.0, 0.0);
-// //             std::list<Vector2d> Intersections = (*ci).getPointsOfContact();
-// //             for (std::list<Vector2d>::const_iterator cj = Intersections.begin();
-// //                     cj != Intersections.end(); ++cj)
-// //                 m_Graphics.dot((*cj));
-// //             m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-// //         }
-// //     }
-// 
-//     METHOD_EXIT("CPhysicsManager::drawWorld")
-// }
-
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Add global forces to all objects
@@ -209,6 +171,24 @@ void CPhysicsManager::addObject(IObject* _pObject)
     m_ObjList.push_back(_pObject);
 
     METHOD_EXIT("CPhysicsManager::addObject")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a list of objects to internal object list
+///
+/// \param _Objects Objects that should be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::addObjects(std::list<IObject*> _Objects)
+{
+    METHOD_ENTRY("CPhysicsManager::addObjects")
+
+    std::list<IObject*>::iterator it = m_ObjList.end();
+    
+    m_ObjList.splice(it,_Objects);
+
+    METHOD_EXIT("CPhysicsManager::addObjects")
 }
 
 ///////////////////////////////////////////////////////////////////////////////

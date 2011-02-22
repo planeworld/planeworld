@@ -7,6 +7,9 @@ FIND_PACKAGE(SDL REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Lua51 REQUIRED)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS thread-mt)
+FIND_PACKAGE(Qt4 COMPONENTS QtCore QtXml REQUIRED )
+   
+include(${QT_USE_FILE})
 
 INCLUDE_DIRECTORIES (
     ${SDL_INCLUDE_DIR}
@@ -33,6 +36,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/spring_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/circle.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/geometry.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/planet.cpp
@@ -62,6 +66,7 @@ TARGET_LINK_LIBRARIES (planeworld
     ${SDL_LIBRARY}
     ${LUA_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
+    ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     noise
 )
