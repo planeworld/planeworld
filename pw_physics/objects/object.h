@@ -27,7 +27,6 @@
 
 #include "contact.h"
 #include "geometry.h"
-#include "visuals.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <vector>
@@ -44,6 +43,8 @@ typedef uint AnchorIDType;
 /// Things like inertia are not included, since point masses and particals don't
 /// need them. They are declared for a body, shape definition is declared there
 /// too.
+///
+/// \todo Move visuals id code. Each shapes should have a visuals id.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class IObject
@@ -73,8 +74,6 @@ class IObject
         
         void                addAcceleration(const Vector2d&);
         AnchorIDType        addAnchor(const Vector2d&);
-        void                addVisualsID(const VisualsIDType&);
-        void                addVisualsIDList(const VisualsIDListType&);
         void                disableGravitation();
         void                enableGravitation();
         CGeometry&          getGeometry();
@@ -111,7 +110,6 @@ class IObject
         double                  m_fTimeFac;                         ///< Factor of realtime
 
         CGeometry               m_Geometry;                         ///< Geometry of object
-        VisualsIDListType       m_VisualsIDs;                       ///< Visuals of object
 
         Vector2d                m_vecOrigin0;                       ///< Initial orgin of object
         Vector2d                m_vecCOM;                           ///< Center of mass
@@ -275,25 +273,6 @@ inline AnchorIDType IObject::addAnchor(const Vector2d& _vecV)
 
     METHOD_EXIT("IObject::addAnchor")
     return m_Anchors.size()-1;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Adds an ID of objects visuals to list
-///
-/// The object just stores ID's to visuals. The visuals itself are handled by 
-/// the visualsmanager.
-///
-/// \param _VisualsID ID of visuals that should be added to list
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IObject::addVisualsID(const VisualsIDType& _VisualsID)
-{
-    METHOD_ENTRY("IObject::addVisualsID")
-    
-    m_VisualsIDs.push_back(_VisualsID);
-
-    METHOD_EXIT("IObject::addVisualsID")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

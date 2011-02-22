@@ -32,6 +32,7 @@
 #include "planet.h"
 #include "planet_visuals.h"
 #include "pointmass.h"
+#include "xml_importer.h"
 #include "random_line.h"
 #include "rectangle_visuals.h"
 #include "rigidbody.h"
@@ -103,6 +104,8 @@ int main(int argc, char *argv[])
     CXFigLoader         XFigLoader;
     CSpring*            pSpring;
     CSpringVisuals*     pSpringVisuals;
+    
+    CXMLImporter        XMLImporter;
 
     long nX;
     long nY;
@@ -191,8 +194,8 @@ int main(int argc, char *argv[])
 //         pPointMass->addVisuals(pRectVisuals);
         
 //         pVisualsManager->addVisuals(pRectVisuals);
-        pPointMass->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
-//         pPointMass->addVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
+        pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+//         pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
         pPhysicsManager->addObject(pPointMass);
     }
 
@@ -209,7 +212,7 @@ int main(int argc, char *argv[])
 //  pBody1->disableDynamics();
 //     pBody1->disableGravitation();
 
-    pBody1->addVisualsIDList(pVisualsManager->addVisualsList(XFigLoader.getVisuals()));
+    pVisualsManager->addVisualsList(XFigLoader.getVisuals());
     pPhysicsManager->addObject(pBody1);
     
     //--- Initialize Rigidbody ----------------------------------------------//
@@ -232,7 +235,7 @@ int main(int argc, char *argv[])
     pCircle->setRadius(3.0);
 
     pBody2->getGeometry().addShape(pCircle);
-    pBody2->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+    pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
     pCircle = new CCircle();
     MEM_ALLOC("pCircle")
@@ -243,7 +246,7 @@ int main(int argc, char *argv[])
     pCircle->setRadius(2.0);
 
     pBody2->getGeometry().addShape(pCircle);
-    pBody2->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+    pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
     pPolyLine = new CPolyLine;
     MEM_ALLOC("pPolyLine")
@@ -256,7 +259,7 @@ int main(int argc, char *argv[])
     pPolyLine->addVertex(-5.0, 5.0);
 
     pBody2->getGeometry().addShape(pPolyLine);
-    pBody2->addVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
+    pPolyLine->setVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
 
 //  pRandomLine = new CRandomLine;
 //  MEM_ALLOC("pRandomLine")
@@ -274,7 +277,7 @@ int main(int argc, char *argv[])
     pRect->setLR(Vector2d(0.4, 2.0));
 
     pBody2->getGeometry().addShape(pRect);
-    pBody2->addVisualsID(pVisualsManager->addVisuals(pRectVisuals));
+    pRect->setVisualsID(pVisualsManager->addVisuals(pRectVisuals));
 
     pPhysicsManager->addObject(pBody2);
 
@@ -300,37 +303,41 @@ int main(int argc, char *argv[])
     pBody3->setName("Box");
     
     pBody3->getGeometry().addShape(pPolyLine);
-    pBody3->addVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
+    pPolyLine->setVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
 
     pPhysicsManager->addObject(pBody3);
     
     //--- Initialise Rigidbody ----------------------------------------------//
-    pEarth = new CRigidBody;
-    MEM_ALLOC("pEarth")
+//     pEarth = new CRigidBody;
+//     MEM_ALLOC("pEarth")
+// 
+//     INFO_MSG("Main", "Creating earth.")
+// 
+//     pEarth->setMass(5.974e24);
+//     pEarth->setInertia(3000.0);
+//     pEarth->setOrigin(Vector2d(0.0,-6378.27e3));
+//     pEarth->disableGravitation();
+// //     pEarth->disableDynamics();
+// //     pEarth->setTimeFac(1.0e5);
+//     pEarth->setName("Earth");
+//     
+//     pPlanet = new CPlanet();
+//     MEM_ALLOC("pPlanet")
+//     pPlanetVisuals = new CPlanetVisuals(pPlanet);
+//     MEM_ALLOC("pPlanetVisuals")
+//     pPlanet->setDepths(SHAPE_DEPTH_ALL);
+//     pPlanet->setCenter( Vector2d(0.0,0.0) );
+//     pPlanet->setRadius(6378.16e3);
+//     pPlanet->setHeight(8000.0);
+//     pPlanet->initTerrain();
+//     pEarth->getGeometry().addShape(pPlanet);
+//     pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
+// 
+//     pPhysicsManager->addObject(pEarth);
 
-    INFO_MSG("Main", "Creating earth.")
-
-    pEarth->setMass(5.974e24);
-    pEarth->setInertia(3000.0);
-    pEarth->setOrigin(Vector2d(0.0,-6378.27e3));
-    pEarth->disableGravitation();
-//     pEarth->disableDynamics();
-//     pEarth->setTimeFac(1.0e5);
-    pEarth->setName("Earth");
-    
-    pPlanet = new CPlanet();
-    MEM_ALLOC("pPlanet")
-    pPlanetVisuals = new CPlanetVisuals(pPlanet);
-    MEM_ALLOC("pPlanetVisuals")
-    pPlanet->setDepths(SHAPE_DEPTH_ALL);
-    pPlanet->setCenter( Vector2d(0.0,0.0) );
-    pPlanet->setRadius(6378.16e3);
-    pPlanet->setHeight(8000.0);
-    pPlanet->initTerrain();
-    pEarth->getGeometry().addShape(pPlanet);
-    pEarth->addVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
-
-    pPhysicsManager->addObject(pEarth);
+    XMLImporter.setVisualsManager(pVisualsManager);
+    XMLImporter.import(argv[1]);
+    pPhysicsManager->addObjects(XMLImporter.getObjects());
     
     //--- Initialise Rigidbody ----------------------------------------------//
     pMoon = new CRigidBody;
@@ -357,7 +364,7 @@ int main(int argc, char *argv[])
     pPlanet->initTerrain();
     
     pMoon->getGeometry().addShape(pPlanet);
-    pMoon->addVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
+    pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
 
     pPhysicsManager->addObject(pMoon);
     
@@ -382,7 +389,7 @@ int main(int argc, char *argv[])
     pCircle->setRadius(0.6957e9);
     
     pSun->getGeometry().addShape(pCircle);
-    pSun->addVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+    pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
     pPhysicsManager->addObject(pSun);
 
@@ -398,7 +405,7 @@ int main(int argc, char *argv[])
     pSpring->setLength(20.0);
 
     pPhysicsManager->addJoint(pSpring);
-    pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
+    pSpring->setVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
 
     pSpring = new CSpring();
     MEM_ALLOC("pSpring")
@@ -411,7 +418,7 @@ int main(int argc, char *argv[])
     pSpring->setLength(15.0);
 
     pPhysicsManager->addJoint(pSpring);
-    pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
+    pSpring->setVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
 
     pSpring = new CSpring();
     MEM_ALLOC("pSpring")
@@ -424,7 +431,7 @@ int main(int argc, char *argv[])
     pSpring->setLength(18.0);
 
     pPhysicsManager->addJoint(pSpring);
-    pSpring->addVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
+    pSpring->setVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
     
     //--- Initialize graphics ------------------------------------------------//
 //     SDL_WM_GrabInput(SDL_GRAB_ON);
@@ -433,11 +440,11 @@ int main(int argc, char *argv[])
     pPhysicsManager->initObjects();
 //     pPhysicsManager->setConstantGravitation(Vector2d(0.0, -9.81));
 
-    pEarth->setVelocity(Vector2d(29.78e3, 0.0));
-    pEarth->setAngleVelocity(0.001);
+//     pEarth->setVelocity(Vector2d(29.78e3, 0.0));
+//     pEarth->setAngleVelocity(0.001);
 //     pMoon->setVelocity(Vector2d(29.78e3+1.023e3, 0.0));
     
-    pCamera->setHook(pEarth);
+    pCamera->setHook(pBody3);
     
     EngineManager.setPhysicsManager(pPhysicsManager);
     EngineManager.setVisualsManager(pVisualsManager);

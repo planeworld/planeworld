@@ -117,30 +117,6 @@ IObject::~IObject()
     METHOD_EXIT("IObject::~IObject")
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Adds a list of IDs to objects list of visuals
-///
-/// The object just stores IDs to visuals. The visuals itself are handled by 
-/// the visualsmanager.
-///
-/// \param _VisualsID ID of visuals that should be added to list
-///
-////////////////////////////////////////////////////////////////////////////////
-void IObject::addVisualsIDList(const VisualsIDListType& _VisualsIDList)
-{
-    METHOD_ENTRY("IObject::addVisualsID")
-    
-    VisualsIDListType::const_iterator ci = _VisualsIDList.begin();
-    while (ci != _VisualsIDList.end())
-    {
-        m_VisualsIDs.push_back((*ci));
-        ++ci;
-    }
-
-    METHOD_EXIT("IObject::addVisualsID")
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Calculate dynamics of object
