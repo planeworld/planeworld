@@ -60,6 +60,7 @@ class CCamera : public CGraphicsBase
         
         //--- Methods --------------------------------------------------------//
         void setHook(IObject*);
+        void setPosition(const double&, const double&);
         void setViewport(const double&, const double&);
         
         void update();

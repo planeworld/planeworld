@@ -75,6 +75,24 @@ void CCamera::setHook(IObject* _pHook)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Sets the local position of the camera
+///
+/// \param _fX X coordinate
+/// \param _fY Y coordinate
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCamera::setPosition(const double& _fX, const double& _fY)
+{
+    METHOD_ENTRY("CCamera::setPosition")
+
+    m_vecPosition[0] = _fX;
+    m_vecPosition[1] = _fY;
+
+    METHOD_EXIT("CCamera::setPosition")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Sets the viewport of the camera
 ///
 /// \param _fW Width
