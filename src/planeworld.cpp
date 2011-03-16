@@ -112,16 +112,13 @@ int main(int argc, char *argv[])
     srand(SDL_GetTicks());
 
     //--- Initialisation -----------------------------------------------------//
-    pCamera = new CCamera;
-    MEM_ALLOC("pCamera")
+//     pCamera = new CCamera;
+//     MEM_ALLOC("pCamera")
     pPhysicsManager = new CPhysicsManager;
     MEM_ALLOC("pPhysicsManager")
     pVisualsManager = new CVisualsManager;
     MEM_ALLOC("pVisualsManager")
     
-    pCamera->setViewport(200.0, 100.0);
-    pVisualsManager->setCamera(pCamera);
-        
     int nNumberOfBoxes = 0;
     
     lua_State *L = lua_open();
@@ -335,10 +332,14 @@ int main(int argc, char *argv[])
 // 
 //     pPhysicsManager->addObject(pEarth);
 
-    XMLImporter.setVisualsManager(pVisualsManager);
+//     XMLImporter.setVisualsManager(pVisualsManager);
     XMLImporter.import(argv[1]);
+    pVisualsManager->setCamera(XMLImporter.getCamera());
     pPhysicsManager->addObjects(XMLImporter.getObjects());
+    pVisualsManager->addVisualsList(XMLImporter.getVisuals());
     
+    pCamera=XMLImporter.getCamera();
+            
     //--- Initialise Rigidbody ----------------------------------------------//
     pMoon = new CRigidBody;
     MEM_ALLOC("pMoon")
@@ -444,7 +445,7 @@ int main(int argc, char *argv[])
 //     pEarth->setAngleVelocity(0.001);
 //     pMoon->setVelocity(Vector2d(29.78e3+1.023e3, 0.0));
     
-    pCamera->setHook(pBody3);
+//     pCamera->setHook(pBody3);
     
     EngineManager.setPhysicsManager(pPhysicsManager);
     EngineManager.setVisualsManager(pVisualsManager);

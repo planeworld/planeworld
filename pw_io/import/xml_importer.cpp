@@ -28,6 +28,52 @@
 #include <qxml.h>
 #include <qdom.h>
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+CXMLImporter::CXMLImporter() : m_pCamera(0)
+{
+    METHOD_ENTRY("CXMLImporter::CXMLImporter")
+    CTOR_CALL("CXMLImporter::CXMLImporter")
+
+    METHOD_EXIT("CXMLImporter::CXMLImporter")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Destructor
+///
+///////////////////////////////////////////////////////////////////////////////
+CXMLImporter::~CXMLImporter()
+{
+    METHOD_ENTRY("CXMLImporter::~CXMLImporter")
+    DTOR_CALL("CXMLImporter::CXMLImporter")
+   
+    METHOD_EXIT("CXMLImporter::~CXMLImporter")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return imported objects
+///
+/// \return List of objects
+///
+////////////////////////////////////////////////////////////////////////////////
+std::list<IObject*> CXMLImporter::getObjects() const
+{
+    METHOD_ENTRY("CXMLImporter::getObjects")
+    
+    std::map<std::string, IObject*>::const_iterator ci;
+    std::list<IObject*> TmpList;
+    for (ci = m_Objects.begin(); ci != m_Objects.end(); ++ci)
+        TmpList.push_back((*ci).second);
+
+    METHOD_EXIT("CXMLImporter::getObjects")
+    return TmpList;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Import an xml file
@@ -68,21 +114,106 @@ bool CXMLImporter::import(const std::string& _strFilename)
         {
             if (E.tagName() == "object")
             {
-                QString strType = E.attribute("type");
-                if (strType == "RigidBody")
+                if (checkFile(E));
+                else if (E.hasAttribute("type"))
                 {
-                    this->createRigidBody(N.firstChild());
+                    QString strType = E.attribute("type");
+                    if (strType == "RigidBody")
+                    {
+                        this->createRigidBody(N.firstChild());
+                    }
                 }
-//                 QString strType = E.attribute("type");
-//                 if (strType == "file")
+            }
+            else if (E.tagName() == "camera")
+            {
+                this->createCamera(N.firstChild());
             }
         }
         
         N = N.nextSibling();
     }    
 
+    // Camera hook must have been read by now
+    std::cout << m_strCameraHook << std::endl;
+    m_pCamera->setHook(m_Objects[m_strCameraHook]);
+
     METHOD_EXIT("CXMLImporter::import")
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Check Element for file attribute
+///
+/// \param _E Node element
+///
+/// \return Has attribute file?
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CXMLImporter::checkFile(const QDomElement& _E)
+{
+    METHOD_ENTRY("CXMLImporter::checkFile")
+    
+    if (_E.hasAttribute("file"))
+    {
+        this->import("../data/"+_E.attribute("file").toStdString());
+        METHOD_EXIT("CXMLImporter::checkFile")
+        return true;
+    }
+ 
+    METHOD_EXIT("CXMLImporter::checkFile")
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create a camera
+///
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createCamera(const QDomNode& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createCamera")
+    
+    INFO_MSG("XML Importer", "Creating camera.")
+    
+     // Free memory if pointer is already existent
+    if (m_pCamera != 0)
+    {
+        delete m_pCamera;
+        m_pCamera = 0;
+        MEM_FREED("m_pCamera");
+        NOTICE_MSG("XML Importer", "More than one camera, creating new.")
+    }
+    m_pCamera = new CCamera;
+    MEM_ALLOC("pCamera")
+    
+    QDomNode N = _Node;
+    
+    while (!N.isNull())
+    {
+        QDomElement E = N.toElement();
+        
+        if (E.tagName() == "hook")
+        {
+            m_strCameraHook = E.attribute("name").toStdString();
+        }
+        else if (E.tagName() == "position")
+        {
+            m_pCamera->setPosition(E.attribute("x").toDouble(),
+                                   E.attribute("y").toDouble());
+        }
+        else if (E.tagName() == "viewport")
+        {
+            m_pCamera->setViewport(E.attribute("w").toDouble(),
+                                   E.attribute("h").toDouble());
+        }
+        
+        N = N.nextSibling();
+    }
+    
+    METHOD_EXIT("CXMLImporter::createCamera")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +254,7 @@ void CXMLImporter::createRigidBody(const QDomNode& _Node)
         N = N.nextSibling();
     }
     
-    m_Objects.push_back(pRigidBody);
+    m_Objects.insert(std::pair<std::string,IObject*>(pRigidBody->getName(),pRigidBody));
     
     METHOD_EXIT("CXMLImporter::createRigidBody")
 }
@@ -199,7 +330,7 @@ void CXMLImporter::createPlanetVisuals(CPlanet* const _pPlanet, const QDomNode& 
             CPlanetVisuals* pPlanetVisuals = new CPlanetVisuals(_pPlanet);
             MEM_ALLOC("pPlanetVisuals")
             
-            _pPlanet->setVisualsID(m_pVisualsManager->addVisuals(pPlanetVisuals));
+            m_Visuals.push_back(pPlanetVisuals);
         }
             
     }
@@ -225,7 +356,7 @@ void CXMLImporter::readObjectCore(IObject* const _pO, const QDomNode& _Node)
         _pO->setName(E.attribute("name").toStdString());
         _pO->setMass(E.attribute("mass").toDouble());
         _pO->setOrigin(E.attribute("origin_x").toDouble(),
-                    E.attribute("origin_y").toDouble());
+                       E.attribute("origin_y").toDouble());
                                 
         if (E.attribute("gravity") == "true")
             _pO->enableGravitation();

@@ -25,8 +25,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
+#include "camera.h"
 #include "planet.h"
-#include "visuals_manager.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "QDomNode"
@@ -42,59 +42,63 @@ class CXMLImporter
     public:
    
         //--- Constructor/Destructor -----------------------------------------//
+        CXMLImporter();
+        ~CXMLImporter();
 
         //--- Constant Methods -----------------------------------------------//
+        CCamera*                getCamera() const;
         std::list<IObject*>     getObjects() const;
-        
+        std::list<IVisuals*>    getVisuals() const;
+                
         //--- Methods --------------------------------------------------------//
         bool import(const std::string&);
         
-        void setVisualsManager(CVisualsManager*);
-
     private:
         
+        bool checkFile(const QDomElement&);
+        void createCamera(const QDomNode&);
         void createPlanetShape(CBody* const, const QDomNode&);
         void createPlanetVisuals(CPlanet* const, const QDomNode&);
         void createRigidBody(const QDomNode&);
         void readObjectCore(IObject* const, const QDomNode&);
         
-        std::list<IObject*>     m_Objects;
-        std::list<IVisuals*>    m_Visuals;
-        CVisualsManager*        m_pVisualsManager;
-        
+        CCamera*                        m_pCamera;
+        std::string                     m_strCameraHook;
+        std::map<std::string,IObject*>  m_Objects;
+        std::list<IVisuals*>            m_Visuals;
+                
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return imported objects
+/// \brief Return camera
 ///
-/// \return List of objects
+/// \return Camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline std::list<IObject*> CXMLImporter::getObjects() const
+inline CCamera* CXMLImporter::getCamera() const
 {
-    METHOD_ENTRY("CXMLImporter::getObjects")
+    METHOD_ENTRY("CXMLImporter::getCamera")
 
-    METHOD_EXIT("CXMLImporter::getObjects")
-    return m_Objects;
+    METHOD_EXIT("CXMLImporter::getCamera")
+    return m_pCamera;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Pass the visuals manager
+/// \brief Return imported objects
 ///
-/// \param _pVM Instance of visuals manager
+/// \return List of visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CXMLImporter::setVisualsManager(CVisualsManager* _pVM)
+inline std::list<IVisuals*> CXMLImporter::getVisuals() const
 {
-    METHOD_ENTRY("CXMLImporter::setVisualsManager")
+    METHOD_ENTRY("CXMLImporter::getVisuals")
 
-    m_pVisualsManager = _pVM;
-
-    METHOD_EXIT("CXMLImporter::setVisualsManager")
+    METHOD_EXIT("CXMLImporter::getVisuals")
+    return m_Visuals;
 }
 
 #endif
