@@ -112,8 +112,6 @@ int main(int argc, char *argv[])
     srand(SDL_GetTicks());
 
     //--- Initialisation -----------------------------------------------------//
-//     pCamera = new CCamera;
-//     MEM_ALLOC("pCamera")
     pPhysicsManager = new CPhysicsManager;
     MEM_ALLOC("pPhysicsManager")
     pVisualsManager = new CVisualsManager;
@@ -305,34 +303,6 @@ int main(int argc, char *argv[])
     pPhysicsManager->addObject(pBody3);
     
     //--- Initialise Rigidbody ----------------------------------------------//
-//     pEarth = new CRigidBody;
-//     MEM_ALLOC("pEarth")
-// 
-//     INFO_MSG("Main", "Creating earth.")
-// 
-//     pEarth->setMass(5.974e24);
-//     pEarth->setInertia(3000.0);
-//     pEarth->setOrigin(Vector2d(0.0,-6378.27e3));
-//     pEarth->disableGravitation();
-// //     pEarth->disableDynamics();
-// //     pEarth->setTimeFac(1.0e5);
-//     pEarth->setName("Earth");
-//     
-//     pPlanet = new CPlanet();
-//     MEM_ALLOC("pPlanet")
-//     pPlanetVisuals = new CPlanetVisuals(pPlanet);
-//     MEM_ALLOC("pPlanetVisuals")
-//     pPlanet->setDepths(SHAPE_DEPTH_ALL);
-//     pPlanet->setCenter( Vector2d(0.0,0.0) );
-//     pPlanet->setRadius(6378.16e3);
-//     pPlanet->setHeight(8000.0);
-//     pPlanet->initTerrain();
-//     pEarth->getGeometry().addShape(pPlanet);
-//     pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
-// 
-//     pPhysicsManager->addObject(pEarth);
-
-//     XMLImporter.setVisualsManager(pVisualsManager);
     XMLImporter.import(argv[1]);
     pVisualsManager->setCamera(XMLImporter.getCamera());
     pPhysicsManager->addObjects(XMLImporter.getObjects());
@@ -388,7 +358,7 @@ int main(int argc, char *argv[])
     pCircle->setDepths(SHAPE_DEPTH_ALL);
     pCircle->setCenter( Vector2d(0.0,0.0) );
     pCircle->setRadius(0.6957e9);
-    
+
     pSun->getGeometry().addShape(pCircle);
     pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
 
@@ -544,13 +514,6 @@ int main(int argc, char *argv[])
     
     PhysicsThread.join();
     VisualsThread.join();
-    
-//     if (pEngineManager != 0)
-//     {
-//         delete pEngineManager;
-//         pEngineManager = 0;
-//         MEM_FREED("pEngineManager")
-//     }
     
     SDL_Quit();
     return 0;

@@ -68,15 +68,17 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
     
     if (vecDist.norm() > fRad-_pCamera->getBoundingCircleRadius())
     {
-        Vector2d vecEx(1.0, 0.0);
-        double fAng;    
-        double fAngEnd;
+        Vector2d    vecEx(1.0, 0.0);
+        double      fAng;    
+        double      fAngEnd;
+        LineType    LineT;
 
         double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecDist.norm()));
         if (isnan(fAlpha))
         {
             fAng = 0.0;
             fAngEnd = 2.0*M_PI;
+            LineT = GRAPHICS_LINETYPE_LOOP;
         }
         else
         {
@@ -86,13 +88,14 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             
             fAng = fAng0-fAlpha;
             fAngEnd = fAng0+fAlpha;
+            LineT = GRAPHICS_LINETYPE_STRIP;
         }
         
         if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
         
-        double fInc = /*m_pPlanet->getGroundResolution()*/ 0.1 / m_pPlanet->getRadius();
+        double fInc = m_pPlanet->getGroundResolution() / m_pPlanet->getRadius();
         
-        m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
+        m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
 
             while ( fAng <= fAngEnd)
             {
@@ -101,10 +104,13 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
                 
                 m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
-    //             m_Graphics.dot(Vector2d(vecCenter[0]-std::sin(fAng)*(fRad+fHght*fHeight),
-    //                                     vecCenter[1]+std::cos(fAng)*(fRad+fHght*fHeight)));
+//                 m_Graphics.dot(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+//                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 
-                fAng += fInc / _pCamera->getZoom();
+                if (_pCamera->getZoom() <= 1.0)
+                    fAng += fInc / _pCamera->getZoom();
+                else
+                    fAng += fInc;
             }
 
         m_Graphics.endLine();

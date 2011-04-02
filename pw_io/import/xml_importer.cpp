@@ -126,7 +126,7 @@ bool CXMLImporter::import(const std::string& _strFilename)
             }
             else if (E.tagName() == "camera")
             {
-                this->createCamera(N.firstChild());
+                this->createCamera(N);
             }
         }
         
@@ -189,29 +189,13 @@ void CXMLImporter::createCamera(const QDomNode& _Node)
     m_pCamera = new CCamera;
     MEM_ALLOC("pCamera")
     
-    QDomNode N = _Node;
+    QDomElement E = _Node.toElement();
     
-    while (!N.isNull())
-    {
-        QDomElement E = N.toElement();
-        
-        if (E.tagName() == "hook")
-        {
-            m_strCameraHook = E.attribute("name").toStdString();
-        }
-        else if (E.tagName() == "position")
-        {
-            m_pCamera->setPosition(E.attribute("x").toDouble(),
-                                   E.attribute("y").toDouble());
-        }
-        else if (E.tagName() == "viewport")
-        {
-            m_pCamera->setViewport(E.attribute("w").toDouble(),
-                                   E.attribute("h").toDouble());
-        }
-        
-        N = N.nextSibling();
-    }
+    m_strCameraHook = E.attribute("hook").toStdString();
+    m_pCamera->setPosition(E.attribute("position_x").toDouble(),
+                           E.attribute("position_y").toDouble());
+    m_pCamera->setViewport(E.attribute("viewport_width").toDouble(),
+                           E.attribute("viewport_height").toDouble());
     
     METHOD_EXIT("CXMLImporter::createCamera")
 }
@@ -247,7 +231,11 @@ void CXMLImporter::createRigidBody(const QDomNode& _Node)
             QString strType = E.attribute("type");
             if (strType == "Planet")
             {
-                this->createPlanetShape(pRigidBody, N);
+                this->createShapePlanet(pRigidBody, N);
+            }
+            else if (strType == "Polyline")
+            {
+                this->createShapePolyline(pRigidBody, N);
             }
         }        
         
@@ -267,26 +255,22 @@ void CXMLImporter::createRigidBody(const QDomNode& _Node)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createPlanetShape(CBody* const _pBody, const QDomNode& _Node)
+void CXMLImporter::createShapePlanet(CBody* const _pBody, const QDomNode& _Node)
 {
-    METHOD_ENTRY("CXMLImporter::createPlanetShape")
+    METHOD_ENTRY("CXMLImporter::createShapePlanet")
     
     CPlanet* pPlanet = new CPlanet;
     MEM_ALLOC("pPlanet")
     
-//     while (!_Node.isNull())
-//     {
-        QDomElement E = _Node.toElement();
+    QDomElement E = _Node.toElement();
+    
+    pPlanet->setRadius(E.attribute("radius").toDouble());
+    pPlanet->setCenter(E.attribute("center_x").toDouble(),
+                        E.attribute("center_y").toDouble());
+    pPlanet->setHeight(E.attribute("height_max").toDouble());
+    pPlanet->setGroundResolution(E.attribute("ground_resolution").toDouble());
+    pPlanet->initTerrain();
         
-        pPlanet->setRadius(E.attribute("radius").toDouble());
-        pPlanet->setCenter(E.attribute("center_x").toDouble(),
-                           E.attribute("center_y").toDouble());
-        pPlanet->setHeight(E.attribute("height_max").toDouble());
-        pPlanet->initTerrain();
-        
-//         _Node = _Node.nextSibling();
-//     }
-
     // The shape might have visuals
     if (_Node.hasChildNodes())
     {
@@ -297,7 +281,7 @@ void CXMLImporter::createPlanetShape(CBody* const _pBody, const QDomNode& _Node)
         
             if (E.tagName() == "visuals")
             {
-                this->createPlanetVisuals(pPlanet, N);
+                this->createVisualsPlanet(pPlanet, N);
             }
             N = N.nextSibling();
         }
@@ -305,7 +289,59 @@ void CXMLImporter::createPlanetShape(CBody* const _pBody, const QDomNode& _Node)
     
     _pBody->getGeometry().addShape(pPlanet);
     
-    METHOD_EXIT("CXMLImporter::createPlanetShape")
+    METHOD_EXIT("CXMLImporter::createShapePlanet")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create a polyline shape
+///
+/// \param _pBody Body to create the shape for
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createShapePolyline(CBody* const _pBody, const QDomNode& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createShapePolyline")
+    
+    CPolyLine* pPolyline = new CPolyLine;
+    MEM_ALLOC("pPolyline")
+    
+    QDomElement E = _Node.toElement();
+
+    if (E.attribute("line_type") == "loop")
+        pPolyline->setLineType(GRAPHICS_LINETYPE_LOOP);
+    else if (E.attribute("line_type") == "strip")
+        pPolyline->setLineType(GRAPHICS_LINETYPE_STRIP);
+    else if (E.attribute("line_type") == "single")
+        pPolyline->setLineType(GRAPHICS_LINETYPE_SINGLE);
+    
+    QStringList Points = E.attribute("points").simplified().split(";");
+    for (int i=0; i<Points.size(); ++i)
+    {
+        QStringList Point = Points[i].simplified().split(",");
+        pPolyline->addVertex(Point[0].toDouble(),Point[1].toDouble());
+    }
+    
+    // The shape might have visuals
+    if (_Node.hasChildNodes())
+    {
+        QDomNode N = _Node.firstChild();
+        while (!N.isNull())
+        {
+            QDomElement E = N.toElement();
+        
+            if (E.tagName() == "visuals")
+            {
+                this->createVisualsPolyline(pPolyline, N);
+            }
+            N = N.nextSibling();
+        }
+    }
+    
+    _pBody->getGeometry().addShape(pPolyline);
+    
+    METHOD_EXIT("CXMLImporter::createShapePolyline")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -317,9 +353,9 @@ void CXMLImporter::createPlanetShape(CBody* const _pBody, const QDomNode& _Node)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createPlanetVisuals(CPlanet* const _pPlanet, const QDomNode& _Node)
+void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet, const QDomNode& _Node)
 {
-    METHOD_ENTRY("CXMLImporter::createPlanetVisuals")
+    METHOD_ENTRY("CXMLImporter::createVisualsPlanet")
     
     if (!_Node.isNull())
     {
@@ -335,7 +371,37 @@ void CXMLImporter::createPlanetVisuals(CPlanet* const _pPlanet, const QDomNode& 
             
     }
     
-    METHOD_EXIT("CXMLImporter::createPlanetVisuals")
+    METHOD_EXIT("CXMLImporter::createVisualsPlanet")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create visuals to a polyline shape
+///
+/// \param _pBody Body to receive visuals ids
+/// \param _pPolyline Polyline to create visuals for
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const QDomNode& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createVisualsPolyline")
+    
+    if (!_Node.isNull())
+    {
+        QDomElement E = _Node.toElement();
+        
+        if (E.attribute("type") == "Polyline")
+        {
+            CPolylineVisuals* pPolylineVisuals = new CPolylineVisuals(_pPolyline);
+            MEM_ALLOC("pPlanetVisuals")
+            
+            m_Visuals.push_back(pPolylineVisuals);
+        }
+            
+    }
+    
+    METHOD_EXIT("CXMLImporter::createVisualsPolyline")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

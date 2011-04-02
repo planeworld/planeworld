@@ -221,7 +221,7 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
 ///
 /// \brief Calculates the possible collision angle on planet's surface
 ///
-/// Since the surface of the planet is a function, the is exactly one height
+/// Since the surface of the planet is a function, there is exactly one height
 /// value for each angle. Thus, mapping the object (or its bounding box) on the
 /// planets surface, one can determine the possible collision area.
 ///

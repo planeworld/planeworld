@@ -92,12 +92,13 @@ void CPlanet::initTerrain()
     METHOD_ENTRY("CPlanet::initTerrain")
     
     double fNrOfPoints = 2.0 * M_PI * m_fRadius / m_fGroundResolution;
-    double fNrOfMountains = 2.0 * M_PI * m_fRadius / (m_fHeightMax*M_PI_2) / 2.0;
+    double fNrOfMountains = 2.0 * M_PI * m_fRadius / (m_fHeightMax*M_PI_2) * 0.5;
     
     double fMinF = 0.5*fNrOfMountains/(2.0*M_PI*m_fRadius);
     double fMaxF = 1.0;
     
-    int nMaxOctave = std::log(fMaxF/(0.5 * fNrOfMountains / fNrOfPoints));
+    int nMaxOctave = log2(fMaxF/fMinF)+1;
+    if (nMaxOctave < 1) nMaxOctave = 1;
     
     INFO_MSG("Planet", "Generating Terrain (Mountains)")
     DOM_VAR(INFO_MSG("Planet", "Number of Mountains: " << fNrOfMountains))

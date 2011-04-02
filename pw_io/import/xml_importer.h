@@ -27,9 +27,17 @@
 #include "body.h"
 #include "camera.h"
 #include "planet.h"
+#include "polyline_visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "QDomNode"
+
+/// Specifies the mode for importing xml data
+typedef enum
+{
+    IMPORT_MODE_UNIVERSE,
+    IMPORT_MODE_RIGIDBODY
+} ImportModeType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -51,14 +59,17 @@ class CXMLImporter
         std::list<IVisuals*>    getVisuals() const;
                 
         //--- Methods --------------------------------------------------------//
-        bool import(const std::string&);
+        bool        import(const std::string&);
+        QDomNode    import(const ImportModeType&);
         
     private:
         
         bool checkFile(const QDomElement&);
         void createCamera(const QDomNode&);
-        void createPlanetShape(CBody* const, const QDomNode&);
-        void createPlanetVisuals(CPlanet* const, const QDomNode&);
+        void createShapePlanet(CBody* const, const QDomNode&);
+        void createShapePolyline(CBody* const, const QDomNode&);
+        void createVisualsPlanet(CPlanet* const, const QDomNode&);
+        void createVisualsPolyline(CPolyLine* const, const QDomNode&);
         void createRigidBody(const QDomNode&);
         void readObjectCore(IObject* const, const QDomNode&);
         
