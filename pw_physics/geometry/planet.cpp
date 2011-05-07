@@ -31,7 +31,7 @@ CPlanet::CPlanet() : m_fAngle(0.0),
                      m_fHeightMax(8000.0),
                      m_fRadius(6378.16e3),
                      m_fSmoothness(1.0),
-                     m_fGroundResolution(0.1),
+                     m_fGroundResolution(1.0),
                      m_nSeed(2)
 {
     METHOD_ENTRY("CPlanet::CPlanet()");

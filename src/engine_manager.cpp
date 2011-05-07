@@ -70,10 +70,13 @@ void CEngineManager::runPhysics()
 
     m_PhysicsTimer.start();
     
+    int nCC=0;
+    
     while (!m_bDone)
     {
         m_pPhysicsManager->addGlobalForces();
         m_pPhysicsManager->moveMasses();
+        if ((nCC % 100) == 0)
         m_pPhysicsManager->collisionDetection();
         
         m_PhysicsTimer.stop();
@@ -84,6 +87,7 @@ void CEngineManager::runPhysics()
             usleep(unFrametime);
         }
         m_PhysicsTimer.start();
+        ++nCC;
     }
     
     METHOD_EXIT("CEngineManager::runPhysics")

@@ -90,11 +90,21 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             fAngEnd = fAng0+fAlpha;
             LineT = GRAPHICS_LINETYPE_STRIP;
         }
+
+        double fInc = m_pPlanet->getGroundResolution() / fRad;
+        
+        // Subsample planet surface when zooming out.
+        if (_pCamera->getZoom()*m_pPlanet->getGroundResolution() <= 1.0)
+            fInc /= _pCamera->getZoom()*m_pPlanet->getGroundResolution();
+        
+        // Snap angle to ground resolution grid to avoid flickering.
+        // If angle is started at arbitrary position, aliasing causes flickering when zooming
+        // or moving, since height is always sampled at different positions.
+        fAng -= ((fAng/fInc)-floor(fAng/fInc))*fInc;
+        fAngEnd += ((fAng/fInc)-floor(fAng/fInc))*fInc;
         
         if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
-        
-        double fInc = m_pPlanet->getGroundResolution() / m_pPlanet->getRadius();
-        
+               
         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
 
             while ( fAng <= fAngEnd)
@@ -107,9 +117,9 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
 //                 m_Graphics.dot(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
 //                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 
-                if (_pCamera->getZoom() <= 1.0)
-                    fAng += fInc / _pCamera->getZoom();
-                else
+//                 if (_pCamera->getZoom() <= 1.0)
+//                     fAng += fInc / _pCamera->getZoom();
+//                 else
                     fAng += fInc;
             }
 

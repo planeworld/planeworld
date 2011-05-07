@@ -42,7 +42,7 @@
       type="Planet"
       radius="6378.16e3"
       height_max="8000.0"
-      ground_resolution="0.1"
+      ground_resolution="1000.0"
       center_x="0.0"
       center_y="0.0">
       <visuals type="Planet"/>
