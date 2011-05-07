@@ -159,6 +159,7 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                     switch((*cj)->getShapeType())
                     {
                         case SHAPE_CIRCLE:
+                        {
                             CCircle* pCirc1;
                             CCircle* pCirc0;
                             CPolyLine* pPoly1;
@@ -169,10 +170,22 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             pPoly0 = static_cast<CPolyLine*>((*ci0));
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
+                        }
                         case SHAPE_PLANET:
+                        {
+                            CPlanet* pPlanet1;
+                            CPlanet* pPlanet0;
+                            CPolyLine* pPoly1;
+                            CPolyLine* pPoly0;
+                            pPlanet1 = static_cast<CPlanet*>((*cj));
+                            pPlanet0 = static_cast<CPlanet*>((*cj0));
+                            pPoly1 = static_cast<CPolyLine*>((*ci));
+                            pPoly0 = static_cast<CPolyLine*>((*ci0));
                             this->getSurfaceOfInterest();
                             break;
+                        }
                         case SHAPE_POLYLINE:
+                        {
                             CPolyLine* pPolyA1;
                             CPolyLine* pPolyB1;
                             CPolyLine* pPolyA0;
@@ -184,6 +197,7 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
+                        }
                         case SHAPE_RECTANGLE:
 //                             this->test((*ci),(*cj));
                             break;
@@ -229,6 +243,64 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
 void CCollisionManager::getSurfaceOfInterest()
 {
     METHOD_ENTRY("CCollisionManager::getSurfaceOfInterest")
+    
+//     double   fRad      = m_pPlanet->getRadius();
+//     double   fHeight   = m_pPlanet->getHeight();
+//     double   fPAng     = m_pPlanet->getAngle();
+//     int      nSeed     = m_pPlanet->getSeed();
+//     double   fSmooth   = m_pPlanet->getSmoothness();
+//     Vector2d vecDist   = m_pPlanet->getCenter()-_pCamera->getCenter();
+//     Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getCenter();
+//     
+//     if (vecDist.norm() > fRad-_pCamera->getBoundingCircleRadius())
+//     {
+//         Vector2d    vecEx(1.0, 0.0);
+//         double      fAng;    
+//         double      fAngEnd;
+//         LineType    LineT;
+// 
+//         double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecDist.norm()));
+//         if (isnan(fAlpha))
+//         {
+//             fAng = 0.0;
+//             fAngEnd = 2.0*M_PI;
+//             LineT = GRAPHICS_LINETYPE_LOOP;
+//         }
+//         else
+//         {
+//             double fAng0 = std::acos((- vecDist.dot(vecEx)) / vecDist.norm());
+//             
+//             if (vecDist[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
+//             
+//             fAng = fAng0-fAlpha;
+//             fAngEnd = fAng0+fAlpha;
+//             LineT = GRAPHICS_LINETYPE_STRIP;
+//         }
+//         
+//         if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+//         
+//         double fInc = m_pPlanet->getGroundResolution() / m_pPlanet->getRadius();
+//         
+//         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
+// 
+//             while ( fAng <= fAngEnd)
+//             {
+//                 double fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
+//                                                                 std::sin(fAng-fPAng)*fRad,0.0);
+//                 
+//                 m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+//                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+// //                 m_Graphics.dot(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+// //                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+// 
+//                 if (_pCamera->getZoom() <= 1.0)
+//                     fAng += fInc / _pCamera->getZoom();
+//                 else
+//                     fAng += fInc;
+//             }
+// 
+//         m_Graphics.endLine();
+//     }
     
     METHOD_EXIT("CCollisionManager::getSurfaceOfInterest")
 }
