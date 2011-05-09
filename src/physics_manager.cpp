@@ -108,10 +108,10 @@ void CPhysicsManager::addGlobalForces()
     {
         cj = ci;
         ++cj;
-        while (cj != m_ObjList.end())
+        
+        if ((*ci)->getGravitationState() == true)
         {
-            if (((*ci)->getGravitationState() == true) ||
-                ((*cj)->getGravitationState() == true))
+            while (cj != m_ObjList.end())
             {
                 vecCC = ((*ci)->getCOM() - (*cj)->getCOM());
                 fCCSqr = vecCC.squaredNorm();
@@ -120,14 +120,13 @@ void CPhysicsManager::addGlobalForces()
                 {
                     vecG = vecCC.normalized() * ((*ci)->getMass() * (*cj)->getMass()) / fCCSqr
 //                             * 6.6742e+0;
-                         * 6.6742e-11;
+                        * 6.6742e-11;
                     if ((*cj)->getGravitationState() == true)
                         (*ci)->addForce(-vecG, (*ci)->getCOM());
-                    if ((*ci)->getGravitationState() == true)
-                        (*cj)->addForce(vecG, (*cj)->getCOM());
+                    (*cj)->addForce(vecG, (*cj)->getCOM());
                 }
+                ++cj;
             }
-            ++cj;
         }
 
         (*ci)->addAcceleration(m_vecConstantGravitation);
