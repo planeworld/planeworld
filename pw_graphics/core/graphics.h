@@ -136,7 +136,7 @@ class CGraphics
         //--- Constant methods -----------------------------------------------//
         void circle(const Vector2d&, const double&) const;
         void dot(const Vector2d&) const;
-        void dots(const std::vector<Vector2d>&) const;
+        void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void filledRect(const Vector2d&, const Vector2d&) const;
         void polyline(const std::list<Vector2d>&, const LineType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void rect(const Vector2d&, const Vector2d&) const;

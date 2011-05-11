@@ -564,21 +564,35 @@ void CGraphics::dot(const Vector2d& _vecV) const
 /// \brief Draw dots
 ///
 /// \param _Dots List of dots to be drawn
+/// \param _vecOffset Offset for drawing, used e.g. when existing list should
+///                   be shifted.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::dots(const std::vector<Vector2d>& _Dots) const
+void CGraphics::dots(const std::vector<Vector2d>& _Dots,
+                     const Vector2d& _vecOffset) const
 {
     METHOD_ENTRY("CGraphics::dots")
     
     std::vector<Vector2d>::const_iterator ci = _Dots.begin();
 
-    glPointSize(5.0);
+    glPointSize(1.0);
     glBegin(GL_POINTS);
-        while (ci != _Dots.end());
+        if (_vecOffset.isZero())
         {
-            glVertex3d( (*ci)[0], (*ci)[1], -10.0);
-            ++ci;
+            while (ci != _Dots.end())
+            {
+                glVertex3d( (*ci)[0], (*ci)[1], -10.0);
+                ++ci;
+            }
         }
+        else
+        {
+            while (ci != _Dots.end())
+            {
+                glVertex3d( (*ci)[0]+_vecOffset[0], (*ci)[1]+_vecOffset[1], -10.0);
+                ++ci;
+            }
+        }   
     glEnd();
     glPointSize(1.0);
 
