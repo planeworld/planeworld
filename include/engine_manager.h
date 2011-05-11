@@ -27,8 +27,6 @@
 #include "physics_manager.h"
 #include "visuals_manager.h"
 
-const double ENGINE_DEFAULT_FREQUENCY = 100.0;
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the engine(s)
