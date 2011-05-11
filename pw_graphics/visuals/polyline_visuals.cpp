@@ -58,16 +58,7 @@ void CPolylineVisuals::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CPolylineVisuals::draw")
 
-    m_Graphics.beginLine(m_pPolyline->getLineType(), SHAPE_DEFAULT_DEPTH);
-
-    std::list<Vector2d>::const_iterator ci = m_pPolyline->getVertices().begin();
-    while (ci != m_pPolyline->getVertices().end())
-    {
-        m_Graphics.addVertex((*ci)-_pCamera->getCenter());
-        ++ci;
-    }
-
-    m_Graphics.endLine();
-
+    m_Graphics.polyline(m_pPolyline->getVertices(), m_pPolyline->getLineType(), -_pCamera->getCenter());
+    
     METHOD_EXIT("CPolylineVisuals::draw")
 }

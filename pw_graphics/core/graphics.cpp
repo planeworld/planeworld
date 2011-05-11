@@ -561,6 +561,32 @@ void CGraphics::dot(const Vector2d& _vecV) const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draw dots
+///
+/// \param _Dots List of dots to be drawn
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::dots(const std::vector<Vector2d>& _Dots) const
+{
+    METHOD_ENTRY("CGraphics::dots")
+    
+    std::vector<Vector2d>::const_iterator ci = _Dots.begin();
+
+    glPointSize(5.0);
+    glBegin(GL_POINTS);
+        while (ci != _Dots.end());
+        {
+            glVertex3d( (*ci)[0], (*ci)[1], -10.0);
+            ++ci;
+        }
+    glEnd();
+    glPointSize(1.0);
+
+    METHOD_EXIT("CGraphics::dots")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw a filled rectangle
 ///
 /// \param _vecLL   Lower left corner
@@ -579,6 +605,55 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR) const
     glEnd();
 
     METHOD_EXIT("CGraphics::filledRect")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw a polygon line
+///
+/// \param _Vertices List of vertices
+/// \param _LineType LineType
+/// \param _vecOffset Offset for drawing, used e.g. when existing list should
+///                   be shifted.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::polyline(const std::list<Vector2d>& _Vertices,
+                         const LineType& _LineType,
+                         const Vector2d& _vecOffset) const
+{
+    METHOD_ENTRY("CGraphics::polyline")
+
+    switch(_LineType)
+    {
+        case GRAPHICS_LINETYPE_SINGLE:
+            glBegin(GL_LINES);  
+            break;
+        case GRAPHICS_LINETYPE_LOOP:
+            glBegin(GL_LINE_LOOP);
+            break;
+        case GRAPHICS_LINETYPE_STRIP:
+            glBegin(GL_LINE_STRIP);
+            break;
+    }
+    if (_vecOffset.isZero())
+    {
+        for (std::list<Vector2d>::const_iterator ci = _Vertices.begin();
+            ci != _Vertices.end(); ++ci)
+        {
+            glVertex3d((*ci)[0], (*ci)[1], -10.0);
+        }
+    }
+    else
+    {
+        for (std::list<Vector2d>::const_iterator ci = _Vertices.begin();
+            ci != _Vertices.end(); ++ci)
+        {
+            glVertex3d((*ci)[0]+_vecOffset[0], (*ci)[1]+_vecOffset[1], -10.0);
+        }
+    }
+    glEnd();
+
+    METHOD_EXIT("CGraphics::polyline")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
