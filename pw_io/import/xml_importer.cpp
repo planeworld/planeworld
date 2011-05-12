@@ -134,7 +134,7 @@ bool CXMLImporter::import(const std::string& _strFilename)
     }    
 
     // Camera hook must have been read by now
-    std::cout << m_strCameraHook << std::endl;
+    INFO_MSG("XML Importer", "Camera Hook: " << m_strCameraHook)
     m_pCamera->setHook(m_Objects[m_strCameraHook]);
 
     METHOD_EXIT("CXMLImporter::import")
