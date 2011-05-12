@@ -63,17 +63,16 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
     double   fPAng     = m_pPlanet->getAngle();
     int      nSeed     = m_pPlanet->getSeed();
     double   fSmooth   = m_pPlanet->getSmoothness();
-    Vector2d vecDist   = m_pPlanet->getCenter()-_pCamera->getCenter();
     Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getCenter();
     
-    if (vecDist.norm() > fRad-_pCamera->getBoundingCircleRadius())
+    if (vecCenter.norm() > fRad-_pCamera->getBoundingCircleRadius())
     {
         Vector2d    vecEx(1.0, 0.0);
         double      fAng;    
         double      fAngEnd;
         LineType    LineT;
 
-        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecDist.norm()));
+        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
         if (isnan(fAlpha))
         {
             fAng = 0.0;
@@ -82,9 +81,9 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
         }
         else
         {
-            double fAng0 = std::acos((- vecDist.dot(vecEx)) / vecDist.norm());
+            double fAng0 = std::acos((- vecCenter.dot(vecEx)) / vecCenter.norm());
             
-            if (vecDist[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
+            if (vecCenter[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
             
             fAng = fAng0-fAlpha;
             fAngEnd = fAng0+fAlpha;
