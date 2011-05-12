@@ -26,6 +26,7 @@
 #include "bounding_box.h"
 #include "engine_common.h"
 #include "visuals.h"
+#include "debris_visuals.h"
 
 const double VISUALS_DEFAULT_FREQUENCY = 30.0;
 
@@ -52,6 +53,7 @@ class CVisualsManager : virtual public CGraphicsBase
         bool            initGraphics() const;
                 
         //--- Methods --------------------------------------------------------//
+        void                addVisuals(CDebrisVisuals*);
         VisualsIDType       addVisuals(IVisuals*);
         VisualsIDListType   addVisualsList(const VisualsListType&);
         void                setCamera(CCamera*);
@@ -61,10 +63,11 @@ class CVisualsManager : virtual public CGraphicsBase
 
     private:
 
-        double              m_fFrequency;           ///< Frequency of visuals update
-        int                 m_nVisualisations;      ///< Additional graphical output
-        CKeyMap<IVisuals*>  m_VisualsMap;           ///< Map of visuals and keys
-        CCamera*            m_pCamera;              ///< Camera for player view
+        double                      m_fFrequency;           ///< Frequency of visuals update
+        int                         m_nVisualisations;      ///< Additional graphical output
+        CKeyMap<IVisuals*>          m_VisualsMap;           ///< Map of visuals and keys
+        std::list<CDebrisVisuals*>  m_DebrisVisuals;        ///< List of debris visuals
+        CCamera*                    m_pCamera;              ///< Camera for player view
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -112,6 +115,22 @@ inline bool CVisualsManager::initGraphics() const
 
     METHOD_EXIT("CVisualsManager::getVisualisations")
     return (m_Graphics.init());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add debris visuals to list
+///
+/// \param _pV Debris visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CVisualsManager::addVisuals(CDebrisVisuals* _pDebris)
+{
+    METHOD_ENTRY("CVisualsManager::addVisuals")
+
+    m_DebrisVisuals.push_back(_pDebris);
+
+    METHOD_EXIT("CVisualsManager::addVisuals")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

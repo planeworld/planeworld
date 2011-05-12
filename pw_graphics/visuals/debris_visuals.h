@@ -9,54 +9,48 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       collision_manager.h
-/// \brief      Prototype of class "CCollisionManager"
+/// \file       debris_visuals.h
+/// \brief      Prototype of class "CDebrisVisuals"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2010-04-25
+/// \date       2011-05-10
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COLLISION_MANAGER_H
-#define COLLISION_MANAGER_H
+#ifndef DEBRIS_VISUALS_H
+#define DEBRIS_VISUALS_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "body.h"
+#include "camera.h"
 #include "debris.h"
-#include "planet.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for managing collisions
+/// \brief Class for managing the visualisation of a debris
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CCollisionManager : virtual public CGraphicsBase
+class CDebrisVisuals : public CGraphicsBase
 {
     
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
-//         CCollisionManager();
-//         ~CCollisionManager();
+        CDebrisVisuals(CDebris*);
+        ~CDebrisVisuals();
         
         //--- Constant Methods -----------------------------------------------//
+        void draw(const CCamera* const) const;
                 
         //--- Methods --------------------------------------------------------//
-        void detectCollisions();
-        void setObjectList(const std::list<IObject*>&);
+        void attach(CDebris*);
         
     private:
         
-        void getSurfaceOfInterest();
+        CDebrisVisuals();       ///< Constructor is private
         
-        void test(CBody*, CBody*);
-        void test(CCircle*, CCircle*, CCircle*, CCircle*, CBody*, CBody*);
-        void test(CCircle*, CCircle*, CPolyLine*, CPolyLine*, CBody*, CBody*);
-        void test(CPolyLine*, CPolyLine*, CPolyLine*, CPolyLine*, CBody*, CBody*);
-        
-        std::list<IObject*> m_ObjList;
+        CDebris* m_pDebris;
 
 };
 
@@ -64,18 +58,18 @@ class CCollisionManager : virtual public CGraphicsBase
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Pass list of objects
+/// \brief Attaches a debris to debris visuals
 ///
-/// \param _ObjList List of objects
+/// \param _pDebris Debris to attach
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setObjectList(const std::list<IObject*>& _ObjList)
+inline void CDebrisVisuals::attach(CDebris* _pDebris)
 {
-    METHOD_ENTRY("CCollisionManager::setObjectList")
+    METHOD_ENTRY("CDebrisVisuals::attach")
 
-    m_ObjList = _ObjList;
+    m_pDebris = _pDebris;
 
-    METHOD_EXIT("CCollisionManager::setObjList")
+    METHOD_EXIT("CDebrisVisuals::attach")
 }
 
 #endif

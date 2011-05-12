@@ -30,6 +30,7 @@ INCLUDE_DIRECTORIES (
 SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/circle_visuals.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/planet_visuals.cpp    
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/polyline_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/rectangle_visuals.cpp
@@ -45,6 +46,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/rectangle.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/body.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/debris.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/object.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/pointmass.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/rigidbody.cpp

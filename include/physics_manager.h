@@ -34,6 +34,9 @@ const double PHYSICS_DEFAULT_FREQUENCY = 1000.0;
 /// \brief Class for managing the physics
 ///
 /// This class manages the lists for displaying objects etc.
+///
+/// \todo Create own list for gravity enabled object. This makes computation
+///       faster, especially for debris.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CPhysicsManager
@@ -51,12 +54,13 @@ class CPhysicsManager
         //--- Methods --------------------------------------------------------//
         void setConstantGravitation(const Vector2d&);
         void addGlobalForces();
+        void addDebris(CDebris*);
         void addJoint(IJoint*);
         void addObject(IObject*);
         void addObjects(std::list<IObject*>);
         void collisionDetection();
         void initObjects();
-        void moveMasses();
+        void moveMasses(int);
         
         void accelerateTime();
         void decelerateTime();
@@ -73,6 +77,7 @@ class CPhysicsManager
 
         Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
 
+        std::list<CDebris*> m_DebrisList;           ///< List of debris
         std::list<IJoint*>  m_JointList;            ///< List of joints
         std::list<IObject*> m_ObjList;              ///< List of objects
         

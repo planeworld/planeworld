@@ -61,6 +61,22 @@ CPhysicsManager::~CPhysicsManager()
             DOM_MEMF(DEBUG_MSG("IObject*", "Memory already freed."))
         }
     };
+    
+    for (std::list< CDebris* >::iterator it = m_DebrisList.begin();
+        it != m_DebrisList.end(); ++it)
+    {
+        // Free memory if pointer is still existent
+        if ((*it) != 0)
+        {
+            delete (*it);
+            (*it) = 0;
+            MEM_FREED("CDebris*")
+        }
+        else
+        {
+            DOM_MEMF(DEBUG_MSG("CDebris*", "Memory already freed."))
+        }
+    };
 
     for (std::list< IJoint* >::iterator it = m_JointList.begin();
         it != m_JointList.end(); ++it)
@@ -134,6 +150,24 @@ void CPhysicsManager::addGlobalForces()
     };
 
     METHOD_EXIT("CPhysicsManager::addGlobalForces")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a debris to list
+///
+/// This method adds the given debris object to the list of debris.
+///
+/// \param _pDebris Debris that should be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::addDebris(CDebris* _pDebris)
+{
+    METHOD_ENTRY("CPhysicsManager::addDebris")
+
+    m_DebrisList.push_back(_pDebris);
+
+    METHOD_EXIT("CPhysicsManager::addDebris")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -220,7 +254,7 @@ void CPhysicsManager::collisionDetection()
 /// At the moment, this is just method for testing purposes.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::moveMasses()
+void CPhysicsManager::moveMasses(int nTest)
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
 
@@ -230,6 +264,14 @@ void CPhysicsManager::moveMasses()
         (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel);
         (*ci)->transform();
         (*ci)->clearForces();
+    }
+    if (nTest % 30 == 0)
+    {
+        for (std::list< CDebris* >::const_iterator ci = m_DebrisList.begin();
+            ci != m_DebrisList.end(); ++ci)
+        {
+            (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel*30);
+        }
     }
 
     METHOD_EXIT("CPhysicsManager::moveMasses")

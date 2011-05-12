@@ -54,6 +54,17 @@ CVisualsManager::~CVisualsManager()
             MEM_FREED("IVisuals*");
         }
     }
+    for (std::list<CDebrisVisuals*>::iterator it = m_DebrisVisuals.begin();
+        it != m_DebrisVisuals.end(); ++it)
+    {
+        // Free memory if pointer is still existent
+        if ((*it) != 0)
+        {
+            delete (*it);
+            (*it) = 0;
+            MEM_FREED("CDebrisVisuals*");
+        }
+    }
     
     // Free memory if pointer is still existent
     if (m_pCamera != 0)
@@ -151,7 +162,7 @@ const bool CVisualsManager::getVisualisation(const int& _nVis) const
 void CVisualsManager::drawWorld() const
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
-
+    
     m_pCamera->update();
         
     for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
@@ -170,6 +181,11 @@ void CVisualsManager::drawWorld() const
                 {
                     (*ci)->draw(m_pCamera);
                 }
+    }
+    for (std::list<CDebrisVisuals*>::const_iterator ci = m_DebrisVisuals.begin();
+         ci != m_DebrisVisuals.end(); ++ci)
+    {
+        (*ci)->draw(m_pCamera);
     }
     
     METHOD_EXIT("CVisualsManager::drawWorld")
