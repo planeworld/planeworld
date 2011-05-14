@@ -43,7 +43,6 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/geometry.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/planet.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/polyline.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/random_line.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/rectangle.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/terrain.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
