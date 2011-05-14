@@ -63,6 +63,7 @@ class IObject
         
         const Vector2d              getCOM() const;
         const int                   getDepths() const;
+        const bool                  getDynamicsState() const;
         const bool                  getGravitationState() const;
         const double                getMass() const;
         const std::string           getName() const;
@@ -189,6 +190,21 @@ inline const int IObject::getDepths() const
 
     METHOD_EXIT("IObject::getDepths")
     return (m_nDepthlayers);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the state for dynamics
+///
+/// \return Dynamics state, true=dynamic, false=static
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const bool IObject::getDynamicsState() const
+{
+    METHOD_ENTRY("IObject::getDynamicsState")
+
+    METHOD_EXIT("IObject::getDynamicsState")
+    return (m_bDynamics);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

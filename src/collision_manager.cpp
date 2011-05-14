@@ -30,12 +30,12 @@ void CCollisionManager::detectCollisions()
 
     std::list< IObject* >::const_iterator cj;
     
-    for (std::list< IObject* >::const_iterator ci = m_ObjList.begin();
-        ci != m_ObjList.end(); ++ci)
+    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+        ci != m_DynamicObjects.end(); ++ci)
     {
         cj = ci;
         ++cj;
-        while (cj != m_ObjList.end())
+        while (cj != m_DynamicObjects.end())
         {
             // Test for overlapping depthlayers
             if (((*ci)->getDepths() & (*cj)->getDepths()) > 0)

@@ -79,7 +79,8 @@ class CPhysicsManager
 
         std::list<CDebris*> m_DebrisList;           ///< List of debris
         std::list<IJoint*>  m_JointList;            ///< List of joints
-        std::list<IObject*> m_ObjList;              ///< List of objects
+        std::list<IObject*> m_DynamicObjects;       ///< List of dynamic objects
+        std::list<IObject*> m_StaticObjects;       ///< List of dynamic objects
         
         ContactList         m_ContactList;          ///< List of contacts
 };

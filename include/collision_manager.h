@@ -45,7 +45,8 @@ class CCollisionManager : virtual public CGraphicsBase
                 
         //--- Methods --------------------------------------------------------//
         void detectCollisions();
-        void setObjectList(const std::list<IObject*>&);
+        void setDynamicObjects(const std::list<IObject*>&);
+        void setStaticObjects(const std::list<IObject*>&);
         
     private:
         
@@ -56,7 +57,8 @@ class CCollisionManager : virtual public CGraphicsBase
         void test(CCircle*, CCircle*, CPolyLine*, CPolyLine*, CBody*, CBody*);
         void test(CPolyLine*, CPolyLine*, CPolyLine*, CPolyLine*, CBody*, CBody*);
         
-        std::list<IObject*> m_ObjList;
+        std::list<IObject*> m_DynamicObjects;
+        std::list<IObject*> m_StaticObjects;
 
 };
 
@@ -64,18 +66,34 @@ class CCollisionManager : virtual public CGraphicsBase
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Pass list of objects
+/// \brief Pass list of dynamic objects
 ///
-/// \param _ObjList List of objects
+/// \param _ObjList List of dynamic objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setObjectList(const std::list<IObject*>& _ObjList)
+inline void CCollisionManager::setDynamicObjects(const std::list<IObject*>& _ObjList)
 {
-    METHOD_ENTRY("CCollisionManager::setObjectList")
+    METHOD_ENTRY("CCollisionManager::setDynamicObjects")
 
-    m_ObjList = _ObjList;
+    m_DynamicObjects = _ObjList;
 
-    METHOD_EXIT("CCollisionManager::setObjList")
+    METHOD_EXIT("CCollisionManager::setDynamicObjects")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Pass list of static objects
+///
+/// \param _ObjList List of static objects
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CCollisionManager::setStaticObjects(const std::list<IObject*>& _ObjList)
+{
+    METHOD_ENTRY("CCollisionManager::setStaticObjects")
+
+    m_StaticObjects = _ObjList;
+
+    METHOD_EXIT("CCollisionManager::setStaticObjects")
 }
 
 #endif

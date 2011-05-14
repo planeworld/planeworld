@@ -46,8 +46,24 @@ CPhysicsManager::~CPhysicsManager()
     METHOD_ENTRY("CPhysicsManager::~CPhysicsManager")
     DTOR_CALL("CPhysicsManager::~CPhysicsManager")
 
-    for (std::list< IObject* >::iterator it = m_ObjList.begin();
-        it != m_ObjList.end(); ++it)
+    for (std::list< IObject* >::iterator it = m_DynamicObjects.begin();
+        it != m_DynamicObjects.end(); ++it)
+    {
+        // Free memory if pointer is still existent
+        if ((*it) != 0)
+        {
+            delete (*it);
+            (*it) = 0;
+            MEM_FREED("IObject*")
+        }
+        else
+        {
+            DOM_MEMF(DEBUG_MSG("IObject*", "Memory already freed."))
+        }
+    };
+    
+    for (std::list< IObject* >::iterator it = m_StaticObjects.begin();
+        it != m_StaticObjects.end(); ++it)
     {
         // Free memory if pointer is still existent
         if ((*it) != 0)
@@ -119,15 +135,15 @@ void CPhysicsManager::addGlobalForces()
         (*ci)->react();
     }
 
-    for (std::list< IObject* >::const_iterator ci = m_ObjList.begin();
-        ci != m_ObjList.end(); ++ci)
+    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+        ci != m_DynamicObjects.end(); ++ci)
     {
         cj = ci;
         ++cj;
         
         if ((*ci)->getGravitationState() == true)
         {
-            while (cj != m_ObjList.end())
+            while (cj != m_DynamicObjects.end())
             {
                 vecCC = ((*ci)->getCOM() - (*cj)->getCOM());
                 fCCSqr = vecCC.squaredNorm();
@@ -192,7 +208,8 @@ void CPhysicsManager::addJoint(IJoint* _pJoint)
 ///
 /// \brief Add a object to list
 ///
-/// This method adds the given object to the list of masses. 
+/// This method adds the given object to the list of object, depending on their
+/// dynamics state. 
 ///
 /// \param _pObject Mass that should be added to list
 ///
@@ -201,7 +218,10 @@ void CPhysicsManager::addObject(IObject* _pObject)
 {
     METHOD_ENTRY("CPhysicsManager::addObject")
 
-    m_ObjList.push_back(_pObject);
+    if (_pObject->getDynamicsState())
+        m_DynamicObjects.push_back(_pObject);
+    else
+        m_StaticObjects.push_back(_pObject);
 
     METHOD_EXIT("CPhysicsManager::addObject")
 }
@@ -210,6 +230,9 @@ void CPhysicsManager::addObject(IObject* _pObject)
 ///
 /// \brief Add a list of objects to internal object list
 ///
+/// This method adds the given objects to the list of object, depending on their
+/// dynamics state. 
+///
 /// \param _Objects Objects that should be added to list
 ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -217,9 +240,16 @@ void CPhysicsManager::addObjects(std::list<IObject*> _Objects)
 {
     METHOD_ENTRY("CPhysicsManager::addObjects")
 
-    std::list<IObject*>::iterator it = m_ObjList.end();
-    
-    m_ObjList.splice(it,_Objects);
+    std::list<IObject*>::const_iterator ci = _Objects.begin();
+  
+    while (ci != _Objects.end())
+    {
+        if ((*ci)->getDynamicsState())
+            m_DynamicObjects.push_back((*ci));
+        else
+            m_StaticObjects.push_back((*ci));
+        ++ci;
+    }
 
     METHOD_EXIT("CPhysicsManager::addObjects")
 }
@@ -234,7 +264,8 @@ void CPhysicsManager::collisionDetection()
     METHOD_ENTRY("CPhysicsManager::collisionDetection")
 
 //     m_ContactList.clear();
-    m_CollisionManager.setObjectList(m_ObjList);
+    m_CollisionManager.setDynamicObjects(m_DynamicObjects);
+    m_CollisionManager.setStaticObjects(m_StaticObjects);
     m_CollisionManager.detectCollisions();
     
 //  for (ContactList::const_iterator ci = m_ContactList.begin();
@@ -258,8 +289,8 @@ void CPhysicsManager::moveMasses(int nTest)
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
 
-    for (std::list< IObject* >::const_iterator ci = m_ObjList.begin();
-        ci != m_ObjList.end(); ++ci)
+    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+        ci != m_DynamicObjects.end(); ++ci)
     {
         (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel);
         (*ci)->transform();
@@ -295,8 +326,13 @@ void CPhysicsManager::initObjects()
 
     INFO_MSG("Physics Manager", "Initialising objects.")
 
-    for (std::list< IObject* >::const_iterator ci = m_ObjList.begin();
-        ci != m_ObjList.end(); ++ci)
+    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+        ci != m_DynamicObjects.end(); ++ci)
+    {
+        (*ci)->init();
+    };
+    for (std::list< IObject* >::const_iterator ci = m_StaticObjects.begin();
+        ci != m_StaticObjects.end(); ++ci)
     {
         (*ci)->init();
     };
