@@ -26,8 +26,9 @@
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
 #include "camera.h"
-#include "planet.h"
+#include "planet_visuals.h"
 #include "polyline_visuals.h"
+#include "terrain_visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "QDomNode"
@@ -67,8 +68,10 @@ class CXMLImporter
         bool checkFile(const QDomElement&);
         void createCamera(const QDomNode&);
         void createShapePlanet(CBody* const, const QDomNode&);
+        void createShapeTerrain(CBody* const, const QDomNode&);
         void createShapePolyline(CBody* const, const QDomNode&);
         void createVisualsPlanet(CPlanet* const, const QDomNode&);
+        void createVisualsTerrain(CTerrain* const, const QDomNode&);
         void createVisualsPolyline(CPolyLine* const, const QDomNode&);
         void createRigidBody(const QDomNode&);
         void readObjectCore(IObject* const, const QDomNode&);

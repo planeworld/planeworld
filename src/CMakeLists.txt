@@ -35,6 +35,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/polyline_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/rectangle_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/spring_visuals.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/terrain_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
@@ -44,6 +45,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/polyline.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/random_line.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/rectangle.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/terrain.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/body.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/debris.cpp

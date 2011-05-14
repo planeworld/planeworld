@@ -237,6 +237,10 @@ void CXMLImporter::createRigidBody(const QDomNode& _Node)
             {
                 this->createShapePolyline(pRigidBody, N);
             }
+            else if (strType == "Terrain")
+            {
+                this->createShapeTerrain(pRigidBody, N);
+            }
         }        
         
         N = N.nextSibling();
@@ -346,6 +350,51 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody, const QDomNode& _Nod
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Create a terrain shape
+///
+/// \param _pBody Body to create the shape for
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createShapeTerrain(CBody* const _pBody, const QDomNode& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createShapeTerrain")
+    
+    CTerrain* pTerrain = new CTerrain;
+    MEM_ALLOC("pTerrain")
+    
+    QDomElement E = _Node.toElement();
+    
+    pTerrain->setWidth (E.attribute("width").toDouble());
+    pTerrain->setCenter(E.attribute("center_x").toDouble(),
+                        E.attribute("center_y").toDouble());
+    pTerrain->setHeight(E.attribute("height_max").toDouble());
+    pTerrain->setGroundResolution(E.attribute("ground_resolution").toDouble());
+    pTerrain->init();
+        
+    // The shape might have visuals
+    if (_Node.hasChildNodes())
+    {
+        QDomNode N = _Node.firstChild();
+        while (!N.isNull())
+        {
+            QDomElement E = N.toElement();
+        
+            if (E.tagName() == "visuals")
+            {
+                this->createVisualsTerrain(pTerrain, N);
+            }
+            N = N.nextSibling();
+        }
+    }
+    
+    _pBody->getGeometry().addShape(pTerrain);
+    
+    METHOD_EXIT("CXMLImporter::createShapeTerrain")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Create visuals to a planet shape
 ///
 /// \param _pBody Body to receive visuals ids
@@ -402,6 +451,36 @@ void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const QDom
     }
     
     METHOD_EXIT("CXMLImporter::createVisualsPolyline")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create visuals to a terrain shape
+///
+/// \param _pBody Body to receive visuals ids
+/// \param _pTerrain Terrain to create visuals for
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain, const QDomNode& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createVisualsTerrain")
+    
+    if (!_Node.isNull())
+    {
+        QDomElement E = _Node.toElement();
+        
+        if (E.attribute("type") == "Terrain")
+        {
+            CTerrainVisuals* pTerrainVisuals = new CTerrainVisuals(_pTerrain);
+            MEM_ALLOC("pTerrainVisuals")
+            
+            m_Visuals.push_back(pTerrainVisuals);
+        }
+            
+    }
+    
+    METHOD_EXIT("CXMLImporter::createVisualsTerrain")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
