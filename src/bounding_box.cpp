@@ -37,6 +37,35 @@ CBoundingBox::CBoundingBox()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Tests a vector to be inside of bounding box
+///
+/// \param _vecV Vector to test for being inside of bounding box
+///
+/// \return Is the vector inside?
+///
+///////////////////////////////////////////////////////////////////////////////
+bool CBoundingBox::isInside(const Vector2d& _vecV) const
+{
+    METHOD_ENTRY("CBoundingBox::isInside")
+
+    if ((m_vecLowerLeft[0] <= _vecV[0]) &&
+        (m_vecLowerLeft[1] <= _vecV[1]) &&
+        (m_vecUpperRight[0] >= _vecV[0]) &&
+        (m_vecUpperRight[1] >= _vecV[1])
+       )
+    {
+        METHOD_EXIT("CBoundingBox::isInside")
+        return true;
+    }
+    else
+    {
+        METHOD_EXIT("CBoundingBox::isInside")
+        return false;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Tests two bounding boxes for overlap
 ///
 /// \param _BBox Second bounding box for overlap test

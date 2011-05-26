@@ -49,6 +49,7 @@ class CBoundingBox
         const double    getHeight() const;
         const double    getWidth() const;
         
+        bool isInside(const Vector2d&) const;
         bool overlaps(const CBoundingBox&) const;
 
         //--- Methods --------------------------------------------------------//
