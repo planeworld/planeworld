@@ -128,6 +128,9 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
 /// \brief Update of the bounding box, frame and position
 ///
 /// \todo Replace dynamic cast and catch bad hooks on point masses.
+/// \todo All updates must be made in realtime when getCenter(), getBoundingBox()
+///       and others are called to prevent errors due to higher physics frequency
+///       of hooked object.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CCamera::update()
