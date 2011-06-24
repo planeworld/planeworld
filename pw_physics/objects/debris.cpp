@@ -29,8 +29,10 @@ CDebris::CDebris() : m_fTimeFac(1.0)
     METHOD_ENTRY("CDebris::CDebris")
     CTOR_CALL("CDebris::CDebris")
     
-    m_PosList.resize(DEBRIS_DEFAULT_NUMBER);
-    m_VelList.resize(DEBRIS_DEFAULT_NUMBER);
+    m_PosList.set_capacity(DEBRIS_DEFAULT_NUMBER);
+    m_VelList.set_capacity(DEBRIS_DEFAULT_NUMBER);
+    m_PosListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
+    m_VelListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
     
     METHOD_EXIT("CDebris::CDebris")
 }
@@ -47,16 +49,20 @@ void CDebris::dynamics(const double& _fStep)
 {
     METHOD_ENTRY("CDebris::dynamics")
     
-    std::vector<Vector2d >::iterator it=m_PosList.begin();
-    std::vector<Vector2d >::iterator jt=m_VelList.begin();
+    boost::circular_buffer<Vector2d>::iterator it=m_PosList.begin();
+    boost::circular_buffer<Vector2d>::iterator jt=m_VelList.begin();
+    boost::circular_buffer<Vector2d>::iterator itPrev=m_PosListPrev.begin();
+    boost::circular_buffer<Vector2d>::iterator jtPrev=m_VelListPrev.begin();
     double fStep = _fStep*m_fTimeFac;
     while (it != m_PosList.end())
     {
-        (*jt) += Vector2d(0.0,-9.81)/*Vector2d(double((rand()%2000) - 1000)/100,double((rand()%2000) - 1000)/100)*/ * fStep;
+        (*itPrev) = (*it);
+        (*jtPrev) = (*jt);
+        (*jt) += Vector2d(0.0,-9.81) * fStep;
         (*it) += (*jt) * _fStep;
-        ++it; ++jt;
+        ++it; ++jt; ++itPrev; ++jtPrev;
     }
-            
+
     METHOD_EXIT("CDebris::dynamics")
 }
 
@@ -92,3 +98,23 @@ void CDebris::init()
     METHOD_EXIT("CDebris::init")
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set number of debris
+///
+/// \param _nN Number of debris
+///
+////////////////////////////////////////////////////////////////////////////////
+void CDebris::setNumber(const int& _nN)
+{
+    METHOD_ENTRY("CDebris::setNumber")
+
+    m_PosList.set_capacity(_nN);
+    m_PosListPrev.resize(_nN);
+    for (int i=0; i<m_PosList.capacity();++i)
+        m_PosList.push_back(Vector2d((rand()%20000000) - 10000000,(rand()%20000000)+10000000)/100000);
+    m_VelList.resize(_nN);
+    m_VelListPrev.resize(_nN);
+
+    METHOD_EXIT("CDebris::setNumber")
+}

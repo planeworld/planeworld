@@ -23,6 +23,8 @@
 ///
 /// \brief Tests objects for collisions, depending on broad phase
 ///
+/// \todo Implement RTTI for object->body casting
+///
 ///////////////////////////////////////////////////////////////////////////////
 void CCollisionManager::detectCollisions()
 {
@@ -59,7 +61,198 @@ void CCollisionManager::detectCollisions()
 //         m_Graphics.setColor(1.0, 1.0, 1.0);
     }
     
+    for (std::list< IObject* >::const_iterator ci = m_StaticObjects.begin();
+        ci != m_StaticObjects.end(); ++ci)
+    {
+        for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
+            cj != m_Debris.end(); ++cj)
+        {
+            this->test(static_cast<CBody*>((*ci)), (*cj));
+        }
+    }
+    
     METHOD_EXIT("CCollisionManager::detectCollisions")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests object against debris
+///
+/// \param _p1 Object
+/// \param _p2 Debris
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCollisionManager::test(CBody* _p1, CDebris* _p2)
+{
+    METHOD_ENTRY("CCollisionManager::test")
+    
+    std::list<IShape*>::const_iterator ci  = _p1->getGeometry().getShapes().begin();
+    
+    while (ci != _p1->getGeometry().getShapes().end())
+    {
+        switch((*ci)->getShapeType())
+        {
+            case SHAPE_TERRAIN:
+                this->test(static_cast<CTerrain*>((*ci)),_p2);
+        }
+        ++ci;
+    }
+    
+    METHOD_EXIT("CCollisionManager::test")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests terrain shape against debris
+///
+/// The test of current debris position with the object's bounding box does not
+/// prevent tunneling. Debris is meant to be a less accurate but fast and
+/// physically plausible particle class.
+///
+/// \todo Build temporary bounding box for moving debris to have a correct
+///       broad phase detection.
+///
+/// \param _p1 Terrain shape
+/// \param _p2 Debris
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
+{
+    METHOD_ENTRY("CCollisionManager::test")
+    
+    boost::circular_buffer<Vector2d>* pPositions (_p2->getPositions());
+    boost::circular_buffer<Vector2d>* pVelocities(_p2->getVelocities());
+    boost::circular_buffer<Vector2d>* pPreviousPositions (_p2->getPreviousPositions());
+    boost::circular_buffer<Vector2d>* pPreviousVelocities(_p2->getPreviousVelocities());
+    boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
+    boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
+    boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
+    boost::circular_buffer<Vector2d>::iterator itVelP = pPreviousVelocities->begin();
+    
+    double fInc = _p1->getGroundResolution();
+    double fTerrainZeroOffset = -_p1->getCenter()[0]+_p1->getWidth()*0.5;
+        
+    while (itPos != pPositions->end())
+    {
+        // Simple broad phase collision detection, does _not_ prevent tunneling
+        if (_p1->getBoundingBox().isInside((*itPos)))
+        {
+            Vector2d vecPOC;
+            double fT = 2.0;
+            
+            double fTerrainLeft  =  -fTerrainZeroOffset;
+            double fTerrainRight =  -fTerrainZeroOffset + _p1->getWidth();
+            double fDebrisLeft;
+            double fDebrisRight;
+            if ((*itPos)[0] < ((*itPosP)[0]))
+            {
+                fDebrisLeft  = (*itPos )[0];
+                fDebrisRight = (*itPosP)[0];
+            }
+            else
+            {
+                fDebrisLeft  = (*itPosP)[0];
+                fDebrisRight = (*itPos )[0];
+            }
+            
+            if (fDebrisLeft > fTerrainLeft)
+                fTerrainLeft = fDebrisLeft;
+            if (fDebrisRight < fTerrainRight)
+                fTerrainRight = fDebrisRight;
+                
+            double fX0 = fTerrainLeft;
+            double fX1 = fTerrainLeft+fInc;
+            
+            double fY0 = _p1->getSurface(fX0);
+            double fY1 = _p1->getSurface(fX1);
+                         
+            double fX0Seg = fX0;
+            double fX1Seg = fX1;
+            double fY0Seg = fY0;
+            double fY1Seg = fY1;
+
+            while ( fX0 <= fTerrainRight)
+            {
+                double fAx = fX0 - (*itPosP)[0];
+                double fAy = fY0 - (*itPosP)[1];
+                double fBx = fX1 - fX0;
+                double fBy = fY1 - fY0;
+                double fCx = ((*itPos) - (*itPosP))[0];
+                double fCy = ((*itPos) - (*itPosP))[1];
+
+                double fTmpA = fBx*fCy-fBy*fCx;
+                double fTmpB = fAx*fCy-fAy*fCx;
+                 
+                double fAlpha = -fTmpB / fTmpA;
+                
+                double fTmpT = -1.0;
+                if ((fAlpha >= 0.0) && (fAlpha <= 1.0))
+                {
+                    if (fCx != 0.0)
+                    {
+                        fTmpT = (fAx+fAlpha*fBx) / (fCx);
+                        if ((fTmpT >= 0.0) && (fTmpT < fT))
+                        {
+                            fT = fTmpT;
+                            
+                            vecPOC[0] = fX0 + fAlpha * (fX1-fX0);
+                            vecPOC[1] = fY0 + fAlpha * (fY1-fY0);
+                            fX0Seg = fX0;
+                            fX1Seg = fX1;
+                            fY0Seg = fY0;
+                            fY1Seg = fY1;
+                        }
+                    }
+                    else if (fCy != 0.0)
+                    {
+                        fTmpT = (fAy+fAlpha*fBy) / (fCy);
+                        if ((fTmpT >= 0.0) && (fTmpT < fT))
+                        {
+                            fT = fTmpT;
+                            
+                            vecPOC[0] = fX0 + fAlpha * (fX1-fX0);
+                            vecPOC[1] = fY0 + fAlpha * (fY1-fY0);
+                            fX0Seg = fX0;
+                            fX1Seg = fX1;
+                            fY0Seg = fY0;
+                            fY1Seg = fY1;
+                        }
+                    }
+                }
+                
+                fX0 =  fX1;
+                fX1 += fInc;
+                fY0 = fY1;
+                fY1 = _p1->getSurface(fX1);
+            }
+            if (fT<=1.0)
+            {
+                double fSegAngle = std::atan2(fY1Seg-fY0Seg, fX1Seg-fX0Seg);
+                double fPosAngle = std::atan2((*itPos)[1]-(*itPosP)[1], (*itPos)[0]-(*itPosP)[0]);
+                
+                Vector2d vecNewVelOrth;
+                Vector2d vecNewVelTang;
+                
+                vecNewVelTang = Vector2d(std::cos(fSegAngle),
+                                         std::sin(fSegAngle));
+                vecNewVelOrth = Vector2d(std::cos(fSegAngle+M_PI*0.5),
+                                         std::sin(fSegAngle+M_PI*0.5));
+                
+                double fTang = std::cos(fSegAngle-fPosAngle)*1.0;
+                double fOrth = std::sin(fSegAngle-fPosAngle)*0.0;
+                double fDamping = sqrt(fTang*fTang+fOrth*fOrth);
+                
+                (*itVel)[0] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * (*itVel).norm())[0];
+                (*itVel)[1] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * (*itVel).norm())[1];
+                (*itVelP)=(*itVel);
+                (*itPos)=vecPOC;
+//                 (*itPosP)=vecPOC;//+((*itPosP)-vecPOC)*1.0e-100;
+            }
+        }
+        ++itPos; ++itVel; ++itPosP; ++itVelP;
+    }
+        
+    METHOD_EXIT("CCollisionManager::test")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -760,6 +953,8 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
                 double fTmpT = -1.0;
                 if ((fAlpha >= 0.0) && (fAlpha <= 1.0))
                 {
+                    /// \todo Optimise here and add similar code segments!
+                    /// \todo Implement cases for fCx=0!
                     if (fCx != 0.0)
                         fTmpT = (fAx+fAlpha*fBx) / (fCx);
                     if ((fTmpT >= 0.0) && (fTmpT < fT))

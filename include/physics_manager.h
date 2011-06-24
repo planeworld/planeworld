@@ -27,7 +27,7 @@
 #include "collision_manager.h"
 #include "joint.h"
 
-const double PHYSICS_DEFAULT_FREQUENCY = 1000.0;
+const double PHYSICS_DEFAULT_FREQUENCY = 60.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -37,6 +37,8 @@ const double PHYSICS_DEFAULT_FREQUENCY = 1000.0;
 ///
 /// \todo Create own list for gravity enabled object. This makes computation
 ///       faster, especially for debris.
+/// \todo Implement methods to move dynamic/static objects between lists to
+///       allow online state change.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CPhysicsManager
@@ -77,10 +79,10 @@ class CPhysicsManager
 
         Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
 
-        std::list<CDebris*> m_DebrisList;           ///< List of debris
+        std::list<CDebris*> m_Debris;               ///< List of debris
         std::list<IJoint*>  m_JointList;            ///< List of joints
         std::list<IObject*> m_DynamicObjects;       ///< List of dynamic objects
-        std::list<IObject*> m_StaticObjects;       ///< List of dynamic objects
+        std::list<IObject*> m_StaticObjects;        ///< List of static objects
         
         ContactList         m_ContactList;          ///< List of contacts
 };

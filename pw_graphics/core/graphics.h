@@ -27,6 +27,7 @@
 #include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
+#include <boost/circular_buffer.hpp>
 #include "eigen2/Eigen/Core"
 #include "eigen2/Eigen/Geometry"
 #include "GL/gl.h"
@@ -137,6 +138,7 @@ class CGraphics
         void circle(const Vector2d&, const double&) const;
         void dot(const Vector2d&) const;
         void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
+        void dots(boost::circular_buffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void filledRect(const Vector2d&, const Vector2d&) const;
         void polyline(const std::list<Vector2d>&, const LineType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void rect(const Vector2d&, const Vector2d&) const;

@@ -26,10 +26,14 @@
 #include "body.h"
 #include "debris.h"
 #include "planet.h"
+#include "terrain.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing collisions
+///
+/// \todo Pass pointers to lists instead of references, now at least the list
+///       structure is copied.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CCollisionManager : virtual public CGraphicsBase
@@ -45,6 +49,7 @@ class CCollisionManager : virtual public CGraphicsBase
                 
         //--- Methods --------------------------------------------------------//
         void detectCollisions();
+        void setDebris(const std::list<CDebris*>&);
         void setDynamicObjects(const std::list<IObject*>&);
         void setStaticObjects(const std::list<IObject*>&);
         
@@ -53,16 +58,34 @@ class CCollisionManager : virtual public CGraphicsBase
         void getSurfaceOfInterest();
         
         void test(CBody*, CBody*);
+        void test(CBody*, CDebris*);
+        void test(CTerrain*, CDebris*);
         void test(CCircle*, CCircle*, CCircle*, CCircle*, CBody*, CBody*);
         void test(CCircle*, CCircle*, CPolyLine*, CPolyLine*, CBody*, CBody*);
         void test(CPolyLine*, CPolyLine*, CPolyLine*, CPolyLine*, CBody*, CBody*);
         
+        std::list<CDebris*> m_Debris;
         std::list<IObject*> m_DynamicObjects;
         std::list<IObject*> m_StaticObjects;
-
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Pass list of debris, which are always dynamic
+///
+/// \param _DebrisList List of debris
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CCollisionManager::setDebris(const std::list<CDebris*>& _DebrisList)
+{
+    METHOD_ENTRY("CCollisionManager::setDebris")
+
+    m_Debris = _DebrisList;
+
+    METHOD_EXIT("CCollisionManager::setDebris")
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

@@ -14,16 +14,18 @@
       name="Terrain"
       mass="1.0"
       origin_x="0.0"
-      origin_y="0.0"
+      origin_y="50.0"
       dynamics="false"
       gravity="false"
     />
     <shape type="Terrain"
-      width="3.0e6"
+      width="3.0e4"
       height_max="100.0"
       ground_resolution="0.1"
+      diversity="5.0"
+      transition="0.2"
       center_x="0.0"
-      center_y="0.0">
+      center_y="100.0">
       <visuals type="Terrain"/>
     </shape>
   </object>

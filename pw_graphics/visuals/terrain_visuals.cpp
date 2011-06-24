@@ -60,66 +60,44 @@ void CTerrainVisuals::draw(const CCamera* const _pCamera) const
 
     double   fWidth    = m_pTerrain->getWidth();
     double   fHeight   = m_pTerrain->getHeight();
-    double   fPAng     = m_pTerrain->getAngle();
-    int      nSeed     = m_pTerrain->getSeed();
-    double   fSmooth   = m_pTerrain->getSmoothness();
-    Vector2d vecCenter = m_pTerrain->getCenter()-_pCamera->getCenter();
+    Vector2d vecCenter = m_pTerrain->getCenter();
     
+    double      fLeft0  = -fWidth*0.5+vecCenter[0];    
+    double      fRight0 =  fWidth*0.5+vecCenter[0];
+    double      fLeft   = fLeft0;    
+    double      fRight  = fRight0;
     
-        Vector2d    vecEx(1.0, 0.0);
-        double      fLeft  = -fWidth*0.5+vecCenter[0];    
-        double      fRight =  fWidth*0.5+vecCenter[0];
-        
-        if (_pCamera->getBoundingBox().getLowerLeft()[0]-_pCamera->getCenter()[0] > fLeft)
-            fLeft = _pCamera->getBoundingBox().getLowerLeft()[0]-_pCamera->getCenter()[0];
-        if (_pCamera->getBoundingBox().getUpperRight()[0]-_pCamera->getCenter()[0] < fRight)
-            fRight = _pCamera->getBoundingBox().getUpperRight()[0]-_pCamera->getCenter()[0];
-//         double fAlpha = fabs(std::asin(_pCamera->getBoundingBox() / vecDist.norm()));
-//         if (isnan(fAlpha))
-//         {
-//             fAng = 0.0;
-//             fAngEnd = 2.0*M_PI;
-//             LineT = GRAPHICS_LINETYPE_LOOP;
-//         }
-//         else
-//         {
-//             double fAng0 = std::acos((- vecDist.dot(vecEx)) / vecDist.norm());
-//             
-//             if (vecDist[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
-//             
-//             fAng = fAng0-fAlpha;
-//             fAngEnd = fAng0+fAlpha;
-//             LineT = GRAPHICS_LINETYPE_STRIP;
-//         }
+    if (_pCamera->getBoundingBox().getLowerLeft()[0] > fLeft)
+        fLeft = _pCamera->getBoundingBox().getLowerLeft()[0];
+    if (_pCamera->getBoundingBox().getUpperRight()[0] < fRight)
+        fRight = _pCamera->getBoundingBox().getUpperRight()[0];
 
-        double fInc = m_pTerrain->getGroundResolution();
+    double fInc = m_pTerrain->getGroundResolution();
+    
+    // Subsample terrain surface when zooming out.
+    if (_pCamera->getZoom()*m_pTerrain->getGroundResolution() <= 1.0)
+        fInc /= _pCamera->getZoom()*m_pTerrain->getGroundResolution();
+    
+    if (fLeft  < fLeft0)  fLeft  = fLeft0;
+    if (fRight > fRight0) fRight = fRight0;
+    
+    // It is very important to do camera positioning after clipping. Otherwise,
+    // camera movement would also be clipped and thus quantized.
+    fLeft  -= _pCamera->getCenter()[0];
+    fRight -= _pCamera->getCenter()[0];
+    
+    m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
+    
+    while ( fLeft <= fRight)
+    {
+        double fHght = m_pTerrain->getSurface(fLeft+_pCamera->getCenter()[0])-_pCamera->getCenter()[1];
         
-        // Subsample terrain surface when zooming out.
-        if (_pCamera->getZoom()*m_pTerrain->getGroundResolution() <= 1.0)
-            fInc /= _pCamera->getZoom()*m_pTerrain->getGroundResolution();
-        
-        // Snap start and end to ground resolution grid to avoid flickering.
-        // If angle is started at arbitrary position, aliasing causes flickering when zooming
-        // or moving, since height is always sampled at different positions.
-        fLeft  -= ((fLeft /fInc)-floor(fLeft /fInc))*fInc;
-        fRight += ((fRight/fInc)-floor(fRight/fInc))*fInc;
-        
-//         if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
-               
-        m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
-        
-        double fX = fLeft;
+        m_Graphics.addVertex(Vector2d(fLeft,fHght));
 
-        while ( fX <= fRight)
-        {
-            double fHght = m_pTerrain->getSurface().GetValue(fX-vecCenter[0],0.0,0.0);
-            
-            m_Graphics.addVertex(Vector2d(fX,vecCenter[1]+fHght*fHeight));
+        fLeft += fInc;
+    }
 
-            fX += fInc;
-        }
-
-        m_Graphics.endLine();
+    m_Graphics.endLine();
 
     METHOD_EXIT("CTerrainVisuals::draw()");
 }

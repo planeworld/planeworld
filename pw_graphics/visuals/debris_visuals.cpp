@@ -61,7 +61,7 @@ void CDebrisVisuals::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CDebrisVisuals::draw()");
 
-    m_Graphics.dots(m_pDebris->getPositions(),-_pCamera->getCenter());
+    m_Graphics.dots((*m_pDebris->getPositions()),-_pCamera->getCenter());
     
     METHOD_EXIT("CDebrisVisuals::draw()");
 }

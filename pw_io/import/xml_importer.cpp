@@ -369,8 +369,8 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody, const QDomNode& _Node
     pTerrain->setCenter(E.attribute("center_x").toDouble(),
                         E.attribute("center_y").toDouble());
     pTerrain->setHeight(E.attribute("height_max").toDouble());
+    pTerrain->setDiversity(E.attribute("diversity").toDouble());
     pTerrain->setGroundResolution(E.attribute("ground_resolution").toDouble());
-    pTerrain->init();
         
     // The shape might have visuals
     if (_Node.hasChildNodes())

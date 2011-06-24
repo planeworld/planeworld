@@ -28,12 +28,10 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "debris_visuals.h"
 #include "engine_manager.h"
-#include "planet.h"
-#include "planet_visuals.h"
 #include "pointmass.h"
 #include "xml_importer.h"
-#include "random_line.h"
 #include "rectangle_visuals.h"
 #include "rigidbody.h"
 #include "spring_visuals.h"
@@ -82,13 +80,14 @@ int main(int argc, char *argv[])
     CCamera*            pCamera;
     CCircle*            pCircle;
     CCircleVisuals*     pCircleVisuals;
+    CDebris*            pDebris;
+    CDebrisVisuals*     pDebrisVisuals;
 //     CPointMass*         pPointMass;
     CRigidBody*         pPointMass;
     CPlanet*            pPlanet;
     CPlanetVisuals*     pPlanetVisuals;
     CPolyLine*          pPolyLine;
     CPolylineVisuals*   pPolylineVisuals;
-    CRandomLine*        pRandomLine;
     CRectangle*         pRect;
     CRectangleVisuals*  pRectVisuals;
     CRigidBody*         pBody1;
@@ -105,8 +104,6 @@ int main(int argc, char *argv[])
     CSpring*            pSpring;
     CSpringVisuals*     pSpringVisuals;
     
-    CXMLImporter        XMLImporter;
-
     long nX;
     long nY;
     srand(SDL_GetTicks());
@@ -155,7 +152,7 @@ int main(int argc, char *argv[])
         test << "PointMass_" << i;
         pPointMass->setName(test.str());
 
-//         pPointMass->disableGravitation();
+        pPointMass->disableGravitation();
 //         pPointMass->disableDynamics();
 //         pPointMass->setTimeFac(1e-10);
         pPointMass->setDepths(SHAPE_DEPTH_ALL);
@@ -193,6 +190,16 @@ int main(int argc, char *argv[])
 //         pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
         pPhysicsManager->addObject(pPointMass);
     }
+
+    //--- Initialize Debris -------------------------------------------------//
+    pDebris = new CDebris;
+    MEM_ALLOC("pDebris")
+    pDebrisVisuals = new CDebrisVisuals(pDebris);
+    MEM_ALLOC("pDebrisVisuals")
+
+    pDebris->setNumber(20000);
+    pVisualsManager->addVisuals(pDebrisVisuals);
+    pPhysicsManager->addDebris(pDebris);
 
     //--- Initialize Rigidbody ----------------------------------------------//
     pBody1 = new CRigidBody;
@@ -256,13 +263,6 @@ int main(int argc, char *argv[])
     pBody2->getGeometry().addShape(pPolyLine);
     pPolyLine->setVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
 
-//  pRandomLine = new CRandomLine;
-//  MEM_ALLOC("pRandomLine")
-//  pRandomLine->init(-160.0, 160.0, -100.0, -100.0, 0.8, 6, 4);
-//  pRandomLine->setDepths(SHAPE_DEPTH_1);
-// 
-//  pBody2->getGeometry().addShape(pRandomLine);
-
     pRect = new CRectangle();
     MEM_ALLOC("pRectangle")
     pRectVisuals = new CRectangleVisuals(pRect);
@@ -302,13 +302,20 @@ int main(int argc, char *argv[])
 
     pPhysicsManager->addObject(pBody3);
     
-    //--- Initialise Rigidbody ----------------------------------------------//
-    XMLImporter.import(argv[1]);
-    pVisualsManager->setCamera(XMLImporter.getCamera());
-    pPhysicsManager->addObjects(XMLImporter.getObjects());
-    pVisualsManager->addVisualsList(XMLImporter.getVisuals());
-    
-    pCamera=XMLImporter.getCamera();
+    //--- Import from xml file ----------------------------------------------//
+    {
+        // XML-Importer is initialised in its own scope to free memory after
+        // objects are handed over to managers. However, this only applies for
+        // the list structure of pointers.
+        CXMLImporter        XMLImporter;
+        
+        XMLImporter.import(argv[1]);
+        pVisualsManager->setCamera(XMLImporter.getCamera());
+        pPhysicsManager->addObjects(XMLImporter.getObjects());
+        pVisualsManager->addVisualsList(XMLImporter.getVisuals());
+        
+        pCamera=XMLImporter.getCamera();
+    }
             
     //--- Initialise Rigidbody ----------------------------------------------//
     pMoon = new CRigidBody;
@@ -348,7 +355,7 @@ int main(int argc, char *argv[])
     pSun->setOrigin(Vector2d(0.0, 149.6e9+6378.27e3));
 //     pSun->setTimeFac(1e5);
 //     pSun->disableGravitation();
-    pSun->disableDynamics();
+//     pSun->disableDynamics();
     pSun->setName("Sun");
     
     pCircle = new CCircle();

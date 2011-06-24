@@ -575,7 +575,47 @@ void CGraphics::dots(const std::vector<Vector2d>& _Dots,
     
     std::vector<Vector2d>::const_iterator ci = _Dots.begin();
 
+    glPointSize(2.0);
+    glBegin(GL_POINTS);
+        if (_vecOffset.isZero())
+        {
+            while (ci != _Dots.end())
+            {
+                glVertex3d( (*ci)[0], (*ci)[1], -10.0);
+                ++ci;
+            }
+        }
+        else
+        {
+            while (ci != _Dots.end())
+            {
+                glVertex3d( (*ci)[0]+_vecOffset[0], (*ci)[1]+_vecOffset[1], -10.0);
+                ++ci;
+            }
+        }   
+    glEnd();
     glPointSize(1.0);
+
+    METHOD_EXIT("CGraphics::dots")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw dots
+///
+/// \param _Dots List of dots to be drawn
+/// \param _vecOffset Offset for drawing, used e.g. when existing list should
+///                   be shifted.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::dots(boost::circular_buffer<Vector2d>& _Dots,
+                     const Vector2d& _vecOffset) const
+{
+    METHOD_ENTRY("CGraphics::dots")
+    
+    boost::circular_buffer<Vector2d>::const_iterator ci = _Dots.begin();
+
+    glPointSize(2.0);
     glBegin(GL_POINTS);
         if (_vecOffset.isZero())
         {

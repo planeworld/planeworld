@@ -78,8 +78,8 @@ CPhysicsManager::~CPhysicsManager()
         }
     };
     
-    for (std::list< CDebris* >::iterator it = m_DebrisList.begin();
-        it != m_DebrisList.end(); ++it)
+    for (std::list< CDebris* >::iterator it = m_Debris.begin();
+        it != m_Debris.end(); ++it)
     {
         // Free memory if pointer is still existent
         if ((*it) != 0)
@@ -181,7 +181,7 @@ void CPhysicsManager::addDebris(CDebris* _pDebris)
 {
     METHOD_ENTRY("CPhysicsManager::addDebris")
 
-    m_DebrisList.push_back(_pDebris);
+    m_Debris.push_back(_pDebris);
 
     METHOD_EXIT("CPhysicsManager::addDebris")
 }
@@ -264,6 +264,7 @@ void CPhysicsManager::collisionDetection()
     METHOD_ENTRY("CPhysicsManager::collisionDetection")
 
 //     m_ContactList.clear();
+    m_CollisionManager.setDebris(m_Debris);
     m_CollisionManager.setDynamicObjects(m_DynamicObjects);
     m_CollisionManager.setStaticObjects(m_StaticObjects);
     m_CollisionManager.detectCollisions();
@@ -296,12 +297,12 @@ void CPhysicsManager::moveMasses(int nTest)
         (*ci)->transform();
         (*ci)->clearForces();
     }
-    if (nTest % 30 == 0)
+//     if (nTest % 30 == 0)
     {
-        for (std::list< CDebris* >::const_iterator ci = m_DebrisList.begin();
-            ci != m_DebrisList.end(); ++ci)
+        for (std::list< CDebris* >::const_iterator ci = m_Debris.begin();
+            ci != m_Debris.end(); ++ci)
         {
-            (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel*30);
+            (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel);
         }
     }
 

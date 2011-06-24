@@ -46,11 +46,12 @@ class CTerrain : public IShape
         //--- Constant Methods -----------------------------------------------//
         const double&                   getAngle() const;
         const Vector2d&                 getCenter() const;
+        const double&                   getDiversity() const;
         const double&                   getGroundResolution() const;
         const double&                   getHeight() const;
         const int&                      getSeed() const;
         const double&                   getSmoothness() const;
-        const noise::module::Select&    getSurface() const;
+        const double&                   getSurface(const double&) const;
         const double&                   getWidth() const;
         
         const ShapeType                 getShapeType() const;
@@ -60,18 +61,21 @@ class CTerrain : public IShape
         
         void setCenter(const Vector2d&);
         void setCenter(const double&, const double&);
+        void setDiversity(const double&);
         void setGroundResolution(const double&);
         void setHeight(const double&);
         void setSeed(const int&);
         void setSmoothness(const double&);
         void setWidth(const double&);
-        
+                
         void transform(const double&, const Vector2d&);
                         
     protected:
 
+        std::vector<double> m_Cache;                  ///< Cached surface of terrain
         Vector2d            m_vecCenter;                ///< Center of terrain
         Vector2d            m_vecCenter0;               ///< Initial center of terrain
+        double              m_fDiversity;               ///< Diversity of terrain
         double              m_fAngle;                   ///< Angle, just for optical reasons
         double              m_fGroundResolution;        ///< Ground resolution in m
         double              m_fHeightMax;               ///< Maximum height of terrain
@@ -79,11 +83,6 @@ class CTerrain : public IShape
         double              m_fWidth;                   ///< Width of terrain
         int                 m_nSeed;                    ///< Unique seed for terrain generation
         
-        noise::module::Select      m_Surface;           ///< Final surface noise function
-        noise::module::RidgedMulti m_MountainTerrain;   ///< Main mountain
-        noise::module::Billow      m_BaseFlatTerrain;   ///< Base terrain
-        noise::module::ScaleBias   m_FlatTerrain;       ///< Base terrain scaler
-        noise::module::Perlin      m_TerrainType;       ///< Terrain type decision function
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -116,6 +115,24 @@ inline const Vector2d& CTerrain::getCenter() const
 
     METHOD_EXIT("CTerrain::getCenter")
     return m_vecCenter;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the diversity value of the terrain
+///
+/// The diversity represents the frequency of terrain changes reffering to width
+/// of terrain.
+///
+/// \return Diversity (frequency of terrain changes)
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CTerrain::getDiversity() const
+{
+    METHOD_ENTRY("CTerrain::getDiversity")
+
+    METHOD_EXIT("CTerrain::getDiversity")
+    return m_fDiversity;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,21 +200,6 @@ inline const double& CTerrain::getSmoothness() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return surface noise module of the terrain
-///
-/// \return Surface noise module
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const noise::module::Select& CTerrain::getSurface() const
-{
-    METHOD_ENTRY("CTerrain::getSmoothness")
-
-    METHOD_EXIT("CTerrain::getSmoothness")
-    return m_Surface;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Return the width of terrains
 ///
 /// \return Width
@@ -224,6 +226,25 @@ inline const ShapeType CTerrain::getShapeType() const
 
     METHOD_EXIT("CTerrain::getShapeType")
     return SHAPE_TERRAIN;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the diversity value of the terrain
+///
+/// The diversity represents the frequency of terrain changes reffering to width
+/// of terrain.
+///
+/// \param _fDiversity Diversity (frequency of terrain changes)
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CTerrain::setDiversity(const double& _fDiversity)
+{
+    METHOD_ENTRY("CTerrain::setDiversity")
+
+    m_fDiversity = _fDiversity;
+
+    METHOD_EXIT("CTerrain::setDiversity")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

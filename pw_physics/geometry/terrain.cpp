@@ -27,42 +27,19 @@
 /// dimensions and landscape.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CTerrain::CTerrain() : m_fAngle(0.0),
-                     m_fHeightMax(100.0),
-                     m_fSmoothness(1.0),
-                     m_fGroundResolution(1.0),
-                     m_fWidth(200.0),
-                     m_nSeed(2)
+CTerrain::CTerrain() :  m_fDiversity(1.0),
+                        m_fAngle(0.0),
+                        m_fHeightMax(100.0),
+                        m_fSmoothness(1.0),
+                        m_fGroundResolution(1.0),
+                        m_fWidth(200.0),
+                        m_nSeed(2)
 {
     METHOD_ENTRY("CTerrain::CTerrain()");
     CTOR_CALL("CTerrain::CTerrain()");
     
     m_vecCenter0.setZero();
-    
-    m_MountainTerrain.SetFrequency(0.000025);
-    m_MountainTerrain.SetLacunarity(1.9737346);
-    m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    m_MountainTerrain.SetOctaveCount(16);
-    
-    m_BaseFlatTerrain.SetFrequency(0.00001);
-    m_BaseFlatTerrain.SetLacunarity(1.793947);
-    m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    
-    m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
-    m_FlatTerrain.SetScale(0.25);
-    m_FlatTerrain.SetBias(-0.75);
-    
-    m_TerrainType.SetFrequency (0.000001);
-    m_TerrainType.SetPersistence (0.25);
-    m_TerrainType.SetLacunarity(2.12358986);
-    m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
-
-    m_Surface.SetSourceModule(0,m_FlatTerrain);
-    m_Surface.SetSourceModule(1,m_MountainTerrain);
-    m_Surface.SetControlModule(m_TerrainType);
-    m_Surface.SetBounds(0.0,100.0);
-    m_Surface.SetEdgeFalloff(0.25);
-    
+        
     METHOD_EXIT("CTerrain::CTerrain()")
 }
 
@@ -79,6 +56,25 @@ CTerrain::~CTerrain()
     METHOD_EXIT("CTerrain::~CTerrain")
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return surface value for given point in world coordinates
+///
+/// \param _fX Point to get height from (world coordinates)
+///
+/// \return Surface noise module
+///
+////////////////////////////////////////////////////////////////////////////////
+const double& CTerrain::getSurface(const double& _fX) const
+{
+    METHOD_ENTRY("CTerrain::getSurface")
+    
+    int nX = static_cast<int>((_fX+m_fWidth*0.5-m_vecCenter[0])/m_fGroundResolution);
+
+    METHOD_EXIT("CTerrain::getSurface")
+    return m_Cache[nX];
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Initialises the terrain
@@ -91,47 +87,64 @@ void CTerrain::init()
 {
     METHOD_ENTRY("CTerrain::init")
     
+    noise::module::Select      Surface;           ///< Final surface noise function
+    noise::module::RidgedMulti MountainTerrain;   ///< Main mountain
+    noise::module::Billow      BaseFlatTerrain;   ///< Base terrain
+    noise::module::ScaleBias   FlatTerrain;       ///< Base terrain scaler
+    noise::module::Perlin      TerrainType;       ///< Terrain type decision function
+    
     double fNrOfPoints = m_fWidth / m_fGroundResolution;
     double fNrOfMountains = m_fWidth / m_fHeightMax *2.0;
     
     double fMinF = fNrOfMountains/fNrOfPoints;
-    double fMaxF = 1.0;
+    double fMaxF = 0.5;
     
     int nMaxOctave = log2(fMaxF/fMinF)+1;
     if (nMaxOctave < 1) nMaxOctave = 1;
     
     INFO_MSG("Terrain", "Generating Terrain (Mountains)")
-    DOM_VAR(INFO_MSG("Terrain", "Number of Mountains: " << fNrOfMountains))
-    DOM_VAR(INFO_MSG("Terrain", "Number of Points:    " << fNrOfPoints))
-    DOM_VAR(INFO_MSG("Terrain", "Minimum Frequency:   " << fMinF))
-    DOM_VAR(INFO_MSG("Terrain", "Maximum Frequency:   " << fMaxF))
-    DOM_VAR(INFO_MSG("Terrain", "Maximum Octaves:     " << nMaxOctave))
+    DOM_VAR(DEBUG_MSG("Terrain", "Number of Mountains: " << fNrOfMountains))
+    DOM_VAR(DEBUG_MSG("Terrain", "Number of Points:    " << fNrOfPoints))
+    DOM_VAR(DEBUG_MSG("Terrain", "Minimum Frequency:   " << fMinF))
+    DOM_VAR(DEBUG_MSG("Terrain", "Maximum Frequency:   " << fMaxF))
+    DOM_VAR(DEBUG_MSG("Terrain", "Maximum Octaves:     " << nMaxOctave))
 
-    m_MountainTerrain.SetFrequency(fMinF);
-    m_MountainTerrain.SetLacunarity(1.937);
-    m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    m_MountainTerrain.SetOctaveCount(nMaxOctave);
+    MountainTerrain.SetFrequency(fMinF);
+    MountainTerrain.SetLacunarity(1.937);
+    MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
+    MountainTerrain.SetOctaveCount(nMaxOctave);
     
-    m_BaseFlatTerrain.SetFrequency(fMinF/*0.5*12/(2.0*M_PI*m_fRadius)*/);
-    m_BaseFlatTerrain.SetLacunarity(1.93947);
-    m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    m_BaseFlatTerrain.SetOctaveCount(nMaxOctave);
-    m_BaseFlatTerrain.SetPersistence(0.5);
+    BaseFlatTerrain.SetFrequency(fMinF);
+    BaseFlatTerrain.SetLacunarity(1.93947);
+    BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
+    BaseFlatTerrain.SetOctaveCount(nMaxOctave);
+    BaseFlatTerrain.SetPersistence(0.5);
     
-    m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
-    m_FlatTerrain.SetScale(0.25);
-    m_FlatTerrain.SetBias(-0.75);
+    FlatTerrain.SetSourceModule(0,BaseFlatTerrain);
+    FlatTerrain.SetScale(0.25);
+    FlatTerrain.SetBias(-0.75);
     
-    m_TerrainType.SetFrequency (1000.0/(m_fWidth));
-    m_TerrainType.SetPersistence (0.5);
-    m_TerrainType.SetLacunarity(2.137);
-    m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
+    TerrainType.SetFrequency (m_fDiversity/(m_fWidth));
+    TerrainType.SetPersistence (0.5);
+    TerrainType.SetLacunarity(2.137);
+    TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
 
-    m_Surface.SetSourceModule(0,m_FlatTerrain);
-    m_Surface.SetSourceModule(1,m_MountainTerrain);
-    m_Surface.SetControlModule(m_TerrainType);
-    m_Surface.SetBounds(0.0,100.0);
-    m_Surface.SetEdgeFalloff(0.5);
+    Surface.SetSourceModule(0,FlatTerrain);
+    Surface.SetSourceModule(1,MountainTerrain);
+    Surface.SetControlModule(TerrainType);
+    Surface.SetBounds(0.0,100.0);
+    Surface.SetEdgeFalloff(0.2);
+    
+    m_Cache.resize(ceil(fNrOfPoints));
+    double fX = 0.0;
+    for (int i=0; i<ceil(fNrOfPoints); ++i)
+    {
+        m_Cache[i]=Surface.GetValue(fX,0.0,0.0) * m_fHeightMax + m_vecCenter[1]; 
+        fX += m_fGroundResolution;
+        m_AABB.update(Vector2d(fX+m_vecCenter[0]-m_fWidth*0.5,m_Cache[i]));
+        
+        Log.progressBar(i,ceil(fNrOfPoints));
+    }
 
     METHOD_EXIT("CTerrain::init")
 }
@@ -143,20 +156,27 @@ void CTerrain::init()
 /// \param _fAngle Rotation angle
 /// \param _vecV Translation vector
 ///
+/// \todo Maybe implement virtual init method for all shapes to call after
+///       transform
+///
 ///////////////////////////////////////////////////////////////////////////////
 void CTerrain::transform( const double& _fAngle, const Vector2d& _vecV )
 {
     METHOD_ENTRY("CTerrain::transform")
 
-    Rotation2Dd Rotation(_fAngle);
-
-    m_vecCenter = Rotation * m_vecCenter0 + _vecV;
-
-    m_fAngle = _fAngle;
-
-    // Update bounding box
-    m_AABB.setLowerLeft( m_vecCenter - Vector2d(m_fWidth*0.5,0.0));
-    m_AABB.setUpperRight(m_vecCenter + Vector2d(m_fWidth*0.5,m_fHeightMax));
+//  Transformation for static shape not needed
+    
+//     Rotation2Dd Rotation(_fAngle);
+// 
+//     m_vecCenter = Rotation * m_vecCenter0 + _vecV;
+// 
+//     m_fAngle = _fAngle;
+//     
+//     // Update bounding box
+//     m_AABB.setLowerLeft( m_vecCenter - Vector2d(m_fWidth*0.5,0.0));
+//     m_AABB.setUpperRight(m_vecCenter + Vector2d(m_fWidth*0.5,m_fHeightMax));
+    
+    this->init();
 
     METHOD_EXIT("CTerrain::transform")
 }
