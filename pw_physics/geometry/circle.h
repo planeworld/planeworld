@@ -43,6 +43,8 @@ class CCircle : public IShape
         virtual ~CCircle();
         
         //--- Constant Methods -----------------------------------------------//
+        CCircle*            clone() const;
+        
         const double&       getAngle() const;
         const Vector2d&     getCenter() const;
         const double&       getRadius() const;

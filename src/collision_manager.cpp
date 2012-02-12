@@ -44,7 +44,7 @@ void CCollisionManager::detectCollisions()
             {
 
                 // Test for overlapping bounding boxes
-                if ((*ci)->getGeometry().getBoundingBox().overlaps((*cj)->getGeometry().getBoundingBox()))
+                if ((*ci)->getGeometry()->getBoundingBox().overlaps((*cj)->getGeometry()->getBoundingBox()))
                 {
 //                     CContact Contact;
                     this->test(static_cast<CBody*>((*ci)),static_cast<CBody*>((*cj)));
@@ -86,9 +86,9 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
-    std::list<IShape*>::const_iterator ci  = _p1->getGeometry().getShapes().begin();
+    std::list<IShape*>::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
     
-    while (ci != _p1->getGeometry().getShapes().end())
+    while (ci != _p1->getGeometry()->getShapes()->end())
     {
         switch((*ci)->getShapeType())
         {
@@ -130,18 +130,19 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
     boost::circular_buffer<Vector2d>::iterator itVelP = pPreviousVelocities->begin();
     
     double fInc = _p1->getGroundResolution();
-    double fTerrainZeroOffset = -_p1->getCenter()[0]+_p1->getWidth()*0.5;
-        
+
     while (itPos != pPositions->end())
     {
-        // Simple broad phase collision detection, does _not_ prevent tunneling
-        if (_p1->getBoundingBox().isInside((*itPos)))
+        // Simple broad phase collision detection, does _not_ prevent tunneling.
+//         if (_p1->getBoundingBox().isInside((*itPos)))
         {
             Vector2d vecPOC;
+            Vector2d vecTmp;
             double fT = 2.0;
             
-            double fTerrainLeft  =  -fTerrainZeroOffset;
-            double fTerrainRight =  -fTerrainZeroOffset + _p1->getWidth();
+            double fTerrainLeft  =  _p1->getCenter()[0]-_p1->getWidth()*0.5;
+            double fTerrainRight =  _p1->getCenter()[0]+_p1->getWidth()*0.5;
+            
             double fDebrisLeft;
             double fDebrisRight;
             if ((*itPos)[0] < ((*itPosP)[0]))
@@ -160,8 +161,8 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
             if (fDebrisRight < fTerrainRight)
                 fTerrainRight = fDebrisRight;
                 
-            double fX0 = fTerrainLeft;
-            double fX1 = fTerrainLeft+fInc;
+            double fX0 = _p1->snapToTerrainGrid(fTerrainLeft); 
+            double fX1 = fX0+fInc;
             
             double fY0 = _p1->getSurface(fX0);
             double fY1 = _p1->getSurface(fX1);
@@ -171,57 +172,42 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
             double fY0Seg = fY0;
             double fY1Seg = fY1;
 
-            while ( fX0 <= fTerrainRight)
+            while ( fX0 < fTerrainRight )
             {
-                double fAx = fX0 - (*itPosP)[0];
-                double fAy = fY0 - (*itPosP)[1];
-                double fBx = fX1 - fX0;
-                double fBy = fY1 - fY0;
-                double fCx = ((*itPos) - (*itPosP))[0];
-                double fCy = ((*itPos) - (*itPosP))[1];
+                double fAx = fX1 - fX0;
+                double fAy = fY1 - fY0;
+                double fCx = (*itPosP)[0]-fX0;
+                double fCy = (*itPosP)[1]-fY0;
+                double fDx = ((*itPos) - (*itPosP))[0];
+                double fDy = ((*itPos) - (*itPosP))[1];
 
-                double fTmpA = fBx*fCy-fBy*fCx;
-                double fTmpB = fAx*fCy-fAy*fCx;
-                 
-                double fAlpha = -fTmpB / fTmpA;
+                double fTmpA = fAx*fCy-fAy*fCx;
+                double fTmpB = fAx*fDy-fAy*fDx;
                 
-                double fTmpT = -1.0;
-                if ((fAlpha >= 0.0) && (fAlpha <= 1.0))
+                double fTmpT = -(fTmpA / fTmpB);
+                
+                if (fTmpB != 0)
                 {
-                    if (fCx != 0.0)
+                    if ((fTmpT >= 0.0) && (fTmpT <= 1.0))
                     {
-                        fTmpT = (fAx+fAlpha*fBx) / (fCx);
-                        if ((fTmpT >= 0.0) && (fTmpT < fT))
+                        if (fTmpT < fT)
                         {
-                            fT = fTmpT;
-                            
-                            vecPOC[0] = fX0 + fAlpha * (fX1-fX0);
-                            vecPOC[1] = fY0 + fAlpha * (fY1-fY0);
-                            fX0Seg = fX0;
-                            fX1Seg = fX1;
-                            fY0Seg = fY0;
-                            fY1Seg = fY1;
-                        }
-                    }
-                    else if (fCy != 0.0)
-                    {
-                        fTmpT = (fAy+fAlpha*fBy) / (fCy);
-                        if ((fTmpT >= 0.0) && (fTmpT < fT))
-                        {
-                            fT = fTmpT;
-                            
-                            vecPOC[0] = fX0 + fAlpha * (fX1-fX0);
-                            vecPOC[1] = fY0 + fAlpha * (fY1-fY0);
-                            fX0Seg = fX0;
-                            fX1Seg = fX1;
-                            fY0Seg = fY0;
-                            fY1Seg = fY1;
+                            vecTmp = (*itPosP) + fTmpT*((*itPos)-(*itPosP));
+                            if ((vecTmp-Vector2d(fX0,fY0)).norm() < Vector2d(fX1-fX0,fY1-fY0).norm())
+                            {
+                                fT = fTmpT;
+                                vecPOC = vecTmp;
+                                fX0Seg = fX0;
+                                fX1Seg = fX1;
+                                fY0Seg = fY0;
+                                fY1Seg = fY1;
+                            }
                         }
                     }
                 }
                 
-                fX0 =  fX1;
-                fX1 += fInc;
+                fX0 = fX1;
+                fX1 = fX1+fInc;
                 fY0 = fY1;
                 fY1 = _p1->getSurface(fX1);
             }
@@ -238,20 +224,20 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
                 vecNewVelOrth = Vector2d(std::cos(fSegAngle+M_PI*0.5),
                                          std::sin(fSegAngle+M_PI*0.5));
                 
-                double fTang = std::cos(fSegAngle-fPosAngle)*1.0;
+                double fTang = std::cos(fSegAngle-fPosAngle)*0.5;
                 double fOrth = std::sin(fSegAngle-fPosAngle)*0.0;
                 double fDamping = sqrt(fTang*fTang+fOrth*fOrth);
                 
-                (*itVel)[0] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * (*itVel).norm())[0];
-                (*itVel)[1] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * (*itVel).norm())[1];
-                (*itVelP)=(*itVel);
-                (*itPos)=vecPOC;
-//                 (*itPosP)=vecPOC;//+((*itPosP)-vecPOC)*1.0e-100;
+                double fNorm = (*itVel).norm();
+                (*itVel)[0] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[0];
+                (*itVel)[1] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[1];
+                (*itPos)=vecPOC+((*itPosP)-vecPOC)/((*itPosP)-vecPOC).norm()*0.01;
+             
             }
         }
         ++itPos; ++itVel; ++itPosP; ++itVelP;
     }
-        
+    
     METHOD_EXIT("CCollisionManager::test")
 }
 
@@ -267,16 +253,16 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
 
-    std::list<IShape*>::const_iterator ci  = _p1->getGeometry().getShapes().begin();
-    std::list<IShape*>::const_iterator ci0 = _p1->getGeometry().getPrevShapes().begin();
+    std::list<IShape*>::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
+    std::list<IShape*>::const_iterator ci0 = _p1->getGeometry()->getPrevShapes()->begin();
     std::list<IShape*>::const_iterator cj;
     std::list<IShape*>::const_iterator cj0;
     
-    while (ci != _p1->getGeometry().getShapes().end())
+    while (ci != _p1->getGeometry()->getShapes()->end())
     {
-        cj  = _p2->getGeometry().getShapes().begin();
-        cj0 = _p2->getGeometry().getPrevShapes().begin();
-        while (cj != _p2->getGeometry().getShapes().end())
+        cj  = _p2->getGeometry()->getShapes()->begin();
+        cj0 = _p2->getGeometry()->getPrevShapes()->begin();
+        while (cj != _p2->getGeometry()->getShapes()->end())
         {
             switch((*ci)->getShapeType())
             {
@@ -284,7 +270,6 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                     switch((*cj)->getShapeType())
                     {
                         case SHAPE_CIRCLE:
-                        
                             CCircle* pCircA1;
                             CCircle* pCircB1;
                             CCircle* pCircA0;
@@ -296,7 +281,7 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             this->test(pCircA1, pCircA0, pCircB1, pCircB0, _p1, _p2);
                             break;
                         case SHAPE_PLANET:
-                            this->getSurfaceOfInterest();
+//                             this->getSurfaceOfInterest();
                             break;
                         case SHAPE_POLYLINE:
                             CCircle* pCirc1;
@@ -310,7 +295,7 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
                         case SHAPE_RECTANGLE:
-//                             this->test((*ci),(*cj));
+// //                             this->test((*ci),(*cj));
                             break;
                     }
                     break;
@@ -318,33 +303,33 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                     switch((*cj)->getShapeType())
                     {
                         case SHAPE_CIRCLE:
-                            CCircle* pCirc1;
-                            CCircle* pCirc0;
-                            CPolyLine* pPoly1;
-                            CPolyLine* pPoly0;
-                            pCirc1 = static_cast<CCircle*>((*cj));
-                            pCirc0 = static_cast<CCircle*>((*cj0));
-                            pPoly1 = static_cast<CPolyLine*>((*ci));
-                            pPoly0 = static_cast<CPolyLine*>((*ci0));
-                            this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
+//                             CCircle* pCirc1;
+//                             CCircle* pCirc0;
+//                             CPolyLine* pPoly1;
+//                             CPolyLine* pPoly0;
+//                             pCirc1 = static_cast<CCircle*>((*cj));
+//                             pCirc0 = static_cast<CCircle*>((*cj0));
+//                             pPoly1 = static_cast<CPolyLine*>((*ci));
+//                             pPoly0 = static_cast<CPolyLine*>((*ci0));
+//                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
                         case SHAPE_PLANET:
-                            this->getSurfaceOfInterest();
+//                             this->getSurfaceOfInterest();
                             break;
                         case SHAPE_POLYLINE:
-                            CPolyLine* pPolyA1;
-                            CPolyLine* pPolyB1;
-                            CPolyLine* pPolyA0;
-                            CPolyLine* pPolyB0;
-                            pPolyA1 = static_cast<CPolyLine*>((*ci));
-                            pPolyB1 = static_cast<CPolyLine*>((*cj));
-                            pPolyA0 = static_cast<CPolyLine*>((*ci0));
-                            pPolyB0 = static_cast<CPolyLine*>((*cj0));
-                            this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
-                            this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
+//                             CPolyLine* pPolyA1;
+//                             CPolyLine* pPolyB1;
+//                             CPolyLine* pPolyA0;
+//                             CPolyLine* pPolyB0;
+//                             pPolyA1 = static_cast<CPolyLine*>((*ci));
+//                             pPolyB1 = static_cast<CPolyLine*>((*cj));
+//                             pPolyA0 = static_cast<CPolyLine*>((*ci0));
+//                             pPolyB0 = static_cast<CPolyLine*>((*cj0));
+//                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
+//                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
                         case SHAPE_RECTANGLE:
-    //                             this->test((*ci),(*cj));
+//     //                             this->test((*ci),(*cj));
                             break;
                     }
                     break;
@@ -366,15 +351,15 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                         }
                         case SHAPE_PLANET:
                         {
-                            CPlanet* pPlanet1;
-                            CPlanet* pPlanet0;
-                            CPolyLine* pPoly1;
-                            CPolyLine* pPoly0;
-                            pPlanet1 = static_cast<CPlanet*>((*cj));
-                            pPlanet0 = static_cast<CPlanet*>((*cj0));
-                            pPoly1 = static_cast<CPolyLine*>((*ci));
-                            pPoly0 = static_cast<CPolyLine*>((*ci0));
-                            this->getSurfaceOfInterest();
+//                             CPlanet* pPlanet1;
+//                             CPlanet* pPlanet0;
+//                             CPolyLine* pPoly1;
+//                             CPolyLine* pPoly0;
+//                             pPlanet1 = static_cast<CPlanet*>((*cj));
+//                             pPlanet0 = static_cast<CPlanet*>((*cj0));
+//                             pPoly1 = static_cast<CPolyLine*>((*ci));
+//                             pPoly0 = static_cast<CPolyLine*>((*ci0));
+//                             this->getSurfaceOfInterest();
                             break;
                         }
                         case SHAPE_POLYLINE:
@@ -392,7 +377,7 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             break;
                         }
                         case SHAPE_RECTANGLE:
-//                             this->test((*ci),(*cj));
+// //                             this->test((*ci),(*cj));
                             break;
                     }
                     break;
@@ -400,16 +385,16 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                     switch((*cj)->getShapeType())
                     {
                         case SHAPE_CIRCLE:
-//                             this->test((*cj),(*ci));
+// //                             this->test((*cj),(*ci));
                             break;
                         case SHAPE_PLANET:
-                            this->getSurfaceOfInterest();
+//                             this->getSurfaceOfInterest();
                             break;
                         case SHAPE_POLYLINE:
-//                             this->test((*cj),(*ci));
+// //                             this->test((*cj),(*ci));
                             break;
                         case SHAPE_RECTANGLE:
-//                             this->test((*ci),(*cj));
+// //                             this->test((*ci),(*cj));
                             break;
                     }
                     break;
@@ -558,7 +543,7 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
     }
     if (fT <= 1.0)
     {
-//         // Colliding objects
+        // Colliding objects
 //         m_Graphics.setColor(0.0, 0.8, 0.0);
 //         m_Graphics.rect(_p1->getGeometry().getBoundingBox().getLowerLeft(),
 //                         _p1->getGeometry().getBoundingBox().getUpperRight());
@@ -570,10 +555,10 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
 //         m_Graphics.dot(vecPA0+(vecPB0-vecPA0)/sqrt((vecPB0-vecPA0).dot((vecPB0-vecPA0)))*fRA);
 //         m_Graphics.setColor(1.0, 1.0, 1.0);
         
-//         _p1->disableDynamics();
-//         _p1->getGeometry().update();
-//         _p2->disableDynamics();
-//         _p2->getGeometry().update();
+        _p1->disableDynamics();
+        _p1->transform();
+        _p2->disableDynamics();
+        _p2->transform();
 //         _p1->setVelocity(-_p1->getVelocity());
 //         _p2->setVelocity(-_p2->getVelocity());
     }
@@ -886,10 +871,10 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
 //         m_Graphics.dot(vecPOC);
 //         m_Graphics.setColor(1.0, 1.0, 1.0);
 
-//         _p1->disableDynamics();
-//         _p1->getGeometry().update();
-//         _p2->disableDynamics();
-//         _p2->getGeometry().update();
+        _p1->disableDynamics();
+        _p1->transform();;
+        _p2->disableDynamics();
+        _p2->transform();;
     } 
         
     METHOD_EXIT("CCollisionManager::test")
@@ -954,7 +939,7 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
                 if ((fAlpha >= 0.0) && (fAlpha <= 1.0))
                 {
                     /// \todo Optimise here and add similar code segments!
-                    /// \todo Implement cases for fCx=0!
+                    /// \todo Implement cases for fCx==0!
                     if (fCx != 0.0)
                         fTmpT = (fAx+fAlpha*fBx) / (fCx);
                     if ((fTmpT >= 0.0) && (fTmpT < fT))
@@ -1099,11 +1084,12 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
 //         m_Graphics.dot(vecPOC);
 //         m_Graphics.setColor(1.0, 1.0, 1.0);
         
-//         _p1->disableDynamics();
-//         _p1->getGeometry().update();
-//         _p2->disableDynamics();
-//         _p2->getGeometry().update();
+        _p1->disableDynamics();
+        _p1->transform();;
+        _p2->disableDynamics();
+        _p2->transform();;
     } 
             
     METHOD_EXIT("CCollisionManager::test")
 }
+

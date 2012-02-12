@@ -45,6 +45,8 @@ class CPolyLine : public IShape
         virtual ~CPolyLine();
         
         //--- Constant Methods -----------------------------------------------//
+        CPolyLine*                  clone() const;
+        
         const LineType&             getLineType() const;
         const ShapeType             getShapeType() const;
         const std::list<Vector2d>&  getVertices() const;

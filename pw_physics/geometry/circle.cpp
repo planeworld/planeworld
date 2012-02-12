@@ -47,6 +47,31 @@ CCircle::~CCircle()
     METHOD_EXIT ( "CCircle::~CCircle" );
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones circle
+///
+/// \return Pointer to cloned circle
+///
+////////////////////////////////////////////////////////////////////////////////
+CCircle* CCircle::clone() const
+{
+    METHOD_ENTRY("CCircle::clone")
+    
+    CCircle* pClone = new CCircle();
+        
+    pClone->m_vecCenter  = m_vecCenter;
+    pClone->m_vecCenter0 = m_vecCenter0;
+    pClone->m_fAngle     = m_fAngle;
+    pClone->m_fRadius    = m_fRadius;
+    pClone->m_AABB         = m_AABB;
+    pClone->m_nDepthlayers = m_nDepthlayers;
+    pClone->m_VisualsID    = m_VisualsID;
+    
+    METHOD_EXIT("CCircle::clone")
+    return pClone;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Transforms the shape

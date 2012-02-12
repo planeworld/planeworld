@@ -58,19 +58,58 @@ CTerrain::~CTerrain()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Clones terrain 
+///
+/// \return Pointer to cloned terrain
+///
+////////////////////////////////////////////////////////////////////////////////
+CTerrain* CTerrain::clone() const
+{
+    METHOD_ENTRY("CTerrain::clone")
+    
+    CTerrain* pClone = new CTerrain();
+    
+    pClone->m_Cache             = m_Cache;
+    pClone->m_fAngle            = m_fAngle;
+    pClone->m_fDiversity        = m_fDiversity;
+    pClone->m_fGroundResolution = m_fGroundResolution;
+    pClone->m_fHeightMax        = m_fHeightMax;
+    pClone->m_fSmoothness       = m_fSmoothness;
+    pClone->m_fWidth            = m_fWidth;
+    pClone->m_nSeed             = m_nSeed;
+    pClone->m_vecCenter         = m_vecCenter;
+    pClone->m_vecCenter0        = m_vecCenter0;
+    pClone->m_AABB              = m_AABB;
+    pClone->m_nDepthlayers      = m_nDepthlayers;
+    pClone->m_VisualsID         = m_VisualsID;
+        
+    METHOD_EXIT("CTerrain::clone")
+    return pClone;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Return surface value for given point in world coordinates
+///
+/// For a given point, the terrain height is returned. Values between cached
+/// points are linearly interpolated.
 ///
 /// \param _fX Point to get height from (world coordinates)
 ///
-/// \return Surface noise module
+/// \return Height
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const double& CTerrain::getSurface(const double& _fX) const
+const double CTerrain::getSurface(const double& _fX) const
 {
     METHOD_ENTRY("CTerrain::getSurface")
     
-    int nX = static_cast<int>((_fX+m_fWidth*0.5-m_vecCenter[0])/m_fGroundResolution);
-
+    int      nX = static_cast<int>(
+                       (_fX+m_fWidth*0.5-m_vecCenter[0])/m_fGroundResolution
+                 );
+    if ((nX < 0) || (nX >= m_Cache.size()))
+    {
+        nX = 0;
+    }
     METHOD_EXIT("CTerrain::getSurface")
     return m_Cache[nX];
 }
@@ -143,7 +182,7 @@ void CTerrain::init()
         fX += m_fGroundResolution;
         m_AABB.update(Vector2d(fX+m_vecCenter[0]-m_fWidth*0.5,m_Cache[i]));
         
-        Log.progressBar(i,ceil(fNrOfPoints));
+        Log.progressBar("Caching Terrain", i,ceil(fNrOfPoints));
     }
 
     METHOD_EXIT("CTerrain::init")

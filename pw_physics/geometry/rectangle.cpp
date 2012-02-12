@@ -49,6 +49,35 @@ CRectangle::~CRectangle()
     METHOD_EXIT("CRectangle::~CRectangle()");
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones rectangle
+///
+/// \return Pointer to cloned rectangle
+///
+////////////////////////////////////////////////////////////////////////////////
+CRectangle* CRectangle::clone() const
+{
+    METHOD_ENTRY("CRectangle::clone")
+    
+    CRectangle* pClone = new CRectangle();
+    
+    pClone->m_vecLL0 = m_vecLL0;
+    pClone->m_vecLR0 = m_vecLR0;
+    pClone->m_vecUL0 = m_vecUL0;
+    pClone->m_vecUR0 = m_vecUR0;
+    pClone->m_vecVerts[0] = m_vecVerts[0];
+    pClone->m_vecVerts[1] = m_vecVerts[1];
+    pClone->m_vecVerts[2] = m_vecVerts[2];
+    pClone->m_vecVerts[3] = m_vecVerts[3];
+    pClone->m_AABB         = m_AABB;
+    pClone->m_nDepthlayers = m_nDepthlayers;
+    pClone->m_VisualsID    = m_VisualsID;
+    
+    METHOD_EXIT("CRectangle::clone")
+    return pClone;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Transforms the shape

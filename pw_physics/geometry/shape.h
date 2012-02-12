@@ -32,6 +32,7 @@
 #include "visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
+#include <boost/thread.hpp> 
 
 using namespace Eigen;
 
@@ -49,6 +50,8 @@ typedef enum
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Abstract class representing a simple shape
+///
+/// \todo Implement clone method
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class IShape
@@ -61,6 +64,7 @@ class IShape
         virtual ~IShape(){}                                                 ///< Destructor
         
         //--- Constant Methods -----------------------------------------------//
+        virtual IShape*             clone() const = 0;
         const CBoundingBox&         getBoundingBox() const;
         int                         getDepths() const;
         virtual const ShapeType     getShapeType() const;

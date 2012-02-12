@@ -44,6 +44,8 @@ class CPlanet : public IShape
         virtual ~CPlanet();
         
         //--- Constant Methods -----------------------------------------------//
+        CPlanet*                        clone() const;
+        
         const double&                   getAngle() const;
         const Vector2d&                 getCenter() const;
         const double&                   getGroundResolution() const;

@@ -21,7 +21,6 @@
 #define ENGINE_MANAGER_H
 
 //--- Standard header --------------------------------------------------------//
-// #include <list>
 
 //--- Program header ---------------------------------------------------------//
 #include "physics_manager.h"
@@ -32,6 +31,9 @@
 /// \brief Class for managing the engine(s)
 ///
 /// This class manages the the different engine modules, like physics, graphics.
+///
+/// \todo Mutex to synchronize graphics with physics might be set tighter to
+///       allow longer async time.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CEngineManager
@@ -44,17 +46,29 @@ class CEngineManager
         ~CEngineManager();
         
         //--- Constant Methods -----------------------------------------------//
+        const bool& isGraphicsReady() const;
                 
         //--- Methods --------------------------------------------------------//
-        void runGraphics();
-        void runPhysics();
+        void runGraphicsThread();
+        void runPhysicsThread();
         void setPhysicsManager(CPhysicsManager*);
         void setVisualsManager(CVisualsManager*);
         void stop();
         
     private:
         
+        static int callRunGraphics(void*);
+        static int callRunPhysics(void*);
+        void runPhysics();
+        void runGraphics();
+        
+        SDL_Thread*         m_pGraphicsThread;      ///< Thread, running graphics
+        SDL_Thread*         m_pPhysicsThread;       ///< Thread, running physics
+        SDL_mutex*          m_pMutex;               ///< Mutex to sync graphics to valid physics state
+        
         bool                m_bDone;                ///< Stop threads if program ends
+        bool                m_bGotPhysics;          ///< Indicates first run of physics thread
+        bool                m_bGraphicsReady;       ///< Graphics have been initialised
         
         CTimer              m_PhysicsTimer;         ///< Timer for physics updates
         CTimer              m_VisualsTimer;         ///< Timer for physics updates
@@ -67,6 +81,19 @@ class CEngineManager
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns if graphics are initialised
+///
+/// \return Graphics initialised?
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const bool& CEngineManager::isGraphicsReady() const
+{
+    METHOD_ENTRY("CEngineManager::isGraphicsReady")
+    return m_bGraphicsReady;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Sets up instance for physics
 ///
 /// \param _pPhys Pointer to physic manager instance
@@ -75,10 +102,7 @@ class CEngineManager
 inline void CEngineManager::setPhysicsManager(CPhysicsManager* _pPhys)
 {
     METHOD_ENTRY("CEngineManager::setPhysicsManager")
-
     m_pPhysicsManager = _pPhys;
-
-    METHOD_EXIT("CEngineManager::setPhysicsManager")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,10 +115,7 @@ inline void CEngineManager::setPhysicsManager(CPhysicsManager* _pPhys)
 inline void CEngineManager::setVisualsManager(CVisualsManager* _pVis)
 {
     METHOD_ENTRY("CEngineManager::setVisualsManager")
-
     m_pVisualsManager = _pVis;
-
-    METHOD_EXIT("CEngineManager::setVisualsManager")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,10 +126,7 @@ inline void CEngineManager::setVisualsManager(CVisualsManager* _pVis)
 inline void CEngineManager::stop()
 {
     METHOD_ENTRY("CEngineManager::stop")
-
     m_bDone = true;
-
-    METHOD_EXIT("CEngineManager::stop")
 }
 
 #endif

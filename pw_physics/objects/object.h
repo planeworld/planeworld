@@ -54,13 +54,12 @@ class IObject
     
         //--- Constructor/Destructor -----------------------------------------//
         IObject();
-        IObject(const double&);
+        IObject(const IObject* const);
         virtual ~IObject();
 
         //--- Constant methods -----------------------------------------------//
         virtual const Vector2d      getAnchor(const int&) const = 0;    ///< Return anchor
-        const CGeometry&            getGeometry() const;
-        
+                
         const Vector2d              getCOM() const;
         const int                   getDepths() const;
         const bool                  getDynamicsState() const;
@@ -77,7 +76,7 @@ class IObject
         AnchorIDType        addAnchor(const Vector2d&);
         void                disableGravitation();
         void                enableGravitation();
-        CGeometry&          getGeometry();
+        CGeometry* const    getGeometry();
         void                setOrigin(const Vector2d&);
         void                setOrigin(const double&, const double&);
         void                setDepths(const int&);
@@ -145,21 +144,6 @@ inline void IObject::addAcceleration(const Vector2d& _vecV)
     this->addForce(_vecV*m_fMass, m_pIntPos->getValue()+m_vecCOM);
     
     METHOD_EXIT("IObject::addAcceleration")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the geometry of the object
-///
-/// \return Geometry
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const CGeometry& IObject::getGeometry() const
-{
-    METHOD_ENTRY("IObject::getGeometry")
-
-    METHOD_EXIT("IObject::getGeometry")
-    return (m_Geometry);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -338,12 +322,12 @@ inline void IObject::enableGravitation()
 /// \return Geometry
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CGeometry& IObject::getGeometry()
+inline CGeometry* const IObject::getGeometry()
 {
     METHOD_ENTRY("IObject::getGeometry")
 
     METHOD_EXIT("IObject::getGeometry")
-    return (m_Geometry);
+    return &m_Geometry;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

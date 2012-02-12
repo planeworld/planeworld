@@ -51,6 +51,9 @@ CTerrainVisuals::~CTerrainVisuals()
 ///
 /// \brief Draw the Terrain
 ///
+/// \note It is very important to do camera positioning after clipping.
+///       Otherwise, camera movement would also be clipped and thus quantized.
+///
 /// \param _pCamera Active camera for drawing visuals
 ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,18 +84,17 @@ void CTerrainVisuals::draw(const CCamera* const _pCamera) const
     if (fLeft  < fLeft0)  fLeft  = fLeft0;
     if (fRight > fRight0) fRight = fRight0;
     
-    // It is very important to do camera positioning after clipping. Otherwise,
-    // camera movement would also be clipped and thus quantized.
-    fLeft  -= _pCamera->getCenter()[0];
-    fRight -= _pCamera->getCenter()[0];
+    fLeft = m_pTerrain->snapToTerrainGrid(fLeft);
+    fRight = m_pTerrain->snapToTerrainGrid(fRight);
     
     m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
     
     while ( fLeft <= fRight)
     {
-        double fHght = m_pTerrain->getSurface(fLeft+_pCamera->getCenter()[0])-_pCamera->getCenter()[1];
+        double fHght = m_pTerrain->getSurface(fLeft);
         
-        m_Graphics.addVertex(Vector2d(fLeft,fHght));
+        m_Graphics.addVertex(Vector2d(fLeft-_pCamera->getCenter()[0],
+                                      fHght-_pCamera->getCenter()[1]));
 
         fLeft += fInc;
     }

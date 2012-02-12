@@ -56,6 +56,7 @@ class CXMLImporter
 
         //--- Constant Methods -----------------------------------------------//
         CCamera*                getCamera() const;
+        Vector2d                getGravity() const;
         std::list<IObject*>     getObjects() const;
         std::list<IVisuals*>    getVisuals() const;
                 
@@ -67,9 +68,12 @@ class CXMLImporter
         
         bool checkFile(const QDomElement&);
         void createCamera(const QDomNode&);
+        void createGravity(const QDomNode&);
+        void createShapeCircle(CBody* const, const QDomNode&);
         void createShapePlanet(CBody* const, const QDomNode&);
         void createShapeTerrain(CBody* const, const QDomNode&);
         void createShapePolyline(CBody* const, const QDomNode&);
+        void createVisualsCircle(CCircle* const, const QDomNode&);
         void createVisualsPlanet(CPlanet* const, const QDomNode&);
         void createVisualsTerrain(CTerrain* const, const QDomNode&);
         void createVisualsPolyline(CPolyLine* const, const QDomNode&);
@@ -77,6 +81,7 @@ class CXMLImporter
         void readObjectCore(IObject* const, const QDomNode&);
         
         CCamera*                        m_pCamera;
+        Vector2d                        m_vecGravity;
         std::string                     m_strCameraHook;
         std::map<std::string,IObject*>  m_Objects;
         std::list<IVisuals*>            m_Visuals;
@@ -98,6 +103,21 @@ inline CCamera* CXMLImporter::getCamera() const
 
     METHOD_EXIT("CXMLImporter::getCamera")
     return m_pCamera;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the vector of constant gravity (default is zero).
+///
+/// \return Constant gravity vector
+///
+////////////////////////////////////////////////////////////////////////////////
+inline Vector2d CXMLImporter::getGravity() const
+{
+    METHOD_ENTRY("CXMLImporter::getGravity")
+
+    METHOD_EXIT("CXMLImporter::getGravity")
+    return m_vecGravity;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

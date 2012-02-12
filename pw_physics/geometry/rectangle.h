@@ -43,6 +43,8 @@ class CRectangle : public IShape
         virtual ~CRectangle();
         
         //--- Const methods --------------------------------------------------//
+        CRectangle*             clone() const;
+        
         const ShapeType         getShapeType() const;
         const Vector2d* const   getVertices() const;
 

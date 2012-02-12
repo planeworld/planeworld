@@ -24,6 +24,13 @@
 
 #include "conf_log.h"
 
+// Test for version of log_conf.h
+#ifndef LOGGING_VERSION
+#error LOGGING_VERSION not defined in log_conf.h
+#elif LOGGING_VERSION!=1
+#error Wrong version of log_conf.h major
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \def DEBUG_MSG(a,b,c)
@@ -116,53 +123,83 @@
 #endif
 
 #ifdef LOGLEVEL_DEBUG
-    #define DEBUG_MSG(a,b)          CLog::s_strStr.str(""); \
+    #define DEBUG_MSG(a,b)          {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);
-    #define DEBUG(a)                a
-    #define INFO_MSG(a,b)           CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom); \
+                                    }
+    #define DEBUG(a)                {a}
+    #define INFO_MSG(a,b)           {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_INFO, CLog::s_Dom);
-    #define INFO(a)                 a
-    #define NOTICE_MSG(a,b)         CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_INFO, CLog::s_Dom); \
+                                    }
+    #define INFO(a)                 {a}
+    #define NOTICE_MSG(a,b)         {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_NOTICE, CLog::s_Dom);
-    #define NOTICE(a)               a
-    #define WARNING_MSG(a,b)        CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_NOTICE, CLog::s_Dom); \
+                                    }
+    #define NOTICE(a)               {a}
+    #define WARNING_MSG(a,b)        {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom);
-    #define WARNING(a)              a
-    #define ERROR_MSG(a,b)          CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
+                                    }
+    #define WARNING(a)              {a}
+    #define ERROR_MSG(a,b)          {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom);
-    #define ERROR(a)                a
-    #define CTOR_CALL(a)            DOM_CTOR(Log.log("Constructor called", a, LOG_LEVEL_DEBUG, CLog::s_Dom);)
-    #define DTOR_CALL(a)            DOM_DTOR(Log.log("Destructor called", a, LOG_LEVEL_DEBUG, CLog::s_Dom);)
-    #define METHOD_ENTRY(a)         DOM_MENT(Log.log("Method entry", a, LOG_LEVEL_DEBUG, CLog::s_Dom);)
-    #define METHOD_EXIT(a)          DOM_MEXT(Log.log("Method exit", a, LOG_LEVEL_DEBUG, CLog::s_Dom);)
-    #define MEM_ALLOC(a)            DOM_MEMA(Log.log("Memory allocated", a, LOG_LEVEL_DEBUG, CLog::s_Dom);)
-    #define MEM_FREED(a)            DOM_MEMF(Log.log("Memory freed", a, LOG_LEVEL_DEBUG, CLog::s_Dom);)
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    }
+    #define ERROR(a)                {a}
+    #define CTOR_CALL(a)            DOM_CTOR( \
+                                    CLog::s_strStr.str(""); \
+                                    CLog::s_strStr << a; \
+                                    Log.log("Constructor called", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+    #define DTOR_CALL(a)            DOM_DTOR( \
+                                    CLog::s_strStr.str(""); \
+                                    CLog::s_strStr << a; \
+                                    Log.log("Destructor called", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+    #define METHOD_ENTRY(a)         CLogMethodHelper ___LOGGING_ENTRY_EXIT_(a);
+    #define METHOD_EXIT(a)
+    #define MEM_ALLOC(a)            DOM_MEMA( \
+                                    CLog::s_strStr.str(""); \
+                                    CLog::s_strStr << a; \
+                                    Log.log("Memory allocated", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+    #define MEM_FREED(a)            DOM_MEMF( \
+                                    CLog::s_strStr.str(""); \
+                                    CLog::s_strStr << a; \
+                                    Log.log("Memory freed", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
 #endif
 
 #ifdef LOGLEVEL_INFO
     #define DEBUG_MSG(a,b)
     #define DEBUG(a)
-    #define INFO_MSG(a,b)           CLog::s_strStr.str(""); \
+    #define INFO_MSG(a,b)           {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_INFO, CLog::s_Dom);
-    #define INFO(a)                 a
-    #define NOTICE_MSG(a,b)         CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_INFO, CLog::s_Dom); \
+                                    }
+    #define INFO(a)                 {a}
+    #define NOTICE_MSG(a,b)         {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_NOTICE, CLog::s_Dom);
-    #define NOTICE(a)               a
-    #define WARNING_MSG(a,b)        CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_NOTICE, CLog::s_Dom); \
+                                    }
+    #define NOTICE(a)               {a}
+    #define WARNING_MSG(a,b)        {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom);
-    #define WARNING(a)              a
-    #define ERROR_MSG(a,b)          CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
+                                    }
+    #define WARNING(a)              {a}
+    #define ERROR_MSG(a,b)          {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom);
-    #define ERROR(a)                a
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    }
+    #define ERROR(a)                {a}
 
     #define CTOR_CALL(a)
     #define DTOR_CALL(a)
@@ -177,18 +214,24 @@
     #define DEBUG(a)
     #define INFO_MSG(a,b)
     #define INFO(a)
-    #define NOTICE_MSG(a,b)         CLog::s_strStr.str(""); \
+    #define NOTICE_MSG(a,b)         {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_NOTICE, CLog::s_Dom);
-    #define NOTICE(a)               a
-    #define WARNING_MSG(a,b)        CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_NOTICE, CLog::s_Dom); \
+                                    }
+    #define NOTICE(a)               {a}
+    #define WARNING_MSG(a,b)        {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom);
-    #define WARNING(a)              a
-    #define ERROR_MSG(a,b)          CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
+                                    }
+    #define WARNING(a)              {a}
+    #define ERROR_MSG(a,b)          {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom);
-    #define ERROR(a)                a
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    }
+    #define ERROR(a)                {a}
 
     #define CTOR_CALL(a)
     #define DTOR_CALL(a)
@@ -205,14 +248,18 @@
     #define INFO(a)
     #define NOTICE_MSG(a,b)
     #define NOTICE(a)
-    #define WARNING_MSG(a,b)        CLog::s_strStr.str(""); \
+    #define WARNING_MSG(a,b)        {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom);
-    #define WARNING(a)              a
-    #define ERROR_MSG(a,b)          CLog::s_strStr.str(""); \
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
+                                    }
+    #define WARNING(a)              {a}
+    #define ERROR_MSG(a,b)          {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom);
-    #define ERROR(a)                a
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    }
+    #define ERROR(a)                {a}
 
     #define CTOR_CALL(a)
     #define DTOR_CALL(a)
@@ -231,10 +278,12 @@
     #define NOTICE(a)
     #define WARNING_MSG(a,b)
     #define WARNING(a)
-    #define ERROR_MSG(a,b)          CLog::s_strStr.str(""); \
+    #define ERROR_MSG(a,b)          {\
+                                    CLog::s_strStr.str(""); \
                                     CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom);
-    #define ERROR(a)                a
+                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    }
+    #define ERROR(a)                {a}
 
     #define CTOR_CALL(a)
     #define DTOR_CALL(a)
@@ -299,11 +348,16 @@
 #endif
 
 // Additional macro for method hierarchy
-#ifdef DOMAIN_METHOD_ENTRY
+#ifdef OUTPUT_INDENTION
     #define DOMAIN_METHOD_HIERARCHY
+    #define INDENT() Log.indent();
+    #define UNINDENT() Log.unindent();
 #endif
-#ifndef DOMAIN_METHOD_EXIT
+#ifndef OUTPUT_INDENTION
     #undef DOMAIN_METHOD_HIERARCHY
+    #define INDENT()
+    #define UNINDENT()
+    
 #endif
 
 #endif

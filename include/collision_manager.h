@@ -36,7 +36,7 @@
 ///       structure is copied.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CCollisionManager : virtual public CGraphicsBase
+class CCollisionManager/* : virtual public CGraphicsBase*/
 {
     
     public:

@@ -21,6 +21,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "circle_visuals.h"
 #include "planet_visuals.h"
 #include "rigidbody.h"
 
@@ -37,6 +38,8 @@ CXMLImporter::CXMLImporter() : m_pCamera(0)
 {
     METHOD_ENTRY("CXMLImporter::CXMLImporter")
     CTOR_CALL("CXMLImporter::CXMLImporter")
+    
+    m_vecGravity.setZero();
 
     METHOD_EXIT("CXMLImporter::CXMLImporter")
 }
@@ -128,14 +131,38 @@ bool CXMLImporter::import(const std::string& _strFilename)
             {
                 this->createCamera(N);
             }
+            else if (E.tagName() == "gravity")
+            {
+                this->createGravity(N);
+            }
         }
         
         N = N.nextSibling();
     }    
 
     // Camera hook must have been read by now
-    INFO_MSG("XML Importer", "Camera Hook: " << m_strCameraHook)
-    m_pCamera->setHook(m_Objects[m_strCameraHook]);
+    // Set hook, if camera given. Otherwise a default cam is used.
+    if (m_pCamera != 0)
+    {
+        INFO_MSG("XML Importer", "Camera Hook: " << m_strCameraHook)
+        m_pCamera->setHook(m_Objects[m_strCameraHook]);
+    }
+    else
+    {
+        CRigidBody* pDefaultCam = new CRigidBody;
+        MEM_ALLOC("pDefaultCam")
+        pDefaultCam->setName("DefaultCamera");
+        pDefaultCam->disableDynamics();
+        pDefaultCam->disableGravitation();
+        
+        m_Objects.insert(std::pair<std::string,IObject*>("pDefaultCam", pDefaultCam));
+        
+        m_pCamera = new CCamera;
+        m_pCamera->setHook(pDefaultCam);
+        
+        INFO_MSG("XML Importer", "Camera Hook: DefaultCamera")
+    }
+    
 
     METHOD_EXIT("CXMLImporter::import")
     return true;
@@ -202,6 +229,27 @@ void CXMLImporter::createCamera(const QDomNode& _Node)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Create constant gravity for the whole universe
+///
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createGravity(const QDomNode& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createGravity")
+    
+    INFO_MSG("XML Importer", "Setting constant gravity.")
+    
+    QDomElement E = _Node.toElement();
+    
+    m_vecGravity = Vector2d(E.attribute("vec_x").toDouble(),
+                            E.attribute("vec_y").toDouble());
+    
+    METHOD_EXIT("CXMLImporter::createGravity")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Create a rigid body
 ///
 /// \param _Node Current node in xml tree
@@ -233,6 +281,10 @@ void CXMLImporter::createRigidBody(const QDomNode& _Node)
             {
                 this->createShapePlanet(pRigidBody, N);
             }
+            else if (strType == "Circle")
+            {
+                this->createShapeCircle(pRigidBody, N);
+            }
             else if (strType == "Polyline")
             {
                 this->createShapePolyline(pRigidBody, N);
@@ -249,6 +301,48 @@ void CXMLImporter::createRigidBody(const QDomNode& _Node)
     m_Objects.insert(std::pair<std::string,IObject*>(pRigidBody->getName(),pRigidBody));
     
     METHOD_EXIT("CXMLImporter::createRigidBody")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create a circle shape
+///
+/// \param _pBody Body to create the shape for
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createShapeCircle(CBody* const _pBody, const QDomNode& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createShapeCircle")
+    
+    CCircle* pCircle = new CCircle;
+    MEM_ALLOC("pCircle")
+    
+    QDomElement E = _Node.toElement();
+    
+    pCircle->setRadius(E.attribute("radius").toDouble());
+    pCircle->setCenter(E.attribute("center_x").toDouble(),
+                       E.attribute("center_y").toDouble());
+        
+    // The shape might have visuals
+    if (_Node.hasChildNodes())
+    {
+        QDomNode N = _Node.firstChild();
+        while (!N.isNull())
+        {
+            QDomElement E = N.toElement();
+        
+            if (E.tagName() == "visuals")
+            {
+                this->createVisualsCircle(pCircle, N);
+            }
+            N = N.nextSibling();
+        }
+    }
+    
+    _pBody->getGeometry()->addShape(pCircle);
+    
+    METHOD_EXIT("CXMLImporter::createShapeCircle")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -291,7 +385,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody, const QDomNode& _Node)
         }
     }
     
-    _pBody->getGeometry().addShape(pPlanet);
+    _pBody->getGeometry()->addShape(pPlanet);
     
     METHOD_EXIT("CXMLImporter::createShapePlanet")
 }
@@ -343,7 +437,7 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody, const QDomNode& _Nod
         }
     }
     
-    _pBody->getGeometry().addShape(pPolyline);
+    _pBody->getGeometry()->addShape(pPolyline);
     
     METHOD_EXIT("CXMLImporter::createShapePolyline")
 }
@@ -388,16 +482,44 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody, const QDomNode& _Node
         }
     }
     
-    _pBody->getGeometry().addShape(pTerrain);
+    _pBody->getGeometry()->addShape(pTerrain);
     
     METHOD_EXIT("CXMLImporter::createShapeTerrain")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Create visuals to a circle shape
+///
+/// \param _pCircle Circle to create visuals for
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createVisualsCircle(CCircle* const _pCircle, const QDomNode& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createVisualsCircle")
+    
+    if (!_Node.isNull())
+    {
+        QDomElement E = _Node.toElement();
+        
+        if (E.attribute("type") == "Circle")
+        {
+            CCircleVisuals* pCircleVisuals = new CCircleVisuals(_pCircle);
+            MEM_ALLOC("pCircleVisuals")
+            
+            m_Visuals.push_back(pCircleVisuals);
+        }
+            
+    }
+    
+    METHOD_EXIT("CXMLImporter::createVisualsCircle")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Create visuals to a planet shape
 ///
-/// \param _pBody Body to receive visuals ids
 /// \param _pPlanet Planet to create visuals for
 /// \param _Node Current node in xml tree
 ///
@@ -427,7 +549,6 @@ void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet, const QDomNode& 
 ///
 /// \brief Create visuals to a polyline shape
 ///
-/// \param _pBody Body to receive visuals ids
 /// \param _pPolyline Polyline to create visuals for
 /// \param _Node Current node in xml tree
 ///
@@ -457,7 +578,6 @@ void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const QDom
 ///
 /// \brief Create visuals to a terrain shape
 ///
-/// \param _pBody Body to receive visuals ids
 /// \param _pTerrain Terrain to create visuals for
 /// \param _Node Current node in xml tree
 ///

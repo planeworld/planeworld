@@ -79,6 +79,35 @@ CPlanet::~CPlanet()
     METHOD_EXIT("CPlanet::~CPlanet")
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones planet
+///
+/// \return Pointer to cloned planet
+///
+////////////////////////////////////////////////////////////////////////////////
+CPlanet* CPlanet::clone() const
+{
+    METHOD_ENTRY("CPlanet::clone")
+    
+    CPlanet* pClone = new CPlanet();
+        
+    pClone->m_fAngle            = m_fAngle;
+    pClone->m_fGroundResolution = m_fGroundResolution;
+    pClone->m_fHeightMax        = m_fHeightMax;
+    pClone->m_fRadius           = m_fRadius;
+    pClone->m_fSmoothness       = m_fSmoothness;
+    pClone->m_nSeed             = m_nSeed;
+    pClone->m_vecCenter         = m_vecCenter;
+    pClone->m_vecCenter0        = m_vecCenter0;
+    pClone->m_AABB              = m_AABB;
+    pClone->m_nDepthlayers      = m_nDepthlayers;
+    pClone->m_VisualsID         = m_VisualsID;
+    
+    METHOD_EXIT("CPlanet::clone")
+    return pClone;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Initialises the planets terrain

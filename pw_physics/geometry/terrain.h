@@ -44,6 +44,7 @@ class CTerrain : public IShape
         virtual ~CTerrain();
         
         //--- Constant Methods -----------------------------------------------//
+        CTerrain*                       clone() const;
         const double&                   getAngle() const;
         const Vector2d&                 getCenter() const;
         const double&                   getDiversity() const;
@@ -51,10 +52,12 @@ class CTerrain : public IShape
         const double&                   getHeight() const;
         const int&                      getSeed() const;
         const double&                   getSmoothness() const;
-        const double&                   getSurface(const double&) const;
+        const double                    getSurface(const double&) const;
         const double&                   getWidth() const;
-        
+                
         const ShapeType                 getShapeType() const;
+        
+        const double                    snapToTerrainGrid(const double&) const;
 
         //--- Methods --------------------------------------------------------//
         void init();
@@ -72,7 +75,7 @@ class CTerrain : public IShape
                         
     protected:
 
-        std::vector<double> m_Cache;                  ///< Cached surface of terrain
+        std::vector<double> m_Cache;                    ///< Cached surface of terrain
         Vector2d            m_vecCenter;                ///< Center of terrain
         Vector2d            m_vecCenter0;               ///< Initial center of terrain
         double              m_fDiversity;               ///< Diversity of terrain
@@ -97,8 +100,6 @@ class CTerrain : public IShape
 inline const double& CTerrain::getAngle() const
 {
     METHOD_ENTRY("CTerrain::getAngle")
-
-    METHOD_EXIT("CTerrain::getAngle")
     return m_fAngle;
 }
 
@@ -112,8 +113,6 @@ inline const double& CTerrain::getAngle() const
 inline const Vector2d& CTerrain::getCenter() const
 {
     METHOD_ENTRY("CTerrain::getCenter")
-
-    METHOD_EXIT("CTerrain::getCenter")
     return m_vecCenter;
 }
 
@@ -130,8 +129,6 @@ inline const Vector2d& CTerrain::getCenter() const
 inline const double& CTerrain::getDiversity() const
 {
     METHOD_ENTRY("CTerrain::getDiversity")
-
-    METHOD_EXIT("CTerrain::getDiversity")
     return m_fDiversity;
 }
 
@@ -148,8 +145,6 @@ inline const double& CTerrain::getDiversity() const
 inline const double& CTerrain::getGroundResolution() const
 {
     METHOD_ENTRY("CTerrain::getNrOfSamplingPoints")
-
-    METHOD_EXIT("CTerrain::getNrOfSamplingPoints")
     return m_fGroundResolution;
 }
 
@@ -163,8 +158,6 @@ inline const double& CTerrain::getGroundResolution() const
 inline const double& CTerrain::getHeight() const
 {
     METHOD_ENTRY("CTerrain::getHeight")
-
-    METHOD_EXIT("CTerrain::getHeight")
     return m_fHeightMax;
 }
 
@@ -178,8 +171,6 @@ inline const double& CTerrain::getHeight() const
 inline const int& CTerrain::getSeed() const
 {
     METHOD_ENTRY("CTerrain::getSeed")
-
-    METHOD_EXIT("CTerrain::getSeed")
     return m_nSeed;
 }
 
@@ -193,8 +184,6 @@ inline const int& CTerrain::getSeed() const
 inline const double& CTerrain::getSmoothness() const
 {
     METHOD_ENTRY("CTerrain::getSmoothness")
-
-    METHOD_EXIT("CTerrain::getSmoothness")
     return m_fSmoothness;
 }
 
@@ -208,8 +197,6 @@ inline const double& CTerrain::getSmoothness() const
 inline const double& CTerrain::getWidth() const
 {
     METHOD_ENTRY("CTerrain::getWidth")
-
-    METHOD_EXIT("CTerrain::getWidth")
     return m_fWidth;
 }
 
@@ -223,16 +210,32 @@ inline const double& CTerrain::getWidth() const
 inline const ShapeType CTerrain::getShapeType() const
 {
     METHOD_ENTRY("CTerrain::getShapeType")
-
-    METHOD_EXIT("CTerrain::getShapeType")
     return SHAPE_TERRAIN;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the given position snapped to terrain grid
+///
+/// The method returns the position snapped to the cached terrain which is left
+/// to the given value (since the given value will simply be clipped).
+///
+/// \param _fX Point to get snapped position from
+///
+/// \return Snapped position
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double CTerrain::snapToTerrainGrid(const double& _fX) const
+{
+    METHOD_ENTRY("CTerrain::snapToTerrainGrid")
+    return floor((_fX+m_vecCenter[0])/m_fGroundResolution)*m_fGroundResolution-m_vecCenter[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Sets the diversity value of the terrain
 ///
-/// The diversity represents the frequency of terrain changes reffering to width
+/// The diversity represents the frequency of terrain changes refering to width
 /// of terrain.
 ///
 /// \param _fDiversity Diversity (frequency of terrain changes)
@@ -243,8 +246,6 @@ inline void CTerrain::setDiversity(const double& _fDiversity)
     METHOD_ENTRY("CTerrain::setDiversity")
 
     m_fDiversity = _fDiversity;
-
-    METHOD_EXIT("CTerrain::setDiversity")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -260,8 +261,6 @@ inline void CTerrain::setCenter(const Vector2d& _vecC)
 
     m_vecCenter0 = _vecC;
     m_vecCenter = _vecC;
-
-    METHOD_EXIT("CTerrain::setCenter")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -281,8 +280,6 @@ inline void CTerrain::setCenter(const double& _fX, const double& _fY)
 
     m_vecCenter[0] = _fX;
     m_vecCenter[1] = _fY;
-
-    METHOD_EXIT("CTerrain::setCenter")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -300,8 +297,6 @@ inline void CTerrain::setGroundResolution(const double& _fGRes)
     METHOD_ENTRY("CTerrain::setGroundResolution")
 
     m_fGroundResolution = _fGRes;
-
-    METHOD_EXIT("CTerrain::setGroundResolution")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -316,8 +311,6 @@ inline void CTerrain::setHeight(const double& _fH)
     METHOD_ENTRY("CTerrain::setHeight")
 
     m_fHeightMax = _fH;
-
-    METHOD_EXIT("CTerrain::setHeight")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -332,8 +325,6 @@ inline void CTerrain::setSeed(const int& _nS)
     METHOD_ENTRY("CTerrain::setSeed")
 
     m_nSeed = _nS;
-
-    METHOD_EXIT("CTerrain::setSeed")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -348,8 +339,6 @@ inline void CTerrain::setSmoothness(const double& _fS)
     METHOD_ENTRY("CTerrain::setSmoothness")
 
     m_fSmoothness = _fS;
-
-    METHOD_EXIT("CTerrain::setSmoothness")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -364,8 +353,6 @@ inline void CTerrain::setWidth(const double& _fW)
     METHOD_ENTRY("CTerrain::setWidth")
 
     m_fWidth = _fW;
-
-    METHOD_EXIT("CTerrain::setWidth")
 }
 
 #endif

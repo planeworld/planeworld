@@ -267,10 +267,10 @@ bool CGraphics::init()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     // Enable anti-aliasing
-//  glEnable(GL_LINE_SMOOTH);
-//  glShadeModel(GL_SMOOTH);
-//  glEnable(GL_POLYGON_SMOOTH);
-//  glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
+    glEnable(GL_LINE_SMOOTH);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_POLYGON_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
 
     // Test for depthbuffer and enable if possible
 //  glEnable(GL_DEPTH_TEST);

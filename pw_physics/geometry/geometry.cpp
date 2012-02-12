@@ -24,7 +24,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CGeometry::CGeometry()
+CGeometry::CGeometry() : m_pShapesCurrent(&m_Shapes1),
+                         m_pShapesPrevious(&m_Shapes2)
 {
     METHOD_ENTRY("CGeometry::CGeometry")
     CTOR_CALL("CGeometry::CGeometry")
@@ -42,8 +43,8 @@ CGeometry::~CGeometry()
     METHOD_ENTRY("CGeometry::~CGeometry")
     DTOR_CALL("CGeometry::~CGeometry")
 
-    for (std::list< IShape* >::iterator it = m_ShapeList.begin();
-        it != m_ShapeList.end(); ++it)
+    for (std::list< IShape* >::iterator it = m_Shapes1.begin();
+        it != m_Shapes1.end(); ++it)
     {
         // Free memory if pointer is still existent
         if ((*it) != 0)
@@ -54,8 +55,8 @@ CGeometry::~CGeometry()
         }
     }
     
-    for (std::list< IShape* >::iterator it = m_PrevShapeList.begin();
-        it != m_PrevShapeList.end(); ++it)
+    for (std::list< IShape* >::iterator it = m_Shapes2.begin();
+        it != m_Shapes2.end(); ++it)
     {
         // Free memory if pointer is still existent
         if ((*it) != 0)
@@ -80,38 +81,9 @@ void CGeometry::addShape(IShape* _pShape)
 {
     METHOD_ENTRY("CGeometry::addShape")
 
-    m_ShapeList.push_back(_pShape);
+    m_pShapesCurrent->push_back(_pShape);
+    m_pShapesPrevious->push_back(_pShape->clone());
     
-    switch (_pShape->getShapeType())
-    {
-        case SHAPE_CIRCLE:
-        {
-            CCircle* pS = new CCircle();
-            MEM_ALLOC("pS");
-            *pS = *(static_cast<CCircle*>(_pShape));
-            m_PrevShapeList.push_back(pS);
-            break;
-        }
-        case SHAPE_RECTANGLE:
-        {
-            CRectangle* pS = new CRectangle();
-            MEM_ALLOC("pS");
-            *pS = *(static_cast<CRectangle*>(_pShape));
-            m_PrevShapeList.push_back(pS);
-            break;
-        }
-        case SHAPE_POLYLINE:
-        {
-            CPolyLine* pS = new CPolyLine();
-            MEM_ALLOC("pS");
-            *pS = *(static_cast<CPolyLine*>(_pShape));
-            m_PrevShapeList.push_back(pS);
-            break;
-        }
-        case SHAPE_NONE:
-            break;
-    }
-
     METHOD_EXIT("CGeometry::addShape")
 }
 
@@ -126,41 +98,16 @@ void CGeometry::setShapes(const std::list<IShape*> _ShapeList)
 {
     METHOD_ENTRY("CGeometry::setShapes")
 
-    m_ShapeList = _ShapeList;
+    m_pShapesPrevious->clear();
+    m_pShapesCurrent->clear();
     
-    std::list<IShape*>::const_iterator ci = m_ShapeList.begin();
+    *m_pShapesCurrent = _ShapeList;
     
-    while (ci != m_ShapeList.end())
+    std::list<IShape*>::const_iterator ci = m_pShapesCurrent->begin();
+    
+    while (ci != m_pShapesCurrent->end())
     {
-        switch ((*ci)->getShapeType())
-        {
-            case SHAPE_CIRCLE:
-            {
-                CCircle* pS = new CCircle();
-                MEM_ALLOC("pS");
-                *pS = *(static_cast<CCircle*>((*ci)));
-                m_PrevShapeList.push_back(pS);
-                break;
-            }
-            case SHAPE_RECTANGLE:
-            {
-                CRectangle* pS = new CRectangle();
-                MEM_ALLOC("pS");
-                *pS = *(static_cast<CRectangle*>((*ci)));
-                m_PrevShapeList.push_back(pS);
-                break;
-            }
-            case SHAPE_POLYLINE:
-            {
-                CPolyLine* pS = new CPolyLine();
-                MEM_ALLOC("pS");
-                *pS = *(static_cast<CPolyLine*>((*ci)));
-                m_PrevShapeList.push_back(pS);
-                break;
-            }
-            case SHAPE_NONE:
-                break;
-        }
+        m_pShapesPrevious->push_back((*ci)->clone());
         ++ci;
     }
     
@@ -169,42 +116,14 @@ void CGeometry::setShapes(const std::list<IShape*> _ShapeList)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Copy current shapelist as shapes of previous time step
-///
-/// \todo Better swap than copy shapelist
+/// \brief Swap current shapelist with shapes of previous time step
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CGeometry::update()
 {
     METHOD_ENTRY("CGeometry::update")
-
-    std::list<IShape*>::const_iterator ci = m_ShapeList.begin();
-    std::list<IShape*>::iterator it = m_PrevShapeList.begin();
-    while (ci != m_ShapeList.end())
-    {
-        switch ((*ci)->getShapeType())
-        {
-            case SHAPE_CIRCLE:
-            {
-                *(static_cast<CCircle*>((*it))) = *(static_cast<CCircle*>((*ci)));
-                break;
-            }
-            case SHAPE_RECTANGLE:
-            {
-                *(static_cast<CRectangle*>((*it))) = *(static_cast<CRectangle*>((*ci)));
-                break;
-            }
-            case SHAPE_POLYLINE:
-            {
-                *(static_cast<CPolyLine*>((*it))) = *(static_cast<CPolyLine*>((*ci)));
-                break;
-            }
-            case SHAPE_NONE:
-                break;
-        }
-        ++ci;
-        ++it;
-    }
+    
+    std::swap(m_pShapesCurrent,m_pShapesPrevious);
     
     METHOD_EXIT("CGeometry::update")
 }

@@ -1,5 +1,9 @@
 <!DOCTYPE PlaneworldML>
 <universe>
+  <gravity
+    vec_x="0.0"
+    vec_y="-1.81"
+  />
   <!-- Create the active camera -->
   <camera
     hook="Terrain"
@@ -8,7 +12,7 @@
     viewport_width="300.0"
     viewport_height="180.0"
   />
-  <!-- Create a box -->
+  <!-- Create a terrain -->
   <object type="RigidBody">
     <core
       name="Terrain"
@@ -21,10 +25,10 @@
     <shape type="Terrain"
       width="3.0e4"
       height_max="100.0"
-      ground_resolution="0.1"
+      ground_resolution="0.8"
       diversity="5.0"
       transition="0.2"
-      center_x="0.0"
+      center_x="0.3"
       center_y="100.0">
       <visuals type="Terrain"/>
     </shape>

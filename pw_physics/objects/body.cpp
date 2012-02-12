@@ -109,8 +109,8 @@ void CBody::myInit()
     m_pIntAng->reset();
     m_pIntAngVel->reset();
     
-    for (std::list< IShape* >::const_iterator ci = m_Geometry.getShapes().begin();
-        ci != m_Geometry.getShapes().end(); ++ci)
+    for (std::list< IShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
+        ci != m_Geometry.getShapes()->end(); ++ci)
     {
         (*ci)->transform(m_fAngle, m_pIntPos->getValue());
 
@@ -121,7 +121,17 @@ void CBody::myInit()
         m_Geometry.updateBoundingBox((*ci)->getBoundingBox());
     }
     // Copy geometry to previous timestep
-    m_Geometry.update();
+    for (std::list< IShape* >::const_iterator ci = m_Geometry.getPrevShapes()->begin();
+        ci != m_Geometry.getPrevShapes()->end(); ++ci)
+    {
+        (*ci)->transform(m_fAngle, m_pIntPos->getValue());
+
+        // Update depthlayers
+        m_nDepthlayers |= (*ci)->getDepths();
+
+        // Update bounding box of current time step
+        m_Geometry.updateBoundingBox((*ci)->getBoundingBox());
+    }
 
     METHOD_EXIT("CBody::myInit")
 }
@@ -186,8 +196,8 @@ void CBody::myTransform()
     METHOD_ENTRY("CBody::myTransform")
 
     m_Geometry.update();
-    for (std::list< IShape* >::const_iterator ci = m_Geometry.getShapes().begin();
-        ci != m_Geometry.getShapes().end(); ++ci)
+    for (std::list< IShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
+        ci != m_Geometry.getShapes()->end(); ++ci)
     {
         // Update bounding box of previous time step for continuous collision dection
         m_Geometry.updateBoundingBox((*ci)->getBoundingBox());

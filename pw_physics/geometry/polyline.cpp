@@ -45,6 +45,30 @@ CPolyLine::~CPolyLine()
     METHOD_EXIT("CPolyLine::~CPolyLine()");
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones polyline
+///
+/// \return Pointer to cloned polyline
+///
+////////////////////////////////////////////////////////////////////////////////
+CPolyLine* CPolyLine::clone() const
+{
+    METHOD_ENTRY("CPolyLine::clone")
+    
+    CPolyLine* pClone = new CPolyLine();
+    
+    pClone->m_LineType     = m_LineType;
+    pClone->m_VertList     = m_VertList;
+    pClone->m_VertList0    = m_VertList0;
+    pClone->m_AABB         = m_AABB;
+    pClone->m_nDepthlayers = m_nDepthlayers;
+    pClone->m_VisualsID    = m_VisualsID;
+    
+    METHOD_EXIT("CPolyLine::clone")
+    return pClone;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Transforms the shape

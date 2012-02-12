@@ -22,8 +22,10 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "circle.h"
+#include "planet.h"
 #include "polyline.h"
 #include "rectangle.h"
+#include "terrain.h"
 
 //--- Standard header --------------------------------------------------------//
 
@@ -44,9 +46,9 @@ class CGeometry
         virtual ~CGeometry();
 
         //--- Constant methods -----------------------------------------------//
-        const CBoundingBox&         getBoundingBox() const;
-        const std::list<IShape*>&   getShapes() const;
-        const std::list<IShape*>&   getPrevShapes() const;
+        const CBoundingBox&             getBoundingBox() const;
+        const std::list<IShape*>* const getShapes() const;
+        const std::list<IShape*>* const getPrevShapes() const;
         
         //--- Methods --------------------------------------------------------//
         CBoundingBox&  getBoundingBox();
@@ -64,8 +66,10 @@ class CGeometry
         //-- Variables [protected] -------------------------------------------//
         CBoundingBox m_AABB;                    ///< Bounding box
         
-        std::list<IShape*> m_ShapeList;        ///< Reference to shapes
-        std::list<IShape*> m_PrevShapeList;    ///< Reference to shapes of previous time step
+        std::list<IShape*>* m_pShapesCurrent;   ///< Shapes (current timestep)
+        std::list<IShape*>* m_pShapesPrevious;  ///< Shapes (previous timestep)
+        std::list<IShape*>  m_Shapes1;          ///< Shapes (current or previous timestep)
+        std::list<IShape*>  m_Shapes2;          ///< Shapes (current or previous timestep)
         
 };
 
@@ -93,12 +97,12 @@ inline const CBoundingBox& CGeometry::getBoundingBox() const
 /// \return Shapelist
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::list< IShape* >& CGeometry::getShapes() const
+inline const std::list< IShape* >* const CGeometry::getShapes() const
 {
     METHOD_ENTRY("CGeometry::getShapes")
 
     METHOD_EXIT("CGeometry::getShapes")
-    return m_ShapeList;
+    return m_pShapesCurrent;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,12 +112,12 @@ inline const std::list< IShape* >& CGeometry::getShapes() const
 /// \return Shapelist
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::list< IShape* >& CGeometry::getPrevShapes() const
+inline const std::list< IShape* >* const CGeometry::getPrevShapes() const
 {
     METHOD_ENTRY("CGeometry::getPrevShapes")
 
     METHOD_EXIT("CGeometry::getPrevShapes")
-    return m_PrevShapeList;
+    return m_pShapesPrevious;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -27,7 +27,9 @@
 #include "collision_manager.h"
 #include "joint.h"
 
-const double PHYSICS_DEFAULT_FREQUENCY = 60.0;
+const double PHYSICS_DEFAULT_FREQUENCY = 100.0;
+
+typedef std::list<IObject*> ObjectsType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -54,7 +56,7 @@ class CPhysicsManager
         const double getFrequency() const;
 
         //--- Methods --------------------------------------------------------//
-        void setConstantGravitation(const Vector2d&);
+        void setConstantGravity(const Vector2d&);
         void addGlobalForces();
         void addDebris(CDebris*);
         void addJoint(IJoint*);
@@ -81,8 +83,8 @@ class CPhysicsManager
 
         std::list<CDebris*> m_Debris;               ///< List of debris
         std::list<IJoint*>  m_JointList;            ///< List of joints
-        std::list<IObject*> m_DynamicObjects;       ///< List of dynamic objects
-        std::list<IObject*> m_StaticObjects;        ///< List of static objects
+        ObjectsType         m_DynamicObjects;       ///< List of dynamic objects
+        ObjectsType         m_StaticObjects;        ///< List of static objects
         
         ContactList         m_ContactList;          ///< List of contacts
 };
@@ -106,18 +108,18 @@ inline const double CPhysicsManager::getFrequency() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set vector for a constant gravitation
+/// \brief Set vector for a constant gravity
 ///
 /// \param _vecG Gravity vector
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::setConstantGravitation(const Vector2d& _vecG)
+inline void CPhysicsManager::setConstantGravity(const Vector2d& _vecG)
 {
-    METHOD_ENTRY("CPhysicsManager::setConstantGravitation")
+    METHOD_ENTRY("CPhysicsManager::setConstantGravity")
 
     m_vecConstantGravitation = _vecG;
 
-    METHOD_EXIT("CPhysicsManager::setConstantGravitation")
+    METHOD_EXIT("CPhysicsManager::setConstantGravitaty")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

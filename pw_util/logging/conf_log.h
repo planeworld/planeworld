@@ -20,6 +20,9 @@
 #ifndef CONF_LOG_H
 #define CONF_LOG_H
 
+// Version of the configuration
+#define LOGGING_VERSION 1
+
 //--- Configuration of loglevel: ---------------------------------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,6 +65,10 @@
 //====================================================//
 #define LOG_LOCKING_ON
 
+//--- Indention of output on/off ---//
+//==================================//
+#define OUTPUT_INDENTION
+
 //--- Otherwise use custom loglevel 
 //--- Uncomment one (only one!) level to be used for displaying ---//
 //=================================================================//
@@ -72,14 +79,13 @@
 // #define LOGLEVEL_WARNING
 // #define LOGLEVEL_ERROR
 // #define LOGLEVEL_NONE
-// #endif
 
 //--- Uncomment all domains that should be used for logging ---//
 //=============================================================//
 
 #define DOMAIN_NONE
-// #define DOMAIN_METHOD_ENTRY
-// #define DOMAIN_METHOD_EXIT
+#define DOMAIN_METHOD_ENTRY
+#define DOMAIN_METHOD_EXIT
 // #define DOMAIN_CONSTRUCTOR
 // #define DOMAIN_DESTRUCTOR
 // #define DOMAIN_MEMORY_ALLOCATED

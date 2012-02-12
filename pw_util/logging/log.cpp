@@ -19,6 +19,8 @@
 
 #include "log.h"
 
+#include <sys/ioctl.h>
+
 std::ostringstream  CLog::s_strStr; ///< Used for streaming functionality in macros
 LogDomainType       CLog::s_Dom = LOG_DOMAIN_NONE;    ///< Used for domain handling in macros
 CLog& Log=CLog::getInstance();
@@ -48,8 +50,6 @@ CLog::~CLog()
             DEBUG_MSG("IMPORTANT", "The last message results from debug information. A lower loglevel won't display it.")
         }
     #endif
-
-    METHOD_EXIT("CLog::~CLog");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,6 @@ CLog& CLog::getInstance()
     
     // !!! Do not log the getInstance method, since there is no reference yet !!!
     //  METHOD_ENTRY("CLog::getInstance");
-    //  METHOD_EXIT("CLog::getInstance");
     
     return (Instance);
 }
@@ -83,29 +82,28 @@ const LogColourSchemeType CLog::stringToColourScheme(const std::string& _strSche
 {
     METHOD_ENTRY("CLog::stringToColourScheme");
     
-    if (_strScheme == "mono_on_white")
+    if (_strScheme == "default")
     {
-        METHOD_EXIT("CLog::stringToColourScheme");
+        return LOG_COLOUR_SCHEME_DEFAULT;
+    }
+    else if (_strScheme == "mono_on_white")
+    {
         return LOG_COLOUR_SCHEME_MONOONWHITE;
     }
     else if (_strScheme == "mono_on_black")
     {
-        METHOD_EXIT("CLog::stringToColourScheme");
         return LOG_COLOUR_SCHEME_MONOONBLACK;
     }
     else if (_strScheme == "on_black")
     {
-        METHOD_EXIT("CLog::stringToColourScheme");
         return LOG_COLOUR_SCHEME_ONBLACK;
     }
     else if (_strScheme == "on_white")
     {
-        METHOD_EXIT("CLog::stringToColourScheme");
         return LOG_COLOUR_SCHEME_ONWHITE;
     }
     else
     {
-        WARNING_MSG("Logging", _strScheme << " unknown, using \"mono_on_white\"");
         return LOG_COLOUR_SCHEME_MONOONWHITE;
     }
 }
@@ -120,6 +118,8 @@ const LogColourSchemeType CLog::stringToColourScheme(const std::string& _strSche
 /// \param _strMessage Message
 /// \param _Level State of message
 /// \param _Domain Domain the message should be associated with
+///
+/// \bug Domains appear in logfile, even if loglevel is below DEBUG
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
@@ -150,7 +150,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
             #ifdef DOMAIN_METHOD_HIERARCHY
                 if (_Domain == LOG_DOMAIN_METHOD_EXIT)
                 {
-                    --m_nHierLevel;
+                    this->unindent();
                 }
             #endif
             if ((m_strMsgBufSrc == _strSrc) && (m_strMsgBufMsg == _strMessage) &&
@@ -267,7 +267,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
             #ifdef DOMAIN_METHOD_HIERARCHY
                 if (_Domain == LOG_DOMAIN_METHOD_ENTRY)
                 {
-                    ++m_nHierLevel;
+                    this->indent();
                 }
             #endif
         }
@@ -277,8 +277,6 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
         m_MsgBufLevel = _Level;
         m_MsgBufDom = _Domain;
     }
-    // !!! Do not log the logging method, this action will never stop
-    // METHOD_EXIT("CLog::log");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -352,9 +350,6 @@ void CLog::logSeparator(LogLevelType _Level)
                 break;
         }
     }
-
-    // Method exit isn't really nice here
-    //METHOD_EXIT("CLog::logSeparator(LogSevType)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -369,8 +364,6 @@ void CLog::setDynSetting(const bool& _bDynSet)
     METHOD_ENTRY("CLog::setDynSetting");
 
     m_bDynSetting = _bDynSet;
-
-    METHOD_EXIT("CLog::setDynSetting");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -409,8 +402,6 @@ void CLog::setLoglevel(const LogLevelType& _Loglevel)
             }
         }
     }
-
-    METHOD_EXIT("CLog::setLoglevel");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -432,8 +423,6 @@ void CLog::setDomain(const LogDomainType& _Domain)
         m_abDomain[_Domain] = true;
         DEBUG_MSG("Logging", "Set domain "+convLogDom2Str(_Domain))
     }
-
-    METHOD_EXIT("CLog::setDomain");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -456,8 +445,6 @@ void CLog::unsetDomain(const LogDomainType& _Domain)
         m_abDomain[_Domain] = false;
         DEBUG_MSG("Logging", "Unset domain "+convLogDom2Str(_Domain))
     }
-
-    METHOD_EXIT("CLog::unsetDomain");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -473,6 +460,18 @@ void CLog::setColourScheme(const LogColourSchemeType _ColourScheme)
 
     switch(_ColourScheme)
     {
+        case LOG_COLOUR_SCHEME_DEFAULT:
+        {
+            m_strColDefault = "";
+            m_strColSender = "";
+            m_strColDebug = "";
+            m_strColInfo = "";
+            m_strColNotice = "";
+            m_strColWarning = "";
+            m_strColError = "";
+            m_strColRepetition = "";
+            break;
+        }
         case LOG_COLOUR_SCHEME_MONOONBLACK:
         {
             m_strColDefault = "\033[0;37m";
@@ -522,65 +521,113 @@ void CLog::setColourScheme(const LogColourSchemeType _ColourScheme)
             break;
         }
     }
-
-    METHOD_EXIT("setColourScheme");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Shows a progress bar in the console
 ///
+/// \param _strMsg Message for progress bar
 /// \param _nI Current loop index
 /// \param _nLoopSize Size of loop = maximum loop index + 1
 /// \param _nBarSize Size of progress bar (ascii blocks)
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CLog::progressBar(const int& _nI, const int& _nLoopSize, const int& _nBarSize)
+void CLog::progressBar(const std::string& _strMsg, const int& _nI,
+                       const int& _nLoopSize, const int& _nBarSize)
 {
-    METHOD_ENTRY("CLog::progressBar");
+//     METHOD_ENTRY("CLog::progressBar");
 
-    if (m_bFirstCall == true)
+    if (m_bPBarFirstCall == true)
     {
-        m_bFirstCall = false;
+        m_bPBarFirstCall = false;
+        m_bPBarDone = false;
         m_Timer.stop();
         m_Timer.start();
+        m_fPreviousIterationTime = m_Timer.getSplitTime();
+        m_fEstimatedIterationTime = 0.0;
+        INFO_MSG("Processing started", _strMsg)
     }
 
     if (_nI == _nLoopSize-1)
     {
-        m_bFirstCall = true;
+        m_bPBarFirstCall = true;
     }
-
-    if (_nI % (_nLoopSize/_nBarSize+1) == 0)
+    
+    if (!m_bPBarDone)
     {
-        std::cout << m_strColRepetition << "[progress] ";
-        for (int i=0; i<(_nBarSize*_nI)/_nLoopSize; ++i)
+        if (_nI != 0 && _nI % m_iProcessorCount == 0)
         {
-            std::cout << "#";
-        }
-        for (int i=0; i<_nBarSize-(_nBarSize*_nI)/_nLoopSize-1; ++i)
-        {
-            std::cout << "=";
+            double fCurrentIterationTime = m_Timer.getSplitTime();
+            double fIterationTime = (fCurrentIterationTime - m_fPreviousIterationTime) / m_iProcessorCount;
+            
+            if (_nI == m_iProcessorCount)
+                m_fEstimatedIterationTime = fIterationTime;
+            else
+                m_fEstimatedIterationTime = m_fEstimationSmoothing * m_fEstimatedIterationTime + (1.0 - m_fEstimationSmoothing) * fIterationTime;
+            
+            m_fPreviousIterationTime = fCurrentIterationTime;
         }
         
         // Done with progress bar
-        if (_nBarSize-(_nBarSize*_nI)/_nLoopSize-1 == 0)
+        if (_nI==_nLoopSize-1)
         {
             #ifdef LOG_LOCKING_ON
-                m_bUnlock = true;
                 m_bLock = false;
             #endif
-            std::cout << std::endl;
+            std::cout << "\r";
+            for (int i=0; i<m_unColsMax; ++i)
+            {
+                std::cout << " ";
+            }
+            std::cout << "\r" << m_strColDefault;
+//             std::cout.flush();
+
+            double fDuration = m_Timer.getSplitTime();
+            
+            std::string strUnit = "s              ";
+            if (fDuration > 60.0)
+            {
+                strUnit = "min            ";
+                fDuration /= 60.0;
+                if (fDuration > 60.0)
+                {
+                    strUnit = "h               ";
+                    fDuration /= 60.0;
+                    if (fDuration > 24.0)
+                    {
+                        strUnit = "day(s)        ";
+                        fDuration /= 24.0;
+                    }
+                }
+            }
+
+            INFO_MSG("Processing finished", "Duration: " << std::setprecision(2) <<
+                    fDuration << strUnit << std::setprecision(5))
+            m_bPBarDone = true;
         }
-        else
+        else if (_nI % (_nLoopSize/_nBarSize+1) == 0)
         {
+            std::cout << m_strColRepetition << "[progress] ";
+            for (int i=0; i<(_nBarSize*_nI)/_nLoopSize; ++i)
+            {
+                std::cout << "#";
+            }
+            for (int i=0; i<_nBarSize-(_nBarSize*_nI)/_nLoopSize-1; ++i)
+            {
+                std::cout << "=";
+            }
+            
+
             #ifdef LOG_LOCKING_ON
                 m_bLock = true;
             #endif
 
-            double fETE = (m_Timer.getSplitTime() / _nI * (_nLoopSize-_nI));
+            //double fETE = (m_Timer.getSplitTime() / _nI * (_nLoopSize-_nI));
+            
+            double fETE = (_nLoopSize - _nI) * m_fEstimatedIterationTime;
+            
             std::string strUnit = "s              ";
-
             if (fETE > 60.0)
             {
                 strUnit = "min            ";
@@ -598,13 +645,13 @@ void CLog::progressBar(const int& _nI, const int& _nLoopSize, const int& _nBarSi
             }
 
             std::cout << " ETE: " << std::setprecision(2) << fETE << strUnit << "\r";
+            std::cout << std::setprecision(5);
             std::cout.flush();
+            
         }
     }
 
     std::cout << m_strColDefault;
-
-    METHOD_EXIT("CLog::progressBar");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -614,10 +661,12 @@ void CLog::progressBar(const int& _nI, const int& _nLoopSize, const int& _nBarSi
 ///////////////////////////////////////////////////////////////////////////////
 CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
                 m_bLock(false),
-                m_bUnlock(false),
-                m_bFirstCall(true),
+                m_bPBarFirstCall(true),
+                m_bPBarDone(false),
+                m_fEstimationSmoothing(0.75),
+                m_iProcessorCount(sysconf(_SC_NPROCESSORS_ONLN)),
                 m_unColsMax(LOG_COLSMAX_DEFAULT),
-                m_strColDefault("\033[1;30m"),
+                m_strColDefault(""),
                 m_strColSender(""),
                 m_strColDebug(""),
                 m_strColInfo(""),
@@ -716,7 +765,11 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
 //  METHOD_ENTRY("CLog::CLog");
 
 //  CTOR_CALL("CLog::CLog");
-//  METHOD_EXIT("CLog::CLog");
+    
+    // Request the terminal width from the system
+    struct winsize w;
+    ioctl(0, TIOCGWINSZ, &w);
+    m_unColsMax = w.ws_col;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -763,7 +816,6 @@ std::string CLog::convLogDom2Str(const LogDomainType& _LogDomain)
             break;
     }
 
-    METHOD_EXIT("CLog::convLogDom2Str");
     return strOut;
 }
 
@@ -802,6 +854,5 @@ std::string CLog::convLogLev2Str(const LogLevelType& _Loglevel)
             break;
     }
 
-    METHOD_EXIT("CLog::convLogLev2Str");
     return strOut;
 }

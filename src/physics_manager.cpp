@@ -46,7 +46,7 @@ CPhysicsManager::~CPhysicsManager()
     METHOD_ENTRY("CPhysicsManager::~CPhysicsManager")
     DTOR_CALL("CPhysicsManager::~CPhysicsManager")
 
-    for (std::list< IObject* >::iterator it = m_DynamicObjects.begin();
+    for (ObjectsType::iterator it = m_DynamicObjects.begin();
         it != m_DynamicObjects.end(); ++it)
     {
         // Free memory if pointer is still existent
@@ -62,7 +62,8 @@ CPhysicsManager::~CPhysicsManager()
         }
     };
     
-    for (std::list< IObject* >::iterator it = m_StaticObjects.begin();
+    
+    for (ObjectsType::iterator it = m_StaticObjects.begin();
         it != m_StaticObjects.end(); ++it)
     {
         // Free memory if pointer is still existent
@@ -77,7 +78,7 @@ CPhysicsManager::~CPhysicsManager()
             DOM_MEMF(DEBUG_MSG("IObject*", "Memory already freed."))
         }
     };
-    
+        
     for (std::list< CDebris* >::iterator it = m_Debris.begin();
         it != m_Debris.end(); ++it)
     {
@@ -124,7 +125,7 @@ void CPhysicsManager::addGlobalForces()
 {
     METHOD_ENTRY("CPhysicsManager::addGlobalForces")
 
-    std::list< IObject* >::const_iterator cj;
+    ObjectsType::const_iterator cj;
     double fCCSqr;
     Vector2d vecCC;
     Vector2d vecG;
@@ -135,7 +136,7 @@ void CPhysicsManager::addGlobalForces()
         (*ci)->react();
     }
 
-    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
         cj = ci;
@@ -240,7 +241,7 @@ void CPhysicsManager::addObjects(std::list<IObject*> _Objects)
 {
     METHOD_ENTRY("CPhysicsManager::addObjects")
 
-    std::list<IObject*>::const_iterator ci = _Objects.begin();
+    ObjectsType::const_iterator ci = _Objects.begin();
   
     while (ci != _Objects.end())
     {
@@ -290,14 +291,13 @@ void CPhysicsManager::moveMasses(int nTest)
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
 
-    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
         (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel);
         (*ci)->transform();
         (*ci)->clearForces();
     }
-//     if (nTest % 30 == 0)
     {
         for (std::list< CDebris* >::const_iterator ci = m_Debris.begin();
             ci != m_Debris.end(); ++ci)
@@ -327,12 +327,12 @@ void CPhysicsManager::initObjects()
 
     INFO_MSG("Physics Manager", "Initialising objects.")
 
-    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
         (*ci)->init();
     };
-    for (std::list< IObject* >::const_iterator ci = m_StaticObjects.begin();
+    for (ObjectsType::const_iterator ci = m_StaticObjects.begin();
         ci != m_StaticObjects.end(); ++ci)
     {
         (*ci)->init();

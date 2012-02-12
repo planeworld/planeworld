@@ -60,6 +60,7 @@ typedef enum
 /// Represents logging level
 typedef enum 
 {
+    LOG_COLOUR_SCHEME_DEFAULT,
     LOG_COLOUR_SCHEME_MONOONBLACK,
     LOG_COLOUR_SCHEME_MONOONWHITE,
     LOG_COLOUR_SCHEME_ONBLACK,
@@ -105,6 +106,8 @@ class CLog
         const LogColourSchemeType stringToColourScheme(const std::string&) const;
 
         //--- Methods --------------------------------------------------------//
+        void indent();
+        void unindent();
         void log(const std::string&, const std::string&, const LogLevelType&,
                 const LogDomainType& = LOG_DOMAIN_NONE);
         void logSeparator(LogLevelType = LOG_LEVEL_INFO);
@@ -114,7 +117,7 @@ class CLog
         void setDomain(const LogDomainType&);
         void unsetDomain(const LogDomainType&);
         void setColourScheme(const LogColourSchemeType);
-        void progressBar(const int&, const int&, const int& _nBarSize=60);
+        void progressBar(const std::string&, const int&, const int&, const int& _nBarSize=60);
         
     private:
     
@@ -125,9 +128,13 @@ class CLog
         bool            m_abDomain[LOG_NOD];    ///< Special flags indicating if domain should be logged
         bool            m_bDynSetting;
         bool            m_bLock;                ///< Locks output for progress bar
-        bool            m_bUnlock;              ///< Flags if p-bar already unlocked logging
-        bool            m_bFirstCall;           ///< Progress bar starting
+        bool            m_bPBarFirstCall;       ///< Progress bar starting
+        bool            m_bPBarDone;            ///< Progress done
         CTimer          m_Timer;                ///< Timer for progress bar (ETA)
+        double          m_fPreviousIterationTime;   ///< Stores the timer value from the last iteration
+        double          m_fEstimationSmoothing;     ///< Strength of the smoothing for the estimated speed
+        double          m_fEstimatedIterationTime;  ///< Estimated time for one iteration for the progress bar
+        int             m_iProcessorCount;          ///< The number of available cpu cores
         
         #ifdef DOMAIN_MEMORY
             int             m_nMemCounter;      ///< Counts memory (de)allocations
@@ -167,6 +174,40 @@ class CLog
 };
 
 extern CLog& Log; ///< Global logging instance
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Helper class for method entry/exit
+///
+/// This class is automatically used by METHOD_ENTRY and METHOD_EXIT.
+/// Entry and Exit messages are automatically created when the constructor and
+/// destructor are called. This guarantuees, that the Exit message is created
+/// even in case of multiple exit points and unhandled exceptions.
+///
+////////////////////////////////////////////////////////////////////////////////
+class CLogMethodHelper
+{
+    public:
+      CLogMethodHelper(const std::string &methodname)
+      : m_methodname(methodname)
+      {
+        DOM_MENT( \
+          CLog::s_strStr.str(""); \
+          CLog::s_strStr << m_methodname; \
+          Log.log("Method entry", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+      }
+      
+      ~CLogMethodHelper()
+      {
+        DOM_MEXT( \
+          CLog::s_strStr.str(""); \
+          CLog::s_strStr << m_methodname; \
+          Log.log("Method exit", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+      }
+    
+    private:
+      std::string m_methodname;
+};
 
 // ////////////////////////////////////////////////////////////////////////////////
 // ///
@@ -215,8 +256,35 @@ inline void CLog::setBreak(const unsigned short& _unCols)
         m_unColsMax = _unCols;
         DOM_VAR(DEBUG_MSG("Logging", "Max. number of columns: " << _unCols))
     }
-
-    METHOD_EXIT("CLog::setBreak")
 }
+
+#ifdef DOMAIN_METHOD_HIERARCHY
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief  Indent output
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CLog::indent()
+{
+//     METHOD_ENTRY("CLog::indent")
+    ++m_nHierLevel;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief  Unindent output
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CLog::unindent()
+{
+//     METHOD_ENTRY("CLog::unindent")
+    if (m_nHierLevel > 0)
+        --m_nHierLevel;
+    else
+    {
+        NOTICE_MSG("Logging", "Something went wrong with indention.")
+    }
+}
+#endif
 
 #endif

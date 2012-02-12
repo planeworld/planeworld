@@ -49,37 +49,6 @@ IObject::IObject(): m_bGravitation(true),
     METHOD_EXIT("IObject::IObject")
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Copy constructor, initialising mass
-///
-///////////////////////////////////////////////////////////////////////////////
-IObject::IObject(const double& _fM):
-                    m_bGravitation(true),
-                    m_bDynamics(true),
-                    m_fTimeFac(1.0),
-                    m_fMass(_fM),
-                    m_nDepthlayers(0),
-                    m_strName("Object")
-{
-    METHOD_ENTRY("IObject::IObject")
-    CTOR_CALL("IObject::IObject")
-    
-    m_pIntPos = new CAdamsMoultonIntegrator<Vector2d>;
-    MEM_ALLOC("m_pIntPos")
-    m_pIntVel = new CAdamsBashforthIntegrator<Vector2d>;
-    MEM_ALLOC("m_pIntVel")
-
-    m_vecOrigin0.setZero();
-    m_vecCOM.setZero();
-    m_vecForce.setZero();
-    m_vecGrid.setZero();
-
-    m_Lifetime.start();
-
-    METHOD_EXIT("IObject::IObject")
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Destructor
