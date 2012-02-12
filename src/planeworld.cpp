@@ -51,6 +51,16 @@ extern "C" {
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Usage to call program
+///
+///////////////////////////////////////////////////////////////////////////////
+void usage()
+{
+    std::cout << "Usage: planeworld UNIVERSE_DATA_FILE" << std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief main function
 ///
 /// This is the entrance point for program startup.
@@ -62,6 +72,12 @@ extern "C" {
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
+    if (argc != 2)
+    {
+        usage();
+        return EXIT_FAILURE;
+    }
+    
     Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
     
     bool                bIsActive = true;
