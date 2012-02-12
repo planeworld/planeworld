@@ -1078,6 +1078,7 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
             
             ++ciB1; ++ciB0;
         }
+        /// \todo LINETYPE_LOOP must be tested here to for _pB1
         ++ciA01; ++ciA00; ++ciA11; ++ciA10;
     }
     if (_pA1->getLineType() == GRAPHICS_LINETYPE_LOOP)
@@ -1157,6 +1158,7 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
             
             ++ciB1, ++ciB0;
         }
+        /// \todo LINETYPE_LOOP must be tested here to for _pB1
     }
     
     if (fT<=1.0)
