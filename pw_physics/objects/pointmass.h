@@ -43,8 +43,8 @@ class CPointMass : public IObject
         virtual ~CPointMass();                          ///< Destructor
 
         //--- Constant Methods -----------------------------------------------//
-        const Vector2d getAnchor(const int&) const {return Vector2d();};
-//         void draw() const;
+        const Vector2d      getAnchor(const int&) const {return Vector2d();};
+        const ObjectType    getObjectType() const;
 
         //--- Methods --------------------------------------------------------//
         void addForce(const Vector2d&, const Vector2d&);
@@ -59,5 +59,19 @@ class CPointMass : public IObject
 
 };
 
+//--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the objects type - RTTI
+///
+/// \return Type of object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ObjectType CPointMass::getObjectType() const
+{
+    METHOD_ENTRY("CCircle::getObjectType")
+    return OBJECT_POINTMASS;
+}
 
 #endif

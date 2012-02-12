@@ -34,6 +34,14 @@
 /// Type definition for the AnchorIDs
 typedef uint AnchorIDType;
 
+/// Specifies the type of the object
+typedef enum 
+{
+    OBJECT_NONE,
+    OBJECT_BODY,
+    OBJECT_POINTMASS,
+} ObjectType;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Base class for general objects
@@ -59,6 +67,7 @@ class IObject
 
         //--- Constant methods -----------------------------------------------//
         virtual const Vector2d      getAnchor(const int&) const = 0;    ///< Return anchor
+        virtual const ObjectType    getObjectType() const;
                 
         const Vector2d              getCOM() const;
         const int                   getDepths() const;
@@ -129,6 +138,19 @@ class IObject
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the objects type - RTTI
+///
+/// \return Type of object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ObjectType IObject::getObjectType() const
+{
+    METHOD_ENTRY("IShape::getObjectType")
+    return OBJECT_NONE;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

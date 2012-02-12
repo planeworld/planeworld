@@ -45,9 +45,10 @@ class CBody : public IObject
         virtual ~CBody();                               ///< Destructor
 
         //--- Constant Methods -----------------------------------------------//
-        const Vector2d  getAnchor(const int&) const;
-        const double    getAngle() const;
-        const double    getAngleVelocity() const;
+        const Vector2d      getAnchor(const int&) const;
+        const double        getAngle() const;
+        const double        getAngleVelocity() const;
+        const ObjectType    getObjectType() const;
         
         //--- Methods --------------------------------------------------------//
         void setAngleVelocity(const double&);
@@ -99,6 +100,19 @@ inline const double CBody::getAngleVelocity() const
 
     METHOD_EXIT("CBody::getAngleVelocity")
     return m_pIntAngVel->getValue();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the objects type - RTTI
+///
+/// \return Type of object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ObjectType CBody::getObjectType() const
+{
+    METHOD_ENTRY("CCircle::getObjectType")
+    return OBJECT_BODY;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

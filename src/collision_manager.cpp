@@ -23,8 +23,6 @@
 ///
 /// \brief Tests objects for collisions, depending on broad phase
 ///
-/// \todo Implement RTTI for object->body casting
-///
 ///////////////////////////////////////////////////////////////////////////////
 void CCollisionManager::detectCollisions()
 {
@@ -46,8 +44,12 @@ void CCollisionManager::detectCollisions()
                 // Test for overlapping bounding boxes
                 if ((*ci)->getGeometry()->getBoundingBox().overlaps((*cj)->getGeometry()->getBoundingBox()))
                 {
+                    switch((*ci)->getObjectType())
+                    {
+                        case OBJECT_BODY:
+                            this->test(static_cast<CBody*>((*ci)),static_cast<CBody*>((*cj)));
+                    }
 //                     CContact Contact;
-                    this->test(static_cast<CBody*>((*ci)),static_cast<CBody*>((*cj)));
 //                     Contact = (*ci)->collidesWith((*cj));
 //                     m_ContactList.push_back(Contact);
 //                     m_ContactList.insert(m_ContactList.end(), Contacts.begin(),
@@ -67,7 +69,11 @@ void CCollisionManager::detectCollisions()
         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
             cj != m_Debris.end(); ++cj)
         {
-            this->test(static_cast<CBody*>((*ci)), (*cj));
+            switch((*ci)->getObjectType())
+            {
+                case OBJECT_BODY:
+                    this->test(static_cast<CBody*>((*ci)), (*cj));
+            }
         }
     }
     
@@ -225,7 +231,7 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
                                          std::sin(fSegAngle+M_PI*0.5));
                 
                 double fTang = std::cos(fSegAngle-fPosAngle)*0.5;
-                double fOrth = std::sin(fSegAngle-fPosAngle)*0.0;
+                double fOrth = std::sin(fSegAngle-fPosAngle)*0.5;
                 double fDamping = sqrt(fTang*fTang+fOrth*fOrth);
                 
                 double fNorm = (*itVel).norm();
