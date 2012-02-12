@@ -41,12 +41,6 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_thread.h"
 
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
-
 #include <iostream>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -132,21 +126,6 @@ int main(int argc, char *argv[])
     
     int nNumberOfBoxes = 0;
     
-    lua_State *L = lua_open();
-    luaL_openlibs(L);
-    int s = luaL_loadfile(L, (PLANEWORLD_DATA_DIR+"test.lua").c_str());
-    if ( s==0 ) {
-        // Execute Lua program
-        s = lua_pcall(L, 0, LUA_MULTRET, 0);
-    }
-//  std::cerr << "-- " << lua_tostring(L, -1) << std::endl;
-//  lua_pop(L, 1);
-    lua_getglobal(L,"NumberOfBoxes");
-    if(lua_isnumber(L,-1))
-        nNumberOfBoxes = lua_tonumber(L,-1);
-    
-    lua_close(L);
-
 //     //--- Initialise particles -----------------------------------------------//
 //     for (int i=0; i<nNumberOfBoxes; ++i)
 //     {
