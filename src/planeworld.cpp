@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     
     lua_close(L);
 
-    //--- Initialise particles -----------------------------------------------//
+//     //--- Initialise particles -----------------------------------------------//
 //     for (int i=0; i<nNumberOfBoxes; ++i)
 //     {
 //         pPointMass = new CRigidBody;

@@ -58,6 +58,15 @@ void CCollisionManager::detectCollisions()
             }
             ++cj;
         }
+//         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
+//             cj != m_Debris.end(); ++cj)
+//         {
+//             switch((*ci)->getObjectType())
+//             {
+//                 case OBJECT_BODY:
+//                     this->test(static_cast<CBody*>((*ci)), (*cj));
+//             }
+//         }
 //         m_Graphics.setColor(0.0, 0.8, 0.0);
 //         m_Graphics.showVec((*ci)->getVelocity(), (*ci)->getCOM());
 //         m_Graphics.setColor(1.0, 1.0, 1.0);
@@ -93,6 +102,7 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
     METHOD_ENTRY("CCollisionManager::test")
     
     std::list<IShape*>::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
+    std::list<IShape*>::const_iterator ci0 = _p1->getGeometry()->getPrevShapes()->begin();
     
     while (ci != _p1->getGeometry()->getShapes()->end())
     {
@@ -100,11 +110,86 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
         {
             case SHAPE_TERRAIN:
                 this->test(static_cast<CTerrain*>((*ci)),_p2);
+//             case SHAPE_CIRCLE:
+//                 this->test(static_cast<CCircle*>((*ci)), static_cast<CCircle*>((*ci0)), _p1, _p2);
         }
         ++ci;
+        ++ci0;
     }
     
     METHOD_EXIT("CCollisionManager::test")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests circle shape against debris
+///
+/// \param _pC1 Circle shape, time t1
+/// \param _pC0 Circle shape, time t0
+/// \param _p1 Object 1
+/// \param _p2 Debris
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* _p2)
+{
+    METHOD_ENTRY("CCollisionManager::test")
+    
+    boost::circular_buffer<Vector2d>* pPositions (_p2->getPositions());
+    boost::circular_buffer<Vector2d>* pVelocities(_p2->getVelocities());
+    boost::circular_buffer<Vector2d>* pPreviousPositions (_p2->getPreviousPositions());
+    boost::circular_buffer<Vector2d>* pPreviousVelocities(_p2->getPreviousVelocities());
+    boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
+    boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
+    boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
+    boost::circular_buffer<Vector2d>::iterator itVelP = pPreviousVelocities->begin();
+    
+    Vector2d vecPOC;
+    Vector2d vecC0 = _pC0->getCenter();
+    Vector2d vecC1 = _pC1->getCenter();
+    double   fR0   = _pC0->getRadius();
+
+    while (itPos != pPositions->end())
+    {
+//         if (_p1->getGeometry()->getBoundingBox().isInside((*itPos)))
+        {
+            double   fT   = 2.0;
+            Vector2d vecA = (*itPosP) - vecC0;
+            Vector2d vecB = (*itPos) - (*itPosP) - vecC1 + vecC0;
+            
+            double fA = vecB.dot(vecB);
+            double fB = 2 * vecA.dot(vecB);
+            double fC = vecA.dot(vecA) - fR0*fR0;
+            
+            if (fA != 0.0)
+            {
+                double fR = fB*fB - 4*fA*fC;
+                if (fR >= 0.0)
+                {
+                    double fT1 = (-fB + sqrt(fR)) / (2*fA);
+                    double fT2 = (-fB - sqrt(fR)) / (2*fA);
+                
+                    if ((fT1 >= 0.0) && ( fT1 < fT))
+                    {
+                        fT = fT1;
+                        vecPOC = (*itPos) + fT * ((*itPos) - (*itPosP));
+                    }
+                    if ((fT2 >= 0.0) && ( fT2 < fT))
+                    {
+                        fT = fT2;
+                        vecPOC = (*itPos) + fT * ((*itPos) - (*itPosP));
+                    }
+                }
+                if (fT<=1.0)
+                {
+                    (*itPos) = vecPOC+((*itPosP)-vecPOC)*0.1;
+                    (*itVel) = -(*itVel);
+                }
+            }
+        }
+        ++itPos;
+        ++itPosP;
+        ++itVel;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -243,8 +328,6 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
         }
         ++itPos; ++itVel; ++itPosP; ++itVelP;
     }
-    
-    METHOD_EXIT("CCollisionManager::test")
 }
 
 ///////////////////////////////////////////////////////////////////////////////

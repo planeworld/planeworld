@@ -59,6 +59,7 @@ class CCollisionManager/* : virtual public CGraphicsBase*/
         
         void test(CBody*, CBody*);
         void test(CBody*, CDebris*);
+        void test(CCircle*, CCircle*, CBody*, CDebris*);
         void test(CTerrain*, CDebris*);
         void test(CCircle*, CCircle*, CCircle*, CCircle*, CBody*, CBody*);
         void test(CCircle*, CCircle*, CPolyLine*, CPolyLine*, CBody*, CBody*);
