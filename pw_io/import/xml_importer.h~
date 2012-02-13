@@ -61,7 +61,8 @@ class CXMLImporter
         std::list<IVisuals*>    getVisuals() const;
                 
         //--- Methods --------------------------------------------------------//
-        bool import(const std::string&, const ImportModeType&=IMPORT_MODE_UNIVERSE);
+        bool import(const std::string&,
+                    const ImportModeType& = IMPORT_MODE_UNIVERSE);
         
     private:
         

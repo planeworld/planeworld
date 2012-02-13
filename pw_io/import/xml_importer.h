@@ -37,7 +37,7 @@
 typedef enum
 {
     IMPORT_MODE_UNIVERSE,
-    IMPORT_MODE_RIGIDBODY
+    IMPORT_MODE_OBJECT
 } ImportModeType;
 
 ////////////////////////////////////////////////////////////////////////////////

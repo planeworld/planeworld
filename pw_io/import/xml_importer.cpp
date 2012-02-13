@@ -111,7 +111,16 @@ bool CXMLImporter::import(const std::string& _strFilename,
     
     QDomElement Root = Doc.documentElement();
     
-    QDomNode N  = Root.firstChild();
+    QDomNode N;
+    switch (_Mode)
+    {
+        case IMPORT_MODE_UNIVERSE:
+            N  = Root.firstChild();
+            break;
+        case IMPORT_MODE_OBJECT:
+            N = Root;
+            break;
+    }
     while (!N.isNull())
     {
         QDomElement E = N.toElement();
@@ -187,7 +196,7 @@ bool CXMLImporter::checkFile(const QDomElement& _E)
     if (_E.hasAttribute("file"))
     {
         this->import("../data/"+_E.attribute("file").toStdString(),
-                     IMPORT_MODE_RIGIDBODY);
+                     IMPORT_MODE_OBJECT);
         METHOD_EXIT("CXMLImporter::checkFile")
         return true;
     }
