@@ -1,0 +1,23 @@
+<!DOCTYPE PlaneworldML>
+<universe>
+  <!-- Create moon -->
+  <object type="RigidBody">
+    <core
+      name="Moon"
+      mass="7.349e22"
+      origin_x="0.0"
+      origin_y="-384.4e6"
+      dynamics="true"
+      gravity="true"
+    />
+    <shape
+      type="Planet"
+      radius="1738.0e3"
+      height_max="1000.0"
+      ground_resolution="1.0"
+      center_x="0.0"
+      center_y="0.0">
+      <visuals type="Planet"/>
+    </shape>
+  </object>
+</universe>

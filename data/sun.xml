@@ -1,0 +1,21 @@
+<!DOCTYPE PlaneworldML>
+<universe>
+  <!-- Create sun -->
+  <object type="RigidBody">
+    <core
+      name="Sun"
+      mass="1.989e30"
+      origin_x="0.0"
+      origin_y="149606378.27e3"
+      dynamics="true"
+      gravity="false"
+    />
+    <shape
+      type="Circle"
+      radius="0.6957e9"
+      center_x="0.0"
+      center_y="0.0">
+      <visuals type="Circle"/>
+    </shape>
+  </object>
+</universe>

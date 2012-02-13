@@ -186,8 +186,7 @@ bool CXMLImporter::checkFile(const QDomElement& _E)
     
     if (_E.hasAttribute("file"))
     {
-        this->import("../data/"+_E.attribute("file").toStdString(),
-                     IMPORT_MODE_RIGIDBODY);
+        this->import("../data/"+_E.attribute("file").toStdString());
         METHOD_EXIT("CXMLImporter::checkFile")
         return true;
     }

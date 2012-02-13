@@ -1,0 +1,23 @@
+<!DOCTYPE PlaneworldML>
+<universe>
+  <!-- Create planet earth -->
+  <object type="RigidBody">
+    <core
+      name="Earth"
+      mass="5.974e24"
+      origin_x="0.0"
+      origin_y="-6378.27e3"
+      dynamics="true"
+      gravity="false"
+    />
+    <shape
+      type="Planet"
+      radius="6378.16e3"
+      height_max="8000.0"
+      ground_resolution="1.0"
+      center_x="0.0"
+      center_y="0.0">
+      <visuals type="Planet"/>
+    </shape>
+  </object>
+</universe>
