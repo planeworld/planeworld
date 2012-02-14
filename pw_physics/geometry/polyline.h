@@ -32,8 +32,6 @@
 ///
 /// \brief Class representing connected lines
 ///
-/// \todo Remove m_VertList0 if random line handles array.
-/// 
 ////////////////////////////////////////////////////////////////////////////////
 class CPolyLine : public IShape
 {

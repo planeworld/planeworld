@@ -44,11 +44,6 @@ CBody::CBody() : m_fAngle(0.0), m_fInertia(1.0), m_fTorque(0.0)
 ///
 /// \brief Destructor, freeing memory
 ///
-/// \todo Remove list element instead of setting pointer=0
-/// \todo Properly displaying message of destruction
-///
-/// \bug Freeing memory not displayed
-///
 ///////////////////////////////////////////////////////////////////////////////
 CBody::~CBody()
 {

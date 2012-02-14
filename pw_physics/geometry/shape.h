@@ -51,8 +51,6 @@ typedef enum
 ///
 /// \brief Abstract class representing a simple shape
 ///
-/// \todo Implement clone method
-/// 
 ////////////////////////////////////////////////////////////////////////////////
 class IShape
 {
