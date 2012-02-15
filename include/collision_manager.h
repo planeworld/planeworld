@@ -32,11 +32,8 @@
 ///
 /// \brief Class for managing collisions
 ///
-/// \todo Pass pointers to lists instead of references, now at least the list
-///       structure is copied.
-///
 ////////////////////////////////////////////////////////////////////////////////
-class CCollisionManager/* : virtual public CGraphicsBase*/
+class CCollisionManager
 {
     
     public:
@@ -57,13 +54,15 @@ class CCollisionManager/* : virtual public CGraphicsBase*/
         
         void getSurfaceOfInterest();
         
-        void test(CBody*, CBody*);
-        void test(CBody*, CDebris*);
-        void test(CCircle*, CCircle*, CBody*, CDebris*);
-        void test(CTerrain*, CDebris*);
-        void test(CCircle*, CCircle*, CCircle*, CCircle*, CBody*, CBody*);
-        void test(CCircle*, CCircle*, CPolyLine*, CPolyLine*, CBody*, CBody*);
-        void test(CPolyLine*, CPolyLine*, CPolyLine*, CPolyLine*, CBody*, CBody*);
+        void    test(CBody*, CBody*);
+        void    test(CBody*, CDebris*);
+        void    test(CCircle*, CCircle*, CBody*, CDebris*);
+        void    test(CTerrain*, CDebris*);
+        void    test(CCircle*, CCircle*, CCircle*, CCircle*, CBody*, CBody*);
+        void    test(CCircle*, CCircle*, CPolyLine*, CPolyLine*, CBody*, CBody*);
+        void    test(CPolyLine*, CPolyLine*, CPolyLine*, CPolyLine*, CBody*, CBody*);
+        double  testPointLine(const Vector2d&, const Vector2d&, const Vector2d&,
+                              const Vector2d&, const Vector2d&, const Vector2d&);
         
         std::list<CDebris*> m_Debris;
         std::list<IObject*> m_DynamicObjects;

@@ -606,7 +606,7 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
     }
     else
     {
-        fR = fRA-fRB;
+        fR = fRA-fRB; // No need for abs() since it will be squared
     }
     
     Vector2d vecA = vecPA0-vecPB0;
@@ -632,24 +632,12 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
     }
     if (fT <= 1.0)
     {
-        // Colliding objects
-//         m_Graphics.setColor(0.0, 0.8, 0.0);
-//         m_Graphics.rect(_p1->getGeometry().getBoundingBox().getLowerLeft(),
-//                         _p1->getGeometry().getBoundingBox().getUpperRight());
-//         m_Graphics.rect(_p2->getGeometry().getBoundingBox().getLowerLeft(),
-//                         _p2->getGeometry().getBoundingBox().getUpperRight());
-//         
-//         // Point of collision
-//         m_Graphics.setColor(0.8, 0.0, 0.0);
-//         m_Graphics.dot(vecPA0+(vecPB0-vecPA0)/sqrt((vecPB0-vecPA0).dot((vecPB0-vecPA0)))*fRA);
-//         m_Graphics.setColor(1.0, 1.0, 1.0);
-        
-        _p1->disableDynamics();
-        _p1->transform();
-        _p2->disableDynamics();
-        _p2->transform();
-//         _p1->setVelocity(-_p1->getVelocity());
-//         _p2->setVelocity(-_p2->getVelocity());
+//         _p1->disableDynamics();
+//         _p1->transform();
+//         _p2->disableDynamics();
+//         _p2->transform();
+        _p1->setVelocity(Vector2d(0.0,0.0));
+        _p2->setVelocity(Vector2d(0.0,0.0));
     }
     
     METHOD_EXIT("CCollisionManager::test")
@@ -658,6 +646,9 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Tests two shapes (circles and polylines) for collision
+///
+/// The vertices of polylines must be tested separately to ensure collsion
+/// detection at polyline angles < 90 degree.
 ///
 /// \param _pA1 Circle, time t1
 /// \param _pA0 Circle, time t0
@@ -803,24 +794,6 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
                     vecPOC = vecSeg0 + fPOC * vecSeg / vecSeg.norm();                        
                 }
             }
-//             double fPOC =
-//                  (((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
-//                   ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))).dot(
-//                   (  vecA0  + fTTmp*(  vecA1  -   vecA0)) - 
-//                   ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))) / fLength;
-//             if ((fPOC >= 0.0) && (fPOC <= fLength))
-//             {
-//                 fT = fTTmp;
-//                 vecPOC =   (*ciB00) + fTTmp*((*ciB01) - (*ciB00)) + fPOC *
-//                          (
-//                           ((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
-//                           ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))
-//                          ) /
-//                          (
-//                           ((*ciB10) + fTTmp*((*ciB11) - (*ciB10))) - 
-//                           ((*ciB00) + fTTmp*((*ciB01) - (*ciB00)))
-//                          ).norm();
-//             }
         }
         
         ++ciB00;
@@ -948,22 +921,12 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
     
     if (fT<=1.0)
     {
-        // Colliding objects
-//         m_Graphics.setColor(0.0, 0.8, 0.0);
-//         m_Graphics.rect(_p1->getGeometry().getBoundingBox().getLowerLeft(),
-//                         _p1->getGeometry().getBoundingBox().getUpperRight());
-//         m_Graphics.rect(_p2->getGeometry().getBoundingBox().getLowerLeft(),
-//                         _p2->getGeometry().getBoundingBox().getUpperRight());
-// 
-//         // Point of collision
-//         m_Graphics.setColor(0.8, 0.0, 0.0);
-//         m_Graphics.dot(vecPOC);
-//         m_Graphics.setColor(1.0, 1.0, 1.0);
-
-        _p1->disableDynamics();
-        _p1->transform();;
-        _p2->disableDynamics();
-        _p2->transform();;
+//         _p1->disableDynamics();
+//         _p1->transform();
+//         _p2->disableDynamics();
+//         _p2->transform();
+        _p1->setVelocity(Vector2d(0.0,0.0));
+        _p2->setVelocity(Vector2d(0.0,0.0));
     } 
         
     METHOD_EXIT("CCollisionManager::test")
@@ -972,6 +935,10 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Tests two shapes (polylines) for collision
+///
+/// This method test all vertices of one polyline against the lines between
+/// vertices of the other polyline. Therefore, it has to be called twice with
+/// parameters being swapped to cover all collisions.
 ///
 /// \param _pA1 PolyLine 1, time t1
 /// \param _pA0 PolyLine 1, time t0
@@ -1008,77 +975,15 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
         
         while (ciB1 != _pB1->getVertices().end())
         {
-            double fAx = ((*ciA00) - (*ciB0))[0];
-            double fAy = ((*ciA00) - (*ciB0))[1];
-            double fBx = ((*ciA10) - (*ciA00))[0];
-            double fBy = ((*ciA10) - (*ciA00))[1];
-            double fCx = ((*ciB1) - (*ciB0) - (*ciA01) + (*ciA00))[0];
-            double fCy = ((*ciB1) - (*ciB0) - (*ciA01) + (*ciA00))[1];
-            double fDx = ((*ciA10) - (*ciA00) - (*ciA11) + (*ciA01))[0];
-            double fDy = ((*ciA10) - (*ciA00) - (*ciA11) + (*ciA01))[1];
-
-            if ((fDx == 0.0) && (fDy == 0.0))
+            double fTmpT = this->testPointLine((*ciB1), (*ciB0), (*ciA01), (*ciA11), (*ciA00), (*ciA10));
+            if ((fTmpT >= 0.0) && (fTmpT < fT))
             {
-                double fTmpA = fBx*fCy-fBy*fCx;
-                double fTmpB = fAx*fCy-fAy*fCx;
-                
-                double fAlpha = - fTmpB / fTmpA;
-                
-                double fTmpT = -1.0;
-                if ((fAlpha >= 0.0) && (fAlpha <= 1.0))
-                {
-                    /// \todo Optimise here and add similar code segments!
-                    /// \todo Implement cases for fCx==0!
-                    if (fCx != 0.0)
-                        fTmpT = (fAx+fAlpha*fBx) / (fCx);
-                    if ((fTmpT >= 0.0) && (fTmpT < fT))
-                    {
-                        fT = fTmpT;
-                        vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
-                    }
-                }
-            }
-            else
-            {
-                double fTmpA = fBx*fDy-fBy*fDx;
-                double fTmpB = fAx*fDy+fBx*fCy-fAy*fDx-fBy*fCx;
-                double fTmpC = fAx*fCy-fAy*fCx;
-                
-                double fTmpR = fTmpB*fTmpB-4*fTmpA*fTmpC;
-                double fAlpha1 = -1.0;
-                double fAlpha2 = -1.0;
-                
-                if (fTmpR != 0)
-                {
-                    fAlpha1 = (-fTmpB + sqrt(fTmpR)) / (2*fTmpA);
-                    fAlpha2 = (-fTmpB - sqrt(fTmpR)) / (2*fTmpA);
-                }
-                
-                double fTmpT1 = -1.0;
-                double fTmpT2 = -1.0;
-                if ((fAlpha1 >= 0.0) && (fAlpha1 <= 1.0))
-                {
-                    fTmpT1 = (fAx+fAlpha1*fBx) / (fCx+fAlpha1*fDx);
-                }
-                if ((fAlpha2 >= 0.0) && (fAlpha2 <= 1.0))
-                {
-                    fTmpT2 = (fAx+fAlpha2*fBx) / (fCx+fAlpha2*fDx);
-                }
-                if ((fTmpT1 >= 0.0) && (fTmpT1 < fT))
-                {
-                    fT = fTmpT1;
-                    vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
-                }
-                if ((fTmpT2 >= 0.0) && (fTmpT2 < fT))
-                {
-                    fT = fTmpT2;
-                    vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
-                }
+                fT = fTmpT;
+                vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
             }
             
             ++ciB1; ++ciB0;
         }
-        /// \todo LINETYPE_LOOP must be tested here to for _pB1
         ++ciA01; ++ciA00; ++ciA11; ++ciA10;
     }
     if (_pA1->getLineType() == GRAPHICS_LINETYPE_LOOP)
@@ -1090,97 +995,112 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
         
         while (ciB1 != _pB1->getVertices().end())
         {
-            double fAx = ((*ciA00) - (*ciB0))[0];
-            double fAy = ((*ciA00) - (*ciB0))[1];
-            double fBx = ((*ciA10) - (*ciA00))[0];
-            double fBy = ((*ciA10) - (*ciA00))[1];
-            double fCx = ((*ciB1) - (*ciB0) - (*ciA01) + (*ciA00))[0];
-            double fCy = ((*ciB1) - (*ciB0) - (*ciA01) + (*ciA00))[1];
-            double fDx = ((*ciA10) - (*ciA00) - (*ciA11) + (*ciA01))[0];
-            double fDy = ((*ciA10) - (*ciA00) - (*ciA11) + (*ciA01))[1];
-
-            if ((fDx == 0.0) && (fDy == 0.0))
+            double fTmpT = this->testPointLine((*ciB1), (*ciB0), (*ciA01), (*ciA11), (*ciA00), (*ciA10));
+            if ((fTmpT >= 0.0) && (fTmpT < fT))
             {
-                double fTmpA = fBx*fCy-fBy*fCx;
-                double fTmpB = fAx*fCy-fAy*fCx;
-                
-                double fAlpha = - fTmpB / fTmpA;
-                
-                double fTmpT = -1.0;
-                if ((fAlpha >= 0.0) && (fAlpha <= 1.0))
-                {
-                    if (fCx != 0.0)
-                        fTmpT = (fAx+fAlpha*fBx) / (fCx);
-                    if ((fTmpT >= 0.0) && (fTmpT < fT))
-                    {
-                        fT = fTmpT;
-                        vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
-                    }
-                }
-            }
-            else
-            {
-                double fTmpA = fBx*fDy-fBy*fDx;
-                double fTmpB = fAx*fDy+fBx*fCy-fAy*fDx-fBy*fCx;
-                double fTmpC = fAx*fCy-fAy*fCx;
-                
-                double fTmpR = fTmpB*fTmpB-4*fTmpA*fTmpC;
-                double fAlpha1 = -1.0;
-                double fAlpha2 = -1.0;
-                
-                if (fTmpR != 0)
-                {
-                    fAlpha1 = (-fTmpB + sqrt(fTmpR)) / (2*fTmpA);
-                    fAlpha2 = (-fTmpB - sqrt(fTmpR)) / (2*fTmpA);
-                }
-                
-                double fTmpT1 = -1.0;
-                double fTmpT2 = -1.0;
-                if ((fAlpha1 >= 0.0) && (fAlpha1 <= 1.0))
-                {
-                    fTmpT1 = (fAx+fAlpha1*fBx) / (fCx+fAlpha1*fDx);
-                }
-                if ((fAlpha2 >= 0.0) && (fAlpha2 <= 1.0))
-                {
-                    fTmpT2 = (fAx+fAlpha2*fBx) / (fCx+fAlpha2*fDx);
-                }
-                if ((fTmpT1 >= 0.0) && (fTmpT1 < fT))
-                {
-                    fT = fTmpT1;
-                    vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
-                }
-                if ((fTmpT2 >= 0.0) && (fTmpT2 < fT))
-                {
-                    fT = fTmpT2;
-                    vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
-                }
+                fT = fTmpT;
+                vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
             }
             
             ++ciB1, ++ciB0;
         }
-        /// \todo LINETYPE_LOOP must be tested here to for _pB1
     }
     
     if (fT<=1.0)
     {
-//         // Colliding objects
-//         m_Graphics.setColor(0.0, 0.8, 0.0);
-//         m_Graphics.rect(_p1->getGeometry().getBoundingBox().getLowerLeft(),
-//                         _p1->getGeometry().getBoundingBox().getUpperRight());
-//         m_Graphics.rect(_p2->getGeometry().getBoundingBox().getLowerLeft(),
-//                         _p2->getGeometry().getBoundingBox().getUpperRight());
-// 
-//         // Point of collision
-//         m_Graphics.setColor(0.8, 0.0, 0.0);
-//         m_Graphics.dot(vecPOC);
-//         m_Graphics.setColor(1.0, 1.0, 1.0);
-        
-        _p1->disableDynamics();
-        _p1->transform();;
-        _p2->disableDynamics();
-        _p2->transform();;
+//         _p1->disableDynamics();
+//         _p1->transform();
+//         _p2->disableDynamics();
+//         _p2->transform();
+        _p1->setVelocity(Vector2d(0.0,0.0));
+        _p2->setVelocity(Vector2d(0.0,0.0));
     } 
-            
-    METHOD_EXIT("CCollisionManager::test")
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests a point against a line
+///
+/// \param _vecP1  Point, time t1
+/// \param _vecP0  Point, time t0
+/// \param _vecLA1 Line, start point, time t1
+/// \param _vecLB1 Line, end point, time t1
+/// \param _vecLA0 Line, start point, time t0
+/// \param _vecLB0 Line, end point, time t0
+///
+/// \return Time of contact
+///
+///////////////////////////////////////////////////////////////////////////////
+double CCollisionManager::testPointLine(const Vector2d& _vecP1,  const Vector2d& _vecP0,
+                                          const Vector2d& _vecLA1, const Vector2d& _vecLB1,
+                                          const Vector2d& _vecLA0, const Vector2d& _vecLB0)
+{
+    METHOD_ENTRY("CCollisionManager::testPointLine")
+    
+    double fAx = (_vecLA0 - _vecP0)[0];
+    double fAy = (_vecLA0 - _vecP0)[1];
+    double fBx = (_vecLB0 - _vecLA0)[0];
+    double fBy = (_vecLB0 - _vecLA0)[1];
+    double fCx = (_vecP1 - _vecP0 - _vecLA1 + _vecLA0)[0];
+    double fCy = (_vecP1 - _vecP0 - _vecLA1 + _vecLA0)[1];
+    double fDx = (_vecLB0 - _vecLA0 - _vecLB1 + _vecLA1)[0];
+    double fDy = (_vecLB0 - _vecLA0 - _vecLB1 + _vecLA1)[1];
+    double fT = -1.0;
+    
+    if ((fDx == 0.0) && (fDy == 0.0))
+    {
+        double fTmpA = fBx*fCy-fBy*fCx;
+        double fTmpB = fAx*fCy-fAy*fCx;
+        
+        double fAlpha = - fTmpB / fTmpA;
+        
+        double fTmpT = -1.0;
+        if ((fAlpha >= 0.0) && (fAlpha <= 1.0))
+        {
+            /// \todo Optimise here and add similar code segments!
+            /// \todo Implement cases for fCx==0!
+            if (fCx != 0.0)
+            {
+                fTmpT = (fAx+fAlpha*fBx) / (fCx);
+                if (fTmpT >= 0.0)
+                    fT = fTmpT;
+            }
+        }
+    }
+    else
+    {
+        double fTmpA = fBx*fDy-fBy*fDx;
+        double fTmpB = fAx*fDy+fBx*fCy-fAy*fDx-fBy*fCx;
+        double fTmpC = fAx*fCy-fAy*fCx;
+        
+        double fTmpR = fTmpB*fTmpB-4*fTmpA*fTmpC;
+        double fAlpha1 = -1.0;
+        double fAlpha2 = -1.0;
+        
+        if (fTmpR != 0)
+        {
+            fAlpha1 = (-fTmpB + sqrt(fTmpR)) / (2*fTmpA);
+            fAlpha2 = (-fTmpB - sqrt(fTmpR)) / (2*fTmpA);
+        }
+        
+        double fTmpT1 = -1.0;
+        double fTmpT2 = -1.0;
+        if ((fAlpha1 >= 0.0) && (fAlpha1 <= 1.0))
+        {
+            fTmpT1 = (fAx+fAlpha1*fBx) / (fCx+fAlpha1*fDx);
+        }
+        if ((fAlpha2 >= 0.0) && (fAlpha2 <= 1.0))
+        {
+            fTmpT2 = (fAx+fAlpha2*fBx) / (fCx+fAlpha2*fDx);
+        }
+        if ((fTmpT1 >= 0.0))
+        {
+            fT = fTmpT1;
+        }
+        if ((fTmpT2 >= 0.0) && (fTmpT2 < fT))
+        {
+            fT = fTmpT2;
+        }
+    }
+    return fT;
+}

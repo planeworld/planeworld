@@ -45,22 +45,19 @@ class CContact
         CContact();
 
         //--- Constant methods -----------------------------------------------//
-        std::list<Vector2d> getPointsOfContact() const;
+        Vector2d getPointsOfContact() const;
         bool occurred() const;
 
         //--- Methods --------------------------------------------------------//
         void setOccurred(const bool&);
-        void setPointsOfContact(const std::list<Vector2d>&);
+        void setPOC(const Vector2d&);
         
     private:
         
-        bool                m_bContact; ///< Flags if contact occurred
-        std::list<Vector2d> m_POCList;  ///< Points of contact
+        bool     m_bContact; ///< Flags if contact occurred
+        Vector2d m_vecPOC;   ///< Point of contact
 
 };
-
-/// Type definition of a list of contacts
-typedef std::list<CContact> ContactList;
 
 //--- Implementation is done here for inlining optimisation ------------------//
 
@@ -84,12 +81,12 @@ inline CContact::CContact():m_bContact(false)
 /// \return Contact list
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline std::list<Vector2d> CContact::getPointsOfContact() const
+inline Vector2d CContact::getPointsOfContact() const
 {
     METHOD_ENTRY("CContact::getPointsOfContact")
 
     METHOD_EXIT("CContact::getPointsOfContact")
-    return m_POCList;
+    return m_vecPOC;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,11 +127,11 @@ inline void CContact::setOccurred(const bool& _bContact)
 /// \param _vecPOC Point of contact
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CContact::setPointsOfContact(const std::list<Vector2d>& _POCList)
+inline void CContact::setPointOfContact(const Vector2d>& _POC)
 {
     METHOD_ENTRY("CContact::setPointsOfContact")
 
-    m_POCList = _POCList;
+    m_vecPOC = _POCList;
     
     METHOD_EXIT("CContact::setPointsOfContact")
 }

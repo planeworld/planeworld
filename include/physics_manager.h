@@ -85,8 +85,6 @@ class CPhysicsManager
         std::list<IJoint*>  m_JointList;            ///< List of joints
         ObjectsType         m_DynamicObjects;       ///< List of dynamic objects
         ObjectsType         m_StaticObjects;        ///< List of static objects
-        
-        ContactList         m_ContactList;          ///< List of contacts
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

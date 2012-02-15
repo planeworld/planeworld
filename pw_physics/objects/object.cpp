@@ -110,8 +110,8 @@ void IObject::dynamics(const double& _fTimeStep)
 /// \brief Initialise object
 ///
 /// When the object is initialised, it is set back to the state of simulation
-/// begin. Specific init methods are calledas well as transformation. Hence,
-/// fixed object don't need to be transformed more than once.
+/// begin. Specific init methods are called as well as transformation. Hence,
+/// fixed objects don't need to be transformed more than once.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void IObject::init()

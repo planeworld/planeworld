@@ -124,77 +124,77 @@ int main(int argc, char *argv[])
     pVisualsManager = new CVisualsManager;
     MEM_ALLOC("pVisualsManager")
     
-    int nNumberOfBoxes = 0;
+    int nNumberOfBoxes = 100;
     
-//     //--- Initialise particles -----------------------------------------------//
-//     for (int i=0; i<nNumberOfBoxes; ++i)
-//     {
-//         pPointMass = new CRigidBody;
-//         MEM_ALLOC("pPointMass")
-// 
-//         DEBUG_MSG("Main", "Starting randomization...")
-//         nX = (rand()%200) - 100;
-//         nY = (rand()%200) - 100;
-// //         nX = (rand()%2000000) - 1000000;
-// //         nY = (rand()%2000000) - 1000000;
-// //         double fRad = (rand()%2) + 0.5;
-//         DEBUG_MSG("Main", "Stopping randomization.")
-//         pPointMass->setMass(1.0e12);
-//         pPointMass->setOrigin(nX, nY);
-//         pPointMass->setInertia(2000.0);
-// 
-//         std::stringstream test;
-//         test << "PointMass_" << i;
-//         pPointMass->setName(test.str());
-// 
-// //         pPointMass->disableGravitation();
-// //         pPointMass->disableDynamics();
-// //         pPointMass->setTimeFac(1e-10);
-//         pPointMass->setDepths(SHAPE_DEPTH_ALL);
-//         
-// //         pRect = new CRectangle();
-//         pCircle = new CCircle();
-// //         pPlanet = new CPlanet();
-//         MEM_ALLOC("pRectangle")
-// //         pRectVisuals = new CRectangleVisuals(pRect);
-//         pCircleVisuals = new CCircleVisuals(pCircle);
-// //         pPlanetVisuals = new CPlanetVisuals(pPlanet);
-//         MEM_ALLOC("pRectangleVisuals")
-// 
-// 
-// //         pRect->setDepths(SHAPE_DEPTH_ALL);
-// //         pRect->setUL(Vector2d(-1.0, +1.0));
-// //         pRect->setLR(Vector2d(+1.0, -1.0));
-//         pCircle->setDepths(SHAPE_DEPTH_ALL);
-//         pCircle->setCenter(1.0, 0.0);
-//         pCircle->setRadius(1.0);
-// //         pPlanet->setDepths(SHAPE_DEPTH_ALL);
-// //         pPlanet->setCenter(0.0, 0.0);
-// //         pPlanet->setRadius(100.0);
-// //         pPlanet->setHeight(1.0);
-// //         pPlanet->initTerrain();
-// 
-//         pPointMass->getGeometry()->addShape(pCircle);
-// //         pPointMass->getGeometry().addShape(pPlanet);
-//         
-// //         pPointMass->getGeometry().addShape(pRect);
-// //         pPointMass->addVisuals(pRectVisuals);
-//         
-// //         pVisualsManager->addVisuals(pRectVisuals);
-//         pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
-// //         pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
-//         pPhysicsManager->addObject(pPointMass);
-//     }
+    //--- Initialise particles -----------------------------------------------//
+    for (int i=0; i<nNumberOfBoxes; ++i)
+    {
+        pPointMass = new CRigidBody;
+        MEM_ALLOC("pPointMass")
+
+        DEBUG_MSG("Main", "Starting randomization...")
+        nX = (rand()%200) - 100;
+        nY = (rand()%200) - 100;
+//         nX = (rand()%2000000) - 1000000;
+//         nY = (rand()%2000000) - 1000000;
+//         double fRad = (rand()%2) + 0.5;
+        DEBUG_MSG("Main", "Stopping randomization.")
+        pPointMass->setMass(1.0e12);
+        pPointMass->setOrigin(nX, nY);
+        pPointMass->setInertia(2000.0);
+
+        std::stringstream test;
+        test << "PointMass_" << i;
+        pPointMass->setName(test.str());
+
+//         pPointMass->disableGravitation();
+//         pPointMass->disableDynamics();
+//         pPointMass->setTimeFac(1e-10);
+        pPointMass->setDepths(SHAPE_DEPTH_ALL);
+        
+//         pRect = new CRectangle();
+        pCircle = new CCircle();
+//         pPlanet = new CPlanet();
+        MEM_ALLOC("pRectangle")
+//         pRectVisuals = new CRectangleVisuals(pRect);
+        pCircleVisuals = new CCircleVisuals(pCircle);
+//         pPlanetVisuals = new CPlanetVisuals(pPlanet);
+        MEM_ALLOC("pRectangleVisuals")
+
+
+//         pRect->setDepths(SHAPE_DEPTH_ALL);
+//         pRect->setUL(Vector2d(-1.0, +1.0));
+//         pRect->setLR(Vector2d(+1.0, -1.0));
+        pCircle->setDepths(SHAPE_DEPTH_ALL);
+        pCircle->setCenter(1.0, 0.0);
+        pCircle->setRadius(1.0);
+//         pPlanet->setDepths(SHAPE_DEPTH_ALL);
+//         pPlanet->setCenter(0.0, 0.0);
+//         pPlanet->setRadius(100.0);
+//         pPlanet->setHeight(1.0);
+//         pPlanet->initTerrain();
+
+        pPointMass->getGeometry()->addShape(pCircle);
+//         pPointMass->getGeometry().addShape(pPlanet);
+        
+//         pPointMass->getGeometry().addShape(pRect);
+//         pPointMass->addVisuals(pRectVisuals);
+        
+//         pVisualsManager->addVisuals(pRectVisuals);
+        pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+//         pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
+        pPhysicsManager->addObject(pPointMass);
+    }
 
     //--- Initialize Debris -------------------------------------------------//
-    pDebris = new CDebris;
-    MEM_ALLOC("pDebris")
-    pDebrisVisuals = new CDebrisVisuals(pDebris);
-    MEM_ALLOC("pDebrisVisuals")
-
-    pDebris->setNumber(10000);
-    pVisualsManager->addVisuals(pDebrisVisuals);
-    pPhysicsManager->addDebris(pDebris);
+//     pDebris = new CDebris;
+//     MEM_ALLOC("pDebris")
+//     pDebrisVisuals = new CDebrisVisuals(pDebris);
+//     MEM_ALLOC("pDebrisVisuals")
+// 
+//     pDebris->setNumber(10000);
+//     pVisualsManager->addVisuals(pDebrisVisuals);
+//     pPhysicsManager->addDebris(pDebris);
 
     //--- Initialize Rigidbody ----------------------------------------------//
 //     pBody1 = new CRigidBody;
@@ -211,8 +211,8 @@ int main(int argc, char *argv[])
 // 
 //     pVisualsManager->addVisualsList(XFigLoader.getVisuals());
 //     pPhysicsManager->addObject(pBody1);
-    
-    //--- Initialize Rigidbody ----------------------------------------------//
+//     
+//     //--- Initialize Rigidbody ----------------------------------------------//
 //     pBody2 = new CRigidBody;
 //     MEM_ALLOC("pBody2")
 // 
@@ -270,8 +270,8 @@ int main(int argc, char *argv[])
 //     pRect->setVisualsID(pVisualsManager->addVisuals(pRectVisuals));
 // 
 //     pPhysicsManager->addObject(pBody2);
-
-    //--- Initialize Rigidbody ----------------------------------------------//
+// 
+//     //--- Initialize Rigidbody ----------------------------------------------//
 //     pPolyLine = new CPolyLine();
 //     MEM_ALLOC("pPolyLine")
 //     pPolylineVisuals = new CPolylineVisuals(pPolyLine);
@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
 //     pPolyLine->setVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
 // 
 //     pPhysicsManager->addObject(pBody3);
-    
+//     
     //--- Import from xml file ----------------------------------------------//
     {
         // XML-Importer is initialised in its own scope to free memory after
@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
         pCamera=XMLImporter.getCamera();
     }
             
-    //--- Initialize Spring -------------------------------------------------//
+//     //--- Initialize Springs ------------------------------------------------//
 //     pSpring = new CSpring();
 //     MEM_ALLOC("pSpring")
 //     pSpringVisuals = new CSpringVisuals(pSpring);
