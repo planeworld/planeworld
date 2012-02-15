@@ -684,118 +684,35 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
     
     while (ciB10 != _pB0->getVertices().end())
     {
-        double fLength = ((*ciB10) - (*ciB00)).norm();
-                
         //-------------------------------------------
         // Test every point for collsion with circle
         //-------------------------------------------
+        double fTmpT = this->testPointCircle((*ciB01),(*ciB00), _pA1, _pA0);
+        if ((fTmpT >= 0.0) && ( fTmpT < fT))
         {
-            Vector2d vecA = (*ciB00) - vecA0;
-            Vector2d vecB = (*ciB01) - (*ciB00) - vecA1 + vecA0;
-            
-            double fA = vecB.dot(vecB);
-            double fB = 2 * vecA.dot(vecB);
-            double fC = vecA.dot(vecA) - fRA*fRA;
-            
-            if (fA != 0.0)
-            {
-                double fR = fB*fB - 4*fA*fC;
-                if (fR >= 0.0)
-                {
-                    double fT1 = (-fB + sqrt(fR)) / (2*fA);
-                    double fT2 = (-fB - sqrt(fR)) / (2*fA);
-                
-                    if ((fT1 >= 0.0) && ( fT1 < fT))
-                    {
-                        fT = fT1;
-                        vecPOC = (*ciB01) + fT * ((*ciB01) - (*ciB00));
-                    }
-                    if ((fT2 >= 0.0) && ( fT2 < fT))
-                    {
-                        fT = fT2;
-                        vecPOC = (*ciB01) + fT * ((*ciB01) - (*ciB00));
-                    }
-                }
-            }
+            fT = fTmpT;
+            vecPOC = (*ciB01) + fT * ((*ciB01) - (*ciB00));
         }
+        
         //------------------------------------------
         // Test every line for collsion with circle
         //------------------------------------------
+        fTmpT = this->testLineCircle((*ciB01),(*ciB11),(*ciB00),(*ciB10),_pA1,_pA0);
+        if ((fTmpT >= 0.0) && ( fTmpT < fT))
         {
-            Vector2d vecA = (*ciB10) - (*ciB00);
-            Vector2d vecB = (*ciB11) - (*ciB10) - (*ciB01) + (*ciB00);
-            Vector2d vecC = vecA0 - (*ciB00);
-            Vector2d vecD = vecA1 - vecA0 - (*ciB01) + (*ciB00);
-            
-            double fTTmp = 2.0;
-            
-            if (vecB.isZero())
+            Vector2d vecSeg0 = (*ciB00) + fTmpT*((*ciB01) - (*ciB00));
+            Vector2d vecSeg1 = (*ciB10) + fTmpT*((*ciB11) - (*ciB10));
+            double fLength = ((*ciB10) - (*ciB00)).norm();
+            double fPOC = (vecSeg1 - vecSeg0).dot(
+                        (vecA0 + fTmpT*(vecA1-vecA0)) - vecSeg0
+                        ) / fLength;
+            if ((fPOC >= 0.0) && (fPOC <= fLength))
             {
-                double fD = vecA[0] * vecD[1] - vecA[1] * vecD[0];
-                double fN = vecA[0] * vecC[1] - vecA[1] * vecC[0];
-                
-                if (fD != 0)
-                {
-                    double fT1 = (fLength * fRA - fN) / fD;
-                    if ((fT1 >= 0.0) && (fT1 < fTTmp))
-                        fTTmp = fT1;
-                    double fT2 = (fLength * fRA + fN) / fD;
-                    if ((fT2 >= 0.0) && (fT2 < fTTmp))
-                        fTTmp = fT2;
-                }
-            }
-            else
-            {
-                double fA  = vecB[0] * vecD[1] - vecB[1] * vecD[0];
-                double fB  = vecB[0] * vecC[1] - vecB[1] * vecC[0] + 
-                            vecA[0] * vecD[1] - vecA[1] * vecD[0];
-                double fC1 = vecA[0] * vecC[1] - vecA[1] * vecC[0] -
-                            fRA*fLength;
-                double fC2 = vecC[0] * vecA[1] - vecC[1] * vecA[0] -
-                            fRA*fLength;
-                double fR1 = fB*fB - 4*fA*fC1;
-                double fR2 = fB*fB + 4*fA*fC2;
-                
-                if (fA != 0.0)
-                {
-                    if (fR1 >= 0.0)
-                    {
-                        double fT1 = (-fB + sqrt(fR1)) / (2*fA);
-                        double fT2 = (-fB - sqrt(fR1)) / (2*fA);
-                    
-                        if ((fT1 >= 0.0) && ( fT1 < fTTmp))
-                            fTTmp = fT1;
-                        if ((fT2 >= 0.0) && ( fT2 < fTTmp))
-                            fTTmp = fT2;
-                    }
-                    if (fR2 >= 0.0)
-                    {
-                        double fT1 = (-fB + sqrt(fR2)) / (2*fA);
-                        double fT2 = (-fB - sqrt(fR2)) / (2*fA);
-                    
-                        if ((fT1 >= 0.0) && ( fT1 < fTTmp))
-                            fTTmp = fT1;
-                        if ((fT2 >= 0.0) && ( fT2 < fTTmp))
-                            fTTmp = fT2;
-                    }
-                }
-            }
-            if (fTTmp < fT)
-            {
-                Vector2d vecSeg0 = (*ciB00) + fTTmp*((*ciB01) - (*ciB00));
-                Vector2d vecSeg1 = (*ciB10) + fTTmp*((*ciB11) - (*ciB10));
-                double fPOC = (vecSeg1 - vecSeg0).dot(
-                            (vecA0 + fTTmp*(vecA1-vecA0)) - vecSeg0
-                            ) / fLength;
-                if ((fPOC >= 0.0) && (fPOC <= fLength))
-                {
-                    fT = fTTmp;
-                    Vector2d vecSeg = vecSeg1 - vecSeg0;
-                    vecPOC = vecSeg0 + fPOC * vecSeg / vecSeg.norm();                        
-                }
+                fT = fTmpT;
+                Vector2d vecSeg = vecSeg1 - vecSeg0;
+                vecPOC = vecSeg0 + fPOC * vecSeg / vecSeg.norm();                        
             }
         }
-        
         ++ciB00;
         ++ciB10;
         ++ciB01;
@@ -806,115 +723,33 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
         ciB11 = _pB1->getVertices().begin();
         ciB10 = _pB0->getVertices().begin();
         
-        double fLength = ((*ciB10) - (*ciB00)).norm();
-                
         //-------------------------------------------
         // Test every point for collsion with circle
         //-------------------------------------------
+        double fTmpT = this->testPointCircle((*ciB01),(*ciB00), _pA1, _pA0);
+        if ((fTmpT >= 0.0) && ( fTmpT < fT))
         {
-            Vector2d vecA = (*ciB00) - vecA0;
-            Vector2d vecB = (*ciB01) - (*ciB00) - vecA1 + vecA0;
-            
-            double fA = vecB.dot(vecB);
-            double fB = 2 * vecA.dot(vecB);
-            double fC = vecA.dot(vecA) - fRA*fRA;
-            
-            if (fA != 0.0)
-            {
-                double fR = fB*fB - 4*fA*fC;
-                if (fR >= 0.0)
-                {
-                    double fT1 = (-fB + sqrt(fR)) / (2*fA);
-                    double fT2 = (-fB - sqrt(fR)) / (2*fA);
-                
-                    if ((fT1 >= 0.0) && ( fT1 < fT))
-                    {
-                        fT = fT1;
-                        vecPOC = (*ciB01) + fT * ((*ciB01) - (*ciB00));
-                    }
-                    if ((fT2 >= 0.0) && ( fT2 < fT))
-                    {
-                        fT = fT2;
-                        vecPOC = (*ciB01) + fT * ((*ciB01) - (*ciB00));
-                    }
-                }
-            }
+            fT = fTmpT;
+            vecPOC = (*ciB01) + fT * ((*ciB01) - (*ciB00));
         }
+        
         //------------------------------------------
         // Test every line for collsion with circle
         //------------------------------------------
+        fTmpT = this->testLineCircle((*ciB01),(*ciB11),(*ciB00),(*ciB10),_pA1,_pA0);
+        if ((fTmpT >= 0.0) && ( fTmpT < fT))
         {
-            Vector2d vecA = (*ciB10) - (*ciB00);
-            Vector2d vecB = (*ciB11) - (*ciB10) - (*ciB01) + (*ciB00);
-            Vector2d vecC = vecA0 - (*ciB00);
-            Vector2d vecD = vecA1 - vecA0 - (*ciB01) + (*ciB00);
-            
-            double fTTmp = 2.0;
-            
-            if (vecB.isZero())
+            Vector2d vecSeg0 = (*ciB00) + fTmpT*((*ciB01) - (*ciB00));
+            Vector2d vecSeg1 = (*ciB10) + fTmpT*((*ciB11) - (*ciB10));
+            double fLength = ((*ciB10) - (*ciB00)).norm();
+            double fPOC = (vecSeg1 - vecSeg0).dot(
+                        (vecA0 + fTmpT*(vecA1-vecA0)) - vecSeg0
+                        ) / fLength;
+            if ((fPOC >= 0.0) && (fPOC <= fLength))
             {
-                double fD = vecA[0] * vecD[1] - vecA[1] * vecD[0];
-                double fN = vecA[0] * vecC[1] - vecA[1] * vecC[0];
-                
-                if (fD != 0)
-                {
-                    double fT1 = (fLength * fRA - fN) / fD;
-                    if ((fT1 >= 0.0) && (fT1 < fTTmp))
-                        fTTmp = fT1;
-                    double fT2 = (fLength * fRA + fN) / fD;
-                    if ((fT2 >= 0.0) && (fT2 < fTTmp))
-                        fTTmp = fT2;
-                }
-            }
-            else
-            {
-                double fA  = vecB[0] * vecD[1] - vecB[1] * vecD[0];
-                double fB  = vecB[0] * vecC[1] - vecB[1] * vecC[0] + 
-                            vecA[0] * vecD[1] - vecA[1] * vecD[0];
-                double fC1 = vecA[0] * vecC[1] - vecA[1] * vecC[0] -
-                            fRA*fLength;
-                double fC2 = vecC[0] * vecA[1] - vecC[1] * vecA[0] -
-                            fRA*fLength;
-                double fR1 = fB*fB - 4*fA*fC1;
-                double fR2 = fB*fB + 4*fA*fC2;
-                
-                if (fA != 0.0)
-                {
-                    if (fR1 >= 0.0)
-                    {
-                        double fT1 = (-fB + sqrt(fR1)) / (2*fA);
-                        double fT2 = (-fB - sqrt(fR1)) / (2*fA);
-                    
-                        if ((fT1 >= 0.0) && ( fT1 < fTTmp))
-                            fTTmp = fT1;
-                        if ((fT2 >= 0.0) && ( fT2 < fTTmp))
-                            fTTmp = fT2;
-                    }
-                    if (fR2 >= 0.0)
-                    {
-                        double fT1 = (-fB + sqrt(fR2)) / (2*fA);
-                        double fT2 = (-fB - sqrt(fR2)) / (2*fA);
-                    
-                        if ((fT1 >= 0.0) && ( fT1 < fTTmp))
-                            fTTmp = fT1;
-                        if ((fT2 >= 0.0) && ( fT2 < fTTmp))
-                            fTTmp = fT2;
-                    }
-                }
-            }
-            if (fTTmp < fT)
-            {
-                Vector2d vecSeg0 = (*ciB00) + fTTmp*((*ciB01) - (*ciB00));
-                Vector2d vecSeg1 = (*ciB10) + fTTmp*((*ciB11) - (*ciB10));
-                double fPOC = (vecSeg1 - vecSeg0).dot(
-                            (vecA0 + fTTmp*(vecA1-vecA0)) - vecSeg0
-                            ) / fLength;
-                if ((fPOC >= 0.0) && (fPOC <= fLength))
-                {
-                    fT = fTTmp;
-                    Vector2d vecSeg = vecSeg1 - vecSeg0;
-                    vecPOC = vecSeg0 + fPOC * vecSeg / vecSeg.norm();                        
-                }
+                fT = fTmpT;
+                Vector2d vecSeg = vecSeg1 - vecSeg0;
+                vecPOC = vecSeg0 + fPOC * vecSeg / vecSeg.norm();                        
             }
         }
     }
@@ -1016,6 +851,143 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
         _p2->setVelocity(Vector2d(0.0,0.0));
     } 
 }
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests a line against a circle
+///
+/// \param _vecLA1 Line, start point, time t1
+/// \param _vecLB1 Line, end point, time t1
+/// \param _vecLA0 Line, start point, time t0
+/// \param _vecLB0 Line, end point, time t0
+/// \param _pC1    Circle, time t1
+/// \param _pC0    Circle, time t0
+///
+/// \return Time of contact
+///
+///////////////////////////////////////////////////////////////////////////////
+double CCollisionManager::testLineCircle(const Vector2d& _vecLA1, const Vector2d& _vecLB1,
+                                         const Vector2d& _vecLA0, const Vector2d& _vecLB0,
+                                         const CCircle* const _pC1,
+                                         const CCircle* const _pC0
+                                        )
+{
+    METHOD_ENTRY("CCollisionManager::testLineCircle")
+    
+    Vector2d vecA0 = _pC0->getCenter();
+    Vector2d vecA1 = _pC1->getCenter();
+    
+    Vector2d vecA = _vecLB0 - _vecLA0;
+    Vector2d vecB = _vecLB1 - _vecLB0 - _vecLA1 + _vecLA0;
+    Vector2d vecC = vecA0 - _vecLA0;
+    Vector2d vecD = vecA1 - vecA0 - _vecLA1 + _vecLA0;
+    
+    double fLength = (_vecLA0 - _vecLB0).norm();
+    double fRA     = _pC0->getRadius();    
+    double fT      = -1.0;
+    
+    if (vecB.isZero())
+    {
+        double fD = vecA[0] * vecD[1] - vecA[1] * vecD[0];
+        double fN = vecA[0] * vecC[1] - vecA[1] * vecC[0];
+        
+        if (fD != 0)
+        {
+            double fT1 = (fLength * fRA - fN) / fD;
+            if (fT1 >= 0.0)
+                fT = fT1;
+            double fT2 = (fLength * fRA + fN) / fD;
+            if ((fT2 >= 0.0) && (fT2 < fT))
+                fT = fT2;
+        }
+    }
+    else
+    {
+        double fA  = vecB[0] * vecD[1] - vecB[1] * vecD[0];
+        double fB  = vecB[0] * vecC[1] - vecB[1] * vecC[0] + 
+                     vecA[0] * vecD[1] - vecA[1] * vecD[0];
+        double fC1 = vecA[0] * vecC[1] - vecA[1] * vecC[0] -
+                     fRA*fLength;
+        double fC2 = vecC[0] * vecA[1] - vecC[1] * vecA[0] -
+                     fRA*fLength;
+        double fR1 = fB*fB - 4.0*fA*fC1;
+        double fR2 = fB*fB + 4.0*fA*fC2;
+        
+        if (fA != 0.0)
+        {
+            if (fR1 >= 0.0)
+            {
+                double fT1 = (-fB + sqrt(fR1)) / (2.0*fA);
+                double fT2 = (-fB - sqrt(fR1)) / (2.0*fA);
+            
+                if (fT1 >= 0.0)
+                    fT = fT1;
+                if ((fT2 >= 0.0) && ( fT2 < fT))
+                    fT = fT2;
+            }
+            if (fR2 >= 0.0)
+            {
+                double fT1 = (-fB + sqrt(fR2)) / (2.0*fA);
+                double fT2 = (-fB - sqrt(fR2)) / (2.0*fA);
+            
+                if ((fT1 >= 0.0) && ( fT1 < fT))
+                    fT = fT1;
+                if ((fT2 >= 0.0) && ( fT2 < fT))
+                    fT = fT2;
+            }
+        }
+    }
+    return fT;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests a point against a circle
+///
+/// \param _vecP1 Point, time t1
+/// \param _vecP0 Point, time t0
+/// \param _vecC1 Circle, time t1
+/// \param _vecC0 Circle, time t0
+///
+/// \return Time of contact
+///
+///////////////////////////////////////////////////////////////////////////////
+double CCollisionManager::testPointCircle(const Vector2d& _vecP1, const Vector2d& _vecP0,
+                                          const CCircle* const _pC1,
+                                          const CCircle* const _pC0)
+{
+    METHOD_ENTRY("CCollisionManager::testPointCircle")
+    
+    double fT = -1.0;
+    
+    Vector2d vecA = _vecP0 - _pC0->getCenter();
+    Vector2d vecB = _vecP1 - _vecP0 - _pC1->getCenter() + _pC0->getCenter();
+    
+    double fA = vecB.dot(vecB);
+    double fB = 2.0 * vecA.dot(vecB);
+    double fC = vecA.dot(vecA) - _pC0->getRadius()*_pC0->getRadius();
+    
+    if (fA != 0.0)
+    {
+        double fR = fB*fB - 4*fA*fC;
+        if (fR >= 0.0)
+        {
+            double fT1 = (-fB + sqrt(fR)) / (2*fA);
+            double fT2 = (-fB - sqrt(fR)) / (2*fA);
+        
+            if (fT1 >= 0.0)
+            {
+                fT = fT1;
+            }
+            if ((fT2 >= 0.0) && ( fT2 < fT))
+            {
+                fT = fT2;
+            }
+        }
+    }
+    return fT;
+}
+    
 
 ///////////////////////////////////////////////////////////////////////////////
 ///

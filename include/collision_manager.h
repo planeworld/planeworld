@@ -61,6 +61,11 @@ class CCollisionManager
         void    test(CCircle*, CCircle*, CCircle*, CCircle*, CBody*, CBody*);
         void    test(CCircle*, CCircle*, CPolyLine*, CPolyLine*, CBody*, CBody*);
         void    test(CPolyLine*, CPolyLine*, CPolyLine*, CPolyLine*, CBody*, CBody*);
+        double  testLineCircle(const Vector2d&, const Vector2d&,
+                               const Vector2d&, const Vector2d&,
+                               const CCircle* const,  const CCircle* const);
+        double  testPointCircle(const Vector2d&, const Vector2d&,
+                                const CCircle* const,  const CCircle* const);
         double  testPointLine(const Vector2d&, const Vector2d&, const Vector2d&,
                               const Vector2d&, const Vector2d&, const Vector2d&);
         
