@@ -32,7 +32,6 @@
 #include "visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include <boost/thread.hpp> 
 
 using namespace Eigen;
 
@@ -58,7 +57,7 @@ class IShape
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        IShape() : m_nDepthlayers(0){}                                      ///< Constructor
+        IShape() : m_nDepthlayers(SHAPE_DEPTH_ALL){}                       ///< Constructor
         virtual ~IShape(){}                                                 ///< Destructor
         
         //--- Constant Methods -----------------------------------------------//

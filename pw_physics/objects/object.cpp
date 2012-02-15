@@ -28,7 +28,7 @@ IObject::IObject(): m_bGravitation(true),
                 m_bDynamics(true),
                 m_fTimeFac(1.0),
                 m_fMass(1.0),
-                m_nDepthlayers(0),
+                m_nDepthlayers(SHAPE_DEPTH_ALL),
                 m_strName("Object")
 {
     METHOD_ENTRY("IObject::IObject")

@@ -25,7 +25,6 @@
 #include "adams_moulton_integrator.h"
 #include "euler_integrator.h"
 
-#include "contact.h"
 #include "geometry.h"
 
 //--- Standard header --------------------------------------------------------//
@@ -53,6 +52,7 @@ typedef enum
 /// too.
 ///
 /// \todo Move visuals id code. Each shapes should have a visuals id.
+/// \todo Move depth information to shapes only. Then map information to object
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class IObject
