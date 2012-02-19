@@ -103,6 +103,9 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
         fAngEnd += ((fAng/fInc)-floor(fAng/fInc))*fInc;
         
         if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+        
+        double fZoom = _pCamera->getZoom() * fHeight;
+        if (fZoom > 1.0) fZoom = 1.0;
                
         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
 
@@ -110,9 +113,11 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             {
                 double fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
                                                                 std::sin(fAng-fPAng)*fRad,0.0);
+                m_Graphics.setColor(0.5+0.5*fHght*fZoom,0.3+0.3*fHght*fZoom,0.1+0.1*fHght*fZoom);
                 
                 m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+//                 m_Graphics.setColor(0.5+0.2*fHght,0.3+0.1*fHght,0.1);
 //                 m_Graphics.dot(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
 //                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 
@@ -123,6 +128,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             }
 
         m_Graphics.endLine();
+        m_Graphics.setColor(1.0,1.0,1.0,1.0);
     }
 
     METHOD_EXIT("CPlanetVisuals::draw()");

@@ -126,7 +126,7 @@ void CPlanet::initTerrain()
     double fMinF = 0.5*fNrOfMountains/(2.0*M_PI*m_fRadius);
     double fMaxF = 1.0;
     
-    int nMaxOctave = log2(fMaxF/fMinF)+1;
+    int nMaxOctave = log2(fMaxF/fMinF)+5;
     if (nMaxOctave < 1) nMaxOctave = 1;
     
     INFO_MSG("Planet", "Generating Terrain (Mountains)")
@@ -137,12 +137,23 @@ void CPlanet::initTerrain()
     DOM_VAR(INFO_MSG("Planet", "Maximum Octaves:     " << nMaxOctave))
 
     m_MountainTerrain.SetFrequency(fMinF);
-    m_MountainTerrain.SetLacunarity(1.937);
+    m_MountainTerrain.SetLacunarity(2.137);
     m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
     m_MountainTerrain.SetOctaveCount(nMaxOctave);
     
+    m_ClampTerrain.SetSourceModule (0, m_MountainTerrain);
+    m_ClampTerrain.SetBounds (-1.0, 0.8);
+    
+    m_TerraceTerrain.SetSourceModule (0, m_ClampTerrain);
+    m_TerraceTerrain.AddControlPoint (-1.0000);
+    m_TerraceTerrain.AddControlPoint (-0.8750);
+    m_TerraceTerrain.AddControlPoint (-0.7500);
+    m_TerraceTerrain.AddControlPoint (-0.5000);
+    m_TerraceTerrain.AddControlPoint ( 0.0000);
+    m_TerraceTerrain.AddControlPoint ( 1.0000);
+    
     m_BaseFlatTerrain.SetFrequency(fMinF/*0.5*12/(2.0*M_PI*m_fRadius)*/);
-    m_BaseFlatTerrain.SetLacunarity(1.93947);
+    m_BaseFlatTerrain.SetLacunarity(2.13947);
     m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
     m_BaseFlatTerrain.SetOctaveCount(nMaxOctave);
     
@@ -152,11 +163,12 @@ void CPlanet::initTerrain()
     
     m_TerrainType.SetFrequency (0.5*80/(2.0*M_PI*m_fRadius));
     m_TerrainType.SetPersistence (0.5);
-    m_TerrainType.SetLacunarity(2.137);
+    m_TerrainType.SetLacunarity(2.13197);
     m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
+    m_TerrainType.SetOctaveCount(nMaxOctave);
 
     m_Surface.SetSourceModule(0,m_FlatTerrain);
-    m_Surface.SetSourceModule(1,m_MountainTerrain);
+    m_Surface.SetSourceModule(1,m_TerraceTerrain);
     m_Surface.SetControlModule(m_TerrainType);
     m_Surface.SetBounds(0.0,100.0);
     m_Surface.SetEdgeFalloff(0.5);

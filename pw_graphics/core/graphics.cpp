@@ -290,18 +290,28 @@ bool CGraphics::init()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
-    GLfloat LightAmbient[]= { 0.0f, 0.0f, 1.0f, 1.0f };
-    GLfloat LightDiffuse[]= { 1.0f, 1.0f, 0.0f, 1.0f };
-    GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0f, 1.0f };
-    
-    glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
-    glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
+//     GLfloat global_ambient[] = {0.0f,0.0f,0.0f,1.0f};
+//     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+//     
+//     GLfloat LightAmbient[]= { 0.0f, 0.0f, 0.0f, 1.0f };
+//     GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 1.0f };
+//     GLfloat LightSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f };
+//     GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0e1f, 1.0f };
+//     
+//     glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
+//     glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
+//     glLightfv(GL_LIGHT1, GL_SPECULAR, LightSpecular);
+//     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
 //     glEnable(GL_LIGHT1);
 //     glEnable(GL_LIGHTING);
 //     glEnable(GL_RESCALE_NORMAL);
 //     glEnable(GL_NORMALIZE);
-    glEnable(GL_LINE_SMOOTH);
+//     glColorMaterial ( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
+//     glEnable ( GL_COLOR_MATERIAL );
+    
+//     float mcolor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+//     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mcolor);
+//     glFrontFace(GL_CCW);
     
     METHOD_EXIT("CGraphics::init")
     return(true);
@@ -804,6 +814,7 @@ void CGraphics::beginLine(const LineType& _LType, const double& _fDepth)
     METHOD_ENTRY("CGraphics::beginLine")
 
     m_fDepth = _fDepth;
+    glLineWidth(2.0);
 
     switch(_LType)
     {
@@ -817,6 +828,7 @@ void CGraphics::beginLine(const LineType& _LType, const double& _fDepth)
             glBegin(GL_LINE_STRIP);
             break;
     }
+    glLineWidth(1.0);
 
     METHOD_EXIT("CGraphics::beginLine")
 }
@@ -833,13 +845,14 @@ void CGraphics::endLine()
 {
     METHOD_ENTRY("CGraphics::endLine")
 
-    for (std::list<Vector2d>::const_iterator ci = m_VertList.begin();
-        ci != m_VertList.end(); ++ci)
-    {
-        glVertex3d((*ci)[0], (*ci)[1], m_fDepth);
-    }
+//     for (std::list<Vector2d>::const_iterator ci = m_VertList.begin();
+//         ci != m_VertList.end(); ++ci)
+//     {
+//         glVertex3d((*ci)[0], (*ci)[1], m_fDepth);
+//     }
     glEnd();
-    m_VertList.clear();
+//     m_VertList.clear();
+    glColor3d(1.0,1.0,1.0);
 
     METHOD_EXIT("CGraphics::endLine")
 }

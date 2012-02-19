@@ -423,7 +423,8 @@ inline void CGraphics::addVertex(const Vector2d& _vecV)
 {
     METHOD_ENTRY("CGraphics::addVertex(const Vector2d&)");
 
-    m_VertList.push_back(_vecV);
+    glVertex3d(_vecV[0], _vecV[1], m_fDepth);
+//     m_VertList.push_back(_vecV);
     ++m_unNrOfLines;
 
     METHOD_EXIT("CGraphics::addVertex(const Vector2d&)");
@@ -444,7 +445,9 @@ inline void CGraphics::addVertex(const double& _fX, const double& _fY)
 {
     METHOD_ENTRY("CGraphics::addVertex(const double&, const double&)");
 
-    m_VertList.push_back(Vector2d(_fX, _fY));
+    glVertex3d(_fX, _fY, m_fDepth);
+    
+//     m_VertList.push_back(Vector2d(_fX, _fY));
     ++m_unNrOfLines;
 
     METHOD_EXIT("CGraphics::addVertex(const double&, const double&)");

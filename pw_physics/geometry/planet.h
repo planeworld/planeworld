@@ -86,6 +86,8 @@ class CPlanet : public IShape
         noise::module::Billow      m_BaseFlatTerrain;   ///< Base terrain
         noise::module::ScaleBias   m_FlatTerrain;       ///< Base terrain scaler
         noise::module::Perlin      m_TerrainType;       ///< Terrain type decision function
+        noise::module::Clamp       m_ClampTerrain;      ///< Clamps terrain at top
+        noise::module::Terrace     m_TerraceTerrain;    ///< Adds terraces to terrain
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
