@@ -39,29 +39,29 @@ CPlanet::CPlanet() : m_fAngle(0.0),
     
     m_vecCenter0.setZero();
     
-    m_MountainTerrain.SetFrequency(0.000025);
-    m_MountainTerrain.SetLacunarity(1.9737346);
-    m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    m_MountainTerrain.SetOctaveCount(16);
-    
-    m_BaseFlatTerrain.SetFrequency(0.00001);
-    m_BaseFlatTerrain.SetLacunarity(1.793947);
-    m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    
-    m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
-    m_FlatTerrain.SetScale(0.25);
-    m_FlatTerrain.SetBias(-0.75);
-    
-    m_TerrainType.SetFrequency (0.000001);
-    m_TerrainType.SetPersistence (0.25);
-    m_TerrainType.SetLacunarity(2.12358986);
-    m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
-
-    m_Surface.SetSourceModule(0,m_FlatTerrain);
-    m_Surface.SetSourceModule(1,m_MountainTerrain);
-    m_Surface.SetControlModule(m_TerrainType);
-    m_Surface.SetBounds(0.0,100.0);
-    m_Surface.SetEdgeFalloff(0.25);
+//     m_MountainTerrain.SetFrequency(0.000025);
+//     m_MountainTerrain.SetLacunarity(1.9737346);
+//     m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
+//     m_MountainTerrain.SetOctaveCount(16);
+//     
+//     m_BaseFlatTerrain.SetFrequency(0.00001);
+//     m_BaseFlatTerrain.SetLacunarity(1.793947);
+//     m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
+//     
+//     m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
+//     m_FlatTerrain.SetScale(0.25);
+//     m_FlatTerrain.SetBias(-0.75);
+//     
+//     m_TerrainType.SetFrequency (0.000001);
+//     m_TerrainType.SetPersistence (0.25);
+//     m_TerrainType.SetLacunarity(2.12358986);
+//     m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
+// 
+//     m_Surface.SetSourceModule(0,m_FlatTerrain);
+//     m_Surface.SetSourceModule(1,m_MountainTerrain);
+//     m_Surface.SetControlModule(m_TerrainType);
+//     m_Surface.SetBounds(0.0,100.0);
+//     m_Surface.SetEdgeFalloff(0.25);
     
     METHOD_EXIT("CPlanet::CPlanet()")
 }
@@ -120,6 +120,17 @@ void CPlanet::initTerrain()
 {
     METHOD_ENTRY("CPlanet::initTerrain")
     
+//     double fNrOfPoints = 2.0 * M_PI * m_fRadius / m_fGroundResolution;
+//     double fNrOfMountains = 2.0 * M_PI * m_fRadius / (m_fHeightMax*M_PI_2) * 0.5;
+//     
+//     double fMinF = 0.5*fNrOfMountains/(2.0*M_PI*m_fRadius);
+//     double fMaxF = 1.0;
+//     
+//     int nMaxOctave = log2(fMaxF/fMinF)+5;
+//     if (nMaxOctave < 1) nMaxOctave = 1;
+    
+    
+    
     double fNrOfPoints = 2.0 * M_PI * m_fRadius / m_fGroundResolution;
     double fNrOfMountains = 2.0 * M_PI * m_fRadius / (m_fHeightMax*M_PI_2) * 0.5;
     
@@ -161,19 +172,18 @@ void CPlanet::initTerrain()
     m_FlatTerrain.SetScale(0.25);
     m_FlatTerrain.SetBias(-0.75);
     
-    m_TerrainType.SetFrequency (0.5*80/(2.0*M_PI*m_fRadius));
+    m_TerrainType.SetFrequency (0.5*100.0/(2.0*M_PI*m_fRadius));
     m_TerrainType.SetPersistence (0.5);
     m_TerrainType.SetLacunarity(2.13197);
     m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
-    m_TerrainType.SetOctaveCount(nMaxOctave);
+    m_TerrainType.SetOctaveCount(20);
 
     m_Surface.SetSourceModule(0,m_FlatTerrain);
     m_Surface.SetSourceModule(1,m_TerraceTerrain);
     m_Surface.SetControlModule(m_TerrainType);
-    m_Surface.SetBounds(0.0,100.0);
+    m_Surface.SetBounds(0.0,1.0);
     m_Surface.SetEdgeFalloff(0.5);
 
-    METHOD_EXIT("CPlanet::initTerrain")
 }
 
 ///////////////////////////////////////////////////////////////////////////////

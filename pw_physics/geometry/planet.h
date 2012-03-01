@@ -54,6 +54,7 @@ class CPlanet : public IShape
         const int&                      getSeed() const;
         const double&                   getSmoothness() const;
         const noise::module::Select&    getSurface() const;
+        const noise::module::Perlin&    getTerrainType() const;
         
         const ShapeType                 getShapeType() const;
 
@@ -80,6 +81,11 @@ class CPlanet : public IShape
         double              m_fRadius;                  ///< Minimum radius of planet
         double              m_fSmoothness;              ///< Smoothness of planet landscape
         int                 m_nSeed;                    ///< Unique seed for terrain generation
+        
+//         noise::module::Perlin      m_ContinentsDef;
+//         noise::module::Perlin      m_TerrainTypeDef;
+//         noise::module::RidgedMulti m_MountainTerrain;
+//         noise::module::Billow      m_BaseFlatTerrain;
         
         noise::module::Select      m_Surface;           ///< Final surface noise function
         noise::module::RidgedMulti m_MountainTerrain;   ///< Main mountain
@@ -213,6 +219,19 @@ inline const noise::module::Select& CPlanet::getSurface() const
 
     METHOD_EXIT("CPlanet::getSmoothness")
     return m_Surface;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return terrain type noise module of the planet
+///
+/// \return terrain type noise module
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const noise::module::Perlin& CPlanet::getTerrainType() const
+{
+    METHOD_ENTRY("CPlanet::getTerrainType")
+    return m_TerrainType;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -814,7 +814,6 @@ void CGraphics::beginLine(const LineType& _LType, const double& _fDepth)
     METHOD_ENTRY("CGraphics::beginLine")
 
     m_fDepth = _fDepth;
-    glLineWidth(2.0);
 
     switch(_LType)
     {
@@ -828,7 +827,6 @@ void CGraphics::beginLine(const LineType& _LType, const double& _fDepth)
             glBegin(GL_LINE_STRIP);
             break;
     }
-    glLineWidth(1.0);
 
     METHOD_EXIT("CGraphics::beginLine")
 }
@@ -852,7 +850,6 @@ void CGraphics::endLine()
 //     }
     glEnd();
 //     m_VertList.clear();
-    glColor3d(1.0,1.0,1.0);
 
     METHOD_EXIT("CGraphics::endLine")
 }

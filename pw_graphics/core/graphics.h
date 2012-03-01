@@ -103,6 +103,7 @@ class CGraphics
         unsigned short  getHeightScr() const;
         void setColor(const double&, const double&, const double&) const;
         void setColor(const double&, const double&, const double&, const double&) const;
+        void setWidth(const double&) const;
 
         //--- Methods --------------------------------------------------------//
         bool init();
@@ -324,6 +325,19 @@ inline void CGraphics::setColor(const double& _fR, const double& _fG,
     glColor4d(_fR, _fG, _fB, _fA);
 
     METHOD_EXIT("CGraphics::setColor(const double&, const double&, const double&, const double&)");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets width of lines
+///
+/// \param _fW Width of lines
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CGraphics::setWidth(const double& _fW) const
+{
+    METHOD_ENTRY("CGraphics::setColor")
+    glLineWidth(_fW);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
