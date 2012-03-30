@@ -74,8 +74,8 @@ Vector2d CGraphics::screen2World(const Vector2d& _vecV) const
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (GRAPHICS_PI/2.0-m_fCamAng))+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (GRAPHICS_PI/2.0-m_fCamAng))- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
 
     METHOD_EXIT("CGraphics::screen2World")
     return vecResult;
@@ -110,8 +110,8 @@ Vector2d CGraphics::screen2World(const double& _fX, const double& _fY) const
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (GRAPHICS_PI/2.0-m_fCamAng))+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (GRAPHICS_PI/2.0-m_fCamAng))- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
 
     METHOD_EXIT("CGraphics::screen2World")
     return vecResult;
@@ -537,12 +537,12 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR) const
     double fAng = 0.0;
 
     glBegin(GL_LINE_LOOP);
-        while (fAng < 2*GRAPHICS_PI)
+        while (fAng < M_2_PI)
         {
             glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
                         _vecC[1]+std::cos(fAng)*_fR,
                         -10.0);
-            fAng += 2*GRAPHICS_PI / 100;
+            fAng += M_2_PI / 100;
         }
     glEnd();
 

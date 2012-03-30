@@ -61,12 +61,12 @@ void CCircleVisuals::draw(const CCamera* const _pCamera) const
     double fAng = m_pCircle->getAngle();
     double fRad = m_pCircle->getRadius();
     Vector2d vecCenter = m_pCircle->getCenter()-_pCamera->getCenter();
-//  double fAngInc =    2.0 * GRAPHICS_PI /
-//                      ceil((100.0 * 2.0 * GRAPHICS_PI * m_fRadius * m_Graphics.getCamZoom()) /
+//  double fAngInc =    2.0 * M_PI /
+//                      ceil((100.0 * 2.0 * M_PI * m_fRadius * m_Graphics.getCamZoom()) /
 //                      (GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT));
-    double fAngInc = 2.0 * GRAPHICS_PI /
+    double fAngInc = 2.0 * M_PI /
                      ceil (
-                         ( 2.0 * GRAPHICS_PI * fRad / m_Graphics.getResMPX() )
+                         ( 2.0 * M_PI * fRad / m_Graphics.getResMPX() )
                          / m_Graphics.getDynPelSize() );
 
     // Limit the maximum and minimum amount of circle elements
@@ -75,7 +75,7 @@ void CCircleVisuals::draw(const CCamera* const _pCamera) const
 
     m_Graphics.beginLine(GRAPHICS_LINETYPE_LOOP, SHAPE_DEFAULT_DEPTH);
 
-    while ( fAng <= 2*GRAPHICS_PI+m_pCircle->getAngle())
+    while ( fAng <= 2*M_PI+m_pCircle->getAngle())
     {
         m_Graphics.addVertex(Vector2d(vecCenter[0]-std::sin(fAng)*fRad,
                                       vecCenter[1]+std::cos(fAng)*fRad));
