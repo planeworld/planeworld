@@ -88,7 +88,7 @@ namespace noise
           return 1;
         }
 
-        virtual double GetValue (double x, double y, double z) const;
+        virtual double GetValue (double x, double y) const;
 
         /// Returns the translation amount to apply to the @a x coordinate of
         /// the input value.
@@ -128,7 +128,6 @@ namespace noise
         {
           m_xTranslation = translation;
           m_yTranslation = translation;
-          m_zTranslation = translation;
         }
 
         /// Sets the translation amounts to apply to the ( @a x, @a y, @a z )

@@ -31,9 +31,9 @@ ScaleBias::ScaleBias ():
 {
 }
 
-double ScaleBias::GetValue (double x, double y, double z) const
+double ScaleBias::GetValue (double x, double y) const
 {
   assert (m_pSourceModule[0] != NULL);
 
-  return m_pSourceModule[0]->GetValue (x, y, z) * m_scale + m_bias;
+  return m_pSourceModule[0]->GetValue (x, y) * m_scale + m_bias;
 }

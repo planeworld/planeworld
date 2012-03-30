@@ -79,7 +79,7 @@ namespace noise
         return 4;
       }
 
-      virtual double GetValue (double x, double y, double z) const;
+      virtual double GetValue (double x, double y) const;
 
       /// Returns the @a x displacement module.
       ///

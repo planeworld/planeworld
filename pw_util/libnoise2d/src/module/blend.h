@@ -103,7 +103,7 @@ namespace noise
           return 3;
         }
 
-	      virtual double GetValue (double x, double y, double z) const;
+	      virtual double GetValue (double x, double y) const;
 
         /// Sets the control module.
         ///

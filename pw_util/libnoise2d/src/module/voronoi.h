@@ -177,7 +177,7 @@ namespace noise
           return m_enableDistance;
         }
 
-        virtual double GetValue (double x, double y, double z) const;
+        virtual double GetValue (double x, double y) const;
 
         /// Sets the displacement value of the Voronoi cells.
         ///

@@ -30,15 +30,14 @@ Cache::Cache ():
 {
 }
 
-double Cache::GetValue (double x, double y, double z) const
+double Cache::GetValue (double x, double y) const
 {
   assert (m_pSourceModule[0] != NULL);
 
-  if (!(m_isCached && x == m_xCache && y == m_yCache && z == m_zCache)) {
-    m_cachedValue = m_pSourceModule[0]->GetValue (x, y, z);
+  if (!(m_isCached && x == m_xCache && y == m_yCache)) {
+    m_cachedValue = m_pSourceModule[0]->GetValue (x, y);
     m_xCache = x;
     m_yCache = y;
-    m_zCache = z;
   }
   m_isCached = true;
   return m_cachedValue;

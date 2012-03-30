@@ -83,7 +83,7 @@ namespace noise
           return 1;
         }
 
-        virtual double GetValue (double x, double y, double z) const;
+        virtual double GetValue (double x, double y) const;
 
         /// Sets the exponent value to apply to the output value from the
         /// source module.

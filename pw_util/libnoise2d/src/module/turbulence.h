@@ -177,7 +177,7 @@ namespace noise
           return 1;
         }
 
-        virtual double GetValue (double x, double y, double z) const;
+        virtual double GetValue (double x, double y) const;
 
         /// Sets the frequency of the turbulence.
         ///
@@ -190,7 +190,6 @@ namespace noise
           // Set the frequency of each Perlin-noise module.
           m_xDistortModule.SetFrequency (frequency);
           m_yDistortModule.SetFrequency (frequency);
-          m_zDistortModule.SetFrequency (frequency);
         }
 
         /// Sets the power of the turbulence.
@@ -223,7 +222,6 @@ namespace noise
           // Set the octave count for each Perlin-noise module.
           m_xDistortModule.SetOctaveCount (roughness);
           m_yDistortModule.SetOctaveCount (roughness);
-          m_zDistortModule.SetOctaveCount (roughness);
         }
 
         /// Sets the seed value of the internal noise modules that are used to
@@ -250,9 +248,6 @@ namespace noise
 
         /// Noise module that displaces the @a y coordinate.
         Perlin m_yDistortModule;
-
-        /// Noise module that displaces the @a z coordinate.
-        Perlin m_zDistortModule;
 
     };
 

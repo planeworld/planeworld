@@ -29,9 +29,9 @@ Invert::Invert ():
 {
 }
 
-double Invert::GetValue (double x, double y, double z) const
+double Invert::GetValue (double x, double y) const
 {
   assert (m_pSourceModule[0] != NULL);
 
-  return -(m_pSourceModule[0]->GetValue (x, y, z));
+  return -(m_pSourceModule[0]->GetValue (x, y));
 }

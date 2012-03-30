@@ -43,5 +43,5 @@ double Cylinder::GetValue (double angle, double height) const
   x = cos (angle * DEG_TO_RAD);
   y = height;
   z = sin (angle * DEG_TO_RAD);
-  return m_pModule->GetValue (x, y, z);
+  return m_pModule->GetValue (x, y);
 }

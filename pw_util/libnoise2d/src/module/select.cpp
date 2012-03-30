@@ -39,13 +39,13 @@ double Select::GetValue (double x, double y, double z) const
   assert (m_pSourceModule[1] != NULL);
   assert (m_pSourceModule[2] != NULL);
 
-  double controlValue = m_pSourceModule[2]->GetValue (x, y, z);
+  double controlValue = m_pSourceModule[2]->GetValue (x, y);
   double alpha;
   if (m_edgeFalloff > 0.0) {
     if (controlValue < (m_lowerBound - m_edgeFalloff)) {
       // The output value from the control module is below the selector
       // threshold; return the output value from the first source module.
-      return m_pSourceModule[0]->GetValue (x, y, z);
+      return m_pSourceModule[0]->GetValue (x, y);
 
     } else if (controlValue < (m_lowerBound + m_edgeFalloff)) {
       // The output value from the control module is near the lower end of the
@@ -55,14 +55,14 @@ double Select::GetValue (double x, double y, double z) const
       double upperCurve = (m_lowerBound + m_edgeFalloff);
       alpha = SCurve3 (
         (controlValue - lowerCurve) / (upperCurve - lowerCurve));
-      return LinearInterp (m_pSourceModule[0]->GetValue (x, y, z),
-        m_pSourceModule[1]->GetValue (x, y, z),
+      return LinearInterp (m_pSourceModule[0]->GetValue (x, y),
+        m_pSourceModule[1]->GetValue (x, y),
         alpha);
 
     } else if (controlValue < (m_upperBound - m_edgeFalloff)) {
       // The output value from the control module is within the selector
       // threshold; return the output value from the second source module.
-      return m_pSourceModule[1]->GetValue (x, y, z);
+      return m_pSourceModule[1]->GetValue (x, y);
 
     } else if (controlValue < (m_upperBound + m_edgeFalloff)) {
       // The output value from the control module is near the upper end of the
@@ -72,20 +72,20 @@ double Select::GetValue (double x, double y, double z) const
       double upperCurve = (m_upperBound + m_edgeFalloff);
       alpha = SCurve3 (
         (controlValue - lowerCurve) / (upperCurve - lowerCurve));
-      return LinearInterp (m_pSourceModule[1]->GetValue (x, y, z),
-        m_pSourceModule[0]->GetValue (x, y, z),
+      return LinearInterp (m_pSourceModule[1]->GetValue (x, y),
+        m_pSourceModule[0]->GetValue (x, y),
         alpha);
 
     } else {
       // Output value from the control module is above the selector threshold;
       // return the output value from the first source module.
-      return m_pSourceModule[0]->GetValue (x, y, z);
+      return m_pSourceModule[0]->GetValue (x, y);
     }
   } else {
     if (controlValue < m_lowerBound || controlValue > m_upperBound) {
-      return m_pSourceModule[0]->GetValue (x, y, z);
+      return m_pSourceModule[0]->GetValue (x, y);
     } else {
-      return m_pSourceModule[1]->GetValue (x, y, z);
+      return m_pSourceModule[1]->GetValue (x, y);
     }
   }
 }

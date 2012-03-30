@@ -99,7 +99,7 @@ namespace noise
           return 1;
         }
 
-        virtual double GetValue (double x, double y, double z) const;
+        virtual double GetValue (double x, double y) const;
 
         /// Sets the bias to apply to the scaled output value from the source
         /// module.

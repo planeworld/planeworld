@@ -109,7 +109,7 @@ namespace noise
           return m_upperBound;
         }
 
-        virtual double GetValue (double x, double y, double z) const;
+        virtual double GetValue (double x, double y) const;
 
         /// Sets the lower and upper bounds of the clamping range.
         ///

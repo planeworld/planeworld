@@ -42,5 +42,5 @@ double Sphere::GetValue (double lat, double lon) const
 
   double x, y, z;
   LatLonToXYZ (lat, lon, x, y, z);
-  return m_pModule->GetValue (x, y, z);
+  return m_pModule->GetValue (x, y);
 }

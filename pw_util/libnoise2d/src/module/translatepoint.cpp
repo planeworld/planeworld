@@ -27,15 +27,13 @@ using namespace noise::module;
 TranslatePoint::TranslatePoint ():
   Module (GetSourceModuleCount ()),
   m_xTranslation (DEFAULT_TRANSLATE_POINT_X),
-  m_yTranslation (DEFAULT_TRANSLATE_POINT_Y),
-  m_zTranslation (DEFAULT_TRANSLATE_POINT_Z)
+  m_yTranslation (DEFAULT_TRANSLATE_POINT_Y)
 {
 }
 
-double TranslatePoint::GetValue (double x, double y, double z) const
+double TranslatePoint::GetValue (double x, double y) const
 {
   assert (m_pSourceModule[0] != NULL);
 
-  return m_pSourceModule[0]->GetValue (x + m_xTranslation, y + m_yTranslation,
-    z + m_zTranslation);
+  return m_pSourceModule[0]->GetValue (x + m_xTranslation, y + m_yTranslation);
 }

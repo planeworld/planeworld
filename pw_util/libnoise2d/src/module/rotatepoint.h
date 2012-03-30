@@ -91,7 +91,7 @@ namespace noise
           return 1;
         }
 
-        virtual double GetValue (double x, double y, double z) const;
+        virtual double GetValue (double x, double y) const;
 
         /// Returns the rotation angle around the @a x axis to apply to the
         /// input value.

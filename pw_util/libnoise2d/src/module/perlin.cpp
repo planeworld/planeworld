@@ -35,7 +35,7 @@ Perlin::Perlin ():
 {
 }
 
-double Perlin::GetValue (double x, double y, double z) const
+double Perlin::GetValue (double x, double y) const
 {
   double value = 0.0;
   double signal = 0.0;
@@ -45,7 +45,6 @@ double Perlin::GetValue (double x, double y, double z) const
 
   x *= m_frequency;
   y *= m_frequency;
-  z *= m_frequency;
 
   for (int curOctave = 0; curOctave < m_octaveCount; curOctave++) {
 
@@ -53,18 +52,16 @@ double Perlin::GetValue (double x, double y, double z) const
     // bit integer so that we can pass them to the coherent-noise functions.
     nx = MakeInt32Range (x);
     ny = MakeInt32Range (y);
-    nz = MakeInt32Range (z);
 
     // Get the coherent-noise value from the input value and add it to the
     // final result.
     seed = (m_seed + curOctave) & 0xffffffff;
-    signal = GradientCoherentNoise3D (nx, ny, nz, seed, m_noiseQuality);
+    signal = GradientCoherentNoise2D (nx, ny, seed, m_noiseQuality);
     value += signal * curPersistence;
 
     // Prepare the next octave.
     x *= m_lacunarity;
     y *= m_lacunarity;
-    z *= m_lacunarity;
     curPersistence *= m_persistence;
   }
 

@@ -87,7 +87,7 @@ namespace noise
           return 1;
         }
 
-        virtual double GetValue (double x, double y, double z) const;
+        virtual double GetValue (double x, double y) const;
 
         /// Returns the scaling factor applied to the @a x coordinate of the
         /// input value.
@@ -120,14 +120,13 @@ namespace noise
         ///
         /// @param scale The scaling factor to apply.
         ///
-        /// The GetValue() method multiplies the ( @a x, @a y, @a z )
+        /// The GetValue() method multiplies the ( @a x, @a y )
         /// coordinates of the input value with a scaling factor before
         /// returning the output value from the source module.
         void SetScale (double scale)
         {
           m_xScale = scale;
           m_yScale = scale;
-          m_zScale = scale;
         }
 
         /// Sets the scaling factor to apply to the ( @a x, @a y, @a z )
@@ -140,11 +139,10 @@ namespace noise
         /// The GetValue() method multiplies the ( @a x, @a y, @a z )
         /// coordinates of the input value with a scaling factor before
         /// returning the output value from the source module.
-        void SetScale (double xScale, double yScale, double zScale)
+        void SetScale (double xScale, double yScale)
         {
           m_xScale = xScale;
           m_yScale = yScale;
-          m_zScale = zScale;
         }
 
         /// Sets the scaling factor to apply to the @a x coordinate of the

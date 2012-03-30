@@ -54,8 +54,7 @@ double Line::GetValue (double p) const
 
   double x = (m_x1 - m_x0) * p + m_x0;
   double y = (m_y1 - m_y0) * p + m_y0;
-  double z = (m_z1 - m_z0) * p + m_z0;
-  double value = m_pModule->GetValue (x, y, z);
+  double value = m_pModule->GetValue (x, y);
 
   if (m_attenuate) {
     return p * (1.0 - p) * 4 * value;

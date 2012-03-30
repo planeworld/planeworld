@@ -34,18 +34,16 @@ Voronoi::Voronoi ():
 {
 }
 
-double Voronoi::GetValue (double x, double y, double z) const
+double Voronoi::GetValue (double x, double y) const
 {
   // This method could be more efficient by caching the seed values.  Fix
   // later.
 
   x *= m_frequency;
   y *= m_frequency;
-  z *= m_frequency;
 
   int xInt = (x > 0.0? (int)x: (int)x - 1);
   int yInt = (y > 0.0? (int)y: (int)y - 1);
-  int zInt = (z > 0.0? (int)z: (int)z - 1);
 
   double minDist = 2147483647.0;
   double xCandidate = 0;
@@ -55,47 +53,40 @@ double Voronoi::GetValue (double x, double y, double z) const
   // Inside each unit cube, there is a seed point at a random position.  Go
   // through each of the nearby cubes until we find a cube with a seed point
   // that is closest to the specified position.
-  for (int zCur = zInt - 2; zCur <= zInt + 2; zCur++) {
     for (int yCur = yInt - 2; yCur <= yInt + 2; yCur++) {
-      for (int xCur = xInt - 2; xCur <= xInt + 2; xCur++) {
+        for (int xCur = xInt - 2; xCur <= xInt + 2; xCur++) {
 
         // Calculate the position and distance to the seed point inside of
         // this unit cube.
-        double xPos = xCur + ValueNoise3D (xCur, yCur, zCur, m_seed    );
-        double yPos = yCur + ValueNoise3D (xCur, yCur, zCur, m_seed + 1);
-        double zPos = zCur + ValueNoise3D (xCur, yCur, zCur, m_seed + 2);
+        double xPos = xCur + ValueNoise2D (xCur, yCur, m_seed    );
+        double yPos = yCur + ValueNoise2D (xCur, yCur, m_seed + 1);
         double xDist = xPos - x;
         double yDist = yPos - y;
-        double zDist = zPos - z;
-        double dist = xDist * xDist + yDist * yDist + zDist * zDist;
+        double dist = xDist * xDist + yDist * yDist;
 
         if (dist < minDist) {
-          // This seed point is closer to any others found so far, so record
-          // this seed point.
-          minDist = dist;
-          xCandidate = xPos;
-          yCandidate = yPos;
-          zCandidate = zPos;
+            // This seed point is closer to any others found so far, so record
+            // this seed point.
+            minDist = dist;
+            xCandidate = xPos;
+            yCandidate = yPos;
         }
-      }
+        }
     }
-  }
 
   double value;
   if (m_enableDistance) {
     // Determine the distance to the nearest seed point.
     double xDist = xCandidate - x;
     double yDist = yCandidate - y;
-    double zDist = zCandidate - z;
-    value = (sqrt (xDist * xDist + yDist * yDist + zDist * zDist)
-      ) * SQRT_3 - 1.0;
+    value = (sqrt (xDist * xDist + yDist * yDist)
+      ) * SQRT_2 - 1.0;
   } else {
     value = 0.0;
   }
 
   // Return the calculated distance with the displacement value applied.
-  return value + (m_displacement * (double)ValueNoise3D (
+  return value + (m_displacement * (double)ValueNoise2D (
     (int)(floor (xCandidate)),
-    (int)(floor (yCandidate)),
-    (int)(floor (zCandidate))));
+    (int)(floor (yCandidate))));
 }

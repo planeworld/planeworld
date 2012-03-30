@@ -31,14 +31,13 @@ RotatePoint::RotatePoint ():
   SetAngles (DEFAULT_ROTATE_X, DEFAULT_ROTATE_Y, DEFAULT_ROTATE_Z);
 }
 
-double RotatePoint::GetValue (double x, double y, double z) const
+double RotatePoint::GetValue (double x, double y) const
 {
   assert (m_pSourceModule[0] != NULL);
 
-  double nx = (m_x1Matrix * x) + (m_y1Matrix * y) + (m_z1Matrix * z);
-  double ny = (m_x2Matrix * x) + (m_y2Matrix * y) + (m_z2Matrix * z);
-  double nz = (m_x3Matrix * x) + (m_y3Matrix * y) + (m_z3Matrix * z);
-  return m_pSourceModule[0]->GetValue (nx, ny, nz);
+  double nx = (m_x1Matrix * x) + (m_y1Matrix * y);
+  double ny = (m_x2Matrix * x) + (m_y2Matrix * y);
+  return m_pSourceModule[0]->GetValue (nx, ny);
 }
 
 void RotatePoint::SetAngles (double xAngle, double yAngle,
