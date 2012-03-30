@@ -40,7 +40,7 @@ double Perlin::GetValue (double x, double y) const
   double value = 0.0;
   double signal = 0.0;
   double curPersistence = 1.0;
-  double nx, ny, nz;
+  double nx, ny;
   int seed;
 
   x *= m_frequency;

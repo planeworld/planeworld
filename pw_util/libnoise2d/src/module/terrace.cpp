@@ -74,7 +74,7 @@ int Terrace::FindInsertionPos (double value)
   return insertionPos;
 }
 
-double Terrace::GetValue (double x, double y, double z) const
+double Terrace::GetValue (double x, double y) const
 {
   assert (m_pSourceModule[0] != NULL);
   assert (m_controlPointCount >= 2);

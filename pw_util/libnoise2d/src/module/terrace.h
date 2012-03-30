@@ -159,7 +159,7 @@ namespace noise
 	        return m_invertTerraces;
         }
 
-    	  virtual double GetValue (double x, double y, double z) const;
+    	  virtual double GetValue (double x, double y) const;
 
 	      /// Creates a number of equally-spaced control points that range from
         /// -1 to +1.

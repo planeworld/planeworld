@@ -33,7 +33,7 @@ Select::Select ():
 {
 }
 
-double Select::GetValue (double x, double y, double z) const
+double Select::GetValue (double x, double y) const
 {
   assert (m_pSourceModule[0] != NULL);
   assert (m_pSourceModule[1] != NULL);
