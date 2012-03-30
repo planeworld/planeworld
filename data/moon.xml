@@ -13,7 +13,7 @@
         type="Planet"
         radius="1738.0e3"
         height_max="1000.0"
-        ground_resolution="1.0"
+        ground_resolution="0.01"
         center_x="0.0"
         center_y="0.0">
         <visuals type="Planet"/>

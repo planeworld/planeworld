@@ -192,7 +192,7 @@ bool CGraphics::init()
     m_nVideoFlags  = SDL_OPENGL;
     m_nVideoFlags |= SDL_GL_DOUBLEBUFFER;
     m_nVideoFlags |= SDL_RESIZABLE;
-//  m_nVideoFlags |= SDL_FULLSCREEN;
+//     m_nVideoFlags |= SDL_FULLSCREEN;
 
     // Testing for SDL hardware acceleration is meaningless when only using OpenGL
     //  // Test for hardware acceleration
