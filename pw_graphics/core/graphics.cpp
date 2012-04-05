@@ -537,12 +537,12 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR) const
     double fAng = 0.0;
 
     glBegin(GL_LINE_LOOP);
-        while (fAng < M_2_PI)
+        while (fAng < 2.0*M_PI)
         {
             glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
                         _vecC[1]+std::cos(fAng)*_fR,
                         -10.0);
-            fAng += M_2_PI / 100;
+            fAng += M_PI / 50;
         }
     glEnd();
 

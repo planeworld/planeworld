@@ -122,10 +122,9 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             while ( fAng <= fAngEnd)
             {
                 fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
-                                                                std::sin(fAng-fPAng)*fRad,0.0);
+                                                         std::sin(fAng-fPAng)*fRad);
                 fTerrainType = m_pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
-                                                                    std::sin(fAng-fPAng)*fRad,
-                                                                    0.0) * 0.5 + 0.5;
+                                                                    std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
 //                 fWeightFlat =  (1.0-TERRAIN_CROSSOVER-fTerrainType)*TERRAIN_CROSSOVER_INV;
 //                 fWeightMountains = (fTerrainType-TERRAIN_CROSSOVER)*TERRAIN_CROSSOVER_INV;
 //                 if (fWeightFlat <= 0.0) fWeightFlat      = 0.0;
@@ -170,15 +169,14 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             while ( fAng <= fAngEnd)
             {
                 fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
-                                                         std::sin(fAng-fPAng)*fRad,0.0);
+                                                         std::sin(fAng-fPAng)*fRad);
                 fTerrainType = m_pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
-                                                                    std::sin(fAng-fPAng)*fRad,
-                                                                    0.0) * 0.5 + 0.5;
+                                                                    std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
                 if (fTerrainType < 0.5)
                 {
                     
-                    double fAngGrass01 = fAng-0.5*noise::ValueNoise3D(1.0,1.0,1.0,fAng/fInc);
-                    double fAngGrass02 = fAng-noise::ValueNoise3D(1.0,1.0,1.0,fAng/fInc);
+                    double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(1.0,1.0,fAng/fInc);
+                    double fAngGrass02 = fAng-noise::ValueNoise2D(1.0,1.0,fAng/fInc);
                     double fHghtGrass01 = fabs(0.5-fTerrainType);
                     double fHghtGrass02 = 0.5*fabs(0.5-fTerrainType);
                     m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP,SHAPE_DEFAULT_DEPTH);

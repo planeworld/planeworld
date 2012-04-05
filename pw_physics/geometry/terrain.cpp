@@ -178,7 +178,7 @@ void CTerrain::init()
     double fX = 0.0;
     for (int i=0; i<ceil(fNrOfPoints); ++i)
     {
-        m_Cache[i]=Surface.GetValue(fX,0.0,0.0) * m_fHeightMax + m_vecCenter[1]; 
+        m_Cache[i]=Surface.GetValue(fX,0.0) * m_fHeightMax + m_vecCenter[1]; 
         fX += m_fGroundResolution;
         m_AABB.update(Vector2d(fX+m_vecCenter[0]-m_fWidth*0.5,m_Cache[i]));
         

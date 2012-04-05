@@ -131,8 +131,8 @@ void CPlanet::initTerrain()
     
     
     
-    double fNrOfPoints = 2.0 * M_PI * m_fRadius / m_fGroundResolution;
-    double fNrOfMountains = 2.0 * M_PI * m_fRadius / (m_fHeightMax*M_PI_2) * 0.5;
+    double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
+    double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2) * 0.5;
     
     double fMinF = 0.5*fNrOfMountains/(2.0*M_PI*m_fRadius);
     double fMaxF = 1.0;
