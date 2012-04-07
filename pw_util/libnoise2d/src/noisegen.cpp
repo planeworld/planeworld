@@ -122,7 +122,7 @@ double noise::GradientNoise2D (double fx, double fy, int ix,
   // vector.  The resulting value is gradient noise.  Apply a scaling value
   // so that this noise value ranges from -1.0 to 1.0.
   return ((xvGradient * xvPoint)
-        + (yvGradient * yvPoint)) * 2.12;
+        + (yvGradient * yvPoint)) * 0.70711;
 }
 
 int noise::IntValueNoise2D (int x, int y, int seed)
