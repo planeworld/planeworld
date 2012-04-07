@@ -110,9 +110,8 @@ double noise::GradientNoise2D (double fx, double fy, int ix,
   vectorIndex ^= (vectorIndex >> SHIFT_NOISE_GEN);
   vectorIndex &= 0xff;
 
-  double xvGradient = g_randomVectors[(vectorIndex << 2)    ];
-  double yvGradient = g_randomVectors[(vectorIndex << 2) + 1];
-//   double zvGradient = g_randomVectors[(vectorIndex << 2) + 2];
+  double xvGradient = g_randomVectors[(vectorIndex << 1)    ];
+  double yvGradient = g_randomVectors[(vectorIndex << 1) + 1];
 
   // Set up us another vector equal to the distance between the two vectors
   // passed to this function.
@@ -123,7 +122,7 @@ double noise::GradientNoise2D (double fx, double fy, int ix,
   // vector.  The resulting value is gradient noise.  Apply a scaling value
   // so that this noise value ranges from -1.0 to 1.0.
   return ((xvGradient * xvPoint)
-    + (yvGradient * yvPoint)) * 2.12;
+        + (yvGradient * yvPoint)) * 2.12;
 }
 
 int noise::IntValueNoise2D (int x, int y, int seed)
