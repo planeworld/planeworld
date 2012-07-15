@@ -125,12 +125,6 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
                                                          std::sin(fAng-fPAng)*fRad);
                 fTerrainType = m_pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
                                                                     std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
-//                 fWeightFlat =  (1.0-TERRAIN_CROSSOVER-fTerrainType)*TERRAIN_CROSSOVER_INV;
-//                 fWeightMountains = (fTerrainType-TERRAIN_CROSSOVER)*TERRAIN_CROSSOVER_INV;
-//                 if (fWeightFlat <= 0.0) fWeightFlat      = 0.0;
-//                 else fWeightFlat = fWeightFlat* TERRAIN_BASEWEIGHT_INV + TERRAIN_BASEWEIGHT;
-//                 if (fWeightMountains <= 0.0) fWeightMountains = 0.0;
-//                 else fWeightMountains = fWeightMountains * TERRAIN_BASEWEIGHT_INV + TERRAIN_BASEWEIGHT;
                 if (fTerrainType < 0.5)
                 {
                     fWeightMountains = 0.0 + (fTerrainType - (0.5-TERRAIN_CROSSOVER))*TERRAIN_CROSSOVER_INV;

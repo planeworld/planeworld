@@ -141,7 +141,7 @@ namespace noise
   ///
   /// In libnoise, the noise-generating algorithms are all integer-based;
   /// they use variables of type noise::int32.  Before calling a noise
-  /// function, pass the @a x, @a y, and @a z coordinates to this function to
+  /// function, pass the @a x and @a y coordinates to this function to
   /// ensure that these coordinates can be cast to a noise::int32 value.
   ///
   /// Although you could do a straight cast from double to noise::int32, the

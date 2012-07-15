@@ -70,7 +70,7 @@ double RidgedMulti::GetValue (double x, double y) const
 
     // Make sure that these floating-point values have the same range as a 32-
     // bit integer so that we can pass them to the coherent-noise functions.
-    double nx, ny, nz;
+    double nx, ny;
     nx = MakeInt32Range (x);
     ny = MakeInt32Range (y);
 

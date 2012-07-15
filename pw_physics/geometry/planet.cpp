@@ -114,6 +114,9 @@ CPlanet* CPlanet::clone() const
 ///
 /// For initialisation, some parameters depend on others. Radius times 2 Pi
 /// is important for the maximum frequency, depending on the ground resolution.
+/// It is also important that the one unit (double fD=1.0) corresponds to one
+/// meter, because the frequency of noise methods is dependend on the unit,
+/// too.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CPlanet::initTerrain()
@@ -129,15 +132,13 @@ void CPlanet::initTerrain()
 //     int nMaxOctave = log2(fMaxF/fMinF)+5;
 //     if (nMaxOctave < 1) nMaxOctave = 1;
     
-    
-    
     double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
-    double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2) * 0.5;
+    double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
     
-    double fMinF = 0.5*fNrOfMountains/(2.0*M_PI*m_fRadius);
+    double fMinF = fNrOfMountains/(fNrOfPoints*m_fGroundResolution);
     double fMaxF = 1.0;
     
-    int nMaxOctave = log2(fMaxF/fMinF)+5;
+    int nMaxOctave = log2(fMaxF/fMinF)+1;
     if (nMaxOctave < 1) nMaxOctave = 1;
     
     INFO_MSG("Planet", "Generating Terrain (Mountains)")
@@ -164,7 +165,7 @@ void CPlanet::initTerrain()
     m_TerraceTerrain.AddControlPoint ( 1.0000);
     
     m_BaseFlatTerrain.SetFrequency(fMinF/*0.5*12/(2.0*M_PI*m_fRadius)*/);
-    m_BaseFlatTerrain.SetLacunarity(2.13947);
+    m_BaseFlatTerrain.SetLacunarity(1.93147);
     m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
     m_BaseFlatTerrain.SetOctaveCount(nMaxOctave);
     
@@ -179,10 +180,10 @@ void CPlanet::initTerrain()
     m_TerrainType.SetOctaveCount(20);
 
     m_Surface.SetSourceModule(0,m_FlatTerrain);
-    m_Surface.SetSourceModule(1,m_TerraceTerrain);
+    m_Surface.SetSourceModule(1,m_MountainTerrain);
     m_Surface.SetControlModule(m_TerrainType);
     m_Surface.SetBounds(0.0,1.0);
-    m_Surface.SetEdgeFalloff(0.5);
+    m_Surface.SetEdgeFalloff(0.05);
 
 }
 
