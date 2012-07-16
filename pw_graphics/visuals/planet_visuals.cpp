@@ -169,8 +169,8 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
                 if (fTerrainType < 0.5)
                 {
                     
-                    double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(1.0,1.0,fAng/fInc);
-                    double fAngGrass02 = fAng-noise::ValueNoise2D(1.0,1.0,fAng/fInc);
+                    double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(1.0,1.0,10.0*fAng/fInc);
+                    double fAngGrass02 = fAng-noise::ValueNoise2D(1.0,1.0,10.0*fAng/fInc);
                     double fHghtGrass01 = fabs(0.5-fTerrainType);
                     double fHghtGrass02 = 0.5*fabs(0.5-fTerrainType);
                     m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP,SHAPE_DEFAULT_DEPTH);
@@ -188,7 +188,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
                                                   std::sin(fAngGrass02)*(fHghtGrass02)));
                     m_Graphics.endLine();
                 }
-                fAng += fInc;
+                fAng += fInc*0.1;
             }
         }
         m_Graphics.setColor(1.0,1.0,1.0,1.0);

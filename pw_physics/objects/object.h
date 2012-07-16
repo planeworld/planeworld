@@ -120,7 +120,7 @@ class IObject
 
         CGeometry               m_Geometry;                         ///< Geometry of object
 
-        Vector2d                m_vecOrigin0;                       ///< Initial orgin of object
+        Vector2d                m_vecOrigin0;                       ///< Initial origin of object
         Vector2d                m_vecCOM;                           ///< Center of mass
         Vector2d                m_vecForce;                         ///< Resulting force applied
         Vector2i                m_vecGrid;                          ///< Position in large scale grid

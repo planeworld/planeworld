@@ -31,7 +31,8 @@ const double SHAPE_DEFAULT_DEPTH = -15.0;
 enum Visuals
 {
     VISUALS_OBJECT_BBOXES = 1,
-    VISUALS_OBJECT_INTERSECTIONS = 2
+    VISUALS_OBJECT_INTERSECTIONS = 2,
+    VISUALS_UNIVERSE_GRID = 4
 };
 
 /// Specifies depthlayer bitcodes

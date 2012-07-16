@@ -397,6 +397,10 @@ int main(int argc, char *argv[])
                     {
                         pVisualsManager->toggleVisualisations(VISUALS_OBJECT_INTERSECTIONS);
                     }
+                    if (event.key.keysym.sym == SDLK_g)
+                    {
+                        pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
+                    }
                     if (event.key.keysym.sym == SDLK_r)
                         pPhysicsManager->initObjects();
                     if (event.key.keysym.sym == SDLK_ESCAPE)

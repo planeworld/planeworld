@@ -131,6 +131,89 @@ void CVisualsManager::drawBoundingBoxes() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draws the universe grid
+///
+/// To overcome problems with numeric limits of double values a grid is incor-
+/// porated. The double valued position lives within a cell of an integer grid.
+/// Hence, objects may not be larger than the size of one grid element to allow
+/// drawing, collision detection and so on.
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawGrid() const
+{
+    METHOD_ENTRY("CVisualsManager::drawBoundingGrid")
+
+    double fGrid = 10.0;
+    
+    if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
+    {
+        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 50.0)
+            fGrid*=10.0;
+        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 5.0)
+            fGrid*=0.1;
+        
+        double fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1)*fGrid;
+        double fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1])/fGrid+1)*fGrid;
+        m_Graphics.setColor(1.0, 1.0, 1.0, 0.2);
+        while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
+        {
+            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.0);
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getLowerLeft()[1]-
+                                                                          m_pCamera->getCenter()[1]);
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getUpperRight()[1]-
+                                                                          m_pCamera->getCenter()[1]);
+            m_Graphics.endLine();
+            fGridLeft += fGrid;
+        }
+        while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
+        {
+            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.0);
+                m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
+                                     m_pCamera->getCenter()[0],
+                                     fGridTop-m_pCamera->getCenter()[1]);
+                m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
+                                     m_pCamera->getCenter()[0],
+                                     fGridTop-m_pCamera->getCenter()[1]);
+            m_Graphics.endLine();
+            fGridTop += fGrid;
+        }
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        
+        fGrid = 1.0e12;
+        
+        fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1)*fGrid;
+        fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1])/fGrid+1)*fGrid;
+        m_Graphics.setColor(1.0, 1.0, 1.0, 0.2);
+        while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
+        {
+            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.0);
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getLowerLeft()[1]-
+                                                                          m_pCamera->getCenter()[1]);
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getUpperRight()[1]-
+                                                                          m_pCamera->getCenter()[1]);
+            m_Graphics.endLine();
+            fGridLeft += fGrid;
+        }
+        while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
+        {
+            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.0);
+                m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
+                                     m_pCamera->getCenter()[0],
+                                     fGridTop-m_pCamera->getCenter()[1]);
+                m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
+                                     m_pCamera->getCenter()[0],
+                                     fGridTop-m_pCamera->getCenter()[1]);
+            m_Graphics.endLine();
+            fGridTop += fGrid;
+        }
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+    }
+
+    METHOD_EXIT("CVisualsManager::drawBoundingGrid")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns if given visualisation is set
 ///
 /// \param _nVis Visualisation (flag) that is tested for state

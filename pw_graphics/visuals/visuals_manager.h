@@ -46,6 +46,7 @@ class CVisualsManager : virtual public CGraphicsBase
         
         //--- Constant Methods -----------------------------------------------//
         void            drawBoundingBoxes() const;
+        void            drawGrid() const;
         void            drawWorld() const;
         const double    getFrequency() const;
         const bool      getVisualisation(const int&) const;
