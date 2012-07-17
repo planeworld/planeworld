@@ -65,7 +65,9 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
     double   fSmooth   = m_pPlanet->getSmoothness();
     Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getCenter();
     
-    if (vecCenter.norm() > fRad-fHeight-_pCamera->getBoundingCircleRadius())
+    if ((vecCenter.norm() <= fRad+fHeight+_pCamera->getBoundingCircleRadius()) &&
+        (vecCenter.norm() >  fRad-fHeight-_pCamera->getBoundingCircleRadius())
+       )
     {
         Vector2d    vecEx(1.0, 0.0);
         double      fAng;    
