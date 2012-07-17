@@ -44,6 +44,8 @@ const double GRAPHICS_TOP_DEFAULT = 100.0;              ///< Default top plane
 const double GRAPHICS_NEAR_DEFAULT = 0.1;               ///< Default min depth
 const double GRAPHICS_FAR_DEFAULT = 1000.0;             ///< Default max depth
 
+const double GRAPHICS_DEPTH_DEFAULT = -15.0;            ///< Default drawing depth
+
 const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn-objects
 
 const double GRAPHICS_DEG2RAD = M_PI / 180.0;           ///< Converts degree to radiant values
@@ -147,6 +149,7 @@ class CGraphics
         //--- Methods --------------------------------------------------------//
         void addVertex(const Vector2d&);
         void addVertex(const double&, const double&);
+        void setDepth(const double&);
         void beginLine(const LineType&, const double&);
         void endLine();
 
@@ -464,6 +467,19 @@ inline void CGraphics::addVertex(const double& _fX, const double& _fY)
     ++m_unNrOfLines;
 
     METHOD_EXIT("CGraphics::addVertex(const double&, const double&)");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets depth of primitiv that should be drawn
+///
+/// \param _fD Depth of primitiv
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CGraphics::setDepth(const double& _fD)
+{
+    METHOD_ENTRY("CGraphics::setDepth")
+    m_fDepth = _fD;
 }
 
 #endif

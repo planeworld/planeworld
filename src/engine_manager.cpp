@@ -148,8 +148,8 @@ void CEngineManager::runGraphics()
     while (!m_bDone)
     {
         SDL_LockMutex(m_pMutex);
-        m_pVisualsManager->drawWorld();
         m_pVisualsManager->drawGrid();
+        m_pVisualsManager->drawWorld();
         m_pVisualsManager->drawBoundingBoxes();
         SDL_UnlockMutex(m_pMutex);
         

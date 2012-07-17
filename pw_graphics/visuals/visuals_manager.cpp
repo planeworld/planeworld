@@ -88,6 +88,22 @@ void CVisualsManager::drawBoundingBoxes() const
 
     if (m_nVisualisations & VISUALS_OBJECT_BBOXES)
     {
+        m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
+        m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
+                        m_pCamera->getCenter(),
+                        m_pCamera->getBoundingBox().getUpperRight()-
+                        m_pCamera->getCenter());
+        m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
+        m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
+                              m_pCamera->getCenter(),
+                              m_pCamera->getBoundingBox().getUpperRight()-
+                              m_pCamera->getCenter());
+        m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
+        m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
+                          m_pCamera->getBoundingCircleRadius());
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
+        
         for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
             ci != m_VisualsMap.end(); ++ci)
         {
@@ -102,28 +118,10 @@ void CVisualsManager::drawBoundingBoxes() const
                                   m_pCamera->getCenter(),
                                   (*ci)->getBoundingBox().getUpperRight()-
                                   m_pCamera->getCenter());
-            m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         }
-        
-        m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
-        m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
-                        m_pCamera->getCenter(),
-                        m_pCamera->getBoundingBox().getUpperRight()-
-                        m_pCamera->getCenter());
-        m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
-        m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
-                              m_pCamera->getCenter(),
-                              m_pCamera->getBoundingBox().getUpperRight()-
-                              m_pCamera->getCenter());
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-        
-        m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
-        m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
-                          m_pCamera->getBoundingCircleRadius());
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-        
     }
 
+    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     m_Graphics.swapBuffers();
 
     METHOD_EXIT("CVisualsManager::drawBoundingBox")
@@ -143,6 +141,8 @@ void CVisualsManager::drawGrid() const
 {
     METHOD_ENTRY("CVisualsManager::drawBoundingGrid")
 
+    m_pCamera->update();
+    
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
         // Default sub grid size every 2m
@@ -160,9 +160,9 @@ void CVisualsManager::drawGrid() const
         
         // Sub grid changes colour if greater than default grid size
         if (fGrid < DEFAULT_GRID_SIZE)
-            m_Graphics.setColor(0.1, 0.1, 0.1, 1.0);
+            m_Graphics.setColor(0.1, 0.1, 0.1);
         else
-            m_Graphics.setColor(0.2, 0.0, 0.0, 1.0);
+            m_Graphics.setColor(0.2, 0.0, 0.0);
         
         // Vertical sub grid lines
         while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
@@ -203,7 +203,7 @@ void CVisualsManager::drawGrid() const
             // Snap grid to grid size
             fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1.0)*fGrid;
             fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1])/fGrid+1.0)*fGrid;
-            m_Graphics.setColor(0.2, 0.2, 0.2, 1.0);
+            m_Graphics.setColor(0.2, 0.2, 0.2);
             
             // Vertical grid lines
             while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
@@ -240,7 +240,7 @@ void CVisualsManager::drawGrid() const
         // Snap grid to grid size
         fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1.0)*fGrid;
         fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1])/fGrid+1.0)*fGrid;
-        m_Graphics.setColor(0.3, 0.0, 0.0, 1.0);
+        m_Graphics.setColor(0.3, 0.0, 0.0);
         
         // Vertical grid lines
         while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
@@ -308,8 +308,6 @@ void CVisualsManager::drawWorld() const
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
-    m_pCamera->update();
-        
     for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
          ci != m_VisualsMap.end(); ++ci)
     {

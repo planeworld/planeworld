@@ -29,14 +29,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 CGraphics::CGraphics() : m_fCamAng(0.0),
                         m_fCamZoom(1.0),
+                        m_fDepth(GRAPHICS_DEPTH_DEFAULT),
                         m_fDepthMax(GRAPHICS_FAR_DEFAULT),
                         m_fDepthMin(GRAPHICS_NEAR_DEFAULT),
                         m_fDynPelSize(GRAPHICS_DYN_PEL_SIZE_DEFAULT),
                         m_nVideoFlags(0),
                         m_unWidthScr(GRAPHICS_WIDTH_DEFAULT),
                         m_unHeightScr(GRAPHICS_HEIGHT_DEFAULT),
-                        m_unNrOfLines(0u),
-                        m_fDepth(1.0)
+                        m_unNrOfLines(0u)                        
 {
     METHOD_ENTRY("CGraphics::CGraphics")
     CTOR_CALL("CGraphics::CGraphics")
@@ -272,16 +272,16 @@ bool CGraphics::init()
     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
 
-    // Test for depthbuffer and enable if possible
-//  glEnable(GL_DEPTH_TEST);
-//  if (!glIsEnabled(GL_DEPTH_TEST))
-//  {
-//      WARNING_MSG("OpenGL", "Could not enable depthbuffer.")
-//  }
-//  else
-//  {
-//      INFO_MSG("OpenGL", "Enabling depthbuffer.")
-//  }
+//     // Test for depthbuffer and enable if possible
+//     glEnable(GL_DEPTH_TEST);
+//     if (!glIsEnabled(GL_DEPTH_TEST))
+//     {
+//         WARNING_MSG("OpenGL", "Could not enable depthbuffer.")
+//     }
+//     else
+//     {
+//         INFO_MSG("OpenGL", "Enabling depthbuffer.")
+//     }
     
     // clear buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
@@ -704,7 +704,7 @@ void CGraphics::polyline(const std::list<Vector2d>& _Vertices,
         for (std::list<Vector2d>::const_iterator ci = _Vertices.begin();
             ci != _Vertices.end(); ++ci)
         {
-            glVertex3d((*ci)[0], (*ci)[1], -10.0);
+            glVertex3d((*ci)[0], (*ci)[1], -15.0);
         }
     }
     else
@@ -712,7 +712,7 @@ void CGraphics::polyline(const std::list<Vector2d>& _Vertices,
         for (std::list<Vector2d>::const_iterator ci = _Vertices.begin();
             ci != _Vertices.end(); ++ci)
         {
-            glVertex3d((*ci)[0]+_vecOffset[0], (*ci)[1]+_vecOffset[1], -10.0);
+            glVertex3d((*ci)[0]+_vecOffset[0], (*ci)[1]+_vecOffset[1], -15.0);
         }
     }
     glEnd();
