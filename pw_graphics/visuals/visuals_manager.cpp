@@ -146,7 +146,9 @@ void CVisualsManager::drawGrid() const
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
         // Default sub grid size every 2m
-        double fGrid = 2.0;
+        double fGrid = 1.0;
+        double fGridLeft;
+        double fGridTop;
         
         // Automatically scale grid depending on zoom level
         while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 100.0)
@@ -155,15 +157,15 @@ void CVisualsManager::drawGrid() const
             fGrid*=0.1;
         
         // Snap sub grid to sub grid size
-        double fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1.0)*fGrid;
-        double fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1])/fGrid+1.0)*fGrid;
+        fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1.0)*fGrid;
+        fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1])/fGrid+1.0)*fGrid;
         
-        // Sub grid changes colour if greater than default grid size
+        // Change colour if on default grid
         if (fGrid < DEFAULT_GRID_SIZE)
             m_Graphics.setColor(0.1, 0.1, 0.1);
         else
-            m_Graphics.setColor(0.2, 0.0, 0.0);
-        
+            m_Graphics.setColor(0.15, 0.0, 0.0);
+    
         // Vertical sub grid lines
         while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
         {
@@ -192,12 +194,12 @@ void CVisualsManager::drawGrid() const
         fGrid = 10.0;
         
         // Automatically scale grid depending on zoom level
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 20.0)
+        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 10.0)
             fGrid*=10.0;
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 2.0)
+        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 1.0)
             fGrid*=0.1;
 
-        // Draw grid only until it equals the default grid
+        // Draw grid only if it is lower than the default grid
         if (fGrid < DEFAULT_GRID_SIZE)
         {
             // Snap grid to grid size
@@ -231,40 +233,44 @@ void CVisualsManager::drawGrid() const
             }
         }
         
-        fGrid = DEFAULT_GRID_SIZE;
+        fGrid = DEFAULT_GRID_SIZE*2.0;
         
         // Automatically scale grid depending on zoom level (only upscaling for this grid)
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 20.0)
+        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 5.0)
             fGrid*=10.0;
 
-        // Snap grid to grid size
-        fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1.0)*fGrid;
-        fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1])/fGrid+1.0)*fGrid;
-        m_Graphics.setColor(0.3, 0.0, 0.0);
-        
-        // Vertical grid lines
-        while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
+        // Draw grid only if it is equal or greater than the default grid
+        if (fGrid > DEFAULT_GRID_SIZE)
         {
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.1);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                                                        m_pCamera->getCenter()[1]);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                                                        m_pCamera->getCenter()[1]);
-            m_Graphics.endLine();
-            fGridLeft += fGrid;
-        }
-        // Horizontal grid lines
-        while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
-        {
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.1);
-                m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                    m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]);
-                m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                    m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]);
-            m_Graphics.endLine();
-            fGridTop += fGrid;
+            // Snap grid to grid size
+            fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1.0)*fGrid - fGrid*0.5;
+            fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1])/fGrid+1.0)*fGrid - fGrid*0.5;
+            m_Graphics.setColor(0.3, 0.0, 0.0);
+            
+            // Vertical grid lines
+            while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
+            {
+                m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.1);
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getLowerLeft()[1]-
+                                                                            m_pCamera->getCenter()[1]);
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getUpperRight()[1]-
+                                                                            m_pCamera->getCenter()[1]);
+                m_Graphics.endLine();
+                fGridLeft += fGrid;
+            }
+            // Horizontal grid lines
+            while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
+            {
+                m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.1);
+                    m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
+                                        m_pCamera->getCenter()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]);
+                    m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
+                                        m_pCamera->getCenter()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]);
+                m_Graphics.endLine();
+                fGridTop += fGrid;
+            }
         }
         
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
