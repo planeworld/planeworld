@@ -261,6 +261,9 @@ namespace noise
             throw noise::ExceptionInvalidParam ();
           }
           m_octaveCount = octaveCount;
+          // m_norm is a normalizing factor to keep the signal in [-1.0,1.0]
+          // The maximum signal amplitude can be calculated, since it is a geometric series
+          m_norm = 2.0*(1.0/m_lacunarity-1.0)/(pow(1.0/m_lacunarity,m_octaveCount+1)-1.0);
         }
 
         /// Sets the seed value used by the ridged-multifractal-noise
@@ -284,6 +287,9 @@ namespace noise
 
         /// Frequency multiplier between successive octaves.
         double m_lacunarity;
+        
+        /// Normalizing factor to keep output values in [-1.0,1.0]
+        double m_norm;
 
         /// Quality of the ridged-multifractal noise.
         noise::NoiseQuality m_noiseQuality;

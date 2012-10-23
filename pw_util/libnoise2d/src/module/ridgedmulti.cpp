@@ -33,6 +33,7 @@ RidgedMulti::RidgedMulti ():
   m_seed         (DEFAULT_RIDGED_SEED)
 {
   CalcSpectralWeights ();
+  m_norm = 1.0;
 }
 
 // Calculates the spectral weights for each octave.
@@ -106,6 +107,6 @@ double RidgedMulti::GetValue (double x, double y) const
     x *= m_lacunarity;
     y *= m_lacunarity;
   }
-
-  return (value * 1.25) - 1.0;
+  
+  return (value*m_norm) - 1.0;
 }
