@@ -149,20 +149,20 @@ void CPlanet::initTerrain()
     DOM_VAR(INFO_MSG("Planet", "Maximum Octaves:     " << nMaxOctave))
 
     m_MountainTerrain.SetFrequency(fMinF);
-    m_MountainTerrain.SetLacunarity(2.137);
+    m_MountainTerrain.SetLacunarity(3.137);
     m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
     m_MountainTerrain.SetOctaveCount(nMaxOctave);
     
-    m_ClampTerrain.SetSourceModule (0, m_MountainTerrain);
-    m_ClampTerrain.SetBounds (-1.0, 0.8);
-    
-    m_TerraceTerrain.SetSourceModule (0, m_ClampTerrain);
-    m_TerraceTerrain.AddControlPoint (-1.0000);
-    m_TerraceTerrain.AddControlPoint (-0.8750);
-    m_TerraceTerrain.AddControlPoint (-0.7500);
-    m_TerraceTerrain.AddControlPoint (-0.5000);
-    m_TerraceTerrain.AddControlPoint ( 0.0000);
-    m_TerraceTerrain.AddControlPoint ( 1.0000);
+//     m_ClampTerrain.SetSourceModule (0, m_MountainTerrain);
+//     m_ClampTerrain.SetBounds (-1.0, 0.8);
+//     
+//     m_TerraceTerrain.SetSourceModule (0, m_ClampTerrain);
+//     m_TerraceTerrain.AddControlPoint (-1.0000);
+//     m_TerraceTerrain.AddControlPoint (-0.8750);
+//     m_TerraceTerrain.AddControlPoint (-0.7500);
+//     m_TerraceTerrain.AddControlPoint (-0.5000);
+//     m_TerraceTerrain.AddControlPoint ( 0.0000);
+//     m_TerraceTerrain.AddControlPoint ( 1.0000);
     
     m_BaseFlatTerrain.SetFrequency(fMinF/*0.5*12/(2.0*M_PI*m_fRadius)*/);
     m_BaseFlatTerrain.SetLacunarity(1.93147);

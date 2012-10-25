@@ -45,6 +45,10 @@ class IVisuals : virtual public CGraphicsBase
                 
         //--- Methods --------------------------------------------------------//
         virtual const CBoundingBox& getBoundingBox() = 0;
+        
+    protected:
+        
+        IObject* m_pObject;     ///< Pointer to corresponding object
 
 };
 

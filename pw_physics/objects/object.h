@@ -73,6 +73,7 @@ class IObject
         const int                   getDepths() const;
         const bool                  getDynamicsState() const;
         const bool                  getGravitationState() const;
+        const Vector2i              getGrid() const;
         const double                getMass() const;
         const std::string           getName() const;
         const Vector2d              getVelocity() const;
@@ -86,6 +87,7 @@ class IObject
         void                disableGravitation();
         void                enableGravitation();
         CGeometry* const    getGeometry();
+        void                setGrid(const Vector2i&);
         void                setOrigin(const Vector2d&);
         void                setOrigin(const double&, const double&);
         void                setDepths(const int&);
@@ -235,6 +237,24 @@ inline const bool IObject::getGravitationState() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns the grid cell of object
+///
+/// The universe is organised in cells that hold a double valued position. The
+/// cell is represented by an integer position index.
+///
+/// \return The grid cell of the object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2i IObject::getGrid() const
+{
+    METHOD_ENTRY("IObject::getGrid")
+
+    METHOD_EXIT("IObject::getGrid")
+    return (m_vecGrid);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns the mass of the object
 ///
 /// \return Mass
@@ -350,6 +370,25 @@ inline CGeometry* const IObject::getGeometry()
 
     METHOD_EXIT("IObject::getGeometry")
     return &m_Geometry;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set the grid cell of the object
+///
+/// The universe is organised in cells that hold a double valued position. The
+/// cell is represented by an integer position index.
+///
+/// \param _vecGrid Grid cell of the object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IObject::setGrid(const Vector2i& _vecGrid)
+{
+    METHOD_ENTRY("IObject::setGrid")
+
+    m_vecGrid = _vecGrid;
+
+    METHOD_EXIT("IObject::setGrid")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

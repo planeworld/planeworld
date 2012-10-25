@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "planet_visuals.h"
+#include <boost-1_49/boost/concept_check.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -27,9 +28,12 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CPlanetVisuals::CPlanetVisuals(CPlanet* _pPlanet): m_pPlanet(_pPlanet)
+                                                                      
 {
     METHOD_ENTRY("CPlanetVisuals::CPlanetVisuals")
     CTOR_CALL("CPlanetVisuals::CPlanetVisuals")
+    
+//     m_pObject = _pObject;
     
     METHOD_EXIT("CPlanetVisuals::CPlanetVisuals")
 }
@@ -53,6 +57,9 @@ CPlanetVisuals::~CPlanetVisuals()
 ///
 /// \param _pCamera Active camera for drawing visuals
 ///
+/// \todo Draw planets clockwise for consistency. ATM they're drawn counter-
+///       clockwise!
+///
 ///////////////////////////////////////////////////////////////////////////////
 void CPlanetVisuals::draw(const CCamera* const _pCamera) const
 {
@@ -73,6 +80,10 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
         double      fAng;    
         double      fAngEnd;
         LineType    LineT;
+        
+       std::vector<std::vector<Vector2d> > WaterlineList;
+       std::vector<Vector2d> WaterlineTmp;
+       bool bInWater = false;
 
         double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
         if (isnan(fAlpha))
@@ -125,26 +136,34 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             {
                 fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
                                                          std::sin(fAng-fPAng)*fRad);
-                fTerrainType = m_pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
-                                                                    std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
-                if (fTerrainType < 0.5)
+//                 if (fabs(fHght)>1.0) std::cout << fHght << std::endl;
+                if (fHght < -0.3)
                 {
-                    fWeightMountains = 0.0 + (fTerrainType - (0.5-TERRAIN_CROSSOVER))*TERRAIN_CROSSOVER_INV;
-                    if (fWeightMountains < 0.0) fWeightMountains = 0.0;
-                    fWeightFlat      = 1.0 - (fTerrainType - (0.5-TERRAIN_CROSSOVER))*TERRAIN_CROSSOVER_INV;
-                    if (fWeightFlat  > 1.0) fWeightFlat = 1.0;
+                  m_Graphics.setColor(0.0,0.0,1.0+fHght);
                 }
                 else
                 {
-                    fWeightFlat      = 0.0 + ((0.5+TERRAIN_CROSSOVER) - fTerrainType)*TERRAIN_CROSSOVER_INV;
-                    if (fWeightFlat  < 0.0) fWeightFlat = 0.0;
-                    fWeightMountains = 1.0 - ((0.5+TERRAIN_CROSSOVER) - fTerrainType)*TERRAIN_CROSSOVER_INV;
-                    if (fWeightMountains > 1.0) fWeightMountains = 1.0;
+                  fTerrainType = m_pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
+                                                                      std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
+                  if (fTerrainType < 0.5)
+                  {
+                      fWeightMountains = 0.0 + (fTerrainType - (0.5-TERRAIN_CROSSOVER))*TERRAIN_CROSSOVER_INV;
+                      if (fWeightMountains < 0.0) fWeightMountains = 0.0;
+                      fWeightFlat      = 1.0 - (fTerrainType - (0.5-TERRAIN_CROSSOVER))*TERRAIN_CROSSOVER_INV;
+                      if (fWeightFlat  > 1.0) fWeightFlat = 1.0;
+                  }
+                  else
+                  {
+                      fWeightFlat      = 0.0 + ((0.5+TERRAIN_CROSSOVER) - fTerrainType)*TERRAIN_CROSSOVER_INV;
+                      if (fWeightFlat  < 0.0) fWeightFlat = 0.0;
+                      fWeightMountains = 1.0 - ((0.5+TERRAIN_CROSSOVER) - fTerrainType)*TERRAIN_CROSSOVER_INV;
+                      if (fWeightMountains > 1.0) fWeightMountains = 1.0;
+                  }
+                  m_Graphics.setColor((fHght+2.0)*0.3*fWeightMountains*0.4 + 0.1*(fHght+2.0)*0.8*fWeightFlat,
+                                      (fHght+2.0)*0.3*fWeightMountains*0.4 + 0.2*(fHght+2.0)*0.8*fWeightFlat,
+                                      (fHght+2.0)*0.3*fWeightMountains*0.4 + 0.1*(fHght+2.0)*0.8*fWeightFlat
+                                    );
                 }
-                m_Graphics.setColor((fHght+2.0)*0.3*fWeightMountains*0.4 + 0.1*(fHght+2.0)*0.8*fWeightFlat,
-                                    (fHght+2.0)*0.3*fWeightMountains*0.4 + 0.2*(fHght+2.0)*0.8*fWeightFlat,
-                                    (fHght+2.0)*0.3*fWeightMountains*0.4 + 0.1*(fHght+2.0)*0.8*fWeightFlat
-                                   );
 //                 m_Graphics.setColor(0.2,(0.5+fTerrainType), 0.2);
                 
                 m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
@@ -153,11 +172,39 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
 //                 m_Graphics.dot(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
 //                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 
+                if (fHght < -0.3)
+                {
+                  WaterlineTmp.push_back(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad-0.3*fHeight),vecCenter[1]+std::sin(fAng)*(fRad-0.3*fHeight)));
+                  bInWater = true;
+                }
+                else
+                {
+                  if (bInWater)
+                  {
+                    WaterlineList.push_back(WaterlineTmp);
+                    WaterlineTmp.clear();
+                    bInWater = false;
+                  }
+                }
+                
                 fAng += fInc;
             }
-
         m_Graphics.endLine();
         m_Graphics.setWidth(1.0);
+
+        if (WaterlineTmp.size() != 0)
+          WaterlineList.push_back(WaterlineTmp);
+        m_Graphics.setWidth(2.0);
+        m_Graphics.setColor(0.0,0.0,0.7);
+        for (int i=0; i<WaterlineList.size(); ++i)
+        {
+          m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
+          for (int j=0; j<WaterlineList[i].size(); ++j)
+            m_Graphics.addVertex(WaterlineList[i][j]);
+          m_Graphics.endLine();
+        }
+        m_Graphics.setWidth(1.0);
+        
         m_Graphics.setColor(0.1,0.2,0.1);
         if (_pCamera->getZoom() >= 1.0)
         {
