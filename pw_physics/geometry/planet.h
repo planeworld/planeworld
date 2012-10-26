@@ -51,6 +51,7 @@ class CPlanet : public IShape
         const double&                   getGroundResolution() const;
         const double&                   getHeight() const;
         const double&                   getRadius() const;
+        const double&                   getSeaLevel() const;
         const int&                      getSeed() const;
         const double&                   getSmoothness() const;
         const noise::module::Select&    getSurface() const;
@@ -66,6 +67,7 @@ class CPlanet : public IShape
         void setGroundResolution(const double&);
         void setHeight(const double&);
         void setRadius(const double&);
+        void setSeaLevel(const double&);
         void setSeed(const int&);
         void setSmoothness(const double&);
         
@@ -79,6 +81,7 @@ class CPlanet : public IShape
         double              m_fGroundResolution;        ///< Ground resolution in m
         double              m_fHeightMax;               ///< Maximum height of terrain
         double              m_fRadius;                  ///< Minimum radius of planet
+        double              m_fSeaLevel;                ///< Sea level in [-1,...,1], if there is water 
         double              m_fSmoothness;              ///< Smoothness of planet landscape
         int                 m_nSeed;                    ///< Unique seed for terrain generation
         
@@ -172,8 +175,20 @@ inline const double& CPlanet::getRadius() const
 {
     METHOD_ENTRY("CPlanet::getRadius")
 
-    METHOD_EXIT("CPlanet::getRadius")
     return m_fRadius;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the sea level of the planet
+///
+/// \return SeaLevel
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CPlanet::getSeaLevel() const
+{
+    METHOD_ENTRY("CPlanet::getSeaLevel")
+    return m_fSeaLevel;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -186,8 +201,6 @@ inline const double& CPlanet::getRadius() const
 inline const int& CPlanet::getSeed() const
 {
     METHOD_ENTRY("CPlanet::getSeed")
-
-    METHOD_EXIT("CPlanet::getSeed")
     return m_nSeed;
 }
 
@@ -201,8 +214,6 @@ inline const int& CPlanet::getSeed() const
 inline const double& CPlanet::getSmoothness() const
 {
     METHOD_ENTRY("CPlanet::getSmoothness")
-
-    METHOD_EXIT("CPlanet::getSmoothness")
     return m_fSmoothness;
 }
 
@@ -244,8 +255,6 @@ inline const noise::module::Perlin& CPlanet::getTerrainType() const
 inline const ShapeType CPlanet::getShapeType() const
 {
     METHOD_ENTRY("CPlanet::getShapeType")
-
-    METHOD_EXIT("CPlanet::getShapeType")
     return SHAPE_PLANET;
 }
 
@@ -262,8 +271,6 @@ inline void CPlanet::setCenter(const Vector2d& _vecC)
 
     m_vecCenter0 = _vecC;
     m_vecCenter = _vecC;
-
-    METHOD_EXIT("CPlanet::setCenter")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -283,8 +290,6 @@ inline void CPlanet::setCenter(const double& _fX, const double& _fY)
 
     m_vecCenter[0] = _fX;
     m_vecCenter[1] = _fY;
-
-    METHOD_EXIT("CPlanet::setCenter")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -300,10 +305,7 @@ inline void CPlanet::setCenter(const double& _fX, const double& _fY)
 inline void CPlanet::setGroundResolution(const double& _fGRes)
 {
     METHOD_ENTRY("CPlanet::setGroundResolution")
-
     m_fGroundResolution = _fGRes;
-
-    METHOD_EXIT("CPlanet::setGroundResolution")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -316,10 +318,7 @@ inline void CPlanet::setGroundResolution(const double& _fGRes)
 inline void CPlanet::setHeight(const double& _fH)
 {
     METHOD_ENTRY("CPlanet::setHeight")
-
     m_fHeightMax = _fH;
-
-    METHOD_EXIT("CPlanet::setHeight")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -332,10 +331,20 @@ inline void CPlanet::setHeight(const double& _fH)
 inline void CPlanet::setRadius(const double& _fR)
 {
     METHOD_ENTRY("CPlanet::setRadius")
-
     m_fRadius = _fR;
+}
 
-    METHOD_EXIT("CPlanet::setRadius")
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets sea level of the planet
+///
+/// \param _fSeaLevel SeaLevel
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPlanet::setSeaLevel(const double& _fSeaLevel)
+{
+    METHOD_ENTRY("CPlanet::setSeaLevel")
+    m_fSeaLevel = _fSeaLevel;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -348,10 +357,7 @@ inline void CPlanet::setRadius(const double& _fR)
 inline void CPlanet::setSeed(const int& _nS)
 {
     METHOD_ENTRY("CPlanet::setSeed")
-
     m_nSeed = _nS;
-
-    METHOD_EXIT("CPlanet::setSeed")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -366,8 +372,6 @@ inline void CPlanet::setSmoothness(const double& _fS)
     METHOD_ENTRY("CPlanet::setSmoothness")
 
     m_fSmoothness = _fS;
-
-    METHOD_EXIT("CPlanet::setSmoothness")
 }
 
 #endif

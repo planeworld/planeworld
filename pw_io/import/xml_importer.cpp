@@ -380,6 +380,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody, const QDomNode& _Node)
                         E.attribute("center_y").toDouble());
     pPlanet->setHeight(E.attribute("height_max").toDouble());
     pPlanet->setGroundResolution(E.attribute("ground_resolution").toDouble());
+    pPlanet->setSeaLevel(E.attribute("sea_level").toDouble());
     pPlanet->initTerrain();
         
     // The shape might have visuals

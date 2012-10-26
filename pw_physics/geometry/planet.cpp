@@ -30,9 +30,10 @@
 CPlanet::CPlanet() : m_fAngle(0.0),
                      m_fHeightMax(8000.0),
                      m_fRadius(6378.16e3),
+                     m_fSeaLevel(0.0),
                      m_fSmoothness(1.0),
                      m_fGroundResolution(1.0),
-                     m_nSeed(2)
+                     m_nSeed(1)
 {
     METHOD_ENTRY("CPlanet::CPlanet()");
     CTOR_CALL("CPlanet::CPlanet()");
@@ -96,6 +97,7 @@ CPlanet* CPlanet::clone() const
     pClone->m_fGroundResolution = m_fGroundResolution;
     pClone->m_fHeightMax        = m_fHeightMax;
     pClone->m_fRadius           = m_fRadius;
+    pClone->m_fSeaLevel         = m_fSeaLevel;
     pClone->m_fSmoothness       = m_fSmoothness;
     pClone->m_nSeed             = m_nSeed;
     pClone->m_vecCenter         = m_vecCenter;
@@ -148,6 +150,7 @@ void CPlanet::initTerrain()
     DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:   " << fMaxF))
     DOM_VAR(INFO_MSG("Planet", "Maximum Octaves:     " << nMaxOctave))
 
+    m_MountainTerrain.SetSeed(m_nSeed);
     m_MountainTerrain.SetFrequency(fMinF);
     m_MountainTerrain.SetLacunarity(3.137);
     m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
@@ -164,6 +167,7 @@ void CPlanet::initTerrain()
 //     m_TerraceTerrain.AddControlPoint ( 0.0000);
 //     m_TerraceTerrain.AddControlPoint ( 1.0000);
     
+    m_BaseFlatTerrain.SetSeed(m_nSeed+3);
     m_BaseFlatTerrain.SetFrequency(fMinF/*0.5*12/(2.0*M_PI*m_fRadius)*/);
     m_BaseFlatTerrain.SetLacunarity(1.93147);
     m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
@@ -173,6 +177,7 @@ void CPlanet::initTerrain()
     m_FlatTerrain.SetScale(0.25);
     m_FlatTerrain.SetBias(-0.75);
     
+    m_TerrainType.SetSeed(m_nSeed+7);
     m_TerrainType.SetFrequency (0.5*100.0/(2.0*M_PI*m_fRadius));
     m_TerrainType.SetPersistence (0.5);
     m_TerrainType.SetLacunarity(2.13197);

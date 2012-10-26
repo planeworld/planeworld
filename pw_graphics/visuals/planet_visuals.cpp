@@ -67,6 +67,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
     double   fRad      = m_pPlanet->getRadius();
     double   fHeight   = m_pPlanet->getHeight();
     double   fPAng     = m_pPlanet->getAngle();
+    double   fSeaLevel = m_pPlanet->getSeaLevel();
     int      nSeed     = m_pPlanet->getSeed();
     double   fSmooth   = m_pPlanet->getSmoothness();
     Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getCenter();
@@ -135,10 +136,9 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             {
                 fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
                                                          std::sin(fAng-fPAng)*fRad);
-//                 if (fabs(fHght)>1.0) std::cout << fHght << std::endl;
-                if (fHght < -0.3)
+                if (fHght < fSeaLevel)
                 {
-                  m_Graphics.setColor(0.0,0.0,1.0+fHght);
+                  m_Graphics.setColor(0.0,0.0,0.7*(fHght+1.0)/(fSeaLevel+1.0));
                 }
                 else
                 {
@@ -171,9 +171,9 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
 //                 m_Graphics.dot(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
 //                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 
-                if (fHght < -0.3)
+                if (fHght < fSeaLevel)
                 {
-                  WaterlineTmp.push_back(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad-0.3*fHeight),vecCenter[1]+std::sin(fAng)*(fRad-0.3*fHeight)));
+                  WaterlineTmp.push_back(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fSeaLevel*fHeight),vecCenter[1]+std::sin(fAng)*(fRad+fSeaLevel*fHeight)));
                   bInWater = true;
                 }
                 else
@@ -191,8 +191,17 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
         m_Graphics.endLine();
         m_Graphics.setWidth(1.0);
 
+        // Determine LineType
+        if ((LineT == GRAPHICS_LINETYPE_LOOP) && (WaterlineList.size() != 0))
+          LineT = GRAPHICS_LINETYPE_STRIP;
+        
+        // Push back potential last line segment
         if (WaterlineTmp.size() != 0)
+        {
           WaterlineList.push_back(WaterlineTmp);
+        }
+        
+        // Draw sea level
         m_Graphics.setWidth(2.0);
         m_Graphics.setColor(0.0,0.0,0.7);
         for (int i=0; i<WaterlineList.size(); ++i)
@@ -204,6 +213,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
         }
         m_Graphics.setWidth(1.0);
         
+        // Draw grass
         m_Graphics.setColor(0.1,0.2,0.1);
         if (_pCamera->getZoom() >= 1.0)
         {
