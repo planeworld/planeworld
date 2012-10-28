@@ -239,7 +239,9 @@ namespace noise
         }
 
         /// Sets the number of octaves that generate the ridged-multifractal
-        /// noise.
+        /// noise. This is the original or maximum number of octaves. Norma-
+        /// lisation is done with respect to this value. For subsampling,
+        /// use SetOctaveCountTmp.
         ///
         /// @param octaveCount The number of octaves that generate the
         /// ridged-multifractal noise.
@@ -261,9 +263,39 @@ namespace noise
             throw noise::ExceptionInvalidParam ();
           }
           m_octaveCount = octaveCount;
+          m_octaveCountTmp = octaveCount;
           // m_norm is a normalizing factor to keep the signal in [-1.0,1.0]
           // The maximum signal amplitude can be calculated, since it is a geometric series
           m_norm = 2.0*(1.0/m_lacunarity-1.0)/(pow(1.0/m_lacunarity,m_octaveCount+1)-1.0);
+        }
+        
+        /// Sets the number of octaves that generate the ridged-multifractal
+        /// noise, but only temporary. This might help for temporary subsampling
+        /// of when representing a very complex surface, but viewing it from
+        /// a large distance. The maximum number of octaves without subsampling
+        /// is given by SetOctaveCount.
+        ///
+        /// @param octaveCount The number of octaves that generate the
+        /// subsampled ridged-multifractal noise.
+        ///
+        /// @pre The number of octaves ranges from 1 to
+        /// noise::module::RIDGED_MAX_OCTAVE.
+        ///
+        /// @throw noise::ExceptionInvalidParam An invalid parameter was
+        /// specified; see the preconditions for more information.
+        ///
+        /// The number of octaves controls the amount of detail in the
+        /// ridged-multifractal noise.
+        ///
+        /// The larger the number of octaves, the more time required to
+        /// calculate the ridged-multifractal-noise value. Therefore, this method
+        /// can be used to temporarily reduce the number of octaves for subsampling.
+        void SetOctaveCountTmp (int octaveCount)
+        {
+          if (octaveCount > RIDGED_MAX_OCTAVE) {
+            throw noise::ExceptionInvalidParam ();
+          }
+          m_octaveCountTmp = octaveCount;
         }
 
         /// Sets the seed value used by the ridged-multifractal-noise
@@ -297,6 +329,10 @@ namespace noise
         /// Total number of octaves that generate the ridged-multifractal
         /// noise.
         int m_octaveCount;
+        
+        /// Total number of octaves that generate for temporary generation
+        /// of ridged-multifractal noise. Can be used for subsampling.
+        int m_octaveCountTmp;
 
         /// Contains the spectral weights for each octave.
         double m_pSpectralWeights[RIDGED_MAX_OCTAVE];

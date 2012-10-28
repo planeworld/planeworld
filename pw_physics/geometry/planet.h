@@ -67,9 +67,12 @@ class CPlanet : public IShape
         void setGroundResolution(const double&);
         void setHeight(const double&);
         void setRadius(const double&);
+        void setSampling(const double&);
         void setSeaLevel(const double&);
         void setSeed(const int&);
         void setSmoothness(const double&);
+        
+        void resetSampling();
         
         void transform(const double&, const Vector2d&);
                         

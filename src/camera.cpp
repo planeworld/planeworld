@@ -27,7 +27,8 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CCamera::CCamera() : m_fViewportWidth(320.0), m_fViewportHeight(200.0),
+CCamera::CCamera() : m_fViewportWidth(GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT),
+                     m_fViewportHeight(GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT),
                      m_fHookAng(0.0), m_pHook(0)
 {
     METHOD_ENTRY("CCamera::CCamera");
@@ -102,8 +103,23 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
 {
     METHOD_ENTRY("CCamera::setViewport")
 
-    m_fViewportWidth  = _fW*0.5;
-    m_fViewportHeight = _fH*0.5;
+    if ((_fW < GRAPHICS_RIGHT_DEFAULT - GRAPHICS_LEFT_DEFAULT) &&
+        (_fH < GRAPHICS_TOP_DEFAULT - GRAPHICS_BOTTOM_DEFAULT))
+    {
+      m_fViewportWidth  = _fW*0.5;
+      m_fViewportHeight = _fH*0.5;
+    }
+    else
+    {
+      m_fViewportWidth  = (GRAPHICS_RIGHT_DEFAULT - GRAPHICS_LEFT_DEFAULT)*0.5;
+      m_fViewportHeight = (GRAPHICS_TOP_DEFAULT - GRAPHICS_BOTTOM_DEFAULT)*0.5;
+      NOTICE_MSG("Camera", "Given viewport is larger than actual screen, resizing to screen size.")
+      NOTICE(
+        std::cout << "  Viewport: " << _fW << "m x " << _fH << "m" << std::endl;
+        std::cout << "  Screen  : " << m_fViewportWidth*2.0 << "m x " <<
+                     m_fViewportHeight*2.0 << "m" << std::endl;
+      )
+    }
         
     m_vecFrame0[0][0] = -m_fViewportWidth;
     m_vecFrame0[0][1] = -m_fViewportHeight;

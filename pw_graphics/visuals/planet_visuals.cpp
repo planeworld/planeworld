@@ -107,7 +107,10 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
         
         // Subsample planet surface when zooming out.
         if (_pCamera->getZoom()*m_pPlanet->getGroundResolution() <= 1.0)
+        {
             fInc /= _pCamera->getZoom()*m_pPlanet->getGroundResolution();
+            m_pPlanet->setSampling(_pCamera->getZoom());
+        }
         
         // Snap angle to ground resolution grid to avoid flickering.
         // If angle is started at arbitrary position, aliasing causes flickering when zooming
@@ -250,6 +253,8 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
             }
         }
         m_Graphics.setColor(1.0,1.0,1.0,1.0);
+        
+        m_pPlanet->resetSampling();
     }
 
     METHOD_EXIT("CPlanetVisuals::draw()");

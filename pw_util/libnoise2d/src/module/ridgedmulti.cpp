@@ -26,11 +26,12 @@ using namespace noise::module;
 
 RidgedMulti::RidgedMulti ():
   Module (GetSourceModuleCount ()),
-  m_frequency    (DEFAULT_RIDGED_FREQUENCY   ),
-  m_lacunarity   (DEFAULT_RIDGED_LACUNARITY  ),
-  m_noiseQuality (DEFAULT_RIDGED_QUALITY     ),
-  m_octaveCount  (DEFAULT_RIDGED_OCTAVE_COUNT),
-  m_seed         (DEFAULT_RIDGED_SEED)
+  m_frequency           (DEFAULT_RIDGED_FREQUENCY   ),
+  m_lacunarity          (DEFAULT_RIDGED_LACUNARITY  ),
+  m_noiseQuality        (DEFAULT_RIDGED_QUALITY     ),
+  m_octaveCount         (DEFAULT_RIDGED_OCTAVE_COUNT),
+  m_octaveCountTmp      (DEFAULT_RIDGED_OCTAVE_COUNT),
+  m_seed                (DEFAULT_RIDGED_SEED)
 {
   CalcSpectralWeights ();
   m_norm = 1.0;
@@ -67,7 +68,7 @@ double RidgedMulti::GetValue (double x, double y) const
   double offset = 1.0;
   double gain = 2.0;
 
-  for (int curOctave = 0; curOctave < m_octaveCount; curOctave++) {
+  for (int curOctave = 0; curOctave < m_octaveCountTmp; curOctave++) {
 
     // Make sure that these floating-point values have the same range as a 32-
     // bit integer so that we can pass them to the coherent-noise functions.

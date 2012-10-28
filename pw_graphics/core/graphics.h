@@ -36,11 +36,21 @@
 using namespace Eigen;
 
 // Constants
-const double GRAPHICS_FOV_DEFAULT = 45.0;               ///< default fov
-const double GRAPHICS_LEFT_DEFAULT = -160.0;            ///< Default left plane
-const double GRAPHICS_RIGHT_DEFAULT = 160.0;            ///< Default right plane
-const double GRAPHICS_BOTTOM_DEFAULT = -100.0;          ///< Default bottom plane
-const double GRAPHICS_TOP_DEFAULT = 100.0;              ///< Default top plane
+const unsigned short GRAPHICS_WIDTH_DEFAULT = 1440u;    ///< Default x-resolution
+const unsigned short GRAPHICS_HEIGHT_DEFAULT = 900u;    ///< Default y-resolution
+
+const double GRAPHICS_PX_PER_METER = 2.0;               ///< Default resolution, pixel per meter
+const double GRAPHICS_FOV_DEFAULT = 45.0;               ///< Default fov
+const double GRAPHICS_RIGHT_DEFAULT =
+                double(GRAPHICS_WIDTH_DEFAULT)*0.5
+                      /GRAPHICS_PX_PER_METER;           ///< Default right plane
+const double GRAPHICS_LEFT_DEFAULT = 
+                -GRAPHICS_RIGHT_DEFAULT;                 ///< Default left plane
+const double GRAPHICS_TOP_DEFAULT =
+                double(GRAPHICS_HEIGHT_DEFAULT)*0.5
+                      /GRAPHICS_PX_PER_METER;           ///< Default top plane
+const double GRAPHICS_BOTTOM_DEFAULT =
+                -GRAPHICS_TOP_DEFAULT;                  ///< Default bottom plane
 const double GRAPHICS_NEAR_DEFAULT = 0.1;               ///< Default min depth
 const double GRAPHICS_FAR_DEFAULT = 1000.0;             ///< Default max depth
 
@@ -50,8 +60,6 @@ const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn
 
 const double GRAPHICS_DEG2RAD = M_PI / 180.0;           ///< Converts degree to radiant values
 const double GRAPHICS_RAD2DEG = 180.0 / M_PI;           ///< Converts radiant to degree values
-const unsigned short GRAPHICS_WIDTH_DEFAULT = 1440u;    ///< Default x-resolution
-const unsigned short GRAPHICS_HEIGHT_DEFAULT = 900u;    ///< Default y-resolution
 
 /// specifies the type of line to be drawn
 typedef enum 

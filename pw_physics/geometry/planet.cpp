@@ -137,8 +137,8 @@ void CPlanet::initTerrain()
     double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
     double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
     
-    double fMinF = fNrOfMountains/(fNrOfPoints*m_fGroundResolution);
-    double fMaxF = 1.0;
+    double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+    double fMaxF = 1.0 / (m_fGroundResolution);
     
     int nMaxOctave = log2(fMaxF/fMinF)+1;
     if (nMaxOctave < 1) nMaxOctave = 1;
@@ -146,13 +146,13 @@ void CPlanet::initTerrain()
     INFO_MSG("Planet", "Generating Terrain (Mountains)")
     DOM_VAR(INFO_MSG("Planet", "Number of Mountains: " << fNrOfMountains))
     DOM_VAR(INFO_MSG("Planet", "Number of Points:    " << fNrOfPoints))
-    DOM_VAR(INFO_MSG("Planet", "Minimum Frequency:   " << fMinF))
-    DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:   " << fMaxF))
+    DOM_VAR(INFO_MSG("Planet", "Minimum Frequency:   " << fMinF << "/m"))
+    DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:   " << fMaxF << "/m"))
     DOM_VAR(INFO_MSG("Planet", "Maximum Octaves:     " << nMaxOctave))
 
     m_MountainTerrain.SetSeed(m_nSeed);
     m_MountainTerrain.SetFrequency(fMinF);
-    m_MountainTerrain.SetLacunarity(3.137);
+    m_MountainTerrain.SetLacunarity(2.137);
     m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
     m_MountainTerrain.SetOctaveCount(nMaxOctave);
     
@@ -189,7 +189,49 @@ void CPlanet::initTerrain()
     m_Surface.SetControlModule(m_TerrainType);
     m_Surface.SetBounds(0.0,1.0);
     m_Surface.SetEdgeFalloff(0.05);
+}
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets sampling of planet surface by given zoom factor
+///
+/// The sampling is also calibrated for meter as unit. If one meter is represen-
+/// ted by 100px you will definitely see the switching to less octaves. So keep
+/// a resolution which is somewhere near to 0.1-1 m/px to ensure seamless sam-
+/// pling.
+///
+/// \param _fZoom Sampling of planet surface
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanet::setSampling(const double& _fZoom)
+{
+    METHOD_ENTRY("CPlanet::setSampling")
+    
+    double fMaxF = _fZoom;
+    double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+
+    int nMaxOctave = log2(fMaxF/fMinF)+1;
+    if (nMaxOctave < 1) nMaxOctave = 1;
+    
+    m_MountainTerrain.SetOctaveCountTmp(nMaxOctave);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Resets the sampling to original value given by octave count
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanet::resetSampling()
+{
+    METHOD_ENTRY("CPlanet::resetSampling")
+    
+    double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+    double fMaxF = 1.0 / (m_fGroundResolution);
+    
+    int nMaxOctave = log2(fMaxF/fMinF)+1;
+    if (nMaxOctave < 1) nMaxOctave = 1;
+    
+    m_MountainTerrain.SetOctaveCountTmp(nMaxOctave);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

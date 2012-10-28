@@ -5,8 +5,8 @@
     hook="Earth"
     position_x="100.0"
     position_y="-6381.27e3"
-    viewport_width="300.0"
-    viewport_height="180.0"
+    viewport_width="700.0"
+    viewport_height="430.0"
   />
   
   <object file="sun.xml"/>
