@@ -275,7 +275,7 @@ namespace noise
         /// a large distance. The maximum number of octaves without subsampling
         /// is given by SetOctaveCount.
         ///
-        /// @param octaveCount The number of octaves that generate the
+        /// @param octaveCountTmp The number of octaves that generate the
         /// subsampled ridged-multifractal noise.
         ///
         /// @pre The number of octaves ranges from 1 to

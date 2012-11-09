@@ -26,13 +26,17 @@ using namespace noise::module;
 
 Perlin::Perlin ():
   Module (GetSourceModuleCount ()),
-  m_frequency    (DEFAULT_PERLIN_FREQUENCY   ),
-  m_lacunarity   (DEFAULT_PERLIN_LACUNARITY  ),
-  m_noiseQuality (DEFAULT_PERLIN_QUALITY     ),
-  m_octaveCount  (DEFAULT_PERLIN_OCTAVE_COUNT),
-  m_persistence  (DEFAULT_PERLIN_PERSISTENCE ),
-  m_seed         (DEFAULT_PERLIN_SEED)
+  m_frequency       (DEFAULT_PERLIN_FREQUENCY   ),
+  m_lacunarity      (DEFAULT_PERLIN_LACUNARITY  ),
+  m_noiseQuality    (DEFAULT_PERLIN_QUALITY     ),
+  m_octaveCount     (DEFAULT_PERLIN_OCTAVE_COUNT),
+  m_octaveCountTmp  (DEFAULT_PERLIN_OCTAVE_COUNT),
+  m_persistence     (DEFAULT_PERLIN_PERSISTENCE ),
+  m_seed            (DEFAULT_PERLIN_SEED)
 {
+    // m_norm is a normalizing factor to keep the signal in [-1.0,1.0]
+    // The maximum signal amplitude can be calculated, since it is a geometric series
+    m_norm = 1.0;//(1.0 - m_persistence) / (1.0-pow(m_persistence,m_octaveCount+1));
 }
 
 double Perlin::GetValue (double x, double y) const
@@ -64,6 +68,6 @@ double Perlin::GetValue (double x, double y) const
     y *= m_lacunarity;
     curPersistence *= m_persistence;
   }
-
-  return value;
+  
+  return value*m_norm;
 }

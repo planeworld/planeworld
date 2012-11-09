@@ -29,12 +29,12 @@ RidgedMulti::RidgedMulti ():
   m_frequency           (DEFAULT_RIDGED_FREQUENCY   ),
   m_lacunarity          (DEFAULT_RIDGED_LACUNARITY  ),
   m_noiseQuality        (DEFAULT_RIDGED_QUALITY     ),
+  m_norm                (1.0),
   m_octaveCount         (DEFAULT_RIDGED_OCTAVE_COUNT),
   m_octaveCountTmp      (DEFAULT_RIDGED_OCTAVE_COUNT),
   m_seed                (DEFAULT_RIDGED_SEED)
 {
   CalcSpectralWeights ();
-  m_norm = 1.0;
 }
 
 // Calculates the spectral weights for each octave.

@@ -33,7 +33,11 @@ CPlanet::CPlanet() : m_fAngle(0.0),
                      m_fSeaLevel(0.0),
                      m_fSmoothness(1.0),
                      m_fGroundResolution(1.0),
-                     m_nSeed(1)
+                     m_nSeed(1),
+                     m_fLacMtTr(2.137),
+                     m_fLacTrTp(2.0531),
+                     m_nOctMtTr(5),
+                     m_nOctTrTp(5)
 {
     METHOD_ENTRY("CPlanet::CPlanet()");
     CTOR_CALL("CPlanet::CPlanet()");
@@ -102,6 +106,10 @@ CPlanet* CPlanet::clone() const
     pClone->m_nSeed             = m_nSeed;
     pClone->m_vecCenter         = m_vecCenter;
     pClone->m_vecCenter0        = m_vecCenter0;
+    pClone->m_fLacMtTr          = m_fLacMtTr;
+    pClone->m_fLacTrTp          = m_fLacTrTp;
+    pClone->m_nOctMtTr          = m_nOctMtTr;
+    pClone->m_nOctTrTp          = m_nOctTrTp;
     pClone->m_AABB              = m_AABB;
     pClone->m_nDepthlayers      = m_nDepthlayers;
     pClone->m_VisualsID         = m_VisualsID;
@@ -125,53 +133,47 @@ void CPlanet::initTerrain()
 {
     METHOD_ENTRY("CPlanet::initTerrain")
     
-//     double fNrOfPoints = 2.0 * M_PI * m_fRadius / m_fGroundResolution;
-//     double fNrOfMountains = 2.0 * M_PI * m_fRadius / (m_fHeightMax*M_PI_2) * 0.5;
-//     
-//     double fMinF = 0.5*fNrOfMountains/(2.0*M_PI*m_fRadius);
-//     double fMaxF = 1.0;
-//     
-//     int nMaxOctave = log2(fMaxF/fMinF)+5;
-//     if (nMaxOctave < 1) nMaxOctave = 1;
+    m_fLacMtTr = 2.137;
+    m_fLacTrTp = 2.317;
     
     double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
     double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
-    
+       
     double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
-    double fMaxF = 1.0 / (m_fGroundResolution);
+    double fMaxF = 1.0 / (m_fGroundResolution*5.0); // 5 Vertices for 1 period
     
-    int nMaxOctave = log2(fMaxF/fMinF)+1;
-    if (nMaxOctave < 1) nMaxOctave = 1;
+    m_nOctMtTr = log2(fMaxF/fMinF)/log2(m_fLacMtTr);
+    if (m_nOctMtTr < 1) m_nOctMtTr = 1;
     
     INFO_MSG("Planet", "Generating Terrain (Mountains)")
     DOM_VAR(INFO_MSG("Planet", "Number of Mountains: " << fNrOfMountains))
     DOM_VAR(INFO_MSG("Planet", "Number of Points:    " << fNrOfPoints))
     DOM_VAR(INFO_MSG("Planet", "Minimum Frequency:   " << fMinF << "/m"))
     DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:   " << fMaxF << "/m"))
-    DOM_VAR(INFO_MSG("Planet", "Maximum Octaves:     " << nMaxOctave))
+    DOM_VAR(INFO_MSG("Planet", "Maximum Octaves:     " << m_nOctMtTr))
 
     m_MountainTerrain.SetSeed(m_nSeed);
     m_MountainTerrain.SetFrequency(fMinF);
-    m_MountainTerrain.SetLacunarity(2.137);
+    m_MountainTerrain.SetLacunarity(m_fLacMtTr);
     m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    m_MountainTerrain.SetOctaveCount(nMaxOctave);
+    m_MountainTerrain.SetOctaveCount(m_nOctMtTr);
     
-//     m_ClampTerrain.SetSourceModule (0, m_MountainTerrain);
-//     m_ClampTerrain.SetBounds (-1.0, 0.8);
-//     
-//     m_TerraceTerrain.SetSourceModule (0, m_ClampTerrain);
-//     m_TerraceTerrain.AddControlPoint (-1.0000);
-//     m_TerraceTerrain.AddControlPoint (-0.8750);
-//     m_TerraceTerrain.AddControlPoint (-0.7500);
-//     m_TerraceTerrain.AddControlPoint (-0.5000);
-//     m_TerraceTerrain.AddControlPoint ( 0.0000);
-//     m_TerraceTerrain.AddControlPoint ( 1.0000);
+    m_ClampTerrain.SetSourceModule (0, m_MountainTerrain);
+    m_ClampTerrain.SetBounds (-1.0, 0.8);
+    
+    m_TerraceTerrain.SetSourceModule (0, m_ClampTerrain);
+    m_TerraceTerrain.AddControlPoint ( 0.0000);
+    m_TerraceTerrain.AddControlPoint ( 0.2500);
+    m_TerraceTerrain.AddControlPoint ( 0.5000);
+    m_TerraceTerrain.AddControlPoint ( 0.7500);
+    m_TerraceTerrain.AddControlPoint ( 0.8750);
+    m_TerraceTerrain.AddControlPoint ( 1.0000);
     
     m_BaseFlatTerrain.SetSeed(m_nSeed+3);
     m_BaseFlatTerrain.SetFrequency(fMinF/*0.5*12/(2.0*M_PI*m_fRadius)*/);
     m_BaseFlatTerrain.SetLacunarity(1.93147);
     m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    m_BaseFlatTerrain.SetOctaveCount(nMaxOctave);
+    m_BaseFlatTerrain.SetOctaveCount(m_nOctMtTr);
     
     m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
     m_FlatTerrain.SetScale(0.25);
@@ -180,12 +182,12 @@ void CPlanet::initTerrain()
     m_TerrainType.SetSeed(m_nSeed+7);
     m_TerrainType.SetFrequency (0.5*100.0/(2.0*M_PI*m_fRadius));
     m_TerrainType.SetPersistence (0.5);
-    m_TerrainType.SetLacunarity(2.13197);
+    m_TerrainType.SetLacunarity(m_fLacTrTp);
     m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
-    m_TerrainType.SetOctaveCount(20);
+    m_TerrainType.SetOctaveCount(15);
 
     m_Surface.SetSourceModule(0,m_FlatTerrain);
-    m_Surface.SetSourceModule(1,m_MountainTerrain);
+    m_Surface.SetSourceModule(1,m_TerraceTerrain);
     m_Surface.SetControlModule(m_TerrainType);
     m_Surface.SetBounds(0.0,1.0);
     m_Surface.SetEdgeFalloff(0.05);
@@ -209,11 +211,18 @@ void CPlanet::setSampling(const double& _fZoom)
     
     double fMaxF = _fZoom;
     double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+    int nOct;
 
-    int nMaxOctave = log2(fMaxF/fMinF)+1;
-    if (nMaxOctave < 1) nMaxOctave = 1;
+    fMaxF = _fZoom;
+    fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+    nOct = log2(fMaxF/fMinF)/log2(m_fLacMtTr)+1;
+    if (nOct < 1) nOct = 1;
+            
+    m_MountainTerrain.SetOctaveCountTmp(nOct);
     
-    m_MountainTerrain.SetOctaveCountTmp(nMaxOctave);
+    nOct = log2(100)/log2(m_fLacTrTp)+1;
+    if (nOct < 1) nOct = 1;
+    m_TerrainType.SetOctaveCountTmp(nOct);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -225,13 +234,8 @@ void CPlanet::resetSampling()
 {
     METHOD_ENTRY("CPlanet::resetSampling")
     
-    double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
-    double fMaxF = 1.0 / (m_fGroundResolution);
-    
-    int nMaxOctave = log2(fMaxF/fMinF)+1;
-    if (nMaxOctave < 1) nMaxOctave = 1;
-    
-    m_MountainTerrain.SetOctaveCountTmp(nMaxOctave);
+    m_MountainTerrain.SetOctaveCountTmp(m_nOctMtTr);
+    m_TerrainType.SetOctaveCountTmp(m_nOctTrTp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

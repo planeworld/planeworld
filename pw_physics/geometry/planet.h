@@ -100,6 +100,11 @@ class CPlanet : public IShape
         noise::module::Perlin      m_TerrainType;       ///< Terrain type decision function
         noise::module::Clamp       m_ClampTerrain;      ///< Clamps terrain at top
         noise::module::Terrace     m_TerraceTerrain;    ///< Adds terraces to terrain
+        
+        double              m_fLacMtTr;                 ///< Lacunarity for mountain terrain
+        double              m_fLacTrTp;                 ///< Lacunarity of terrain type
+        int                 m_nOctMtTr;                 ///< Maximum number of octaves for mountain terrain
+        int                 m_nOctTrTp;                 ///< Maximum number of octaves for terrain type
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
