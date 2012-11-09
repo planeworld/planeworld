@@ -187,14 +187,14 @@ int main(int argc, char *argv[])
     }
 
     //--- Initialize Debris -------------------------------------------------//
-//     pDebris = new CDebris;
-//     MEM_ALLOC("pDebris")
-//     pDebrisVisuals = new CDebrisVisuals(pDebris);
-//     MEM_ALLOC("pDebrisVisuals")
-// 
-//     pDebris->setNumber(10000);
-//     pVisualsManager->addVisuals(pDebrisVisuals);
-//     pPhysicsManager->addDebris(pDebris);
+    pDebris = new CDebris;
+    MEM_ALLOC("pDebris")
+    pDebrisVisuals = new CDebrisVisuals(pDebris);
+    MEM_ALLOC("pDebrisVisuals")
+
+    pDebris->setNumber(1000);
+    pVisualsManager->addVisuals(pDebrisVisuals);
+    pPhysicsManager->addDebris(pDebris);
 
     //--- Initialize Rigidbody ----------------------------------------------//
 //     pBody1 = new CRigidBody;

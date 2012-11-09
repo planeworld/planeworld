@@ -30,6 +30,9 @@ void CCollisionManager::detectCollisions()
 
     std::list< IObject* >::const_iterator cj;
     
+    //--------------------------------------------------------------------------
+    // Test dynamic objects
+    //--------------------------------------------------------------------------
     for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
@@ -72,6 +75,9 @@ void CCollisionManager::detectCollisions()
 //         m_Graphics.setColor(1.0, 1.0, 1.0);
     }
     
+    //--------------------------------------------------------------------------
+    // Test static objects against debris
+    //--------------------------------------------------------------------------
     for (std::list< IObject* >::const_iterator ci = m_StaticObjects.begin();
         ci != m_StaticObjects.end(); ++ci)
     {
@@ -85,6 +91,24 @@ void CCollisionManager::detectCollisions()
             }
         }
     }
+    
+    //--------------------------------------------------------------------------
+    // Test dynamic objects against debris
+    //--------------------------------------------------------------------------
+    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+        ci != m_DynamicObjects.end(); ++ci)
+    {
+        for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
+            cj != m_Debris.end(); ++cj)
+        {
+            switch((*ci)->getObjectType())
+            {
+                case OBJECT_BODY:
+                    this->test(static_cast<CBody*>((*ci)), (*cj));
+            }
+        }
+    }
+    
     
     METHOD_EXIT("CCollisionManager::detectCollisions")
 }
@@ -110,8 +134,8 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
         {
             case SHAPE_TERRAIN:
                 this->test(static_cast<CTerrain*>((*ci)),_p2);
-//             case SHAPE_CIRCLE:
-//                 this->test(static_cast<CCircle*>((*ci)), static_cast<CCircle*>((*ci0)), _p1, _p2);
+            case SHAPE_CIRCLE:
+                this->test(static_cast<CCircle*>((*ci)), static_cast<CCircle*>((*ci0)), _p1, _p2);
         }
         ++ci;
         ++ci0;
@@ -157,32 +181,57 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
             Vector2d vecB = (*itPos) - (*itPosP) - vecC1 + vecC0;
             
             double fA = vecB.dot(vecB);
-            double fB = 2 * vecA.dot(vecB);
+            double fB = 2.0 * vecA.dot(vecB);
             double fC = vecA.dot(vecA) - fR0*fR0;
             
             if (fA != 0.0)
             {
-                double fR = fB*fB - 4*fA*fC;
+                double fR = fB*fB - 4.0*fA*fC;
                 if (fR >= 0.0)
                 {
-                    double fT1 = (-fB + sqrt(fR)) / (2*fA);
-                    double fT2 = (-fB - sqrt(fR)) / (2*fA);
+                    double fT1 = (-fB + sqrt(fR)) / (2.0*fA);
+                    double fT2 = (-fB - sqrt(fR)) / (2.0*fA);
                 
                     if ((fT1 >= 0.0) && ( fT1 < fT))
                     {
                         fT = fT1;
-                        vecPOC = (*itPos) + fT * ((*itPos) - (*itPosP));
                     }
                     if ((fT2 >= 0.0) && ( fT2 < fT))
                     {
                         fT = fT2;
-                        vecPOC = (*itPos) + fT * ((*itPos) - (*itPosP));
                     }
                 }
                 if (fT<=1.0)
                 {
-                    (*itPos) = vecPOC+((*itPosP)-vecPOC)*0.1;
-                    (*itVel) = -(*itVel);
+                    vecPOC = (*itPosP) + fT * ((*itPos) - (*itPosP));
+                    double fDebrisAngle = std::atan2((*itPos)[1]-(*itPosP)[1], (*itPos)[0]-(*itPosP)[0]);
+                    
+//                     (*itPos) = vecPOC+((*itPosP)-vecPOC)*0.01;
+//                     (*itVel) = -(*itVel)+_p1->getVelocity();
+                    
+                    Vector2d vecC = vecC0 + fT * ((vecC1 - vecC0));
+                    
+                    double fCircleAngle = std::atan2((vecC[0]-vecPOC[0]), -(vecC[1]-vecPOC[1]));
+                                        
+                    Vector2d vecNewVelOrth;
+                    Vector2d vecNewVelTang;
+                    
+                    vecNewVelTang = Vector2d(std::cos(fCircleAngle),
+                                            std::sin(fCircleAngle));
+                    vecNewVelOrth = Vector2d(std::cos(fCircleAngle+M_PI*0.5),
+                                            std::sin(fCircleAngle+M_PI*0.5));
+                    
+                    double fTang = std::cos(fCircleAngle-fDebrisAngle)*0.5;
+                    double fOrth = std::sin(fCircleAngle-fDebrisAngle)*0.5;
+                    double fDamping = sqrt(fTang*fTang+fOrth*fOrth);
+
+//                     (*itVel) -= _p1->getVelocity();
+                    
+                    double fNorm = (*itVel).norm();
+                    (*itVel)[0] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[0];
+                    (*itVel)[1] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[1];
+                    
+                    (*itPos)=vecPOC+(vecNewVelOrth)/(vecNewVelOrth).norm()*0.01;
                 }
             }
         }

@@ -58,7 +58,7 @@ void CDebris::dynamics(const double& _fStep)
     {
         (*itPrev) = (*it);
         (*jtPrev) = (*jt);
-        (*jt) += Vector2d(0.0,-9.81) * fStep;
+        (*jt) += Vector2d(0.0,1.81) * fStep;
         (*it) += (*jt) * _fStep;
         ++it; ++jt; ++itPrev; ++jtPrev;
     }
@@ -112,7 +112,7 @@ void CDebris::setNumber(const int& _nN)
     m_PosList.set_capacity(_nN);
     m_PosListPrev.resize(_nN);
     for (int i=0; i<m_PosList.capacity();++i)
-        m_PosList.push_back(Vector2d((rand()%20000000) - 10000000,(rand()%20000000)+10000000)/100000);
+        m_PosList.push_back(Vector2d((rand()%20000000) - 10000000,(rand()%20000000) - 10000000)/100000);
     m_VelList.resize(_nN);
     m_VelListPrev.resize(_nN);
 

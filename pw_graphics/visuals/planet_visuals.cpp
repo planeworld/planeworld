@@ -216,42 +216,42 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
         }
         m_Graphics.setWidth(1.0);
         
-        // Draw grass
-        m_Graphics.setColor(0.1,0.2,0.1);
-        if (_pCamera->getZoom() >= 1.0)
-        {
-            fAng = fAngBak;
-            while ( fAng <= fAngEnd)
-            {
-                fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
-                                                         std::sin(fAng-fPAng)*fRad);
-                fTerrainType = m_pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
-                                                                    std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
-                if (fTerrainType < 0.5)
-                {
-                    
-                    double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(1.0,1.0,10.0*fAng/fInc);
-                    double fAngGrass02 = fAng-noise::ValueNoise2D(1.0,1.0,10.0*fAng/fInc);
-                    double fHghtGrass01 = fabs(0.5-fTerrainType);
-                    double fHghtGrass02 = 0.5*fabs(0.5-fTerrainType);
-                    m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP,SHAPE_DEFAULT_DEPTH);
-                    m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
-                                                  vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
-                    m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
-                                                  vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight))+
-                                         Vector2d(std::cos(fAngGrass01)*(fHghtGrass01),
-                                                  std::sin(fAngGrass01)*(fHghtGrass01)));
-                    m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
-                                                  vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight))+
-                                         Vector2d(std::cos(fAngGrass01)*(fHghtGrass01),
-                                                  std::sin(fAngGrass01)*(fHghtGrass01))+
-                                         Vector2d(std::cos(fAngGrass02)*(fHghtGrass02),
-                                                  std::sin(fAngGrass02)*(fHghtGrass02)));
-                    m_Graphics.endLine();
-                }
-                fAng += fInc*0.1;
-            }
-        }
+//         // Draw grass
+//         m_Graphics.setColor(0.1,0.2,0.1);
+//         if (_pCamera->getZoom() >= 1.0)
+//         {
+//             fAng = fAngBak;
+//             while ( fAng <= fAngEnd)
+//             {
+//                 fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
+//                                                          std::sin(fAng-fPAng)*fRad);
+//                 fTerrainType = m_pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
+//                                                                     std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
+//                 if (fTerrainType < 0.5)
+//                 {
+//                     
+//                     double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(1.0,1.0,10.0*fAng/fInc);
+//                     double fAngGrass02 = fAng-noise::ValueNoise2D(1.0,1.0,10.0*fAng/fInc);
+//                     double fHghtGrass01 = fabs(0.5-fTerrainType);
+//                     double fHghtGrass02 = 0.5*fabs(0.5-fTerrainType);
+//                     m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP,SHAPE_DEFAULT_DEPTH);
+//                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+//                                                   vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+//                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+//                                                   vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight))+
+//                                          Vector2d(std::cos(fAngGrass01)*(fHghtGrass01),
+//                                                   std::sin(fAngGrass01)*(fHghtGrass01)));
+//                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+//                                                   vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight))+
+//                                          Vector2d(std::cos(fAngGrass01)*(fHghtGrass01),
+//                                                   std::sin(fAngGrass01)*(fHghtGrass01))+
+//                                          Vector2d(std::cos(fAngGrass02)*(fHghtGrass02),
+//                                                   std::sin(fAngGrass02)*(fHghtGrass02)));
+//                     m_Graphics.endLine();
+//                 }
+//                 fAng += fInc*0.1;
+//             }
+//         }
         m_Graphics.setColor(1.0,1.0,1.0,1.0);
         
         m_pPlanet->resetSampling();
