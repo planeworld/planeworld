@@ -198,6 +198,9 @@ namespace noise
         }
 
         /// Sets the number of octaves that generate the billowy noise.
+        /// This is the original or maximum number of octaves. Norma-
+        /// lisation is done with respect to this value. For subsampling,
+        /// use SetOctaveCountTmp.
         ///
         /// @param octaveCount The number of octaves that generate the billowy
         /// noise.
@@ -219,6 +222,39 @@ namespace noise
             throw noise::ExceptionInvalidParam ();
           }
           m_octaveCount = octaveCount;
+          // m_norm is a normalizing factor to keep the signal in [-1.0,1.0]
+          // The maximum signal amplitude can be calculated, since it is a geometric series
+          m_norm = (1.0 - m_persistence) / (1.0-pow(m_persistence,m_octaveCount+1));
+        }
+        
+        /// Sets the number of octaves that generate the billowy noise,
+        /// but only temporary. This might help for temporary subsampling
+        /// of when representing a very complex surface, but viewing it from
+        /// a large distance. The maximum number of octaves without subsampling
+        /// is given by SetOctaveCount.
+        ///
+        /// @param octaveCountTmp The number of octaves that generate the
+        /// subsampled billowy noise.
+        ///
+        /// @pre The number of octaves ranges from 1 to
+        /// noise::module::PERLIN_MAX_OCTAVE.
+        ///
+        /// @throw noise::ExceptionInvalidParam An invalid parameter was
+        /// specified; see the preconditions for more information.
+        ///
+        /// The number of octaves controls the amount of detail in the Billow
+        /// noise.
+        ///
+        /// The larger the number of octaves, the more time required to
+        /// calculate the Billow-noise value. Therefore, this method
+        /// can be used to temporarily reduce the number of octaves for
+        /// subsampling.
+        void SetOctaveCountTmp (int octaveCount)
+        {
+          if (octaveCount < 1 || octaveCount > BILLOW_MAX_OCTAVE) {
+            throw noise::ExceptionInvalidParam ();
+          }
+          m_octaveCountTmp = octaveCount;
         }
 
         /// Sets the persistence value of the billowy noise.
@@ -249,12 +285,19 @@ namespace noise
 
         /// Frequency multiplier between successive octaves.
         double m_lacunarity;
+        
+        /// Normalizing factor to keep output values in [-1.0,1.0]
+        double m_norm;
 
         /// Quality of the billowy noise.
         noise::NoiseQuality m_noiseQuality;
 
         /// Total number of octaves that generate the billowy noise.
         int m_octaveCount;
+        
+        /// Total number of octaves that generate for temporary generation
+        /// of Billow noise. Can be used for subsampling.
+        int m_octaveCountTmp;
 
         /// Persistence value of the billowy noise.
         double m_persistence;

@@ -317,7 +317,7 @@ namespace noise
         /// is given by SetOctaveCount.
         ///
         /// @param octaveCountTmp The number of octaves that generate the
-        /// subsampled ridged-multifractal noise.
+        /// subsampled perlin noise.
         ///
         /// @pre The number of octaves ranges from 1 to
         /// noise::module::PERLIN_MAX_OCTAVE.
@@ -330,7 +330,8 @@ namespace noise
         ///
         /// The larger the number of octaves, the more time required to
         /// calculate the Perlin-noise value. Therefore, this method
-        /// can be used to temporarily reduce the number of octaves for subsampling.
+        /// can be used to temporarily reduce the number of octaves for
+        /// subsampling.
         void SetOctaveCountTmp (int octaveCount)
         {
           if (octaveCount < 1 || octaveCount > PERLIN_MAX_OCTAVE) {
