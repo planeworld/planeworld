@@ -25,6 +25,7 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects
+    ${CMAKE_HOME_DIRECTORY}/pw_unit
     ${CMAKE_HOME_DIRECTORY}/include
 )
 
@@ -62,9 +63,22 @@ SET(SRCS
     parzival.cpp
     physics_manager.cpp
     planeworld.cpp
+    universe.cpp
+    
+)
+
+SET(SRCS_UNIVERSE_UT
+    ${CMAKE_HOME_DIRECTORY}/pw_unit/universe_ut.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
+    
+    ${CMAKE_HOME_DIRECTORY}/pw_unit/universe_ut.cpp
+    
+    universe.cpp
 )
 
 ADD_EXECUTABLE (planeworld ${SRCS})
+ADD_EXECUTABLE (universe_ut ${SRCS_UNIVERSE_UT})
 
 TARGET_LINK_LIBRARIES (planeworld
     ${SDL_LIBRARY}
@@ -76,6 +90,6 @@ TARGET_LINK_LIBRARIES (planeworld
     noise
 )
 
-INSTALL (TARGETS planeworld
+INSTALL (TARGETS planeworld universe_ut
     RUNTIME DESTINATION bin
 )
