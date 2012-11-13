@@ -93,6 +93,12 @@ bool CXMLImporter::import(const std::string& _strFilename,
     QDomDocument Doc("PlaneworldML");
     QFile ImportFile(QString(_strFilename.c_str()));
     
+    m_strPath=QString(_strFilename.c_str());
+    m_strPath.truncate(m_strPath.lastIndexOf("/"));
+    
+    QString strFilename=QString(_strFilename.c_str());
+    strFilename = strFilename.section('/',-1);
+    
     // Read the document
     if(!ImportFile.open(QIODevice::ReadOnly))
     {
@@ -195,7 +201,7 @@ bool CXMLImporter::checkFile(const QDomElement& _E)
     
     if (_E.hasAttribute("file"))
     {
-        this->import("../data/"+_E.attribute("file").toStdString(),
+        this->import(m_strPath.toStdString()+"/"+_E.attribute("file").toStdString(),
                      IMPORT_MODE_OBJECT);
         METHOD_EXIT("CXMLImporter::checkFile")
         return true;

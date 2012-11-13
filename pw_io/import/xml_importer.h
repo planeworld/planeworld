@@ -85,6 +85,7 @@ class CXMLImporter
         std::string                     m_strCameraHook;
         std::map<std::string,IObject*>  m_Objects;
         std::list<IVisuals*>            m_Visuals;
+        QString                         m_strPath;
                 
 };
 
