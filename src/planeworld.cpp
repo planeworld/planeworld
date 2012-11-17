@@ -35,6 +35,7 @@
 #include "rectangle_visuals.h"
 #include "rigidbody.h"
 #include "spring_visuals.h"
+#include "universe.h"
 #include "xfig_loader.h"
 
 //--- Misc-Header ------------------------------------------------------------//
@@ -113,6 +114,7 @@ int main(int argc, char *argv[])
     CXFigLoader         XFigLoader;
     CSpring*            pSpring;
     CSpringVisuals*     pSpringVisuals;
+    CUniverse           Universe;
     
     long nX;
     long nY;
@@ -125,6 +127,8 @@ int main(int argc, char *argv[])
     MEM_ALLOC("pVisualsManager")
     
     int nNumberOfBoxes = 100;
+    
+    Universe.generate(100);
     
     //--- Initialise particles -----------------------------------------------//
     for (int i=0; i<nNumberOfBoxes; ++i)

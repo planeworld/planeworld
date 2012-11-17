@@ -130,7 +130,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
         double fWeightMountains;
         double fWeightFlat;
         
-        const double TERRAIN_CROSSOVER = 0.1;
+        const double TERRAIN_CROSSOVER = 0.001;
         const double TERRAIN_CROSSOVER_INV = 0.5/(TERRAIN_CROSSOVER);
         m_Graphics.setWidth(3.0);
         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);

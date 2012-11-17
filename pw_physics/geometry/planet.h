@@ -29,6 +29,15 @@
 #include "eigen2/Eigen/Geometry"
 #include "noise/noise.h"
 
+/// Specifies the major type of the planet which defines basic noise functions
+/// and colours.
+typedef enum 
+{
+    PLANET_TYPE_EARTHLIKE,
+    PLANET_TYPE_ICE,
+    PLANET_TYPE_ROCK,
+} PlanetType;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class representing a procedural created planet shape.
@@ -88,11 +97,6 @@ class CPlanet : public IShape
         double              m_fSmoothness;              ///< Smoothness of planet landscape
         int                 m_nSeed;                    ///< Unique seed for terrain generation
         
-//         noise::module::Perlin      m_ContinentsDef;
-//         noise::module::Perlin      m_TerrainTypeDef;
-//         noise::module::RidgedMulti m_MountainTerrain;
-//         noise::module::Billow      m_BaseFlatTerrain;
-        
         noise::module::Select      m_Surface;           ///< Final surface noise function
         noise::module::RidgedMulti m_MountainTerrain;   ///< Main mountain
         noise::module::Billow      m_BaseFlatTerrain;   ///< Base terrain
@@ -101,8 +105,10 @@ class CPlanet : public IShape
         noise::module::Clamp       m_ClampTerrain;      ///< Clamps terrain at top
         noise::module::Terrace     m_TerraceTerrain;    ///< Adds terraces to terrain
         
+        double              m_fLacHlTr;                 ///< Lacunarity for hilly terrain
         double              m_fLacMtTr;                 ///< Lacunarity for mountain terrain
         double              m_fLacTrTp;                 ///< Lacunarity of terrain type
+        int                 m_nOctHlTr;                 ///< Maximum number of octaves for hilly terrain
         int                 m_nOctMtTr;                 ///< Maximum number of octaves for mountain terrain
         int                 m_nOctTrTp;                 ///< Maximum number of octaves for terrain type
 };
