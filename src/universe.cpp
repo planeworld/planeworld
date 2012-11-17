@@ -63,7 +63,11 @@ void CUniverse::generate(const int& _nSeed)
         ++vecNrOfPlanets[PoissionDistribution(Generator)];
     }
     
-    INFO_MSG("Universe generator", "Generated planets. Distribution of number of planet per star system: ")
+    int nNrOfPlanets = 0;
+    for (int i=0; i<20; ++i)
+        nNrOfPlanets += vecNrOfPlanets[i]*i;
+    
+    INFO_MSG("Universe generator", "Generated "<< nNrOfPlanets << " planets. Distribution of number of planet per star system: ")
     Log.logSeparator();
     
     for (int i=0; i<10; ++i)
