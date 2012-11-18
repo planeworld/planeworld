@@ -18,9 +18,28 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <random>
-#include <vector>
 
 #include "universe.h"
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Destructor, freeing memory
+///
+///////////////////////////////////////////////////////////////////////////////
+CUniverse::~CUniverse()
+{
+    METHOD_ENTRY("CUniverse::~CUniverse");
+    DTOR_CALL("CUniverse::~CUniverse");
+    
+    for (int i=0; i<m_StarSystems.size(); ++i)
+    {
+        delete m_StarSystems[i];
+        m_StarSystems[i] = 0;
+        MEM_FREED("pStarSystem");
+    }
+    m_StarSystems.clear();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -34,17 +53,42 @@ void CUniverse::generate(const int& _nSeed)
     METHOD_ENTRY("CUniverse::generate")
     
     const int nBar=100;
-    const int nNrOfStars=10000000;
+    const int nNrOfStars=20000;
     const int nNrOfStarTypes=7;
     
-    std::default_random_engine Generator;
+    m_StarSystems.reserve(nNrOfStars);
     
-    std::exponential_distribution<double> ExponentialDistribution(3.5);
+    std::mt19937 Generator;
+    
+    Generator.seed(_nSeed);
+    
+    std::exponential_distribution<double>   ExponentialDistribution(3.5);
+    std::normal_distribution<double>        NormalDistribution(0.0, 1.0e5);
+    std::uniform_real_distribution<double>  UniformDistribution(0.0,2.0*M_PI);
     std::vector<int> vecNrOfStars(nNrOfStarTypes,0);
 
-    for (int i=0; i<nNrOfStars; ++i) {
+    // Create a globular cluster
+    for (int i=0; i<nNrOfStars; ++i)
+    {
         double fNumber = ExponentialDistribution(Generator);
-        if (fNumber<1.0) ++vecNrOfStars[int(nNrOfStarTypes*fNumber)];
+        if (fNumber<1.0)
+        {
+            ++vecNrOfStars[int(nNrOfStarTypes*fNumber)];
+            CStarSystem* pStarSystem = new CStarSystem();
+            MEM_ALLOC("pStarSystem");
+
+            double fDistance = NormalDistribution(Generator);
+            double fAngle    = UniformDistribution(Generator);
+            Vector2d vecLocation;
+            
+            vecLocation[0] = fDistance*std::sin(fAngle);
+            vecLocation[1] = fDistance*std::cos(fAngle);
+            
+            pStarSystem->setStarType(int(nNrOfStarTypes*fNumber));
+            pStarSystem->setLocation(vecLocation);
+            
+            m_StarSystems.push_back(pStarSystem);
+        }
     }
 
     INFO_MSG("Universe generator", "Generated " << nNrOfStars << " Stars. Distribution of spectral classes: ")
@@ -90,12 +134,12 @@ const std::string CUniverse::starClassToString(const int& _nClass) const
     
     switch (_nClass)
     {
-        case 0: return "M"; break;
-        case 1: return "K"; break;
-        case 2: return "G"; break;
-        case 3: return "F"; break;
-        case 4: return "A"; break;
-        case 5: return "B"; break;
-        case 6: return "O"; break;
+        case STAR_CLASS_M: return "M"; break;
+        case STAR_CLASS_K: return "K"; break;
+        case STAR_CLASS_G: return "G"; break;
+        case STAR_CLASS_F: return "F"; break;
+        case STAR_CLASS_A: return "A"; break;
+        case STAR_CLASS_B: return "B"; break;
+        case STAR_CLASS_O: return "O"; break;
     }
 }

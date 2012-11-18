@@ -70,8 +70,6 @@ int main(int argc, char *argv[])
     
     //--- Initialisation -----------------------------------------------------//
     Universe.generate(100);
-    
-    //--- Initialize graphics ------------------------------------------------//
 
     return 0;
 }

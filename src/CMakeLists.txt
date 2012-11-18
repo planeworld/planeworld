@@ -63,21 +63,34 @@ SET(SRCS
     parzival.cpp
     physics_manager.cpp
     planeworld.cpp
+    star_system.cpp
     universe.cpp
     
 )
 
+SET(SRCS_STARMAP_UT
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
+    
+    ${CMAKE_HOME_DIRECTORY}/pw_unit/star_map_ut.cpp
+    
+    star_system.cpp
+    universe.cpp
+)
+
 SET(SRCS_UNIVERSE_UT
-    ${CMAKE_HOME_DIRECTORY}/pw_unit/universe_ut.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
     
     ${CMAKE_HOME_DIRECTORY}/pw_unit/universe_ut.cpp
     
+    star_system.cpp
     universe.cpp
 )
 
 ADD_EXECUTABLE (planeworld ${SRCS})
+ADD_EXECUTABLE (starmap_ut ${SRCS_STARMAP_UT})
 ADD_EXECUTABLE (universe_ut ${SRCS_UNIVERSE_UT})
 
 TARGET_LINK_LIBRARIES (planeworld
@@ -90,6 +103,11 @@ TARGET_LINK_LIBRARIES (planeworld
     noise
 )
 
-INSTALL (TARGETS planeworld universe_ut
+TARGET_LINK_LIBRARIES (starmap_ut
+    ${SDL_LIBRARY}
+    ${OPENGL_gl_LIBRARY}
+)
+
+INSTALL (TARGETS planeworld starmap_ut universe_ut
     RUNTIME DESTINATION bin
 )
