@@ -65,6 +65,8 @@ void CUniverse::generate(const int& _nSeed)
     std::exponential_distribution<double>   ExponentialDistribution(3.5);
     std::normal_distribution<double>        NormalDistribution(0.0, 1.0e5);
     std::uniform_real_distribution<double>  UniformDistribution(0.0,2.0*M_PI);
+    std::poisson_distribution<int>          PoissionDistribution(3.0);
+    std::vector<int> vecNrOfPlanets(20,0);
     std::vector<int> vecNrOfStars(nNrOfStarTypes,0);
 
     // Create a globular cluster
@@ -74,6 +76,7 @@ void CUniverse::generate(const int& _nSeed)
         if (fNumber<1.0)
         {
             ++vecNrOfStars[int(nNrOfStarTypes*fNumber)];
+            
             CStarSystem* pStarSystem = new CStarSystem();
             MEM_ALLOC("pStarSystem");
 
@@ -86,8 +89,11 @@ void CUniverse::generate(const int& _nSeed)
             
             pStarSystem->setStarType(int(nNrOfStarTypes*fNumber));
             pStarSystem->setLocation(vecLocation);
+            pStarSystem->setNumberOfPlanets(PoissionDistribution(Generator));
             
             m_StarSystems.push_back(pStarSystem);
+            
+            ++vecNrOfPlanets[pStarSystem->getNumberOfPlanets()];
         }
     }
 
@@ -100,14 +106,6 @@ void CUniverse::generate(const int& _nSeed)
     }
     Log.logSeparator();
 
-    std::poisson_distribution<int> PoissionDistribution(4.0);
-    std::vector<int> vecNrOfPlanets(20,0);
-    
-    for (int i=0; i<nNrOfStars; ++i)
-    {
-        ++vecNrOfPlanets[PoissionDistribution(Generator)];
-    }
-    
     int nNrOfPlanets = 0;
     for (int i=0; i<20; ++i)
         nNrOfPlanets += vecNrOfPlanets[i]*i;

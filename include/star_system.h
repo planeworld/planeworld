@@ -56,10 +56,12 @@ class CStarSystem
         
         //--- Constant Methods -----------------------------------------------//
         const Vector2d& getLocation() const;
+        const int&      getNumberOfPlanets() const;
         const int&      getStarType() const;
 
         //--- Methods --------------------------------------------------------//
         void setLocation(const Vector2d&);
+        void setNumberOfPlanets(const int&);
         void setStarType(const int&);
         
     private:
@@ -67,8 +69,9 @@ class CStarSystem
         //--- Constant Methods [private] -------------------------------------//
         
         //--- Variables [private] --------------------------------------------//
-        Vector2d m_vecLocation;     ///< Location of star system
-        int      m_StarType;        ///< Type of star
+        Vector2d m_vecLocation;         ///< Location of star system
+        int      m_nNumberOfPlanets;    ///< Number of planets in this star system
+        int      m_StarType;            ///< Type of star
 
 };
 
@@ -85,6 +88,19 @@ inline const Vector2d& CStarSystem::getLocation() const
 {
     METHOD_ENTRY("CStarSystem::getLocation")
     return m_vecLocation;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the number of planets for this star system
+///
+/// \return Number of planets for this star system
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const int& CStarSystem::getNumberOfPlanets() const
+{
+    METHOD_ENTRY("CStarSystem::getNumberOfPlanets")
+    return m_nNumberOfPlanets;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +128,20 @@ inline void CStarSystem::setLocation(const Vector2d& _vecLocation)
     METHOD_ENTRY("CStarSystem::setLocation")
 
     m_vecLocation = _vecLocation;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the number of planets in this star system
+///
+/// \param _nNrOfPlanets Number of planets to set for this star system
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CStarSystem::setNumberOfPlanets(const int& _nNumberOfPlanets)
+{
+    METHOD_ENTRY("CStarSystem::setNumberOfPlanets")
+
+    m_nNumberOfPlanets = _nNumberOfPlanets;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

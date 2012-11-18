@@ -112,6 +112,7 @@ class CGraphics
         unsigned short  getHeightScr() const;
         void setColor(const double&, const double&, const double&) const;
         void setColor(const double&, const double&, const double&, const double&) const;
+        void setPointSize(const double&) const;
         void setWidth(const double&) const;
 
         //--- Methods --------------------------------------------------------//
@@ -335,6 +336,19 @@ inline void CGraphics::setColor(const double& _fR, const double& _fG,
     glColor4d(_fR, _fG, _fB, _fA);
 
     METHOD_EXIT("CGraphics::setColor(const double&, const double&, const double&, const double&)");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the size of points
+///
+/// \param _fS Size of points
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CGraphics::setPointSize(const double& _fS) const
+{
+    METHOD_ENTRY("CGraphics::setPointSize")
+    glPointSize(_fS);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
