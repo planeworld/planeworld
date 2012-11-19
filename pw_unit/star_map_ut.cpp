@@ -34,7 +34,6 @@
 
 //--- Misc-Header ------------------------------------------------------------//
 #include "SDL/SDL.h"
-#include <boost-1_49/boost/concept_check.hpp>
 
 #include <iostream>
 
