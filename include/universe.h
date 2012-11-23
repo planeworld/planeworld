@@ -29,10 +29,23 @@
 
 //--- Misc header ------------------------------------------------------------//
 
+const double UNIVERSE_CELL_SIZE=1.0e12;
+const int    UNIVERSE_NR_OF_STARS_DEFAULT=20000;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class representing a universe. Mainly needed for procedural generation.
-/// 
+///
+/// Some notes: A globular cluster, which is represented at the moment, consists
+/// of 10000 to several million stars. Their density is 0.4 stars/parsec on
+/// average and 100-1000 stars/parsec in the inner core.
+/// One cell of the space grid in planeworld that avoids numerical problems is
+/// 1.0e12m. One parsec is 30.857e15m. This means that the star density is
+/// 0.4/30.857e15m which is 0.4e12/30.857e15=1.3e-5/cell. Moreover, given
+/// m_nNrOfStars and using the 3-sigma value to cut the distribution, the
+/// density is 0.4/30.857e15m = m_nNrOfStars / 3-Sigma.That is
+/// Sigma = m_nNrOfStars*30.857e15/(3*0.4)
+///
 ////////////////////////////////////////////////////////////////////////////////
 class CUniverse
 {
@@ -40,7 +53,7 @@ class CUniverse
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-//         CUniverse();
+        CUniverse();
         virtual ~CUniverse();
         
         //--- Constant Methods -----------------------------------------------//
@@ -54,7 +67,8 @@ class CUniverse
         //--- Constant Methods [private] -------------------------------------//
         const std::string starClassToString(const int&) const;
         
-        std::vector<CStarSystem*> m_StarSystems;  // Star system in this universe
+        int                         m_nNrOfStars;   ///< Number of stars in this universe
+        std::vector<CStarSystem*>   m_StarSystems;  ///< Star system in this universe
 
 };
 

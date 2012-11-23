@@ -26,7 +26,7 @@
 
 /// Default depth for drawing
 const double SHAPE_DEFAULT_DEPTH = -15.0;
-const double DEFAULT_GRID_SIZE = 1.0e12;
+const double DEFAULT_CELL_SIZE = 1.0e12;
 
 /// Specifies bitcodes for additional visuals
 enum Visuals

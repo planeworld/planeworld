@@ -55,12 +55,14 @@ class CStarSystem
         CStarSystem();
         
         //--- Constant Methods -----------------------------------------------//
-        const Vector2d& getLocation() const;
+        const Vector2i& getCell() const;
+        const Vector2d& getCenter() const;
         const int&      getNumberOfPlanets() const;
         const int&      getStarType() const;
 
         //--- Methods --------------------------------------------------------//
-        void setLocation(const Vector2d&);
+        void setCell(const Vector2i&);
+        void setCenter(const Vector2d&);
         void setNumberOfPlanets(const int&);
         void setStarType(const int&);
         
@@ -69,7 +71,8 @@ class CStarSystem
         //--- Constant Methods [private] -------------------------------------//
         
         //--- Variables [private] --------------------------------------------//
-        Vector2d m_vecLocation;         ///< Location of star system
+        Vector2i m_vecCell;             ///< Cell in that the star system is located
+        Vector2d m_vecCenter;           ///< Center of star system in cell
         int      m_nNumberOfPlanets;    ///< Number of planets in this star system
         int      m_StarType;            ///< Type of star
 
@@ -79,15 +82,28 @@ class CStarSystem
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns the location of the star system
+/// \brief Returns the cell the star system is located at.
 ///
-/// \return Location of the star system
+/// \return Cell the star system is located at
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d& CStarSystem::getLocation() const
+inline const Vector2i& CStarSystem::getCell() const
 {
-    METHOD_ENTRY("CStarSystem::getLocation")
-    return m_vecLocation;
+    METHOD_ENTRY("CStarSystem::getCell")
+    return m_vecCell;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the center of the star system within its grid
+///
+/// \return Center of the star system
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2d& CStarSystem::getCenter() const
+{
+    METHOD_ENTRY("CStarSystem::getCenter")
+    return m_vecCenter;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,16 +134,30 @@ inline const int& CStarSystem::getStarType() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the location of the star system
+/// \brief Sets the cell the star system is located at
 ///
-/// \param _vecLocation Location of star system
+/// \param _vecCell Cell of star system
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CStarSystem::setLocation(const Vector2d& _vecLocation)
+inline void CStarSystem::setCell(const Vector2i& _vecCell)
 {
-    METHOD_ENTRY("CStarSystem::setLocation")
+    METHOD_ENTRY("CStarSystem::setCell")
 
-    m_vecLocation = _vecLocation;
+    m_vecCell = _vecCell;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the center of the star system within its cell
+///
+/// \param _vecCenter Center of star system
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CStarSystem::setCenter(const Vector2d& _vecCenter)
+{
+    METHOD_ENTRY("CStarSystem::setCenter")
+
+    m_vecCenter = _vecCenter;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

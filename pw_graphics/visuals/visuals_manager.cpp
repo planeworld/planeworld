@@ -161,7 +161,7 @@ void CVisualsManager::drawGrid() const
         fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1])/fGrid+1.0)*fGrid;
         
         // Change colour if on default grid
-        if (fGrid < DEFAULT_GRID_SIZE)
+        if (fGrid < DEFAULT_CELL_SIZE)
             m_Graphics.setColor(0.1, 0.1, 0.1);
         else
             m_Graphics.setColor(0.15, 0.0, 0.0);
@@ -200,7 +200,7 @@ void CVisualsManager::drawGrid() const
             fGrid*=0.1;
 
         // Draw grid only if it is lower than the default grid
-        if (fGrid < DEFAULT_GRID_SIZE)
+        if (fGrid < DEFAULT_CELL_SIZE)
         {
             // Snap grid to grid size
             fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1.0)*fGrid;
@@ -233,14 +233,14 @@ void CVisualsManager::drawGrid() const
             }
         }
         
-        fGrid = DEFAULT_GRID_SIZE*2.0;
+        fGrid = DEFAULT_CELL_SIZE*2.0;
         
         // Automatically scale grid depending on zoom level (only upscaling for this grid)
         while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 5.0)
             fGrid*=10.0;
 
         // Draw grid only if it is equal or greater than the default grid
-        if (fGrid > DEFAULT_GRID_SIZE)
+        if (fGrid > DEFAULT_CELL_SIZE)
         {
             // Snap grid to grid size
             fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0])/fGrid+1.0)*fGrid - fGrid*0.5;

@@ -30,5 +30,6 @@ CStarSystem::CStarSystem() : m_nNumberOfPlanets(0),
     METHOD_ENTRY("CStarSystem::CStarSystem()");
     CTOR_CALL("CStarSystem::CStarSystem()");
     
-    m_vecLocation.setZero();
+    m_vecCell.setZero();
+    m_vecCenter.setZero();
 }

@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
             double fColor = 0.1*StarSystems[i]->getStarType()+0.3;
             Graphics.setColor(0.8,fColor,0.3);
             Graphics.setPointSize(StarSystems[i]->getNumberOfPlanets());
-            Graphics.dot(StarSystems[i]->getLocation());
+            Graphics.dot(StarSystems[i]->getCenter());
         }
         Graphics.swapBuffers();
         Timer.stop();
