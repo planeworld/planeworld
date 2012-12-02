@@ -26,14 +26,12 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "graphics.h"
+#include "hookable.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "eigen2/Eigen/Geometry"
 
 using namespace Eigen;
-
-///< Forward declaration of object class
-class IObject;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -56,12 +54,14 @@ class CCamera : public CGraphicsBase
         const double&                getBoundingCircleRadius() const;
         const std::vector<Vector2d>& getFrame() const;
         
-        const Vector2d&    getCenter() const;
-        const double       getAngle() const;
-        const double&      getZoom() const;
+        const Vector2i&     getCell() const;
+        const Vector2d&     getCenter() const;
+        const double        getAngle() const;
+        const double&       getZoom() const;
         
         //--- Methods --------------------------------------------------------//
-        void setHook(IObject*);
+        void setCell(const Vector2i&);
+        void setHook(IHookable*);
         void setPosition(const double&, const double&);
         void setViewport(const double&, const double&);
         
@@ -82,8 +82,10 @@ class CCamera : public CGraphicsBase
         std::vector<Vector2d>  m_vecFrame0;         ///< Initial camera frame
         std::vector<Vector2d>  m_vecFrame;          ///< Camera frame
         CBoundingBox    m_BoundingBox;              ///< Cameras bounding box (for culling)
+        Vector2i        m_vecCell;                  ///< Cell in which the camera is located
         Vector2d        m_vecPosition;              ///< Camera position
         Vector2d        m_vecHook;                  ///< Hook position
+        Vector2i        m_vecHookCell;              ///< Cell position of hook
         Vector2d        m_vecCenter;                ///< Center of camera
         double          m_fHookAng;                 ///< Hook angle
         double          m_fBoundingCircleRadius;    ///< Radius of Bounding circle
@@ -92,7 +94,7 @@ class CCamera : public CGraphicsBase
         double          m_fAngle;                   ///< Camera angle
         double          m_fZoom;                    ///< Camera zoom
         
-        IObject*        m_pHook;                    ///< Object to hook camera on
+        IHookable*      m_pHook;                    ///< Hook for the camera
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -113,6 +115,19 @@ inline const CBoundingBox CCamera::getBoundingBox() const
 
     METHOD_EXIT("CCamera::getBoundingBox")
     return m_BoundingBox;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the cell the camera is located at.
+///
+/// \return Cell the camera is located at
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2i& CCamera::getCell() const
+{
+    METHOD_ENTRY("CCamera::getCell")
+    return m_vecCell;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,6 +206,20 @@ inline const double& CCamera::getZoom() const
 
     METHOD_EXIT("CCamera::getZoom")
     return m_fZoom;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the cell the camera is located at
+///
+/// \param _vecCell Cell of the camera
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CCamera::setCell(const Vector2i& _vecCell)
+{
+    METHOD_ENTRY("CCamera::setCell")
+
+    m_vecCell = _vecCell;
 }
 
 #endif

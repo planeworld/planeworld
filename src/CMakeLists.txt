@@ -99,7 +99,6 @@ TARGET_LINK_LIBRARIES (planeworld
     ${OPENGL_gl_LIBRARY}
     ${QT_LIBRARIES}
     ${X11_LIBRARIES}
-#     ${Boost_LIBRARIES}
     noise
 )
 

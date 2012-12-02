@@ -233,7 +233,7 @@ void CVisualsManager::drawGrid() const
             }
         }
         
-        fGrid = DEFAULT_CELL_SIZE*2.0;
+        fGrid = DEFAULT_CELL_SIZE_2;
         
         // Automatically scale grid depending on zoom level (only upscaling for this grid)
         while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 5.0)
@@ -324,7 +324,7 @@ void CVisualsManager::drawWorld() const
                     (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) < 0.3))
                 {
                     m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() -
-                                   m_pCamera->getCenter());
+                                   m_pCamera->getCenter()-m_pCamera->getCell().cast<double>()*DEFAULT_CELL_SIZE_2);
                 }
                 else
                 {

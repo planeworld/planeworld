@@ -9,69 +9,47 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       visuals.h
-/// \brief      Prototype of class "IVisuals"
+/// \file       hookable.h
+/// \brief      Prototype of interface "IHookable"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2010-04-08
+/// \date       2012-12-02
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef VISUALS_H
-#define VISUALS_H
+#ifndef HOOKABLE_H
+#define HOOKABLE_H
+
+//--- Program header ---------------------------------------------------------//
 
 //--- Standard header --------------------------------------------------------//
 
-//--- Program header ---------------------------------------------------------//
-#include "camera.h"
-#include "graphics.h"
-#include "key_map.h"
-// #include "object.h"
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for visualisation of world objects
-///
+/// \brief Interface for camera hookable objects.
+/// 
 ////////////////////////////////////////////////////////////////////////////////
-class IVisuals : virtual public CGraphicsBase
+class IHookable
 {
     
     public:
-
+    
         //--- Constructor/Destructor -----------------------------------------//
-        virtual ~IVisuals(){}
-        
-        //--- Constant Methods -----------------------------------------------//
-        virtual void draw(const CCamera* const) const = 0;
-        
-//         const Vector2i getCell() const;
-                
-        //--- Methods --------------------------------------------------------//
-        virtual const CBoundingBox& getBoundingBox() = 0;
-        
-    protected:
-        
-//         IObject* m_pObject;     ///< Pointer to corresponding object
 
+        //--- Constant methods -----------------------------------------------//
+        virtual const double   getHookAngle() const = 0;
+        virtual const Vector2i getHookCell() const = 0;
+        virtual const Vector2d getHookPosition() const = 0;
+
+        //--- Methods --------------------------------------------------------//
+
+    protected:
+
+        //--- Abstract methods [protected] -----------------------------------//
+
+        //-- Variables [protected] -------------------------------------------//
 };
 
-typedef KeyType VisualsIDType;
-typedef std::list<IVisuals*> VisualsListType;
-typedef std::list<VisualsIDType> VisualsIDListType;
-
 //--- Implementation is done here for inline optimisation --------------------//
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Returns the cell that the visual is located at
-// ///
-// /// \return Cell the visual is located
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// inline const Vector2i IVisuals::getCell() const
-// {
-//     METHOD_ENTRY("IVisuals::getCell")
-//     return m_pObject->getCell();
-// }
 
 #endif

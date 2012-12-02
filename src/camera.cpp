@@ -34,9 +34,11 @@ CCamera::CCamera() : m_fViewportWidth(GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAU
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
     
+    m_vecCell.setZero();
     m_vecFrame0.resize(4);
     m_vecFrame.resize(4);
     m_vecHook.setZero();
+    m_vecHookCell.setZero();
     
     this->reset();
     
@@ -63,12 +65,14 @@ CCamera::~CCamera()
 /// \param _pHook Object to be hooked on
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCamera::setHook(IObject* _pHook)
+void CCamera::setHook(IHookable* _pHook)
 {
     METHOD_ENTRY("CCamera::setHook")
 
     m_pHook = _pHook;
-    m_vecHook = m_pHook->getCOM();
+    m_fHookAng = m_pHook->getHookAngle();
+    m_vecHook = m_pHook->getHookPosition();
+    m_vecHookCell = m_pHook->getHookCell();
 
     METHOD_EXIT("CCamera::setHook")
 }
@@ -142,7 +146,6 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
 ///
 /// \brief Update of the bounding box, frame and position
 ///
-/// \todo Replace dynamic cast and catch bad hooks on point masses.
 /// \todo All updates must be made in realtime when getCenter(), getBoundingBox()
 ///       and others are called to prevent errors due to higher physics frequency
 ///       of hooked object.
@@ -154,8 +157,9 @@ void CCamera::update()
 
     if (m_pHook != 0)
     {
-        m_vecHook = m_pHook->getCOM();
-        m_fHookAng = dynamic_cast<CBody*>(m_pHook)->getAngle();
+        m_fHookAng = m_pHook->getHookAngle();
+        m_vecHook = m_pHook->getHookPosition();
+        m_vecHookCell = m_pHook->getHookCell();
     }
     
     m_Graphics.rotCamTo(m_fHookAng+m_fAngle);
@@ -164,18 +168,20 @@ void CCamera::update()
     Rotation2Dd CameraRotation(m_fAngle);
     Rotation2Dd HookRotation(m_fHookAng);
     
+    // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
+    // Hence, accuracy is low, so it can stay with the double value.
     m_vecFrame[0] = HookRotation * (CameraRotation * m_vecFrame0[0]/m_fZoom+
                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
-                                      +m_vecHook;
+                                      +m_vecHook+m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
     m_vecFrame[1] = HookRotation * (CameraRotation * m_vecFrame0[1]/m_fZoom+
                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
-                                      +m_vecHook;
+                                      +m_vecHook+m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
     m_vecFrame[2] = HookRotation * (CameraRotation * m_vecFrame0[2]/m_fZoom+
                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
-                                      +m_vecHook;
+                                      +m_vecHook+m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
     m_vecFrame[3] = HookRotation * (CameraRotation * m_vecFrame0[3]/m_fZoom+
                                        Vector2d(m_vecPosition[0],-m_vecPosition[1]))
-                                      +m_vecHook;
+                                      +m_vecHook+m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
     
     m_BoundingBox.setLowerLeft( m_vecFrame[0]);
     m_BoundingBox.setUpperRight(m_vecFrame[0]);
@@ -186,7 +192,15 @@ void CCamera::update()
     m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
                                    m_fViewportHeight*m_fViewportHeight)/m_fZoom;
     m_vecCenter = HookRotation * (Vector2d(m_vecPosition[0], -m_vecPosition[1]))
-                   + m_vecHook;
+                   + m_vecHook + m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
+    
+    double fCells = floor((m_vecCenter[0]+DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2);
+    m_vecCell[0]  = static_cast<int>(fCells);
+    m_vecCenter[0] -= DEFAULT_CELL_SIZE_2*fCells;
+
+    fCells = floor((m_vecCenter[1]+DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2);
+    m_vecCell[1]  = static_cast<int>(fCells);
+    m_vecCenter[1] -= DEFAULT_CELL_SIZE_2*fCells;
     
     METHOD_EXIT("CCamera::update")
 }
@@ -201,6 +215,7 @@ void CCamera::reset()
     METHOD_ENTRY("CCamera::reset")
 
     m_vecPosition.setZero();
+    m_vecCell.setZero();
     m_vecCenter.setZero();
     m_fAngle = 0.0;
     m_fZoom  = 1.0;
@@ -270,7 +285,7 @@ void CCamera::translateBy(const Vector2d& _vecV)
 ///
 /// \brief Translates the camera to a given position
 ///
-/// \param _vecV Vector to move camera by
+/// \param _vecV Vector to move camera to
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CCamera::translateTo(const Vector2d& _vecV)

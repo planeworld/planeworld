@@ -23,7 +23,6 @@
 #define SHAPE_H
 
 //--- Standard header --------------------------------------------------------//
-// #include <list>
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"

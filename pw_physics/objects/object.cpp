@@ -42,7 +42,7 @@ IObject::IObject(): m_bGravitation(true),
     m_vecOrigin0.setZero();
     m_vecCOM.setZero();
     m_vecForce.setZero();
-    m_vecGrid.setZero();
+    m_vecCell.setZero();
 
     m_Lifetime.start();
 

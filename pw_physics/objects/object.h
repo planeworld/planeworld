@@ -51,11 +51,11 @@ typedef enum
 /// need them. They are declared for a body, shape definition is declared there
 /// too.
 ///
-/// \todo Move visuals id code. Each shapes should have a visuals id.
+/// \todo Move visuals id code. Each shape should have a visuals id.
 /// \todo Move depth information to shapes only. Then map information to object
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class IObject
+class IObject : public IHookable
 {
     
     public:
@@ -68,12 +68,16 @@ class IObject
         //--- Constant methods -----------------------------------------------//
         virtual const Vector2d      getAnchor(const int&) const = 0;    ///< Return anchor
         virtual const ObjectType    getObjectType() const;
-                
+        
+        const double                getHookAngle() const;
+        const Vector2i              getHookCell() const;
+        const Vector2d              getHookPosition() const;
+        
         const Vector2d              getCOM() const;
         const int                   getDepths() const;
         const bool                  getDynamicsState() const;
         const bool                  getGravitationState() const;
-        const Vector2i              getGrid() const;
+        const Vector2i              getCell() const;
         const double                getMass() const;
         const std::string           getName() const;
         const Vector2d              getVelocity() const;
@@ -87,7 +91,7 @@ class IObject
         void                disableGravitation();
         void                enableGravitation();
         CGeometry* const    getGeometry();
-        void                setGrid(const Vector2i&);
+        void                setCell(const Vector2i&);
         void                setOrigin(const Vector2d&);
         void                setOrigin(const double&, const double&);
         void                setDepths(const int&);
@@ -124,9 +128,8 @@ class IObject
 
         Vector2d                m_vecOrigin0;                       ///< Initial origin of object
         Vector2d                m_vecCOM;                           ///< Center of mass
+        Vector2i                m_vecCell;                          ///< Cell position in large scale grid
         Vector2d                m_vecForce;                         ///< Resulting force applied
-        Vector2i                m_vecGrid;                          ///< Position in large scale grid
-                                                                    ///  \todo Implement grid handling
         
         double                  m_fMass;                            ///< Mass of object in kg
         int                     m_nDepthlayers;                     ///< Depths in which shape exists
@@ -168,6 +171,52 @@ inline void IObject::addAcceleration(const Vector2d& _vecV)
     this->addForce(_vecV*m_fMass, m_pIntPos->getValue()+m_vecCOM);
     
     METHOD_EXIT("IObject::addAcceleration")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the hook angle
+///
+/// Hook angle is zero, since a basic point object has no angle.
+///
+/// \return Hook angle
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double IObject::getHookAngle() const
+{
+    METHOD_ENTRY("IObject::getHookAngle")
+
+    return 0.0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the hook cell
+///
+/// \return The hook's cell
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2i IObject::getHookCell() const
+{
+    METHOD_ENTRY("IObject::getHookCell")
+
+    return m_vecCell;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the hook position
+///
+/// Hook position is the same as the center of mass of the object.
+///
+/// \return Hook position
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2d IObject::getHookPosition() const
+{
+    METHOD_ENTRY("IObject::getHookPosition")
+
+    return (m_vecCOM+m_pIntPos->getValue());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,12 +294,12 @@ inline const bool IObject::getGravitationState() const
 /// \return The grid cell of the object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2i IObject::getGrid() const
+inline const Vector2i IObject::getCell() const
 {
-    METHOD_ENTRY("IObject::getGrid")
+    METHOD_ENTRY("IObject::getCell")
 
-    METHOD_EXIT("IObject::getGrid")
-    return (m_vecGrid);
+    METHOD_EXIT("IObject::getCell")
+    return (m_vecCell);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -379,16 +428,16 @@ inline CGeometry* const IObject::getGeometry()
 /// The universe is organised in cells that hold a double valued position. The
 /// cell is represented by an integer position index.
 ///
-/// \param _vecGrid Grid cell of the object
+/// \param _vecCell Cell cell of the object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setGrid(const Vector2i& _vecGrid)
+inline void IObject::setCell(const Vector2i& _vecCell)
 {
-    METHOD_ENTRY("IObject::setGrid")
+    METHOD_ENTRY("IObject::setCell")
 
-    m_vecGrid = _vecGrid;
+    m_vecCell = _vecCell;
 
-    METHOD_EXIT("IObject::setGrid")
+    METHOD_EXIT("IObject::setCell")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

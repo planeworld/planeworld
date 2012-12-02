@@ -45,6 +45,8 @@ class CBody : public IObject
         virtual ~CBody();                               ///< Destructor
 
         //--- Constant Methods -----------------------------------------------//
+        const double        getHookAngle() const;
+        
         const Vector2d      getAnchor(const int&) const;
         const double        getAngle() const;
         const double        getAngleVelocity() const;
@@ -71,6 +73,20 @@ class CBody : public IObject
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the angle of the hooked object
+///
+/// \return Angle of hooked object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double CBody::getHookAngle() const
+{
+    METHOD_ENTRY("CBody::getHookAngle")
+
+    return m_pIntAng->getValue();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
