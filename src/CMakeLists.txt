@@ -7,15 +7,16 @@ FIND_PACKAGE(SDL REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 #FIND_PACKAGE(Boost REQUIRED COMPONENTS thread-mt)
 FIND_PACKAGE(X11 REQUIRED) 
-FIND_PACKAGE(Boost)
-FIND_PACKAGE(Qt4 COMPONENTS QtCore QtXml REQUIRED )
+# FIND_PACKAGE(Boost)
+# FIND_PACKAGE(Qt4 COMPONENTS QtCore QtXml REQUIRED )
    
-include(${QT_USE_FILE})
+# include(${QT_USE_FILE})
 
 INCLUDE_DIRECTORIES (
     ${SDL_INCLUDE_DIR}
     ${LUA_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
+    ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
     ${CMAKE_HOME_DIRECTORY}/pw_util/
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging
@@ -30,6 +31,7 @@ INCLUDE_DIRECTORIES (
 )
 
 SET(SRCS
+    ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src/pugixml.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/circle_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals.cpp
@@ -95,7 +97,7 @@ TARGET_LINK_LIBRARIES (planeworld
     ${SDL_LIBRARY}
     ${LUA_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
-    ${QT_LIBRARIES}
+#     ${QT_LIBRARIES}
     ${X11_LIBRARIES}
     noise2d
 )

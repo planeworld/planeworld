@@ -30,7 +30,7 @@
 #include "terrain_visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include "QDomNode"
+#include "pugixml.hpp"
 
 /// Specifies the mode for importing xml data
 typedef enum
@@ -65,26 +65,26 @@ class CXMLImporter
         
     private:
         
-        bool checkFile(const QDomElement&);
-        void createCamera(const QDomNode&);
-        void createGravity(const QDomNode&);
-        void createShapeCircle(CBody* const, const QDomNode&);
-        void createShapePlanet(CBody* const, const QDomNode&);
-        void createShapeTerrain(CBody* const, const QDomNode&);
-        void createShapePolyline(CBody* const, const QDomNode&);
-        void createVisualsCircle(CCircle* const, const QDomNode&);
-        void createVisualsPlanet(CPlanet* const, const QDomNode&);
-        void createVisualsTerrain(CTerrain* const, const QDomNode&);
-        void createVisualsPolyline(CPolyLine* const, const QDomNode&);
-        void createRigidBody(const QDomNode&);
-        void readObjectCore(IObject* const, const QDomNode&);
+        bool checkFile(const pugi::xml_node&);
+        void createCamera(const pugi::xml_node&);
+        void createGravity(const pugi::xml_node&);
+        void createShapeCircle(CBody* const, const pugi::xml_node&);
+        void createShapePlanet(CBody* const, const pugi::xml_node&);
+        void createShapeTerrain(CBody* const, const pugi::xml_node&);
+        void createShapePolyline(CBody* const, const pugi::xml_node&);
+        void createVisualsCircle(CCircle* const, const pugi::xml_node&);
+        void createVisualsPlanet(CPlanet* const, const pugi::xml_node&);
+        void createVisualsTerrain(CTerrain* const, const pugi::xml_node&);
+        void createVisualsPolyline(CPolyLine* const, const pugi::xml_node&);
+        void createRigidBody(const pugi::xml_node&);
+        void readObjectCore(IObject* const, const pugi::xml_node&);
         
         CCamera*                        m_pCamera;
         Vector2d                        m_vecGravity;
         std::string                     m_strCameraHook;
         std::map<std::string,IObject*>  m_Objects;
         std::list<IVisuals*>            m_Visuals;
-        QString                         m_strPath;
+        std::string                     m_strPath;
                 
 };
 
@@ -100,8 +100,6 @@ class CXMLImporter
 inline CCamera* CXMLImporter::getCamera() const
 {
     METHOD_ENTRY("CXMLImporter::getCamera")
-
-    METHOD_EXIT("CXMLImporter::getCamera")
     return m_pCamera;
 }
 
@@ -115,8 +113,6 @@ inline CCamera* CXMLImporter::getCamera() const
 inline Vector2d CXMLImporter::getGravity() const
 {
     METHOD_ENTRY("CXMLImporter::getGravity")
-
-    METHOD_EXIT("CXMLImporter::getGravity")
     return m_vecGravity;
 }
 
@@ -130,8 +126,6 @@ inline Vector2d CXMLImporter::getGravity() const
 inline std::list<IVisuals*> CXMLImporter::getVisuals() const
 {
     METHOD_ENTRY("CXMLImporter::getVisuals")
-
-    METHOD_EXIT("CXMLImporter::getVisuals")
     return m_Visuals;
 }
 

@@ -26,8 +26,6 @@
 #include "rigidbody.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include <qxml.h>
-#include <qdom.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -40,8 +38,6 @@ CXMLImporter::CXMLImporter() : m_pCamera(0)
     CTOR_CALL("CXMLImporter::CXMLImporter")
     
     m_vecGravity.setZero();
-
-    METHOD_EXIT("CXMLImporter::CXMLImporter")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,8 +49,6 @@ CXMLImporter::~CXMLImporter()
 {
     METHOD_ENTRY("CXMLImporter::~CXMLImporter")
     DTOR_CALL("CXMLImporter::CXMLImporter")
-   
-    METHOD_EXIT("CXMLImporter::~CXMLImporter")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +67,6 @@ std::list<IObject*> CXMLImporter::getObjects() const
     for (ci = m_Objects.begin(); ci != m_Objects.end(); ++ci)
         TmpList.push_back((*ci).second);
 
-    METHOD_EXIT("CXMLImporter::getObjects")
     return TmpList;
 }
 
@@ -90,71 +83,58 @@ bool CXMLImporter::import(const std::string& _strFilename,
 {
     METHOD_ENTRY("CXMLImporter::import")
     
-    QDomDocument Doc("PlaneworldML");
-    QFile ImportFile(QString(_strFilename.c_str()));
+    pugi::xml_document Doc;
+    pugi::xml_parse_result Result = Doc.load_file(_strFilename.c_str());
     
-    m_strPath=QString(_strFilename.c_str());
-    m_strPath.truncate(m_strPath.lastIndexOf("/"));
+    size_t Pos;
+    Pos       = _strFilename.find_last_of("/");
+    m_strPath = _strFilename.substr(0,Pos);
     
-    QString strFilename=QString(_strFilename.c_str());
-    strFilename = strFilename.section('/',-1);
-    
-    // Read the document
-    if(!ImportFile.open(QIODevice::ReadOnly))
+    if (Result)
     {
-        WARNING_MSG("XML Importer", "Cannot open xml file, skipping import.")
-        METHOD_EXIT("CXMLImporter::import")
-        return false;
+        INFO_MSG("XML Importer","XML file " << _strFilename << " parsed without errors.")
     }
-    if(!Doc.setContent(&ImportFile))
+    else
     {
-        WARNING_MSG("XML Importer", "Content not valid, skipping import.")
-        ImportFile.close();
-        METHOD_EXIT("CXMLImporter::import")
-        return false;
+        WARNING_MSG("XML Importer", "XML file " << _strFilename << " parsed with errors.")
+        WARNING_MSG("XML Importer", "Error description: " << Result.description())
     }
-    ImportFile.close();
     
-    QDomElement Root = Doc.documentElement();
-    
-    QDomNode N;
+    pugi::xml_node Root = Doc.first_child();
+    pugi::xml_node N;
     switch (_Mode)
     {
         case IMPORT_MODE_UNIVERSE:
-            N  = Root.firstChild();
+            N  = Root.first_child();
             break;
         case IMPORT_MODE_OBJECT:
             N = Root;
             break;
     }
-    while (!N.isNull())
+    while (!N.empty())
     {
-        QDomElement E = N.toElement();
-        if (!E.isNull())
+        if (std::string(N.name()) == "object")
         {
-            if (E.tagName() == "object")
+            if (checkFile(N));
+            else if (N.attribute("type").value() != "")
             {
-                if (checkFile(E));
-                else if (E.hasAttribute("type"))
+                std::string strType = N.attribute("type").as_string();
+                if (strType == "RigidBody")
                 {
-                    QString strType = E.attribute("type");
-                    if (strType == "RigidBody")
-                    {
-                        this->createRigidBody(N.firstChild());
-                    }
+                    this->createRigidBody(N.first_child());
                 }
             }
-            else if (E.tagName() == "camera")
-            {
-                this->createCamera(N);
-            }
-            else if (E.tagName() == "gravity")
-            {
-                this->createGravity(N);
-            }
+        }
+        else if (std::string(N.name()) == "camera")
+        {
+            this->createCamera(N);
+        }
+        else if (std::string(N.name()) == "gravity")
+        {
+            this->createGravity(N);
         }
         
-        N = N.nextSibling();
+        N = N.next_sibling();
     }    
 
     if (_Mode == IMPORT_MODE_UNIVERSE)
@@ -188,26 +168,24 @@ bool CXMLImporter::import(const std::string& _strFilename,
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Check Element for file attribute
+/// \brief Check node for file attribute
 ///
-/// \param _E Node element
+/// \param _Node Current node in xml tree
 ///
 /// \return Has attribute file?
 ///
 ////////////////////////////////////////////////////////////////////////////////
-bool CXMLImporter::checkFile(const QDomElement& _E)
+bool CXMLImporter::checkFile(const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::checkFile")
     
-    if (_E.hasAttribute("file"))
+    if (_Node.attribute("file").value() != "")
     {
-        this->import(m_strPath.toStdString()+"/"+_E.attribute("file").toStdString(),
+        this->import(m_strPath+"/"+_Node.attribute("file").value(),
                      IMPORT_MODE_OBJECT);
-        METHOD_EXIT("CXMLImporter::checkFile")
         return true;
     }
- 
-    METHOD_EXIT("CXMLImporter::checkFile")
+
     return false;
 }
 
@@ -218,7 +196,7 @@ bool CXMLImporter::checkFile(const QDomElement& _E)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createCamera(const QDomNode& _Node)
+void CXMLImporter::createCamera(const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createCamera")
     
@@ -235,15 +213,11 @@ void CXMLImporter::createCamera(const QDomNode& _Node)
     m_pCamera = new CCamera;
     MEM_ALLOC("pCamera")
     
-    QDomElement E = _Node.toElement();
-    
-    m_strCameraHook = E.attribute("hook").toStdString();
-    m_pCamera->setPosition(E.attribute("position_x").toDouble(),
-                           E.attribute("position_y").toDouble());
-    m_pCamera->setViewport(E.attribute("viewport_width").toDouble(),
-                           E.attribute("viewport_height").toDouble());
-    
-    METHOD_EXIT("CXMLImporter::createCamera")
+    m_strCameraHook = _Node.attribute("hook").as_string();
+    m_pCamera->setPosition(_Node.attribute("position_x").as_double(),
+                           _Node.attribute("position_y").as_double());
+    m_pCamera->setViewport(_Node.attribute("viewport_width").as_int(),
+                           _Node.attribute("viewport_height").as_int());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -253,18 +227,14 @@ void CXMLImporter::createCamera(const QDomNode& _Node)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createGravity(const QDomNode& _Node)
+void CXMLImporter::createGravity(const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createGravity")
     
     INFO_MSG("XML Importer", "Setting constant gravity.")
     
-    QDomElement E = _Node.toElement();
-    
-    m_vecGravity = Vector2d(E.attribute("vec_x").toDouble(),
-                            E.attribute("vec_y").toDouble());
-    
-    METHOD_EXIT("CXMLImporter::createGravity")
+    m_vecGravity = Vector2d(_Node.attribute("vec_x").as_double(),
+                            _Node.attribute("vec_y").as_double());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -274,7 +244,7 @@ void CXMLImporter::createGravity(const QDomNode& _Node)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createRigidBody(const QDomNode& _Node)
+void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createRigidBody")
     
@@ -283,19 +253,17 @@ void CXMLImporter::createRigidBody(const QDomNode& _Node)
     CRigidBody* pRigidBody = new CRigidBody;
     MEM_ALLOC("pRigidBody")
     
-    QDomNode N = _Node;
+    pugi::xml_node N = _Node;
     
-    while (!N.isNull())
+    while (!N.empty())
     {
-        QDomElement E = N.toElement();
-        
-        if (E.tagName() == "core")
+        if (std::string(N.name()) == "core")
         {
             this->readObjectCore(pRigidBody, N);
         }
-        else if (E.tagName() == "shape")
+        else if (std::string(N.name()) == "shape")
         {
-            QString strType = E.attribute("type");
+            std::string strType(N.attribute("type").as_string());
             if (strType == "Planet")
             {
                 this->createShapePlanet(pRigidBody, N);
@@ -314,12 +282,10 @@ void CXMLImporter::createRigidBody(const QDomNode& _Node)
             }
         }        
         
-        N = N.nextSibling();
+        N = N.next_sibling();
     }
     
     m_Objects.insert(std::pair<std::string,IObject*>(pRigidBody->getName(),pRigidBody));
-    
-    METHOD_EXIT("CXMLImporter::createRigidBody")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -330,38 +296,32 @@ void CXMLImporter::createRigidBody(const QDomNode& _Node)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapeCircle(CBody* const _pBody, const QDomNode& _Node)
+void CXMLImporter::createShapeCircle(CBody* const _pBody, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapeCircle")
     
     CCircle* pCircle = new CCircle;
     MEM_ALLOC("pCircle")
     
-    QDomElement E = _Node.toElement();
-    
-    pCircle->setRadius(E.attribute("radius").toDouble());
-    pCircle->setCenter(E.attribute("center_x").toDouble(),
-                       E.attribute("center_y").toDouble());
+    pCircle->setRadius(_Node.attribute("radius").as_double());
+    pCircle->setCenter(_Node.attribute("center_x").as_double(),
+                       _Node.attribute("center_y").as_double());
         
     // The shape might have visuals
-    if (_Node.hasChildNodes())
+    if (_Node.first_child())
     {
-        QDomNode N = _Node.firstChild();
-        while (!N.isNull())
+        pugi::xml_node N = _Node.first_child();
+        while (!N.empty())
         {
-            QDomElement E = N.toElement();
-        
-            if (E.tagName() == "visuals")
+            if (std::string(N.name()) == "visuals")
             {
                 this->createVisualsCircle(pCircle, N);
             }
-            N = N.nextSibling();
+            N = N.next_sibling();
         }
     }
     
     _pBody->getGeometry()->addShape(pCircle);
-    
-    METHOD_EXIT("CXMLImporter::createShapeCircle")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -372,42 +332,36 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody, const QDomNode& _Node)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapePlanet(CBody* const _pBody, const QDomNode& _Node)
+void CXMLImporter::createShapePlanet(CBody* const _pBody, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapePlanet")
     
     CPlanet* pPlanet = new CPlanet;
     MEM_ALLOC("pPlanet")
     
-    QDomElement E = _Node.toElement();
-    
-    pPlanet->setRadius(E.attribute("radius").toDouble());
-    pPlanet->setCenter(E.attribute("center_x").toDouble(),
-                        E.attribute("center_y").toDouble());
-    pPlanet->setHeight(E.attribute("height_max").toDouble());
-    pPlanet->setGroundResolution(E.attribute("ground_resolution").toDouble());
-    pPlanet->setSeaLevel(E.attribute("sea_level").toDouble());
+    pPlanet->setRadius(_Node.attribute("radius").as_double());
+    pPlanet->setCenter(_Node.attribute("center_x").as_double(),
+                       _Node.attribute("center_y").as_double());
+    pPlanet->setHeight(_Node.attribute("height_max").as_double());
+    pPlanet->setGroundResolution(_Node.attribute("ground_resolution").as_double());
+    pPlanet->setSeaLevel(_Node.attribute("sea_level").as_double());
     pPlanet->initTerrain();
         
     // The shape might have visuals
-    if (_Node.hasChildNodes())
+    if (_Node.first_child())
     {
-        QDomNode N = _Node.firstChild();
-        while (!N.isNull())
+        pugi::xml_node N = _Node.first_child();
+        while (!N.empty())
         {
-            QDomElement E = N.toElement();
-        
-            if (E.tagName() == "visuals")
+            if (std::string(N.name()) == "visuals")
             {
                 this->createVisualsPlanet(pPlanet, N);
             }
-            N = N.nextSibling();
+            N = N.next_sibling();
         }
     }
     
     _pBody->getGeometry()->addShape(pPlanet);
-    
-    METHOD_EXIT("CXMLImporter::createShapePlanet")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -418,48 +372,61 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody, const QDomNode& _Node)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapePolyline(CBody* const _pBody, const QDomNode& _Node)
+void CXMLImporter::createShapePolyline(CBody* const _pBody, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapePolyline")
     
     CPolyLine* pPolyline = new CPolyLine;
     MEM_ALLOC("pPolyline")
     
-    QDomElement E = _Node.toElement();
-
-    if (E.attribute("line_type") == "loop")
+    if (std::string(_Node.attribute("line_type").as_string()) == "loop")
         pPolyline->setLineType(GRAPHICS_LINETYPE_LOOP);
-    else if (E.attribute("line_type") == "strip")
+    else if (std::string(_Node.attribute("line_type").as_string()) == "strip")
         pPolyline->setLineType(GRAPHICS_LINETYPE_STRIP);
-    else if (E.attribute("line_type") == "single")
+    else if (std::string(_Node.attribute("line_type").as_string()) == "single")
         pPolyline->setLineType(GRAPHICS_LINETYPE_SINGLE);
     
-    QStringList Points = E.attribute("points").simplified().split(";");
-    for (int i=0; i<Points.size(); ++i)
+    std::string strPoints = _Node.attribute("points").as_string();
+    size_t Pos;
+
+    Pos=strPoints.find_first_of(",");
+    while (Pos != std::string::npos)
     {
-        QStringList Point = Points[i].simplified().split(",");
-        pPolyline->addVertex(Point[0].toDouble(),Point[1].toDouble());
+        double fX;
+        double fY;
+        std::string strTmp;
+        {
+            strTmp    = strPoints.substr(0,Pos);
+            strPoints = strPoints.substr(Pos+1);
+            std::istringstream iss(strTmp);
+            iss >> fX;
+            Pos=strPoints.find_first_of(";");
+        }
+        {
+            strTmp    = strPoints.substr(0,Pos);
+            strPoints = strPoints.substr(Pos+1);
+            std::istringstream iss(strTmp);
+            iss >> fY;
+            Pos=strPoints.find_first_of(",");
+        }
+        pPolyline->addVertex(fX,fY);
     }
     
     // The shape might have visuals
-    if (_Node.hasChildNodes())
+    if (!_Node.empty())
     {
-        QDomNode N = _Node.firstChild();
-        while (!N.isNull())
+        pugi::xml_node N = _Node.first_child();
+        while (!N.empty())
         {
-            QDomElement E = N.toElement();
-        
-            if (E.tagName() == "visuals")
+            if (std::string(N.name()) == "visuals")
             {
                 this->createVisualsPolyline(pPolyline, N);
             }
-            N = N.nextSibling();
+            N = N.next_sibling();
         }
     }
     
     _pBody->getGeometry()->addShape(pPolyline);
-    
-    METHOD_EXIT("CXMLImporter::createShapePolyline")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -470,41 +437,35 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody, const QDomNode& _Nod
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapeTerrain(CBody* const _pBody, const QDomNode& _Node)
+void CXMLImporter::createShapeTerrain(CBody* const _pBody, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapeTerrain")
     
     CTerrain* pTerrain = new CTerrain;
     MEM_ALLOC("pTerrain")
     
-    QDomElement E = _Node.toElement();
-    
-    pTerrain->setWidth (E.attribute("width").toDouble());
-    pTerrain->setCenter(E.attribute("center_x").toDouble(),
-                        E.attribute("center_y").toDouble());
-    pTerrain->setHeight(E.attribute("height_max").toDouble());
-    pTerrain->setDiversity(E.attribute("diversity").toDouble());
-    pTerrain->setGroundResolution(E.attribute("ground_resolution").toDouble());
+    pTerrain->setWidth (_Node.attribute("width").as_double());
+    pTerrain->setCenter(_Node.attribute("center_x").as_double(),
+                        _Node.attribute("center_y").as_double());
+    pTerrain->setHeight(_Node.attribute("height_max").as_double());
+    pTerrain->setDiversity(_Node.attribute("diversity").as_double());
+    pTerrain->setGroundResolution(_Node.attribute("ground_resolution").as_double());
         
     // The shape might have visuals
-    if (_Node.hasChildNodes())
+    if (_Node.first_child())
     {
-        QDomNode N = _Node.firstChild();
-        while (!N.isNull())
+        pugi::xml_node N = _Node.first_child();
+        while (!N.empty())
         {
-            QDomElement E = N.toElement();
-        
-            if (E.tagName() == "visuals")
+            if (std::string(N.name()) == "visuals")
             {
                 this->createVisualsTerrain(pTerrain, N);
             }
-            N = N.nextSibling();
+            N = N.next_sibling();
         }
     }
     
     _pBody->getGeometry()->addShape(pTerrain);
-    
-    METHOD_EXIT("CXMLImporter::createShapeTerrain")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -515,15 +476,13 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody, const QDomNode& _Node
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsCircle(CCircle* const _pCircle, const QDomNode& _Node)
+void CXMLImporter::createVisualsCircle(CCircle* const _pCircle, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createVisualsCircle")
     
-    if (!_Node.isNull())
+    if (!_Node.empty())
     {
-        QDomElement E = _Node.toElement();
-        
-        if (E.attribute("type") == "Circle")
+        if (std::string(_Node.attribute("type").as_string()) == "Circle")
         {
             CCircleVisuals* pCircleVisuals = new CCircleVisuals(_pCircle);
             MEM_ALLOC("pCircleVisuals")
@@ -532,8 +491,6 @@ void CXMLImporter::createVisualsCircle(CCircle* const _pCircle, const QDomNode& 
         }
             
     }
-    
-    METHOD_EXIT("CXMLImporter::createVisualsCircle")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -544,15 +501,13 @@ void CXMLImporter::createVisualsCircle(CCircle* const _pCircle, const QDomNode& 
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet, const QDomNode& _Node)
+void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createVisualsPlanet")
     
-    if (!_Node.isNull())
+    if (!_Node.empty())
     {
-        QDomElement E = _Node.toElement();
-        
-        if (E.attribute("type") == "Planet")
+        if (std::string(_Node.attribute("type").as_string()) == "Planet")
         {
             CPlanetVisuals* pPlanetVisuals = new CPlanetVisuals(_pPlanet);
             MEM_ALLOC("pPlanetVisuals")
@@ -561,8 +516,6 @@ void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet, const QDomNode& 
         }
             
     }
-    
-    METHOD_EXIT("CXMLImporter::createVisualsPlanet")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -573,15 +526,13 @@ void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet, const QDomNode& 
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const QDomNode& _Node)
+void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createVisualsPolyline")
     
-    if (!_Node.isNull())
+    if (!_Node.empty())
     {
-        QDomElement E = _Node.toElement();
-        
-        if (E.attribute("type") == "Polyline")
+        if (std::string(_Node.attribute("type").as_string()) == "Polyline")
         {
             CPolylineVisuals* pPolylineVisuals = new CPolylineVisuals(_pPolyline);
             MEM_ALLOC("pPlanetVisuals")
@@ -590,8 +541,6 @@ void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const QDom
         }
             
     }
-    
-    METHOD_EXIT("CXMLImporter::createVisualsPolyline")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -602,15 +551,13 @@ void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const QDom
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain, const QDomNode& _Node)
+void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createVisualsTerrain")
     
-    if (!_Node.isNull())
+    if (!_Node.empty())
     {
-        QDomElement E = _Node.toElement();
-        
-        if (E.attribute("type") == "Terrain")
+        if (std::string(_Node.attribute("type").as_string()) == "Terrain")
         {
             CTerrainVisuals* pTerrainVisuals = new CTerrainVisuals(_pTerrain);
             MEM_ALLOC("pTerrainVisuals")
@@ -619,8 +566,6 @@ void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain, const QDomNod
         }
             
     }
-    
-    METHOD_EXIT("CXMLImporter::createVisualsTerrain")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -631,27 +576,24 @@ void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain, const QDomNod
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::readObjectCore(IObject* const _pO, const QDomNode& _Node)
+void CXMLImporter::readObjectCore(IObject* const _pO, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createRigidBody")
     
-    QDomElement E = _Node.toElement();
-    if (!E.isNull())
+    if (!_Node.empty())
     {
-        _pO->setName(E.attribute("name").toStdString());
-        _pO->setMass(E.attribute("mass").toDouble());
-        _pO->setOrigin(E.attribute("origin_x").toDouble(),
-                       E.attribute("origin_y").toDouble());
+        _pO->setName(_Node.attribute("name").as_string());
+        _pO->setMass(_Node.attribute("mass").as_double());
+        _pO->setOrigin(_Node.attribute("origin_x").as_double(),
+                       _Node.attribute("origin_y").as_double());
                                 
-        if (E.attribute("gravity") == "true")
+        if (_Node.attribute("gravity").as_bool() == true)
             _pO->enableGravitation();
         else
             _pO->disableGravitation();
-        if (E.attribute("dynamics") == "true")
+        if (_Node.attribute("dynamics").as_bool() == true)
             _pO->enableDynamics();
         else
             _pO->disableDynamics();
     }
-    
-    METHOD_EXIT("CXMLImporter::createRigidBody")
 }
