@@ -23,7 +23,6 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "bounding_box.h"
 #include "engine_common.h"
 #include "visuals.h"
 #include "debris_visuals.h"

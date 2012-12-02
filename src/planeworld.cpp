@@ -28,7 +28,6 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "debris_visuals.h"
 #include "engine_manager.h"
 #include "pointmass.h"
 #include "xml_importer.h"
@@ -40,8 +39,6 @@
 //--- Misc-Header ------------------------------------------------------------//
 #include "SDL/SDL.h"
 #include "SDL/SDL_thread.h"
-
-#include <iostream>
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

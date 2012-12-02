@@ -21,7 +21,6 @@
 #define CAMERA_H
 
 //--- Standard header --------------------------------------------------------//
-#include <vector>
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"

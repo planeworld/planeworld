@@ -24,7 +24,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "camera.h"
-#include "graphics.h"
 #include "key_map.h"
 // #include "object.h"
 

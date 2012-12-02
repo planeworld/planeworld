@@ -21,7 +21,6 @@
 #define XML_IMPORTER_H
 
 //--- Standard header --------------------------------------------------------//
-#include <string>
 
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
