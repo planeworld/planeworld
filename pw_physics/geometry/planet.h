@@ -27,7 +27,7 @@
 
 //--- Misc header ------------------------------------------------------------//
 #include "eigen2/Eigen/Geometry"
-#include "noise/noise.h"
+#include "noise2d/noise.h"
 
 /// Specifies the major type of the planet which defines basic noise functions
 /// and colours.

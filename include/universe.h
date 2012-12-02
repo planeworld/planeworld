@@ -21,6 +21,7 @@
 #define UNIVERSE_H
 
 //--- Standard header --------------------------------------------------------//
+#include <vector>
 
 //--- Program header ---------------------------------------------------------//
 #include "star_system.h"

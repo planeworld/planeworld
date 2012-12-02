@@ -97,7 +97,7 @@ TARGET_LINK_LIBRARIES (planeworld
     ${OPENGL_gl_LIBRARY}
     ${QT_LIBRARIES}
     ${X11_LIBRARIES}
-    noise
+    noise2d
 )
 
 TARGET_LINK_LIBRARIES (starmap_ut
