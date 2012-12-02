@@ -432,9 +432,6 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             pPoly0 = static_cast<CPolyLine*>((*cj0));
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
-                        case SHAPE_RECTANGLE:
-// //                             this->test((*ci),(*cj));
-                            break;
                     }
                     break;
                 case SHAPE_PLANET:
@@ -465,9 +462,6 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
 //                             pPolyB0 = static_cast<CPolyLine*>((*cj0));
 //                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
 //                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
-                            break;
-                        case SHAPE_RECTANGLE:
-//     //                             this->test((*ci),(*cj));
                             break;
                     }
                     break;
@@ -514,26 +508,6 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
                         }
-                        case SHAPE_RECTANGLE:
-// //                             this->test((*ci),(*cj));
-                            break;
-                    }
-                    break;
-                case SHAPE_RECTANGLE:
-                    switch((*cj)->getShapeType())
-                    {
-                        case SHAPE_CIRCLE:
-// //                             this->test((*cj),(*ci));
-                            break;
-                        case SHAPE_PLANET:
-//                             this->getSurfaceOfInterest();
-                            break;
-                        case SHAPE_POLYLINE:
-// //                             this->test((*cj),(*ci));
-                            break;
-                        case SHAPE_RECTANGLE:
-// //                             this->test((*ci),(*cj));
-                            break;
                     }
                     break;
             }

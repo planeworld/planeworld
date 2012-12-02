@@ -41,7 +41,6 @@ typedef enum
     SHAPE_CIRCLE,
     SHAPE_PLANET,
     SHAPE_POLYLINE,
-    SHAPE_RECTANGLE,
     SHAPE_TERRAIN
 } ShapeType;
 

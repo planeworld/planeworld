@@ -24,7 +24,6 @@
 #include "circle.h"
 #include "planet.h"
 #include "polyline.h"
-#include "rectangle.h"
 #include "terrain.h"
 
 //--- Standard header --------------------------------------------------------//

@@ -32,7 +32,6 @@
 #include "engine_manager.h"
 #include "pointmass.h"
 #include "xml_importer.h"
-#include "rectangle_visuals.h"
 #include "rigidbody.h"
 #include "spring_visuals.h"
 #include "universe.h"
@@ -99,8 +98,6 @@ int main(int argc, char *argv[])
     CPlanetVisuals*     pPlanetVisuals;
     CPolyLine*          pPolyLine;
     CPolylineVisuals*   pPolylineVisuals;
-    CRectangle*         pRect;
-    CRectangleVisuals*  pRectVisuals;
     CRigidBody*         pBody1;
     CRigidBody*         pBody2;
     CRigidBody*         pBody3;
@@ -156,14 +153,12 @@ int main(int argc, char *argv[])
 //         pPointMass->setTimeFac(1e-10);
         pPointMass->setDepths(SHAPE_DEPTH_ALL);
         
-//         pRect = new CRectangle();
         pCircle = new CCircle();
 //         pPlanet = new CPlanet();
-        MEM_ALLOC("pRectangle")
-//         pRectVisuals = new CRectangleVisuals(pRect);
+        MEM_ALLOC("pCircle")
         pCircleVisuals = new CCircleVisuals(pCircle);
 //         pPlanetVisuals = new CPlanetVisuals(pPlanet);
-        MEM_ALLOC("pRectangleVisuals")
+        MEM_ALLOC("pCircleVisuals")
 
 
 //         pRect->setDepths(SHAPE_DEPTH_ALL);
@@ -261,17 +256,6 @@ int main(int argc, char *argv[])
 // 
 //     pBody2->getGeometry()->addShape(pPolyLine);
 //     pPolyLine->setVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
-// 
-//     pRect = new CRectangle();
-//     MEM_ALLOC("pRectangle")
-//     pRectVisuals = new CRectangleVisuals(pRect);
-//     MEM_ALLOC("pRectVisuals")
-//     pRect->setDepths(SHAPE_DEPTH_ALL);
-//     pRect->setUL(Vector2d(-3.0, -5.5));
-//     pRect->setLR(Vector2d(0.4, 2.0));
-// 
-//     pBody2->getGeometry()->addShape(pRect);
-//     pRect->setVisualsID(pVisualsManager->addVisuals(pRectVisuals));
 // 
 //     pPhysicsManager->addObject(pBody2);
 // 
