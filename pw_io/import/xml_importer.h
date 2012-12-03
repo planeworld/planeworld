@@ -24,7 +24,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
-#include "camera.h"
 #include "planet_visuals.h"
 #include "polyline_visuals.h"
 #include "terrain_visuals.h"

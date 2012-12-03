@@ -20,7 +20,6 @@
 #include "engine_manager.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include "X11/Xlib.h" // For XInitThreads (see below)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -33,10 +32,6 @@ CEngineManager::CEngineManager() : m_bDone(false),
 {
     METHOD_ENTRY("CEngineManager::CEngineManager")
     CTOR_CALL("CEngineManager::CEngineManager")
-    
-    // Important to allow more than one gui thread. This is not the case here,
-    // but somehow there is an error if not calling XInitThreads.
-    XInitThreads(); 
     
     m_pMutex = SDL_CreateMutex();
 }

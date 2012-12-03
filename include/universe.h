@@ -29,7 +29,7 @@
 //--- Misc header ------------------------------------------------------------//
 
 const double UNIVERSE_CELL_SIZE=1.0e12;
-const int    UNIVERSE_NR_OF_STARS_DEFAULT=20000;
+const int    UNIVERSE_NR_OF_STARS_DEFAULT=10000;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
