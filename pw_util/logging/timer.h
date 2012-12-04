@@ -48,6 +48,7 @@ class CTimer
         //--- Methods --------------------------------------------------------//
         void start();
         void stop();
+        void sleepRemaining(const double&);
 
         //--- Constant Methods -----------------------------------------------//
         double          getSplitTime();

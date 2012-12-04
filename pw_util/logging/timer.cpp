@@ -31,8 +31,6 @@ CTimer::CTimer():m_bFirstCall(true)
 //  CTOR_CALL("CTimer::CTimer()");
 
     gettimeofday(&m_Start, &m_TimeZone);
-
-//  METHOD_EXIT("CTimer::CTimer()");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,8 +44,6 @@ void CTimer::start()
 
     m_bFirstCall = false;
     gettimeofday(&m_Start, &m_TimeZone);
-
-//  METHOD_EXIT("CTimer::start()");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,8 +60,31 @@ void CTimer::stop()
         m_fDiffTime = (m_Stop.tv_sec - m_Start.tv_sec)+double(m_Stop.tv_usec - m_Start.tv_usec)*TIMER_OUTPUT_SEC_FACTOR;
     else
         m_fDiffTime = 0.0;
+}
 
-//  METHOD_EXIT("CTimer::stop()");
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sleeps for the time that remains between stop and start given a frequency.
+///
+/// If a frequency is given for a loop (or a thread) the timer stop, measures
+/// the runtime between start and stop and sleeps for the rest of the time
+/// according to the frequency.
+///
+/// \param _fFreq Frequency of the loop
+///
+///////////////////////////////////////////////////////////////////////////////
+void CTimer::sleepRemaining(const double& _fFreq)
+{
+//  METHOD_ENTRY("CTimer::sleepRemaining")
+
+    this->stop();
+    double fFrametime = 1.0/_fFreq-this->getTime();
+    if (fFrametime > 0.0)
+    {
+        unsigned int unFrametime = static_cast<unsigned int>(fFrametime*1e6);
+        usleep(unFrametime);
+    }
+    this->start();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,6 +105,4 @@ double CTimer::getSplitTime()
                 double(tmpStop.tv_usec - m_Start.tv_usec)*TIMER_OUTPUT_SEC_FACTOR);
     else
         return 0.0;
-
-//  METHOD_EXIT("CTimer::getSplitTime()");
 }
