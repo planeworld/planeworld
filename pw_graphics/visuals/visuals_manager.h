@@ -58,6 +58,7 @@ class CVisualsManager : virtual public CGraphicsBase
         VisualsIDListType   addVisualsList(const VisualsListType&);
         void                setCamera(CCamera*);
         void                setVisualisations(const int&);
+        void                setWindow(sf::Window* const);
         void                toggleVisualisations(const int&);
         void                unsetVisualisations(const int&);
 
@@ -82,8 +83,6 @@ class CVisualsManager : virtual public CGraphicsBase
 inline const double CVisualsManager::getFrequency() const
 {
     METHOD_ENTRY("CVisualsManager::getFrequency()")
-
-    METHOD_EXIT("CVisualsManager::getFrequency()")
     return (m_fFrequency);
 }
 
@@ -97,8 +96,6 @@ inline const double CVisualsManager::getFrequency() const
 inline const int CVisualsManager::getVisualisations() const
 {
     METHOD_ENTRY("CVisualsManager::getVisualisations")
-
-    METHOD_EXIT("CVisualsManager::getVisualisations")
     return (m_nVisualisations);
 }
 
@@ -112,8 +109,6 @@ inline const int CVisualsManager::getVisualisations() const
 inline bool CVisualsManager::initGraphics() const
 {
     METHOD_ENTRY("CVisualsManager::getVisualisations")
-
-    METHOD_EXIT("CVisualsManager::getVisualisations")
     return (m_Graphics.init());
 }
 
@@ -127,10 +122,7 @@ inline bool CVisualsManager::initGraphics() const
 inline void CVisualsManager::addVisuals(CDebrisVisuals* _pDebris)
 {
     METHOD_ENTRY("CVisualsManager::addVisuals")
-
     m_DebrisVisuals.push_back(_pDebris);
-
-    METHOD_EXIT("CVisualsManager::addVisuals")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,10 +135,7 @@ inline void CVisualsManager::addVisuals(CDebrisVisuals* _pDebris)
 inline void CVisualsManager::setCamera(CCamera* _pCamera)
 {
     METHOD_ENTRY("CVisualsManager::setCamera")
-
     m_pCamera = _pCamera;
-
-    METHOD_EXIT("CVisualsManager::setCamera")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -159,10 +148,20 @@ inline void CVisualsManager::setCamera(CCamera* _pCamera)
 inline void CVisualsManager::setVisualisations(const int& _nVis)
 {
     METHOD_ENTRY("CVisualsManager::setVisualisations")
-
     m_nVisualisations |= _nVis;
+}
 
-    METHOD_EXIT("CVisualsManager::setVisualisations")
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set window to draw on
+///
+/// \param _pWindow Window to draw on
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CVisualsManager::setWindow(sf::Window* const _pWindow)
+{
+    METHOD_ENTRY("CVisualsManager::setWindow")
+    m_Graphics.setWindow(_pWindow);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -175,10 +174,7 @@ inline void CVisualsManager::setVisualisations(const int& _nVis)
 inline void CVisualsManager::toggleVisualisations(const int& _nVis)
 {
     METHOD_ENTRY("CVisualsManager::toggleVisualisations")
-
     m_nVisualisations ^= _nVis;
-
-    METHOD_EXIT("CVisualsManager::toggleVisualisations")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,10 +187,7 @@ inline void CVisualsManager::toggleVisualisations(const int& _nVis)
 inline void CVisualsManager::unsetVisualisations(const int& _nVis)
 {
     METHOD_ENTRY("CVisualsManager::unsetVisualisations")
-
     m_nVisualisations &= (~_nVis);
-    
-    METHOD_EXIT("CVisualsManager::unsetVisualisations")
 }
 
 #endif

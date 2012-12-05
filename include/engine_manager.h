@@ -57,14 +57,11 @@ class CEngineManager
         
     private:
         
-        static int callRunGraphics(void*);
-        static int callRunPhysics(void*);
         void runPhysics();
         void runGraphics();
         
-        SDL_Thread*         m_pGraphicsThread;      ///< Thread, running graphics
-        SDL_Thread*         m_pPhysicsThread;       ///< Thread, running physics
-        SDL_mutex*          m_pMutex;               ///< Mutex to sync graphics to valid physics state
+        sf::Thread          m_GraphicsThread;      ///< Thread, running graphics
+        sf::Thread          m_PhysicsThread;       ///< Thread, running physics
         
         bool                m_bDone;                ///< Stop threads if program ends
         bool                m_bGotPhysics;          ///< Indicates first run of physics thread

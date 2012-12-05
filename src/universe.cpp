@@ -73,7 +73,7 @@ void CUniverse::generate(const int& _nSeed)
     Generator.seed(_nSeed);
     
     // Density = m_nNrOfStars/(3.0*fSigma * 2.0*M_PI) = 0.4/30.857e15;
-    double fSigma = m_nNrOfStars * 30.857e15 / (0.4*3.0*2.0*M_PI);
+    double fSigma = 10;// m_nNrOfStars * 30.857e15 / (0.4*3.0*2.0*M_PI);
     
     std::exponential_distribution<double>   ExponentialDistribution(3.5);
     std::normal_distribution<double>        NormalDistribution(0.0, fSigma);

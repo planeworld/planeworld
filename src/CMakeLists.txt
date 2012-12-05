@@ -1,15 +1,10 @@
 PROJECT (planeworld)
 
-#set(Boost_USE_STATIC_LIBS   ON)
-#set(Boost_USE_MULTITHREADED ON)
-
-FIND_PACKAGE(SDL REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
-#FIND_PACKAGE(Boost REQUIRED COMPONENTS thread-mt)
+
 # FIND_PACKAGE(Boost)
 
 INCLUDE_DIRECTORIES (
-    ${SDL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
@@ -54,7 +49,6 @@ SET(SRCS
     bounding_box.cpp
     camera.cpp
     collision_manager.cpp
-    engine_manager.cpp
     parzival.cpp
     physics_manager.cpp
     planeworld.cpp
@@ -89,14 +83,15 @@ ADD_EXECUTABLE (starmap_ut ${SRCS_STARMAP_UT})
 ADD_EXECUTABLE (universe_ut ${SRCS_UNIVERSE_UT})
 
 TARGET_LINK_LIBRARIES (planeworld
-    ${SDL_LIBRARY}
     ${OPENGL_gl_LIBRARY}
     noise2d
+    sfml-system
+    sfml-window
 )
 
 TARGET_LINK_LIBRARIES (starmap_ut
-    ${SDL_LIBRARY}
     ${OPENGL_gl_LIBRARY}
+    sfml-window
 )
 
 INSTALL (TARGETS planeworld starmap_ut universe_ut

@@ -30,10 +30,13 @@
 #include <boost/circular_buffer.hpp>
 #include "eigen2/Eigen/Core"
 #include "eigen2/Eigen/Geometry"
-#include "GL/gl.h"
-#include "SDL.h"
+#include <SFML/OpenGL.hpp>
+#include <SFML/Window.hpp>
 
 using namespace Eigen;
+
+
+static sf::Window g_Window;                             ///< Main window
 
 // Constants
 const unsigned short GRAPHICS_WIDTH_DEFAULT = 1440u;    ///< Default x-resolution
@@ -75,7 +78,7 @@ typedef enum
 ///
 /// This class is responsible for all graphical stuff. That is:
 /// initialization and providing methods for drawing lines. The class is built
-/// on top of OpenGL and the SDL. The class is implemented as a meyers-singleton
+/// on top of OpenGL and the SFML. The class is implemented as a meyers-singleton
 /// to provide easy access to its methods for graphics abstraction classes like
 /// IShape.
 ///
@@ -114,6 +117,8 @@ class CGraphics
         void setColor(const double&, const double&, const double&, const double&) const;
         void setPointSize(const double&) const;
         void setWidth(const double&) const;
+        
+        sf::Window* const getWindow() const;
 
         //--- Methods --------------------------------------------------------//
         bool init();
@@ -121,6 +126,8 @@ class CGraphics
         void setWidthScr(const unsigned short&);
         void setHeightScr(const unsigned short&);
         void swapBuffers();
+        
+        void setWindow(sf::Window* const);
 
         //
         //--- Methods for camera movement ------------------------------------//
@@ -166,6 +173,8 @@ class CGraphics
     private:
         
         //--- Variabels [private] --------------------------------------------//
+        sf::Window*             m_pWindow;      ///< Pointer to main sfml window
+        
         Vector3d                m_vecCamPos;    ///< camera position
         double                  m_fCamAng;      ///< camera angle
         double                  m_fCamZoom;     ///< camera zoom
@@ -178,8 +187,6 @@ class CGraphics
         unsigned short          m_unWidthScr;   ///< Screen width
         unsigned short          m_unHeightScr;  ///< Screen height
 
-        unsigned int            m_unNrOfLines;  ///< Total number of lines drawn
-        
         std::list<Vector2d>     m_VertList;     ///< list, containing the coordinates of vertices
         double                  m_fDepth;       ///< depth of lines in list
         
@@ -211,6 +218,9 @@ class CGraphics
 ////////////////////////////////////////////////////////////////////////////////
 class CGraphicsBase
 {
+public:
+        CGraphics& getGraphics() {return m_Graphics;}
+    
     protected:
         //--- Protected constructor ------------------------------------------//
         CGraphicsBase():m_Graphics(CGraphics::getInstance())
@@ -232,8 +242,6 @@ class CGraphicsBase
 inline double CGraphics::getDynPelSize() const
 {
     METHOD_ENTRY("CGraphics::getDynPelSize()");
-
-    METHOD_EXIT("CGraphics::getDynPelSize()");
     return (m_fDynPelSize);
 }
 
@@ -247,8 +255,6 @@ inline double CGraphics::getDynPelSize() const
 inline double CGraphics::getResMPX() const
 {
     METHOD_ENTRY("CGraphics::getResMPX()");
-
-    METHOD_EXIT("CGraphics::getResMPX()");
     return ((GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT) /
             (m_fCamZoom * m_unWidthScr));
 }
@@ -263,8 +269,6 @@ inline double CGraphics::getResMPX() const
 inline double CGraphics::getResMPY() const
 {
     METHOD_ENTRY("CGraphics::getResMPY()");
-
-    METHOD_EXIT("CGraphics::getResMPY()");
     return ((GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT) /
             (m_fCamZoom * m_unWidthScr));
 }
@@ -279,8 +283,6 @@ inline double CGraphics::getResMPY() const
 inline unsigned short CGraphics::getWidthScr() const
 {
     METHOD_ENTRY("CGraphics::getWidthScr()");
-
-    METHOD_EXIT("CGraphics::getWidthScr()");
     return m_unWidthScr;
 }
 
@@ -294,8 +296,6 @@ inline unsigned short CGraphics::getWidthScr() const
 inline unsigned short CGraphics::getHeightScr() const
 {
     METHOD_ENTRY("CGraphics::getHeightScr()");
-
-    METHOD_EXIT("CGraphics::getHeightScr()");
     return m_unHeightScr;
 }
 
@@ -312,10 +312,7 @@ inline void CGraphics::setColor(const double& _fR, const double& _fG,
                                 const double& _fB) const
 {
     METHOD_ENTRY("CGraphics::setColor(const double&, const double&, const double&)");
-
     glColor3d(_fR, _fG, _fB);
-
-    METHOD_EXIT("CGraphics::setColor(const double&, const double&, const double&)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -332,10 +329,7 @@ inline void CGraphics::setColor(const double& _fR, const double& _fG,
                                 const double& _fB, const double& _fA) const
 {
     METHOD_ENTRY("CGraphics::setColor(const double&, const double&, const double&, const double&)");
-
     glColor4d(_fR, _fG, _fB, _fA);
-
-    METHOD_EXIT("CGraphics::setColor(const double&, const double&, const double&, const double&)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -366,6 +360,23 @@ inline void CGraphics::setWidth(const double& _fW) const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns the main window of initialisation
+///
+/// This method return a pointer to the main window that is created when 
+/// initialising the graphics with. It is needed for external use of
+/// event loop which is hooked to the main window.
+///
+/// \return Main window
+///
+///////////////////////////////////////////////////////////////////////////////
+inline sf::Window* const CGraphics::getWindow() const
+{
+    METHOD_ENTRY("CGraphics::getWindow")
+    return m_pWindow;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Set the screen width
 ///
 /// Actually, this method does not resize the screen, it just modifies the
@@ -377,10 +388,7 @@ inline void CGraphics::setWidth(const double& _fW) const
 inline void CGraphics::setWidthScr(const unsigned short& _unWidthScr)
 {
     METHOD_ENTRY("CGraphics::setWidthScr(const unsigned short&)");
-
     m_unWidthScr = _unWidthScr;
-
-    METHOD_EXIT("CGraphics::setWidthScr(const unsigned short&)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -396,10 +404,20 @@ inline void CGraphics::setWidthScr(const unsigned short& _unWidthScr)
 inline void CGraphics::setHeightScr(const unsigned short& _unHeightScr)
 {
     METHOD_ENTRY("CGraphics::setHeightScr(const unsigned short&)");
-
     m_unHeightScr = _unHeightScr;
+}
 
-    METHOD_EXIT("CGraphics::setHeightScr(const unsigned short&)");
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set the main window
+///
+/// \param _pWindow Main window
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CGraphics::setWindow(sf::Window* const _pWindow)
+{
+    METHOD_ENTRY("CGraphics::setWindow");
+    m_pWindow = _pWindow;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -412,8 +430,6 @@ inline void CGraphics::setHeightScr(const unsigned short& _unHeightScr)
 inline Vector2d CGraphics::getCamPos() const
 {
     METHOD_ENTRY("CGraphics::getCamPos()");
-
-    METHOD_EXIT("CGraphics::getCamPos()");
     return Vector2d(m_vecCamPos[0], m_vecCamPos[1]);
 }
 
@@ -427,8 +443,6 @@ inline Vector2d CGraphics::getCamPos() const
 inline double CGraphics::getCamAng() const
 {
     METHOD_ENTRY("CGraphics::getCamAngle()");
-
-    METHOD_EXIT("CGraphics::getCamAngle()");
     return m_fCamAng;
 }
 
@@ -442,8 +456,6 @@ inline double CGraphics::getCamAng() const
 inline double CGraphics::getCamZoom() const
 {
     METHOD_ENTRY("CGraphics::getCamZoom()");
-
-    METHOD_EXIT("CGraphics::getCamZoom()");
     return m_fCamZoom;
 }
 
@@ -463,9 +475,6 @@ inline void CGraphics::addVertex(const Vector2d& _vecV)
 
     glVertex3d(_vecV[0], _vecV[1], m_fDepth);
 //     m_VertList.push_back(_vecV);
-    ++m_unNrOfLines;
-
-    METHOD_EXIT("CGraphics::addVertex(const Vector2d&)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -486,9 +495,6 @@ inline void CGraphics::addVertex(const double& _fX, const double& _fY)
     glVertex3d(_fX, _fY, m_fDepth);
     
 //     m_VertList.push_back(Vector2d(_fX, _fY));
-    ++m_unNrOfLines;
-
-    METHOD_EXIT("CGraphics::addVertex(const double&, const double&)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

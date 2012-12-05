@@ -28,12 +28,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 CEngineManager::CEngineManager() : m_bDone(false),
                                    m_bGotPhysics(false),
-                                   m_bGraphicsReady(false)
+                                   m_bGraphicsReady(false),
+                                   m_GraphicsThread(&CEngineManager::runGraphics, this),
+                                   m_PhysicsThread(&CEngineManager::runPhysics, this)
 {
     METHOD_ENTRY("CEngineManager::CEngineManager")
     CTOR_CALL("CEngineManager::CEngineManager")
-    
-    m_pMutex = SDL_CreateMutex();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,11 +45,6 @@ CEngineManager::~CEngineManager()
 {
     METHOD_ENTRY("CEngineManager::~CEngineManager")
     DTOR_CALL("CEngineManager::~CEngineManager")
-
-    // Clean up threading
-    SDL_WaitThread(m_pPhysicsThread, NULL);
-    SDL_WaitThread(m_pGraphicsThread, NULL);
-    SDL_DestroyMutex(m_pMutex);
 
     // Free memory if pointer is still existent
     if (m_pPhysicsManager != 0)
@@ -70,60 +65,25 @@ CEngineManager::~CEngineManager()
 ///
 /// \brief Start the graphics engine thread
 ///
-/// This method calls a static caller function. This is a work around to enable
-/// usage of SDL threading of member methods.
-///
 ////////////////////////////////////////////////////////////////////////////////
 void CEngineManager::runGraphicsThread()
 {
-    METHOD_ENTRY("CEngineManager::runGraphicsThreadThread")
-    m_pGraphicsThread = SDL_CreateThread(CEngineManager::callRunGraphics, this);
+    METHOD_ENTRY("CEngineManager::runGraphicsThread")
+    
+    while (!m_bGotPhysics) usleep(100);
+//     m_pVisualsManager->getGraphics().getWindow()->setActive(false);
+    m_GraphicsThread.launch();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Start the physics engine thread
-///
-/// This method calls a static caller function. This is a work around to enable
-/// SDL threading of member methods.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CEngineManager::runPhysicsThread()
 {
     METHOD_ENTRY("CEngineManager::runPhysicsThread")
-    m_pPhysicsThread = SDL_CreateThread(CEngineManager::callRunPhysics, this);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Calls the graphics engine method
-///
-/// This static caller function is a workaround to enable SDL threading of member
-/// methods. It calls the actual graphics processing method.
-///
-/// \param _pCallerType Data passed to thread. Here, it's the caller type (this)
-///
-////////////////////////////////////////////////////////////////////////////////
-int CEngineManager::callRunGraphics(void* _pCallerType)
-{
-    METHOD_ENTRY("CEngineManager::callRunGraphicsThread")
-    static_cast<CEngineManager*>(_pCallerType)->runGraphics();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Start the physics engine thread
-///
-/// This static caller function is a workaround to enable SDL threading of member
-/// methods. It calls the actual physics processing method.
-///
-/// \param _pCallerType Data passed to thread. Here, it's the caller type (this)
-///
-////////////////////////////////////////////////////////////////////////////////
-int CEngineManager::callRunPhysics(void* _pCallerType)
-{
-    METHOD_ENTRY("CEngineManager::callRunPhysicsPhysicsThread")
-    static_cast<CEngineManager*>(_pCallerType)->runPhysics();
+    m_PhysicsThread.launch();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,27 +95,19 @@ void CEngineManager::runGraphics()
 {
     METHOD_ENTRY("CEngineManager::runGraphics")
 
-    INFO_MSG("Engine Manager", "Graphics thread startet.")
-    while (!m_bGotPhysics) usleep(1000);
+    INFO_MSG("Engine Manager", "Graphics thread started.")
+    
+    m_pVisualsManager->getGraphics().getWindow()->setActive(true);
     m_pVisualsManager->initGraphics();
     m_bGraphicsReady = true;
     m_VisualsTimer.start();
     while (!m_bDone)
     {
-        SDL_LockMutex(m_pMutex);
         m_pVisualsManager->drawGrid();
         m_pVisualsManager->drawWorld();
         m_pVisualsManager->drawBoundingBoxes();
-        SDL_UnlockMutex(m_pMutex);
         
-        m_VisualsTimer.stop();
-        double fFrametime = 1.0/m_pVisualsManager->getFrequency()-m_VisualsTimer.getTime();
-        if (fFrametime > 0.0)
-        {
-            unsigned int unFrametime = static_cast<unsigned int>(fFrametime*1e6);
-            usleep(unFrametime);
-        }
-        m_VisualsTimer.start();
+        m_VisualsTimer.sleepRemaining(m_pVisualsManager->getFrequency());
     }
 }
 
@@ -168,27 +120,19 @@ void CEngineManager::runPhysics()
 {
     METHOD_ENTRY("CEngineManager::runPhysics")
     
-    INFO_MSG("Engine Manager", "Physics thread startet.")
+    INFO_MSG("Engine Manager", "Physics thread started.")
     m_PhysicsTimer.start();
     
     int nCC=0;
-    
+
     while (!m_bDone)
     {
         m_pPhysicsManager->addGlobalForces();
-        SDL_LockMutex(m_pMutex);
         m_pPhysicsManager->moveMasses(nCC);
         m_pPhysicsManager->collisionDetection();
-        SDL_UnlockMutex(m_pMutex);
         m_bGotPhysics=true;
-        m_PhysicsTimer.stop();
-        double fFrametime = 1.0/m_pPhysicsManager->getFrequency()-m_PhysicsTimer.getTime();
-        if (fFrametime > 0.0)
-        {
-            unsigned int unFrametime = static_cast<unsigned int>(fFrametime*1e6);
-            usleep(unFrametime);
-        }
-        m_PhysicsTimer.start();
+        
+        m_PhysicsTimer.sleepRemaining(m_pPhysicsManager->getFrequency());
         ++nCC;
     }
 }

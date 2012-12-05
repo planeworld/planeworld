@@ -27,7 +27,8 @@
 /// meyers-singleton.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CGraphics::CGraphics() : m_fCamAng(0.0),
+CGraphics::CGraphics() : m_pWindow(0),
+                        m_fCamAng(0.0),
                         m_fCamZoom(1.0),
                         m_fDepth(GRAPHICS_DEPTH_DEFAULT),
                         m_fDepthMax(GRAPHICS_FAR_DEFAULT),
@@ -35,15 +36,12 @@ CGraphics::CGraphics() : m_fCamAng(0.0),
                         m_fDynPelSize(GRAPHICS_DYN_PEL_SIZE_DEFAULT),
                         m_nVideoFlags(0),
                         m_unWidthScr(GRAPHICS_WIDTH_DEFAULT),
-                        m_unHeightScr(GRAPHICS_HEIGHT_DEFAULT),
-                        m_unNrOfLines(0u)                        
+                        m_unHeightScr(GRAPHICS_HEIGHT_DEFAULT)
 {
     METHOD_ENTRY("CGraphics::CGraphics")
     CTOR_CALL("CGraphics::CGraphics")
     
     m_vecCamPos.setZero();
-    
-    METHOD_EXIT("CGraphics::CGraphics")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +75,6 @@ Vector2d CGraphics::screen2World(const Vector2d& _vecV) const
     vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
     vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
 
-    METHOD_EXIT("CGraphics::screen2World")
     return vecResult;
 }
 
@@ -113,7 +110,6 @@ Vector2d CGraphics::screen2World(const double& _fX, const double& _fY) const
     vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
     vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
 
-    METHOD_EXIT("CGraphics::screen2World")
     return vecResult;
 }
 
@@ -128,30 +124,20 @@ void CGraphics::swapBuffers()
 {
     METHOD_ENTRY("CGraphics::swapBuffers")
     
-    SDL_GL_SwapBuffers();
+    m_pWindow->display();
 
-    //INFO_MSG("Graphics", "Lines: " << m_unNrOfLines, LOG_DOMAIN_NONE);
-    m_unNrOfLines = 0u;
-    
     // clear offscreen buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
     
-    // set default to matrixmode modelview
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    
-    METHOD_EXIT("CGraphics::swapBuffers")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Initializes graphics
 ///
-/// This method initialises the graphics by calling some SDL- and
-/// OpenGL-routines
-///
-/// \note With SDL 1.2.10: SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
-///         aktivates the VSYNC.
+/// This method initialises the graphics by calling some OpenGL-routines
 ///
 /// \return Success
 ///
@@ -160,7 +146,8 @@ bool CGraphics::init()
 {
     METHOD_ENTRY("CGraphics::init")
     
-    const   SDL_VideoInfo*  pVideoInfo;
+    m_pWindow->setMouseCursorVisible(false);
+//     const   SDL_VideoInfo*  pVideoInfo;
     
     //--------------------------------------------------------------------------
     // Initialize window and graphics
@@ -171,27 +158,27 @@ bool CGraphics::init()
 //  INFO_MSG("Graphics", "Enabling vsync.", LOG_DOMAIN_NONE);
 
     // Initialize SDL-video and -timer
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
-    {
-        ERROR_MSG("Graphics/SDL", "Could not initialise SDL.")
-    }
-    else
-    {
-        INFO_MSG("Graphics/SDL", "SDL initialised.")
-    }
-    
-    // Set video-flags
-    pVideoInfo = SDL_GetVideoInfo();
-    
-    if (0 == pVideoInfo)
-    {
-        ERROR_MSG("Graphics/SDL", "Could not get video information.")
-        METHOD_EXIT("CGraphics::init")
-        return (false);
-    }
-    m_nVideoFlags  = SDL_OPENGL;
-    m_nVideoFlags |= SDL_GL_DOUBLEBUFFER;
-    m_nVideoFlags |= SDL_RESIZABLE;
+//     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
+//     {
+//         ERROR_MSG("Graphics/SDL", "Could not initialise SDL.")
+//     }
+//     else
+//     {
+//         INFO_MSG("Graphics/SDL", "SDL initialised.")
+//     }
+//     
+//     // Set video-flags
+//     pVideoInfo = SDL_GetVideoInfo();
+//     
+//     if (0 == pVideoInfo)
+//     {
+//         ERROR_MSG("Graphics/SDL", "Could not get video information.")
+//         METHOD_EXIT("CGraphics::init")
+//         return (false);
+//     }
+//     m_nVideoFlags  = SDL_OPENGL;
+//     m_nVideoFlags |= SDL_GL_DOUBLEBUFFER;
+//     m_nVideoFlags |= SDL_RESIZABLE;
 //     m_nVideoFlags |= SDL_FULLSCREEN;
 
     // Testing for SDL hardware acceleration is meaningless when only using OpenGL
@@ -221,29 +208,28 @@ bool CGraphics::init()
     //  }
     
     // Enable double buffering
-    if (0 == SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 ))
-    {
-        INFO_MSG("Graphics/SDL_GL", "Enabling double-buffering.")
-    }
-    else
-    {
-        NOTICE_MSG("Graphics/SDL_GL", "Double-buffering not supported.")
-    }
-    
-    // Enable cursor
-    SDL_ShowCursor(SDL_ENABLE);
-    
-    // Initialize graphics
-    if (SDL_SetVideoMode(m_unWidthScr, m_unHeightScr, 0, m_nVideoFlags) != 0)
-    {
-        INFO_MSG("Graphics/SDL", "Videomode set (" << m_unWidthScr << "x" << m_unHeightScr << ").")
-    }
-    else
-    {
-        ERROR_MSG("Graphics/SDL", "Could not set videomode.")
-        METHOD_EXIT("CGraphics::init")
-        return(false);
-    }
+//     if (0 == SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 ))
+//     {
+//         INFO_MSG("Graphics/SDL_GL", "Enabling double-buffering.")
+//     }
+//     else
+//     {
+//         NOTICE_MSG("Graphics/SDL_GL", "Double-buffering not supported.")
+//     }
+//     
+//     // Enable cursor
+//     SDL_ShowCursor(SDL_ENABLE);
+//     
+//     // Initialize graphics
+//     if (SDL_SetVideoMode(m_unWidthScr, m_unHeightScr, 0, m_nVideoFlags) != 0)
+//     {
+//         INFO_MSG("Graphics/SDL", "Videomode set (" << m_unWidthScr << "x" << m_unHeightScr << ").")
+//     }
+//     else
+//     {
+//         ERROR_MSG("Graphics/SDL", "Could not set videomode.")
+//         return(false);
+//     }
     
 
     //--------------------------------------------------------------------------
@@ -313,8 +299,7 @@ bool CGraphics::init()
 //     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mcolor);
 //     glFrontFace(GL_CCW);
     
-    METHOD_EXIT("CGraphics::init")
-    return(true);
+    return (true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -333,39 +318,38 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
 {
     METHOD_ENTRY("CGraphics::resizeWindow")
 
-    if (SDL_SetVideoMode(_unWidthScr, _unHeightScr, 0, m_nVideoFlags) != 0)
-    {
-        INFO_MSG("Graphics/SDL", "Windowsize changed (" << m_unWidthScr << "x" << m_unHeightScr << ").")
-    }
-    else
-    {
-        ERROR_MSG("Graphics/SDL", "Could not set videomode.")
-        METHOD_EXIT("CGraphics::resizeWindow")
-        return(false);
-    }
+//     if (SDL_SetVideoMode(_unWidthScr, _unHeightScr, 0, m_nVideoFlags) != 0)
+//     {
+//         INFO_MSG("Graphics/SDL", "Windowsize changed (" << m_unWidthScr << "x" << m_unHeightScr << ").")
+//     }
+//     else
+//     {
+//         ERROR_MSG("Graphics/SDL", "Could not set videomode.")
+//         METHOD_EXIT("CGraphics::resizeWindow")
+//         return(false);
+//     }
 
     // Setup viewport
-    glMatrixMode(GL_VIEWPORT);
-    glLoadIdentity();
+//     glMatrixMode(GL_VIEWPORT);
+//     glLoadIdentity();
     glViewport(0, 0, _unWidthScr, _unHeightScr);
-    
+    INFO_MSG("Graphics", "Windowsize changed (" << m_unWidthScr << "x" << m_unHeightScr << ").")
     // Setup projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(GRAPHICS_LEFT_DEFAULT, GRAPHICS_RIGHT_DEFAULT,
-            GRAPHICS_BOTTOM_DEFAULT, GRAPHICS_TOP_DEFAULT,
-            GRAPHICS_NEAR_DEFAULT, GRAPHICS_FAR_DEFAULT);
+//     glMatrixMode(GL_PROJECTION);
+//     glLoadIdentity();
+//     glOrtho(GRAPHICS_LEFT_DEFAULT, GRAPHICS_RIGHT_DEFAULT,
+//             GRAPHICS_BOTTOM_DEFAULT, GRAPHICS_TOP_DEFAULT,
+//             GRAPHICS_NEAR_DEFAULT, GRAPHICS_FAR_DEFAULT);
     
     // Set default to matrixmode modelview
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+//     glMatrixMode(GL_MODELVIEW);
+//     glLoadIdentity();
     
     // Store resolution
     m_unWidthScr = _unWidthScr;
     m_unHeightScr = _unHeightScr;
     
-    METHOD_EXIT("CGraphics::resizeWindow")
-    return(true);
+    return (true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -387,8 +371,6 @@ void CGraphics::applyCamMovement()
 //     GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0f, 1.0f };
 //     glLightf (GL_LIGHT1, GL_SPOT_CUTOFFB, 15.f);
 //     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
-
-    METHOD_EXIT("CGraphics::applyCamMovement")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -403,9 +385,6 @@ void CGraphics::resetCam()
     m_fCamZoom = 1.0;
     m_fCamAng = 0.0;
     m_vecCamPos.setZero();
-    
-
-    METHOD_EXIT("CGraphics::resetCam")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -422,8 +401,6 @@ void CGraphics::rotCamBy(const double& _fInc)
     m_fCamAng += _fInc;
     
     glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
-
-    METHOD_EXIT("CGraphics::rotCamBy")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -440,8 +417,6 @@ void CGraphics::rotCamTo(const double& _fAng)
     m_fCamAng = _fAng;
     
     glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
-
-    METHOD_EXIT("CGraphics::rotCamTo")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -464,8 +439,6 @@ void CGraphics::transCamBy(const Vector2d& _vecInc)
     m_vecCamPos.segment<2>(0) += Rotation * _vecInc;
     
     glTranslated(-m_vecCamPos[0], m_vecCamPos[1], 0.0);
-    
-    METHOD_EXIT("CGraphics::transCamBy")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -482,8 +455,6 @@ void CGraphics::transCamTo(const Vector2d& _vecPos)
     m_vecCamPos.segment<2>(0) = _vecPos;
     
     glTranslated(-m_vecCamPos[0], m_vecCamPos[1], 0.0);
-
-    METHOD_EXIT("CGraphics::transCamTo")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -500,8 +471,6 @@ void CGraphics::zoomCamBy(const double& _fFac)
     m_fCamZoom *= _fFac;
     
     glScaled(m_fCamZoom, m_fCamZoom, 1.0);
-
-    METHOD_EXIT("CGraphics::zoomCamBy")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -518,8 +487,6 @@ void CGraphics::zoomCamTo(const double& _fFac)
     m_fCamZoom = _fFac;
     
     glScaled(m_fCamZoom, m_fCamZoom, 1.0);
-
-    METHOD_EXIT("CGraphics::zoomCamTo")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -545,8 +512,6 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR) const
             fAng += M_PI / 50;
         }
     glEnd();
-
-    METHOD_EXIT("CGraphics::circle")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -563,8 +528,6 @@ void CGraphics::dot(const Vector2d& _vecV) const
     glBegin(GL_POINTS);
         glVertex3d( _vecV[0], _vecV[1], -10.0);
     glEnd();
-
-    METHOD_EXIT("CGraphics::dot")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -603,8 +566,6 @@ void CGraphics::dots(const std::vector<Vector2d>& _Dots,
         }   
     glEnd();
     glPointSize(1.0);
-
-    METHOD_EXIT("CGraphics::dots")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -643,8 +604,6 @@ void CGraphics::dots(boost::circular_buffer<Vector2d>& _Dots,
         }   
     glEnd();
     glPointSize(1.0);
-
-    METHOD_EXIT("CGraphics::dots")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -665,8 +624,6 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR) const
         glVertex3d(_vecUR[0], _vecUR[1], -15.0);
         glVertex3d(_vecLL[0], _vecUR[1], -15.0);
     glEnd();
-
-    METHOD_EXIT("CGraphics::filledRect")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -714,8 +671,6 @@ void CGraphics::polyline(const std::list<Vector2d>& _Vertices,
         }
     }
     glEnd();
-
-    METHOD_EXIT("CGraphics::polyline")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -736,8 +691,6 @@ void CGraphics::rect(const Vector2d& _vecLL, const Vector2d& _vecUR) const
         glVertex3d(_vecUR[0], _vecUR[1], -15.0);
         glVertex3d(_vecLL[0], _vecUR[1], -15.0);
     glEnd();
-
-    METHOD_EXIT("CGraphics::rect")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -791,8 +744,6 @@ void CGraphics::showVec(const Vector2d& _vecV, const Vector2d& _vecPos) const
 
 //         glLineWidth(1.0);
     }
-
-    METHOD_EXIT("CGraphics::showVec")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -825,8 +776,6 @@ void CGraphics::beginLine(const LineType& _LType, const double& _fDepth)
             glBegin(GL_LINE_STRIP);
             break;
     }
-
-    METHOD_EXIT("CGraphics::beginLine")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -848,8 +797,6 @@ void CGraphics::endLine()
 //     }
     glEnd();
 //     m_VertList.clear();
-
-    METHOD_EXIT("CGraphics::endLine")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -880,7 +827,5 @@ void CGraphics::glSetPerspective(const GLdouble& _fFov, const GLdouble& _fWidthS
     fXMin = fYMin * _fWidthScr/_fHeightScr;
     fXMax = fYMax * _fWidthScr/_fHeightScr;
     glFrustum(fXMin, fXMax, fYMin, fYMax, _fZNear, _fZFar);
-
-    METHOD_EXIT("CGraphics::glSetPerspective")
 }
 

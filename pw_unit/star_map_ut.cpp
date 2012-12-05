@@ -18,16 +18,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //--- Standard header --------------------------------------------------------//
+#include <iostream>
 
 //--- Program header ---------------------------------------------------------//
 #include "graphics.h"
 #include "universe.h"
-#include "time.h"
 
 //--- Misc-Header ------------------------------------------------------------//
-#include "SDL/SDL.h"
-
-#include <iostream>
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -62,84 +59,88 @@ int main(int argc, char *argv[])
     
     bool                bIsActive = true;
     bool                bDone = false;
-    SDL_Event           event;
-    int                 nT0 = 0;            // initial value of timer
-    CTimer              Timer;
     double              fZoom = 1.0;
     Vector2d            vecTranslation;
+    CTimer              Timer;
 
-    //--- Demonstration Variables ---------------------------------------------//
-    int             nMouseX;
-    int             nMouseY;
+    int                 nMouseX = 0;
+    int                 nMouseY = 0;
     
     //--- Major instances ----------------------------------------------------//
     CGraphics&          Graphics = CGraphics::getInstance();
     CUniverse           Universe;
     
-    long nX;
-    long nY;
-
-    //--- Initialisation -----------------------------------------------------//
+    //--- Initialisation of universe------------------------------------------//
     Universe.generate(atoi(argv[1]));
     std::vector<CStarSystem*> StarSystems = Universe.getStarSystems();
+
+    //--- Initialisation of graphics -----------------------------------------//
+    sf::Window Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
+                      "Starmap Unit Test", sf::Style::Default, sf::ContextSettings(32));
+    
+    Graphics.setWindow(&Window);
     Graphics.init();
     
-    //--- Initialize graphics ------------------------------------------------//
-//     SDL_WM_GrabInput(SDL_GRAB_ON);
-    Timer.start();
-    while (false == bDone)
+    //--- Prepare for querying relative mouse movement -----------------------//
+    sf::Vector2i vecMouse;
+    sf::Vector2i vecMouseCenter(sf::Vector2i(Window.getSize().x >> 1,Window.getSize().y >> 1));
+    
+    //--- Run the main loop --------------------------------------------------//
+    while (!bDone)
     {
-        while (SDL_PollEvent(&event) != 0)
+        vecMouse = vecMouseCenter-sf::Mouse::getPosition();
+        sf::Mouse::setPosition(vecMouseCenter);
+        
+        // Handle events
+        sf::Event Event;
+        while (Window.pollEvent(Event))
         {
-            switch(event.type)
+            switch (Event.type)
             {
-                case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_ESCAPE)
-                    {
-                        bDone = true;
-                        std::cout << "QUIT" << std::endl;
-                        break;
-                    }
-                case SDL_ACTIVEEVENT:
-                    if (0 == event.active.gain)
-                        bIsActive = false;
-                    else
-                        bIsActive = true;
-                    break;
-                case SDL_MOUSEMOTION:
-                    if (event.motion.state == SDL_BUTTON(1))
-                    {
-                        vecTranslation += Vector2d(double(event.motion.xrel)/
-                                                    fZoom,
-                                                    double(event.motion.yrel)/
-                                                    fZoom);
-                    }
-                    if (event.motion.state == SDL_BUTTON(3))
-                    {
-                        fZoom *= 1.0-double(event.motion.yrel)/100;
-                    }
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    if (event.button.button == SDL_BUTTON_MIDDLE)
-                    {
-                        fZoom = 1.0;
-                        vecTranslation.setZero();
-                    }
-                    break;
-                case SDL_VIDEORESIZE:
-                    Graphics.resizeWindow(event.resize.w, event.resize.h);
-                    break;
-                case SDL_QUIT:
-                    std::cout << "QUIT" << std::endl;
+                case sf::Event::Closed:
+                {
+                    // End the program
                     bDone = true;
                     break;
+                }
+                case sf::Event::Resized:
+                {
+                    // adjust the viewport when the window is resized
+                    Graphics.resizeWindow(Event.size.width, Event.size.height);
+                    break;
+                }
+                case sf::Event::KeyPressed:
+                {
+                    switch (Event.key.code)
+                    {
+                        case sf::Keyboard::Escape:
+                        {
+                            bDone = true;
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case sf::Event::MouseMoved:
+                {
+                    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                    {
+                        vecTranslation -= 0.1*Vector2d(double(vecMouse.x)/fZoom,double(vecMouse.y)/fZoom);
+                    }
+                    if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+                        fZoom *= 1.0+double(vecMouse.y)*0.001;
+                    break;
+                }
                 default:
                     break;
             }
-            
         }
+        
+        
+        // Draw
         Graphics.zoomCamTo(fZoom);
         Graphics.transCamTo(vecTranslation);
+        
         for (int i=0; i<StarSystems.size(); ++i)
         {
             double fColor = 0.1*StarSystems[i]->getStarType()+0.3;
@@ -147,17 +148,10 @@ int main(int argc, char *argv[])
             Graphics.setPointSize(StarSystems[i]->getNumberOfPlanets());
             Graphics.dot(StarSystems[i]->getCenter());
         }
+
         Graphics.swapBuffers();
-        Timer.stop();
-        double fFrametime = 1.0/30.0-Timer.getTime();
-        if (fFrametime > 0.0)
-        {
-            unsigned int unFrametime = static_cast<unsigned int>(fFrametime*1e6);
-            usleep(unFrametime);
-        }
-        Timer.start();
+        Timer.sleepRemaining(30.0);
     }
 
-    SDL_Quit();
     return 0;
 }

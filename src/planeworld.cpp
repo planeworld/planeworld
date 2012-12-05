@@ -26,19 +26,49 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //--- Standard header --------------------------------------------------------//
+#include <functional>
 
 //--- Program header ---------------------------------------------------------//
-#include "engine_manager.h"
+#include "physics_manager.h"
 #include "pointmass.h"
-#include "xml_importer.h"
 #include "rigidbody.h"
 #include "spring_visuals.h"
 #include "universe.h"
 #include "xfig_loader.h"
+#include "xml_importer.h"
+#include "visuals_manager.h"
 
 //--- Misc-Header ------------------------------------------------------------//
-#include "SDL/SDL.h"
-#include "SDL/SDL_thread.h"
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Runs the physics engine, called as a thread.
+///
+/// \param _pPhysicsManager Pointer to physics manager
+/// \param _pbDone Pointer to bool, indicating if program is stopped
+///
+///////////////////////////////////////////////////////////////////////////////
+void runPhysics(CPhysicsManager* const _pPhysicsManager, bool* const _pbDone)
+{
+    METHOD_ENTRY("runPhysics")
+    
+    INFO_MSG("Main", "Physics thread started.")
+    CTimer PhysicsTimer;
+    
+    PhysicsTimer.start();
+    
+    int nCC=0;
+
+    while (!(*_pbDone))
+    {
+        _pPhysicsManager->addGlobalForces();
+        _pPhysicsManager->moveMasses(nCC);
+        _pPhysicsManager->collisionDetection();
+        PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
+        ++nCC;
+    }
+    INFO_MSG("Main", "Physics thread stopped.")
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -73,14 +103,13 @@ int main(int argc, char *argv[])
     
     bool                bIsActive = true;
     bool                bDone = false;
-    SDL_Event           event;
     int                 nT0 = 0;            // initial value of timer
     const std::string   PLANEWORLD_DATA_DIR="/home/bfeld/tmp/local/share/planeworld/data/";
     CTimer              Timer;
 
     //--- Demonstration Variables ---------------------------------------------//
-    int             nMouseX;
-    int             nMouseY;
+    int                 nMouseX;
+    int                 nMouseY;
     
     //--- Major instances ----------------------------------------------------//
     CGraphics&          Graphics = CGraphics::getInstance();
@@ -102,7 +131,7 @@ int main(int argc, char *argv[])
     CRigidBody*         pEarth;
     CRigidBody*         pMoon;
     CRigidBody*         pSun;
-    CEngineManager      EngineManager;
+//     CEngineManager      EngineManager;
     CPhysicsManager*    pPhysicsManager;
     CVisualsManager*    pVisualsManager;
     CXFigLoader         XFigLoader;
@@ -110,10 +139,6 @@ int main(int argc, char *argv[])
     CSpringVisuals*     pSpringVisuals;
     CUniverse           Universe;
     
-    long nX;
-    long nY;
-    srand(SDL_GetTicks());
-
     //--- Initialisation -----------------------------------------------------//
     pPhysicsManager = new CPhysicsManager;
     MEM_ALLOC("pPhysicsManager")
@@ -125,6 +150,9 @@ int main(int argc, char *argv[])
     Universe.generate(100);
     
     //--- Initialise particles -----------------------------------------------//
+    long nX;
+    long nY;
+    srand(234);
     for (int i=0; i<nNumberOfBoxes; ++i)
     {
         pPointMass = new CRigidBody;
@@ -338,112 +366,122 @@ int main(int argc, char *argv[])
 //     pPhysicsManager->addJoint(pSpring);
 //     pSpring->setVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
     
-    //--- Initialize graphics ------------------------------------------------//
-//     SDL_WM_GrabInput(SDL_GRAB_ON);
 
     // Set initialisation state of all objects
     pPhysicsManager->initObjects();
-
+    
 //     pEarth->setVelocity(Vector2d(29.78e3, 0.0));
 //     pEarth->setAngleVelocity(0.001);
 //     pMoon->setVelocity(Vector2d(29.78e3+1.023e3, 0.0));
     
 //     pCamera->setHook(pBody3);
     
-    EngineManager.setPhysicsManager(pPhysicsManager);
-    EngineManager.setVisualsManager(pVisualsManager);
-    EngineManager.runPhysicsThread();
-    EngineManager.runGraphicsThread();
+    //--- Initialise graphics ------------------------------------------------//
+    sf::Window Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
+                      "Planeworld", sf::Style::Default, sf::ContextSettings(32));
+    
+    pVisualsManager->setWindow(&Window);
+    pVisualsManager->initGraphics();
+    
+    sf::Thread PhysicsThread(std::bind(&runPhysics, pPhysicsManager, &bDone));
+    PhysicsThread.launch();
+    
+    
+    //--- Prepare for querying relative mouse movement -----------------------//
+    sf::Vector2i vecMouse;
+    sf::Vector2i vecMouseCenter(sf::Vector2i(Window.getSize().x >> 1,Window.getSize().y >> 1));
+    
+    //--- Run the main loop --------------------------------------------------//
     Timer.start();
-    while (false == bDone)
+    while (!bDone)
     {
-        while (SDL_PollEvent(&event) != 0)
+        vecMouse = vecMouseCenter-sf::Mouse::getPosition();
+        sf::Mouse::setPosition(vecMouseCenter);
+        
+        // Handle events
+        sf::Event Event;
+        while (Window.pollEvent(Event))
         {
-            switch(event.type)
+            switch (Event.type)
             {
-                case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_KP_PLUS || event.key.keysym.sym == SDLK_PLUS)
-                    {
-                        pPhysicsManager->accelerateTime();
-                    }
-                    if (event.key.keysym.sym == SDLK_KP_MINUS || event.key.keysym.sym == SDLK_MINUS)
-                    {
-                        pPhysicsManager->decelerateTime();
-                    }
-                    if (event.key.keysym.sym == SDLK_KP_ENTER || event.key.keysym.sym == SDLK_RETURN)
-                    {
-                        pPhysicsManager->resetTime();
-                    }
-                    if (event.key.keysym.sym == SDLK_b)
-                    {
-                        pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
-                    }
-                    if (event.key.keysym.sym == SDLK_i)
-                    {
-                        pVisualsManager->toggleVisualisations(VISUALS_OBJECT_INTERSECTIONS);
-                    }
-                    if (event.key.keysym.sym == SDLK_g)
-                    {
-                        pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
-                    }
-                    if (event.key.keysym.sym == SDLK_r)
-                        pPhysicsManager->initObjects();
-                    if (event.key.keysym.sym == SDLK_ESCAPE)
-                    {
-                        bDone = true;
-                        std::cout << "QUIT" << std::endl;
-                        EngineManager.stop();
-                    }
-//                     break;
-                case SDL_ACTIVEEVENT:
-                    if (0 == event.active.gain)
-                        bIsActive = false;
-                    else
-                        bIsActive = true;
-                    break;
-                case SDL_MOUSEMOTION:
-                    if (event.motion.state == SDL_BUTTON(1))
-                    {
-                        pCamera->translateBy(Vector2d(double(event.motion.xrel)/
-                                              pCamera->getZoom(),
-                                              double(event.motion.yrel)/
-                                              pCamera->getZoom()));
-                    }
-                    if (event.motion.state == SDL_BUTTON(3))
-                    {
-                        pCamera->rotateBy(-double(event.motion.xrel)*0.01);
-                        pCamera->zoomBy(1.0-double(event.motion.yrel)/100);
-                    }
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    if (event.button.button == SDL_BUTTON_MIDDLE)
-                    {
-                        pCamera->reset();
-                    }
-                    break;
-                case SDL_VIDEORESIZE:
-                    Graphics.resizeWindow(event.resize.w, event.resize.h);
-                    break;
-                case SDL_QUIT:
-                    std::cout << "QUIT" << std::endl;
-                    EngineManager.stop();
+                case sf::Event::Closed:
+                {
+                    // End the program
                     bDone = true;
                     break;
+                }
+                case sf::Event::Resized:
+                {
+                    // adjust the viewport when the window is resized
+                    Graphics.resizeWindow(Event.size.width, Event.size.height);
+                    break;
+                }
+                case sf::Event::KeyPressed:
+                {
+                    switch (Event.key.code)
+                    {
+                        case sf::Keyboard::Escape:
+                        {
+                            bDone = true;
+                            break;
+                        }
+                        case sf::Keyboard::Add:
+                        {
+                            pPhysicsManager->accelerateTime();
+                            break;
+                        }
+                        case sf::Keyboard::Subtract:
+                        {
+                            pPhysicsManager->decelerateTime();
+                            break;
+                        }
+                        case sf::Keyboard::Return:
+                        {
+                            pPhysicsManager->resetTime();
+                            break;
+                        }
+                        case sf::Keyboard::B:
+                        {
+                            pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
+                            break;
+                        }
+                        case sf::Keyboard::I:
+                        {
+                            pVisualsManager->toggleVisualisations(VISUALS_OBJECT_INTERSECTIONS);
+                            break;
+                        }
+                        case sf::Keyboard::G:
+                        {
+                            pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case sf::Event::MouseMoved:
+                {
+                    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                    {
+                        pCamera->translateBy(0.1*Vector2d(-double(vecMouse.x)/pCamera->getZoom(),-double(vecMouse.y)/pCamera->getZoom()));
+                    }
+                    if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+                    {
+                        pCamera->rotateBy(double(vecMouse.x)*0.001);
+                        pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
-            
         }
-        Timer.stop();
-        double fFrametime = 1.0/30.0-Timer.getTime();
-        if (fFrametime > 0.0)
-        {
-            unsigned int unFrametime = static_cast<unsigned int>(fFrametime*1e6);
-            usleep(unFrametime);
-        }
-        Timer.start();
+        pVisualsManager->drawGrid();
+        pVisualsManager->drawWorld();
+        pVisualsManager->drawBoundingBoxes();
+        Timer.sleepRemaining(pVisualsManager->getFrequency());
     }
+    
+    PhysicsThread.wait();
 
-    SDL_Quit();
     return 0;
 }
