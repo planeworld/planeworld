@@ -396,6 +396,7 @@ int main(int argc, char *argv[])
     while (!bDone)
     {
         vecMouse = vecMouseCenter-sf::Mouse::getPosition();
+        vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
         sf::Mouse::setPosition(vecMouseCenter);
         
         // Handle events
@@ -462,11 +463,11 @@ int main(int argc, char *argv[])
                 {
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
-                        pCamera->translateBy(0.1*Vector2d(-double(vecMouse.x)/pCamera->getZoom(),-double(vecMouse.y)/pCamera->getZoom()));
+                        pCamera->translateBy(0.1*Vector2d(double(vecMouse.x)/pCamera->getZoom(),double(vecMouse.y)/pCamera->getZoom()));
                     }
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                     {
-                        pCamera->rotateBy(double(vecMouse.x)*0.001);
+                        pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
                         pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
                     }
                     break;

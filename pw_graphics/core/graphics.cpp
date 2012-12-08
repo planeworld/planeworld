@@ -354,10 +354,13 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief apply the camera movement
+/// \brief Apply the camera movement
 ///
 /// This method applies the movement of the camera, that is rotation and
-/// translation, to OpenGL.
+/// translation, to OpenGL. If camera is rotated clockwise, the world must be
+/// rotated counter clockwise.
+/// The matrices are multiplied, so the first matrix will be the last operation.
+/// This means, a vertex is translated, rotated and scaled in the end.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CGraphics::applyCamMovement()
@@ -366,7 +369,7 @@ void CGraphics::applyCamMovement()
 
     glScaled(m_fCamZoom, m_fCamZoom, 1.0);
     glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
-    glTranslated(-m_vecCamPos[0], m_vecCamPos[1], 0.0);
+    glTranslated(-m_vecCamPos[0], -m_vecCamPos[1], 0.0);
     
 //     GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0f, 1.0f };
 //     glLightf (GL_LIGHT1, GL_SPOT_CUTOFFB, 15.f);
@@ -389,7 +392,10 @@ void CGraphics::resetCam()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief rotate camera
+/// \brief Rotate camera clockwise by given angle
+///
+/// \note Angles are interpreted mathematically positive which means
+///       counter clockwise!
 ///
 /// \param _fInc incremental camera angle
 ///
@@ -399,13 +405,14 @@ void CGraphics::rotCamBy(const double& _fInc)
     METHOD_ENTRY("CGraphics::rotCamBy")
 
     m_fCamAng += _fInc;
-    
-    glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief rotate camera to given angle
+/// \brief Rotate camera clockwise to given angle
+///
+/// \note Angles are interpreted mathematically positive which means
+///       counter clockwise!
 ///
 /// \param _fAng camera angle
 ///
@@ -415,35 +422,31 @@ void CGraphics::rotCamTo(const double& _fAng)
     METHOD_ENTRY("CGraphics::rotCamTo")
 
     m_fCamAng = _fAng;
-    
-    glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief move camera position
+/// \brief Move camera position
+///
+/// The world is translated and then rotated with negative camera angle.
+/// Therefore, further translations must be made with respect to positive
+/// camera angle.
 ///
 /// \param _vecInc incremental movement in x-,y- and z-direction
-///
-/// \note This one was a little bit tricky. Camera movement has to be applied
-///         with respect to the angle. I first tried to do this within the
-///         method "applyCamMovement" but that's not easily possible.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CGraphics::transCamBy(const Vector2d& _vecInc)
 {
     METHOD_ENTRY("CGraphics::transCamBy")
 
-    Rotation2Dd Rotation(-m_fCamAng);
+    Rotation2Dd Rotation(m_fCamAng);
 
     m_vecCamPos.segment<2>(0) += Rotation * _vecInc;
-    
-    glTranslated(-m_vecCamPos[0], m_vecCamPos[1], 0.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief move camera to given position
+/// \brief Move camera to given position
 ///
 /// \param _vecPos position in x-,y- and z-direction
 ///
@@ -452,14 +455,14 @@ void CGraphics::transCamTo(const Vector2d& _vecPos)
 {
     METHOD_ENTRY("CGraphics::transCamTo")
 
-    m_vecCamPos.segment<2>(0) = _vecPos;
+    Rotation2Dd Rotation(m_fCamAng);
     
-    glTranslated(-m_vecCamPos[0], m_vecCamPos[1], 0.0);
+    m_vecCamPos.segment<2>(0) = Rotation * _vecPos;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief zoom camera
+/// \brief Zoom camera
 ///
 /// \param _fFac multiplicational camera zoom
 ///
@@ -469,8 +472,6 @@ void CGraphics::zoomCamBy(const double& _fFac)
     METHOD_ENTRY("CGraphics::zoomCamBy")
 
     m_fCamZoom *= _fFac;
-    
-    glScaled(m_fCamZoom, m_fCamZoom, 1.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -485,8 +486,6 @@ void CGraphics::zoomCamTo(const double& _fFac)
     METHOD_ENTRY("CGraphics::zoomCamTo")
 
     m_fCamZoom = _fFac;
-    
-    glScaled(m_fCamZoom, m_fCamZoom, 1.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
     bool                bIsActive = true;
     bool                bDone = false;
     double              fZoom = 1.0;
+    double              fAngle = 0.0;
     Vector2d            vecTranslation;
     CTimer              Timer;
 
@@ -89,6 +90,7 @@ int main(int argc, char *argv[])
     while (!bDone)
     {
         vecMouse = vecMouseCenter-sf::Mouse::getPosition();
+        vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
         sf::Mouse::setPosition(vecMouseCenter);
         
         // Handle events
@@ -125,10 +127,13 @@ int main(int argc, char *argv[])
                 {
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
-                        vecTranslation -= 0.1*Vector2d(double(vecMouse.x)/fZoom,double(vecMouse.y)/fZoom);
+                        Graphics.transCamBy(0.2*Vector2d(double(vecMouse.x)/Graphics.getCamZoom(),double(vecMouse.y)/Graphics.getCamZoom()));
                     }
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-                        fZoom *= 1.0+double(vecMouse.y)*0.001;
+                    {
+                        Graphics.zoomCamBy(1.0+double(vecMouse.y)*0.001);
+                        Graphics.rotCamBy(-double(vecMouse.x)*0.001); // Clockwise for right mouse movement
+                    }
                     break;
                 }
                 default:
@@ -138,8 +143,7 @@ int main(int argc, char *argv[])
         
         
         // Draw
-        Graphics.zoomCamTo(fZoom);
-        Graphics.transCamTo(vecTranslation);
+        Graphics.applyCamMovement();
         
         for (int i=0; i<StarSystems.size(); ++i)
         {
