@@ -52,16 +52,19 @@ CCircleVisuals::~CCircleVisuals()
 /// \brief Draw the Circle
 ///
 /// \param _pCamera Active camera for drawing visuals
+/// \param _pObject Corresponding object
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCircleVisuals::draw(const CCamera* const _pCamera) const
+void CCircleVisuals::draw(const CCamera* const _pCamera,
+                          const IObject* const _pObject) const
 {
     METHOD_ENTRY("CCircleVisuals::draw()");
 
     double fAng = m_pCircle->getAngle();
     double fRad = m_pCircle->getRadius();
-    Vector2d vecCenter = m_pCircle->getCenter()-_pCamera->getCenter();//+
-//                          (this->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;
+    Vector2d vecCenter = m_pCircle->getCenter()-_pCamera->getCenter() + 
+                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;
+                         
 //  double fAngInc =    2.0 * M_PI /
 //                      ceil((100.0 * 2.0 * M_PI * m_fRadius * m_Graphics.getCamZoom()) /
 //                      (GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT));

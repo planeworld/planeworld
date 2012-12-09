@@ -41,10 +41,8 @@ CTerrainVisuals::CTerrainVisuals(CTerrain* _pTerrain): m_pTerrain(_pTerrain)
 ///////////////////////////////////////////////////////////////////////////////
 CTerrainVisuals::~CTerrainVisuals()
 {
-    METHOD_ENTRY("CTerrainVisuals::~CTerrainVisuals()");
-    DTOR_CALL("CTerrainVisuals::~CTerrainVisuals()");
-
-    METHOD_EXIT("CTerrainVisuals::~CTerrainVisuals()");
+    METHOD_ENTRY("CTerrainVisuals::~CTerrainVisuals")
+    DTOR_CALL("CTerrainVisuals::~CTerrainVisuals")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,11 +53,13 @@ CTerrainVisuals::~CTerrainVisuals()
 ///       Otherwise, camera movement would also be clipped and thus quantized.
 ///
 /// \param _pCamera Active camera for drawing visuals
+/// \param _pObject Corresponding object
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CTerrainVisuals::draw(const CCamera* const _pCamera) const
+void CTerrainVisuals::draw(const CCamera* const _pCamera,
+                           const IObject* const _pObject) const
 {
-    METHOD_ENTRY("CTerrainVisuals::draw()");
+    METHOD_ENTRY("CTerrainVisuals::draw")
 
     double   fWidth    = m_pTerrain->getWidth();
     double   fHeight   = m_pTerrain->getHeight();
@@ -100,6 +100,4 @@ void CTerrainVisuals::draw(const CCamera* const _pCamera) const
     }
 
     m_Graphics.endLine();
-
-    METHOD_EXIT("CTerrainVisuals::draw()");
 }

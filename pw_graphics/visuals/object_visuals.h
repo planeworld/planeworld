@@ -32,7 +32,7 @@
 /// \brief Class for visualisation of world objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IObjectVisuals
+class IObjectVisuals : virtual public CGraphicsBase
 {
     
     public:
@@ -70,20 +70,6 @@ inline IObjectVisuals::IObjectVisuals(IObject* const _pObject) : m_pObject(_pObj
 {
     METHOD_ENTRY("IObjectVisuals")
     CTOR_CALL("IObjectVisuals")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Draw all shape visuals of this object
-///
-/// \param _pCamera Draw visuals with respect to this camera
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IObjectVisuals::draw(const CCamera* const _pCamera) const
-{
-    METHOD_ENTRY("draw")
-    
-    for (int i=0; i<m_Visuals.size(); ++i) m_Visuals[i]->draw(_pCamera);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -24,8 +24,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "camera.h"
-// #include "key_map.h"
-// #include "object.h"
+#include "object.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -41,36 +40,13 @@ class IVisuals : virtual public CGraphicsBase
         virtual ~IVisuals(){}
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void draw(const CCamera* const) const = 0;
-        
-//         const Vector2i getCell() const;
+        virtual void draw(const CCamera* const,
+                          const IObject* const) const = 0;
                 
         //--- Methods --------------------------------------------------------//
         virtual const CBoundingBox& getBoundingBox() = 0;
         
-    protected:
-        
-//         IObject* m_pObject;     ///< Pointer to corresponding object
-
 };
 
-// typedef KeyType VisualsIDType;
-// typedef std::list<IVisuals*> VisualsListType;
-// typedef std::list<VisualsIDType> VisualsIDListType;
-
-//--- Implementation is done here for inline optimisation --------------------//
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Returns the cell that the visual is located at
-// ///
-// /// \return Cell the visual is located
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// inline const Vector2i IVisuals::getCell() const
-// {
-//     METHOD_ENTRY("IVisuals::getCell")
-//     return m_pObject->getCell();
-// }
 
 #endif

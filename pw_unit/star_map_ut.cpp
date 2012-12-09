@@ -57,16 +57,9 @@ int main(int argc, char *argv[])
     
     Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
     
-    bool                bIsActive = true;
     bool                bDone = false;
-    double              fZoom = 1.0;
-    double              fAngle = 0.0;
-    Vector2d            vecTranslation;
     CTimer              Timer;
 
-    int                 nMouseX = 0;
-    int                 nMouseY = 0;
-    
     //--- Major instances ----------------------------------------------------//
     CGraphics&          Graphics = CGraphics::getInstance();
     CUniverse           Universe;

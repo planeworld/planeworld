@@ -43,7 +43,7 @@ class CPlanetVisuals : public IVisuals
         ~CPlanetVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void draw(const CCamera* const) const;
+        virtual void draw(const CCamera* const, const IObject* const) const;
                 
         //--- Methods --------------------------------------------------------//
         void                attach(CPlanet*);

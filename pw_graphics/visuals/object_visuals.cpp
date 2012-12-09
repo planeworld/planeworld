@@ -41,3 +41,33 @@ IObjectVisuals::~IObjectVisuals()
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw all shape visuals of this object
+///
+/// \param _pCamera Draw visuals with respect to this camera
+///
+////////////////////////////////////////////////////////////////////////////////
+void IObjectVisuals::draw(const CCamera* const _pCamera) const
+{
+    METHOD_ENTRY("IObjectVisuals::draw")
+    
+    for (std::vector<IVisuals*>::const_iterator ci  = m_Visuals.begin();
+                                                ci != m_Visuals.end(); ++ci)
+    {
+        if ((*ci)->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+        {
+            if ((((*ci)->getBoundingBox().getWidth() * _pCamera->getZoom()) <  0.3) && 
+                (((*ci)->getBoundingBox().getHeight() * _pCamera->getZoom()) < 0.3))
+            {
+                m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() -
+                                _pCamera->getCenter()-_pCamera->getCellToPos());
+            }
+            else
+            {
+                (*ci)->draw(_pCamera, m_pObject);
+            }
+        }
+    }
+}

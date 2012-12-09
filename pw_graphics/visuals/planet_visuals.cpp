@@ -37,12 +37,11 @@ CPlanetVisuals::~CPlanetVisuals()
 /// \brief Draw the Planet
 ///
 /// \param _pCamera Active camera for drawing visuals
-///
-/// \todo Draw planets clockwise for consistency. ATM they're drawn counter-
-///       clockwise!
+/// \param _pObject Corresponding object
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPlanetVisuals::draw(const CCamera* const _pCamera) const
+void CPlanetVisuals::draw(const CCamera* const _pCamera,
+                          const IObject* const _pObject) const
 {
     METHOD_ENTRY("CPlanetVisuals::draw()");
 
@@ -52,7 +51,8 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera) const
     double   fSeaLevel = m_pPlanet->getSeaLevel();
     int      nSeed     = m_pPlanet->getSeed();
     double   fSmooth   = m_pPlanet->getSmoothness();
-    Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getCenter();
+    Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getCenter() +
+                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;;
     
     if ((vecCenter.norm() <= fRad+fHeight+_pCamera->getBoundingCircleRadius()) &&
         (vecCenter.norm() >  fRad-fHeight-_pCamera->getBoundingCircleRadius())

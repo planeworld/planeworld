@@ -30,8 +30,6 @@ CPolylineVisuals::CPolylineVisuals(CPolyLine* _pPolyline): m_pPolyline(_pPolylin
 {
     METHOD_ENTRY("CPolylineVisuals::CPolylineVisuals")
     CTOR_CALL("CPolylineVisuals::CPolylineVisuals")
-    
-    METHOD_EXIT("CPolylineVisuals::CPolylineVisuals")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,8 +41,6 @@ CPolylineVisuals::~CPolylineVisuals()
 {
     METHOD_ENTRY("CPolylineVisuals::~CPolylineVisuals")
     DTOR_CALL("CPolylineVisuals::~CPolylineVisuals")
-
-    METHOD_EXIT("CPolylineVisuals::~CPolylineVisuals")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,13 +48,15 @@ CPolylineVisuals::~CPolylineVisuals()
 /// \brief Draw the polyline
 ///
 /// \param _pCamera Active camera for drawing visuals
+/// \param _pObject Corresponding object
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPolylineVisuals::draw(const CCamera* const _pCamera) const
+void CPolylineVisuals::draw(const CCamera* const _pCamera,
+                            const IObject* const _pObject) const
 {
     METHOD_ENTRY("CPolylineVisuals::draw")
 
-    m_Graphics.polyline(m_pPolyline->getVertices(), m_pPolyline->getLineType(), -_pCamera->getCenter());
-    
-    METHOD_EXIT("CPolylineVisuals::draw")
+    m_Graphics.polyline(m_pPolyline->getVertices(), m_pPolyline->getLineType(),
+                        -_pCamera->getCenter() + 
+                        (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2);
 }

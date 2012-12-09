@@ -101,16 +101,9 @@ int main(int argc, char *argv[])
     
     Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
     
-    bool                bIsActive = true;
     bool                bDone = false;
-    int                 nT0 = 0;            // initial value of timer
-    const std::string   PLANEWORLD_DATA_DIR="/home/bfeld/tmp/local/share/planeworld/data/";
     CTimer              Timer;
 
-    //--- Demonstration Variables ---------------------------------------------//
-    int                 nMouseX;
-    int                 nMouseY;
-    
     //--- Major instances ----------------------------------------------------//
     CGraphics&          Graphics = CGraphics::getInstance();
     CCamera*            pCamera;
@@ -129,9 +122,6 @@ int main(int argc, char *argv[])
     CRigidBody*         pBody2;
     CRigidBody*         pBody3;
     CRigidBody*         pBody4;
-    CRigidBody*         pEarth;
-    CRigidBody*         pMoon;
-    CRigidBody*         pSun;
 //     CEngineManager      EngineManager;
     CPhysicsManager*    pPhysicsManager;
     CVisualsManager*    pVisualsManager;

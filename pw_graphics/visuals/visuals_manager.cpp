@@ -319,23 +319,7 @@ void CVisualsManager::drawWorld() const
     for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
          ci != m_ObjectVisuals.end(); ++ci)
     {
-//         if ((((*ci)->getBoundingBox().getWidth() * m_pCamera->getZoom()) > 0.01) && 
-//             (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) > 0.01))
-            for (std::vector<IVisuals*>::const_iterator cj=(*ci)->getShapeVisuals().begin();
-                 cj != (*ci)->getShapeVisuals().end(); ++cj)
-            {
-                if ((*cj)->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
-                    if ((((*cj)->getBoundingBox().getWidth() * m_pCamera->getZoom()) <  0.3) && 
-                        (((*cj)->getBoundingBox().getHeight() * m_pCamera->getZoom()) < 0.3))
-                    {
-                        m_Graphics.dot((*cj)->getBoundingBox().getLowerLeft() -
-                                       m_pCamera->getCenter()-m_pCamera->getCellToPos());
-                    }
-                    else
-                    {
-                        (*cj)->draw(m_pCamera);
-                    }
-            }
+        (*ci)->draw(m_pCamera);
     }
     for (std::list<CDebrisVisuals*>::const_iterator ci = m_DebrisVisuals.begin();
          ci != m_DebrisVisuals.end(); ++ci)
