@@ -81,7 +81,6 @@ CTerrain* CTerrain::clone() const
     pClone->m_vecCenter0        = m_vecCenter0;
     pClone->m_AABB              = m_AABB;
     pClone->m_nDepthlayers      = m_nDepthlayers;
-    pClone->m_VisualsID         = m_VisualsID;
         
     METHOD_EXIT("CTerrain::clone")
     return pClone;

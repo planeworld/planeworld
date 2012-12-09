@@ -25,6 +25,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "graphics.h"
+#include "engine_common.h"
 #include "hookable.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -54,6 +55,7 @@ class CCamera : public CGraphicsBase
         const std::vector<Vector2d>& getFrame() const;
         
         const Vector2i&     getCell() const;
+        const Vector2d      getCellToPos() const;
         const Vector2d&     getCenter() const;
         const double        getAngle() const;
         const double&       getZoom() const;
@@ -127,6 +129,21 @@ inline const Vector2i& CCamera::getCell() const
 {
     METHOD_ENTRY("CCamera::getCell")
     return m_vecCell;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the cell as a double position in the universe
+///
+/// \note This does lower the precision and is mainly suited when zoomed out.
+///
+/// \return Cell as double position the camera is located at
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2d CCamera::getCellToPos() const
+{
+    METHOD_ENTRY("CCamera::getCellToPos")
+    return m_vecCell.cast<double>()*DEFAULT_CELL_SIZE_2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

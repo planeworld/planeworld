@@ -81,8 +81,6 @@ class CCircle : public IShape
 inline const double& CCircle::getAngle() const
 {
     METHOD_ENTRY("CCircle::getAngle")
-
-    METHOD_EXIT("CCircle::getAngle")
     return m_fAngle;
 }
 
@@ -96,8 +94,6 @@ inline const double& CCircle::getAngle() const
 inline const Vector2d& CCircle::getCenter() const
 {
     METHOD_ENTRY("CCircle::getCenter")
-
-    METHOD_EXIT("CCircle::getCenter")
     return m_vecCenter;
 }
 
@@ -111,8 +107,6 @@ inline const Vector2d& CCircle::getCenter() const
 inline const double& CCircle::getRadius() const
 {
     METHOD_ENTRY("CCircle::getRadius")
-
-    METHOD_EXIT("CCircle::getRadius")
     return m_fRadius;
 }
 
@@ -126,8 +120,6 @@ inline const double& CCircle::getRadius() const
 inline const ShapeType CCircle::getShapeType() const
 {
     METHOD_ENTRY("CCircle::getShapeType")
-
-    METHOD_EXIT("CCircle::getShapeType")
     return SHAPE_CIRCLE;
 }
 
@@ -144,8 +136,6 @@ inline void CCircle::setCenter(const Vector2d& _vecC)
 
     m_vecCenter0 = _vecC;
     m_vecCenter = _vecC;
-
-    METHOD_EXIT("CCircle::setCenter")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,8 +155,6 @@ inline void CCircle::setCenter(const double& _fX, const double& _fY)
 
     m_vecCenter[0] = _fX;
     m_vecCenter[1] = _fY;
-
-    METHOD_EXIT("CCircle::setCenter")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -181,8 +169,6 @@ inline void CCircle::setRadius(const double& _fRadius)
     METHOD_ENTRY("CCircle::setRadius")
 
     m_fRadius = _fRadius;
-
-    METHOD_EXIT("CCircle::setRadius")
 }
 
 #endif

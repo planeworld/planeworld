@@ -70,8 +70,6 @@ inline void CSpringVisuals::attach(CSpring* _pSpring)
     METHOD_ENTRY("CSpringVisuals::attach")
 
     m_pSpring = _pSpring;
-
-    METHOD_EXIT("CSpringVisuals::attach")
 }
 
 #endif

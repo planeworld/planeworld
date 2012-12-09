@@ -61,6 +61,20 @@ class CPlanetVisuals : public IVisuals
 
 //--- Implementation is done here for inline optimisation --------------------//
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy Constructor
+///
+/// \param _pPlanet Planet to attach when initialising 
+///
+///////////////////////////////////////////////////////////////////////////////
+inline CPlanetVisuals::CPlanetVisuals(CPlanet* _pPlanet): m_pPlanet(_pPlanet)
+                                                                      
+{
+    METHOD_ENTRY("CPlanetVisuals::CPlanetVisuals")
+    CTOR_CALL("CPlanetVisuals::CPlanetVisuals")
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Attaches a planet to planet visuals

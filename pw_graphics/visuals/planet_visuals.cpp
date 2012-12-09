@@ -21,24 +21,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Copy Constructor
-///
-/// \param _pPlanet Planet to attach when initialising 
-///
-///////////////////////////////////////////////////////////////////////////////
-CPlanetVisuals::CPlanetVisuals(CPlanet* _pPlanet): m_pPlanet(_pPlanet)
-                                                                      
-{
-    METHOD_ENTRY("CPlanetVisuals::CPlanetVisuals")
-    CTOR_CALL("CPlanetVisuals::CPlanetVisuals")
-    
-//     m_pObject = _pObject;
-    
-    METHOD_EXIT("CPlanetVisuals::CPlanetVisuals")
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Destructor
 ///
 ///////////////////////////////////////////////////////////////////////////////

@@ -8,7 +8,6 @@ INCLUDE_DIRECTORIES (
     ${Boost_INCLUDE_DIRS}
     ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
-    ${CMAKE_HOME_DIRECTORY}/pw_util/
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging
     ${CMAKE_HOME_DIRECTORY}/pw_util/math
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core
@@ -25,6 +24,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/circle_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/object_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/planet_visuals.cpp    
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/polyline_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/spring_visuals.cpp

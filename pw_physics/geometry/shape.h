@@ -28,7 +28,6 @@
 #include "bounding_box.h"
 #include "engine_common.h"
 #include "graphics.h"
-#include "visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -67,7 +66,6 @@ class IShape
         //--- Methods --------------------------------------------------------//
         virtual void transform(const double&, const Vector2d&) = 0;         ///< Transforms the shape
         
-        void setVisualsID(const VisualsIDType&);
         void setDepths(const int&);
         void unsetDepths(const int&);
 
@@ -76,8 +74,6 @@ class IShape
         //--- Protected Variables --------------------------------------------//
         CBoundingBox    m_AABB;                             ///< Bounding box of shape
         int             m_nDepthlayers;                     ///< Depths in which shape exists
-        VisualsIDType   m_VisualsID;                        ///< ID to visual
-        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -127,25 +123,6 @@ inline const ShapeType IShape::getShapeType() const
 
     METHOD_EXIT("IShape::getShapeType")
     return SHAPE_NONE;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the ID of shapes visuals to shape
-///
-/// The shape just stores the ID to a visual. The visual itself is handled by 
-/// the visualsmanager.
-///
-/// \param _VisualsID ID of visuals that should be added to list
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IShape::setVisualsID(const VisualsIDType& _VisualsID)
-{
-    METHOD_ENTRY("IShape::setVisualsID")
-    
-    m_VisualsID = _VisualsID;
-
-    METHOD_EXIT("IShape::setVisualsID")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

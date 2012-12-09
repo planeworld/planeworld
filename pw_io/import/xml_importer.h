@@ -21,9 +21,12 @@
 #define XML_IMPORTER_H
 
 //--- Standard header --------------------------------------------------------//
+#include <map>
 
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
+#include "circle_visuals.h"
+#include "object_visuals.h"
 #include "planet_visuals.h"
 #include "polyline_visuals.h"
 #include "terrain_visuals.h"
@@ -53,10 +56,10 @@ class CXMLImporter
         ~CXMLImporter();
 
         //--- Constant Methods -----------------------------------------------//
-        CCamera*                getCamera() const;
-        Vector2d                getGravity() const;
-        std::list<IObject*>     getObjects() const;
-        std::list<IVisuals*>    getVisuals() const;
+        CCamera*                        getCamera() const;
+        Vector2d                        getGravity() const;
+        std::vector<IObject*>           getObjects() const;
+        std::vector<IObjectVisuals*>    getVisuals() const;
                 
         //--- Methods --------------------------------------------------------//
         bool import(const std::string&,
@@ -67,23 +70,23 @@ class CXMLImporter
         bool checkFile(const pugi::xml_node&);
         void createCamera(const pugi::xml_node&);
         void createGravity(const pugi::xml_node&);
-        void createShapeCircle(CBody* const, const pugi::xml_node&);
-        void createShapePlanet(CBody* const, const pugi::xml_node&);
-        void createShapeTerrain(CBody* const, const pugi::xml_node&);
-        void createShapePolyline(CBody* const, const pugi::xml_node&);
-        void createVisualsCircle(CCircle* const, const pugi::xml_node&);
-        void createVisualsPlanet(CPlanet* const, const pugi::xml_node&);
-        void createVisualsTerrain(CTerrain* const, const pugi::xml_node&);
-        void createVisualsPolyline(CPolyLine* const, const pugi::xml_node&);
+        void createShapeCircle(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createShapePlanet(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createShapeTerrain(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createShapePolyline(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createVisualsCircle(CCircle* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createVisualsPlanet(CPlanet* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createVisualsTerrain(CTerrain* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createVisualsPolyline(CPolyLine* const, IObjectVisuals* const, const pugi::xml_node&);
         void createRigidBody(const pugi::xml_node&);
         void readObjectCore(IObject* const, const pugi::xml_node&);
         
-        CCamera*                        m_pCamera;
-        Vector2d                        m_vecGravity;
-        std::string                     m_strCameraHook;
-        std::map<std::string,IObject*>  m_Objects;
-        std::list<IVisuals*>            m_Visuals;
-        std::string                     m_strPath;
+        CCamera*                        m_pCamera;       ///< Main camera
+        Vector2d                        m_vecGravity;    ///< Constant gravity vector
+        std::string                     m_strCameraHook; ///< Camera hook
+        std::map<std::string,IObject*>  m_Objects;       ///< List of objects
+        std::vector<IObjectVisuals*>    m_Visuals;       ///< List of object visuals
+        std::string                     m_strPath;       ///< Path to read data from
                 
 };
 
@@ -117,12 +120,12 @@ inline Vector2d CXMLImporter::getGravity() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return imported objects
+/// \brief Return imported object visuals
 ///
-/// \return List of visuals
+/// \return List of object visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline std::list<IVisuals*> CXMLImporter::getVisuals() const
+inline std::vector<IObjectVisuals*> CXMLImporter::getVisuals() const
 {
     METHOD_ENTRY("CXMLImporter::getVisuals")
     return m_Visuals;

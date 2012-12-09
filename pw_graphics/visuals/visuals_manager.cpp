@@ -30,8 +30,6 @@ CVisualsManager::CVisualsManager() : m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
-
-    METHOD_EXIT("CVisualsManager::CVisualsManager")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,16 +40,17 @@ CVisualsManager::CVisualsManager() : m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
 CVisualsManager::~CVisualsManager()
 {
     METHOD_ENTRY("CVisualsManager::~CVisualsManager")
+    DTOR_CALL("CVisualsManager::~CVisualsManager")
     
-    for (CKeyMap<IVisuals*>::iterator it = m_VisualsMap.begin();
-        it != m_VisualsMap.end(); ++it)
+    for (std::vector<IObjectVisuals*>::iterator it = m_ObjectVisuals.begin();
+        it != m_ObjectVisuals.end(); ++it)
     {
         // Free memory if pointer is still existent
         if ((*it) != 0)
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("IVisuals*");
+            MEM_FREED("IObjectVisuals*");
         }
     }
     for (std::list<CDebrisVisuals*>::iterator it = m_DebrisVisuals.begin();
@@ -73,8 +72,6 @@ CVisualsManager::~CVisualsManager()
         m_pCamera = 0;
         MEM_FREED("m_pCamera");
     }
-    
-    METHOD_EXIT("CVisualsManager::~CVisualsManager")
 }
     
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,41 +87,42 @@ void CVisualsManager::drawBoundingBoxes() const
     {
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
         m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
-                        m_pCamera->getCenter(),
+                        m_pCamera->getCenter()-m_pCamera->getCellToPos(),
                         m_pCamera->getBoundingBox().getUpperRight()-
-                        m_pCamera->getCenter());
+                        m_pCamera->getCenter()-m_pCamera->getCellToPos());
         m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
         m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
-                              m_pCamera->getCenter(),
+                              m_pCamera->getCenter()-m_pCamera->getCellToPos(),
                               m_pCamera->getBoundingBox().getUpperRight()-
-                              m_pCamera->getCenter());
+                              m_pCamera->getCenter()-m_pCamera->getCellToPos());
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
         m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
                           m_pCamera->getBoundingCircleRadius());
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
         
-        for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
-            ci != m_VisualsMap.end(); ++ci)
+        for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
+            ci != m_ObjectVisuals.end(); ++ci)
         {
-    
-            m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
-            m_Graphics.rect((*ci)->getBoundingBox().getLowerLeft() -
-                            m_pCamera->getCenter(),
-                            (*ci)->getBoundingBox().getUpperRight()-
-                            m_pCamera->getCenter());
-            m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
-            m_Graphics.filledRect((*ci)->getBoundingBox().getLowerLeft() -
-                                  m_pCamera->getCenter(),
-                                  (*ci)->getBoundingBox().getUpperRight()-
-                                  m_pCamera->getCenter());
+            for (std::vector<IVisuals*>::const_iterator cj = (*ci)->getShapeVisuals().begin();
+                 cj != (*ci)->getShapeVisuals().end(); ++cj)
+            {
+                m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
+                m_Graphics.rect((*cj)->getBoundingBox().getLowerLeft() -
+                                m_pCamera->getCenter(),
+                                (*cj)->getBoundingBox().getUpperRight()-
+                                m_pCamera->getCenter());
+                m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
+                m_Graphics.filledRect((*cj)->getBoundingBox().getLowerLeft() -
+                                    m_pCamera->getCenter(),
+                                    (*cj)->getBoundingBox().getUpperRight()-
+                                    m_pCamera->getCenter());
+            }
         }
     }
 
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     m_Graphics.swapBuffers();
-
-    METHOD_EXIT("CVisualsManager::drawBoundingBox")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,10 +168,12 @@ void CVisualsManager::drawGrid() const
         while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
         {
             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.3);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                                                        m_pCamera->getCenter()[1]);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                                                        m_pCamera->getCenter()[1]);
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                               m_pCamera->getBoundingBox().getLowerLeft()[1]-
+                                               m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                               m_pCamera->getBoundingBox().getUpperRight()[1]-
+                                               m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
             m_Graphics.endLine();
             fGridLeft += fGrid;
         }
@@ -182,11 +182,11 @@ void CVisualsManager::drawGrid() const
         {
             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.3);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                    m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]);
+                                    m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                    fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                    m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]);
+                                    m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                    fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
             m_Graphics.endLine();
             fGridTop += fGrid;
         }
@@ -211,10 +211,12 @@ void CVisualsManager::drawGrid() const
             while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
             {
                 m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
-                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                                                            m_pCamera->getCenter()[1]);
-                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                                                            m_pCamera->getCenter()[1]);
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                                   m_pCamera->getBoundingBox().getLowerLeft()[1]-
+                                                   m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                                   m_pCamera->getBoundingBox().getUpperRight()[1]-
+                                                   m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
                 m_Graphics.endLine();
                 fGridLeft += fGrid;
             }
@@ -223,11 +225,11 @@ void CVisualsManager::drawGrid() const
             {
                 m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                        m_pCamera->getCenter()[0],
-                                        fGridTop-m_pCamera->getCenter()[1]);
+                                        m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                        m_pCamera->getCenter()[0],
-                                        fGridTop-m_pCamera->getCenter()[1]);
+                                        m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
                 m_Graphics.endLine();
                 fGridTop += fGrid;
             }
@@ -251,10 +253,12 @@ void CVisualsManager::drawGrid() const
             while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
             {
                 m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.1);
-                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                                                            m_pCamera->getCenter()[1]);
-                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0], m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                                                            m_pCamera->getCenter()[1]);
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                                   m_pCamera->getBoundingBox().getLowerLeft()[1]-
+                                                   m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                                   m_pCamera->getBoundingBox().getUpperRight()[1]-
+                                                   m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
                 m_Graphics.endLine();
                 fGridLeft += fGrid;
             }
@@ -263,11 +267,11 @@ void CVisualsManager::drawGrid() const
             {
                 m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.1);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                        m_pCamera->getCenter()[0],
-                                        fGridTop-m_pCamera->getCenter()[1]);
+                                        m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                        m_pCamera->getCenter()[0],
-                                        fGridTop-m_pCamera->getCenter()[1]);
+                                        m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
                 m_Graphics.endLine();
                 fGridTop += fGrid;
             }
@@ -276,8 +280,6 @@ void CVisualsManager::drawGrid() const
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         
     }
-
-    METHOD_EXIT("CVisualsManager::drawBoundingGrid")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -314,22 +316,26 @@ void CVisualsManager::drawWorld() const
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
-    for (CKeyMap<IVisuals*>::const_iterator ci = m_VisualsMap.begin();
-         ci != m_VisualsMap.end(); ++ci)
+    for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
+         ci != m_ObjectVisuals.end(); ++ci)
     {
 //         if ((((*ci)->getBoundingBox().getWidth() * m_pCamera->getZoom()) > 0.01) && 
 //             (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) > 0.01))
-            if ((*ci)->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
-                if ((((*ci)->getBoundingBox().getWidth() * m_pCamera->getZoom()) <  0.3) && 
-                    (((*ci)->getBoundingBox().getHeight() * m_pCamera->getZoom()) < 0.3))
-                {
-                    m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() -
-                                   m_pCamera->getCenter()-m_pCamera->getCell().cast<double>()*DEFAULT_CELL_SIZE_2);
-                }
-                else
-                {
-                    (*ci)->draw(m_pCamera);
-                }
+            for (std::vector<IVisuals*>::const_iterator cj=(*ci)->getShapeVisuals().begin();
+                 cj != (*ci)->getShapeVisuals().end(); ++cj)
+            {
+                if ((*cj)->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
+                    if ((((*cj)->getBoundingBox().getWidth() * m_pCamera->getZoom()) <  0.3) && 
+                        (((*cj)->getBoundingBox().getHeight() * m_pCamera->getZoom()) < 0.3))
+                    {
+                        m_Graphics.dot((*cj)->getBoundingBox().getLowerLeft() -
+                                       m_pCamera->getCenter()-m_pCamera->getCellToPos());
+                    }
+                    else
+                    {
+                        (*cj)->draw(m_pCamera);
+                    }
+            }
     }
     for (std::list<CDebrisVisuals*>::const_iterator ci = m_DebrisVisuals.begin();
          ci != m_DebrisVisuals.end(); ++ci)
@@ -344,17 +350,13 @@ void CVisualsManager::drawWorld() const
 ///
 /// \brief Adds visuals of an object to list
 ///
-/// \param _pVisuals Visuals that should be added to list
-///
-/// \return Unique ID
+/// \param _pObjectVisuals Visuals that should be added to list
 ///
 ////////////////////////////////////////////////////////////////////////////////
-KeyType CVisualsManager::addVisuals(IVisuals* _pVisuals)
+void CVisualsManager::addVisuals(IObjectVisuals* _pObjectVisuals)
 {
     METHOD_ENTRY("CVisualsManager::addVisuals")
-    
-    METHOD_EXIT("CVisualsManager::addVisuals")
-    return m_VisualsMap.insert(_pVisuals);
+    m_ObjectVisuals.push_back(_pObjectVisuals);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -363,20 +365,14 @@ KeyType CVisualsManager::addVisuals(IVisuals* _pVisuals)
 ///
 /// \param _VisualsList Visuals that should be added to list
 ///
-/// \return List of unique IDs
-///
 ////////////////////////////////////////////////////////////////////////////////
-VisualsIDListType CVisualsManager::addVisualsList(const VisualsListType& _VisualsList)
+void CVisualsManager::addVisualsList(const std::vector<IObjectVisuals*>& _VisualsList)
 {
     METHOD_ENTRY("CVisualsManager::addVisualsList")
     
-    std::list<VisualsIDType> VisualsIDList;
-    for (VisualsListType::const_iterator it  = _VisualsList.begin();
-                                         it != _VisualsList.end(); ++it)
+    for (std::vector<IObjectVisuals*>::const_iterator ci  = _VisualsList.begin();
+                                         ci != _VisualsList.end(); ++ci)
     {
-        VisualsIDList.push_back(m_VisualsMap.insert((*it)));
+        m_ObjectVisuals.push_back(*ci);
     }
-
-    METHOD_EXIT("CVisualsManager::addVisualsList")
-    return VisualsIDList;
 }

@@ -28,12 +28,12 @@ void CCollisionManager::detectCollisions()
 {
     METHOD_ENTRY("CCollisionManager::detectCollisions")
 
-    std::list< IObject* >::const_iterator cj;
+    std::vector< IObject* >::const_iterator cj;
     
     //--------------------------------------------------------------------------
     // Test dynamic objects
     //--------------------------------------------------------------------------
-    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+    for (std::vector<IObject*>::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
         cj = ci;
@@ -78,7 +78,7 @@ void CCollisionManager::detectCollisions()
     //--------------------------------------------------------------------------
     // Test static objects against debris
     //--------------------------------------------------------------------------
-    for (std::list< IObject* >::const_iterator ci = m_StaticObjects.begin();
+    for (std::vector< IObject* >::const_iterator ci = m_StaticObjects.begin();
         ci != m_StaticObjects.end(); ++ci)
     {
         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
@@ -95,7 +95,7 @@ void CCollisionManager::detectCollisions()
     //--------------------------------------------------------------------------
     // Test dynamic objects against debris
     //--------------------------------------------------------------------------
-    for (std::list< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+    for (std::vector< IObject* >::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();

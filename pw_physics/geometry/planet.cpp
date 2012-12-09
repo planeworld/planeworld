@@ -116,7 +116,6 @@ CPlanet* CPlanet::clone() const
     pClone->m_nOctTrTp          = m_nOctTrTp;
     pClone->m_AABB              = m_AABB;
     pClone->m_nDepthlayers      = m_nDepthlayers;
-    pClone->m_VisualsID         = m_VisualsID;
     
     METHOD_EXIT("CPlanet::clone")
     return pClone;

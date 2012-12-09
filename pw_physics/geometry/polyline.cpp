@@ -63,7 +63,6 @@ CPolyLine* CPolyLine::clone() const
     pClone->m_VertList0    = m_VertList0;
     pClone->m_AABB         = m_AABB;
     pClone->m_nDepthlayers = m_nDepthlayers;
-    pClone->m_VisualsID    = m_VisualsID;
     
     METHOD_EXIT("CPolyLine::clone")
     return pClone;

@@ -26,6 +26,7 @@
 #include "euler_integrator.h"
 
 #include "geometry.h"
+#include "hookable.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <vector>

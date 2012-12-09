@@ -30,8 +30,6 @@ CCircle::CCircle() : m_fAngle(0.0),m_fRadius(1.0)
     CTOR_CALL ( "CCircle::CCircle()" );
     
     m_vecCenter0.setZero();
-    
-    METHOD_EXIT ( "CCircle::CCircle()" );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,8 +41,6 @@ CCircle::~CCircle()
 {
     METHOD_ENTRY ( "CCircle::~CCircle" );
     DTOR_CALL ( "CCircle::~CCircle" );
-
-    METHOD_EXIT ( "CCircle::~CCircle" );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,9 +62,7 @@ CCircle* CCircle::clone() const
     pClone->m_fRadius    = m_fRadius;
     pClone->m_AABB         = m_AABB;
     pClone->m_nDepthlayers = m_nDepthlayers;
-    pClone->m_VisualsID    = m_VisualsID;
     
-    METHOD_EXIT("CCircle::clone")
     return pClone;
 }
 
@@ -93,6 +87,4 @@ void CCircle::transform( const double& _fAngle, const Vector2d& _vecV )
     // Update bounding box
     m_AABB.setLowerLeft( m_vecCenter - Vector2d(m_fRadius,m_fRadius));
     m_AABB.setUpperRight(m_vecCenter + Vector2d(m_fRadius,m_fRadius));
-
-    METHOD_EXIT ( "CCircle::transform(const double&, const Vector2d&)" );
 }

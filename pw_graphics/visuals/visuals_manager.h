@@ -24,8 +24,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "engine_common.h"
-#include "visuals.h"
 #include "debris_visuals.h"
+#include "object_visuals.h"
 
 const double VISUALS_DEFAULT_FREQUENCY = 30.0;
 
@@ -53,22 +53,23 @@ class CVisualsManager : virtual public CGraphicsBase
         bool            initGraphics() const;
                 
         //--- Methods --------------------------------------------------------//
-        void                addVisuals(CDebrisVisuals*);
-        VisualsIDType       addVisuals(IVisuals*);
-        VisualsIDListType   addVisualsList(const VisualsListType&);
-        void                setCamera(CCamera*);
-        void                setVisualisations(const int&);
-        void                setWindow(sf::Window* const);
-        void                toggleVisualisations(const int&);
-        void                unsetVisualisations(const int&);
+        void            addVisuals(CDebrisVisuals*);
+        void            addVisuals(IObjectVisuals* const);
+        void            addVisualsList(const std::vector<IObjectVisuals*>&);
+        void            setCamera(CCamera*);
+        void            setVisualisations(const int&);
+        void            setWindow(sf::Window* const);
+        void            toggleVisualisations(const int&);
+        void            unsetVisualisations(const int&);
 
     private:
 
-        double                      m_fFrequency;           ///< Frequency of visuals update
-        int                         m_nVisualisations;      ///< Additional graphical output
-        CKeyMap<IVisuals*>          m_VisualsMap;           ///< Map of visuals and keys
-        std::list<CDebrisVisuals*>  m_DebrisVisuals;        ///< List of debris visuals
-        CCamera*                    m_pCamera;              ///< Camera for player view
+        double                          m_fFrequency;       ///< Frequency of visuals update
+        int                             m_nVisualisations;  ///< Additional graphical output
+//         CKeyMap<IVisuals*>          m_VisualsMap;           ///< Map of visuals and keys
+        std::vector<IObjectVisuals*>    m_ObjectVisuals;    ///< List of object visuals
+        std::list<CDebrisVisuals*>      m_DebrisVisuals;    ///< List of debris visuals
+        CCamera*                        m_pCamera;          ///< Camera for player view
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -82,7 +83,7 @@ class CVisualsManager : virtual public CGraphicsBase
 ////////////////////////////////////////////////////////////////////////////////
 inline const double CVisualsManager::getFrequency() const
 {
-    METHOD_ENTRY("CVisualsManager::getFrequency()")
+    METHOD_ENTRY("CVisualsManager::getFrequency")
     return (m_fFrequency);
 }
 

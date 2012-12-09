@@ -67,9 +67,7 @@ class CSpring : public IJoint
 ////////////////////////////////////////////////////////////////////////////////
 inline const double CSpring::getC() const
 {
-    METHOD_ENTRY("CSpring::getC()");
-
-    METHOD_EXIT("CSpring::getC()");
+    METHOD_ENTRY("CSpring::getC")
     return m_fC;
 }
 
@@ -82,9 +80,7 @@ inline const double CSpring::getC() const
 ////////////////////////////////////////////////////////////////////////////////
 inline const double CSpring::getLength() const
 {
-    METHOD_ENTRY("CSpring::getLength()");
-
-    METHOD_EXIT("CSpring::getLength()");
+    METHOD_ENTRY("CSpring::getLength")
     return m_fLength;
 }
 
@@ -97,11 +93,8 @@ inline const double CSpring::getLength() const
 ////////////////////////////////////////////////////////////////////////////////
 inline void CSpring::setC(const double& _fC)
 {
-    METHOD_ENTRY("CSpring::setC()");
-
+    METHOD_ENTRY("CSpring::setC")
     m_fC = _fC;
-
-    METHOD_EXIT("CSpring::setC()");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,11 +106,8 @@ inline void CSpring::setC(const double& _fC)
 ////////////////////////////////////////////////////////////////////////////////
 inline void CSpring::setLength(const double& _fLength)
 {
-    METHOD_ENTRY("CSpring::setLength()");
-
+    METHOD_ENTRY("CSpring::setLength")
     m_fLength = _fLength;
-
-    METHOD_EXIT("CSpring::setLength()");
 }
 
 #endif

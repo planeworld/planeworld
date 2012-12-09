@@ -32,8 +32,6 @@ CPhysicsManager::CPhysicsManager() : m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
     CTOR_CALL("CPhysicsManager::CPhysicsManager")
     
     m_vecConstantGravitation.setZero();
-
-    METHOD_EXIT("CPhysicsManager::CPhysicsManager")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,8 +108,6 @@ CPhysicsManager::~CPhysicsManager()
             DOM_MEMF(DEBUG_MSG("IJoint*", "Memory already freed."))
         }
     };
-
-    METHOD_EXIT("CPhysicsManager::~CPhysicsManager")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,10 +159,7 @@ void CPhysicsManager::addGlobalForces()
         }
 
         (*ci)->addAcceleration(m_vecConstantGravitation);
-
     };
-
-    METHOD_EXIT("CPhysicsManager::addGlobalForces")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -183,8 +176,6 @@ void CPhysicsManager::addDebris(CDebris* _pDebris)
     METHOD_ENTRY("CPhysicsManager::addDebris")
 
     m_Debris.push_back(_pDebris);
-
-    METHOD_EXIT("CPhysicsManager::addDebris")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -201,8 +192,6 @@ void CPhysicsManager::addJoint(IJoint* _pJoint)
     METHOD_ENTRY("CPhysicsManager::addJoint")
 
     m_JointList.push_back(_pJoint);
-
-    METHOD_EXIT("CPhysicsManager::addJoint")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -223,8 +212,6 @@ void CPhysicsManager::addObject(IObject* _pObject)
         m_DynamicObjects.push_back(_pObject);
     else
         m_StaticObjects.push_back(_pObject);
-
-    METHOD_EXIT("CPhysicsManager::addObject")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -237,7 +224,7 @@ void CPhysicsManager::addObject(IObject* _pObject)
 /// \param _Objects Objects that should be added to list
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addObjects(std::list<IObject*> _Objects)
+void CPhysicsManager::addObjects(ObjectsType _Objects)
 {
     METHOD_ENTRY("CPhysicsManager::addObjects")
 
@@ -251,8 +238,6 @@ void CPhysicsManager::addObjects(std::list<IObject*> _Objects)
             m_StaticObjects.push_back((*ci));
         ++ci;
     }
-
-    METHOD_EXIT("CPhysicsManager::addObjects")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -276,8 +261,6 @@ void CPhysicsManager::collisionDetection()
 //      (*ci).getObjectA()->disableDynamics();
 //      (*ci).getObjectB()->disableDynamics();
 //  }
-
-    METHOD_EXIT("CPhysicsManager::collisionDetection")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -305,8 +288,6 @@ void CPhysicsManager::moveMasses(int nTest)
             (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel);
         }
     }
-
-    METHOD_EXIT("CPhysicsManager::moveMasses")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -337,6 +318,4 @@ void CPhysicsManager::initObjects()
     {
         (*ci)->init();
     };
-
-    METHOD_EXIT("CPhysicsManager::resetStates")
 }

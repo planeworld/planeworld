@@ -58,12 +58,12 @@ CXMLImporter::~CXMLImporter()
 /// \return List of objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::list<IObject*> CXMLImporter::getObjects() const
+std::vector<IObject*> CXMLImporter::getObjects() const
 {
     METHOD_ENTRY("CXMLImporter::getObjects")
     
     std::map<std::string, IObject*>::const_iterator ci;
-    std::list<IObject*> TmpList;
+    std::vector<IObject*> TmpList;
     for (ci = m_Objects.begin(); ci != m_Objects.end(); ++ci)
         TmpList.push_back((*ci).second);
 
@@ -253,6 +253,8 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
     CRigidBody* pRigidBody = new CRigidBody;
     MEM_ALLOC("pRigidBody")
     
+    IObjectVisuals* pObjectVisuals = new IObjectVisuals(pRigidBody);
+    
     pugi::xml_node N = _Node;
     
     while (!N.empty())
@@ -266,19 +268,19 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
             std::string strType(N.attribute("type").as_string());
             if (strType == "Planet")
             {
-                this->createShapePlanet(pRigidBody, N);
+                this->createShapePlanet(pRigidBody, pObjectVisuals, N);
             }
             else if (strType == "Circle")
             {
-                this->createShapeCircle(pRigidBody, N);
+                this->createShapeCircle(pRigidBody, pObjectVisuals, N);
             }
             else if (strType == "Polyline")
             {
-                this->createShapePolyline(pRigidBody, N);
+                this->createShapePolyline(pRigidBody, pObjectVisuals, N);
             }
             else if (strType == "Terrain")
             {
-                this->createShapeTerrain(pRigidBody, N);
+                this->createShapeTerrain(pRigidBody, pObjectVisuals, N);
             }
         }        
         
@@ -286,6 +288,7 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
     }
     
     m_Objects.insert(std::pair<std::string,IObject*>(pRigidBody->getName(),pRigidBody));
+    m_Visuals.push_back(pObjectVisuals);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,10 +296,13 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
 /// \brief Create a circle shape
 ///
 /// \param _pBody Body to create the shape for
+/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapeCircle(CBody* const _pBody, const pugi::xml_node& _Node)
+void CXMLImporter::createShapeCircle(CBody* const _pBody,
+                                     IObjectVisuals* const _pObjectVisuals,
+                                     const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapeCircle")
     
@@ -315,7 +321,7 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody, const pugi::xml_node& 
         {
             if (std::string(N.name()) == "visuals")
             {
-                this->createVisualsCircle(pCircle, N);
+                this->createVisualsCircle(pCircle, _pObjectVisuals, N);
             }
             N = N.next_sibling();
         }
@@ -329,10 +335,13 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody, const pugi::xml_node& 
 /// \brief Create a planet shape
 ///
 /// \param _pBody Body to create the shape for
+/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapePlanet(CBody* const _pBody, const pugi::xml_node& _Node)
+void CXMLImporter::createShapePlanet(CBody* const _pBody,
+                                     IObjectVisuals* const _pObjectVisuals,
+                                     const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapePlanet")
     
@@ -355,7 +364,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody, const pugi::xml_node& 
         {
             if (std::string(N.name()) == "visuals")
             {
-                this->createVisualsPlanet(pPlanet, N);
+                this->createVisualsPlanet(pPlanet, _pObjectVisuals, N);
             }
             N = N.next_sibling();
         }
@@ -369,10 +378,13 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody, const pugi::xml_node& 
 /// \brief Create a polyline shape
 ///
 /// \param _pBody Body to create the shape for
+/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapePolyline(CBody* const _pBody, const pugi::xml_node& _Node)
+void CXMLImporter::createShapePolyline(CBody* const _pBody,
+                                       IObjectVisuals* const _pObjectVisuals,
+                                       const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapePolyline")
     
@@ -420,7 +432,7 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody, const pugi::xml_node
         {
             if (std::string(N.name()) == "visuals")
             {
-                this->createVisualsPolyline(pPolyline, N);
+                this->createVisualsPolyline(pPolyline, _pObjectVisuals, N);
             }
             N = N.next_sibling();
         }
@@ -434,10 +446,13 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody, const pugi::xml_node
 /// \brief Create a terrain shape
 ///
 /// \param _pBody Body to create the shape for
+/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapeTerrain(CBody* const _pBody, const pugi::xml_node& _Node)
+void CXMLImporter::createShapeTerrain(CBody* const _pBody,
+                                      IObjectVisuals* const _pObjectVisuals,
+                                      const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapeTerrain")
     
@@ -459,7 +474,7 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody, const pugi::xml_node&
         {
             if (std::string(N.name()) == "visuals")
             {
-                this->createVisualsTerrain(pTerrain, N);
+                this->createVisualsTerrain(pTerrain, _pObjectVisuals, N);
             }
             N = N.next_sibling();
         }
@@ -473,10 +488,13 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody, const pugi::xml_node&
 /// \brief Create visuals to a circle shape
 ///
 /// \param _pCircle Circle to create visuals for
+/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsCircle(CCircle* const _pCircle, const pugi::xml_node& _Node)
+void CXMLImporter::createVisualsCircle(CCircle* const _pCircle,
+                                       IObjectVisuals* const _pObjectVisuals,
+                                       const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createVisualsCircle")
     
@@ -487,7 +505,7 @@ void CXMLImporter::createVisualsCircle(CCircle* const _pCircle, const pugi::xml_
             CCircleVisuals* pCircleVisuals = new CCircleVisuals(_pCircle);
             MEM_ALLOC("pCircleVisuals")
             
-            m_Visuals.push_back(pCircleVisuals);
+            _pObjectVisuals->addVisuals(pCircleVisuals);
         }
             
     }
@@ -498,10 +516,13 @@ void CXMLImporter::createVisualsCircle(CCircle* const _pCircle, const pugi::xml_
 /// \brief Create visuals to a planet shape
 ///
 /// \param _pPlanet Planet to create visuals for
+/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet, const pugi::xml_node& _Node)
+void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet,
+                                       IObjectVisuals* const _pObjectVisuals,
+                                       const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createVisualsPlanet")
     
@@ -512,7 +533,7 @@ void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet, const pugi::xml_
             CPlanetVisuals* pPlanetVisuals = new CPlanetVisuals(_pPlanet);
             MEM_ALLOC("pPlanetVisuals")
             
-            m_Visuals.push_back(pPlanetVisuals);
+            _pObjectVisuals->addVisuals(pPlanetVisuals);
         }
             
     }
@@ -523,10 +544,13 @@ void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet, const pugi::xml_
 /// \brief Create visuals to a polyline shape
 ///
 /// \param _pPolyline Polyline to create visuals for
+/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const pugi::xml_node& _Node)
+void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline,
+                                         IObjectVisuals* const _pObjectVisuals,
+                                         const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createVisualsPolyline")
     
@@ -537,7 +561,7 @@ void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const pugi
             CPolylineVisuals* pPolylineVisuals = new CPolylineVisuals(_pPolyline);
             MEM_ALLOC("pPlanetVisuals")
             
-            m_Visuals.push_back(pPolylineVisuals);
+            _pObjectVisuals->addVisuals(pPolylineVisuals);
         }
             
     }
@@ -548,10 +572,13 @@ void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline, const pugi
 /// \brief Create visuals to a terrain shape
 ///
 /// \param _pTerrain Terrain to create visuals for
+/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain, const pugi::xml_node& _Node)
+void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain,
+                                        IObjectVisuals* const _pObjectVisuals,
+                                        const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createVisualsTerrain")
     
@@ -562,7 +589,7 @@ void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain, const pugi::x
             CTerrainVisuals* pTerrainVisuals = new CTerrainVisuals(_pTerrain);
             MEM_ALLOC("pTerrainVisuals")
             
-            m_Visuals.push_back(pTerrainVisuals);
+            _pObjectVisuals->addVisuals(pTerrainVisuals);
         }
             
     }

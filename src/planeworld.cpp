@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
     CCamera*            pCamera;
     CCircle*            pCircle;
     CCircleVisuals*     pCircleVisuals;
+    IObjectVisuals*     pObjectVisuals;
     CDebris*            pDebris;
     CDebrisVisuals*     pDebrisVisuals;
 //     CPointMass*         pPointMass;
@@ -184,6 +185,10 @@ int main(int argc, char *argv[])
         pCircleVisuals = new CCircleVisuals(pCircle);
 //         pPlanetVisuals = new CPlanetVisuals(pPlanet);
         MEM_ALLOC("pCircleVisuals")
+        
+        pObjectVisuals = new IObjectVisuals(pPointMass);
+//         pPlanetVisuals = new CPlanetVisuals(pPlanet);
+        MEM_ALLOC("pObjectVisuals")
 
 
 //         pRect->setDepths(SHAPE_DEPTH_ALL);
@@ -205,7 +210,8 @@ int main(int argc, char *argv[])
 //         pPointMass->addVisuals(pRectVisuals);
         
 //         pVisualsManager->addVisuals(pRectVisuals);
-        pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
+        pObjectVisuals->addVisuals(pCircleVisuals);
+        pVisualsManager->addVisuals(pObjectVisuals);
 //         pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
         pPhysicsManager->addObject(pPointMass);
     }

@@ -53,14 +53,11 @@ class IJoint
         //--- Methods --------------------------------------------------------//
         void attachObjectA(IObject*, const AnchorIDType&);
         void attachObjectB(IObject*, const AnchorIDType&);
-        void setVisualsID(const VisualsIDType&);
 
     protected:
         
         IObject* m_pObjectA;        ///< Pointer to attached object
         IObject* m_pObjectB;        ///< Pointer to attached object
-        
-        VisualsIDListType  m_VisualsIDs; ///< Visuals of joint
         
         AnchorIDType    m_AnchorIDA;  ///< Anchor ID of first attached object
         AnchorIDType    m_AnchorIDB;  ///< Anchor ID of second attached object
@@ -78,8 +75,6 @@ class IJoint
 inline AnchorIDType IJoint::getAnchorIDA() const
 {
     METHOD_ENTRY("IJoint::getAnchorIDA()");
-
-    METHOD_EXIT("IJoint::getAnchorIDA()");
     return (m_AnchorIDA);
 }
 
@@ -93,8 +88,6 @@ inline AnchorIDType IJoint::getAnchorIDA() const
 inline AnchorIDType IJoint::getAnchorIDB() const
 {
     METHOD_ENTRY("IJoint::getAnchorIDB()");
-
-    METHOD_EXIT("IJoint::getAnchorIDB()");
     return (m_AnchorIDB);
 }
 
@@ -108,8 +101,6 @@ inline AnchorIDType IJoint::getAnchorIDB() const
 inline IObject* IJoint::getObjectA() const
 {
     METHOD_ENTRY("IJoint::getObjectA()");
-
-    METHOD_EXIT("IJoint::getObjectA()");
     return (m_pObjectA);
 }
 
@@ -123,8 +114,6 @@ inline IObject* IJoint::getObjectA() const
 inline IObject* IJoint::getObjectB() const
 {
     METHOD_ENTRY("IJoint::getObjectB()");
-
-    METHOD_EXIT("IJoint::getObjectB()");
     return (m_pObjectB);
 }
 
@@ -142,8 +131,6 @@ inline void IJoint::attachObjectA(IObject* _pA, const AnchorIDType& _AnchorID)
 
     m_pObjectA = _pA;
     m_AnchorIDA = _AnchorID;
-    
-    METHOD_EXIT("IJoint::attachObjectA")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -160,27 +147,6 @@ inline void IJoint::attachObjectB(IObject* _pB, const AnchorIDType& _AnchorID)
 
     m_pObjectB = _pB;
     m_AnchorIDB = _AnchorID;
-    
-    METHOD_EXIT("IJoint::attachObjectA")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Adds an ID of joints visuals to list
-///
-/// The joint just stores ID's to visuals. The visuals itself are handled by 
-/// the visualsmanager.
-///
-/// \param _VisualsID ID of visuals that should be added to list
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IJoint::setVisualsID(const VisualsIDType& _VisualsID)
-{
-    METHOD_ENTRY("IJoint::setVisualsID")
-    
-    m_VisualsIDs.push_back(_VisualsID);
-
-    METHOD_EXIT("IJoint::setVisualsID")
 }
 
 #endif

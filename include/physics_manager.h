@@ -29,7 +29,7 @@
 
 const double PHYSICS_DEFAULT_FREQUENCY = 100.0;
 
-typedef std::list<IObject*> ObjectsType;
+typedef std::vector<IObject*> ObjectsType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -61,7 +61,7 @@ class CPhysicsManager
         void addDebris(CDebris*);
         void addJoint(IJoint*);
         void addObject(IObject*);
-        void addObjects(std::list<IObject*>);
+        void addObjects(ObjectsType);
         void collisionDetection();
         void initObjects();
         void moveMasses(int);

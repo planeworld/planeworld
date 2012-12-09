@@ -30,8 +30,6 @@ CSpringVisuals::CSpringVisuals(CSpring* _pSpring): m_pSpring(_pSpring)
 {
     METHOD_ENTRY("CSpringVisuals::CSpringVisuals")
     CTOR_CALL("CSpringVisuals::CSpringVisuals")
-    
-    METHOD_EXIT("CSpringVisuals::CSpringVisuals")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,8 +41,6 @@ CSpringVisuals::~CSpringVisuals()
 {
     METHOD_ENTRY("CSpringVisuals::~CSpringVisuals()");
     DTOR_CALL("CSpringVisuals::~CSpringVisuals()");
-
-    METHOD_EXIT("CSpringVisuals::~CSpringVisuals()");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,8 +76,6 @@ void CSpringVisuals::draw(const CCamera* const _pCamera) const
 
     m_Graphics.addVertex(vec2);
     m_Graphics.endLine();
-    
-    METHOD_EXIT("CSpringVisuals::draw()");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +102,5 @@ const CBoundingBox& CSpringVisuals::getBoundingBox()
     m_BoundingBox.update(vec2-vecOrth);
     m_BoundingBox.update(vec2+vecOrth);
 
-    METHOD_EXIT("CSpringVisuals::getBoundingBox")
     return m_BoundingBox;
 }

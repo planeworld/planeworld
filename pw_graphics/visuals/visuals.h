@@ -24,7 +24,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "camera.h"
-#include "key_map.h"
+// #include "key_map.h"
 // #include "object.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,9 +54,9 @@ class IVisuals : virtual public CGraphicsBase
 
 };
 
-typedef KeyType VisualsIDType;
-typedef std::list<IVisuals*> VisualsListType;
-typedef std::list<VisualsIDType> VisualsIDListType;
+// typedef KeyType VisualsIDType;
+// typedef std::list<IVisuals*> VisualsListType;
+// typedef std::list<VisualsIDType> VisualsIDListType;
 
 //--- Implementation is done here for inline optimisation --------------------//
 
