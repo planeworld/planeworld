@@ -52,7 +52,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
     int      nSeed     = m_pPlanet->getSeed();
     double   fSmooth   = m_pPlanet->getSmoothness();
     Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getCenter() +
-                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;;
+                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;
     
     if ((vecCenter.norm() <= fRad+fHeight+_pCamera->getBoundingCircleRadius()) &&
         (vecCenter.norm() >  fRad-fHeight-_pCamera->getBoundingCircleRadius())

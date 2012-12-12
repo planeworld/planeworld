@@ -202,8 +202,6 @@ void CCamera::update()
     fCells = floor((m_vecCenter[1]+DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2);
     m_vecCell[1]  = static_cast<int>(fCells);
     m_vecCenter[1] -= DEFAULT_CELL_SIZE_2*fCells;
-    
-    METHOD_EXIT("CCamera::update")
 }
 
 ///////////////////////////////////////////////////////////////////////////////

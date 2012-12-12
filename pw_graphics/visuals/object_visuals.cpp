@@ -46,6 +46,10 @@ IObjectVisuals::~IObjectVisuals()
 ///
 /// \brief Draw all shape visuals of this object
 ///
+/// \todo At the moment, an object is only drawn if in the same cell as the
+///       camera, otherwise, when zoomed out, a dot is drawn. Bounding Boxes are
+///       not fully adjusted to cells yet. Dots need not always to be drawn.
+///
 /// \param _pCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,18 +60,19 @@ void IObjectVisuals::draw(const CCamera* const _pCamera) const
     for (std::vector<IVisuals*>::const_iterator ci  = m_Visuals.begin();
                                                 ci != m_Visuals.end(); ++ci)
     {
-        if ((*ci)->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+        
+        if ((((*ci)->getBoundingBox().getWidth() * _pCamera->getZoom()) <  0.3) && 
+            (((*ci)->getBoundingBox().getHeight() * _pCamera->getZoom()) < 0.3))
         {
-            if ((((*ci)->getBoundingBox().getWidth() * _pCamera->getZoom()) <  0.3) && 
-                (((*ci)->getBoundingBox().getHeight() * _pCamera->getZoom()) < 0.3))
-            {
-                m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() -
-                                _pCamera->getCenter()-_pCamera->getCellToPos());
-            }
-            else
-            {
-                (*ci)->draw(_pCamera, m_pObject);
-            }
+            m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() -
+                            _pCamera->getCenter() + 
+                            (m_pObject->getCell()-_pCamera->getCell()).cast<double>()*DEFAULT_CELL_SIZE_2);
+        }
+        else
+        {
+            if (m_pObject->getCell() == _pCamera->getCell())
+//                 if ((*ci)->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+                    (*ci)->draw(_pCamera, m_pObject);
         }
     }
 }

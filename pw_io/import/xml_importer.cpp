@@ -613,6 +613,9 @@ void CXMLImporter::readObjectCore(IObject* const _pO, const pugi::xml_node& _Nod
         _pO->setMass(_Node.attribute("mass").as_double());
         _pO->setOrigin(_Node.attribute("origin_x").as_double(),
                        _Node.attribute("origin_y").as_double());
+        _pO->setCell(Vector2i(
+                     _Node.attribute("cell_x").as_int(),
+                     _Node.attribute("cell_y").as_int()));
                                 
         if (_Node.attribute("gravity").as_bool() == true)
             _pO->enableGravitation();

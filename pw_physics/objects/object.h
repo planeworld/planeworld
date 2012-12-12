@@ -170,8 +170,6 @@ inline void IObject::addAcceleration(const Vector2d& _vecV)
     METHOD_ENTRY("IObject::addAcceleration")
 
     this->addForce(_vecV*m_fMass, m_pIntPos->getValue()+m_vecCOM);
-    
-    METHOD_EXIT("IObject::addAcceleration")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -230,8 +228,6 @@ inline const Vector2d IObject::getHookPosition() const
 inline const Vector2d IObject::getCOM() const
 {
     METHOD_ENTRY("IObject::getCOM")
-
-    METHOD_EXIT("IObject::getCOM")
     return (m_vecCOM+m_pIntPos->getValue());
 }
 
@@ -245,8 +241,6 @@ inline const Vector2d IObject::getCOM() const
 inline const int IObject::getDepths() const
 {
     METHOD_ENTRY("IObject::getDepths")
-
-    METHOD_EXIT("IObject::getDepths")
     return (m_nDepthlayers);
 }
 
@@ -260,8 +254,6 @@ inline const int IObject::getDepths() const
 inline const bool IObject::getDynamicsState() const
 {
     METHOD_ENTRY("IObject::getDynamicsState")
-
-    METHOD_EXIT("IObject::getDynamicsState")
     return (m_bDynamics);
 }
 
@@ -280,8 +272,6 @@ inline const bool IObject::getDynamicsState() const
 inline const bool IObject::getGravitationState() const
 {
     METHOD_ENTRY("IObject::getGravitationState")
-
-    METHOD_EXIT("IObject::getGravitationState")
     return (m_bGravitation);
 }
 
@@ -298,8 +288,6 @@ inline const bool IObject::getGravitationState() const
 inline const Vector2i IObject::getCell() const
 {
     METHOD_ENTRY("IObject::getCell")
-
-    METHOD_EXIT("IObject::getCell")
     return (m_vecCell);
 }
 
@@ -313,8 +301,6 @@ inline const Vector2i IObject::getCell() const
 inline const double IObject::getMass() const
 {
     METHOD_ENTRY("IObject::getMass")
-
-    METHOD_EXIT("IObject::getMass")
     return (m_fMass);
 }
 
@@ -328,8 +314,6 @@ inline const double IObject::getMass() const
 inline const std::string IObject::getName() const
 {
     METHOD_ENTRY("IObject::getName")
-
-    METHOD_EXIT("IObject::getName")
     return (m_strName);
 }
 
@@ -343,8 +327,6 @@ inline const std::string IObject::getName() const
 inline const Vector2d IObject::getVelocity() const
 {
     METHOD_ENTRY("IObject::getVelocity")
-
-    METHOD_EXIT("IObject::getVelocity")
     return (m_pIntVel->getValue());
 }
 
@@ -362,8 +344,7 @@ inline AnchorIDType IObject::addAnchor(const Vector2d& _vecV)
     METHOD_ENTRY("IObject::addAnchor")
 
     m_Anchors.push_back(_vecV);
-
-    METHOD_EXIT("IObject::addAnchor")
+    
     return m_Anchors.size()-1;
 }
 
@@ -383,8 +364,6 @@ inline void IObject::disableGravitation()
     METHOD_ENTRY("IObject::disableGravitation")
 
     m_bGravitation = false;
-
-    METHOD_EXIT("IObject::disableGravitation")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -403,8 +382,6 @@ inline void IObject::enableGravitation()
     METHOD_ENTRY("IObject::enableGravitation")
 
     m_bGravitation = true;
-
-    METHOD_EXIT("IObject::enableGravitation")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -417,8 +394,6 @@ inline void IObject::enableGravitation()
 inline CGeometry* const IObject::getGeometry()
 {
     METHOD_ENTRY("IObject::getGeometry")
-
-    METHOD_EXIT("IObject::getGeometry")
     return &m_Geometry;
 }
 
@@ -437,8 +412,6 @@ inline void IObject::setCell(const Vector2i& _vecCell)
     METHOD_ENTRY("IObject::setCell")
 
     m_vecCell = _vecCell;
-
-    METHOD_EXIT("IObject::setCell")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -454,8 +427,6 @@ inline void IObject::setOrigin(const Vector2d& _vecOrigin)
 
     m_vecOrigin0 = _vecOrigin;
     m_pIntPos->init(_vecOrigin);
-
-    METHOD_EXIT("IObject::setOrigin")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -474,8 +445,6 @@ inline void IObject::setOrigin(const double& _fX, const double& _fY)
     m_vecOrigin0[1] = _fY;
 
     m_pIntPos->init(m_vecOrigin0);
-
-    METHOD_EXIT("IObject::setOrigin")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -490,8 +459,6 @@ inline void IObject::setDepths(const int& _nD)
     METHOD_ENTRY("IObject::setDepths")
 
     m_nDepthlayers |= _nD;
-
-    METHOD_EXIT("IObject::setDepths")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -506,8 +473,6 @@ inline void IObject::unsetDepths(const int& _nD)
     METHOD_ENTRY("IObject::unsetDepths")
 
     m_nDepthlayers &= (!_nD);
-
-    METHOD_EXIT("IObject::unsetDepths")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -522,8 +487,6 @@ inline void IObject::setMass(const double& _fMass)
     METHOD_ENTRY("IObject::setMass")
 
     m_fMass = _fMass;
-
-    METHOD_EXIT("IObject::setMass")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -538,8 +501,6 @@ inline void IObject::setName(const std::string& _strName)
     METHOD_ENTRY("IObject::setName")
 
     m_strName = _strName;
-
-    METHOD_EXIT("IObject::setName")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -558,8 +519,6 @@ inline void IObject::setTimeFac(const double& _fTF)
     METHOD_ENTRY("IObject::setTimeFac")
 
     m_fTimeFac = _fTF;
-
-    METHOD_EXIT("IObject::setTimeFac")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -574,8 +533,6 @@ inline void IObject::setVelocity(const Vector2d& _vecVel)
     METHOD_ENTRY("IObject::setVelocity")
 
     m_pIntVel->init(_vecVel);
-
-    METHOD_EXIT("IObject::setVelocity")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -590,8 +547,6 @@ inline void IObject::enableDynamics()
     METHOD_ENTRY("IObject::enableDynamics")
 
     m_bDynamics = true;
-
-    METHOD_EXIT("IObject::enableDynamics")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -608,8 +563,6 @@ inline void IObject::disableDynamics()
     METHOD_ENTRY("IObject::disableDynamics")
 
     m_bDynamics = false;
-
-    METHOD_EXIT("IObject::disableDynamics")
 }
 
 #endif
