@@ -30,6 +30,7 @@
 #include "planet_visuals.h"
 #include "polyline_visuals.h"
 #include "terrain_visuals.h"
+#include "universe.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "pugixml.hpp"
@@ -60,6 +61,7 @@ class CXMLImporter
         Vector2d                        getGravity() const;
         std::vector<IObject*>           getObjects() const;
         std::vector<IObjectVisuals*>    getVisuals() const;
+        const CUniverse&                getUniverse() const;
                 
         //--- Methods --------------------------------------------------------//
         bool import(const std::string&,
@@ -79,8 +81,10 @@ class CXMLImporter
         void createVisualsTerrain(CTerrain* const, IObjectVisuals* const, const pugi::xml_node&);
         void createVisualsPolyline(CPolyLine* const, IObjectVisuals* const, const pugi::xml_node&);
         void createRigidBody(const pugi::xml_node&);
+        void createUniverse(const pugi::xml_node&);
         void readObjectCore(IObject* const, const pugi::xml_node&);
         
+        CUniverse                       m_Universe;      ///< The procedurally generated universe
         CCamera*                        m_pCamera;       ///< Main camera
         Vector2d                        m_vecGravity;    ///< Constant gravity vector
         std::string                     m_strCameraHook; ///< Camera hook
@@ -129,6 +133,19 @@ inline std::vector<IObjectVisuals*> CXMLImporter::getVisuals() const
 {
     METHOD_ENTRY("CXMLImporter::getVisuals")
     return m_Visuals;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return procedurally generated universe
+///
+/// \return Procedurally generated universe
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CUniverse& CXMLImporter::getUniverse() const
+{
+    METHOD_ENTRY("CXMLImporter::getUniverse")
+    return m_Universe;
 }
 
 #endif

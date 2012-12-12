@@ -33,7 +33,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 void usage()
 {
-    std::cout << "Usage: starmap_ut <seed>" << std::endl;
+    std::cout << "Usage: starmap_ut <seed> <number_of_stars>" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ void usage()
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if (argc != 3)
     {
         usage();
         return EXIT_FAILURE;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     CUniverse           Universe;
     
     //--- Initialisation of universe------------------------------------------//
-    Universe.generate(atoi(argv[1]));
+    Universe.generate(atoi(argv[1]),atoi(argv[2]));
     std::vector<CStarSystem*> StarSystems = Universe.getStarSystems();
 
     //--- Initialisation of graphics -----------------------------------------//

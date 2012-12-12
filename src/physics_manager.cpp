@@ -24,7 +24,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CPhysicsManager::CPhysicsManager() : m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
+CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
+                                     m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
                                      m_fTimeAccel(1.0)
                                    
 {

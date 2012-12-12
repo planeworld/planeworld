@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     CUniverse           Universe;
     
     //--- Initialisation -----------------------------------------------------//
-    Universe.generate(100);
+    Universe.generate(234, 10000);
 
     return 0;
 }

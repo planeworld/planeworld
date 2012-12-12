@@ -29,7 +29,6 @@
 //--- Misc header ------------------------------------------------------------//
 
 const double UNIVERSE_CELL_SIZE=1.0e12;
-const int    UNIVERSE_NR_OF_STARS_DEFAULT=10000;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -59,14 +58,17 @@ class CUniverse
         const std::vector<CStarSystem*>& getStarSystems() const;
 
         //--- Methods --------------------------------------------------------//
-        void generate(const int&);
+        void generate(const int&, const int&);
+        void clone(const CUniverse&);
         
     private:
+        
+        CUniverse(const CUniverse&);                ///< Private, prevent copy-construction, use clone instead
+        CUniverse& operator=(const CUniverse&);     ///< Private, prevent assignment, use clone instead
         
         //--- Constant Methods [private] -------------------------------------//
         const std::string starClassToString(const int&) const;
         
-        int                         m_nNrOfStars;   ///< Number of stars in this universe
         std::vector<CStarSystem*>   m_StarSystems;  ///< Star system in this universe
 
 };

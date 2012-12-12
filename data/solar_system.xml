@@ -1,5 +1,8 @@
 <!DOCTYPE PlaneworldML>
-<universe>
+<universe
+  seed="234"
+  number_of_stars="10000"
+>
   <!-- Create the active camera -->
   <camera
     hook="SmallPlanet"

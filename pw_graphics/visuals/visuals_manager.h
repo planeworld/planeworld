@@ -26,6 +26,7 @@
 #include "engine_common.h"
 #include "debris_visuals.h"
 #include "object_visuals.h"
+#include "universe.h"
 
 const double VISUALS_DEFAULT_FREQUENCY = 30.0;
 
@@ -57,6 +58,7 @@ class CVisualsManager : virtual public CGraphicsBase
         void            addVisuals(IObjectVisuals* const);
         void            addVisualsList(const std::vector<IObjectVisuals*>&);
         void            setCamera(CCamera*);
+        void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
         void            setWindow(sf::Window* const);
         void            toggleVisualisations(const int&);
@@ -64,6 +66,7 @@ class CVisualsManager : virtual public CGraphicsBase
 
     private:
 
+        CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         double                          m_fFrequency;       ///< Frequency of visuals update
         int                             m_nVisualisations;  ///< Additional graphical output
 //         CKeyMap<IVisuals*>          m_VisualsMap;           ///< Map of visuals and keys
@@ -137,6 +140,19 @@ inline void CVisualsManager::setCamera(CCamera* _pCamera)
 {
     METHOD_ENTRY("CVisualsManager::setCamera")
     m_pCamera = _pCamera;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets procedurally generated universe for visualisation
+///
+/// \param _pUniverse Procedurally generated universe
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CVisualsManager::setUniverse(CUniverse* const _pUniverse)
+{
+    METHOD_ENTRY("CVisualsManager::setUniverse")
+    m_pUniverse = _pUniverse;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

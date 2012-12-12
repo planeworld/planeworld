@@ -27,7 +27,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CUniverse::CUniverse() : m_nNrOfStars(UNIVERSE_NR_OF_STARS_DEFAULT)
+CUniverse::CUniverse()
 {
     METHOD_ENTRY("CUniverse::CUniverse");
     CTOR_CALL("CUniverse::CUniverse");
@@ -57,23 +57,24 @@ CUniverse::~CUniverse()
 /// \brief Procudurally generates a universe based on a given seed.
 ///
 /// \param _nSeed Initial seed for procedural universe generation
+/// \param _nNumberOfStars Number of stars for this universe
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CUniverse::generate(const int& _nSeed)
+void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 {
     METHOD_ENTRY("CUniverse::generate")
     
     const int nBar=100;
     const int nNrOfStarTypes=7;
     
-    m_StarSystems.reserve(m_nNrOfStars);
+    m_StarSystems.reserve(_nNumberOfStars);
     
     std::mt19937 Generator;
     
     Generator.seed(_nSeed);
     
     // Density = m_nNrOfStars/(3.0*fSigma * 2.0*M_PI) = 0.4/30.857e15;
-    double fSigma = 10;// m_nNrOfStars * 30.857e15 / (0.4*3.0*2.0*M_PI);
+    double fSigma = _nNumberOfStars * 30.857e15 / (0.4*3.0*2.0*M_PI);
     
     std::exponential_distribution<double>   ExponentialDistribution(3.5);
     std::normal_distribution<double>        NormalDistribution(0.0, fSigma);
@@ -83,7 +84,7 @@ void CUniverse::generate(const int& _nSeed)
     std::vector<int> vecNrOfStars(nNrOfStarTypes,0);
 
     // Create a globular cluster
-    for (int i=0; i<m_nNrOfStars; ++i)
+    for (int i=0; i<_nNumberOfStars; ++i)
     {
         double fNumber = ExponentialDistribution(Generator);
         if (fNumber<1.0)
@@ -98,11 +99,11 @@ void CUniverse::generate(const int& _nSeed)
             Vector2i vecCell;
             Vector2d vecCenter;
             
-            vecCell[0] = static_cast<int>(fDistance*std::sin(fAngle)/DEFAULT_CELL_SIZE);
-            vecCell[1] = static_cast<int>(fDistance*std::cos(fAngle)/DEFAULT_CELL_SIZE);
+            vecCell[0] = static_cast<int>(fDistance*std::sin(fAngle)/DEFAULT_CELL_SIZE_2);
+            vecCell[1] = static_cast<int>(fDistance*std::cos(fAngle)/DEFAULT_CELL_SIZE_2);
             
-            vecCenter[0] = fDistance*std::sin(fAngle)-vecCell[0]*DEFAULT_CELL_SIZE;
-            vecCenter[1] = fDistance*std::cos(fAngle)-vecCell[1]*DEFAULT_CELL_SIZE;
+            vecCenter[0] = fDistance*std::sin(fAngle)-DEFAULT_CELL_SIZE_2*vecCell[0];
+            vecCenter[1] = fDistance*std::cos(fAngle)-DEFAULT_CELL_SIZE_2*vecCell[1];
             
             pStarSystem->setStarType(int(nNrOfStarTypes*fNumber));
             pStarSystem->setCenter(vecCenter);
@@ -120,7 +121,7 @@ void CUniverse::generate(const int& _nSeed)
     
     for (int i=0; i<nNrOfStarTypes; ++i) {
         std::cout << "Class " << this->starClassToString(i) << ": ";
-        std::cout << std::string(vecNrOfStars[i]*nBar/m_nNrOfStars,'#') << std::endl;
+        std::cout << std::string(vecNrOfStars[i]*nBar/_nNumberOfStars,'#') << std::endl;
     }
     Log.logSeparator();
 
@@ -132,9 +133,29 @@ void CUniverse::generate(const int& _nSeed)
     Log.logSeparator();
     
     for (int i=0; i<10; ++i)
-        std::cout << "Planets: " << i << ": " << std::string(vecNrOfPlanets[i]*nBar/m_nNrOfStars,'#') << std::endl;
+        std::cout << "Planets: " << i << ": " << std::string(vecNrOfPlanets[i]*nBar/_nNumberOfStars,'#') << std::endl;
     
     Log.logSeparator();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies the full content of a given universe
+///
+/// \param _Universe The universe to be copied
+///
+///////////////////////////////////////////////////////////////////////////////
+void CUniverse::clone(const CUniverse& _Universe)
+{
+    for (std::vector<CStarSystem*>::const_iterator ci=_Universe.getStarSystems().begin();
+                                                   ci!=_Universe.getStarSystems().end(); ++ci)
+    {
+        CStarSystem* pStarSystem = new CStarSystem();
+        MEM_ALLOC("pStarSystem");
+        
+        *pStarSystem = *(*ci);
+        m_StarSystems.push_back((pStarSystem));
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

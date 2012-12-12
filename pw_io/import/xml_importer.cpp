@@ -106,6 +106,11 @@ bool CXMLImporter::import(const std::string& _strFilename,
     {
         case IMPORT_MODE_UNIVERSE:
             N  = Root.first_child();
+            
+            if (std::string(Root.name()) == "universe")
+            {
+                this->createUniverse(Root);
+            }
             break;
         case IMPORT_MODE_OBJECT:
             N = Root;
@@ -592,6 +597,24 @@ void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain,
             _pObjectVisuals->addVisuals(pTerrainVisuals);
         }
             
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates the procedurally generated universe
+///
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createUniverse(const pugi::xml_node& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createUniverse")
+    
+    if (!_Node.empty())
+    {
+        m_Universe.generate(_Node.attribute("seed").as_int(),
+                            _Node.attribute("number_of_stars").as_int());
     }
 }
 

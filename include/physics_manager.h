@@ -26,6 +26,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "collision_manager.h"
 #include "joint.h"
+#include "universe.h"
 
 const double PHYSICS_DEFAULT_FREQUENCY = 100.0;
 
@@ -53,10 +54,12 @@ class CPhysicsManager
         ~CPhysicsManager();
         
         //--- Constant Methods -----------------------------------------------//
-        const double getFrequency() const;
+        const double     getFrequency() const;
+        CUniverse* const getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
         void setConstantGravity(const Vector2d&);
+        void setUniverse(CUniverse* const);
         void addGlobalForces();
         void addDebris(CDebris*);
         void addJoint(IJoint*);
@@ -72,6 +75,8 @@ class CPhysicsManager
         
 
     private:
+        
+        CUniverse*          m_pUniverse;            ///< The procedurally generated universe
         
         CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
 
@@ -99,9 +104,20 @@ class CPhysicsManager
 inline const double CPhysicsManager::getFrequency() const
 {
     METHOD_ENTRY("CPhysicsManager::getFrequency()")
-
-    METHOD_EXIT("CPhysicsManager::getFrequency()")
     return (m_fFrequency);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the procedurally generated universe
+///
+/// \return Procedurally generated universe
+///
+////////////////////////////////////////////////////////////////////////////////
+inline CUniverse* const CPhysicsManager::getUniverse() const
+{
+    METHOD_ENTRY("CPhysicsManager::getUniverse()")
+    return m_pUniverse;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,10 +130,20 @@ inline const double CPhysicsManager::getFrequency() const
 inline void CPhysicsManager::setConstantGravity(const Vector2d& _vecG)
 {
     METHOD_ENTRY("CPhysicsManager::setConstantGravity")
-
     m_vecConstantGravitation = _vecG;
+}
 
-    METHOD_EXIT("CPhysicsManager::setConstantGravitaty")
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set the procedurally generated universe
+///
+/// \param _pUniverse The procedurally generated universe
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPhysicsManager::setUniverse(CUniverse* const _pUniverse)
+{
+    METHOD_ENTRY("CPhysicsManager::setUniverse")
+    m_pUniverse = _pUniverse;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -128,11 +154,8 @@ inline void CPhysicsManager::setConstantGravity(const Vector2d& _vecG)
 inline void CPhysicsManager::accelerateTime()
 {
     METHOD_ENTRY("CPhysicsManager::accelerateTime")
-    
     if (m_fTimeAccel < 16.0)
         m_fTimeAccel *= 2.0;
-
-    METHOD_EXIT("CPhysicsManager::accelerateTime")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,10 +166,7 @@ inline void CPhysicsManager::accelerateTime()
 inline void CPhysicsManager::decelerateTime()
 {
     METHOD_ENTRY("CPhysicsManager::decelerateTime")
-
-    m_fTimeAccel /= 2.0;
-
-    METHOD_EXIT("CPhysicsManager::decelerateTime")
+    m_fTimeAccel *= 0.5;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,10 +177,7 @@ inline void CPhysicsManager::decelerateTime()
 inline void CPhysicsManager::resetTime()
 {
     METHOD_ENTRY("CPhysicsManager::resetTime")
-
     m_fTimeAccel = 1.0;
-
-    METHOD_EXIT("CPhysicsManager::resetTime")
 }
 
 #endif

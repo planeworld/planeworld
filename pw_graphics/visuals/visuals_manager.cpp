@@ -24,7 +24,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CVisualsManager::CVisualsManager() : m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
+CVisualsManager::CVisualsManager() : m_pUniverse(0),
+                                     m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
                                      m_nVisualisations(0),
                                      m_pCamera(0)
 {
@@ -325,6 +326,16 @@ void CVisualsManager::drawWorld() const
          ci != m_DebrisVisuals.end(); ++ci)
     {
         (*ci)->draw(m_pCamera);
+    }
+    for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+    {
+        double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+        m_Graphics.setColor(0.8,fColor,0.3);
+        m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getNumberOfPlanets());
+        m_Graphics.dot(m_pUniverse->getStarSystems()[i]->getCenter()-
+                       m_pCamera->getCenter()+
+                       (m_pUniverse->getStarSystems()[i]->getCell()-
+                        m_pCamera->getCell()).cast<double>()*DEFAULT_CELL_SIZE_2);
     }
     
     METHOD_EXIT("CVisualsManager::drawWorld")

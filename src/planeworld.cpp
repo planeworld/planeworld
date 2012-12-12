@@ -33,7 +33,6 @@
 #include "pointmass.h"
 #include "rigidbody.h"
 #include "spring_visuals.h"
-#include "universe.h"
 #include "xfig_loader.h"
 #include "xml_importer.h"
 #include "visuals_manager.h"
@@ -137,8 +136,6 @@ int main(int argc, char *argv[])
     MEM_ALLOC("pVisualsManager")
     
     int nNumberOfBoxes = 100;
-    
-    Universe.generate(100);
     
     //--- Initialise particles -----------------------------------------------//
     long nX;
@@ -320,6 +317,8 @@ int main(int argc, char *argv[])
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
         
         pCamera=XMLImporter.getCamera();
+        
+        Universe.clone(XMLImporter.getUniverse());
     }
             
 //     //--- Initialize Springs ------------------------------------------------//
@@ -362,7 +361,9 @@ int main(int argc, char *argv[])
 //     pPhysicsManager->addJoint(pSpring);
 //     pSpring->setVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
     
-
+    pVisualsManager->setUniverse(&Universe);
+    pPhysicsManager->setUniverse(&Universe);
+    
     // Set initialisation state of all objects
     pPhysicsManager->initObjects();
     
