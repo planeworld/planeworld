@@ -337,6 +337,7 @@ void CVisualsManager::drawWorld() const
                        (m_pUniverse->getStarSystems()[i]->getCell()-
                         m_pCamera->getCell()).cast<double>()*DEFAULT_CELL_SIZE_2);
     }
+    m_Graphics.setPointSize(1.0);
     
     METHOD_EXIT("CVisualsManager::drawWorld")
 }

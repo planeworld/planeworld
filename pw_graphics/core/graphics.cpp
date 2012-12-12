@@ -545,7 +545,7 @@ void CGraphics::dots(const std::vector<Vector2d>& _Dots,
     
     std::vector<Vector2d>::const_iterator ci = _Dots.begin();
 
-    glPointSize(2.0);
+//     glPointSize(1.0);
     glBegin(GL_POINTS);
         if (_vecOffset.isZero())
         {
@@ -564,7 +564,7 @@ void CGraphics::dots(const std::vector<Vector2d>& _Dots,
             }
         }   
     glEnd();
-    glPointSize(1.0);
+//     glPointSize(1.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -583,7 +583,7 @@ void CGraphics::dots(boost::circular_buffer<Vector2d>& _Dots,
     
     boost::circular_buffer<Vector2d>::const_iterator ci = _Dots.begin();
 
-    glPointSize(2.0);
+//     glPointSize(1.0);
     glBegin(GL_POINTS);
         if (_vecOffset.isZero())
         {
@@ -602,7 +602,7 @@ void CGraphics::dots(boost::circular_buffer<Vector2d>& _Dots,
             }
         }   
     glEnd();
-    glPointSize(1.0);
+//     glPointSize(1.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
