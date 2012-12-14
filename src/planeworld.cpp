@@ -386,15 +386,16 @@ int main(int argc, char *argv[])
     
     //--- Prepare for querying relative mouse movement -----------------------//
     sf::Vector2i vecMouse;
-    sf::Vector2i vecMouseCenter(sf::Vector2i(Window.getSize().x >> 1,Window.getSize().y >> 1));
+    sf::Vector2i vecMouseCenter(sf::Vector2i(Window.getSize().x >> 1, Window.getSize().y >> 1));
+    sf::Mouse::setPosition(vecMouseCenter,Window);
     
     //--- Run the main loop --------------------------------------------------//
     Timer.start();
     while (!bDone)
     {
-        vecMouse = vecMouseCenter-sf::Mouse::getPosition();
+        vecMouse = vecMouseCenter-sf::Mouse::getPosition(Window);
         vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
-        sf::Mouse::setPosition(vecMouseCenter);
+        sf::Mouse::setPosition(vecMouseCenter,Window);
         
         // Handle events
         sf::Event Event;
