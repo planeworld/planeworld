@@ -59,15 +59,15 @@ class IShape
         
         //--- Constant Methods -----------------------------------------------//
         virtual IShape*             clone() const = 0;
-        const CBoundingBox&         getBoundingBox() const;
         int                         getDepths() const;
         virtual const ShapeType     getShapeType() const;
                 
         //--- Methods --------------------------------------------------------//
         virtual void transform(const double&, const Vector2d&) = 0;         ///< Transforms the shape
-        
-        void setDepths(const int&);
-        void unsetDepths(const int&);
+
+        CBoundingBox& getBoundingBox();
+        void          setDepths(const int&);
+        void          unsetDepths(const int&);
 
     protected:
 
@@ -79,21 +79,6 @@ class IShape
 //--- Implementation is done here for inline optimisation --------------------//
 
 // ShapeType IShape::m_ShapeType = SHAPE_NONE;
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return the Axis Aligned Bounding Box 
-///
-/// \return Returns bounding box
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& IShape::getBoundingBox() const
-{
-    METHOD_ENTRY("IShape::getBoundingBox")
-
-    METHOD_EXIT("IShape::getBoundingBox")
-    return m_AABB;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -123,6 +108,21 @@ inline const ShapeType IShape::getShapeType() const
 
     METHOD_EXIT("IShape::getShapeType")
     return SHAPE_NONE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the Axis Aligned Bounding Box 
+///
+/// \return Returns bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+inline CBoundingBox& IShape::getBoundingBox()
+{
+    METHOD_ENTRY("IShape::getBoundingBox")
+
+    METHOD_EXIT("IShape::getBoundingBox")
+    return m_AABB;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

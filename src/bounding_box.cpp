@@ -31,8 +31,6 @@ CBoundingBox::CBoundingBox()
     
     m_vecLowerLeft.setZero();
     m_vecUpperRight.setZero();
-    
-    METHOD_EXIT("CBoundingBox::CBoundingBox")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,12 +52,10 @@ bool CBoundingBox::isInside(const Vector2d& _vecV) const
         (m_vecUpperRight[1] >= _vecV[1])
        )
     {
-        METHOD_EXIT("CBoundingBox::isInside")
         return true;
     }
     else
     {
-        METHOD_EXIT("CBoundingBox::isInside")
         return false;
     }
 }
@@ -68,45 +64,65 @@ bool CBoundingBox::isInside(const Vector2d& _vecV) const
 ///
 /// \brief Tests two bounding boxes for overlap
 ///
+/// This methods tests two bounding boxes for overlap. The second parameter
+/// steers behaviour in the universe grid. The camera must be always tested
+/// for overlap, independently of the cell. But physical objects, that may not
+/// be larger than one cell, must be located in neighbouring cells or the same
+/// cell to overlap. The second parameter sets this limit, negative values
+/// will always test for overlap, the case of neighbouring cells implies 1 for
+/// the cell limit.
+///
 /// \param _BBox Second bounding box for overlap test
+/// \param _nCellLimit If cells differ too much, bounding boxes are not tested
+///                    for overlap.
 ///
 /// \return Do the bounding boxes overlap?
 ///
 ///////////////////////////////////////////////////////////////////////////////
-bool CBoundingBox::overlaps(const CBoundingBox& _BBox) const
+bool CBoundingBox::overlaps(const CBoundingBox& _BBox,
+                            const int& _nCellLimit) const
 {
     METHOD_ENTRY("CBoundingBox::overlaps")
 
     // Test for overlapping bounding boxes
-    if ((
-        std::abs(
-        ((m_vecLowerLeft[0]+m_vecUpperRight[0]) / 2.0) -
-        ((_BBox.getLowerLeft()[0]+_BBox.getUpperRight()[0]) / 2.0))
-        <
-        (
-        (std::abs(m_vecUpperRight[0]-m_vecLowerLeft[0]) / 2.0) +
-        (std::abs(_BBox.getUpperRight()[0]-_BBox.getLowerLeft()[0]) / 2.0))
-        )
-        &&
-        (
-        std::abs(
-        ((m_vecLowerLeft[1]+m_vecUpperRight[1]) / 2.0) -
-        ((_BBox.getLowerLeft()[1]+_BBox.getUpperRight()[1]) / 2.0))
-        <
-        (
-        (std::abs(m_vecUpperRight[1]-m_vecLowerLeft[1]) / 2.0) +
-        (std::abs(_BBox.getUpperRight()[1]-_BBox.getLowerLeft()[1]) / 2.0))
-        )
-        )
+    if ((std::abs(m_vecCell[0] - _BBox.m_vecCell[0]) <= _nCellLimit &&
+         std::abs(m_vecCell[1] - _BBox.m_vecCell[1]) <= _nCellLimit) ||
+                                         _nCellLimit <  0)             
     {
-        METHOD_EXIT("CBoundingBox::overlaps")
-        return true;
+    
+        if ((
+            std::abs(
+                ((m_vecLowerLeft[0]+m_vecUpperRight[0]) / 2.0) -
+                ((_BBox.getLowerLeft()[0]+_BBox.getUpperRight()[0]) / 2.0)+
+                IUniverseScaled::cellToDouble(m_vecCell-_BBox.m_vecCell)[0]
+            )
+            <
+            (
+                (std::abs(m_vecUpperRight[0]-m_vecLowerLeft[0]) / 2.0) +
+                (std::abs(_BBox.getUpperRight()[0]-_BBox.getLowerLeft()[0]) / 2.0))
+            )
+            &&
+            (
+            std::abs(
+                ((m_vecLowerLeft[1]+m_vecUpperRight[1]) / 2.0) -
+                ((_BBox.getLowerLeft()[1]+_BBox.getUpperRight()[1]) / 2.0)+
+                IUniverseScaled::cellToDouble(m_vecCell-_BBox.m_vecCell)[1]
+            )
+            <
+            (
+                (std::abs(m_vecUpperRight[1]-m_vecLowerLeft[1]) / 2.0) +
+                (std::abs(_BBox.getUpperRight()[1]-_BBox.getLowerLeft()[1]) / 2.0))
+            )
+            )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
-    else
-    {
-        METHOD_EXIT("CBoundingBox::overlaps")
-        return false;
-    }
+    else return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,8 +143,6 @@ void CBoundingBox::update(const CBoundingBox& _BBox)
     if (_BBox.getLowerLeft()[1] < m_vecLowerLeft[1]) m_vecLowerLeft[1]=_BBox.getLowerLeft()[1];
     if (_BBox.getUpperRight()[0] > m_vecUpperRight[0]) m_vecUpperRight[0]=_BBox.getUpperRight()[0];
     if (_BBox.getUpperRight()[1] > m_vecUpperRight[1]) m_vecUpperRight[1]=_BBox.getUpperRight()[1]; 
-    
-    METHOD_EXIT("CBoundingBox::update")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -149,7 +163,5 @@ void CBoundingBox::update(const Vector2d& _vecPoint)
     else if (_vecPoint[0] > m_vecUpperRight[0]) m_vecUpperRight[0] = _vecPoint[0];
     if      (_vecPoint[1] < m_vecLowerLeft[1]) m_vecLowerLeft[1] = _vecPoint[1];
     else if (_vecPoint[1] > m_vecUpperRight[1]) m_vecUpperRight[1] = _vecPoint[1];
-    
-    METHOD_EXIT("CBoundingBox::update")
 }
     

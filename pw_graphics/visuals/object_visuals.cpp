@@ -57,22 +57,22 @@ void IObjectVisuals::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("IObjectVisuals::draw")
     
-    for (std::vector<IVisuals*>::const_iterator ci  = m_Visuals.begin();
-                                                ci != m_Visuals.end(); ++ci)
+    if (m_pObject->getGeometry()->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
     {
-        
-        if ((((*ci)->getBoundingBox().getWidth() * _pCamera->getZoom()) <  0.3) && 
-            (((*ci)->getBoundingBox().getHeight() * _pCamera->getZoom()) < 0.3))
+        for (std::vector<IVisuals*>::const_iterator ci  = m_Visuals.begin();
+                                                    ci != m_Visuals.end(); ++ci)
         {
-            m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() -
-                            _pCamera->getCenter() + 
-                            (m_pObject->getCell()-_pCamera->getCell()).cast<double>()*DEFAULT_CELL_SIZE_2);
-        }
-        else
-        {
-            if (m_pObject->getCell() == _pCamera->getCell())
-//                 if ((*ci)->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+            if ((*ci)->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+                if ((((*ci)->getBoundingBox().getWidth() * _pCamera->getZoom()) <  1.0) && 
+                    (((*ci)->getBoundingBox().getHeight() * _pCamera->getZoom()) < 1.0))
+                {
+                    m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() - _pCamera->getCenter() + 
+                                    IUniverseScaled::cellToDouble(m_pObject->getCell()-_pCamera->getCell()));
+                }
+                else
+                {
                     (*ci)->draw(_pCamera, m_pObject);
+                }
         }
     }
 }

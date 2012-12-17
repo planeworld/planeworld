@@ -21,7 +21,6 @@
 #define PHYSICS_MANAGER_H
 
 //--- Standard header --------------------------------------------------------//
-// #include <list>
 
 //--- Program header ---------------------------------------------------------//
 #include "collision_manager.h"
@@ -36,7 +35,7 @@ typedef std::vector<IObject*> ObjectsType;
 ///
 /// \brief Class for managing the physics
 ///
-/// This class manages the lists for displaying objects etc.
+/// This class computes everything that is physics related.
 ///
 /// \todo Create own list for gravity enabled object. This makes computation
 ///       faster, especially for debris.

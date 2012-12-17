@@ -92,7 +92,7 @@ bool CXMLImporter::import(const std::string& _strFilename,
     
     if (Result)
     {
-        INFO_MSG("XML Importer","XML file " << _strFilename << " parsed without errors.")
+        DOM_FIO(INFO_MSG("XML Importer","XML file " << _strFilename << " parsed without errors."))
     }
     else
     {

@@ -172,36 +172,37 @@ void CCamera::update()
     // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
     // Hence, accuracy is low, so it can stay with the double value.
     m_vecFrame[0] = HookRotation * (CameraRotation * m_vecFrame0[0]/m_fZoom+
-                                       Vector2d(m_vecPosition[0],m_vecPosition[1]))
-                                      +m_vecHook+m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
+                                       Vector2d(m_vecPosition[0],m_vecPosition[1]))+m_vecHook+
+                                      IUniverseScaled::cellToDouble(m_vecHookCell-m_vecCell);
     m_vecFrame[1] = HookRotation * (CameraRotation * m_vecFrame0[1]/m_fZoom+
-                                       Vector2d(m_vecPosition[0],m_vecPosition[1]))
-                                      +m_vecHook+m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
+                                       Vector2d(m_vecPosition[0],m_vecPosition[1]))+m_vecHook+
+                                      IUniverseScaled::cellToDouble(m_vecHookCell-m_vecCell);
     m_vecFrame[2] = HookRotation * (CameraRotation * m_vecFrame0[2]/m_fZoom+
-                                       Vector2d(m_vecPosition[0],m_vecPosition[1]))
-                                      +m_vecHook+m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
+                                       Vector2d(m_vecPosition[0],m_vecPosition[1]))+m_vecHook+
+                                      IUniverseScaled::cellToDouble(m_vecHookCell-m_vecCell);
     m_vecFrame[3] = HookRotation * (CameraRotation * m_vecFrame0[3]/m_fZoom+
-                                       Vector2d(m_vecPosition[0],m_vecPosition[1]))
-                                      +m_vecHook+m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
+                                       Vector2d(m_vecPosition[0],m_vecPosition[1]))+m_vecHook+
+                                      IUniverseScaled::cellToDouble(m_vecHookCell-m_vecCell);
     
     m_BoundingBox.setLowerLeft( m_vecFrame[0]);
     m_BoundingBox.setUpperRight(m_vecFrame[0]);
     m_BoundingBox.update(m_vecFrame[1]);
     m_BoundingBox.update(m_vecFrame[2]);
     m_BoundingBox.update(m_vecFrame[3]);
+    m_BoundingBox.setCell(m_vecCell);
     
     m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
                                    m_fViewportHeight*m_fViewportHeight)/m_fZoom;
     m_vecCenter = HookRotation * (Vector2d(m_vecPosition[0], m_vecPosition[1]))
-                   + m_vecHook + m_vecHookCell.cast<double>()*DEFAULT_CELL_SIZE_2;
+                   + m_vecHook + IUniverseScaled::cellToDouble(m_vecHookCell-m_vecCell);
     
-    double fCells = floor((m_vecCenter[0]+DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2);
-    m_vecCell[0]  = static_cast<int>(fCells);
-    m_vecCenter[0] -= DEFAULT_CELL_SIZE_2*fCells;
-
-    fCells = floor((m_vecCenter[1]+DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2);
-    m_vecCell[1]  = static_cast<int>(fCells);
-    m_vecCenter[1] -= DEFAULT_CELL_SIZE_2*fCells;
+//     double fCells = floor((m_vecCenter[0]+DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2);
+//     m_vecCell[0]  = static_cast<int>(fCells);
+//     m_vecCenter[0] -= DEFAULT_CELL_SIZE_2*fCells;
+// 
+//     fCells = floor((m_vecCenter[1]+DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2);
+//     m_vecCell[1]  = static_cast<int>(fCells);
+//     m_vecCenter[1] -= DEFAULT_CELL_SIZE_2*fCells;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

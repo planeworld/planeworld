@@ -45,7 +45,7 @@ void CCollisionManager::detectCollisions()
             {
 
                 // Test for overlapping bounding boxes
-                if ((*ci)->getGeometry()->getBoundingBox().overlaps((*cj)->getGeometry()->getBoundingBox()))
+                if ((*ci)->getGeometry()->getBoundingBox().overlaps((*cj)->getGeometry()->getBoundingBox(),1))
                 {
                     switch((*ci)->getObjectType())
                     {

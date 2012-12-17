@@ -45,12 +45,11 @@ class CGeometry
         virtual ~CGeometry();
 
         //--- Constant methods -----------------------------------------------//
-        const CBoundingBox&             getBoundingBox() const;
         const std::list<IShape*>* const getShapes() const;
         const std::list<IShape*>* const getPrevShapes() const;
         
         //--- Methods --------------------------------------------------------//
-        CBoundingBox&  getBoundingBox();
+        CBoundingBox&                   getBoundingBox();
         
         void addShape(IShape*);
         void updateBoundingBox(const CBoundingBox&);
@@ -73,21 +72,6 @@ class CGeometry
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the bounding box
-///
-/// \return Bounding box
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& CGeometry::getBoundingBox() const
-{
-    METHOD_ENTRY("CGeometry::getBoundingBox")
-
-    METHOD_EXIT("CGeometry::getBoundingBox")
-    return (m_AABB);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -121,7 +105,7 @@ inline const std::list< IShape* >* const CGeometry::getPrevShapes() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns bounding box
+/// \brief Returns the bounding box
 ///
 /// \return Bounding box
 ///

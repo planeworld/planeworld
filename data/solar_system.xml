@@ -1,6 +1,6 @@
 <!DOCTYPE PlaneworldML>
 <universe
-  seed="234"
+  seed="1072"
   number_of_stars="10000"
 >
   <!-- Create the active camera -->
@@ -8,8 +8,8 @@
     hook="SmallPlanet"
     position_x="10.0"
     position_y="-1.0"
-    viewport_width="700.0"
-    viewport_height="430.0"
+    viewport_width="600.0"
+    viewport_height="400.0"
   />
   
   <object file="sun.xml"/>

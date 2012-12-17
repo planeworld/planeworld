@@ -88,14 +88,14 @@ void CVisualsManager::drawBoundingBoxes() const
     {
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
         m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
-                        m_pCamera->getCenter()-m_pCamera->getCellToPos(),
+                        m_pCamera->getCenter()-IUniverseScaled::cellToDouble(m_pCamera->getCell()),
                         m_pCamera->getBoundingBox().getUpperRight()-
-                        m_pCamera->getCenter()-m_pCamera->getCellToPos());
+                        m_pCamera->getCenter()-IUniverseScaled::cellToDouble(m_pCamera->getCell()));
         m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
         m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
-                              m_pCamera->getCenter()-m_pCamera->getCellToPos(),
+                              m_pCamera->getCenter()-IUniverseScaled::cellToDouble(m_pCamera->getCell()),
                               m_pCamera->getBoundingBox().getUpperRight()-
-                              m_pCamera->getCenter()-m_pCamera->getCellToPos());
+                              m_pCamera->getCenter()-IUniverseScaled::cellToDouble(m_pCamera->getCell()));
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
         m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
                           m_pCamera->getBoundingCircleRadius());
@@ -109,15 +109,15 @@ void CVisualsManager::drawBoundingBoxes() const
                  cj != (*ci)->getShapeVisuals().end(); ++cj)
             {
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
-                m_Graphics.rect((*cj)->getBoundingBox().getLowerLeft() -
-                                m_pCamera->getCenter(),
-                                (*cj)->getBoundingBox().getUpperRight()-
-                                m_pCamera->getCenter());
+                m_Graphics.rect((*cj)->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                                IUniverseScaled::cellToDouble((*cj)->getBoundingBox().getCell()-m_pCamera->getCell()),
+                                (*cj)->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                IUniverseScaled::cellToDouble((*cj)->getBoundingBox().getCell()-m_pCamera->getCell()));
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
-                m_Graphics.filledRect((*cj)->getBoundingBox().getLowerLeft() -
-                                    m_pCamera->getCenter(),
-                                    (*cj)->getBoundingBox().getUpperRight()-
-                                    m_pCamera->getCenter());
+                m_Graphics.filledRect((*cj)->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() +
+                                    IUniverseScaled::cellToDouble((*cj)->getBoundingBox().getCell()-m_pCamera->getCell()),
+                                    (*cj)->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
+                                    IUniverseScaled::cellToDouble((*cj)->getBoundingBox().getCell()-m_pCamera->getCell()));
             }
         }
     }
@@ -169,12 +169,12 @@ void CVisualsManager::drawGrid() const
         while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
         {
             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.3);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
                                                m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                               m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                               m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
                                                m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                               m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                                               m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
             m_Graphics.endLine();
             fGridLeft += fGrid;
         }
@@ -183,11 +183,11 @@ void CVisualsManager::drawGrid() const
         {
             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.3);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                    m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                                    m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                                    fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                    m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                                    m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                                    fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
             m_Graphics.endLine();
             fGridTop += fGrid;
         }
@@ -212,12 +212,12 @@ void CVisualsManager::drawGrid() const
             while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
             {
                 m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
-                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
                                                    m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                                   m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
-                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                                   m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
                                                    m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                                   m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                                                   m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
                 m_Graphics.endLine();
                 fGridLeft += fGrid;
             }
@@ -226,11 +226,11 @@ void CVisualsManager::drawGrid() const
             {
                 m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                        m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
-                                        fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                                        m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                                        fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                        m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
-                                        fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                                        m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                                        fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
                 m_Graphics.endLine();
                 fGridTop += fGrid;
             }
@@ -254,12 +254,12 @@ void CVisualsManager::drawGrid() const
             while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
             {
                 m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.1);
-                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
                                                    m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                                   m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
-                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
+                                                   m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
                                                    m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                                   m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                                                   m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
                 m_Graphics.endLine();
                 fGridLeft += fGrid;
             }
@@ -268,11 +268,11 @@ void CVisualsManager::drawGrid() const
             {
                 m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.1);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                        m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
-                                        fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                                        m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                                        fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                        m_pCamera->getCenter()[0]-m_pCamera->getCellToPos()[0],
-                                        fGridTop-m_pCamera->getCenter()[1]-m_pCamera->getCellToPos()[1]);
+                                        m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                                        fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
                 m_Graphics.endLine();
                 fGridTop += fGrid;
             }
@@ -327,16 +327,47 @@ void CVisualsManager::drawWorld() const
     {
         (*ci)->draw(m_pCamera);
     }
-    for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+    if (m_pCamera->getZoom() < 1.0e-9)
     {
-        double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
-        m_Graphics.setColor(0.8,fColor,0.3);
-        m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getNumberOfPlanets());
-        m_Graphics.dot(m_pUniverse->getStarSystems()[i]->getCenter()-
-                       m_pCamera->getCenter()+
-                       (m_pUniverse->getStarSystems()[i]->getCell()-
-                        m_pCamera->getCell()).cast<double>()*DEFAULT_CELL_SIZE_2);
+        for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+        {
+            Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
+                              m_pUniverse->getStarSystems()[i]->getCell().cast<double>() *
+                              DEFAULT_CELL_SIZE_2;
+            if (m_pCamera->getBoundingBox().isInside(vecPos))
+            {
+                Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
+                                     m_pCamera->getCenter()+
+                                    (m_pUniverse->getStarSystems()[i]->getCell()-
+                                     m_pCamera->getCell()).cast<double>()*DEFAULT_CELL_SIZE_2;
+                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                m_Graphics.setColor(0.8,fColor,0.3);
+                m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getNumberOfPlanets());
+                m_Graphics.dot(vecPosRel);
+            }
+        }
     }
+    else
+    {
+        for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+        {
+            Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
+                              m_pUniverse->getStarSystems()[i]->getCell().cast<double>() *
+                              DEFAULT_CELL_SIZE_2;
+            if (m_pCamera->getBoundingBox().isInside(vecPos))
+            {
+                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
+                                     m_pCamera->getCenter()+
+                                    (m_pUniverse->getStarSystems()[i]->getCell()-
+                                     m_pCamera->getCell()).cast<double>()*DEFAULT_CELL_SIZE_2;
+                m_Graphics.setColor(0.8,fColor,0.3);
+                m_Graphics.circle(vecPosRel,
+                                  double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9);
+            }
+        }
+    }
+    
     m_Graphics.setPointSize(1.0);
     
     METHOD_EXIT("CVisualsManager::drawWorld")

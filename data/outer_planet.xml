@@ -4,9 +4,9 @@
     <core
         name="OuterPlanet"
         mass="1.0e20"
-        origin_x="-5.0e11"
-        origin_y="7.0e11"
-        cell_x = "-200"
+        origin_x="-9.9e11"
+        origin_y="9.99999999999999999e11"
+        cell_x = "-1"
         cell_y = "0"
         dynamics="true"
         gravity="false"

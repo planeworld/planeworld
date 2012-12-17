@@ -24,6 +24,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "universe_scaled.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "eigen2/Eigen/Core"
@@ -35,7 +36,7 @@ using namespace Eigen;
 /// \brief Class representing an Axis Aligned Bounding Box
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CBoundingBox
+class CBoundingBox : public IUniverseScaled
 {
     
     public:
@@ -50,7 +51,7 @@ class CBoundingBox
         const double    getWidth() const;
         
         bool isInside(const Vector2d&) const;
-        bool overlaps(const CBoundingBox&) const;
+        bool overlaps(const CBoundingBox&, const int& = -1) const;
 
         //--- Methods --------------------------------------------------------//
         void setLowerLeft(const Vector2d&);
@@ -79,8 +80,6 @@ class CBoundingBox
 inline const Vector2d& CBoundingBox::getLowerLeft() const
 {
     METHOD_ENTRY("CBoundingBox::getLowerLeft")
-
-    METHOD_EXIT("CBoundingBox::getLowerLeft")
     return m_vecLowerLeft;
 }
 
@@ -94,8 +93,6 @@ inline const Vector2d& CBoundingBox::getLowerLeft() const
 inline const Vector2d& CBoundingBox::getUpperRight() const
 {
     METHOD_ENTRY("CBoundingBox::getUpperRight")
-
-    METHOD_EXIT("CBoundingBox::getUpperRight")
     return m_vecUpperRight;
 }
 
@@ -109,8 +106,6 @@ inline const Vector2d& CBoundingBox::getUpperRight() const
 inline const double CBoundingBox::getHeight() const
 {
     METHOD_ENTRY("CBoundingBox::getHeight")
-
-    METHOD_EXIT("CBoundingBox::getHeight")
     return m_vecUpperRight[1] - m_vecLowerLeft[1];
 }
 
@@ -124,8 +119,6 @@ inline const double CBoundingBox::getHeight() const
 inline const double CBoundingBox::getWidth() const
 {
     METHOD_ENTRY("CBoundingBox::getWidth")
-
-    METHOD_EXIT("CBoundingBox::getWidth")
     return m_vecUpperRight[0] - m_vecLowerLeft[0];
 }
 
@@ -141,8 +134,6 @@ inline void CBoundingBox::setLowerLeft(const Vector2d& _vecLL)
     METHOD_ENTRY("CBoundingBox::setLowerLeft")
     
     m_vecLowerLeft = _vecLL;
-
-    METHOD_EXIT("CBoundingBox::setLowerLeft")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,8 +148,6 @@ inline void CBoundingBox::setUpperRight(const Vector2d& _vecUR)
     METHOD_ENTRY("CBoundingBox::setUpperRight")
     
     m_vecUpperRight = _vecUR;
-
-    METHOD_EXIT("CBoundingBox::setUpperRight")
 }
 
 #endif

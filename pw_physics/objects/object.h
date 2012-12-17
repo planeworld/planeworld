@@ -25,6 +25,7 @@
 #include "adams_moulton_integrator.h"
 #include "euler_integrator.h"
 
+#include "universe_scaled.h"
 #include "geometry.h"
 #include "hookable.h"
 
@@ -52,11 +53,10 @@ typedef enum
 /// need them. They are declared for a body, shape definition is declared there
 /// too.
 ///
-/// \todo Move visuals id code. Each shape should have a visuals id.
 /// \todo Move depth information to shapes only. Then map information to object
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class IObject : public IHookable
+class IObject : public IHookable, public IUniverseScaled
 {
     
     public:
@@ -78,7 +78,6 @@ class IObject : public IHookable
         const int                   getDepths() const;
         const bool                  getDynamicsState() const;
         const bool                  getGravitationState() const;
-        const Vector2i              getCell() const;
         const double                getMass() const;
         const std::string           getName() const;
         const Vector2d              getVelocity() const;
@@ -129,7 +128,6 @@ class IObject : public IHookable
 
         Vector2d                m_vecOrigin0;                       ///< Initial origin of object
         Vector2d                m_vecCOM;                           ///< Center of mass
-        Vector2i                m_vecCell;                          ///< Cell position in large scale grid
         Vector2d                m_vecForce;                         ///< Resulting force applied
         
         double                  m_fMass;                            ///< Mass of object in kg
@@ -277,22 +275,6 @@ inline const bool IObject::getGravitationState() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns the grid cell of object
-///
-/// The universe is organised in cells that hold a double valued position. The
-/// cell is represented by an integer position index.
-///
-/// \return The grid cell of the object
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const Vector2i IObject::getCell() const
-{
-    METHOD_ENTRY("IObject::getCell")
-    return (m_vecCell);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Returns the mass of the object
 ///
 /// \return Mass
@@ -399,12 +381,9 @@ inline CGeometry* const IObject::getGeometry()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set the grid cell of the object
+/// \brief Method to set cell, overloaded to hand cell to bounding box.
 ///
-/// The universe is organised in cells that hold a double valued position. The
-/// cell is represented by an integer position index.
-///
-/// \param _vecCell Cell cell of the object
+/// \param _vecCell Grid cell of the object
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline void IObject::setCell(const Vector2i& _vecCell)
@@ -412,7 +391,15 @@ inline void IObject::setCell(const Vector2i& _vecCell)
     METHOD_ENTRY("IObject::setCell")
 
     m_vecCell = _vecCell;
+    m_Geometry.getBoundingBox().setCell(_vecCell);
+    std::list<IShape*>::const_iterator ci = m_Geometry.getShapes()->begin();
+    while (ci != m_Geometry.getShapes()->end())
+    {
+        (*ci)->getBoundingBox().setCell(m_vecCell);
+        ++ci;
+    }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

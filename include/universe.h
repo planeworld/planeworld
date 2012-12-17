@@ -69,7 +69,8 @@ class CUniverse
         //--- Constant Methods [private] -------------------------------------//
         const std::string starClassToString(const int&) const;
         
-        std::vector<CStarSystem*>   m_StarSystems;  ///< Star system in this universe
+        std::vector<CStarSystem*>   m_StarSystems;      ///< Star system in this universe
+        int                         m_nNrOfPlanetsMax;  ///< Maximum number of planets
 
 };
 

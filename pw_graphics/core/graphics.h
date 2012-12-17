@@ -48,7 +48,7 @@ const double GRAPHICS_RIGHT_DEFAULT =
                 double(GRAPHICS_WIDTH_DEFAULT)*0.5
                       /GRAPHICS_PX_PER_METER;           ///< Default right plane
 const double GRAPHICS_LEFT_DEFAULT = 
-                -GRAPHICS_RIGHT_DEFAULT;                 ///< Default left plane
+                -GRAPHICS_RIGHT_DEFAULT;                ///< Default left plane
 const double GRAPHICS_TOP_DEFAULT =
                 double(GRAPHICS_HEIGHT_DEFAULT)*0.5
                       /GRAPHICS_PX_PER_METER;           ///< Default top plane

@@ -27,7 +27,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CUniverse::CUniverse()
+CUniverse::CUniverse() :m_nNrOfPlanetsMax(0)
 {
     METHOD_ENTRY("CUniverse::CUniverse");
     CTOR_CALL("CUniverse::CUniverse");
@@ -79,8 +79,8 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     std::exponential_distribution<double>   ExponentialDistribution(3.5);
     std::normal_distribution<double>        NormalDistribution(0.0, fSigma);
     std::uniform_real_distribution<double>  UniformDistribution(0.0,2.0*M_PI);
-    std::poisson_distribution<int>          PoissionDistribution(3.0);
-    std::vector<int> vecNrOfPlanets(20,0);
+    std::poisson_distribution<int>          PoissionDistribution(4);
+    std::vector<int> vecNrOfPlanets;
     std::vector<int> vecNrOfStars(nNrOfStarTypes,0);
 
     // Create a globular cluster
@@ -110,32 +110,45 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             pStarSystem->setCell(vecCell);
             pStarSystem->setNumberOfPlanets(PoissionDistribution(Generator));
             
+            // Store the maximum number of planets
+            if (pStarSystem->getNumberOfPlanets() > m_nNrOfPlanetsMax)
+            {
+                m_nNrOfPlanetsMax = pStarSystem->getNumberOfPlanets();
+                vecNrOfPlanets.resize(m_nNrOfPlanetsMax,0);
+            }
+            
             m_StarSystems.push_back(pStarSystem);
             
             ++vecNrOfPlanets[pStarSystem->getNumberOfPlanets()];
         }
     }
 
-    INFO_MSG("Universe generator", "Generated " << m_StarSystems.size() << " Stars. Distribution of spectral classes: ")
-    Log.logSeparator();
-    
-    for (int i=0; i<nNrOfStarTypes; ++i) {
-        std::cout << "Class " << this->starClassToString(i) << ": ";
-        std::cout << std::string(vecNrOfStars[i]*nBar/_nNumberOfStars,'#') << std::endl;
-    }
-    Log.logSeparator();
+    DOM_VAR(INFO_MSG("Universe generator", "Generated " << m_StarSystems.size() << " Stars."))
+    DEBUG(
+        DEBUG_MSG("Universe generator", "Distribution of spectral classes: ")
+        Log.logSeparator();
+        
+        for (int i=0; i<nNrOfStarTypes; ++i) {
+            std::cout << "Class " << this->starClassToString(i) << ": ";
+            std::cout << std::string(vecNrOfStars[i]*nBar/_nNumberOfStars,'#') << std::endl;
+        }
+        Log.logSeparator();
+    )
 
     int nNrOfPlanets = 0;
-    for (int i=0; i<20; ++i)
+    for (int i=0; i<=m_nNrOfPlanetsMax; ++i)
         nNrOfPlanets += vecNrOfPlanets[i]*i;
     
-    INFO_MSG("Universe generator", "Generated "<< nNrOfPlanets << " planets. Distribution of number of planet per star system: ")
-    Log.logSeparator();
-    
-    for (int i=0; i<10; ++i)
-        std::cout << "Planets: " << i << ": " << std::string(vecNrOfPlanets[i]*nBar/_nNumberOfStars,'#') << std::endl;
-    
-    Log.logSeparator();
+    DOM_VAR(INFO_MSG("Universe generator", "Generated "<< nNrOfPlanets << " planets."))
+    DEBUG(
+        DEBUG_MSG("Universe generator", "Distribution of number of planet per star system: ")
+        Log.logSeparator();
+        
+        for (int i=0; i<=m_nNrOfPlanetsMax; ++i)
+            std::cout << "Planets: " << i << ": " << std::string(vecNrOfPlanets[i]*nBar/_nNumberOfStars,'#') << std::endl;
+        
+        Log.logSeparator();
+    )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
