@@ -205,6 +205,7 @@ void CBody::myTransform()
         // Update bounding box of current time step
         m_Geometry.updateBoundingBox((*ci)->getBoundingBox());
     }
+    this->setCell(m_vecCell);
 
     METHOD_EXIT("CBody::myTransform")
 }

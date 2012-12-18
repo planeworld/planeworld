@@ -86,6 +86,45 @@ IObject::~IObject()
     METHOD_EXIT("IObject::~IObject")
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Update the cell of this object
+///
+////////////////////////////////////////////////////////////////////////////////
+void IObject::updateCell()
+{
+    METHOD_ENTRY("IObject::updateCell")
+
+    Vector2d vecUpdate;
+    Vector2i vecUpdateCell;
+    vecUpdate.setZero();
+    vecUpdateCell.setZero();
+    if      (m_pIntPos->getValue()[0] >  DEFAULT_CELL_SIZE)
+    {
+        vecUpdate[0]     -= DEFAULT_CELL_SIZE_2;
+        vecUpdateCell[0] += 1;
+    }
+    else if (m_pIntPos->getValue()[0] < -DEFAULT_CELL_SIZE)
+    {
+        vecUpdate[0] += DEFAULT_CELL_SIZE_2;
+        vecUpdateCell[0] -= 1;
+    }
+    else if (m_pIntPos->getValue()[1] >  DEFAULT_CELL_SIZE)
+    {
+        vecUpdate[1] -= DEFAULT_CELL_SIZE_2;
+        vecUpdateCell[1] += 1;
+    }
+    else if (m_pIntPos->getValue()[1] < -DEFAULT_CELL_SIZE)
+    {
+        vecUpdate[1] += DEFAULT_CELL_SIZE_2;
+        vecUpdateCell[1] -= 1;
+    }
+    m_pIntPos->init(m_pIntPos->getValue()+vecUpdate);
+    m_vecCell += vecUpdateCell;
+    std::cout << "Cell update for " << m_strName << " is " << vecUpdateCell[0] <<
+                 ", " << vecUpdateCell[1] << std::endl;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Calculate dynamics of object

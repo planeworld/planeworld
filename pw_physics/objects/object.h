@@ -100,6 +100,7 @@ class IObject : public IHookable, public IUniverseScaled
         void                setTimeFac(const double&);
         void                setVelocity(const Vector2d&);
         void                unsetDepths(const int&);
+        void                updateCell();
 
         void                enableDynamics();
         void                disableDynamics();

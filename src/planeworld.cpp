@@ -366,6 +366,8 @@ int main(int argc, char *argv[])
     
     // Set initialisation state of all objects
     pPhysicsManager->initObjects();
+    sf::Thread CellUpdater(std::bind(&CPhysicsManager::runCellUpdate,pPhysicsManager));
+    CellUpdater.launch();
     
 //     pEarth->setVelocity(Vector2d(29.78e3, 0.0));
 //     pEarth->setAngleVelocity(0.001);
@@ -479,7 +481,9 @@ int main(int argc, char *argv[])
         pVisualsManager->drawBoundingBoxes();
         Timer.sleepRemaining(pVisualsManager->getFrequency());
     }
-    
+
+    CellUpdater.terminate();
+    CellUpdater.wait();
     PhysicsThread.wait();
 
     return 0;

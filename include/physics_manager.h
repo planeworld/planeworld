@@ -67,11 +67,11 @@ class CPhysicsManager
         void collisionDetection();
         void initObjects();
         void moveMasses(int);
-        
         void accelerateTime();
         void decelerateTime();
         void resetTime();
         
+        void runCellUpdate() const;
 
     private:
         

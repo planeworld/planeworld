@@ -117,6 +117,8 @@ CPhysicsManager::~CPhysicsManager()
 ///
 /// This method adds global forces to all objects, for example gravitation.
 ///
+/// \todo Inter object forces need to incorporate cell information
+///
 ///////////////////////////////////////////////////////////////////////////////
 void CPhysicsManager::addGlobalForces()
 {
@@ -319,4 +321,31 @@ void CPhysicsManager::initObjects()
     {
         (*ci)->init();
     };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Method that is run as a thread which updates the cells of all objects.
+///
+/// An object has a maximum speed of 3e9 m/s, which means it moves 
+/// cell update has to be checked every DEFAULT_GRID_SIZE_2 / 3e9 seconds. 
+/// Given n objects to be checked, the frequency should be
+/// n / (DEFAULT_GRID_SIZE_2 / 3e9) Hz
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::runCellUpdate() const
+{
+    CTimer Timer;
+    Timer.start();
+    
+    ObjectsType::const_iterator ci = m_DynamicObjects.begin();
+    while (true)
+    {
+        (*ci)->updateCell();
+        // Use double frequency just to avoid any surprises
+        Timer.sleepRemaining(6.0e9*m_DynamicObjects.size()/DEFAULT_CELL_SIZE_2);
+        
+        if (++ci == m_DynamicObjects.end())
+            ci = m_DynamicObjects.begin();
+    }
 }
