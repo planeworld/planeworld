@@ -94,6 +94,8 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
             m_pPlanet->setSampling(_pCamera->getZoom());
         }
         
+        fAngEnd += fInc;
+        
         // Snap angle to ground resolution grid to avoid flickering.
         // If angle is started at arbitrary position, aliasing causes flickering when zooming
         // or moving, since height is always sampled at different positions.
@@ -117,7 +119,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
         m_Graphics.setWidth(3.0);
         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
 
-            while ( fAng <= fAngEnd)
+            while ( fAng < fAngEnd)
             {
                 fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
                                                          std::sin(fAng-fPAng)*fRad);

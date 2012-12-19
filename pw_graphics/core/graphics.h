@@ -269,8 +269,8 @@ inline double CGraphics::getResMPX() const
 inline double CGraphics::getResMPY() const
 {
     METHOD_ENTRY("CGraphics::getResMPY()");
-    return ((GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT) /
-            (m_fCamZoom * m_unWidthScr));
+    return ((GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT) /
+            (m_fCamZoom * m_unHeightScr));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

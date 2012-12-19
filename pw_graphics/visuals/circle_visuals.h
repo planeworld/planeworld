@@ -26,6 +26,9 @@
 #include "circle.h"
 #include "visuals.h"
 
+const double CIRCLE_DEFAULT_RESOLUTION = 5.0; ///< Ground resolution, px/vertex.
+const double CIRCLE_MINIMUM_SEGMENTS  = 10.0;   ///< Minimum number of circle segments
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the visualisation of a circle

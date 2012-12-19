@@ -30,8 +30,6 @@ CCircleVisuals::CCircleVisuals(CCircle* _pCircle): m_pCircle(_pCircle)
 {
     METHOD_ENTRY("CCircleVisuals::CCircleVisuals")
     CTOR_CALL("CCircleVisuals::CCircleVisuals")
-    
-    METHOD_EXIT("CCircleVisuals::CCircleVisuals")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,8 +41,6 @@ CCircleVisuals::~CCircleVisuals()
 {
     METHOD_ENTRY("CCircleVisuals::~CCircleVisuals()");
     DTOR_CALL("CCircleVisuals::~CCircleVisuals()");
-
-    METHOD_EXIT("CCircleVisuals::~CCircleVisuals()");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,34 +55,54 @@ void CCircleVisuals::draw(const CCamera* const _pCamera,
                           const IObject* const _pObject) const
 {
     METHOD_ENTRY("CCircleVisuals::draw()");
-
-    double fAng = m_pCircle->getAngle();
-    double fRad = m_pCircle->getRadius();
-    Vector2d vecCenter = m_pCircle->getCenter()-_pCamera->getCenter() + 
-                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;
-                         
-//  double fAngInc =    2.0 * M_PI /
-//                      ceil((100.0 * 2.0 * M_PI * m_fRadius * m_Graphics.getCamZoom()) /
-//                      (GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT));
-    double fAngInc = 2.0*M_PI /
-                     ceil (
-                         ( 2.0*M_PI * fRad / m_Graphics.getResMPX() )
-                         / m_Graphics.getDynPelSize() );
-
-    // Limit the maximum and minimum amount of circle elements
-    if ( fAngInc < 0.1*GRAPHICS_DEG2RAD ) fAngInc = 0.1*GRAPHICS_DEG2RAD;
-    if ( fAngInc > 18.0*GRAPHICS_DEG2RAD ) fAngInc = 18.0*GRAPHICS_DEG2RAD;
-
-    m_Graphics.beginLine(GRAPHICS_LINETYPE_LOOP, SHAPE_DEFAULT_DEPTH);
-
-    while ( fAng <= 2.0*M_PI+m_pCircle->getAngle())
+    
+    double   fRad      = m_pCircle->getRadius();
+    double   fPAng     = m_pCircle->getAngle();
+    Vector2d vecCenter = m_pCircle->getCenter() - _pCamera->getCenter() +
+                         IUniverseScaled::cellToDouble(_pObject->getCell() - _pCamera->getCell());
+    
+    if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&
+        (vecCenter.norm() >  fRad-_pCamera->getBoundingCircleRadius())
+       )
     {
-        m_Graphics.addVertex(Vector2d(vecCenter[0]-std::sin(fAng)*fRad,
-                                      vecCenter[1]+std::cos(fAng)*fRad));
-        fAng += fAngInc;
+        Vector2d    vecEx(1.0, 0.0);
+        double      fAng;    
+        double      fAngEnd;
+        LineType    LineT;
+        
+        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
+        if (isnan(fAlpha))
+        {
+            fAng = 0.0;
+            fAngEnd = 2.0*M_PI;
+            LineT = GRAPHICS_LINETYPE_LOOP;
+        }
+        else
+        {
+            double fAng0 = std::acos((- vecCenter.dot(vecEx)) / vecCenter.norm());
+            
+            if (vecCenter[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
+            
+            fAng = fAng0-fAlpha;
+            fAngEnd = fAng0+fAlpha;
+            LineT = GRAPHICS_LINETYPE_STRIP;
+        }
+
+        double fInc = CIRCLE_DEFAULT_RESOLUTION * m_Graphics.getResMPX() / fRad; 
+        
+        if (fInc > 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS) fInc = 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS;
+        fAngEnd += fInc;
+        
+        if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+        
+        m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
+
+            while ( fAng < fAngEnd)
+            {
+                m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*fRad,
+                                              vecCenter[1]+std::sin(fAng)*fRad));
+                fAng += fInc;
+            }
+        m_Graphics.endLine();
     }
-
-    m_Graphics.endLine();
-
-    METHOD_EXIT("CCircleVisuals::draw()");
 }
