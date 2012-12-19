@@ -117,8 +117,6 @@ CPhysicsManager::~CPhysicsManager()
 ///
 /// This method adds global forces to all objects, for example gravitation.
 ///
-/// \todo Inter object forces need to incorporate cell information
-///
 ///////////////////////////////////////////////////////////////////////////////
 void CPhysicsManager::addGlobalForces()
 {
@@ -145,7 +143,8 @@ void CPhysicsManager::addGlobalForces()
         {
             while (cj != m_DynamicObjects.end())
             {
-                vecCC = ((*ci)->getCOM() - (*cj)->getCOM());
+                vecCC = (*ci)->getCOM() - (*cj)->getCOM() +
+                        IUniverseScaled::cellToDouble((*ci)->getCell()-(*cj)->getCell());
                 fCCSqr = vecCC.squaredNorm();
 
                 if (fCCSqr > 400.0)
