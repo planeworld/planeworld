@@ -366,8 +366,6 @@ int main(int argc, char *argv[])
     
     // Set initialisation state of all objects
     pPhysicsManager->initObjects();
-    sf::Thread CellUpdater(std::bind(&CPhysicsManager::runCellUpdate,pPhysicsManager));
-    CellUpdater.launch();
     
 //     pEarth->setVelocity(Vector2d(29.78e3, 0.0));
 //     pEarth->setAngleVelocity(0.001);
@@ -383,7 +381,11 @@ int main(int argc, char *argv[])
     pVisualsManager->initGraphics();
     
     sf::Thread PhysicsThread(std::bind(&runPhysics, pPhysicsManager, &bDone));
+    sf::Thread CellUpdater(std::bind(&CPhysicsManager::runCellUpdate,pPhysicsManager));
     PhysicsThread.launch();
+    CellUpdater.launch();
+    INFO_MSG("Main", "Physics thread for cell update started.")
+    
     
     
     //--- Prepare for querying relative mouse movement -----------------------//
@@ -484,6 +486,7 @@ int main(int argc, char *argv[])
 
     CellUpdater.terminate();
     CellUpdater.wait();
+    INFO_MSG("Main", "Physics thread for cell update stopped.")
     PhysicsThread.wait();
 
     return 0;
