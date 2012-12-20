@@ -275,6 +275,34 @@ inline double CGraphics::getResMPY() const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns horizontal resolution
+///
+/// \return Horizontal resolution in pel/m
+///
+///////////////////////////////////////////////////////////////////////////////
+inline double CGraphics::getResPMX() const
+{
+    METHOD_ENTRY("CGraphics::getResPMX()");
+    return ((m_fCamZoom * m_unWidthScr) / 
+            (GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns vertical resolution
+///
+/// \return Vertical resolution in pel/m
+///
+///////////////////////////////////////////////////////////////////////////////
+inline double CGraphics::getResPMY() const
+{
+    METHOD_ENTRY("CGraphics::getResPMY()");
+    return ((m_fCamZoom * m_unWidthScr) / 
+            (GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns the screen width
 ///
 /// \return Screen width in pel

@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "planet.h"
+#include <boost-1_49/boost/concept_check.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -144,12 +145,12 @@ void CPlanet::initTerrain()
     double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
        
     double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
-    double fMaxF = 1.0 / (m_fGroundResolution*5.0); // 5 Vertices for 1 period
+    double fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
     
-    m_nOctHlTr = log2(fMaxF/fMinF)/log2(m_fLacHlTr);
+    m_nOctHlTr = log2(fMaxF/fMinF)/log2(m_fLacHlTr)+1;
     if (m_nOctHlTr < 1) m_nOctHlTr = 1;
     
-    m_nOctMtTr = log2(fMaxF/fMinF)/log2(m_fLacMtTr);
+    m_nOctMtTr = log2(fMaxF/fMinF)/log2(m_fLacMtTr)+1;
     if (m_nOctMtTr < 1) m_nOctMtTr = 1;
     
     INFO_MSG("Planet", "Generating Terrain (Mountains)")
@@ -205,24 +206,24 @@ void CPlanet::initTerrain()
 ///
 /// \brief Sets sampling of planet surface by given zoom factor
 ///
-/// The sampling is also calibrated for meter as unit. If one meter is represen-
-/// ted by 100px you will definitely see the switching to less octaves. So keep
-/// a resolution which is somewhere near to 0.1-1 m/px to ensure seamless sam-
-/// pling.
+/// The frequency is also calibrated for meter as unit. Thus, the initial maximum
+/// frequency is 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD).
 ///
-/// \param _fZoom Sampling of planet surface
+/// \param _fMaxF Maximum sampling frequency of planet surface
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CPlanet::setSampling(const double& _fZoom)
+void CPlanet::setSampling(const double& _fMaxF)
 {
     METHOD_ENTRY("CPlanet::setSampling")
     
-    double fMaxF;
     double fMinF;
+    double fMaxF;
     int nOct;
 
-    fMaxF = _fZoom;
+    fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
     fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+    
+    if (_fMaxF < fMaxF) fMaxF = _fMaxF;
     nOct = log2(fMaxF/fMinF)/log2(m_fLacMtTr)+1;
     if (nOct < 1) nOct = 1;
     m_MountainTerrain.SetOctaveCountTmp(nOct);

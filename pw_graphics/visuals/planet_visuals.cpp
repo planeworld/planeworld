@@ -85,13 +85,14 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
             LineT = GRAPHICS_LINETYPE_STRIP;
         }
 
-        double fInc = m_pPlanet->getGroundResolution() / fRad;
+        double fInc  = m_pPlanet->getGroundResolution() / fRad;
         
         // Subsample planet surface when zooming out.
         if (_pCamera->getZoom()*m_pPlanet->getGroundResolution() <= 1.0)
         {
-            fInc /= _pCamera->getZoom()*m_pPlanet->getGroundResolution();
-            m_pPlanet->setSampling(_pCamera->getZoom());
+            fInc /= m_pPlanet->getGroundResolution();
+            fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION * m_Graphics.getResMPX();
+            m_pPlanet->setSampling(m_Graphics.getResPMX()/PLANET_VISUALS_DEFAULT_RESOLUTION);
         }
         
         fAngEnd += fInc;

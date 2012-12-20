@@ -38,6 +38,8 @@ typedef enum
     PLANET_TYPE_ROCK,
 } PlanetType;
 
+const double PLANET_DEFAULT_VERTICES_PER_PERIOD = 5.0; ///< Vertices per period for calculation of octaves
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class representing a procedural created planet shape.

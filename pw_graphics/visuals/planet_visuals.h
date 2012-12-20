@@ -28,6 +28,8 @@
 
 //--- Misc header ------------------------------------------------------------//
 
+const double PLANET_VISUALS_DEFAULT_RESOLUTION=2.0; ///< Default resolution for visual sampling px/vertex
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the visualisation of a planet
