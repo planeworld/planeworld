@@ -327,7 +327,7 @@ void CVisualsManager::drawWorld() const
     {
         (*ci)->draw(m_pCamera);
     }
-    if (m_pCamera->getZoom() < 1.0e-9)
+    if (1.0e9 * m_Graphics.getResPMX() < 1.0)
     {
         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
         {

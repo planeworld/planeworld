@@ -297,7 +297,7 @@ inline double CGraphics::getResPMX() const
 inline double CGraphics::getResPMY() const
 {
     METHOD_ENTRY("CGraphics::getResPMY()");
-    return ((m_fCamZoom * m_unWidthScr) / 
+    return ((m_fCamZoom * m_unHeightScr) / 
             (GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT));
 }
 
