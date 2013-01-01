@@ -184,7 +184,7 @@ bool CXMLImporter::checkFile(const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::checkFile")
     
-    if (_Node.attribute("file").value() != "")
+    if (!_Node.attribute("file").empty())
     {
         this->import(m_strPath+"/"+_Node.attribute("file").value(),
                      IMPORT_MODE_OBJECT);
