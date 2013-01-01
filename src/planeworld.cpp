@@ -489,5 +489,16 @@ int main(int argc, char *argv[])
     INFO_MSG("Main", "Physics thread for cell update stopped.")
     PhysicsThread.wait();
 
+    if (pPhysicsManager != 0)
+    {
+        delete pPhysicsManager;
+        MEM_FREED("pPhysicsManager")
+    }
+    if (pVisualsManager != 0)
+    {
+        delete pVisualsManager;
+        MEM_FREED("pVisualsManager")
+    }
+    
     return 0;
 }

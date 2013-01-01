@@ -98,6 +98,7 @@ CPlanet* CPlanet::clone() const
     METHOD_ENTRY("CPlanet::clone")
     
     CPlanet* pClone = new CPlanet();
+    MEM_ALLOC("pClone")
         
     pClone->m_fAngle            = m_fAngle;
     pClone->m_fGroundResolution = m_fGroundResolution;

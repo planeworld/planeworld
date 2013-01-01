@@ -162,6 +162,7 @@ bool CXMLImporter::import(const std::string& _strFilename,
             m_Objects.insert(std::pair<std::string,IObject*>("pDefaultCam", pDefaultCam));
             
             m_pCamera = new CCamera;
+            MEM_ALLOC("m_pCamera")
             m_pCamera->setHook(pDefaultCam);
             
             INFO_MSG("XML Importer", "Camera Hook: DefaultCamera")
@@ -259,6 +260,7 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
     MEM_ALLOC("pRigidBody")
     
     IObjectVisuals* pObjectVisuals = new IObjectVisuals(pRigidBody);
+    MEM_ALLOC("pObjectVisuals");
     
     pugi::xml_node N = _Node;
     

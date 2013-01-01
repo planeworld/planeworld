@@ -68,6 +68,7 @@ CTerrain* CTerrain::clone() const
     METHOD_ENTRY("CTerrain::clone")
     
     CTerrain* pClone = new CTerrain();
+    MEM_ALLOC("pClone")
     
     pClone->m_Cache             = m_Cache;
     pClone->m_fAngle            = m_fAngle;
