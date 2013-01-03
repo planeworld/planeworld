@@ -24,6 +24,10 @@
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
+#include "circle.h"
+#include "circle_visuals.h"
+#include "object_visuals.h"
+#include "rigidbody.h"
 #include "star_system.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -49,13 +53,19 @@ class CUniverse
 {
     
     public:
+        CRigidBody*                 m_pStar;
+        CCircle*                    m_pStarShape;
+        CCircleVisuals*             m_pStarVisuals;
+        IObjectVisuals*             m_pStarObjectVisuals;
     
         //--- Constructor/Destructor -----------------------------------------//
         CUniverse();
         virtual ~CUniverse();
         
         //--- Constant Methods -----------------------------------------------//
-        const std::vector<CStarSystem*>& getStarSystems() const;
+        const std::vector<IObject*>&          getObjects() const;
+        const std::vector<CStarSystem*>&      getStarSystems() const;
+        const std::vector<IObjectVisuals*>&   getVisuals() const;
 
         //--- Methods --------------------------------------------------------//
         void generate(const int&, const int&);
@@ -69,12 +79,27 @@ class CUniverse
         //--- Constant Methods [private] -------------------------------------//
         const std::string starClassToString(const int&) const;
         
-        std::vector<CStarSystem*>   m_StarSystems;      ///< Star system in this universe
-        int                         m_nNrOfPlanetsMax;  ///< Maximum number of planets
+        std::vector<IObject*>           m_Objects;          ///< Objects of the universe
+        std::vector<CStarSystem*>       m_StarSystems;      ///< Star system in this universe
+        std::vector<IObjectVisuals*>    m_Visuals;          ///< Object visuals of the universe
+        int                             m_nNrOfPlanetsMax;  ///< Maximum number of planets
 
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return generated objects
+///
+/// \return List of generated objects
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::vector<IObject*>& CUniverse::getObjects() const
+{
+    METHOD_ENTRY("CUniverse::getObjects")
+    return m_Objects;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -89,5 +114,17 @@ inline const std::vector< CStarSystem* >& CUniverse::getStarSystems() const
     return m_StarSystems;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return generated object visuals
+///
+/// \return List of generated object visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::vector<IObjectVisuals*>& CUniverse::getVisuals() const
+{
+    METHOD_ENTRY("CUniverse::getVisuals")
+    return m_Visuals;
+}
 
 #endif

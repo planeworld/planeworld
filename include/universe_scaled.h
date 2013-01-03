@@ -51,6 +51,8 @@ class IUniverseScaled
         
         //--- Static methods -------------------------------------------------//
         static const Vector2d   cellToDouble(const Vector2i&);
+        static const Vector2d   getCellResidual(const Vector2d&);
+        static const Vector2i   getDoubleToCell(const Vector2d&);
 
         //--- Constant methods -----------------------------------------------//
         virtual const Vector2i  getCell() const;
@@ -84,6 +86,44 @@ inline const Vector2d IUniverseScaled::cellToDouble(const Vector2i& _vecCell)
 {
     METHOD_ENTRY("IUniverseScaled::cellToDouble")
     return _vecCell.cast<double>() * DEFAULT_CELL_SIZE_2;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the grid cell as position in double values
+///
+/// The universe is organised in cells that hold a double valued position. The
+/// cell is represented by an integer position index. This methods returns a
+/// a local double position within a cell.
+///
+/// \param _vecV Vector that should be transferred to local cell coordinates
+///
+/// \return The local coordinates within a grid cell
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2d IUniverseScaled::getCellResidual(const Vector2d& _vecV)
+{
+    METHOD_ENTRY("IUniverseScaled::getCellResidual")
+    return _vecV-((_vecV/DEFAULT_CELL_SIZE_2).cast<int>()).cast<double>()*DEFAULT_CELL_SIZE_2;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the grid cell of absolute double position
+///
+/// The universe is organised in cells that hold a double valued position. The
+/// cell is represented by an integer position index. This methods returns the
+/// grid cell a given absolute double position is located in.
+///
+/// \param _vecV Absolute double position
+///
+/// \return The grid cell the absolute double position is located in
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2i IUniverseScaled::getDoubleToCell(const Vector2d& _vecV)
+{
+    METHOD_ENTRY("IUniverseScaled::getDoubleToCell")
+    return (_vecV.cast<double>()/DEFAULT_CELL_SIZE_2).cast<int>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

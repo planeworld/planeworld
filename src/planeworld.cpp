@@ -363,6 +363,8 @@ int main(int argc, char *argv[])
     
     pVisualsManager->setUniverse(&Universe);
     pPhysicsManager->setUniverse(&Universe);
+    pPhysicsManager->addObjects(Universe.getObjects());
+    pVisualsManager->addVisualsList(Universe.getVisuals());
     
     // Set initialisation state of all objects
     pPhysicsManager->initObjects();

@@ -79,8 +79,8 @@ SET(SRCS_UNIVERSE_UT
 )
 
 ADD_EXECUTABLE (planeworld ${SRCS})
-ADD_EXECUTABLE (starmap_ut ${SRCS_STARMAP_UT})
-ADD_EXECUTABLE (universe_ut ${SRCS_UNIVERSE_UT})
+#ADD_EXECUTABLE (starmap_ut ${SRCS_STARMAP_UT})
+#ADD_EXECUTABLE (universe_ut ${SRCS_UNIVERSE_UT})
 
 TARGET_LINK_LIBRARIES (planeworld
     ${OPENGL_gl_LIBRARY}
@@ -89,11 +89,14 @@ TARGET_LINK_LIBRARIES (planeworld
     sfml-window
 )
 
-TARGET_LINK_LIBRARIES (starmap_ut
-    ${OPENGL_gl_LIBRARY}
-    sfml-window
-)
-
-INSTALL (TARGETS planeworld starmap_ut universe_ut
+# TARGET_LINK_LIBRARIES (starmap_ut
+#     ${OPENGL_gl_LIBRARY}
+#     sfml-window
+# )
+# 
+# INSTALL (TARGETS planeworld starmap_ut universe_ut
+#     RUNTIME DESTINATION bin
+# )
+INSTALL (TARGETS planeworld
     RUNTIME DESTINATION bin
 )

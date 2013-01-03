@@ -50,9 +50,8 @@ class CCamera : public CGraphicsBase, public IUniverseScaled
         virtual ~CCamera();
 
         //--- Constant Methods -----------------------------------------------//
-        const CBoundingBox           getBoundingBox() const;
-        const double&                getBoundingCircleRadius() const;
-        const std::vector<Vector2d>& getFrame() const;
+        const CBoundingBox  getBoundingBox() const;
+        const double&       getBoundingCircleRadius() const;
         
         const Vector2d&     getCenter() const;
         const double        getAngle() const;
@@ -78,7 +77,6 @@ class CCamera : public CGraphicsBase, public IUniverseScaled
 
         //--- Variables [protected] ------------------------------------------//
         std::vector<Vector2d>  m_vecFrame0;         ///< Initial camera frame
-        std::vector<Vector2d>  m_vecFrame;          ///< Camera frame
         CBoundingBox    m_BoundingBox;              ///< Cameras bounding box (for culling)
         Vector2d        m_vecPosition;              ///< Camera position
         Vector2d        m_vecHook;                  ///< Hook position
@@ -96,7 +94,7 @@ class CCamera : public CGraphicsBase, public IUniverseScaled
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Returns cameras bounding box
 ///
@@ -105,31 +103,27 @@ class CCamera : public CGraphicsBase, public IUniverseScaled
 ///
 /// \return The bounding box
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 inline const CBoundingBox CCamera::getBoundingBox() const
 {
     METHOD_ENTRY("CCamera::getBoundingBox")
-
-    METHOD_EXIT("CCamera::getBoundingBox")
     return m_BoundingBox;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Returns center of camera
 ///
 /// \return The camera's center
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 inline const Vector2d& CCamera::getCenter() const
 {
     METHOD_ENTRY("CCamera::getCenter")
-
-    METHOD_EXIT("CCamera::getCenter")
     return m_vecCenter;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Returns radius of cameras bounding circle
 ///
@@ -138,57 +132,36 @@ inline const Vector2d& CCamera::getCenter() const
 ///
 /// \return The bounding circle's radius
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 inline const double& CCamera::getBoundingCircleRadius() const
 {
     METHOD_ENTRY("CCamera::BoundingCircleRadius")
-
-    METHOD_EXIT("CCamera::BoundingCircleRadius")
     return m_fBoundingCircleRadius;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns camera frame (viewport) in world coordinates
-///
-/// \return The camera frame
-///
-///////////////////////////////////////////////////////////////////////////////
-inline const std::vector<Vector2d>& CCamera::getFrame() const
-{
-    METHOD_ENTRY("CCamera::getFrame")
-
-    METHOD_EXIT("CCamera::getFrame")
-    return m_vecFrame;
-}
-
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Returns the camera angle
 ///
 /// \return The camera angle
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 inline const double CCamera::getAngle() const
 {
     METHOD_ENTRY("CCamera::getAngle")
-
-    METHOD_EXIT("CCamera::getAngle")
     return (m_fAngle+m_fHookAng);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Returns the camera zoom
 ///
 /// \return The camera zoom
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 inline const double& CCamera::getZoom() const
 {
     METHOD_ENTRY("CCamera::getZoom")
-
-    METHOD_EXIT("CCamera::getZoom")
     return m_fZoom;
 }
 

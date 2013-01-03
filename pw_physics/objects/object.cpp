@@ -121,8 +121,8 @@ void IObject::updateCell()
     }
     m_pIntPos->init(m_pIntPos->getValue()+vecUpdate);
     m_vecCell += vecUpdateCell;
-    std::cout << "Cell update for " << m_strName << " is " << vecUpdateCell[0] <<
-                 ", " << vecUpdateCell[1] << std::endl;
+    DEBUG_MSG("Object Interface","Cell update for " << m_strName << " is " <<
+               vecUpdateCell[0] << ", " << vecUpdateCell[1])
 }
 
 ///////////////////////////////////////////////////////////////////////////////
