@@ -48,6 +48,7 @@ class CVisualsManager : virtual public CGraphicsBase
         void            drawBoundingBoxes() const;
         void            drawGrid() const;
         void            drawWorld() const;
+        void            finishFrame() const;
         const double    getFrequency() const;
         const bool      getVisualisation(const int&) const;
         const int       getVisualisations() const;
@@ -76,6 +77,17 @@ class CVisualsManager : virtual public CGraphicsBase
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Drawing finished, now swap buffers
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CVisualsManager::finishFrame() const
+{
+    METHOD_ENTRY("CVisualsManager::finishFrame")
+    m_Graphics.swapBuffers();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

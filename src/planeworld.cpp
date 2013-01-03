@@ -481,6 +481,7 @@ int main(int argc, char *argv[])
         pVisualsManager->drawGrid();
         pVisualsManager->drawWorld();
         pVisualsManager->drawBoundingBoxes();
+        pVisualsManager->finishFrame();
         Timer.sleepRemaining(pVisualsManager->getFrequency());
     }
 
