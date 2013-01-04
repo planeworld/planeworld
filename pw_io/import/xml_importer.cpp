@@ -566,7 +566,7 @@ void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline,
         if (std::string(_Node.attribute("type").as_string()) == "Polyline")
         {
             CPolylineVisuals* pPolylineVisuals = new CPolylineVisuals(_pPolyline);
-            MEM_ALLOC("pPlanetVisuals")
+            MEM_ALLOC("pPolylineVisuals")
             
             _pObjectVisuals->addVisuals(pPolylineVisuals);
         }

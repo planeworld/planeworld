@@ -70,7 +70,6 @@ class CVisualsManager : virtual public CGraphicsBase
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         double                          m_fFrequency;       ///< Frequency of visuals update
         int                             m_nVisualisations;  ///< Additional graphical output
-//         CKeyMap<IVisuals*>          m_VisualsMap;           ///< Map of visuals and keys
         std::vector<IObjectVisuals*>    m_ObjectVisuals;    ///< List of object visuals
         std::list<CDebrisVisuals*>      m_DebrisVisuals;    ///< List of debris visuals
         CCamera*                        m_pCamera;          ///< Camera for player view

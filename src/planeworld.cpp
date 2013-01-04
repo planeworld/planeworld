@@ -177,7 +177,6 @@ int main(int argc, char *argv[])
 //         pPlanetVisuals = new CPlanetVisuals(pPlanet);
         MEM_ALLOC("pObjectVisuals")
 
-
 //         pRect->setDepths(SHAPE_DEPTH_ALL);
 //         pRect->setUL(Vector2d(-1.0, +1.0));
 //         pRect->setLR(Vector2d(+1.0, -1.0));
@@ -362,7 +361,7 @@ int main(int argc, char *argv[])
 //     pSpring->setVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
     
     pVisualsManager->setUniverse(&Universe);
-    pPhysicsManager->setUniverse(&Universe);
+//     pPhysicsManager->setUniverse(&Universe);
     pPhysicsManager->addObjects(Universe.getObjects());
     pVisualsManager->addVisualsList(Universe.getVisuals());
     

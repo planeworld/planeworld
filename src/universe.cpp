@@ -54,13 +54,6 @@ CUniverse::~CUniverse()
         MEM_FREED("pStarSystem");
     }
     m_StarSystems.clear();
-        
-    if (m_pStar != 0)
-    {
-        delete m_pStar;
-        m_pStar = 0;
-        MEM_FREED("pStar");
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -171,17 +164,13 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     MEM_ALLOC("pStarVisuals");
     MEM_ALLOC("pStarObjectVisuals");
 
-//     m_pStarShape->setRadius(1.0e9*(int(nNrOfStarTypes*fNumber)+1));
-//     m_pStar->setOrigin(vecCenter);
-//     m_pStar->setCell(vecCell);
-//     m_pStar->setName("Star");
     m_pStar->disableDynamics();
     m_pStar->disableGravitation();
     m_pStar->getGeometry()->addShape(m_pStarShape);
     m_pStarObjectVisuals->addVisuals(m_pStarVisuals);
 
-//     m_Objects.push_back(m_pStar);
-//     m_Visuals.push_back(m_pStarObjectVisuals);
+    m_Objects.push_back(m_pStar);
+    m_Visuals.push_back(m_pStarObjectVisuals);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -189,7 +178,6 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 /// \brief Copies the full content of a given universe
 ///
 /// \param _Universe The universe to be copied
-/// \todo Also copy rigidbody, shapes,...
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CUniverse::clone(const CUniverse& _Universe)
@@ -205,27 +193,16 @@ void CUniverse::clone(const CUniverse& _Universe)
         *pStarSystem = *(*ci);
         m_StarSystems.push_back((pStarSystem));
     }
-    
-    m_pStar = new CRigidBody;
-    m_pStarShape = new CCircle;
-    m_pStarVisuals = new CCircleVisuals(m_pStarShape);
-    m_pStarObjectVisuals = new IObjectVisuals(m_pStar);
-    MEM_ALLOC("pStar");
-    MEM_ALLOC("pStarShape");
-    MEM_ALLOC("pStarVisuals");
-    MEM_ALLOC("pStarObjectVisuals");
 
-//     m_pStarShape->setRadius(1.0e9*(int(nNrOfStarTypes*fNumber)+1));
-//     m_pStar->setOrigin(vecCenter);
-//     m_pStar->setCell(vecCell);
-//     m_pStar->setName("Star");
-    m_pStar->disableDynamics();
-    m_pStar->disableGravitation();
-    m_pStar->getGeometry()->addShape(m_pStarShape);
-    m_pStarObjectVisuals->addVisuals(m_pStarVisuals);
-    
-    m_Objects.push_back(m_pStar);
-    m_Visuals.push_back(m_pStarObjectVisuals);
+    // Hand over object information. Important: The original objects are kept,
+    // the pointers are copied. This class passes responsibility of dynamically
+    // allocated objects!
+    m_pStar = _Universe.m_pStar;
+    m_pStarShape = _Universe.m_pStarShape;
+    m_pStarVisuals = _Universe.m_pStarVisuals;
+    m_pStarObjectVisuals = _Universe.m_pStarObjectVisuals;
+    m_Objects.push_back(_Universe.m_pStar);
+    m_Visuals.push_back(_Universe.m_pStarObjectVisuals);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

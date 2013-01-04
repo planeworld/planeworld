@@ -15,7 +15,7 @@
   <object file="sun.xml"/>
   <object file="earth.xml"/>
   <object file="moon.xml"/>
-  <object file="outer_planet.xml"/>
+  <object file="outer_planet.xml"/> 
   
   <!-- Create a box -->
   <object type="RigidBody">
