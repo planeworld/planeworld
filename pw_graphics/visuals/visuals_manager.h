@@ -47,6 +47,7 @@ class CVisualsManager : virtual public CGraphicsBase
         //--- Constant Methods -----------------------------------------------//
         void            drawBoundingBoxes() const;
         void            drawGrid() const;
+        void            drawGridHUD() const;
         void            drawWorld() const;
         void            finishFrame() const;
         const double    getFrequency() const;

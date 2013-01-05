@@ -137,7 +137,7 @@ void CVisualsManager::drawBoundingBoxes() const
 ////////////////////////////////////////////////////////////////////////////////
 void CVisualsManager::drawGrid() const
 {
-    METHOD_ENTRY("CVisualsManager::drawBoundingGrid")
+    METHOD_ENTRY("CVisualsManager::drawGrid")
 
     m_pCamera->update();
     
@@ -268,6 +268,63 @@ void CVisualsManager::drawGrid() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draws the universe grid HUD displaying the zoom level
+///
+/// Zoom level is displayed as lines where the number of lines represents the
+/// power of the zoom level. Thus, three lines is 1.0e3 m. There are also
+/// negative powers if lines are increasing to the left instead of right.
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawGridHUD() const
+{
+    METHOD_ENTRY("CVisualsManager::drawGridHU")
+
+    if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
+    {
+        m_Graphics.setColor(1.0,1.0,1.0,0.6);
+
+        double fGrid = 10.0;
+        
+        // Automatically scale grid depending on zoom level
+        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 10.0)
+            fGrid*=10.0;
+        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 1.0)
+            fGrid*=0.1;
+        
+        // Draw zoom scale
+        m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+            m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2- 26,10));
+            m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+101,10));
+        m_Graphics.endLine();
+        for (int i=-1; i<=4; ++i)
+        {
+            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,11));
+                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,15));
+            m_Graphics.endLine();
+        }
+        // Draw zoom level
+        for (int i=static_cast<int>(std::log10(fGrid)); i<0; ++i)
+        {
+            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
+                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
+            m_Graphics.endLine();
+        }
+        for (int i=1; i<=static_cast<int>(std::log10(fGrid)); ++i)
+        {
+            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
+                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
+            m_Graphics.endLine();
+        }
+        
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns if given visualisation is set
 ///
 /// \param _nVis Visualisation (flag) that is tested for state
@@ -333,7 +390,7 @@ void CVisualsManager::drawWorld() const
     {
         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
         {
-            if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 3.0)
+            if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 1.1)
             {
                 double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
                 Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
@@ -343,9 +400,9 @@ void CVisualsManager::drawWorld() const
                                      
                 m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
                 m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
-                m_pUniverse->m_pStar->init();
                 m_pUniverse->m_pStarShape->setRadius(double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9);
-                m_Graphics.setColor(0.8,fColor,0.3);
+                m_pUniverse->m_pStar->enableDynamics();
+                m_pUniverse->m_pStar->init();
             }
         }
     }
