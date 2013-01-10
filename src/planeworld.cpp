@@ -471,11 +471,9 @@ int main(int argc, char *argv[])
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                     {
                         pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
-                        if (((pCamera->getZoom() > 1.0e-18) &&
-                             (vecMouse.y < 0)) ||
-                            ((pCamera->getZoom() < 1.0e7) &&
-                             (vecMouse.y > 0)))
-                            pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
+                        pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
+                        if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
+                        else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
                     }
                     break;
                 }

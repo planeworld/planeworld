@@ -27,7 +27,7 @@
 #include "joint.h"
 #include "universe.h"
 
-const double PHYSICS_DEFAULT_FREQUENCY = 100.0;
+const double PHYSICS_DEFAULT_FREQUENCY = 10.0;
 
 typedef std::vector<IObject*> ObjectsType;
 

@@ -28,7 +28,7 @@
 #include "object_visuals.h"
 #include "universe.h"
 
-const double VISUALS_DEFAULT_FREQUENCY = 30.0;
+const double VISUALS_DEFAULT_FREQUENCY = 60.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -48,7 +48,7 @@ class CVisualsManager : virtual public CGraphicsBase
         void            drawBoundingBoxes() const;
         void            drawGrid() const;
         void            drawGridHUD() const;
-        void            drawWorld() const;
+        void            drawWorld();
         void            finishFrame() const;
         const double    getFrequency() const;
         const bool      getVisualisation(const int&) const;
@@ -71,6 +71,7 @@ class CVisualsManager : virtual public CGraphicsBase
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         double                          m_fFrequency;       ///< Frequency of visuals update
         int                             m_nVisualisations;  ///< Additional graphical output
+        int                             m_nStarIndex;       ///< Indicates procedurally generated star
         std::vector<IObjectVisuals*>    m_ObjectVisuals;    ///< List of object visuals
         std::list<CDebrisVisuals*>      m_DebrisVisuals;    ///< List of debris visuals
         CCamera*                        m_pCamera;          ///< Camera for player view

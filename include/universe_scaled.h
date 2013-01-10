@@ -27,9 +27,6 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Misc header ---....-----------------------------------------------------//
-#include "eigen2/Eigen/Geometry"
-
-using namespace Eigen;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -51,8 +48,7 @@ class IUniverseScaled
         
         //--- Static methods -------------------------------------------------//
         static const Vector2d   cellToDouble(const Vector2i&);
-        static const Vector2d   getCellResidual(const Vector2d&);
-        static const Vector2i   getDoubleToCell(const Vector2d&);
+        static void             separateCenterCell(const Vector2d&,Vector2d&,Vector2i&);
 
         //--- Constant methods -----------------------------------------------//
         virtual const Vector2i  getCell() const;
@@ -90,44 +86,6 @@ inline const Vector2d IUniverseScaled::cellToDouble(const Vector2i& _vecCell)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns the grid cell as position in double values
-///
-/// The universe is organised in cells that hold a double valued position. The
-/// cell is represented by an integer position index. This methods returns a
-/// a local double position within a cell.
-///
-/// \param _vecV Vector that should be transferred to local cell coordinates
-///
-/// \return The local coordinates within a grid cell
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d IUniverseScaled::getCellResidual(const Vector2d& _vecV)
-{
-    METHOD_ENTRY("IUniverseScaled::getCellResidual")
-    return _vecV-((_vecV/DEFAULT_CELL_SIZE_2).cast<int>()).cast<double>()*DEFAULT_CELL_SIZE_2;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the grid cell of absolute double position
-///
-/// The universe is organised in cells that hold a double valued position. The
-/// cell is represented by an integer position index. This methods returns the
-/// grid cell a given absolute double position is located in.
-///
-/// \param _vecV Absolute double position
-///
-/// \return The grid cell the absolute double position is located in
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const Vector2i IUniverseScaled::getDoubleToCell(const Vector2d& _vecV)
-{
-    METHOD_ENTRY("IUniverseScaled::getDoubleToCell")
-    return (_vecV.cast<double>()/DEFAULT_CELL_SIZE_2).cast<int>();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Returns the grid cell of entity
 ///
 /// The universe is organised in cells that hold a double valued position. The
@@ -140,6 +98,29 @@ inline const Vector2i IUniverseScaled::getCell() const
 {
     METHOD_ENTRY("IUniverseScaled::getCell")
     return m_vecCell;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Separate a given location into its local position within its cell and
+///        the cell itself.
+///
+/// \param _vecV Location to be separated
+/// \param _vecCenter Resulting center within grid cell
+/// \param _vecCell Resulting grid cell
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IUniverseScaled::separateCenterCell(const Vector2d& _vecV,
+                                                Vector2d& _vecCenter,
+                                                Vector2i& _vecCell)
+{
+    METHOD_ENTRY("IUniverseScaled::separateCenterCell")
+
+    Vector2d vecTmp((_vecV+DEFAULT_CELL_SIZE_VEC)/DEFAULT_CELL_SIZE_2);
+    vecTmp = Vector2d(floor(vecTmp[0]), floor(vecTmp[1]));
+    
+    _vecCell = vecTmp.cast<int>();
+    _vecCenter = _vecV-_vecCell.cast<double>()*DEFAULT_CELL_SIZE_2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -102,12 +102,9 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             double fAngle    = UniformDistribution(Generator);
             Vector2i vecCell;
             Vector2d vecCenter;
+            Vector2d vecPosition(fDistance*std::sin(fAngle),fDistance*std::cos(fAngle));
             
-            vecCell[0] = static_cast<int>(fDistance*std::sin(fAngle)/DEFAULT_CELL_SIZE_2);
-            vecCell[1] = static_cast<int>(fDistance*std::cos(fAngle)/DEFAULT_CELL_SIZE_2);
-            
-            vecCenter[0] = fDistance*std::sin(fAngle)-DEFAULT_CELL_SIZE_2*vecCell[0];
-            vecCenter[1] = fDistance*std::cos(fAngle)-DEFAULT_CELL_SIZE_2*vecCell[1];
+            IUniverseScaled::separateCenterCell(vecPosition,vecCenter,vecCell);
             
             pStarSystem->setStarType(int(nNrOfStarTypes*fNumber));
             pStarSystem->setCenter(vecCenter);
@@ -164,8 +161,9 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     MEM_ALLOC("pStarVisuals");
     MEM_ALLOC("pStarObjectVisuals");
 
-    m_pStar->disableDynamics();
-    m_pStar->disableGravitation();
+    m_pStar->setName("Procedurally_Generated_Star");
+    m_pStar->enableDynamics();
+    m_pStar->enableGravitation();
     m_pStar->getGeometry()->addShape(m_pStarShape);
     m_pStarObjectVisuals->addVisuals(m_pStarVisuals);
 

@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "visuals_manager.h"
+#include <boost-1_49/boost/concept_check.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -27,6 +28,7 @@
 CVisualsManager::CVisualsManager() : m_pUniverse(0),
                                      m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
                                      m_nVisualisations(0),
+                                     m_nStarIndex(-1),
                                      m_pCamera(0)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
@@ -105,6 +107,19 @@ void CVisualsManager::drawBoundingBoxes() const
         for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
             ci != m_ObjectVisuals.end(); ++ci)
         {
+            // Object bounding boxes
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+            m_Graphics.rect((*ci)->getObject()->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                            IUniverseScaled::cellToDouble((*ci)->getObject()->getCell()-m_pCamera->getCell()),
+                            (*ci)->getObject()->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                            IUniverseScaled::cellToDouble((*ci)->getObject()->getCell()-m_pCamera->getCell()));
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+            m_Graphics.filledRect((*ci)->getObject()->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                                  IUniverseScaled::cellToDouble((*ci)->getObject()->getCell()-m_pCamera->getCell()),
+                                  (*ci)->getObject()->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                  IUniverseScaled::cellToDouble((*ci)->getObject()->getCell()-m_pCamera->getCell()));
+            
+            // Shape bounding boxes
             for (std::vector<IVisuals*>::const_iterator cj = (*ci)->getShapeVisuals().begin();
                  cj != (*ci)->getShapeVisuals().end(); ++cj)
             {
@@ -147,6 +162,8 @@ void CVisualsManager::drawGrid() const
         double fGrid = 1.0;
         double fGridLeft;
         double fGridTop;
+        double fGridLeftCell;
+        double fGridTopCell;
         
         // Automatically scale grid depending on zoom level
         while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 100.0)
@@ -154,64 +171,66 @@ void CVisualsManager::drawGrid() const
         while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 10.0)
             fGrid*=0.1;
         
+        // If zoomed out to larger grids then universe cell, the bounding box
+        // cell of the camera has to be considered.
+        if (fGrid < 1.0e12)
+        {
+            fGridLeftCell = 0.0;
+            fGridTopCell = 0.0;
+        }
+        else
+        {
+            fGridLeftCell = IUniverseScaled::cellToDouble(m_pCamera->getCell())[0];
+            fGridTopCell  = IUniverseScaled::cellToDouble(m_pCamera->getCell())[1];
+        }
+
         // Snap sub grid to sub grid size
-        fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0]+
-                        IUniverseScaled::cellToDouble(m_pCamera->getCell())[0]
-                        )/fGrid+1.0)*fGrid;
-        fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1]+
-                        IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]
-                        )/fGrid+1.0)*fGrid;
+        fGridLeft=(floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
+                          fGridLeftCell)/fGrid)+1.0)*fGrid-fGridLeftCell;
+        fGridTop =(floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
+                          fGridTopCell )/fGrid)+1.0)*fGrid-fGridTopCell;
         
         // Change colour if on cell grid
         if (fGrid == DEFAULT_CELL_SIZE)
             m_Graphics.setColor(0.3, 0.0, 0.0);
         else
             m_Graphics.setColor(0.1, 0.1, 0.1);
-//     
+     
         // Vertical sub grid lines
-        while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0]+IUniverseScaled::cellToDouble(m_pCamera->getCell())[0])
+        while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
         {
             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.3);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                m_pCamera->getBoundingBox().getLowerLeft()[1]-
                                                m_pCamera->getCenter()[1]);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                m_pCamera->getBoundingBox().getUpperRight()[1]-
                                                m_pCamera->getCenter()[1]);
             m_Graphics.endLine();
             fGridLeft += fGrid;
         }
         // Horizontal sub grid lines
-        while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1]+IUniverseScaled::cellToDouble(m_pCamera->getCell())[1])
+        while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
         {
             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.3);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
                                     m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
+                                    fGridTop-m_pCamera->getCenter()[1]);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
                                     m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
+                                    fGridTop-m_pCamera->getCenter()[1]);
             m_Graphics.endLine();
             fGridTop += fGrid;
         }
         
         // Second grid is more coarse
-        fGrid = 10.0;
+        fGrid *= 10.0;
         
-        // Automatically scale grid depending on zoom level
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 10.0)
-            fGrid*=10.0;
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 1.0)
-            fGrid*=0.1;
-
-
         // Snap grid to grid size
-        fGridLeft=floor((m_pCamera->getBoundingBox().getLowerLeft()[0]+
-                            IUniverseScaled::cellToDouble(m_pCamera->getCell())[0]
-                        )/fGrid+1.0)*fGrid;
-        fGridTop =floor((m_pCamera->getBoundingBox().getLowerLeft()[1]+
-                            IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]
-                        )/fGrid+1.0)*fGrid;
+        fGridLeft=(floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
+                          fGridLeftCell)/fGrid)+1.0)*fGrid - fGridLeftCell;
+        fGridTop =(floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
+                          fGridTopCell)/fGrid)+1.0)*fGrid - fGridTopCell;
         
         // Change colour if on cell grid
         if (fGrid == DEFAULT_CELL_SIZE)
@@ -222,28 +241,28 @@ void CVisualsManager::drawGrid() const
         m_Graphics.setWidth(2.0);
         
         // Vertical grid lines
-        while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0]+IUniverseScaled::cellToDouble(m_pCamera->getCell())[0])
+        while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
         {
             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                 m_pCamera->getBoundingBox().getLowerLeft()[1]-
                                                 m_pCamera->getCenter()[1]);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[0],
+                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                 m_pCamera->getBoundingBox().getUpperRight()[1]-
                                                 m_pCamera->getCenter()[1]);
             m_Graphics.endLine();
             fGridLeft += fGrid;
         }
         // Horizontal grid lines
-        while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1]+IUniverseScaled::cellToDouble(m_pCamera->getCell())[1])
+        while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
         {
             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
                                     m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
+                                    fGridTop-m_pCamera->getCenter()[1]);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
                                     m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]-IUniverseScaled::cellToDouble(m_pCamera->getCell())[1]);
+                                    fGridTop-m_pCamera->getCenter()[1]);
             m_Graphics.endLine();
             fGridTop += fGrid;
         }
@@ -251,19 +270,6 @@ void CVisualsManager::drawGrid() const
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         m_Graphics.setWidth(1.0);
     }
-//     m_Graphics.setColor(0.0, 1.0, 1.0, 0.2);
-//     for (int x=-5; x<=+5; ++x)
-//         for (int y=-5; y<=+5; ++y)
-//         {
-//             if ((Vector2d(x,y)*DEFAULT_CELL_SIZE_2+m_pCamera->getCenter()).norm()<DEFAULT_CELL_SIZE_2*2.1)
-//             {
-//                 double fX1 = floor(((x*DEFAULT_CELL_SIZE_2+m_pCamera->getCenter()[0])-DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2)*DEFAULT_CELL_SIZE_2+DEFAULT_CELL_SIZE;
-//                 double fX2 = floor(((x*DEFAULT_CELL_SIZE_2+m_pCamera->getCenter()[0])+DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2)*DEFAULT_CELL_SIZE_2+DEFAULT_CELL_SIZE;
-//                 double fY1 = floor(((y*DEFAULT_CELL_SIZE_2+m_pCamera->getCenter()[1])-DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2)*DEFAULT_CELL_SIZE_2+DEFAULT_CELL_SIZE;
-//                 double fY2 = floor(((y*DEFAULT_CELL_SIZE_2+m_pCamera->getCenter()[1])+DEFAULT_CELL_SIZE)/DEFAULT_CELL_SIZE_2)*DEFAULT_CELL_SIZE_2+DEFAULT_CELL_SIZE;
-//                 m_Graphics.filledRect(Vector2d(fX1,fY1)-m_pCamera->getCenter(),Vector2d(fX2,fY2)-m_pCamera->getCenter());
-//             }
-//         }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -283,12 +289,12 @@ void CVisualsManager::drawGridHUD() const
     {
         m_Graphics.setColor(1.0,1.0,1.0,0.6);
 
-        double fGrid = 10.0;
+        double fGrid = 1.0;
         
         // Automatically scale grid depending on zoom level
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 10.0)
+        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 100.0)
             fGrid*=10.0;
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 1.0)
+        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 10.0)
             fGrid*=0.1;
         
         // Draw zoom scale
@@ -353,7 +359,7 @@ const bool CVisualsManager::getVisualisation(const int& _nVis) const
 /// \brief Draws all visuals from list
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawWorld() const
+void CVisualsManager::drawWorld()
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
@@ -377,8 +383,9 @@ void CVisualsManager::drawWorld() const
             {
                 Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
                                      m_pCamera->getCenter()+
-                                    (m_pUniverse->getStarSystems()[i]->getCell()-
-                                     m_pCamera->getCell()).cast<double>()*DEFAULT_CELL_SIZE_2;
+                                     IUniverseScaled::cellToDouble
+                                     (m_pUniverse->getStarSystems()[i]->getCell()-
+                                      m_pCamera->getCell());
                 double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
                 m_Graphics.setColor(0.8,fColor,0.3);
                 m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getNumberOfPlanets());
@@ -390,23 +397,30 @@ void CVisualsManager::drawWorld() const
     {
         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
         {
-            if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 1.1)
+            if (m_nStarIndex != i)
             {
-                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
-                Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
-                                     m_pCamera->getCenter()+
-                                    (m_pUniverse->getStarSystems()[i]->getCell()-
-                                     m_pCamera->getCell()).cast<double>()*DEFAULT_CELL_SIZE_2;
-                                     
-                m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
-                m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
-                m_pUniverse->m_pStarShape->setRadius(double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9);
-                m_pUniverse->m_pStar->enableDynamics();
-                m_pUniverse->m_pStar->init();
+                if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 2.1)
+                {
+                    double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                    // RACE_CONDITION if object dynamic
+                    m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
+                    m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
+                    
+                    // The whole double buffering for physical objects, which is
+                    // needed for collision detection ist not working. This is
+                    // because pointers to shapes, e.g. visualisation, do not
+                    // know their buffered clone. Hence, the following method
+                    // does only set the radius for one shape, not for its
+                    // clone. Maybe copying is needed or some tricky method.
+                    m_pUniverse->m_pStarShape->setRadius(double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9);
+                    m_pUniverse->m_pStar->init();
+                    m_nStarIndex = i;
+                }
             }
         }
     }
     m_Graphics.setPointSize(1.0);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

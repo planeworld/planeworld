@@ -6,7 +6,7 @@
         mass="1.0e20"
         origin_x="-9.9e11"
         origin_y="9.99999999999999999e11"
-        cell_x = "-5"
+        cell_x = "-50"
         cell_y = "-3"
         dynamics="true"
         gravity="false"

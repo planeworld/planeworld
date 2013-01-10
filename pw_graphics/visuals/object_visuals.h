@@ -45,6 +45,8 @@ class IObjectVisuals : virtual public CGraphicsBase
         virtual void draw(const CCamera* const) const;
 
         virtual const std::vector<IVisuals*>& getShapeVisuals() const;
+        
+        IObject* const getObject() const;
                 
         //--- Methods --------------------------------------------------------//
         void addVisuals(IVisuals* const);
@@ -83,6 +85,19 @@ inline const std::vector<IVisuals*>& IObjectVisuals::getShapeVisuals() const
 {
     METHOD_ENTRY("IObjectVisuals::getShapeVisuals")
     return m_Visuals;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns object these visuals refer to.
+///
+/// \return Object these visuals refer to
+///
+////////////////////////////////////////////////////////////////////////////////
+inline IObject* const IObjectVisuals::getObject() const
+{
+    METHOD_ENTRY("IObjectVisuals::getObject")
+    return m_pObject;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

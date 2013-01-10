@@ -150,8 +150,8 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
 ///       of hooked object.
 /// \todo Hook handling must be improved. At the moment, the camera doesn't
 ///       use cells but absolute coordinates because of the hook. The cell data
-///       is just post-calculated and thus, lacks precesion.
-///       The bounding box also needs adjustment
+///       is just post-calculated and thus, lacks precesion. Best would be to
+///       only allow for hooked movement within double precision.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CCamera::update()
@@ -159,52 +159,70 @@ void CCamera::update()
     METHOD_ENTRY("CCamera::update")
     
     std::vector<Vector2d>  vecFrame(4);
+    Rotation2Dd            CameraRotation(m_fAngle);
 
     if (m_pHook != 0)
     {
         m_fHookAng = m_pHook->getHookAngle();
         m_vecHook = m_pHook->getHookPosition();
         m_vecHookCell = m_pHook->getHookCell();
-    }
     
-    m_Graphics.rotCamTo(m_fHookAng+m_fAngle);
+        Rotation2Dd HookRotation(M_PI_2);
+        
+        m_vecCenter = HookRotation * m_vecPosition + m_vecHook + IUniverseScaled::cellToDouble(m_vecHookCell);
+
+        // m_vecCenter is in absolute coordinates while m_vecCell is zero. Thus, they
+        // have to be separated:
+        IUniverseScaled::separateCenterCell(m_vecCenter,m_vecCenter,m_vecCell);
+        
+        // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
+        // Hence, accuracy is low, so it can stay with the double value.
+        vecFrame[0] = HookRotation * (CameraRotation * m_vecFrame0[0]/m_fZoom + m_vecPosition) +
+                    m_vecHook + IUniverseScaled::cellToDouble(m_vecHookCell);
+        vecFrame[1] = HookRotation * (CameraRotation * m_vecFrame0[1]/m_fZoom + m_vecPosition) +
+                    m_vecHook + IUniverseScaled::cellToDouble(m_vecHookCell);
+        vecFrame[2] = HookRotation * (CameraRotation * m_vecFrame0[2]/m_fZoom + m_vecPosition) +
+                    m_vecHook + IUniverseScaled::cellToDouble(m_vecHookCell);
+        vecFrame[3] = HookRotation * (CameraRotation * m_vecFrame0[3]/m_fZoom + m_vecPosition) +
+                    m_vecHook + IUniverseScaled::cellToDouble(m_vecHookCell);
+                    
+        m_BoundingBox.setLowerLeft(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
+        m_BoundingBox.setUpperRight(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
+        m_BoundingBox.update(vecFrame[1]-IUniverseScaled::cellToDouble(m_vecCell));
+        m_BoundingBox.update(vecFrame[2]-IUniverseScaled::cellToDouble(m_vecCell));
+        m_BoundingBox.update(vecFrame[3]-IUniverseScaled::cellToDouble(m_vecCell));
+                    
+        m_Graphics.rotCamTo(M_PI_2+m_fAngle);
+    }
+    else
+    {
+        Vector2i vecCell;
+        
+        IUniverseScaled::separateCenterCell(m_vecPosition, m_vecPosition, vecCell);
+        m_vecCenter = m_vecPosition;
+        m_vecCell  += vecCell;
+        
+        // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
+        // Hence, accuracy is low, so it can stay with the double value.
+        vecFrame[0] = CameraRotation * m_vecFrame0[0]/m_fZoom + m_vecPosition;
+        vecFrame[1] = CameraRotation * m_vecFrame0[1]/m_fZoom + m_vecPosition;
+        vecFrame[2] = CameraRotation * m_vecFrame0[2]/m_fZoom + m_vecPosition;
+        vecFrame[3] = CameraRotation * m_vecFrame0[3]/m_fZoom + m_vecPosition;
+        
+        m_BoundingBox.setLowerLeft(vecFrame[0]);
+        m_BoundingBox.setUpperRight(vecFrame[0]);
+        m_BoundingBox.update(vecFrame[1]);
+        m_BoundingBox.update(vecFrame[2]);
+        m_BoundingBox.update(vecFrame[3]);
+        
+        m_Graphics.rotCamTo(m_fAngle);
+    }
+
     m_Graphics.zoomCamTo(m_fZoom);
     m_Graphics.applyCamMovement();
 
-    Rotation2Dd CameraRotation(m_fAngle);
-    Rotation2Dd HookRotation(m_fHookAng);
-    
     m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
                                    m_fViewportHeight*m_fViewportHeight)/m_fZoom;
-    m_vecCenter = HookRotation * (Vector2d(m_vecPosition[0], m_vecPosition[1]))
-                  + m_vecHook + IUniverseScaled::cellToDouble(m_vecHookCell);
-
-    // m_vecCenter is in absolute coordinates while m_vecCell is zero. Thus, they
-    // have to be separated:
-    m_vecCell   = IUniverseScaled::getDoubleToCell(m_vecCenter);
-    m_vecCenter = IUniverseScaled::getCellResidual(m_vecCenter);
-
-    
-    // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
-    // Hence, accuracy is low, so it can stay with the double value.
-    vecFrame[0] = HookRotation * (CameraRotation * m_vecFrame0[0]/m_fZoom+
-                                  Vector2d(m_vecPosition[0],m_vecPosition[1]))+m_vecHook+
-                                  IUniverseScaled::cellToDouble(m_vecHookCell);
-    vecFrame[1] = HookRotation * (CameraRotation * m_vecFrame0[1]/m_fZoom+
-                                  Vector2d(m_vecPosition[0],m_vecPosition[1]))+m_vecHook+
-                                  IUniverseScaled::cellToDouble(m_vecHookCell);
-    vecFrame[2] = HookRotation * (CameraRotation * m_vecFrame0[2]/m_fZoom+
-                                  Vector2d(m_vecPosition[0],m_vecPosition[1]))+m_vecHook+
-                                  IUniverseScaled::cellToDouble(m_vecHookCell);
-    vecFrame[3] = HookRotation * (CameraRotation * m_vecFrame0[3]/m_fZoom+
-                                  Vector2d(m_vecPosition[0],m_vecPosition[1]))+m_vecHook+
-                                  IUniverseScaled::cellToDouble(m_vecHookCell);
-    
-    m_BoundingBox.setLowerLeft(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.setUpperRight(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[1]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[2]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[3]-IUniverseScaled::cellToDouble(m_vecCell));
     m_BoundingBox.setCell(m_vecCell);
 }
 

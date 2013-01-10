@@ -48,7 +48,7 @@ IObjectVisuals::~IObjectVisuals()
 ///
 /// \todo At the moment, an object is only drawn if in the same cell as the
 ///       camera, otherwise, when zoomed out, a dot is drawn. Bounding Boxes are
-///       not fully adjusted to cells yet. Dots need not always to be drawn.
+///       not fully adjusted to cells yet.
 ///
 /// \param _pCamera Draw visuals with respect to this camera
 ///

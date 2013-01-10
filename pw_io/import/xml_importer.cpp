@@ -153,19 +153,20 @@ bool CXMLImporter::import(const std::string& _strFilename,
         }
         else
         {
-            CRigidBody* pDefaultCam = new CRigidBody;
-            MEM_ALLOC("pDefaultCam")
-            pDefaultCam->setName("DefaultCamera");
-            pDefaultCam->disableDynamics();
-            pDefaultCam->disableGravitation();
-            
-            m_Objects.insert(std::pair<std::string,IObject*>("pDefaultCam", pDefaultCam));
+//             CRigidBody* pDefaultCam = new CRigidBody;
+//             MEM_ALLOC("pDefaultCam")
+//             pDefaultCam->setName("DefaultCamera");
+//             pDefaultCam->disableDynamics();
+//             pDefaultCam->disableGravitation();
+//             
+//             m_Objects.insert(std::pair<std::string,IObject*>("pDefaultCam", pDefaultCam));
             
             m_pCamera = new CCamera;
             MEM_ALLOC("m_pCamera")
-            m_pCamera->setHook(pDefaultCam);
+//             m_pCamera->setHook(pDefaultCam);
+            m_pCamera->setViewport(600.0,400.0);
             
-            INFO_MSG("XML Importer", "Camera Hook: DefaultCamera")
+            INFO_MSG("XML Importer", "Default Camera created.")
         }
     }
 
