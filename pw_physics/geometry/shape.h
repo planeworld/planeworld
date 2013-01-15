@@ -78,8 +78,6 @@ class IShape
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-// ShapeType IShape::m_ShapeType = SHAPE_NONE;
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Get the layers covered by shape
@@ -90,8 +88,6 @@ class IShape
 inline int IShape::getDepths() const
 {
     METHOD_ENTRY("IShape::getDepths")
-
-    METHOD_EXIT("IShape::getDepths")
     return m_nDepthlayers;
 }
 
@@ -105,8 +101,6 @@ inline int IShape::getDepths() const
 inline const ShapeType IShape::getShapeType() const
 {
     METHOD_ENTRY("IShape::getShapeType")
-
-    METHOD_EXIT("IShape::getShapeType")
     return SHAPE_NONE;
 }
 
@@ -120,8 +114,6 @@ inline const ShapeType IShape::getShapeType() const
 inline CBoundingBox& IShape::getBoundingBox()
 {
     METHOD_ENTRY("IShape::getBoundingBox")
-
-    METHOD_EXIT("IShape::getBoundingBox")
     return m_AABB;
 }
 
@@ -135,10 +127,7 @@ inline CBoundingBox& IShape::getBoundingBox()
 inline void IShape::setDepths(const int& _nD)
 {
     METHOD_ENTRY("IShape::setDepths")
-
     m_nDepthlayers |= _nD;
-
-    METHOD_EXIT("IShape::setDepths")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,10 +140,7 @@ inline void IShape::setDepths(const int& _nD)
 inline void IShape::unsetDepths(const int& _nD)
 {
     METHOD_ENTRY("IShape::unsetDepths")
-
     m_nDepthlayers &= (!_nD);
-
-    METHOD_EXIT("IShape::unsetDepths")
 }
 
 #endif
