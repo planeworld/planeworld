@@ -54,8 +54,9 @@ class IShape
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        IShape() : m_nDepthlayers(SHAPE_DEPTH_ALL){}                       ///< Constructor
-        virtual ~IShape(){}                                                 ///< Destructor
+        IShape() : m_nDepthlayers(SHAPE_DEPTH_ALL),
+                   m_pBuf(0){}                              ///< Constructor
+        virtual ~IShape(){}                                 ///< Destructor
         
         //--- Constant Methods -----------------------------------------------//
         virtual IShape*             clone() const = 0;
@@ -74,6 +75,7 @@ class IShape
         //--- Protected Variables --------------------------------------------//
         CBoundingBox    m_AABB;                             ///< Bounding box of shape
         int             m_nDepthlayers;                     ///< Depths in which shape exists
+        IShape*         m_pBuf;                             ///< Buffered shape for double buffering
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -128,6 +130,10 @@ inline void IShape::setDepths(const int& _nD)
 {
     METHOD_ENTRY("IShape::setDepths")
     m_nDepthlayers |= _nD;
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+        m_pBuf->m_nDepthlayers |= _nD;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -141,6 +147,10 @@ inline void IShape::unsetDepths(const int& _nD)
 {
     METHOD_ENTRY("IShape::unsetDepths")
     m_nDepthlayers &= (!_nD);
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+        m_pBuf->m_nDepthlayers &= (!_nD);
 }
 
 #endif

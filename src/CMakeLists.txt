@@ -33,6 +33,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/circle.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/double_buffered_shape.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/geometry.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/planet.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/polyline.cpp

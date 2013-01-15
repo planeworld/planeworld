@@ -57,10 +57,10 @@ CCircle* CCircle::clone() const
     CCircle* pClone = new CCircle();
     MEM_ALLOC("pClone")
         
-    pClone->m_vecCenter  = m_vecCenter;
-    pClone->m_vecCenter0 = m_vecCenter0;
-    pClone->m_fAngle     = m_fAngle;
-    pClone->m_fRadius    = m_fRadius;
+    pClone->m_vecCenter    = m_vecCenter;
+    pClone->m_vecCenter0   = m_vecCenter0;
+    pClone->m_fAngle       = m_fAngle;
+    pClone->m_fRadius      = m_fRadius;
     pClone->m_AABB         = m_AABB;
     pClone->m_nDepthlayers = m_nDepthlayers;
     

@@ -397,7 +397,7 @@ void CVisualsManager::drawWorld()
     {
         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
         {
-            if (m_nStarIndex != i)
+//             if (m_nStarIndex != i)
             {
                 if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 2.1)
                 {

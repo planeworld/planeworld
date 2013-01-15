@@ -123,6 +123,13 @@ void CGeometry::update()
 {
     METHOD_ENTRY("CGeometry::update")
     
+//     std::list<IShape*>::iterator it = m_pShapesPrevious->begin();
+//     for (std::list<IShape*>::const_iterator ci  = m_pShapesCurrent->begin();
+//                                             ci != m_pShapesCurrent->end(); ++ci, ++it)
+//          {
+//              *(*it) = *(*ci);
+//          }
+    
     std::swap(m_pShapesCurrent,m_pShapesPrevious);
     
     METHOD_EXIT("CGeometry::update")

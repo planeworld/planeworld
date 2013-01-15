@@ -32,6 +32,8 @@
 ///
 /// \brief Class representing connected lines
 ///
+/// \todo Implement double buffer.
+///
 ////////////////////////////////////////////////////////////////////////////////
 class CPolyLine : public IShape
 {
