@@ -1,0 +1,6 @@
+eigen2
+boost
+
+SFML:
+openal
+glew
