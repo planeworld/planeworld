@@ -23,7 +23,6 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "planet.h"
 #include "visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -41,14 +40,14 @@ class CPlanetVisuals : public IVisuals
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
-        CPlanetVisuals(CPlanet*);
+        CPlanetVisuals(CDoubleBufferedShape* const);
         ~CPlanetVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         virtual void draw(const CCamera* const, const IObject* const) const;
                 
         //--- Methods --------------------------------------------------------//
-        void                attach(CPlanet*);
+        void                attach(CDoubleBufferedShape* const);
         const CBoundingBox& getBoundingBox();
                 
     private:
@@ -58,7 +57,7 @@ class CPlanetVisuals : public IVisuals
         //--- Constant Methods [private] -------------------------------------//
         
         //--- Variables [private] --------------------------------------------//
-        CPlanet*            m_pPlanet;          ///< Pointer to corresponding shape
+        CDoubleBufferedShape* m_pPlanet;          ///< Pointer to corresponding shape
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -70,27 +69,13 @@ class CPlanetVisuals : public IVisuals
 /// \param _pPlanet Planet to attach when initialising 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline CPlanetVisuals::CPlanetVisuals(CPlanet* _pPlanet): m_pPlanet(_pPlanet)
+inline CPlanetVisuals::CPlanetVisuals(CDoubleBufferedShape* const _pPlanet)
                                                                       
 {
     METHOD_ENTRY("CPlanetVisuals::CPlanetVisuals")
     CTOR_CALL("CPlanetVisuals::CPlanetVisuals")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a planet to planet visuals
-///
-/// \param _pPlanet Planet to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPlanetVisuals::attach(CPlanet* _pPlanet)
-{
-    METHOD_ENTRY("CPlanetVisuals::attach")
-
-    m_pPlanet = _pPlanet;
-
-    METHOD_EXIT("CPlanetVisuals::attach")
+    
+    this->attach(_pPlanet);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,9 +88,7 @@ inline void CPlanetVisuals::attach(CPlanet* _pPlanet)
 inline const CBoundingBox& CPlanetVisuals::getBoundingBox()
 {
     METHOD_ENTRY("CPlanetVisuals::getBoundingBox")
-
-    METHOD_EXIT("CPlanetVisuals::getBoundingBox")
-    return m_pPlanet->getBoundingBox();
+    return m_pPlanet->getShapeCur()->getBoundingBox();
 }
 
 #endif

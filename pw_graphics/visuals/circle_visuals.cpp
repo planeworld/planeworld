@@ -19,6 +19,8 @@
 
 #include "circle_visuals.h"
 
+#include "circle.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Copy Constructor
@@ -26,10 +28,12 @@
 /// \param _pCircle Circle to attach when initialising 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CCircleVisuals::CCircleVisuals(CCircle* _pCircle): m_pCircle(_pCircle)
+CCircleVisuals::CCircleVisuals(CDoubleBufferedShape* const _pCircle)
 {
     METHOD_ENTRY("CCircleVisuals::CCircleVisuals")
     CTOR_CALL("CCircleVisuals::CCircleVisuals")
+    
+    this->attach(_pCircle);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,9 +60,9 @@ void CCircleVisuals::draw(const CCamera* const _pCamera,
 {
     METHOD_ENTRY("CCircleVisuals::draw()");
     
-    double   fRad      = m_pCircle->getRadius();
-    double   fPAng     = m_pCircle->getAngle();
-    Vector2d vecCenter = m_pCircle->getCenter() - _pCamera->getCenter() +
+    double   fRad      = static_cast<CCircle*>(m_pCircle->getShapeCur())->getRadius();
+    double   fPAng     = static_cast<CCircle*>(m_pCircle->getShapeCur())->getAngle();
+    Vector2d vecCenter = static_cast<CCircle*>(m_pCircle->getShapeCur())->getCenter() - _pCamera->getCenter() +
                          IUniverseScaled::cellToDouble(_pObject->getCell() - _pCamera->getCell());
     
     if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&
@@ -105,4 +109,25 @@ void CCircleVisuals::draw(const CCamera* const _pCamera,
             }
         m_Graphics.endLine();
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Attaches a circle to circle visuals
+///
+/// \param _pCirc Circle to attach
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircleVisuals::attach(CDoubleBufferedShape* const _pCirc)
+{
+    METHOD_ENTRY("CCircleVisuals::attach")
+    if (_pCirc->getShapeCur()->getShapeType() == SHAPE_CIRCLE)
+    {
+        m_pCircle = _pCirc;
+    }
+    else
+    {
+        ERROR_MSG("Circle Visuals", "Wrong shape attached to visuals.")
+    }
+    
 }

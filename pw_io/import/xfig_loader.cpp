@@ -19,6 +19,9 @@
 
 #include "xfig_loader.h"
 
+#include "circle.h"
+#include "polyline.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief constructor
@@ -40,6 +43,7 @@ void CXFigLoader::load(const std::string& _strFilename)
 {
     METHOD_ENTRY("CXFigLoader::load")
 
+    CDoubleBufferedShape* pShape;
     CCircle*            pCircle;
     CCircleVisuals*     pCircleVisuals;
     CPolyLine*          pPolyLine;
@@ -145,7 +149,10 @@ void CXFigLoader::load(const std::string& _strFilename)
                 // Add object to shapelist
                 pCircle = new CCircle;
                 MEM_ALLOC("pCircle")
-                pCircleVisuals = new CCircleVisuals(pCircle);
+                pShape = new CDoubleBufferedShape;
+                MEM_ALLOC("pShape")
+                pShape->buffer(pCircle);
+                pCircleVisuals = new CCircleVisuals(pShape);
                 MEM_ALLOC("pCircleVisuals")
                 pCircle->setRadius(double(nRadiusX)/100.0);
                 pCircle->setCenter(double(nCenterX)/100.0, double(-nCenterY)/100.0);
@@ -189,7 +196,10 @@ void CXFigLoader::load(const std::string& _strFilename)
 
                 pPolyLine = new CPolyLine;
                 MEM_ALLOC("pPolyline")
-                pPolylineVisuals = new CPolylineVisuals(pPolyLine);
+                pShape = new CDoubleBufferedShape;
+                MEM_ALLOC("pShape")
+                pShape->buffer(pPolyLine);
+                pPolylineVisuals = new CPolylineVisuals(pShape);
                 MEM_ALLOC("pPolylineVisuals")
                 pPolyLine->setLineType(GRAPHICS_LINETYPE_LOOP);
                 pPolyLine->setDepths(SHAPE_DEPTH_ALL);

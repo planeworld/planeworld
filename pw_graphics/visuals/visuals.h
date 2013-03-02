@@ -42,8 +42,11 @@ class IVisuals : virtual public CGraphicsBase
         //--- Constant Methods -----------------------------------------------//
         virtual void draw(const CCamera* const,
                           const IObject* const) const = 0;
+                          
+        
                 
         //--- Methods --------------------------------------------------------//
+        virtual void                attach(CDoubleBufferedShape* const) = 0;
         virtual const CBoundingBox& getBoundingBox() = 0;
         
 };

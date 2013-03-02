@@ -23,7 +23,6 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "circle.h"
 #include "visuals.h"
 
 const double CIRCLE_DEFAULT_RESOLUTION = 5.0; ///< Default resolution for visual sampling, px/vertex.
@@ -40,41 +39,25 @@ class CCircleVisuals : public IVisuals
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
-        CCircleVisuals(CCircle*);
+        CCircleVisuals(CDoubleBufferedShape* const);
         ~CCircleVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         virtual void draw(const CCamera* const, const IObject* const) const;
                 
         //--- Methods --------------------------------------------------------//
-        void attach(CCircle*);
+        virtual void attach(CDoubleBufferedShape* const);
         virtual const CBoundingBox& getBoundingBox();
         
     private:
         
-        CCircleVisuals();       ///< Constructor is private
+        CCircleVisuals();                   ///< Constructor is private
         
-        CCircle* m_pCircle;
+        CDoubleBufferedShape* m_pCircle;    ///< Pointer to buffered shape
 
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a circle to circle visuals
-///
-/// \param _pCirc Circle to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCircleVisuals::attach(CCircle* _pCirc)
-{
-    METHOD_ENTRY("CCircleVisuals::attach")
-
-    m_pCircle = _pCirc;
-
-    METHOD_EXIT("CCircleVisuals::attach")
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -86,9 +69,7 @@ inline void CCircleVisuals::attach(CCircle* _pCirc)
 inline const CBoundingBox& CCircleVisuals::getBoundingBox()
 {
     METHOD_ENTRY("CCircleVisuals::getBoundingBox")
-
-    METHOD_EXIT("CCircleVisuals::getBoundingBox")
-    return m_pCircle->getBoundingBox();
+    return m_pCircle->getShapeCur()->getBoundingBox();
 }
 
 #endif

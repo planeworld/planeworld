@@ -30,6 +30,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "physics_manager.h"
+#include "planet.h"
+#include "planet_visuals.h"
 #include "pointmass.h"
 #include "rigidbody.h"
 #include "spring_visuals.h"
@@ -169,13 +171,6 @@ int main(int argc, char *argv[])
         pCircle = new CCircle();
 //         pPlanet = new CPlanet();
         MEM_ALLOC("pCircle")
-        pCircleVisuals = new CCircleVisuals(pCircle);
-//         pPlanetVisuals = new CPlanetVisuals(pPlanet);
-        MEM_ALLOC("pCircleVisuals")
-        
-        pObjectVisuals = new IObjectVisuals(pPointMass);
-//         pPlanetVisuals = new CPlanetVisuals(pPlanet);
-        MEM_ALLOC("pObjectVisuals")
 
 //         pRect->setDepths(SHAPE_DEPTH_ALL);
 //         pRect->setUL(Vector2d(-1.0, +1.0));
@@ -189,7 +184,19 @@ int main(int argc, char *argv[])
 //         pPlanet->setHeight(1.0);
 //         pPlanet->initTerrain();
 
-        pPointMass->getGeometry()->addShape(pCircle);
+        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+        MEM_ALLOC("pShape")
+        pShape->buffer(pCircle);
+        pPointMass->getGeometry()->addShape(pShape);
+        
+        pCircleVisuals = new CCircleVisuals(pShape);
+//         pPlanetVisuals = new CPlanetVisuals(pPlanet);
+        MEM_ALLOC("pCircleVisuals")
+        
+        pObjectVisuals = new IObjectVisuals(pPointMass);
+//         pPlanetVisuals = new CPlanetVisuals(pPlanet);
+        MEM_ALLOC("pObjectVisuals")
+        
 //         pPointMass->getGeometry().addShape(pPlanet);
         
 //         pPointMass->getGeometry().addShape(pRect);

@@ -21,9 +21,16 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
-#include "circle_visuals.h"
-#include "planet_visuals.h"
 #include "rigidbody.h"
+
+#include "circle.h"
+#include "circle_visuals.h"
+#include "planet.h"
+#include "planet_visuals.h"
+#include "polyline.h"
+#include "polyline_visuals.h"
+#include "terrain.h"
+#include "terrain_visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -320,6 +327,11 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody,
     pCircle->setRadius(_Node.attribute("radius").as_double());
     pCircle->setCenter(_Node.attribute("center_x").as_double(),
                        _Node.attribute("center_y").as_double());
+    
+    CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+    MEM_ALLOC("pShape")
+    
+    pShape->buffer(pCircle);
         
     // The shape might have visuals
     if (_Node.first_child())
@@ -329,13 +341,13 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody,
         {
             if (std::string(N.name()) == "visuals")
             {
-                this->createVisualsCircle(pCircle, _pObjectVisuals, N);
+                this->createVisualsCircle(pShape, _pObjectVisuals, N);
             }
             N = N.next_sibling();
         }
     }
     
-    _pBody->getGeometry()->addShape(pCircle);
+    _pBody->getGeometry()->addShape(pShape);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -363,6 +375,10 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
     pPlanet->setGroundResolution(_Node.attribute("ground_resolution").as_double());
     pPlanet->setSeaLevel(_Node.attribute("sea_level").as_double());
     pPlanet->initTerrain();
+    
+    CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+    MEM_ALLOC("pShape")
+    pShape->buffer(pPlanet);
         
     // The shape might have visuals
     if (_Node.first_child())
@@ -372,13 +388,13 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
         {
             if (std::string(N.name()) == "visuals")
             {
-                this->createVisualsPlanet(pPlanet, _pObjectVisuals, N);
+                this->createVisualsPlanet(pShape, _pObjectVisuals, N);
             }
             N = N.next_sibling();
         }
     }
     
-    _pBody->getGeometry()->addShape(pPlanet);
+    _pBody->getGeometry()->addShape(pShape);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -432,6 +448,10 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody,
         pPolyline->addVertex(fX,fY);
     }
     
+    CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+    MEM_ALLOC("pShape")
+    pShape->buffer(pPolyline);
+    
     // The shape might have visuals
     if (!_Node.empty())
     {
@@ -440,13 +460,13 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody,
         {
             if (std::string(N.name()) == "visuals")
             {
-                this->createVisualsPolyline(pPolyline, _pObjectVisuals, N);
+                this->createVisualsPolyline(pShape, _pObjectVisuals, N);
             }
             N = N.next_sibling();
         }
     }
     
-    _pBody->getGeometry()->addShape(pPolyline);
+    _pBody->getGeometry()->addShape(pShape);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -473,7 +493,11 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody,
     pTerrain->setHeight(_Node.attribute("height_max").as_double());
     pTerrain->setDiversity(_Node.attribute("diversity").as_double());
     pTerrain->setGroundResolution(_Node.attribute("ground_resolution").as_double());
-        
+
+    CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+    MEM_ALLOC("pShape")
+    pShape->buffer(pTerrain);
+    
     // The shape might have visuals
     if (_Node.first_child())
     {
@@ -482,13 +506,13 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody,
         {
             if (std::string(N.name()) == "visuals")
             {
-                this->createVisualsTerrain(pTerrain, _pObjectVisuals, N);
+                this->createVisualsTerrain(pShape, _pObjectVisuals, N);
             }
             N = N.next_sibling();
         }
     }
     
-    _pBody->getGeometry()->addShape(pTerrain);
+    _pBody->getGeometry()->addShape(pShape);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -500,7 +524,7 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody,
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsCircle(CCircle* const _pCircle,
+void CXMLImporter::createVisualsCircle(CDoubleBufferedShape* const _pCircle,
                                        IObjectVisuals* const _pObjectVisuals,
                                        const pugi::xml_node& _Node)
 {
@@ -528,7 +552,7 @@ void CXMLImporter::createVisualsCircle(CCircle* const _pCircle,
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet,
+void CXMLImporter::createVisualsPlanet(CDoubleBufferedShape* const _pPlanet,
                                        IObjectVisuals* const _pObjectVisuals,
                                        const pugi::xml_node& _Node)
 {
@@ -556,7 +580,7 @@ void CXMLImporter::createVisualsPlanet(CPlanet* const _pPlanet,
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline,
+void CXMLImporter::createVisualsPolyline(CDoubleBufferedShape* const _pPolyline,
                                          IObjectVisuals* const _pObjectVisuals,
                                          const pugi::xml_node& _Node)
 {
@@ -584,7 +608,7 @@ void CXMLImporter::createVisualsPolyline(CPolyLine* const _pPolyline,
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsTerrain(CTerrain* const _pTerrain,
+void CXMLImporter::createVisualsTerrain(CDoubleBufferedShape* const _pTerrain,
                                         IObjectVisuals* const _pObjectVisuals,
                                         const pugi::xml_node& _Node)
 {

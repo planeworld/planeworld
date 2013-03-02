@@ -32,8 +32,6 @@
 ///
 /// \brief Class representing connected lines
 ///
-/// \todo Implement double buffer.
-///
 ////////////////////////////////////////////////////////////////////////////////
 class CPolyLine : public IShape
 {
@@ -78,8 +76,6 @@ class CPolyLine : public IShape
 inline const LineType& CPolyLine::getLineType() const
 {
     METHOD_ENTRY("CPolyLine::getLineType()");
-
-    METHOD_EXIT("CPolyLine::getLineType()");
     return m_LineType;
 }
 
@@ -91,8 +87,6 @@ inline const LineType& CPolyLine::getLineType() const
 inline const std::list<Vector2d>& CPolyLine::getVertices() const
 {
     METHOD_ENTRY("CPolyLine::getVertices");
-
-    METHOD_EXIT("CPolyLine::getVertices");
     return m_VertList;
 }
 
@@ -106,8 +100,6 @@ inline const std::list<Vector2d>& CPolyLine::getVertices() const
 inline const ShapeType CPolyLine::getShapeType() const
 {
     METHOD_ENTRY("CPolyLine::getShapeType")
-
-    METHOD_EXIT("CPolyLine::getShapeType")
     return SHAPE_POLYLINE;
 }
 
@@ -120,12 +112,17 @@ inline const ShapeType CPolyLine::getShapeType() const
 ///////////////////////////////////////////////////////////////////////////////
 inline void CPolyLine::addVertex(const Vector2d& _vecV)
 {
-    METHOD_ENTRY("CPolyLine::addVertex(const Vector2d&)");
+    METHOD_ENTRY("CPolyLine::addVertex");
 
     m_VertList0.push_back(_vecV);
     m_VertList.push_back(_vecV);
-
-    METHOD_EXIT("CPolyLine::addVertex(const Vector2d&)");
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPolyLine*>(m_pBuf)->m_VertList0.push_back(_vecV);
+        static_cast<CPolyLine*>(m_pBuf)->m_VertList.push_back(_vecV);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -138,12 +135,17 @@ inline void CPolyLine::addVertex(const Vector2d& _vecV)
 ///////////////////////////////////////////////////////////////////////////////
 inline void CPolyLine::addVertex(const double& _fX, const double& _fY)
 {
-    METHOD_ENTRY("CPolyLine::addVertex(const double&, const double&)");
+    METHOD_ENTRY("CPolyLine::addVertex");
 
     m_VertList0.push_back(Vector2d(_fX, _fY));
     m_VertList.push_back(Vector2d(_fX, _fY));
-
-    METHOD_EXIT("CPolyLine::addVertex(const double&, const double&)");
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPolyLine*>(m_pBuf)->m_VertList0.push_back(Vector2d(_fX,_fY));
+        static_cast<CPolyLine*>(m_pBuf)->m_VertList.push_back(Vector2d(_fX,_fY));
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,8 +160,12 @@ inline void CPolyLine::setLineType(const LineType& _LT)
     METHOD_ENTRY("CPolyLine::setLineType(const LineType&)");
 
     m_LineType = _LT;
-
-    METHOD_EXIT("CPolyLine::setLineType(const LineType&)");
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPolyLine*>(m_pBuf)->m_LineType = _LT;
+    }
 }
 
 #endif

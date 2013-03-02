@@ -53,3 +53,30 @@ CDoubleBufferedShape::~CDoubleBufferedShape()
         m_pShapeCur = 0;
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Buffer a given shape
+///
+/// \param _pShape Shape to buffer
+///
+///////////////////////////////////////////////////////////////////////////////
+void CDoubleBufferedShape::buffer(IShape* const _pShape)
+{
+    METHOD_ENTRY ( "CDoubleBufferedShape::buffer")
+    
+    if (m_pShapeCur != 0)
+    {
+        delete m_pShapeBuf;
+        MEM_FREED("m_pShapeBuf");
+        delete m_pShapeCur;
+        MEM_FREED("m_pShapeCur");
+        NOTICE_MSG("Double buffered shape", "Shape already buffered. Deleting old shapes.")
+    }
+    
+    m_pShapeCur = _pShape;
+    m_pShapeBuf = _pShape->clone();
+    
+    m_pShapeBuf->setBuffer(m_pShapeCur);
+    m_pShapeCur->setBuffer(m_pShapeBuf);
+}

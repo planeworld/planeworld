@@ -69,8 +69,6 @@ CPlanet::CPlanet() : m_fAngle(0.0),
 //     m_Surface.SetControlModule(m_TerrainType);
 //     m_Surface.SetBounds(0.0,100.0);
 //     m_Surface.SetEdgeFalloff(0.25);
-    
-    METHOD_EXIT("CPlanet::CPlanet()")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,8 +80,6 @@ CPlanet::~CPlanet()
 {
     METHOD_ENTRY("CPlanet::~CPlanet")
     DTOR_CALL("CPlanet::~CPlanet")
-
-    METHOD_EXIT("CPlanet::~CPlanet")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +114,6 @@ CPlanet* CPlanet::clone() const
     pClone->m_AABB              = m_AABB;
     pClone->m_nDepthlayers      = m_nDepthlayers;
     
-    METHOD_EXIT("CPlanet::clone")
     return pClone;
 }
 
@@ -136,6 +131,124 @@ CPlanet* CPlanet::clone() const
 void CPlanet::initTerrain()
 {
     METHOD_ENTRY("CPlanet::initTerrain")
+
+    this->myInitTerrain();
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->myInitTerrain();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets sampling of planet surface by given zoom factor
+///
+/// The frequency is also calibrated for meter as unit. Thus, the initial maximum
+/// frequency is 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD).
+///
+/// \param _fMaxF Maximum sampling frequency of planet surface
+///
+/// \todo setSampling and resetSampling are only used temporarily at the moment
+///       when used by visuals. Therefore, no double buffering is needed here.
+///       If used otherwise, double buffering must be incorporated. Apart from
+///       this, the physics needs full precision, so there must be a mutex for
+///       these cases or visuals need their own noise methods.
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanet::setSampling(const double& _fMaxF)
+{
+    METHOD_ENTRY("CPlanet::setSampling")
+    
+    double fMinF;
+    double fMaxF;
+    int nOct;
+
+    fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
+    fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+    
+    if (_fMaxF < fMaxF) fMaxF = _fMaxF;
+    nOct = log2(fMaxF/fMinF)/log2(m_fLacMtTr)+1;
+    if (nOct < 1) nOct = 1;
+    m_MountainTerrain.SetOctaveCountTmp(nOct);
+    
+    nOct = log2(fMaxF/fMinF)/log2(m_fLacHlTr)+1;
+    if (nOct < 1) nOct = 1;
+    m_BaseFlatTerrain.SetOctaveCountTmp(nOct);
+    
+    nOct = log2(100)/log2(m_fLacTrTp)+1;
+    if (nOct < 1) nOct = 1;
+    m_TerrainType.SetOctaveCountTmp(nOct);
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->setSampling(_fMaxF);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Resets the sampling to original value given by octave count
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanet::resetSampling()
+{
+    METHOD_ENTRY("CPlanet::resetSampling")
+    
+    m_BaseFlatTerrain.SetOctaveCountTmp(m_nOctHlTr);
+    m_MountainTerrain.SetOctaveCountTmp(m_nOctMtTr);
+    m_TerrainType.SetOctaveCountTmp(m_nOctTrTp);
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->resetSampling();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Transforms the shape
+///
+/// \param _fAngle Rotation angle
+/// \param _vecV Translation vector
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPlanet::transform( const double& _fAngle, const Vector2d& _vecV )
+{
+    METHOD_ENTRY("CPlanet::transform")
+
+    Rotation2Dd Rotation(_fAngle);
+
+    m_vecCenter = Rotation * m_vecCenter0 + _vecV;
+
+    m_fAngle = _fAngle;
+
+    // Update bounding box
+    m_AABB.setLowerLeft( m_vecCenter - Vector2d(m_fRadius+m_fHeightMax,
+                                                m_fRadius+m_fHeightMax));
+    m_AABB.setUpperRight(m_vecCenter + Vector2d(m_fRadius+m_fHeightMax,
+                                                m_fRadius+m_fHeightMax));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Initialises the planets terrain
+///
+/// For initialisation, some parameters depend on others. Radius times 2 Pi
+/// is important for the maximum frequency, depending on the ground resolution.
+/// It is also important that the one unit (double fD=1.0) corresponds to one
+/// meter, because the frequency of noise methods is dependend on the unit,
+/// too.
+///
+/// This method is internal to make it usable in double buffering
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPlanet::myInitTerrain()
+{
+    METHOD_ENTRY("CPlanet::myInitTerrain")
 
     m_fLacHlTr = 1.9371;
     m_fLacMtTr = 2.137;
@@ -200,80 +313,4 @@ void CPlanet::initTerrain()
     m_Surface.SetControlModule(m_TerrainType);
     m_Surface.SetBounds(0.0,1.0);
     m_Surface.SetEdgeFalloff(0.05);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets sampling of planet surface by given zoom factor
-///
-/// The frequency is also calibrated for meter as unit. Thus, the initial maximum
-/// frequency is 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD).
-///
-/// \param _fMaxF Maximum sampling frequency of planet surface
-///
-////////////////////////////////////////////////////////////////////////////////
-void CPlanet::setSampling(const double& _fMaxF)
-{
-    METHOD_ENTRY("CPlanet::setSampling")
-    
-    double fMinF;
-    double fMaxF;
-    int nOct;
-
-    fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
-    fMinF = 1.0 / (m_fHeightMax*M_PI_2);
-    
-    if (_fMaxF < fMaxF) fMaxF = _fMaxF;
-    nOct = log2(fMaxF/fMinF)/log2(m_fLacMtTr)+1;
-    if (nOct < 1) nOct = 1;
-    m_MountainTerrain.SetOctaveCountTmp(nOct);
-    
-    nOct = log2(fMaxF/fMinF)/log2(m_fLacHlTr)+1;
-    if (nOct < 1) nOct = 1;
-    m_BaseFlatTerrain.SetOctaveCountTmp(nOct);
-    
-    nOct = log2(100)/log2(m_fLacTrTp)+1;
-    if (nOct < 1) nOct = 1;
-    m_TerrainType.SetOctaveCountTmp(nOct);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Resets the sampling to original value given by octave count
-///
-////////////////////////////////////////////////////////////////////////////////
-void CPlanet::resetSampling()
-{
-    METHOD_ENTRY("CPlanet::resetSampling")
-    
-    m_BaseFlatTerrain.SetOctaveCountTmp(m_nOctHlTr);
-    m_MountainTerrain.SetOctaveCountTmp(m_nOctMtTr);
-    m_TerrainType.SetOctaveCountTmp(m_nOctTrTp);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Transforms the shape
-///
-/// \param _fAngle Rotation angle
-/// \param _vecV Translation vector
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPlanet::transform( const double& _fAngle, const Vector2d& _vecV )
-{
-    METHOD_ENTRY("CPlanet::transform")
-
-    Rotation2Dd Rotation(_fAngle);
-
-    m_vecCenter = Rotation * m_vecCenter0 + _vecV;
-
-    m_fAngle = _fAngle;
-
-    // Update bounding box
-    m_AABB.setLowerLeft( m_vecCenter - Vector2d(m_fRadius+m_fHeightMax,
-                                                m_fRadius+m_fHeightMax));
-    m_AABB.setUpperRight(m_vecCenter + Vector2d(m_fRadius+m_fHeightMax,
-                                                m_fRadius+m_fHeightMax));
-
-    METHOD_EXIT("CPlanet::transform")
 }

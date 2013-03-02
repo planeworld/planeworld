@@ -50,6 +50,7 @@ class CDoubleBufferedShape
         IShape* const getShapeCur() const;
                         
         //--- Methods --------------------------------------------------------//
+        void buffer(IShape* const);
         void swapBuffer();
 
     private:

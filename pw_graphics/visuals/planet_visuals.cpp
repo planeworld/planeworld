@@ -19,6 +19,8 @@
 
 #include "planet_visuals.h"
 
+#include "planet.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Destructor
@@ -26,10 +28,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 CPlanetVisuals::~CPlanetVisuals()
 {
-    METHOD_ENTRY("CPlanetVisuals::~CPlanetVisuals()");
-    DTOR_CALL("CPlanetVisuals::~CPlanetVisuals()");
-
-    METHOD_EXIT("CPlanetVisuals::~CPlanetVisuals()");
+    METHOD_ENTRY("CPlanetVisuals::~CPlanetVisuals")
+    DTOR_CALL("CPlanetVisuals::~CPlanetVisuals")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,15 +43,17 @@ CPlanetVisuals::~CPlanetVisuals()
 void CPlanetVisuals::draw(const CCamera* const _pCamera,
                           const IObject* const _pObject) const
 {
-    METHOD_ENTRY("CPlanetVisuals::draw()");
+    METHOD_ENTRY("CPlanetVisuals::draw")
 
-    double   fRad      = m_pPlanet->getRadius();
-    double   fHeight   = m_pPlanet->getHeight();
-    double   fPAng     = m_pPlanet->getAngle();
-    double   fSeaLevel = m_pPlanet->getSeaLevel();
-    int      nSeed     = m_pPlanet->getSeed();
-    double   fSmooth   = m_pPlanet->getSmoothness();
-    Vector2d vecCenter = m_pPlanet->getCenter()-_pCamera->getCenter() +
+    CPlanet* pPlanet = static_cast<CPlanet*>(m_pPlanet->getShapeCur());
+    
+    double   fRad      = pPlanet->getRadius();
+    double   fHeight   = pPlanet->getHeight();
+    double   fPAng     = pPlanet->getAngle();
+    double   fSeaLevel = pPlanet->getSeaLevel();
+    int      nSeed     = pPlanet->getSeed();
+    double   fSmooth   = pPlanet->getSmoothness();
+    Vector2d vecCenter = pPlanet->getCenter()-_pCamera->getCenter() +
                          (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;
     
     if ((vecCenter.norm() <= fRad+fHeight+_pCamera->getBoundingCircleRadius()) &&
@@ -85,14 +87,14 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
             LineT = GRAPHICS_LINETYPE_STRIP;
         }
 
-        double fInc  = m_pPlanet->getGroundResolution() / fRad;
+        double fInc  = pPlanet->getGroundResolution() / fRad;
         
         // Subsample planet surface when zooming out.
-        if (_pCamera->getZoom()*m_pPlanet->getGroundResolution() <= 1.0)
+        if (_pCamera->getZoom()*pPlanet->getGroundResolution() <= 1.0)
         {
-            fInc /= m_pPlanet->getGroundResolution();
+            fInc /= pPlanet->getGroundResolution();
             fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION * m_Graphics.getResMPX();
-            m_pPlanet->setSampling(m_Graphics.getResPMX()/PLANET_VISUALS_DEFAULT_RESOLUTION);
+//             pPlanet->setSampling(m_Graphics.getResPMX()/PLANET_VISUALS_DEFAULT_RESOLUTION);
         }
         
         fAngEnd += fInc;
@@ -122,7 +124,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
 
             while ( fAng < fAngEnd)
             {
-                fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
+                fHght = pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
                                                          std::sin(fAng-fPAng)*fRad);
                 if (fHght < fSeaLevel)
                 {
@@ -130,7 +132,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
                 }
                 else
                 {
-                  fTerrainType = m_pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
+                  fTerrainType = pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
                                                                       std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
                   if (fTerrainType < 0.5)
                   {
@@ -239,8 +241,27 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
 //         }
         m_Graphics.setColor(1.0,1.0,1.0,1.0);
         
-        m_pPlanet->resetSampling();
+//         pPlanet->resetSampling();
     }
+}
 
-    METHOD_EXIT("CPlanetVisuals::draw()");
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Attaches a planet to planet visuals
+///
+/// \param _pPlanet Planet to attach
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanetVisuals::attach(CDoubleBufferedShape* const _pPlanet)
+{
+    METHOD_ENTRY("CPlanetVisuals::attach")
+
+    if (_pPlanet->getShapeCur()->getShapeType() == SHAPE_PLANET)
+    {
+        m_pPlanet = _pPlanet;
+    }
+    else
+    {
+        ERROR_MSG("Planet Visuals", "Wrong shape attached to visuals.")
+    }
 }

@@ -25,11 +25,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
-#include "circle_visuals.h"
-#include "object_visuals.h"
-#include "planet_visuals.h"
-#include "polyline_visuals.h"
-#include "terrain_visuals.h"
 #include "universe.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -76,10 +71,10 @@ class CXMLImporter
         void createShapePlanet(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
         void createShapeTerrain(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
         void createShapePolyline(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createVisualsCircle(CCircle* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createVisualsPlanet(CPlanet* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createVisualsTerrain(CTerrain* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createVisualsPolyline(CPolyLine* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createVisualsCircle(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createVisualsPlanet(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createVisualsTerrain(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createVisualsPolyline(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
         void createRigidBody(const pugi::xml_node&);
         void createUniverse(const pugi::xml_node&);
         void readObjectCore(IObject* const, const pugi::xml_node&);

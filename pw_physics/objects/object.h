@@ -382,28 +382,6 @@ inline CGeometry* const IObject::getGeometry()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Method to set cell, overloaded to hand cell to bounding box.
-///
-/// \param _vecCell Grid cell of the object
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setCell(const Vector2i& _vecCell)
-{
-    METHOD_ENTRY("IObject::setCell")
-
-    m_vecCell = _vecCell;
-    m_Geometry.getBoundingBox().setCell(_vecCell);
-    std::list<IShape*>::const_iterator ci = m_Geometry.getShapes()->begin();
-    while (ci != m_Geometry.getShapes()->end())
-    {
-        (*ci)->getBoundingBox().setCell(m_vecCell);
-        ++ci;
-    }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Set the origin of mass
 ///
 /// \param _vecOrigin Origin of mass 

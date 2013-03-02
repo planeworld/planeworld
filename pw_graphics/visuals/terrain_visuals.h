@@ -23,7 +23,6 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "terrain.h"
 #include "visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -39,14 +38,14 @@ class CTerrainVisuals : public IVisuals
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
-        CTerrainVisuals(CTerrain*);
+        CTerrainVisuals(CDoubleBufferedShape* const);
         ~CTerrainVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         virtual void draw(const CCamera* const, const IObject* const) const;
                 
         //--- Methods --------------------------------------------------------//
-        void                attach(CTerrain*);
+        void                attach(CDoubleBufferedShape* const);
         const CBoundingBox& getBoundingBox();
                 
     private:
@@ -54,26 +53,10 @@ class CTerrainVisuals : public IVisuals
         CTerrainVisuals();       ///< Constructor is private
         
         //--- Variables [private] --------------------------------------------//
-        CTerrain*            m_pTerrain;          ///< Pointer to corresponding shape
+        CDoubleBufferedShape* m_pTerrain; ///< Pointer to corresponding shape
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a terrain to terrain visuals
-///
-/// \param _pTerrain Terrain to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CTerrainVisuals::attach(CTerrain* _pTerrain)
-{
-    METHOD_ENTRY("CTerrainVisuals::attach")
-
-    m_pTerrain = _pTerrain;
-
-    METHOD_EXIT("CTerrainVisuals::attach")
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -85,9 +68,7 @@ inline void CTerrainVisuals::attach(CTerrain* _pTerrain)
 inline const CBoundingBox& CTerrainVisuals::getBoundingBox()
 {
     METHOD_ENTRY("CTerrainVisuals::getBoundingBox")
-
-    METHOD_EXIT("CTerrainVisuals::getBoundingBox")
-    return m_pTerrain->getBoundingBox();
+    return m_pTerrain->getShapeCur()->getBoundingBox();
 }
 
 #endif

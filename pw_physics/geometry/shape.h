@@ -67,8 +67,9 @@ class IShape
         virtual void transform(const double&, const Vector2d&) = 0;         ///< Transforms the shape
 
         CBoundingBox& getBoundingBox();
-        void          setDepths(const int&);
-        void          unsetDepths(const int&);
+        void            setBuffer(IShape* const);
+        void            setDepths(const int&);
+        void            unsetDepths(const int&);
 
     protected:
 
@@ -117,6 +118,19 @@ inline CBoundingBox& IShape::getBoundingBox()
 {
     METHOD_ENTRY("IShape::getBoundingBox")
     return m_AABB;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief  Set the buffer for this shape
+///
+/// \param _pBuf Shape buffer
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IShape::setBuffer(IShape* const _pBuf)
+{
+    METHOD_ENTRY("IShape::setBuffer")
+    m_pBuf = _pBuf;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

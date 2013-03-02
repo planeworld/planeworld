@@ -142,7 +142,9 @@ void CBoundingBox::update(const CBoundingBox& _BBox)
     if (_BBox.getLowerLeft()[0] < m_vecLowerLeft[0]) m_vecLowerLeft[0]=_BBox.getLowerLeft()[0];
     if (_BBox.getLowerLeft()[1] < m_vecLowerLeft[1]) m_vecLowerLeft[1]=_BBox.getLowerLeft()[1];
     if (_BBox.getUpperRight()[0] > m_vecUpperRight[0]) m_vecUpperRight[0]=_BBox.getUpperRight()[0];
-    if (_BBox.getUpperRight()[1] > m_vecUpperRight[1]) m_vecUpperRight[1]=_BBox.getUpperRight()[1]; 
+    if (_BBox.getUpperRight()[1] > m_vecUpperRight[1]) m_vecUpperRight[1]=_BBox.getUpperRight()[1];
+    
+    m_vecCell = _BBox.m_vecCell;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

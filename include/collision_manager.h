@@ -24,8 +24,10 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
+#include "circle.h"
 #include "debris.h"
-#include <bits/stl_vector.h>
+#include "polyline.h"
+#include "terrain.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

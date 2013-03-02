@@ -173,6 +173,33 @@ void IObject::init()
     METHOD_EXIT("IObject::init")
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Method to set cell, overloaded to hand cell to bounding box.
+///
+/// \param _vecCell Grid cell of the object
+///
+////////////////////////////////////////////////////////////////////////////////
+void IObject::setCell(const Vector2i& _vecCell)
+{
+    METHOD_ENTRY("IObject::setCell")
+
+    m_vecCell = _vecCell;
+    m_Geometry.getBoundingBox().setCell(_vecCell);
+    std::list<CDoubleBufferedShape*>::const_iterator ci = m_Geometry.getShapes()->begin();
+    while (ci != m_Geometry.getShapes()->end())
+    {
+        (*ci)->getShapeCur()->getBoundingBox().setCell(m_vecCell);
+        ++ci;
+    }
+    ci = m_Geometry.getShapes()->begin();
+    while (ci != m_Geometry.getShapes()->end())
+    {
+        (*ci)->getShapeBuf()->getBoundingBox().setCell(m_vecCell);
+        ++ci;
+    }    
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Sets a new integrator for this instance

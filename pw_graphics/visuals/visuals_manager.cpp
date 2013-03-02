@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "visuals_manager.h"
-#include <boost-1_49/boost/concept_check.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -397,7 +396,7 @@ void CVisualsManager::drawWorld()
     {
         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
         {
-//             if (m_nStarIndex != i)
+            if (m_nStarIndex != i)
             {
                 if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 2.1)
                 {
@@ -405,15 +404,9 @@ void CVisualsManager::drawWorld()
                     // RACE_CONDITION if object dynamic
                     m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
                     m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
-                    
-                    // The whole double buffering for physical objects, which is
-                    // needed for collision detection ist not working. This is
-                    // because pointers to shapes, e.g. visualisation, do not
-                    // know their buffered clone. Hence, the following method
-                    // does only set the radius for one shape, not for its
-                    // clone. Maybe copying is needed or some tricky method.
                     m_pUniverse->m_pStarShape->setRadius(double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9);
                     m_pUniverse->m_pStar->init();
+//                     m_pUniverse->m_pStar->setVelocity(Vector2d(3.0e9,0.0)); // Test cell update, doesn't work correctly
                     m_nStarIndex = i;
                 }
             }

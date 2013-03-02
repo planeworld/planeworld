@@ -19,6 +19,8 @@
 
 #include "terrain_visuals.h"
 
+#include "terrain.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Copy Constructor
@@ -26,12 +28,12 @@
 /// \param _pTerrain Terrain to attach when initialising 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CTerrainVisuals::CTerrainVisuals(CTerrain* _pTerrain): m_pTerrain(_pTerrain)
+CTerrainVisuals::CTerrainVisuals(CDoubleBufferedShape* const _pTerrain)
 {
     METHOD_ENTRY("CTerrainVisuals::CTerrainVisuals")
     CTOR_CALL("CTerrainVisuals::CTerrainVisuals")
     
-    METHOD_EXIT("CTerrainVisuals::CTerrainVisuals")
+    this->attach(_pTerrain);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,10 +62,12 @@ void CTerrainVisuals::draw(const CCamera* const _pCamera,
                            const IObject* const _pObject) const
 {
     METHOD_ENTRY("CTerrainVisuals::draw")
+    
+    CTerrain* pTerrain = static_cast<CTerrain*>(m_pTerrain->getShapeCur());
 
-    double   fWidth    = m_pTerrain->getWidth();
-    double   fHeight   = m_pTerrain->getHeight();
-    Vector2d vecCenter = m_pTerrain->getCenter();
+    double   fWidth    = pTerrain->getWidth();
+    double   fHeight   = pTerrain->getHeight();
+    Vector2d vecCenter = pTerrain->getCenter();
     
     double      fLeft0  = -fWidth*0.5+vecCenter[0];    
     double      fRight0 =  fWidth*0.5+vecCenter[0];
@@ -75,23 +79,23 @@ void CTerrainVisuals::draw(const CCamera* const _pCamera,
     if (_pCamera->getBoundingBox().getUpperRight()[0] < fRight)
         fRight = _pCamera->getBoundingBox().getUpperRight()[0];
 
-    double fInc = m_pTerrain->getGroundResolution();
+    double fInc = pTerrain->getGroundResolution();
     
     // Subsample terrain surface when zooming out.
-    if (_pCamera->getZoom()*m_pTerrain->getGroundResolution() <= 1.0)
-        fInc /= _pCamera->getZoom()*m_pTerrain->getGroundResolution();
+    if (_pCamera->getZoom()*pTerrain->getGroundResolution() <= 1.0)
+        fInc /= _pCamera->getZoom()*pTerrain->getGroundResolution();
     
     if (fLeft  < fLeft0)  fLeft  = fLeft0;
     if (fRight > fRight0) fRight = fRight0;
     
-    fLeft = m_pTerrain->snapToTerrainGrid(fLeft);
-    fRight = m_pTerrain->snapToTerrainGrid(fRight);
+    fLeft = pTerrain->snapToTerrainGrid(fLeft);
+    fRight = pTerrain->snapToTerrainGrid(fRight);
     
     m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
     
     while ( fLeft <= fRight)
     {
-        double fHght = m_pTerrain->getSurface(fLeft);
+        double fHght = pTerrain->getSurface(fLeft);
         
         m_Graphics.addVertex(Vector2d(fLeft-_pCamera->getCenter()[0],
                                       fHght-_pCamera->getCenter()[1]));
@@ -100,4 +104,24 @@ void CTerrainVisuals::draw(const CCamera* const _pCamera,
     }
 
     m_Graphics.endLine();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Attaches a terrain to terrain visuals
+///
+/// \param _pTerrain Terrain to attach
+///
+////////////////////////////////////////////////////////////////////////////////
+void CTerrainVisuals::attach(CDoubleBufferedShape* const _pTerrain)
+{
+    METHOD_ENTRY("CTerrainVisuals::attach")
+    if (_pTerrain->getShapeCur()->getShapeType() == SHAPE_TERRAIN)
+    {
+        m_pTerrain = _pTerrain;
+    }
+    else
+    {
+        ERROR_MSG("Terrain Visuals", "Wrong shape attached to visuals.")
+    }
 }

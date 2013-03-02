@@ -21,10 +21,7 @@
 #define GEOMETRY_H
 
 //--- Program header ---------------------------------------------------------//
-#include "circle.h"
-#include "planet.h"
-#include "polyline.h"
-#include "terrain.h"
+#include "double_buffered_shape.h"
 
 //--- Standard header --------------------------------------------------------//
 
@@ -45,16 +42,15 @@ class CGeometry
         virtual ~CGeometry();
 
         //--- Constant methods -----------------------------------------------//
-        const std::list<IShape*>* const getShapes() const;
-        const std::list<IShape*>* const getPrevShapes() const;
+        const std::list<CDoubleBufferedShape*>* const getShapes() const;
         
         //--- Methods --------------------------------------------------------//
-        CBoundingBox&                   getBoundingBox();
+        CBoundingBox& getBoundingBox();
         
-        void addShape(IShape*);
+        void addShape(CDoubleBufferedShape* const);
         void updateBoundingBox(const CBoundingBox&);
         void updateBoundingBox(const Vector2d&);
-        void setShapes(const std::list<IShape*>);
+        void setShapes(std::list<CDoubleBufferedShape*>* const);
         void update();
         
     protected:
@@ -62,12 +58,8 @@ class CGeometry
         //--- Abstract methods [protected] -----------------------------------//
 
         //-- Variables [protected] -------------------------------------------//
-        CBoundingBox m_AABB;                    ///< Bounding box
-        
-        std::list<IShape*>* m_pShapesCurrent;   ///< Shapes (current timestep)
-        std::list<IShape*>* m_pShapesPrevious;  ///< Shapes (previous timestep)
-        std::list<IShape*>  m_Shapes1;          ///< Shapes (current or previous timestep)
-        std::list<IShape*>  m_Shapes2;          ///< Shapes (current or previous timestep)
+        CBoundingBox m_AABB;                            ///< Bounding box
+        std::list<CDoubleBufferedShape*>* m_pShapes;    ///< Double buffered shapes
         
 };
 
@@ -80,27 +72,10 @@ class CGeometry
 /// \return Shapelist
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::list< IShape* >* const CGeometry::getShapes() const
+inline const std::list<CDoubleBufferedShape*>* const CGeometry::getShapes() const
 {
     METHOD_ENTRY("CGeometry::getShapes")
-
-    METHOD_EXIT("CGeometry::getShapes")
-    return m_pShapesCurrent;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return the shapelist of previous time step
-///
-/// \return Shapelist
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const std::list< IShape* >* const CGeometry::getPrevShapes() const
-{
-    METHOD_ENTRY("CGeometry::getPrevShapes")
-
-    METHOD_EXIT("CGeometry::getPrevShapes")
-    return m_pShapesPrevious;
+    return m_pShapes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,8 +88,6 @@ inline const std::list< IShape* >* const CGeometry::getPrevShapes() const
 inline CBoundingBox& CGeometry::getBoundingBox()
 {
     METHOD_ENTRY("CGeometry::getBoundingBox")
-
-    METHOD_EXIT("CGeometry::getBoundingBox")
     return (m_AABB);
 }
 
@@ -128,10 +101,7 @@ inline CBoundingBox& CGeometry::getBoundingBox()
 inline void CGeometry::updateBoundingBox(const CBoundingBox& _BBox)
 {
     METHOD_ENTRY("CGeometry::updateBoundingBox")
-
     m_AABB.update(_BBox);
-
-    METHOD_EXIT("CGeometry::updateBoundingBox")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,10 +114,7 @@ inline void CGeometry::updateBoundingBox(const CBoundingBox& _BBox)
 inline void CGeometry::updateBoundingBox(const Vector2d& _vecV)
 {
     METHOD_ENTRY("CGeometry::updateBoundingBox")
-
     m_AABB.update(_vecV);
-
-    METHOD_EXIT("CGeometry::updateBoundingBox")
 }
 
 #endif

@@ -23,7 +23,6 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "polyline.h"
 #include "visuals.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,21 +36,21 @@ class CPolylineVisuals : public IVisuals
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
-        CPolylineVisuals(CPolyLine*);
+        CPolylineVisuals(CDoubleBufferedShape* const);
         ~CPolylineVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         virtual void draw(const CCamera* const, const IObject* const) const;
                 
         //--- Methods --------------------------------------------------------//
-        void attach(CPolyLine*);
+        void                        attach(CDoubleBufferedShape* const);
         virtual const CBoundingBox& getBoundingBox();
         
     private:
         
         CPolylineVisuals();        ///< Constructor is private, copy constructor must be used
         
-        CPolyLine* m_pPolyline;
+        CDoubleBufferedShape* m_pPolyline;
 
 };
 
@@ -67,25 +66,7 @@ class CPolylineVisuals : public IVisuals
 inline const CBoundingBox& CPolylineVisuals::getBoundingBox()
 {
     METHOD_ENTRY("CPolyLineVisuals::getBoundingBox")
-
-    METHOD_EXIT("CPolyLineVisuals::getBoundingBox")
-    return m_pPolyline->getBoundingBox();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a polyline to polyline visuals
-///
-/// \param _pPolyline Polyline to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPolylineVisuals::attach(CPolyLine* _pPolyline)
-{
-    METHOD_ENTRY("CPolylineVisuals::attach")
-
-    m_pPolyline = _pPolyline;
-
-    METHOD_EXIT("CPolylineVisuals::attach")
+    return m_pPolyline->getShapeCur()->getBoundingBox();
 }
 
 #endif

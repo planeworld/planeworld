@@ -90,6 +90,8 @@ class CPlanet : public IShape
         void transform(const double&, const Vector2d&);
                         
     protected:
+        
+        void                myInitTerrain();
 
         Vector2d            m_vecCenter;                ///< Center of planet
         Vector2d            m_vecCenter0;               ///< Initial center of planet
@@ -245,8 +247,6 @@ inline const double& CPlanet::getSmoothness() const
 inline const noise::module::Select& CPlanet::getSurface() const
 {
     METHOD_ENTRY("CPlanet::getSmoothness")
-
-    METHOD_EXIT("CPlanet::getSmoothness")
     return m_Surface;
 }
 
@@ -289,6 +289,13 @@ inline void CPlanet::setCenter(const Vector2d& _vecC)
 
     m_vecCenter0 = _vecC;
     m_vecCenter = _vecC;
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->m_vecCenter0 = _vecC;
+        static_cast<CPlanet*>(m_pBuf)->m_vecCenter  = _vecC;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -305,9 +312,17 @@ inline void CPlanet::setCenter(const double& _fX, const double& _fY)
 
     m_vecCenter0[0] = _fX;
     m_vecCenter0[1] = _fY;
-
-    m_vecCenter[0] = _fX;
-    m_vecCenter[1] = _fY;
+    m_vecCenter[0]  = _fX;
+    m_vecCenter[1]  = _fY;
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->m_vecCenter0[0] = _fX;
+        static_cast<CPlanet*>(m_pBuf)->m_vecCenter0[1] = _fY;
+        static_cast<CPlanet*>(m_pBuf)->m_vecCenter[0]  = _fX;
+        static_cast<CPlanet*>(m_pBuf)->m_vecCenter[1]  = _fY;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -324,6 +339,12 @@ inline void CPlanet::setGroundResolution(const double& _fGRes)
 {
     METHOD_ENTRY("CPlanet::setGroundResolution")
     m_fGroundResolution = _fGRes;
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->m_fGroundResolution = _fGRes;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -337,6 +358,12 @@ inline void CPlanet::setHeight(const double& _fH)
 {
     METHOD_ENTRY("CPlanet::setHeight")
     m_fHeightMax = _fH;
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->m_fHeightMax = _fH;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -350,6 +377,12 @@ inline void CPlanet::setRadius(const double& _fR)
 {
     METHOD_ENTRY("CPlanet::setRadius")
     m_fRadius = _fR;
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->m_fRadius = _fR;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -363,6 +396,12 @@ inline void CPlanet::setSeaLevel(const double& _fSeaLevel)
 {
     METHOD_ENTRY("CPlanet::setSeaLevel")
     m_fSeaLevel = _fSeaLevel;
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->m_fSeaLevel = _fSeaLevel;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -376,6 +415,12 @@ inline void CPlanet::setSeed(const int& _nS)
 {
     METHOD_ENTRY("CPlanet::setSeed")
     m_nSeed = _nS;
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->m_nSeed = _nS;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -390,6 +435,12 @@ inline void CPlanet::setSmoothness(const double& _fS)
     METHOD_ENTRY("CPlanet::setSmoothness")
 
     m_fSmoothness = _fS;
+    
+    // We have a buffer which must also be updated
+    if (m_pBuf != 0)
+    {
+        static_cast<CPlanet*>(m_pBuf)->m_fSmoothness = _fS;
+    }
 }
 
 #endif

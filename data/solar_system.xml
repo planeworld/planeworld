@@ -12,10 +12,10 @@
     viewport_height="400.0"
   />-->
   
-  <object file="sun.xml"/>
-  <object file="earth.xml"/>
-  <object file="moon.xml"/>
-  <object file="outer_planet.xml"/> 
+<!--   <object file="sun.xml"/> -->
+<!--   <object file="earth.xml"/> -->
+<!--   <object file="moon.xml"/> -->
+<!--   <object file="outer_planet.xml"/>   -->
   
   <!-- Create a box -->
   <object type="RigidBody">
@@ -38,7 +38,7 @@
     </shape>
   </object>
   <!-- Create a small planet -->
-  <object type="RigidBody">
+  <!--<object type="RigidBody">
     <core
       name="SmallPlanet"
       mass="5.974e4"
@@ -56,5 +56,5 @@
       center_y="0.0">
       <visuals type="Planet"/>
     </shape>
-  </object>
+  </object>-->
 </universe>

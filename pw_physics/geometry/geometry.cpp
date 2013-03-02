@@ -24,13 +24,13 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CGeometry::CGeometry() : m_pShapesCurrent(&m_Shapes1),
-                         m_pShapesPrevious(&m_Shapes2)
+CGeometry::CGeometry()
 {
     METHOD_ENTRY("CGeometry::CGeometry")
     CTOR_CALL("CGeometry::CGeometry")
-
-    METHOD_EXIT("CGeometry::CGeometry")
+    
+    m_pShapes = new std::list<CDoubleBufferedShape*>();
+    MEM_ALLOC("m_pShapes")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,31 +43,25 @@ CGeometry::~CGeometry()
     METHOD_ENTRY("CGeometry::~CGeometry")
     DTOR_CALL("CGeometry::~CGeometry")
 
-    for (std::list< IShape* >::iterator it = m_Shapes1.begin();
-        it != m_Shapes1.end(); ++it)
+    for (std::list< CDoubleBufferedShape* >::iterator it = m_pShapes->begin();
+        it != m_pShapes->end(); ++it)
     {
         // Free memory if pointer is still existent
         if ((*it) != 0)
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("IShape*")
+            MEM_FREED("CDoubleBufferedShape*")
         }
     }
     
-    for (std::list< IShape* >::iterator it = m_Shapes2.begin();
-        it != m_Shapes2.end(); ++it)
+    // Free memory if pointer is still existent
+    if (m_pShapes != 0)
     {
-        // Free memory if pointer is still existent
-        if ((*it) != 0)
-        {
-            delete (*it);
-            (*it) = 0;
-            MEM_FREED("IShape*")
-        }
+        delete m_pShapes;
+        m_pShapes = 0;
+        MEM_FREED("m_pShapes")
     }
-    
-    METHOD_EXIT("CGeometry::~CGeometry")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,41 +71,25 @@ CGeometry::~CGeometry()
 /// \param _pShape Shape, that should be added to list
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGeometry::addShape(IShape* _pShape)
+void CGeometry::addShape(CDoubleBufferedShape* const _pShape)
 {
     METHOD_ENTRY("CGeometry::addShape")
-
-    m_pShapesCurrent->push_back(_pShape);
-    m_pShapesPrevious->push_back(_pShape->clone());
-    
-    METHOD_EXIT("CGeometry::addShape")
+    m_pShapes->push_back(_pShape);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Copy the given shapelist
 ///
-/// \param _ShapeList Shapelist to be set
+/// \param _pShapeList Shapelist to be set
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGeometry::setShapes(const std::list<IShape*> _ShapeList)
+void CGeometry::setShapes(std::list<CDoubleBufferedShape*>* _pShapeList)
 {
     METHOD_ENTRY("CGeometry::setShapes")
 
-    m_pShapesPrevious->clear();
-    m_pShapesCurrent->clear();
-    
-    *m_pShapesCurrent = _ShapeList;
-    
-    std::list<IShape*>::const_iterator ci = m_pShapesCurrent->begin();
-    
-    while (ci != m_pShapesCurrent->end())
-    {
-        m_pShapesPrevious->push_back((*ci)->clone());
-        ++ci;
-    }
-    
-    METHOD_EXIT("CGeometry::setShapes")
+    m_pShapes->clear();
+    m_pShapes = _pShapeList;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,14 +101,9 @@ void CGeometry::update()
 {
     METHOD_ENTRY("CGeometry::update")
     
-//     std::list<IShape*>::iterator it = m_pShapesPrevious->begin();
-//     for (std::list<IShape*>::const_iterator ci  = m_pShapesCurrent->begin();
-//                                             ci != m_pShapesCurrent->end(); ++ci, ++it)
-//          {
-//              *(*it) = *(*ci);
-//          }
-    
-    std::swap(m_pShapesCurrent,m_pShapesPrevious);
-    
-    METHOD_EXIT("CGeometry::update")
+    for (std::list<CDoubleBufferedShape*>::iterator it  = m_pShapes->begin();
+                                                    it != m_pShapes->end(); ++it)
+    {
+        (*it)->swapBuffer();
+    }
 }

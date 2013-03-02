@@ -125,23 +125,19 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
-    std::list<IShape*>::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
-    std::list<IShape*>::const_iterator ci0 = _p1->getGeometry()->getPrevShapes()->begin();
+    std::list<CDoubleBufferedShape*>::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
     
     while (ci != _p1->getGeometry()->getShapes()->end())
     {
-        switch((*ci)->getShapeType())
+        switch((*ci)->getShapeCur()->getShapeType())
         {
             case SHAPE_TERRAIN:
-                this->test(static_cast<CTerrain*>((*ci)),_p2);
+                this->test(static_cast<CTerrain*>((*ci)->getShapeCur()),_p2);
             case SHAPE_CIRCLE:
-                this->test(static_cast<CCircle*>((*ci)), static_cast<CCircle*>((*ci0)), _p1, _p2);
+                this->test(static_cast<CCircle*>((*ci)->getShapeCur()), static_cast<CCircle*>((*ci)->getShapeBuf()), _p1, _p2);
         }
         ++ci;
-        ++ci0;
     }
-    
-    METHOD_EXIT("CCollisionManager::test")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -391,31 +387,28 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
 
-    std::list<IShape*>::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
-    std::list<IShape*>::const_iterator ci0 = _p1->getGeometry()->getPrevShapes()->begin();
-    std::list<IShape*>::const_iterator cj;
-    std::list<IShape*>::const_iterator cj0;
+    std::list<CDoubleBufferedShape*>::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
+    std::list<CDoubleBufferedShape*>::const_iterator cj;
     
     while (ci != _p1->getGeometry()->getShapes()->end())
     {
         cj  = _p2->getGeometry()->getShapes()->begin();
-        cj0 = _p2->getGeometry()->getPrevShapes()->begin();
         while (cj != _p2->getGeometry()->getShapes()->end())
         {
-            switch((*ci)->getShapeType())
+            switch((*ci)->getShapeCur()->getShapeType())
             {
                 case SHAPE_CIRCLE:
-                    switch((*cj)->getShapeType())
+                    switch((*cj)->getShapeCur()->getShapeType())
                     {
                         case SHAPE_CIRCLE:
                             CCircle* pCircA1;
                             CCircle* pCircB1;
                             CCircle* pCircA0;
                             CCircle* pCircB0;
-                            pCircA1 = static_cast<CCircle*>((*ci));
-                            pCircB1 = static_cast<CCircle*>((*cj));
-                            pCircA0 = static_cast<CCircle*>((*ci0));
-                            pCircB0 = static_cast<CCircle*>((*cj0));
+                            pCircA1 = static_cast<CCircle*>((*ci)->getShapeCur());
+                            pCircB1 = static_cast<CCircle*>((*cj)->getShapeCur());
+                            pCircA0 = static_cast<CCircle*>((*ci)->getShapeBuf());
+                            pCircB0 = static_cast<CCircle*>((*cj)->getShapeBuf());
                             this->test(pCircA1, pCircA0, pCircB1, pCircB0, _p1, _p2);
                             break;
                         case SHAPE_PLANET:
@@ -426,16 +419,16 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             CCircle* pCirc0;
                             CPolyLine* pPoly1;
                             CPolyLine* pPoly0;
-                            pCirc1 = static_cast<CCircle*>((*ci));
-                            pCirc0 = static_cast<CCircle*>((*ci0));
-                            pPoly1 = static_cast<CPolyLine*>((*cj));
-                            pPoly0 = static_cast<CPolyLine*>((*cj0));
+                            pCirc1 = static_cast<CCircle*>((*ci)->getShapeCur());
+                            pCirc0 = static_cast<CCircle*>((*ci)->getShapeBuf());
+                            pPoly1 = static_cast<CPolyLine*>((*cj)->getShapeCur());
+                            pPoly0 = static_cast<CPolyLine*>((*cj)->getShapeBuf());
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
                     }
                     break;
                 case SHAPE_PLANET:
-                    switch((*cj)->getShapeType())
+                    switch((*cj)->getShapeCur()->getShapeType())
                     {
                         case SHAPE_CIRCLE:
 //                             CCircle* pCirc1;
@@ -466,7 +459,7 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                     }
                     break;
                 case SHAPE_POLYLINE:
-                    switch((*cj)->getShapeType())
+                    switch((*cj)->getShapeCur()->getShapeType())
                     {
                         case SHAPE_CIRCLE:
                         {
@@ -474,10 +467,10 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             CCircle* pCirc0;
                             CPolyLine* pPoly1;
                             CPolyLine* pPoly0;
-                            pCirc1 = static_cast<CCircle*>((*cj));
-                            pCirc0 = static_cast<CCircle*>((*cj0));
-                            pPoly1 = static_cast<CPolyLine*>((*ci));
-                            pPoly0 = static_cast<CPolyLine*>((*ci0));
+                            pCirc1 = static_cast<CCircle*>((*cj)->getShapeCur());
+                            pCirc0 = static_cast<CCircle*>((*cj)->getShapeBuf());
+                            pPoly1 = static_cast<CPolyLine*>((*ci)->getShapeCur());
+                            pPoly0 = static_cast<CPolyLine*>((*ci)->getShapeBuf());
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
                         }
@@ -500,10 +493,10 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             CPolyLine* pPolyB1;
                             CPolyLine* pPolyA0;
                             CPolyLine* pPolyB0;
-                            pPolyA1 = static_cast<CPolyLine*>((*ci));
-                            pPolyB1 = static_cast<CPolyLine*>((*cj));
-                            pPolyA0 = static_cast<CPolyLine*>((*ci0));
-                            pPolyB0 = static_cast<CPolyLine*>((*cj0));
+                            pPolyA1 = static_cast<CPolyLine*>((*ci)->getShapeCur());
+                            pPolyB1 = static_cast<CPolyLine*>((*cj)->getShapeCur());
+                            pPolyA0 = static_cast<CPolyLine*>((*ci)->getShapeBuf());
+                            pPolyB0 = static_cast<CPolyLine*>((*cj)->getShapeBuf());
                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
@@ -512,13 +505,9 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                     break;
             }
             ++cj;
-            ++cj0;
         }
         ++ci;
-        ++ci0;
     }
-        
-    METHOD_EXIT("CCollisionManager::test")
 }
 
 ///////////////////////////////////////////////////////////////////////////////

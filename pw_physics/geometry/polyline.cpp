@@ -26,10 +26,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 CPolyLine::CPolyLine() : m_LineType(GRAPHICS_LINETYPE_STRIP)
 {
-    METHOD_ENTRY("CPolyLine::CPolyLine()");
-    CTOR_CALL("CPolyLine::CPolyLine()");
-    
-    METHOD_EXIT("CPolyLine::CPolyLine()");
+    METHOD_ENTRY("CPolyLine::CPolyLine")
+    CTOR_CALL("CPolyLine::CPolyLine")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,10 +37,8 @@ CPolyLine::CPolyLine() : m_LineType(GRAPHICS_LINETYPE_STRIP)
 ///////////////////////////////////////////////////////////////////////////////
 CPolyLine::~CPolyLine()
 {
-    METHOD_ENTRY("CPolyLine::~CPolyLine()");
-    DTOR_CALL("CPolyLine::~CPolyLine()");
-
-    METHOD_EXIT("CPolyLine::~CPolyLine()");
+    METHOD_ENTRY("CPolyLine::~CPolyLine")
+    DTOR_CALL("CPolyLine::~CPolyLine")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +61,6 @@ CPolyLine* CPolyLine::clone() const
     pClone->m_AABB         = m_AABB;
     pClone->m_nDepthlayers = m_nDepthlayers;
     
-    METHOD_EXIT("CPolyLine::clone")
     return pClone;
 }
 
@@ -102,6 +97,4 @@ void CPolyLine::transform(const double& _fAngle, const Vector2d& _vecV)
         ++it;
         ++ci;
     }
-
-    METHOD_EXIT("CPolyLine::transform(const double&, const Vector2d&)");
 }

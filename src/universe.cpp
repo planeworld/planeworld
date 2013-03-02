@@ -79,6 +79,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     
     // Density = m_nNrOfStars/(3.0*fSigma * 2.0*M_PI) = 0.4/30.857e15;
     double fSigma = _nNumberOfStars * 30.857e15 / (0.4*3.0*2.0*M_PI);
+//     double fSigma = _nNumberOfStars * 30.857e8 / (0.4*3.0*2.0*M_PI);
     
     std::exponential_distribution<double>   ExponentialDistribution(3.5);
     std::normal_distribution<double>        NormalDistribution(0.0, fSigma);
@@ -153,18 +154,22 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     
     // Reserve memory for star object
     m_pStar = new CRigidBody;
-    m_pStarShape = new CCircle;
-    m_pStarVisuals = new CCircleVisuals(m_pStarShape);
-    m_pStarObjectVisuals = new IObjectVisuals(m_pStar);
-    MEM_ALLOC("pStar");
-    MEM_ALLOC("pStarShape");
-    MEM_ALLOC("pStarVisuals");
-    MEM_ALLOC("pStarObjectVisuals");
-
     m_pStar->setName("Procedurally_Generated_Star");
     m_pStar->enableDynamics();
     m_pStar->enableGravitation();
-    m_pStar->getGeometry()->addShape(m_pStarShape);
+    m_pStarShape = new CCircle;
+    CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+    pShape->buffer(m_pStarShape);
+    m_pStar->getGeometry()->addShape(pShape);
+    m_pStarVisuals = new CCircleVisuals(pShape);
+    m_pStarObjectVisuals = new IObjectVisuals(m_pStar);
+    
+    MEM_ALLOC("pStar");
+    MEM_ALLOC("pStarShape");
+    MEM_ALLOC("pShape")
+    MEM_ALLOC("pStarVisuals");
+    MEM_ALLOC("pStarObjectVisuals");
+
     m_pStarObjectVisuals->addVisuals(m_pStarVisuals);
 
     m_Objects.push_back(m_pStar);

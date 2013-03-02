@@ -19,6 +19,8 @@
 
 #include "polyline_visuals.h"
 
+#include "polyline.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Copy Constructor
@@ -26,10 +28,12 @@
 /// \param _pPolyline Polyline to attach when initialising 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CPolylineVisuals::CPolylineVisuals(CPolyLine* _pPolyline): m_pPolyline(_pPolyline)
+CPolylineVisuals::CPolylineVisuals(CDoubleBufferedShape* const _pPolyline)
 {
     METHOD_ENTRY("CPolylineVisuals::CPolylineVisuals")
     CTOR_CALL("CPolylineVisuals::CPolylineVisuals")
+    
+    this->attach(_pPolyline);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,7 +60,29 @@ void CPolylineVisuals::draw(const CCamera* const _pCamera,
 {
     METHOD_ENTRY("CPolylineVisuals::draw")
 
-    m_Graphics.polyline(m_pPolyline->getVertices(), m_pPolyline->getLineType(),
+    CPolyLine* pPolyline = static_cast<CPolyLine*>(m_pPolyline->getShapeCur());
+    
+    m_Graphics.polyline(pPolyline->getVertices(), pPolyline->getLineType(),
                         -_pCamera->getCenter() + 
                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Attaches a polyline to polyline visuals
+///
+/// \param _pPolyline Polyline to attach
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPolylineVisuals::attach(CDoubleBufferedShape* const _pPolyline)
+{
+    METHOD_ENTRY("CPolylineVisuals::attach")
+    if (_pPolyline->getShapeCur()->getShapeType() == SHAPE_POLYLINE)
+    {
+        m_pPolyline = _pPolyline;
+    }
+    else
+    {
+        ERROR_MSG("Polyline Visuals", "Wrong shape attached to visuals.")
+    }
 }
