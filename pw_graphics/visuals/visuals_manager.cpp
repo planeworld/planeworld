@@ -404,9 +404,13 @@ void CVisualsManager::drawWorld()
                     // RACE_CONDITION if object dynamic
                     m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
                     m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
-                    m_pUniverse->m_pStarShape->setRadius(double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9);
+                    static_cast<CCircle*>(m_pUniverse->m_pStar->getGeometry()->getShapes()->front()->getShapeCur())->setRadius(
+                        double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9
+                    );
+                    m_pUniverse->m_pStar->getGeometry()->getShapes()->front()->updateBuffer();
+//                     m_pUniverse->m_pStarShape->setRadius(double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9);
                     m_pUniverse->m_pStar->init();
-//                     m_pUniverse->m_pStar->setVelocity(Vector2d(3.0e9,0.0)); // Test cell update, doesn't work correctly
+                    m_pUniverse->m_pStar->setVelocity(Vector2d(3.0e9,0.0)); // Test cell update, doesn't work correctly
                     m_nStarIndex = i;
                 }
             }

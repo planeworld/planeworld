@@ -117,6 +117,40 @@ CPlanet* CPlanet::clone() const
     return pClone;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies information of a given planet shape.
+///
+/// This method does not create a new planet shape, use clone in that case!
+///
+/// \param _pShape Shape to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanet::copy(const IShape* const _pShape)
+{
+    METHOD_ENTRY("CPlanet::copy");
+    
+    const CPlanet* const pPlanet = static_cast<const CPlanet* const>(_pShape);
+        
+    m_fAngle            = pPlanet->m_fAngle;
+    m_fGroundResolution = pPlanet->m_fGroundResolution;
+    m_fHeightMax        = pPlanet->m_fHeightMax;
+    m_fRadius           = pPlanet->m_fRadius;
+    m_fSeaLevel         = pPlanet->m_fSeaLevel;
+    m_fSmoothness       = pPlanet->m_fSmoothness;
+    m_nSeed             = pPlanet->m_nSeed;
+    m_vecCenter         = pPlanet->m_vecCenter;
+    m_vecCenter0        = pPlanet->m_vecCenter0;
+    m_fLacHlTr          = pPlanet->m_fLacHlTr;
+    m_fLacMtTr          = pPlanet->m_fLacMtTr;
+    m_fLacTrTp          = pPlanet->m_fLacTrTp;
+    m_nOctHlTr          = pPlanet->m_nOctHlTr;
+    m_nOctMtTr          = pPlanet->m_nOctMtTr;
+    m_nOctTrTp          = pPlanet->m_nOctTrTp;
+    m_AABB              = pPlanet->m_AABB;
+    m_nDepthlayers      = pPlanet->m_nDepthlayers;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Initialises the planets terrain
@@ -133,12 +167,6 @@ void CPlanet::initTerrain()
     METHOD_ENTRY("CPlanet::initTerrain")
 
     this->myInitTerrain();
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-    {
-        static_cast<CPlanet*>(m_pBuf)->myInitTerrain();
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,12 +208,6 @@ void CPlanet::setSampling(const double& _fMaxF)
     nOct = log2(100)/log2(m_fLacTrTp)+1;
     if (nOct < 1) nOct = 1;
     m_TerrainType.SetOctaveCountTmp(nOct);
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-    {
-        static_cast<CPlanet*>(m_pBuf)->setSampling(_fMaxF);
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -200,12 +222,6 @@ void CPlanet::resetSampling()
     m_BaseFlatTerrain.SetOctaveCountTmp(m_nOctHlTr);
     m_MountainTerrain.SetOctaveCountTmp(m_nOctMtTr);
     m_TerrainType.SetOctaveCountTmp(m_nOctTrTp);
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-    {
-        static_cast<CPlanet*>(m_pBuf)->resetSampling();
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

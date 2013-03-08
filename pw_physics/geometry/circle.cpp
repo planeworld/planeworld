@@ -26,8 +26,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 CCircle::CCircle() : m_fAngle(0.0),m_fRadius(1.0)
 {
-    METHOD_ENTRY ( "CCircle::CCircle()" );
-    CTOR_CALL ( "CCircle::CCircle()" );
+    METHOD_ENTRY("CCircle::CCircle");
+    CTOR_CALL ("CCircle::CCircle");
     
     m_vecCenter0.setZero();
 }
@@ -39,8 +39,8 @@ CCircle::CCircle() : m_fAngle(0.0),m_fRadius(1.0)
 ///////////////////////////////////////////////////////////////////////////////
 CCircle::~CCircle()
 {
-    METHOD_ENTRY ( "CCircle::~CCircle" );
-    DTOR_CALL ( "CCircle::~CCircle" );
+    METHOD_ENTRY("CCircle::~CCircle");
+    DTOR_CALL("CCircle::~CCircle");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ CCircle::~CCircle()
 ////////////////////////////////////////////////////////////////////////////////
 CCircle* CCircle::clone() const
 {
-    METHOD_ENTRY("CCircle::clone")
+    METHOD_ENTRY("CCircle::clone");
     
     CCircle* pClone = new CCircle();
     MEM_ALLOC("pClone")
@@ -67,6 +67,29 @@ CCircle* CCircle::clone() const
     return pClone;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies information of a given circle
+///
+/// This method does not create a new circle, use clone in that case!
+///
+/// \param _pShape Shape to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::copy(const IShape* const _pShape)
+{
+    METHOD_ENTRY("CCircle::copy");
+    
+    const CCircle* const pCircle = static_cast<const CCircle* const>(_pShape);
+        
+    m_vecCenter    = pCircle->m_vecCenter;
+    m_vecCenter0   = pCircle->m_vecCenter0;
+    m_fAngle       = pCircle->m_fAngle;
+    m_fRadius      = pCircle->m_fRadius;
+    m_AABB         = pCircle->m_AABB;
+    m_nDepthlayers = pCircle->m_nDepthlayers;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Transforms the shape
@@ -77,7 +100,7 @@ CCircle* CCircle::clone() const
 ///////////////////////////////////////////////////////////////////////////////
 void CCircle::transform( const double& _fAngle, const Vector2d& _vecV )
 {
-    METHOD_ENTRY ( "CCircle::transform(const double&, const Vector2d&)" );
+    METHOD_ENTRY("CCircle::transform");
 
     Rotation2Dd Rotation(_fAngle);
 

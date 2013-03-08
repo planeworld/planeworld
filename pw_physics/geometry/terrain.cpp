@@ -39,8 +39,6 @@ CTerrain::CTerrain() :  m_fDiversity(1.0),
     CTOR_CALL("CTerrain::CTerrain()");
     
     m_vecCenter0.setZero();
-        
-    METHOD_EXIT("CTerrain::CTerrain()")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,8 +50,6 @@ CTerrain::~CTerrain()
 {
     METHOD_ENTRY("CTerrain::~CTerrain")
     DTOR_CALL("CTerrain::~CTerrain")
-
-    METHOD_EXIT("CTerrain::~CTerrain")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +79,6 @@ CTerrain* CTerrain::clone() const
     pClone->m_AABB              = m_AABB;
     pClone->m_nDepthlayers      = m_nDepthlayers;
         
-    METHOD_EXIT("CTerrain::clone")
     return pClone;
 }
 
@@ -110,8 +105,36 @@ const double CTerrain::getSurface(const double& _fX) const
     {
         nX = 0;
     }
-    METHOD_EXIT("CTerrain::getSurface")
     return m_Cache[nX];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies information of a given terrain
+///
+/// This method does not create a new terrain, use clone in that case!
+///
+/// \param _pShape Shape to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void CTerrain::copy(const IShape* const _pShape)
+{
+    METHOD_ENTRY("CTerrain::copy");
+    
+    const CTerrain* const pTerrain = static_cast<const CTerrain* const>(_pShape);
+        
+    m_Cache             = pTerrain->m_Cache;
+    m_fAngle            = pTerrain->m_fAngle;
+    m_fDiversity        = pTerrain->m_fDiversity;
+    m_fGroundResolution = pTerrain->m_fGroundResolution;
+    m_fHeightMax        = pTerrain->m_fHeightMax;
+    m_fSmoothness       = pTerrain->m_fSmoothness;
+    m_fWidth            = pTerrain->m_fWidth;
+    m_nSeed             = pTerrain->m_nSeed;
+    m_vecCenter         = pTerrain->m_vecCenter;
+    m_vecCenter0        = pTerrain->m_vecCenter0;
+    m_AABB              = pTerrain->m_AABB;
+    m_nDepthlayers      = pTerrain->m_nDepthlayers;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -94,7 +94,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
         {
             fInc /= pPlanet->getGroundResolution();
             fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION * m_Graphics.getResMPX();
-//             pPlanet->setSampling(m_Graphics.getResPMX()/PLANET_VISUALS_DEFAULT_RESOLUTION);
+            pPlanet->setSampling(m_Graphics.getResPMX()/PLANET_VISUALS_DEFAULT_RESOLUTION);
         }
         
         fAngEnd += fInc;

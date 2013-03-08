@@ -48,6 +48,7 @@ class CDoubleBufferedShape
         //--- Constant Methods -----------------------------------------------//
         IShape* const getShapeBuf() const;
         IShape* const getShapeCur() const;
+		void 		  updateBuffer() const;
                         
         //--- Methods --------------------------------------------------------//
         void buffer(IShape* const);
@@ -86,6 +87,18 @@ inline IShape* const CDoubleBufferedShape::getShapeCur() const
 {
     METHOD_ENTRY("CDoubleBufferedShape::getShapeCur")
     return m_pShapeCur;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy shape information to buffer
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CDoubleBufferedShape::updateBuffer() const
+{
+    METHOD_ENTRY ("CDoubleBufferedShape::updateBuffer")
+    
+    m_pShapeBuf->copy(m_pShapeCur);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

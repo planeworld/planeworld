@@ -54,8 +54,7 @@ class IShape
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        IShape() : m_nDepthlayers(SHAPE_DEPTH_ALL),
-                   m_pBuf(0){}                              ///< Constructor
+        IShape() : m_nDepthlayers(SHAPE_DEPTH_ALL){}        ///< Constructor
         virtual ~IShape(){}                                 ///< Destructor
         
         //--- Constant Methods -----------------------------------------------//
@@ -64,10 +63,10 @@ class IShape
         virtual const ShapeType     getShapeType() const;
                 
         //--- Methods --------------------------------------------------------//
-        virtual void transform(const double&, const Vector2d&) = 0;         ///< Transforms the shape
+        virtual void copy(const IShape* const) = 0; ///< Copies shape attributes
+        virtual void transform(const double&, const Vector2d&) = 0;  ///< Transforms the shape
 
-        CBoundingBox& getBoundingBox();
-        void            setBuffer(IShape* const);
+        CBoundingBox&   getBoundingBox();
         void            setDepths(const int&);
         void            unsetDepths(const int&);
 
@@ -76,7 +75,6 @@ class IShape
         //--- Protected Variables --------------------------------------------//
         CBoundingBox    m_AABB;                             ///< Bounding box of shape
         int             m_nDepthlayers;                     ///< Depths in which shape exists
-        IShape*         m_pBuf;                             ///< Buffered shape for double buffering
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -122,19 +120,6 @@ inline CBoundingBox& IShape::getBoundingBox()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief  Set the buffer for this shape
-///
-/// \param _pBuf Shape buffer
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IShape::setBuffer(IShape* const _pBuf)
-{
-    METHOD_ENTRY("IShape::setBuffer")
-    m_pBuf = _pBuf;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief  Set the layers covered by shape
 ///
 /// \param _nD Depthlayers as bit pattern
@@ -144,10 +129,6 @@ inline void IShape::setDepths(const int& _nD)
 {
     METHOD_ENTRY("IShape::setDepths")
     m_nDepthlayers |= _nD;
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-        m_pBuf->m_nDepthlayers |= _nD;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -161,10 +142,6 @@ inline void IShape::unsetDepths(const int& _nD)
 {
     METHOD_ENTRY("IShape::unsetDepths")
     m_nDepthlayers &= (!_nD);
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-        m_pBuf->m_nDepthlayers &= (!_nD);
 }
 
 #endif

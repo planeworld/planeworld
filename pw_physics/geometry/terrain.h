@@ -60,6 +60,8 @@ class CTerrain : public IShape
         const double                    snapToTerrainGrid(const double&) const;
 
         //--- Methods --------------------------------------------------------//
+        void copy(const IShape* const);
+        
         void init();
         
         void setCenter(const Vector2d&);

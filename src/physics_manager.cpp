@@ -342,7 +342,7 @@ void CPhysicsManager::runCellUpdate() const
     {
         (*ci)->updateCell();
         // Use double frequency just to avoid any surprises
-        Timer.sleepRemaining(6.0e9*m_DynamicObjects.size()/DEFAULT_CELL_SIZE_2);
+        Timer.sleepRemaining(6.0e9*m_fTimeAccel*m_DynamicObjects.size()/DEFAULT_CELL_SIZE_2);
         
         if (++ci == m_DynamicObjects.end())
             ci = m_DynamicObjects.begin();

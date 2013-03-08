@@ -39,8 +39,7 @@ class CPolyLine : public IShape
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        CPolyLine();
-        virtual ~CPolyLine();
+        virtual ~CPolyLine(){};
         
         //--- Constant Methods -----------------------------------------------//
         CPolyLine*                  clone() const;
@@ -52,6 +51,7 @@ class CPolyLine : public IShape
         //--- Methods --------------------------------------------------------//
         void addVertex(const Vector2d&);
         void addVertex(const double&, const double&);
+        void copy(const IShape* const);
         void finish();
         void transform(const double&, const Vector2d&);
         
@@ -116,13 +116,6 @@ inline void CPolyLine::addVertex(const Vector2d& _vecV)
 
     m_VertList0.push_back(_vecV);
     m_VertList.push_back(_vecV);
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-    {
-        static_cast<CPolyLine*>(m_pBuf)->m_VertList0.push_back(_vecV);
-        static_cast<CPolyLine*>(m_pBuf)->m_VertList.push_back(_vecV);
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,13 +132,6 @@ inline void CPolyLine::addVertex(const double& _fX, const double& _fY)
 
     m_VertList0.push_back(Vector2d(_fX, _fY));
     m_VertList.push_back(Vector2d(_fX, _fY));
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-    {
-        static_cast<CPolyLine*>(m_pBuf)->m_VertList0.push_back(Vector2d(_fX,_fY));
-        static_cast<CPolyLine*>(m_pBuf)->m_VertList.push_back(Vector2d(_fX,_fY));
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -160,12 +146,6 @@ inline void CPolyLine::setLineType(const LineType& _LT)
     METHOD_ENTRY("CPolyLine::setLineType(const LineType&)");
 
     m_LineType = _LT;
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-    {
-        static_cast<CPolyLine*>(m_pBuf)->m_LineType = _LT;
-    }
 }
 
 #endif

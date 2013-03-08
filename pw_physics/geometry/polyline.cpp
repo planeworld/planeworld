@@ -19,28 +19,6 @@
 
 #include "polyline.h"
 
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Constructor, initialising members
-///
-///////////////////////////////////////////////////////////////////////////////
-CPolyLine::CPolyLine() : m_LineType(GRAPHICS_LINETYPE_STRIP)
-{
-    METHOD_ENTRY("CPolyLine::CPolyLine")
-    CTOR_CALL("CPolyLine::CPolyLine")
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Destructor
-///
-///////////////////////////////////////////////////////////////////////////////
-CPolyLine::~CPolyLine()
-{
-    METHOD_ENTRY("CPolyLine::~CPolyLine")
-    DTOR_CALL("CPolyLine::~CPolyLine")
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Clones polyline
@@ -62,6 +40,28 @@ CPolyLine* CPolyLine::clone() const
     pClone->m_nDepthlayers = m_nDepthlayers;
     
     return pClone;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies information of a given polyline
+///
+/// This method does not create a new polyline, use clone in that case!
+///
+/// \param _pShape Shape to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPolyLine::copy(const IShape* const _pShape)
+{
+    METHOD_ENTRY("CPolyLine::copy");
+    
+    const CPolyLine* const pPolyLine = static_cast<const CPolyLine* const>(_pShape);
+        
+    m_LineType     = pPolyLine->m_LineType;
+    m_VertList     = pPolyLine->m_VertList;
+    m_VertList0    = pPolyLine->m_VertList0;
+    m_AABB         = pPolyLine->m_AABB;
+    m_nDepthlayers = pPolyLine->m_nDepthlayers;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

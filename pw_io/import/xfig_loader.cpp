@@ -151,12 +151,12 @@ void CXFigLoader::load(const std::string& _strFilename)
                 MEM_ALLOC("pCircle")
                 pShape = new CDoubleBufferedShape;
                 MEM_ALLOC("pShape")
-                pShape->buffer(pCircle);
                 pCircleVisuals = new CCircleVisuals(pShape);
                 MEM_ALLOC("pCircleVisuals")
                 pCircle->setRadius(double(nRadiusX)/100.0);
                 pCircle->setCenter(double(nCenterX)/100.0, double(-nCenterY)/100.0);
                 pCircle->setDepths(SHAPE_DEPTH_ALL);
+                pShape->buffer(pCircle);
                 m_ShapeList.push_back(pCircle);
                 m_VisualsList.push_back(pCircleVisuals);
                 }
@@ -198,7 +198,6 @@ void CXFigLoader::load(const std::string& _strFilename)
                 MEM_ALLOC("pPolyline")
                 pShape = new CDoubleBufferedShape;
                 MEM_ALLOC("pShape")
-                pShape->buffer(pPolyLine);
                 pPolylineVisuals = new CPolylineVisuals(pShape);
                 MEM_ALLOC("pPolylineVisuals")
                 pPolyLine->setLineType(GRAPHICS_LINETYPE_LOOP);
@@ -210,6 +209,7 @@ void CXFigLoader::load(const std::string& _strFilename)
                     DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, point " << i+1 << ": " << nX << "," << nY))
                     pPolyLine->addVertex(Vector2d(double(nX)/100.0,double(-nY)/100.0));
                 }
+                pShape->buffer(pPolyLine);
                 m_ShapeList.push_back(pPolyLine);
                 m_VisualsList.push_back(pPolylineVisuals);
                 break;

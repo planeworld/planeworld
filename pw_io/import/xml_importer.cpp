@@ -379,6 +379,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
     CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
     MEM_ALLOC("pShape")
     pShape->buffer(pPlanet);
+    static_cast<CPlanet*>(pShape->getShapeBuf())->initTerrain();
         
     // The shape might have visuals
     if (_Node.first_child())

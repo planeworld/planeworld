@@ -76,7 +76,4 @@ void CDoubleBufferedShape::buffer(IShape* const _pShape)
     
     m_pShapeCur = _pShape;
     m_pShapeBuf = _pShape->clone();
-    
-    m_pShapeBuf->setBuffer(m_pShapeCur);
-    m_pShapeCur->setBuffer(m_pShapeBuf);
 }

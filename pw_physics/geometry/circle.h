@@ -51,6 +51,7 @@ class CCircle : public IShape
         const ShapeType     getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
+        void copy(const IShape* const);
         void transform(const double&, const Vector2d&);
         void setCenter(const Vector2d&);
         void setCenter(const double&, const double&);
@@ -136,13 +137,6 @@ inline void CCircle::setCenter(const Vector2d& _vecC)
 
     m_vecCenter0 = _vecC;
     m_vecCenter = _vecC;
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-    {
-        static_cast<CCircle*>(m_pBuf)->m_vecCenter0 = _vecC;
-        static_cast<CCircle*>(m_pBuf)->m_vecCenter  = _vecC;
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,15 +156,6 @@ inline void CCircle::setCenter(const double& _fX, const double& _fY)
 
     m_vecCenter[0] = _fX;
     m_vecCenter[1] = _fY;
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-    {
-        static_cast<CCircle*>(m_pBuf)->m_vecCenter0[0] = _fX;
-        static_cast<CCircle*>(m_pBuf)->m_vecCenter0[1] = _fY;
-        static_cast<CCircle*>(m_pBuf)->m_vecCenter[0]  = _fX;
-        static_cast<CCircle*>(m_pBuf)->m_vecCenter[1]  = _fY;
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -185,10 +170,6 @@ inline void CCircle::setRadius(const double& _fRadius)
     METHOD_ENTRY("CCircle::setRadius")
 
     m_fRadius = _fRadius;
-    
-    // We have a buffer which must also be updated
-    if (m_pBuf != 0)
-        static_cast<CCircle*>(m_pBuf)->m_fRadius = _fRadius;
 }
 
 #endif
