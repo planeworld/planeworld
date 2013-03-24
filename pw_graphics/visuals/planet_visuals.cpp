@@ -90,11 +90,27 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
         double fInc  = pPlanet->getGroundResolution() / fRad;
         
         // Subsample planet surface when zooming out.
-        if (_pCamera->getZoom()*pPlanet->getGroundResolution() <= 1.0)
+        if (_pCamera->getZoom()*pPlanet->getGroundResolution() <= PLANET_VISUALS_DEFAULT_RESOLUTION)
         {
-            fInc /= pPlanet->getGroundResolution();
-            fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION * m_Graphics.getResMPX();
-            pPlanet->setSampling(m_Graphics.getResPMX()/PLANET_VISUALS_DEFAULT_RESOLUTION);
+            // 1. Normalise according to planet's ground resolution
+            // 2. Adjust to given visual quality (length of lines)
+            // 3. Adjust to given visual quality (maximum planet amplitude, planet is nearly circular)
+            //   3a. General adjustment by zoom
+            //   3b. Ensure enough segments for circular object, but also incorporate resolution
+            // 4. Adjust octaves
+            fInc /= pPlanet->getGroundResolution(); 
+            fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION * m_Graphics.getResMPX(); 
+            if (fHeight*_pCamera->getZoom() < PLANET_VISUALS_DEFAULT_RESOLUTION)
+            {
+                fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION / (fHeight*_pCamera->getZoom());
+                if (fInc > PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE)
+                {
+                    fInc = PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE;
+                    if (fInc * fRad * m_Graphics.getResPMX() < PLANET_VISUALS_DEFAULT_RESOLUTION) 
+                        fInc = PLANET_VISUALS_DEFAULT_RESOLUTION * m_Graphics.getResMPX() / fRad;
+                }
+            }
+            pPlanet->setSampling(m_Graphics.getResPMX()); 
         }
         
         fAngEnd += fInc;
@@ -159,7 +175,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 //                 m_Graphics.setColor(0.5+0.2*fHght,0.3+0.1*fHght,0.1);
 //                 m_Graphics.dot(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
-//                                               vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+//                                         vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 
                 if (fHght < fSeaLevel)
                 {
@@ -180,7 +196,7 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
             }
         m_Graphics.endLine();
         m_Graphics.setWidth(1.0);
-
+        
         // Determine LineType
         if ((LineT == GRAPHICS_LINETYPE_LOOP) && (WaterlineList.size() != 0))
           LineT = GRAPHICS_LINETYPE_STRIP;

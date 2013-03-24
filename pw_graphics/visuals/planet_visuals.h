@@ -27,7 +27,8 @@
 
 //--- Misc header ------------------------------------------------------------//
 
-const double PLANET_VISUALS_DEFAULT_RESOLUTION=2.0; ///< Default resolution for visual sampling px/vertex
+const double PLANET_VISUALS_DEFAULT_RESOLUTION=3.0;          ///< Default resolution for visual sampling px/vertex
+const double PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE=M_PI*0.01; ///< Default minium of 200 segments if above resolution limit
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
