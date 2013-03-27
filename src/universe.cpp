@@ -108,6 +108,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             IUniverseScaled::separateCenterCell(vecPosition,vecCenter,vecCell);
             
             pStarSystem->setStarType(int(nNrOfStarTypes*fNumber));
+            pStarSystem->setSeed(i);
             pStarSystem->setCenter(vecCenter);
             pStarSystem->setCell(vecCell);
             pStarSystem->setNumberOfPlanets(PoissionDistribution(Generator));

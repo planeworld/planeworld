@@ -411,6 +411,16 @@ void CVisualsManager::drawWorld()
                     m_pUniverse->m_pStar->init();
                     m_pUniverse->m_pStar->setVelocity(Vector2d(3.0e9,0.0));
                     m_nStarIndex = i;
+                    
+                    std::mt19937 LocalGenerator;
+                    std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
+
+                    LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
+                    
+                    for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
+                    {
+                        std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
+                    }
                 }
             }
         }

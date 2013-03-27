@@ -59,11 +59,13 @@ class CStarSystem
         const Vector2d& getCenter() const;
         const int&      getNumberOfPlanets() const;
         const int&      getStarType() const;
+        const int&      getSeed() const;
 
         //--- Methods --------------------------------------------------------//
         void setCell(const Vector2i&);
         void setCenter(const Vector2d&);
         void setNumberOfPlanets(const int&);
+        void setSeed(const int&);
         void setStarType(const int&);
         
     private:
@@ -75,6 +77,7 @@ class CStarSystem
         Vector2d m_vecCenter;           ///< Center of star system in cell
         int      m_nNumberOfPlanets;    ///< Number of planets in this star system
         int      m_StarType;            ///< Type of star
+        int      m_nSeed;               ///< Local seed of this star system
 
 };
 
@@ -134,6 +137,19 @@ inline const int& CStarSystem::getStarType() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns the local seed of this star system
+///
+/// \return Local seed of star system
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const int& CStarSystem::getSeed() const
+{
+    METHOD_ENTRY("CStarSystem::getSeed")
+    return m_nSeed;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Sets the cell the star system is located at
 ///
 /// \param _vecCell Cell of star system
@@ -172,6 +188,20 @@ inline void CStarSystem::setNumberOfPlanets(const int& _nNumberOfPlanets)
     METHOD_ENTRY("CStarSystem::setNumberOfPlanets")
 
     m_nNumberOfPlanets = _nNumberOfPlanets;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the local seed for this star system
+///
+/// \param _nSeed Local seed for this star system
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CStarSystem::setSeed(const int& _nSeed)
+{
+    METHOD_ENTRY("CStarSystem::setSeed")
+
+    m_nSeed = _nSeed;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
