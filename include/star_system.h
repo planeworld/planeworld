@@ -55,15 +55,17 @@ class CStarSystem
         CStarSystem();
         
         //--- Constant Methods -----------------------------------------------//
-        const Vector2i& getCell() const;
-        const Vector2d& getCenter() const;
-        const int&      getNumberOfPlanets() const;
-        const int&      getStarType() const;
-        const int&      getSeed() const;
+        const Vector2i&     getCell() const;
+        const Vector2d&     getCenter() const;
+        const std::string&  getName() const;
+        const int&          getNumberOfPlanets() const;
+        const int&          getStarType() const;
+        const int&          getSeed() const;
 
         //--- Methods --------------------------------------------------------//
         void setCell(const Vector2i&);
         void setCenter(const Vector2d&);
+        void setName(const std::string&);
         void setNumberOfPlanets(const int&);
         void setSeed(const int&);
         void setStarType(const int&);
@@ -73,11 +75,12 @@ class CStarSystem
         //--- Constant Methods [private] -------------------------------------//
         
         //--- Variables [private] --------------------------------------------//
-        Vector2i m_vecCell;             ///< Cell in that the star system is located
-        Vector2d m_vecCenter;           ///< Center of star system in cell
-        int      m_nNumberOfPlanets;    ///< Number of planets in this star system
-        int      m_StarType;            ///< Type of star
-        int      m_nSeed;               ///< Local seed of this star system
+        std::string m_strName;             ///< Name of the central star
+        Vector2i    m_vecCell;             ///< Cell in that the star system is located
+        Vector2d    m_vecCenter;           ///< Center of star system in cell
+        int         m_nNumberOfPlanets;    ///< Number of planets in this star system
+        int         m_StarType;            ///< Type of star
+        int         m_nSeed;               ///< Local seed of this star system
 
 };
 
@@ -107,6 +110,19 @@ inline const Vector2d& CStarSystem::getCenter() const
 {
     METHOD_ENTRY("CStarSystem::getCenter")
     return m_vecCenter;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the name of this star system (i.e. the central star)
+///
+/// \return Name of this star system
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::string& CStarSystem::getName() const
+{
+    METHOD_ENTRY("CStarSystem::getName")
+    return m_strName;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,6 +190,20 @@ inline void CStarSystem::setCenter(const Vector2d& _vecCenter)
     METHOD_ENTRY("CStarSystem::setCenter")
 
     m_vecCenter = _vecCenter;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the name this star system (i.e. its central star)
+///
+/// \param _strName Name of the central star
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CStarSystem::setName(const std::string& _strName)
+{
+    METHOD_ENTRY("CStarSystem::setName")
+
+    m_strName = _strName;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -20,6 +20,7 @@
 #include <random>
 
 #include "engine_common.h"
+#include "namegenerator.h"
 #include "universe.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,6 +69,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 {
     METHOD_ENTRY("CUniverse::generate")
     
+    CNameGenerator StarNameGenerator(_nSeed);
     const int nBar=100;
     const int nNrOfStarTypes=7;
     
@@ -107,11 +109,14 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             
             IUniverseScaled::separateCenterCell(vecPosition,vecCenter,vecCell);
             
+            pStarSystem->setName(StarNameGenerator.getName());
             pStarSystem->setStarType(int(nNrOfStarTypes*fNumber));
             pStarSystem->setSeed(i);
             pStarSystem->setCenter(vecCenter);
             pStarSystem->setCell(vecCell);
             pStarSystem->setNumberOfPlanets(PoissionDistribution(Generator));
+            
+            INFO_MSG("Universe Generator", "System name: " << pStarSystem->getName())
             
             // Store the maximum number of planets
             if (pStarSystem->getNumberOfPlanets() > m_nNrOfPlanetsMax)
@@ -155,7 +160,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     
     // Reserve memory for star object
     m_pStar = new CRigidBody;
-    m_pStar->setName("Procedurally_Generated_Star");
+    m_pStar->setName("Procedurally_Generated_Star_Dummy");
     m_pStar->enableDynamics();
     m_pStar->enableGravitation();
     m_pStarShape = new CCircle;

@@ -50,6 +50,7 @@ SET(SRCS
     bounding_box.cpp
     camera.cpp
     collision_manager.cpp
+    namegenerator.cpp
     parzival.cpp
     physics_manager.cpp
     planeworld.cpp
@@ -88,6 +89,7 @@ TARGET_LINK_LIBRARIES (planeworld
     noise2d
     sfml-system
     sfml-window
+    sfml-graphics
 )
 
 # TARGET_LINK_LIBRARIES (starmap_ut

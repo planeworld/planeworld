@@ -24,7 +24,8 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CStarSystem::CStarSystem() : m_nNumberOfPlanets(0),
+CStarSystem::CStarSystem() : m_strName("Star system"),
+                             m_nNumberOfPlanets(0),
                              m_StarType(STAR_CLASS_M)
 {
     METHOD_ENTRY("CStarSystem::CStarSystem()");
