@@ -53,8 +53,6 @@ CNameGenerator::CNameGenerator(const int& _nSeed)
 ///////////////////////////////////////////////////////////////////////////////
 const std::string CNameGenerator::getName()
 {
-    std::uniform_int_distribution<int>  VowelDistribution(0,4);
-    std::uniform_int_distribution<int>  ConsonantsDistribution(0,20);
     std::uniform_int_distribution<int>  CharDistribution(0,25);
     std::poisson_distribution<int>      LengthDistribution(NAME_GENERATOR_LENGTH_MEAN);
     
