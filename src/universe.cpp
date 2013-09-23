@@ -90,6 +90,8 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     std::vector<int> vecNrOfPlanets;
     std::vector<int> vecNrOfStars(nNrOfStarTypes,0);
 
+    int nNrOfPlanets = 0;
+    
     // Create a globular cluster
     for (int i=0; i<_nNumberOfStars; ++i)
     {
@@ -115,6 +117,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             pStarSystem->setCenter(vecCenter);
             pStarSystem->setCell(vecCell);
             pStarSystem->setNumberOfPlanets(PoissionDistribution(Generator));
+            nNrOfPlanets += pStarSystem->getNumberOfPlanets();
             
             INFO_MSG("Universe Generator", "System name: " << pStarSystem->getName())
             
@@ -138,22 +141,18 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         
         for (int i=0; i<nNrOfStarTypes; ++i) {
             std::cout << "Class " << this->starClassToString(i) << ": ";
-            std::cout << std::string(vecNrOfStars[i]*nBar/_nNumberOfStars,'#') << std::endl;
+            std::cout << std::string(double(vecNrOfStars[i]*nBar)/_nNumberOfStars,'#') << std::endl;
         }
         Log.logSeparator();
     )
 
-    int nNrOfPlanets = 0;
-    for (int i=0; i<=m_nNrOfPlanetsMax; ++i)
-        nNrOfPlanets += vecNrOfPlanets[i]*i;
-    
     DOM_VAR(INFO_MSG("Universe generator", "Generated "<< nNrOfPlanets << " planets."))
     DEBUG(
         DEBUG_MSG("Universe generator", "Distribution of number of planet per star system: ")
         Log.logSeparator();
         
-        for (int i=0; i<=m_nNrOfPlanetsMax; ++i)
-            std::cout << "Planets: " << i << ": " << std::string(vecNrOfPlanets[i]*nBar/_nNumberOfStars,'#') << std::endl;
+        for (int i=0; i<m_nNrOfPlanetsMax; ++i)
+            std::cout << "Planets: " << i << ": " << std::string(double(vecNrOfPlanets[i]*nBar)/nNrOfPlanets,'#') << std::endl;
         
         Log.logSeparator();
     )
