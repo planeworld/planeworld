@@ -286,8 +286,8 @@ void CVisualsManager::drawGridHUD() const
 
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
-        m_Graphics.setColor(1.0,1.0,1.0,0.6);
-
+//         m_Graphics.setColor(1.0,1.0,1.0,0.6);
+// 
         double fGrid = 1.0;
         
         // Automatically scale grid depending on zoom level
@@ -295,36 +295,51 @@ void CVisualsManager::drawGridHUD() const
             fGrid*=10.0;
         while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 10.0)
             fGrid*=0.1;
+//         
+//         // Draw zoom scale
+//         m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+//             m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2- 26,10));
+//             m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+101,10));
+//         m_Graphics.endLine();
+//         for (int i=-1; i<=4; ++i)
+//         {
+//             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,11));
+//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,15));
+//             m_Graphics.endLine();
+//         }
+//         // Draw zoom level
+//         for (int i=static_cast<int>(std::log10(fGrid)); i<0; ++i)
+//         {
+//             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
+//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
+//             m_Graphics.endLine();
+//         }
+//         for (int i=1; i<=static_cast<int>(std::log10(fGrid)); ++i)
+//         {
+//             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
+//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
+//             m_Graphics.endLine();
+//         }
+//         
+//         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         
-        // Draw zoom scale
-        m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
-            m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2- 26,10));
-            m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+101,10));
-        m_Graphics.endLine();
-        for (int i=-1; i<=4; ++i)
-        {
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
-                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,11));
-                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,15));
-            m_Graphics.endLine();
-        }
-        // Draw zoom level
-        for (int i=static_cast<int>(std::log10(fGrid)); i<0; ++i)
-        {
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
-                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
-                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
-            m_Graphics.endLine();
-        }
-        for (int i=1; i<=static_cast<int>(std::log10(fGrid)); ++i)
-        {
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
-                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
-                m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
-            m_Graphics.endLine();
-        }
+        // Now draw the text
+        std::stringstream oss;
+        oss << "Grid Resolution: " << fGrid << "m";
         
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        m_Graphics.getWindow()->pushGLStates();
+        sf::Font font;
+        font.loadFromFile("/home/bfeld/tmp/local/share/planeworld/data/consola.ttf");
+        sf::Text text;
+        text.setString(oss.str());
+        text.setFont(font);
+        text.setCharacterSize(12);
+        text.setPosition(m_Graphics.getWidthScr()/2, 0.0f);
+        m_Graphics.getWindow()->draw(text);
+        m_Graphics.getWindow()->popGLStates();
     }
 }
 
@@ -389,6 +404,12 @@ void CVisualsManager::drawWorld()
                 m_Graphics.setColor(0.8,fColor,0.3);
                 m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getNumberOfPlanets());
                 m_Graphics.dot(vecPosRel);
+                
+                if (m_nStarIndex == i)
+                {
+                    m_pUniverse->getStarSystems()[i]->setCell(m_pUniverse->m_pStar->getCell());
+                    m_pUniverse->getStarSystems()[i]->setCenter(m_pUniverse->m_pStar->getCOM());
+                }
             }
         }
     }
@@ -402,6 +423,7 @@ void CVisualsManager::drawWorld()
                 {
                     double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
                     // RACE_CONDITION if object dynamic
+                    m_pUniverse->m_pStar->setName(m_pUniverse->getStarSystems()[i]->getName());
                     m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
                     m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
                     static_cast<CCircle*>(m_pUniverse->m_pStar->getGeometry()->getShapes()->front()->getShapeCur())->setRadius(
@@ -417,16 +439,91 @@ void CVisualsManager::drawWorld()
 
                     LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
                     
+                    std::cout << m_pUniverse->m_pStar->getName() << std::endl;
                     for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
                     {
-                        std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
+                         std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
                     }
                 }
+            }
+            else
+            {
+                m_pUniverse->getStarSystems()[i]->setCell(m_pUniverse->m_pStar->getCell());
+                m_pUniverse->getStarSystems()[i]->setCenter(m_pUniverse->m_pStar->getCOM());
             }
         }
     }
     m_Graphics.setPointSize(1.0);
+    
+    // Draw names (this is quite hacked and just a proof of concept)
+    
+    sf::Font font;
+    font.loadFromFile("/home/bfeld/tmp/local/share/planeworld/data/consola.ttf");
 
+    m_Graphics.getWindow()->pushGLStates();    
+    for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
+         ci != m_ObjectVisuals.end(); ++ci)
+    {
+        if (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() > 1.0)
+        {
+        Vector2d vecPosRel = (*ci)->getObject()->getCOM()-
+                             m_pCamera->getCenter()+
+                             IUniverseScaled::cellToDouble
+                             ((*ci)->getObject()->getCell()-
+                             m_pCamera->getCell());
+        
+        // Now draw the text
+        std::stringstream oss;
+        oss << (*ci)->getObject()->getName();
+        
+        sf::Text text;
+        double fColor = (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
+        if (fColor > 255.0) fColor = 255.0;
+        sf::Color color(fColor, fColor, fColor);
+        
+        text.setString(oss.str());
+        text.setFont(font);
+        text.setCharacterSize(12);
+        text.setColor(color);
+        text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+
+        m_Graphics.getWindow()->draw(text);
+        }
+    }
+    if (1.0e9 * m_Graphics.getResPMX() < 1.0)
+    {
+        for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+        {
+            Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
+                              IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
+            if (m_pCamera->getBoundingBox().isInside(vecPos))
+            {
+                Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
+                                     m_pCamera->getCenter()+
+                                     IUniverseScaled::cellToDouble
+                                     (m_pUniverse->getStarSystems()[i]->getCell()-
+                                      m_pCamera->getCell());
+                
+                // Now draw the text
+                std::stringstream oss;
+                oss << m_pUniverse->getStarSystems()[i]->getName();
+                
+                sf::Text text;
+                double fColor=0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                sf::Color color(0.8*255, fColor*255, 0.3*255);
+                
+                text.setString(oss.str());
+                text.setFont(font);
+                text.setCharacterSize(12);
+                text.setColor(color);
+                text.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
+
+                m_Graphics.getWindow()->draw(text);
+            }
+        }
+    }
+    
+    m_Graphics.getWindow()->popGLStates();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

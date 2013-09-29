@@ -27,13 +27,16 @@
 /// dimensions and landscape.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CPlanet::CPlanet() : m_fAngle(0.0),
-                     m_fHeightMax(8000.0),
-                     m_fRadius(6378.16e3),
+CPlanet::CPlanet() : m_PlanetType(PLANET_TYPE_EARTHLIKE),
+                     m_fAngle(0.0),
+                     m_fHeightMax(10.0),
+                     m_fRadius(1000.0),
                      m_fSeaLevel(0.0),
                      m_fSmoothness(1.0),
                      m_fGroundResolution(1.0),
                      m_nSeed(1),
+                     m_pSurface(0),
+                     m_pTerrainType(0),
                      m_fLacHlTr(1.937),
                      m_fLacMtTr(2.137),
                      m_fLacTrTp(2.0531),
@@ -41,34 +44,10 @@ CPlanet::CPlanet() : m_fAngle(0.0),
                      m_nOctMtTr(5),
                      m_nOctTrTp(5)
 {
-    METHOD_ENTRY("CPlanet::CPlanet()");
-    CTOR_CALL("CPlanet::CPlanet()");
+    METHOD_ENTRY("CPlanet::CPlanet")
+    CTOR_CALL("CPlanet::CPlanet")
     
     m_vecCenter0.setZero();
-    
-//     m_MountainTerrain.SetFrequency(0.000025);
-//     m_MountainTerrain.SetLacunarity(1.9737346);
-//     m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-//     m_MountainTerrain.SetOctaveCount(16);
-//     
-//     m_BaseFlatTerrain.SetFrequency(0.00001);
-//     m_BaseFlatTerrain.SetLacunarity(1.793947);
-//     m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-//     
-//     m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
-//     m_FlatTerrain.SetScale(0.25);
-//     m_FlatTerrain.SetBias(-0.75);
-//     
-//     m_TerrainType.SetFrequency (0.000001);
-//     m_TerrainType.SetPersistence (0.25);
-//     m_TerrainType.SetLacunarity(2.12358986);
-//     m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
-// 
-//     m_Surface.SetSourceModule(0,m_FlatTerrain);
-//     m_Surface.SetSourceModule(1,m_MountainTerrain);
-//     m_Surface.SetControlModule(m_TerrainType);
-//     m_Surface.SetBounds(0.0,100.0);
-//     m_Surface.SetEdgeFalloff(0.25);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,6 +75,7 @@ CPlanet* CPlanet::clone() const
     CPlanet* pClone = new CPlanet();
     MEM_ALLOC("pClone")
         
+    pClone->m_PlanetType        = m_PlanetType;
     pClone->m_fAngle            = m_fAngle;
     pClone->m_fGroundResolution = m_fGroundResolution;
     pClone->m_fHeightMax        = m_fHeightMax;
@@ -132,6 +112,7 @@ void CPlanet::copy(const IShape* const _pShape)
     
     const CPlanet* const pPlanet = static_cast<const CPlanet* const>(_pShape);
         
+    m_PlanetType        = pPlanet->m_PlanetType;
     m_fAngle            = pPlanet->m_fAngle;
     m_fGroundResolution = pPlanet->m_fGroundResolution;
     m_fHeightMax        = pPlanet->m_fHeightMax;
@@ -197,17 +178,19 @@ void CPlanet::setSampling(const double& _fMaxF)
     fMinF = 1.0 / (m_fHeightMax*M_PI_2);
     
     if (_fMaxF < fMaxF) fMaxF = _fMaxF;
-    nOct = log2(fMaxF/fMinF)/log2(m_fLacMtTr)+1;
+    nOct = ceil(log2(fMaxF/fMinF)/log2(m_fLacMtTr));
     if (nOct < 1) nOct = 1;
-    m_MountainTerrain.SetOctaveCountTmp(nOct);
+    for (int i=0; i<m_RidgedMulti.size(); ++i)
+        m_RidgedMulti[i].SetOctaveCountTmp(nOct);
     
-    nOct = log2(fMaxF/fMinF)/log2(m_fLacHlTr)+1;
+    nOct = ceil(log2(fMaxF/fMinF)/log2(m_fLacHlTr));
     if (nOct < 1) nOct = 1;
-    m_BaseFlatTerrain.SetOctaveCountTmp(nOct);
+    for (int i=0; i<m_Billow.size(); ++i)
+        m_Billow[i].SetOctaveCountTmp(nOct);
     
-    nOct = log2(100)/log2(m_fLacTrTp)+1;
-    if (nOct < 1) nOct = 1;
-    m_TerrainType.SetOctaveCountTmp(nOct);
+//     nOct = ceil(log2(fMaxF/(0.5*100.0/(2.0*M_PI*m_fRadius)))/log2(m_fLacTrTp));
+//     if (nOct < 1) nOct = 1;
+//     m_TerrainType.SetOctaveCountTmp(nOct);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -219,9 +202,11 @@ void CPlanet::resetSampling()
 {
     METHOD_ENTRY("CPlanet::resetSampling")
     
-    m_BaseFlatTerrain.SetOctaveCountTmp(m_nOctHlTr);
-    m_MountainTerrain.SetOctaveCountTmp(m_nOctMtTr);
-    m_TerrainType.SetOctaveCountTmp(m_nOctTrTp);
+    for (int i=0; i<m_Billow.size(); ++i)
+        m_Billow[i].SetOctaveCountTmp(m_nOctHlTr);
+    for (int i=0; i<m_RidgedMulti.size(); ++i)
+        m_RidgedMulti[i].SetOctaveCountTmp(m_nOctMtTr);
+//     m_TerrainType.SetOctaveCountTmp(m_nOctTrTp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -265,68 +250,151 @@ void CPlanet::transform( const double& _fAngle, const Vector2d& _vecV )
 void CPlanet::myInitTerrain()
 {
     METHOD_ENTRY("CPlanet::myInitTerrain")
+    
+    // Cleanup everything for the rare case that terrain is initialised more than once.
+    m_Billow.clear();
+    m_Clamp.clear();
+    m_Perlin.clear();
+    m_RidgedMulti.clear();
+    m_Selector.clear();
+    m_Terrace.clear();
+    
+    switch(m_PlanetType)
+    {
+        case PLANET_TYPE_EARTHLIKE:
+        {
+            m_fLacHlTr = 1.9371;
+            m_fLacMtTr = 2.137;
+            m_fLacTrTp = 2.317;
+            
+            double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
+            double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
+            
+            double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+            double fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
+            
+            m_nOctHlTr = ceil(log2(fMaxF/fMinF)/log2(m_fLacHlTr));
+            if (m_nOctHlTr < 1) m_nOctHlTr = 1;
+            
+            m_nOctMtTr = ceil(log2(fMaxF/fMinF)/log2(m_fLacMtTr));
+            if (m_nOctMtTr < 1) m_nOctMtTr = 1;
+            
+            m_nOctTrTp = ceil(log2(fMaxF/(0.5*100.0/(2.0*M_PI*m_fRadius)))/log2(m_fLacTrTp));
+            if (m_nOctTrTp < 1) m_nOctTrTp = 1;
+            
+            INFO_MSG("Planet", "Generating Terrain (Mountains)")
+            DOM_VAR(INFO_MSG("Planet", "Number of Mountains:       " << fNrOfMountains))
+            DOM_VAR(INFO_MSG("Planet", "Number of Points:          " << fNrOfPoints))
+            DOM_VAR(INFO_MSG("Planet", "Minimum Frequency:         " << fMinF << "/m"))
+            DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:         " << fMaxF << "/m"))
+            DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Mountains: " << m_nOctMtTr))
+            DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Hills:     " << m_nOctHlTr))
+            
+            // Reserve memory for noise functions
+            m_Billow.resize(1);
+            m_Clamp.resize(1);
+            m_Perlin.resize(1);
+            m_RidgedMulti.resize(1);
+            m_Selector.resize(1);
+            m_Terrace.resize(1);
 
-    m_fLacHlTr = 1.9371;
-    m_fLacMtTr = 2.137;
-    m_fLacTrTp = 2.317;
-    
-    double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
-    double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
-       
-    double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
-    double fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
-    
-    m_nOctHlTr = log2(fMaxF/fMinF)/log2(m_fLacHlTr)+1;
-    if (m_nOctHlTr < 1) m_nOctHlTr = 1;
-    
-    m_nOctMtTr = log2(fMaxF/fMinF)/log2(m_fLacMtTr)+1;
-    if (m_nOctMtTr < 1) m_nOctMtTr = 1;
-    
-    INFO_MSG("Planet", "Generating Terrain (Mountains)")
-    DOM_VAR(INFO_MSG("Planet", "Number of Mountains:       " << fNrOfMountains))
-    DOM_VAR(INFO_MSG("Planet", "Number of Points:          " << fNrOfPoints))
-    DOM_VAR(INFO_MSG("Planet", "Minimum Frequency:         " << fMinF << "/m"))
-    DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:         " << fMaxF << "/m"))
-    DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Mountains: " << m_nOctMtTr))
-    DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Hills:     " << m_nOctHlTr))
+            m_RidgedMulti[0].SetSeed(m_nSeed);
+            m_RidgedMulti[0].SetFrequency(fMinF);
+            m_RidgedMulti[0].SetLacunarity(m_fLacMtTr);
+            m_RidgedMulti[0].SetNoiseQuality(noise::QUALITY_BEST);
+            m_RidgedMulti[0].SetOctaveCount(m_nOctMtTr);
+            
+            m_Clamp[0].SetSourceModule (0, m_RidgedMulti[0]);
+            m_Clamp[0].SetBounds (-1.0, 0.8);
+            
+            m_Terrace[0].SetSourceModule (0, m_Clamp[0]);
+            m_Terrace[0].AddControlPoint ( 0.0000);
+            m_Terrace[0].AddControlPoint ( 0.2500);
+            m_Terrace[0].AddControlPoint ( 0.5000);
+            m_Terrace[0].AddControlPoint ( 0.7500);
+            m_Terrace[0].AddControlPoint ( 0.8750);
+            m_Terrace[0].AddControlPoint ( 1.0000);
+            
+            m_Billow[0].SetSeed(m_nSeed+3);
+            m_Billow[0].SetFrequency(fMinF);
+            m_Billow[0].SetLacunarity(m_fLacHlTr);
+            m_Billow[0].SetNoiseQuality(noise::QUALITY_BEST);
+            m_Billow[0].SetOctaveCount(m_nOctHlTr);
+            
+        //     m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
+        //     m_FlatTerrain.SetScale(0.25);
+        //     m_FlatTerrain.SetBias(-0.75);
+            
+            m_Perlin[0].SetSeed(m_nSeed+7);
+            m_Perlin[0].SetFrequency (0.5*100.0/(2.0*M_PI*m_fRadius));
+            m_Perlin[0].SetPersistence (0.5);
+            m_Perlin[0].SetLacunarity(m_fLacTrTp);
+            m_Perlin[0].SetNoiseQuality(noise::QUALITY_BEST);
+            m_Perlin[0].SetOctaveCount(m_nOctTrTp);
 
-    m_MountainTerrain.SetSeed(m_nSeed);
-    m_MountainTerrain.SetFrequency(fMinF);
-    m_MountainTerrain.SetLacunarity(m_fLacMtTr);
-    m_MountainTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    m_MountainTerrain.SetOctaveCount(m_nOctMtTr);
-    
-    m_ClampTerrain.SetSourceModule (0, m_MountainTerrain);
-    m_ClampTerrain.SetBounds (-1.0, 0.8);
-    
-    m_TerraceTerrain.SetSourceModule (0, m_ClampTerrain);
-    m_TerraceTerrain.AddControlPoint ( 0.0000);
-    m_TerraceTerrain.AddControlPoint ( 0.2500);
-    m_TerraceTerrain.AddControlPoint ( 0.5000);
-    m_TerraceTerrain.AddControlPoint ( 0.7500);
-    m_TerraceTerrain.AddControlPoint ( 0.8750);
-    m_TerraceTerrain.AddControlPoint ( 1.0000);
-    
-    m_BaseFlatTerrain.SetSeed(m_nSeed+3);
-    m_BaseFlatTerrain.SetFrequency(fMinF);
-    m_BaseFlatTerrain.SetLacunarity(m_fLacHlTr);
-    m_BaseFlatTerrain.SetNoiseQuality(noise::QUALITY_BEST);
-    m_BaseFlatTerrain.SetOctaveCount(m_nOctHlTr);
-    
-//     m_FlatTerrain.SetSourceModule(0,m_BaseFlatTerrain);
-//     m_FlatTerrain.SetScale(0.25);
-//     m_FlatTerrain.SetBias(-0.75);
-    
-    m_TerrainType.SetSeed(m_nSeed+7);
-    m_TerrainType.SetFrequency (0.5*100.0/(2.0*M_PI*m_fRadius));
-    m_TerrainType.SetPersistence (0.5);
-    m_TerrainType.SetLacunarity(m_fLacTrTp);
-    m_TerrainType.SetNoiseQuality(noise::QUALITY_BEST);
-    m_TerrainType.SetOctaveCount(15);
+            m_Selector[0].SetSourceModule(0,m_Billow[0]);
+            m_Selector[0].SetSourceModule(1,m_Terrace[0]);
+            m_Selector[0].SetControlModule(m_Perlin[0]);
+            m_Selector[0].SetBounds(0.0,1.0);
+            m_Selector[0].SetEdgeFalloff(0.05);
+            
+            m_pTerrainType = &m_Perlin[0];
+            m_pSurface = &m_Selector[0];
+            break;
+        }
+        case PLANET_TYPE_ROCK:
+        {
+            m_fLacHlTr = 1.9371;
+            m_fLacMtTr = 2.137;
+            m_fLacTrTp = 2.317;
+            
+            m_fRadius = 120.0;
+            m_fHeightMax = 60.0;
+            
+            double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
+            double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
+            
+            double fMinF = 1.0 / (0.2*m_fRadius*2.0*M_PI);
+            double fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
+            
+            m_nOctHlTr = ceil(log2(fMaxF/fMinF)/log2(m_fLacHlTr));
+            if (m_nOctHlTr < 1) m_nOctHlTr = 1;
+            
+            m_nOctMtTr = ceil(log2(fMaxF/fMinF)/log2(m_fLacMtTr));
+            if (m_nOctMtTr < 1) m_nOctMtTr = 1;
+            
+            m_nOctTrTp = ceil(log2(fMaxF/(0.5*100.0/(2.0*M_PI*m_fRadius)))/log2(m_fLacTrTp));
+            if (m_nOctTrTp < 1) m_nOctTrTp = 1;
+            
+            INFO_MSG("Planet", "Generating Terrain (Mountains)")
+            DOM_VAR(INFO_MSG("Planet", "Number of Mountains:       " << fNrOfMountains))
+            DOM_VAR(INFO_MSG("Planet", "Number of Points:          " << fNrOfPoints))
+            DOM_VAR(INFO_MSG("Planet", "Minimum Frequency:         " << fMinF << "/m"))
+            DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:         " << fMaxF << "/m"))
+            DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Mountains: " << m_nOctMtTr))
+            DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Hills:     " << m_nOctHlTr))
 
-    m_Surface.SetSourceModule(0,m_BaseFlatTerrain);
-    m_Surface.SetSourceModule(1,m_TerraceTerrain);
-    m_Surface.SetControlModule(m_TerrainType);
-    m_Surface.SetBounds(0.0,1.0);
-    m_Surface.SetEdgeFalloff(0.05);
+            // Reserve memory for noise functions
+            m_Perlin.resize(1);
+            m_RidgedMulti.resize(1);
+            
+            m_RidgedMulti[0].SetSeed(m_nSeed);
+            m_RidgedMulti[0].SetFrequency(fMinF);
+            m_RidgedMulti[0].SetLacunarity(m_fLacMtTr);
+            m_RidgedMulti[0].SetNoiseQuality(noise::QUALITY_BEST);
+            m_RidgedMulti[0].SetOctaveCount(m_nOctMtTr);
+                
+            m_Perlin[0].SetSeed(m_nSeed+7);
+            m_Perlin[0].SetFrequency (0.5*100.0/(2.0*M_PI*m_fRadius));
+            m_Perlin[0].SetPersistence (0.5);
+            m_Perlin[0].SetLacunarity(m_fLacTrTp);
+            m_Perlin[0].SetNoiseQuality(noise::QUALITY_BEST);
+            m_Perlin[0].SetOctaveCount(m_nOctTrTp);
+            
+            m_pTerrainType = &m_Perlin[0];
+            m_pSurface = &m_RidgedMulti[0];
+            
+            break;
+        }
+    }
 }

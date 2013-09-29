@@ -115,6 +115,25 @@ Vector2d CGraphics::screen2World(const double& _fX, const double& _fY) const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Reprojection of world coordinate to a pixel position
+///
+/// \param _vecV Position in world coordinates
+///
+/// \return Position in screen coordinates
+///
+///////////////////////////////////////////////////////////////////////////////
+Vector2d CGraphics::world2Screen(const Vector2d& _vecV) const
+{
+    METHOD_ENTRY("CGraphics::world2Screen")
+
+    Rotation2Dd Rot(m_fCamAng);
+    
+    return (Rot*Vector2d(_vecV[0],-_vecV[1])*m_fCamZoom-Vector2d(GRAPHICS_LEFT_DEFAULT,-GRAPHICS_TOP_DEFAULT))
+            *m_unWidthScr/(GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Clear and swap videobuffers
 ///
 /// This method swaps videobuffers and clears offscreen buffers afterwards.

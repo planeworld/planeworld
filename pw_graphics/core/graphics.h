@@ -31,7 +31,8 @@
 #include "eigen2/Eigen/Core"
 #include "eigen2/Eigen/Geometry"
 #include <SFML/OpenGL.hpp>
-#include <SFML/Window.hpp>
+// #include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
 
 using namespace Eigen;
 
@@ -106,6 +107,7 @@ class CGraphics
         //--- Constant methods -----------------------------------------------//
         Vector2d        screen2World(const Vector2d&) const;
         Vector2d        screen2World(const double&, const double&) const;
+        Vector2d        world2Screen(const Vector2d&) const;
         double          getDynPelSize() const;
         double          getResMPX() const;
         double          getResMPY() const;
@@ -118,7 +120,7 @@ class CGraphics
         void setPointSize(const double&) const;
         void setWidth(const double&) const;
         
-        sf::Window* const getWindow() const;
+        sf::RenderWindow* const getWindow() const;
 
         //--- Methods --------------------------------------------------------//
         bool init();
@@ -127,7 +129,7 @@ class CGraphics
         void setHeightScr(const unsigned short&);
         void swapBuffers();
         
-        void setWindow(sf::Window* const);
+        void setWindow(sf::RenderWindow* const);
 
         //
         //--- Methods for camera movement ------------------------------------//
@@ -173,7 +175,7 @@ class CGraphics
     private:
         
         //--- Variabels [private] --------------------------------------------//
-        sf::Window*             m_pWindow;      ///< Pointer to main sfml window
+        sf::RenderWindow*       m_pWindow;      ///< Pointer to main sfml window
         
         Vector3d                m_vecCamPos;    ///< camera position
         double                  m_fCamAng;      ///< camera angle
@@ -397,7 +399,7 @@ inline void CGraphics::setWidth(const double& _fW) const
 /// \return Main window
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline sf::Window* const CGraphics::getWindow() const
+inline sf::RenderWindow* const CGraphics::getWindow() const
 {
     METHOD_ENTRY("CGraphics::getWindow")
     return m_pWindow;
@@ -442,7 +444,7 @@ inline void CGraphics::setHeightScr(const unsigned short& _unHeightScr)
 /// \param _pWindow Main window
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void CGraphics::setWindow(sf::Window* const _pWindow)
+inline void CGraphics::setWindow(sf::RenderWindow* const _pWindow)
 {
     METHOD_ENTRY("CGraphics::setWindow");
     m_pWindow = _pWindow;

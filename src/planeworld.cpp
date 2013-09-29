@@ -382,8 +382,10 @@ int main(int argc, char *argv[])
 //     pCamera->setHook(pBody3);
     
     //--- Initialise graphics ------------------------------------------------//
-    sf::Window Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
-                      "Planeworld", sf::Style::Default, sf::ContextSettings(32));
+//     sf::RenderWindow Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
+//                             "Planeworld", sf::Style::Default, sf::ContextSettings(32));
+    sf::RenderWindow Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
+                            "Planeworld");
     
     pVisualsManager->setWindow(&Window);
     pVisualsManager->initGraphics();

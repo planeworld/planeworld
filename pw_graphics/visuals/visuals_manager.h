@@ -62,7 +62,7 @@ class CVisualsManager : virtual public CGraphicsBase
         void            setCamera(CCamera*);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
-        void            setWindow(sf::Window* const);
+        void            setWindow(sf::RenderWindow* const);
         void            toggleVisualisations(const int&);
         void            unsetVisualisations(const int&);
 
@@ -188,7 +188,7 @@ inline void CVisualsManager::setVisualisations(const int& _nVis)
 /// \param _pWindow Window to draw on
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setWindow(sf::Window* const _pWindow)
+inline void CVisualsManager::setWindow(sf::RenderWindow* const _pWindow)
 {
     METHOD_ENTRY("CVisualsManager::setWindow")
     m_Graphics.setWindow(_pWindow);

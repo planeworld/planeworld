@@ -133,23 +133,23 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
         double fWeightMountains;
         double fWeightFlat;
         
-        const double TERRAIN_CROSSOVER = 0.001;
+        const double TERRAIN_CROSSOVER = 1.0e-10;
         const double TERRAIN_CROSSOVER_INV = 0.5/(TERRAIN_CROSSOVER);
         m_Graphics.setWidth(3.0);
         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
 
-            while ( fAng < fAngEnd)
+            while (fAng < fAngEnd)
             {
-                fHght = pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
-                                                         std::sin(fAng-fPAng)*fRad);
+                fHght = pPlanet->getSurface()->GetValue(std::cos(fAng-fPAng)*fRad,
+                                                        std::sin(fAng-fPAng)*fRad);
                 if (fHght < fSeaLevel)
                 {
                   m_Graphics.setColor(0.0,0.0,0.7*(fHght+1.0)/(fSeaLevel+1.0));
                 }
                 else
                 {
-                  fTerrainType = pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
-                                                                      std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
+                  fTerrainType = 0.1;// pPlanet->getTerrainType()->GetValue(std::cos(fAng-fPAng)*fRad,
+                                     //                               std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
                   if (fTerrainType < 0.5)
                   {
                       fWeightMountains = 0.0 + (fTerrainType - (0.5-TERRAIN_CROSSOVER))*TERRAIN_CROSSOVER_INV;
@@ -226,15 +226,15 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
 //             fAng = fAngBak;
 //             while ( fAng <= fAngEnd)
 //             {
-//                 fHght = m_pPlanet->getSurface().GetValue(std::cos(fAng-fPAng)*fRad,
+//                 fHght = pPlanet->getSurface()->GetValue(std::cos(fAng-fPAng)*fRad,
 //                                                          std::sin(fAng-fPAng)*fRad);
-//                 fTerrainType = m_pPlanet->getTerrainType().GetValue(std::cos(fAng-fPAng)*fRad,
+//                 fTerrainType = pPlanet->getTerrainType()->GetValue(std::cos(fAng-fPAng)*fRad,
 //                                                                     std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
 //                 if (fTerrainType < 0.5)
 //                 {
 //                     
-//                     double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(1.0,1.0,10.0*fAng/fInc);
-//                     double fAngGrass02 = fAng-noise::ValueNoise2D(1.0,1.0,10.0*fAng/fInc);
+//                     double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(1.0,1.0,fAng/fInc);
+//                     double fAngGrass02 = fAng-noise::ValueNoise2D(1.0,1.0,fAng/fInc);
 //                     double fHghtGrass01 = fabs(0.5-fTerrainType);
 //                     double fHghtGrass02 = 0.5*fabs(0.5-fTerrainType);
 //                     m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP,SHAPE_DEFAULT_DEPTH);
@@ -252,12 +252,12 @@ void CPlanetVisuals::draw(const CCamera* const _pCamera,
 //                                                   std::sin(fAngGrass02)*(fHghtGrass02)));
 //                     m_Graphics.endLine();
 //                 }
-//                 fAng += fInc*0.1;
+//                 fAng += fInc;
 //             }
 //         }
         m_Graphics.setColor(1.0,1.0,1.0,1.0);
         
-//         pPlanet->resetSampling();
+        pPlanet->resetSampling();
     }
 }
 

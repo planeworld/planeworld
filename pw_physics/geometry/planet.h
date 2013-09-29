@@ -38,14 +38,23 @@ typedef enum
     PLANET_TYPE_ROCK,
 } PlanetType;
 
+typedef enum
+{
+    PLANET_TERRAIN_TYPE_BADLANDS,   // With and without terraces
+    PLANET_TERRAIN_TYPE_CRATER,     // Size and number depends on atmosphere and history
+    PLANET_TERRAIN_TYPE_DUNES,      // Sand
+    PLANET_TERRAIN_TYPE_HILLS,      // On earthlike, green
+    PLANET_TERRAIN_TYPE_MOUNTAINS,  // Mountains
+    PLANET_TERRAIN_TYPE_SUBSEA,     // Underwater
+    PLANET_TERRAIN_TYPE_TERRACES,   // On earth and rocky structures, depends on water?
+} TerrainType;
+
 const double PLANET_DEFAULT_VERTICES_PER_PERIOD = 5.0; ///< Vertices per period for calculation of octaves
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class representing a procedural created planet shape.
+/// \brief Class representing a procedurally created planet shape.
 ///
-/// \todo Implement double buffer.
-/// 
 ////////////////////////////////////////////////////////////////////////////////
 class CPlanet : public IShape
 {
@@ -57,25 +66,27 @@ class CPlanet : public IShape
         virtual ~CPlanet();
         
         //--- Constant Methods -----------------------------------------------//
-        CPlanet*                        clone() const;
+        CPlanet*                            clone() const;
         
-        const double&                   getAngle() const;
-        const Vector2d&                 getCenter() const;
-        const double&                   getGroundResolution() const;
-        const double&                   getHeight() const;
-        const double&                   getRadius() const;
-        const double&                   getSeaLevel() const;
-        const int&                      getSeed() const;
-        const double&                   getSmoothness() const;
-        const noise::module::Select&    getSurface() const;
-        const noise::module::Perlin&    getTerrainType() const;
+        const double&                       getAngle() const;
+        const Vector2d&                     getCenter() const;
+        const double&                       getGroundResolution() const;
+        const double&                       getHeight() const;
+        const double&                       getRadius() const;
+        const double&                       getSeaLevel() const;
+        const int&                          getSeed() const;
+        const double&                       getSmoothness() const;
+        const noise::module::Module* const  getSurface() const;
+        const noise::module::Module* const  getTerrainType() const;
         
-        const ShapeType                 getShapeType() const;
+        const ShapeType                     getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
         void copy(const IShape* const);
         
         void initTerrain();
+        
+        void setPlanetType(const PlanetType&);
         
         void setCenter(const Vector2d&);
         void setCenter(const double&, const double&);
@@ -94,6 +105,8 @@ class CPlanet : public IShape
     protected:
         
         void                myInitTerrain();
+        
+        PlanetType          m_PlanetType;               ///< Identifies type of planet
 
         Vector2d            m_vecCenter;                ///< Center of planet
         Vector2d            m_vecCenter0;               ///< Initial center of planet
@@ -105,13 +118,16 @@ class CPlanet : public IShape
         double              m_fSmoothness;              ///< Smoothness of planet landscape
         int                 m_nSeed;                    ///< Unique seed for terrain generation
         
-        noise::module::Select      m_Surface;           ///< Final surface noise function
-        noise::module::RidgedMulti m_MountainTerrain;   ///< Main mountain
-        noise::module::Billow      m_BaseFlatTerrain;   ///< Base terrain
-        noise::module::ScaleBias   m_FlatTerrain;       ///< Base terrain scaler
-        noise::module::Perlin      m_TerrainType;       ///< Terrain type decision function
-        noise::module::Clamp       m_ClampTerrain;      ///< Clamps terrain at top
-        noise::module::Terrace     m_TerraceTerrain;    ///< Adds terraces to terrain
+        noise::module::Module*     m_pSurface;          ///< Final surface noise function
+        noise::module::Module*     m_pTerrainType;      ///< Final terrain type noise function
+        
+        std::vector<noise::module::Billow>      m_Billow;       ///< Billow modules
+        std::vector<noise::module::Clamp>       m_Clamp;        ///< Clamp modules
+        std::vector<noise::module::Perlin>      m_Perlin;       ///< Perlin modules
+        std::vector<noise::module::RidgedMulti> m_RidgedMulti;  ///< RidgedMulti modules
+        std::vector<noise::module::ScaleBias>   m_ScaleBias;    ///< Selector modules
+        std::vector<noise::module::Select>      m_Selector;     ///< Selector modules
+        std::vector<noise::module::Terrace>     m_Terrace;      ///< Terrace modules
         
         double              m_fLacHlTr;                 ///< Lacunarity for hilly terrain
         double              m_fLacMtTr;                 ///< Lacunarity for mountain terrain
@@ -246,10 +262,10 @@ inline const double& CPlanet::getSmoothness() const
 /// \return Surface noise module
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const noise::module::Select& CPlanet::getSurface() const
+inline const noise::module::Module* const CPlanet::getSurface() const
 {
-    METHOD_ENTRY("CPlanet::getSmoothness")
-    return m_Surface;
+    METHOD_ENTRY("CPlanet::getSurface")
+    return m_pSurface;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -259,10 +275,10 @@ inline const noise::module::Select& CPlanet::getSurface() const
 /// \return terrain type noise module
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const noise::module::Perlin& CPlanet::getTerrainType() const
+inline const noise::module::Module* const CPlanet::getTerrainType() const
 {
     METHOD_ENTRY("CPlanet::getTerrainType")
-    return m_TerrainType;
+    return m_pTerrainType;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -276,6 +292,20 @@ inline const ShapeType CPlanet::getShapeType() const
 {
     METHOD_ENTRY("CPlanet::getShapeType")
     return SHAPE_PLANET;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines the type of this planet
+///
+/// \param _PlanetType Type of this planet
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPlanet::setPlanetType(const PlanetType& _PlanetType)
+{
+    METHOD_ENTRY("CPlanet::setPlanetType")
+
+    m_PlanetType = _PlanetType;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
