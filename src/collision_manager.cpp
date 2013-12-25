@@ -227,7 +227,14 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
                     (*itVel)[0] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[0];
                     (*itVel)[1] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[1];
                     
-                    (*itPos)=vecPOC+(vecNewVelOrth)/(vecNewVelOrth).norm()*0.01;
+                    // Add the velocity of the object because debris' are virtually weightless.
+                    // Otherwise, they would be passed in the next step
+                    (*itVel) += _p1->getVelocity();
+                    
+                    // (*itPos)= vecPOC+(vecNewVelOrth)/(vecNewVelOrth).norm()*0.001;
+                    // Cannot use POC here, because debris' are virtually weightless. Thus, the
+                    // object moves on and does not care about POC position.
+                    (*itPos)= vecC1+(vecNewVelOrth)/(vecNewVelOrth).norm()*(fR0+0.001);
                 }
             }
         }
