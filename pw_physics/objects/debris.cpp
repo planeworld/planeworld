@@ -33,8 +33,6 @@ CDebris::CDebris() : m_fTimeFac(1.0)
     m_VelList.set_capacity(DEBRIS_DEFAULT_NUMBER);
     m_PosListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
     m_VelListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
-    
-    METHOD_EXIT("CDebris::CDebris")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,17 +51,15 @@ void CDebris::dynamics(const double& _fStep)
     boost::circular_buffer<Vector2d>::iterator jt=m_VelList.begin();
     boost::circular_buffer<Vector2d>::iterator itPrev=m_PosListPrev.begin();
     boost::circular_buffer<Vector2d>::iterator jtPrev=m_VelListPrev.begin();
-    double fStep = _fStep*m_fTimeFac;
+    Vector2d vecStep = Vector2d(0.0,9.81) * _fStep * m_fTimeFac;;
     while (it != m_PosList.end())
     {
         (*itPrev) = (*it);
         (*jtPrev) = (*jt);
-        (*jt) += Vector2d(0.0,1.81) * fStep;
+        (*jt) += vecStep;
         (*it) += (*jt) * _fStep;
         ++it; ++jt; ++itPrev; ++jtPrev;
     }
-
-    METHOD_EXIT("CDebris::dynamics")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,8 +90,6 @@ void CDebris::init()
 //     }
 //     // Copy geometry to previous timestep
 //     m_Geometry.update();
-
-    METHOD_EXIT("CDebris::init")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,6 +109,4 @@ void CDebris::setNumber(const int& _nN)
         m_PosList.push_back(Vector2d((rand()%20000000) - 10000000,(rand()%20000000) - 10000000)/100000);
     m_VelList.resize(_nN);
     m_VelListPrev.resize(_nN);
-
-    METHOD_EXIT("CDebris::setNumber")
 }
