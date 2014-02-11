@@ -641,8 +641,12 @@ void CXMLImporter::createUniverse(const pugi::xml_node& _Node)
     
     if (!_Node.empty())
     {
-        m_Universe.generate(_Node.attribute("seed").as_int(),
-                            _Node.attribute("number_of_stars").as_int());
+        if (_Node.attribute("procedural_generation").as_bool() == true)
+        {
+            m_Universe.generate(_Node.attribute("seed").as_int(),
+                                _Node.attribute("number_of_stars").as_int());
+            INFO_MSG("XML Importer", "Procedural universe generated.")
+        }
     }
 }
 

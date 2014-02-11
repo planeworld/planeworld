@@ -1,0 +1,36 @@
+<!DOCTYPE PlaneworldML>
+<universe procedural_generation="false">
+  <gravity
+    vec_x="0.0"
+    vec_y="-1.81"
+  />
+  <object type="RigidBody">
+    <core
+      name="Ground"
+      mass="10.0"
+      origin_x="0.0"
+      origin_y="-150.0"
+      dynamics="false"
+      gravity="false"
+    />
+    <shape type="Polyline"
+      line_type="strip"
+      points="      -10000.0,3000.0;
+                    0.1,0.0;
+                    +10000.0,3000.0">
+      <visuals type="Polyline"/>
+    </shape>
+    <shape type="Polyline"
+        line_type="strip"
+        points="      -10.0,50.0;
+                      +10.0,50.0">
+        <visuals type="Polyline"/>
+    </shape>
+    <shape type="Polyline"
+        line_type="strip"
+        points="      +20.0,25.0;
+                      -20.0,25.0">
+        <visuals type="Polyline"/>
+    </shape>
+  </object>  
+</universe>

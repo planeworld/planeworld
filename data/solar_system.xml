@@ -1,5 +1,6 @@
 <!DOCTYPE PlaneworldML>
 <universe
+  procedural_generation="true"
   seed="1072"
   number_of_stars="10000"
 >
@@ -20,11 +21,11 @@
   <!-- Create a box -->
   <object type="RigidBody">
     <core
-      name="Box"
+      name="Box_1"
       mass="250.0"
       origin_x="-20.0"
       origin_y="0.0"
-      dynamics="true"
+      dynamics="false"
       gravity="true"
     />
     <shape type="Polyline"
@@ -34,6 +35,25 @@
              -3.0, 5.0;
              -7.0, 0.0;
              -4.0, 2.0">
+      <visuals type="Polyline"/>
+    </shape>
+  </object>
+  <!-- Create a box -->
+  <object type="RigidBody">
+    <core
+      name="Box_2"
+      mass="250.0"
+      origin_x="20.0"
+      origin_y="0.0"
+      dynamics="false"
+      gravity="true"
+    />
+    <shape type="Polyline"
+      line_type="loop"
+      points="-5.0,-5.0;
+               5.0, -5.0;
+               5.0, 5.0;
+              -5.0, 5.0">
       <visuals type="Polyline"/>
     </shape>
   </object>

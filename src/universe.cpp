@@ -192,25 +192,28 @@ void CUniverse::clone(const CUniverse& _Universe)
 {
     m_nNrOfPlanetsMax = _Universe.m_nNrOfPlanetsMax;
     
-    for (std::vector<CStarSystem*>::const_iterator ci=_Universe.getStarSystems().begin();
-                                                   ci!=_Universe.getStarSystems().end(); ++ci)
+    if (_Universe.getStarSystems().size() > 0)
     {
-        CStarSystem* pStarSystem = new CStarSystem();
-        MEM_ALLOC("pStarSystem");
-        
-        *pStarSystem = *(*ci);
-        m_StarSystems.push_back((pStarSystem));
-    }
+        for (std::vector<CStarSystem*>::const_iterator ci=_Universe.getStarSystems().begin();
+                                                    ci!=_Universe.getStarSystems().end(); ++ci)
+        {
+            CStarSystem* pStarSystem = new CStarSystem();
+            MEM_ALLOC("pStarSystem");
+            
+            *pStarSystem = *(*ci);
+            m_StarSystems.push_back((pStarSystem));
+        }
 
-    // Hand over object information. Important: The original objects are kept,
-    // the pointers are copied. This class passes responsibility of dynamically
-    // allocated objects!
-    m_pStar = _Universe.m_pStar;
-    m_pStarShape = _Universe.m_pStarShape;
-    m_pStarVisuals = _Universe.m_pStarVisuals;
-    m_pStarObjectVisuals = _Universe.m_pStarObjectVisuals;
-    m_Objects.push_back(_Universe.m_pStar);
-    m_Visuals.push_back(_Universe.m_pStarObjectVisuals);
+        // Hand over object information. Important: The original objects are kept,
+        // the pointers are copied. This class passes responsibility of dynamically
+        // allocated objects!
+        m_pStar = _Universe.m_pStar;
+        m_pStarShape = _Universe.m_pStarShape;
+        m_pStarVisuals = _Universe.m_pStarVisuals;
+        m_pStarObjectVisuals = _Universe.m_pStarObjectVisuals;
+        m_Objects.push_back(_Universe.m_pStar);
+        m_Visuals.push_back(_Universe.m_pStarObjectVisuals);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
