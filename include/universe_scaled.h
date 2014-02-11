@@ -49,10 +49,13 @@ class IUniverseScaled
         //--- Static methods -------------------------------------------------//
         static const Vector2d   cellToDouble(const Vector2i&);
         static void             separateCenterCell(const Vector2d&,Vector2d&,Vector2i&);
+        
+//         //--- Abstract constant methods --------------------------------------//
+//         virtual const Vector2d  getOrigin() const = 0;
 
         //--- Constant methods -----------------------------------------------//
         virtual const Vector2i  getCell() const;
-
+        
         //--- Methods --------------------------------------------------------//
         virtual void            setCell(const Vector2i&);
 

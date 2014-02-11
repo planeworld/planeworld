@@ -387,7 +387,29 @@ void CVisualsManager::drawWorld()
     {
         (*ci)->draw(m_pCamera);
     }
-    if (1.0e9 * m_Graphics.getResPMX() < 1.0)
+    for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+    {
+        if (m_nStarIndex == i)
+        {
+            std::mt19937 LocalGenerator;
+            std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
+            
+            LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
+            
+            for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
+            {
+                m_Graphics.setColor(0.2,0.2,0.5);
+                m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
+                                    IUniverseScaled::cellToDouble(
+                                        m_pUniverse->getStarSystems()[i]->getCell()-
+                                        m_pCamera->getCell()),
+                                    std::fabs(OrbitDistribution(LocalGenerator))
+                                    );
+//                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
+            }
+        }
+    }
+    if (1.0e13 * m_Graphics.getResPMX() < 1.0)
     {
         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
         {
@@ -422,7 +444,6 @@ void CVisualsManager::drawWorld()
                 if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 2.1)
                 {
                     double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
-                    // RACE_CONDITION if object dynamic
                     m_pUniverse->m_pStar->setName(m_pUniverse->getStarSystems()[i]->getName());
                     m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
                     m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
@@ -434,16 +455,22 @@ void CVisualsManager::drawWorld()
                     m_pUniverse->m_pStar->setVelocity(Vector2d(3.0e9,0.0));
                     m_nStarIndex = i;
                     
-                    std::mt19937 LocalGenerator;
-                    std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
+//                     std::mt19937 LocalGenerator;
+//                     std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
 
-                    LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
+//                     LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
                     
                     std::cout << m_pUniverse->m_pStar->getName() << std::endl;
-                    for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
-                    {
-                         std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
-                    }
+//                     for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
+//                     {
+//                         m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
+//                                           IUniverseScaled::cellToDouble(
+//                                               m_pUniverse->getStarSystems()[i]->getCell()-
+//                                               m_pCamera->getCell()),
+//                                           std::fabs(OrbitDistribution(LocalGenerator))
+//                                          );
+// //                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
+//                     }
                 }
             }
             else
@@ -457,73 +484,73 @@ void CVisualsManager::drawWorld()
     
     // Draw names (this is quite hacked and just a proof of concept)
     
-    sf::Font font;
-    font.loadFromFile("/home/bfeld/tmp/local/share/planeworld/data/consola.ttf");
-
-    m_Graphics.getWindow()->pushGLStates();    
-    for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
-         ci != m_ObjectVisuals.end(); ++ci)
-    {
-        if (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() > 1.0)
-        {
-        Vector2d vecPosRel = (*ci)->getObject()->getCOM()-
-                             m_pCamera->getCenter()+
-                             IUniverseScaled::cellToDouble
-                             ((*ci)->getObject()->getCell()-
-                             m_pCamera->getCell());
-        
-        // Now draw the text
-        std::stringstream oss;
-        oss << (*ci)->getObject()->getName();
-        
-        sf::Text text;
-        double fColor = (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
-        if (fColor > 255.0) fColor = 255.0;
-        sf::Color color(fColor, fColor, fColor);
-        
-        text.setString(oss.str());
-        text.setFont(font);
-        text.setCharacterSize(12);
-        text.setColor(color);
-        text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
-
-        m_Graphics.getWindow()->draw(text);
-        }
-    }
-    if (1.0e9 * m_Graphics.getResPMX() < 1.0)
-    {
-        for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
-        {
-            Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
-                              IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
-            if (m_pCamera->getBoundingBox().isInside(vecPos))
-            {
-                Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
-                                     m_pCamera->getCenter()+
-                                     IUniverseScaled::cellToDouble
-                                     (m_pUniverse->getStarSystems()[i]->getCell()-
-                                      m_pCamera->getCell());
-                
-                // Now draw the text
-                std::stringstream oss;
-                oss << m_pUniverse->getStarSystems()[i]->getName();
-                
-                sf::Text text;
-                double fColor=0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
-                sf::Color color(0.8*255, fColor*255, 0.3*255);
-                
-                text.setString(oss.str());
-                text.setFont(font);
-                text.setCharacterSize(12);
-                text.setColor(color);
-                text.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
-
-                m_Graphics.getWindow()->draw(text);
-            }
-        }
-    }
-    
-    m_Graphics.getWindow()->popGLStates();
+//     sf::Font font;
+//     font.loadFromFile("/home/bfeld/tmp/local/share/planeworld/data/consola.ttf");
+// 
+//     m_Graphics.getWindow()->pushGLStates();    
+//     for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
+//          ci != m_ObjectVisuals.end(); ++ci)
+//     {
+//         if (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() > 1.0)
+//         {
+//         Vector2d vecPosRel = (*ci)->getObject()->getCOM()-
+//                              m_pCamera->getCenter()+
+//                              IUniverseScaled::cellToDouble
+//                              ((*ci)->getObject()->getCell()-
+//                              m_pCamera->getCell());
+//         
+//         // Now draw the text
+//         std::stringstream oss;
+//         oss << (*ci)->getObject()->getName();
+//         
+//         sf::Text text;
+//         double fColor = (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
+//         if (fColor > 255.0) fColor = 255.0;
+//         sf::Color color(255.0,255.0,255.0, fColor);
+//         
+//         text.setString(oss.str());
+//         text.setFont(font);
+//         text.setCharacterSize(12);
+//         text.setColor(color);
+//         text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+// 
+//         m_Graphics.getWindow()->draw(text);
+//         }
+//     }
+//     if (1.0e9 * m_Graphics.getResPMX() < 1.0)
+//     {
+//         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+//         {
+//             Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
+//                               IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
+//             if (m_pCamera->getBoundingBox().isInside(vecPos))
+//             {
+//                 Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
+//                                      m_pCamera->getCenter()+
+//                                      IUniverseScaled::cellToDouble
+//                                      (m_pUniverse->getStarSystems()[i]->getCell()-
+//                                       m_pCamera->getCell());
+//                 
+//                 // Now draw the text
+//                 std::stringstream oss;
+//                 oss << m_pUniverse->getStarSystems()[i]->getName();
+//                 
+//                 sf::Text text;
+//                 double fColor=0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+//                 sf::Color color(0.8*255, fColor*255, 0.3*255);
+//                 
+//                 text.setString(oss.str());
+//                 text.setFont(font);
+//                 text.setCharacterSize(12);
+//                 text.setColor(color);
+//                 text.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
+// 
+//                 m_Graphics.getWindow()->draw(text);
+//             }
+//         }
+//     }
+//     
+//     m_Graphics.getWindow()->popGLStates();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

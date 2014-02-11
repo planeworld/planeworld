@@ -22,6 +22,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "universe_scaled.h"
 #include "eigen2/Eigen/Core"
 
 //--- Standard header --------------------------------------------------------//
@@ -42,7 +43,7 @@ using namespace Eigen;
 /// purposes, do not have any real mass and thus, do not influence other objects.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CDebris
+class CDebris : public IUniverseScaled
 {
     
     public:
@@ -54,8 +55,6 @@ class CDebris
         const int getDepths() const;
 
         //--- Methods --------------------------------------------------------//
-        void addForce(const Vector2d&, const Vector2d&);
-        
         boost::circular_buffer<Vector2d>* getPositions();
         boost::circular_buffer<Vector2d>* getVelocities();
         boost::circular_buffer<Vector2d>* getPreviousPositions();
@@ -63,6 +62,7 @@ class CDebris
 
         void                setDamping(const double&);
         void                setDepths(const int&);
+        void                setForce(const Vector2d&);
         void                setNumber(const int&);
         void                setTimeFac(const double&);
         
@@ -82,10 +82,13 @@ class CDebris
         
         double                  m_fDamping;                         ///< Damping of debris
         int                     m_nDepthlayers;                     ///< Depths in which debris exists
+        
+        Vector2d                m_vecForce;                         ///< Gravitational force applied
 
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -97,8 +100,6 @@ class CDebris
 inline boost::circular_buffer<Vector2d>* CDebris::getPositions()
 {
     METHOD_ENTRY("CDebris::getPositions")
-
-    METHOD_EXIT("CDebris::getPositions")
     return &m_PosList;
 }
 
@@ -112,8 +113,6 @@ inline boost::circular_buffer<Vector2d>* CDebris::getPositions()
 inline boost::circular_buffer<Vector2d>* CDebris::getVelocities()
 {
     METHOD_ENTRY("CDebris::getVelocities")
-
-    METHOD_EXIT("CDebris::getVelocities")
     return &m_VelList;
 }
 
@@ -127,8 +126,6 @@ inline boost::circular_buffer<Vector2d>* CDebris::getVelocities()
 inline boost::circular_buffer<Vector2d>* CDebris::getPreviousPositions()
 {
     METHOD_ENTRY("CDebris::getPreviousPositions")
-
-    METHOD_EXIT("CDebris::getPreviousPositions")
     return &m_PosListPrev;
 }
 
@@ -142,8 +139,6 @@ inline boost::circular_buffer<Vector2d>* CDebris::getPreviousPositions()
 inline boost::circular_buffer<Vector2d>* CDebris::getPreviousVelocities()
 {
     METHOD_ENTRY("CDebris::getPreviousVelocities")
-
-    METHOD_EXIT("CDebris::getPreviousVelocities")
     return &m_VelListPrev;
 }
 
@@ -157,8 +152,6 @@ inline boost::circular_buffer<Vector2d>* CDebris::getPreviousVelocities()
 inline const int CDebris::getDepths() const
 {
     METHOD_ENTRY("CDebris::getDepths")
-
-    METHOD_EXIT("CDebris::getDepths")
     return (m_nDepthlayers);
 }
 
@@ -174,10 +167,7 @@ inline const int CDebris::getDepths() const
 inline void CDebris::setDamping(const double& _fD)
 {
     METHOD_ENTRY("CDebris::setDamping")
-
     m_fDamping = _fD;
-
-    METHOD_EXIT("CDebris::setDamping")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -190,10 +180,20 @@ inline void CDebris::setDamping(const double& _fD)
 inline void CDebris::setDepths(const int& _nD)
 {
     METHOD_ENTRY("CDebris::setDepths")
-
     m_nDepthlayers |= _nD;
+}
 
-    METHOD_EXIT("CDebris::setDepths")
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets gravitational force that acts on debris.
+///
+/// \param _vecF Gravitational force
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CDebris::setForce(const Vector2d& _vecF)
+{
+    METHOD_ENTRY("CDebris::setForce")
+    m_vecForce = _vecF;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,8 +212,6 @@ inline void CDebris::setTimeFac(const double& _fTF)
     METHOD_ENTRY("CDebris::setTimeFac")
 
     m_fTimeFac = _fTF;
-
-    METHOD_EXIT("CDebris::setTimeFac")
 }
 
 #endif

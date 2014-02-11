@@ -66,10 +66,7 @@ class CDebrisVisuals : public CGraphicsBase
 inline void CDebrisVisuals::attach(CDebris* _pDebris)
 {
     METHOD_ENTRY("CDebrisVisuals::attach")
-
     m_pDebris = _pDebris;
-
-    METHOD_EXIT("CDebrisVisuals::attach")
 }
 
 #endif

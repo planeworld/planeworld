@@ -13,7 +13,7 @@
         type="Planet"
         radius="6378.16e3"
         height_max="8000.0"
-        sea_level="-0.9"
+        sea_level="-0.2"
         ground_resolution="0.001"
         center_x="0.0"
         center_y="0.0">

@@ -51,6 +51,7 @@ void CCollisionManager::detectCollisions()
                     {
                         case OBJECT_BODY:
                             this->test(static_cast<CBody*>((*ci)),static_cast<CBody*>((*cj)));
+                            break;
                     }
 //                     CContact Contact;
 //                     Contact = (*ci)->collidesWith((*cj));
@@ -88,6 +89,7 @@ void CCollisionManager::detectCollisions()
             {
                 case OBJECT_BODY:
                     this->test(static_cast<CBody*>((*ci)), (*cj));
+                    break;
             }
         }
     }
@@ -105,6 +107,7 @@ void CCollisionManager::detectCollisions()
             {
                 case OBJECT_BODY:
                     this->test(static_cast<CBody*>((*ci)), (*cj));
+                    break;
             }
         }
     }
@@ -133,8 +136,16 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
         {
             case SHAPE_TERRAIN:
                 this->test(static_cast<CTerrain*>((*ci)->getShapeCur()),_p2);
+                break;
             case SHAPE_CIRCLE:
                 this->test(static_cast<CCircle*>((*ci)->getShapeCur()), static_cast<CCircle*>((*ci)->getShapeBuf()), _p1, _p2);
+                break;
+            case SHAPE_PLANET:
+                this->test(static_cast<CPlanet*>((*ci)->getShapeCur()), static_cast<CPlanet*>((*ci)->getShapeBuf()), _p1, _p2);
+                break;
+            case SHAPE_POLYLINE:
+                this->test(static_cast<CPolyLine*>((*ci)->getShapeCur()), static_cast<CPolyLine*>((*ci)->getShapeBuf()), _p1, _p2);
+                break;
         }
         ++ci;
     }
@@ -161,7 +172,6 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
     boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
     boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
     boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
-    boost::circular_buffer<Vector2d>::iterator itVelP = pPreviousVelocities->begin();
     
     Vector2d vecPOC;
     Vector2d vecC0 = _pC0->getCenter();
@@ -202,9 +212,6 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
                     vecPOC = (*itPosP) + fT * ((*itPos) - (*itPosP));
                     double fDebrisAngle = std::atan2((*itPos)[1]-(*itPosP)[1], (*itPos)[0]-(*itPosP)[0]);
                     
-//                     (*itPos) = vecPOC+((*itPosP)-vecPOC)*0.01;
-//                     (*itVel) = -(*itVel)+_p1->getVelocity();
-                    
                     Vector2d vecC = vecC0 + fT * ((vecC1 - vecC0));
                     
                     double fCircleAngle = std::atan2((vecC[0]-vecPOC[0]), -(vecC[1]-vecPOC[1]));
@@ -213,15 +220,14 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
                     Vector2d vecNewVelTang;
                     
                     vecNewVelTang = Vector2d(std::cos(fCircleAngle),
-                                            std::sin(fCircleAngle));
+                                             std::sin(fCircleAngle));
                     vecNewVelOrth = Vector2d(std::cos(fCircleAngle+M_PI*0.5),
-                                            std::sin(fCircleAngle+M_PI*0.5));
+                                             std::sin(fCircleAngle+M_PI*0.5));
                     
-                    double fTang = std::cos(fCircleAngle-fDebrisAngle)*0.5;
+                    double fTang = std::cos(fCircleAngle-fDebrisAngle)*1.0;
                     double fOrth = std::sin(fCircleAngle-fDebrisAngle)*0.5;
-                    double fDamping = sqrt(fTang*fTang+fOrth*fOrth);
+                    double fDamping = sqrt(fTang*fTang+fOrth*fOrth)*0.7071;
 
-//                     (*itVel) -= _p1->getVelocity();
                     
                     double fNorm = (*itVel).norm();
                     (*itVel)[0] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[0];
@@ -238,6 +244,140 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
                 }
             }
         }
+        ++itPos;
+        ++itPosP;
+        ++itVel;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests planet shape against debris
+///
+/// \param _pP1 Planet shape, time t1
+/// \param _pP0 Planet shape, time t0
+/// \param _p1 Object 1
+/// \param _p2 Debris
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CBody* _p1, CDebris* _p2)
+{
+    METHOD_ENTRY("CCollisionManager::test")
+    
+    boost::circular_buffer<Vector2d>* pPositions (_p2->getPositions());
+    boost::circular_buffer<Vector2d>* pVelocities(_p2->getVelocities());
+    boost::circular_buffer<Vector2d>* pPreviousPositions (_p2->getPreviousPositions());
+    boost::circular_buffer<Vector2d>* pPreviousVelocities(_p2->getPreviousVelocities());
+    boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
+    boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
+    boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
+    
+    Vector2d vecPOC;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests circle shape against debris
+///
+/// \param _pC1 Circle shape, time t1
+/// \param _pC0 Circle shape, time t0
+/// \param _p1 Object 1
+/// \param _p2 Debris
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCollisionManager::test(CPolyLine* _pP1, CPolyLine* _pP0, CBody* _p1, CDebris* _p2)
+{
+    METHOD_ENTRY("CCollisionManager::test")
+    
+    boost::circular_buffer<Vector2d>* pPositions (_p2->getPositions());
+    boost::circular_buffer<Vector2d>* pVelocities(_p2->getVelocities());
+    boost::circular_buffer<Vector2d>* pPreviousPositions (_p2->getPreviousPositions());
+    boost::circular_buffer<Vector2d>* pPreviousVelocities(_p2->getPreviousVelocities());
+    boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
+    boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
+    boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
+    
+    double fDampOrth = 0.5;
+    double fDampTang = 1.0;
+    
+    std::list<Vector2d>::const_iterator ciP01;
+    std::list<Vector2d>::const_iterator ciP00;
+    std::list<Vector2d>::const_iterator ciP11;
+    std::list<Vector2d>::const_iterator ciP10;
+    ++ciP11;
+    ++ciP10;
+    
+    // Iterators storing the segment vertices of collision
+    std::list<Vector2d>::const_iterator ciPS1;
+    std::list<Vector2d>::const_iterator ciPS0;
+    
+    while (itPos != pPositions->end())
+    {
+        ciP01 = _pP1->getVertices().begin();
+        ciP00 = _pP0->getVertices().begin();
+        ciP11 = ciP01;
+        ciP10 = ciP00;
+        ++ciP11;
+        ++ciP10;
+        ciPS1 = ciP11;
+        ciPS0 = ciP01;
+        
+        Vector2d vecPOC;
+        
+        double fT = 2.0;
+        double fAlpha = -1.0;
+        
+        while (ciP11 != _pP1->getVertices().end())
+        {
+            CCollisionManager::PointLineContact Contact;
+            Contact = this->testPointLine((*itPos), (*itPosP), (*ciP01), (*ciP11), (*ciP00), (*ciP10));
+            if ((Contact.fT >= 0.0) && (Contact.fT < fT))
+            {
+                fT     = Contact.fT;
+                fAlpha = Contact.fAlpha;
+                ciPS0  = ciP01;
+                ciPS1  = ciP11;
+            }
+                
+            ++ciP01; ++ciP00; ++ciP11; ++ciP10;
+        }
+        if (_pP1->getLineType() == GRAPHICS_LINETYPE_LOOP)
+        {
+            ciP11 = _pP1->getVertices().begin();
+            ciP10 = _pP1->getVertices().begin();
+
+            CCollisionManager::PointLineContact Contact;
+            Contact = this->testPointLine((*itPos), (*itPosP), (*ciP01), (*ciP11), (*ciP00), (*ciP10));
+            if ((Contact.fT >= 0.0) && (Contact.fT < fT))
+            {
+                fT     = Contact.fT;
+                fAlpha = Contact.fAlpha;
+                ciPS0  = ciP01;
+                ciPS1  = ciP11;
+            }
+        }
+        
+        if (fT<=1.0)
+        {
+            // Calculate point of contact
+            vecPOC = (*itPosP) + fT * ((*itPos) - (*itPosP));
+            
+            // Projection onto segment and separation of orthogonal an tangential component
+            Vector2d vecNewVelTang = ((*itVel).dot(((*ciPS0)-(*ciPS1)).normalized())) * ((*ciPS0)-(*ciPS1)).normalized();
+            Vector2d vecNewVelOrth = vecNewVelTang - (*itVel);
+            
+            (*itVel) = (vecNewVelOrth * fDampTang + vecNewVelTang * fDampOrth) * 0.7071;
+
+            // Add the velocity of the object because debris' are virtually weightless.
+            // Otherwise, they would be passed in the next step
+            (*itVel) += _p1->getVelocity();
+            
+            // (*itPos)= vecPOC+(vecNewVelOrth)/(vecNewVelOrth).norm()*0.001;
+            // Cannot use POC here, because debris' are virtually weightless. Thus, the
+            // object moves on and does not care about POC position.
+            (*itPos)  = (*ciPS0) + fAlpha * ((*ciPS1)-(*ciPS0)) + vecNewVelOrth.normalized()*0.001;
+        } 
+        
         ++itPos;
         ++itPosP;
         ++itVel;
@@ -270,7 +410,6 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
     boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
     boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
     boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
-    boost::circular_buffer<Vector2d>::iterator itVelP = pPreviousVelocities->begin();
     
     double fInc = _p1->getGroundResolution();
 
@@ -367,18 +506,18 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
                 vecNewVelOrth = Vector2d(std::cos(fSegAngle+M_PI*0.5),
                                          std::sin(fSegAngle+M_PI*0.5));
                 
-                double fTang = std::cos(fSegAngle-fPosAngle)*0.5;
-                double fOrth = std::sin(fSegAngle-fPosAngle)*0.5;
-                double fDamping = sqrt(fTang*fTang+fOrth*fOrth);
+                double fTang =    std::cos(fSegAngle-fPosAngle)*0.5;
+                double fOrth =    std::sin(fSegAngle-fPosAngle)*0.5;
+                double fDamping = sqrt(fTang*fTang+fOrth*fOrth)*0.7071;
                 
                 double fNorm = (*itVel).norm();
                 (*itVel)[0] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[0];
                 (*itVel)[1] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[1];
-                (*itPos)=vecPOC+((*itPosP)-vecPOC)/((*itPosP)-vecPOC).norm()*0.01;
+                (*itPos)=vecPOC+((*itPosP)-vecPOC)/((*itPosP)-vecPOC).norm()*0.001;
              
             }
         }
-        ++itPos; ++itVel; ++itPosP; ++itVelP;
+        ++itPos; ++itVel; ++itPosP;
     }
 }
 
@@ -587,8 +726,6 @@ void CCollisionManager::getSurfaceOfInterest()
 // 
 //         m_Graphics.endLine();
 //     }
-    
-    METHOD_EXIT("CCollisionManager::getSurfaceOfInterest")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -658,8 +795,6 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
         _p1->setVelocity(Vector2d(0.0,0.0));
         _p2->setVelocity(Vector2d(0.0,0.0));
     }
-    
-    METHOD_EXIT("CCollisionManager::test")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -782,8 +917,6 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
         _p1->setVelocity(Vector2d(0.0,0.0));
         _p2->setVelocity(Vector2d(0.0,0.0));
     } 
-        
-    METHOD_EXIT("CCollisionManager::test")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -829,14 +962,17 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
         
         while (ciB1 != _pB1->getVertices().end())
         {
-            double fTmpT = this->testPointLine((*ciB1), (*ciB0), (*ciA01), (*ciA11), (*ciA00), (*ciA10));
-            if ((fTmpT >= 0.0) && (fTmpT < fT))
+            CCollisionManager::PointLineContact Contact;
+            Contact = this->testPointLine((*ciB1), (*ciB0), (*ciA01), (*ciA11), (*ciA00), (*ciA10));
+            if ((Contact.fT >= 0.0) && (Contact.fT < fT))
             {
-                fT = fTmpT;
+                fT = Contact.fT;
                 vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
             }
             
             ++ciB1; ++ciB0;
+            
+            /// \todo LineType Loop!
         }
         ++ciA01; ++ciA00; ++ciA11; ++ciA10;
     }
@@ -849,14 +985,17 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
         
         while (ciB1 != _pB1->getVertices().end())
         {
-            double fTmpT = this->testPointLine((*ciB1), (*ciB0), (*ciA01), (*ciA11), (*ciA00), (*ciA10));
-            if ((fTmpT >= 0.0) && (fTmpT < fT))
+            CCollisionManager::PointLineContact Contact;
+            Contact = this->testPointLine((*ciB1), (*ciB0), (*ciA01), (*ciA11), (*ciA00), (*ciA10));
+            if ((Contact.fT >= 0.0) && (Contact.fT < fT))
             {
-                fT = fTmpT;
+                fT = Contact.fT;
                 vecPOC = (*ciB0) + fT * ((*ciB1)-(*ciB0));
             }
             
             ++ciB1, ++ciB0;
+            
+            /// \todo LineType Loop!
         }
     }
     
@@ -1019,12 +1158,13 @@ double CCollisionManager::testPointCircle(const Vector2d& _vecP1, const Vector2d
 /// \param _vecLA0 Line, start point, time t0
 /// \param _vecLB0 Line, end point, time t0
 ///
-/// \return Time of contact
+/// \return Time and relative segment position of contact
 ///
 ///////////////////////////////////////////////////////////////////////////////
-double CCollisionManager::testPointLine(const Vector2d& _vecP1,  const Vector2d& _vecP0,
-                                          const Vector2d& _vecLA1, const Vector2d& _vecLB1,
-                                          const Vector2d& _vecLA0, const Vector2d& _vecLB0)
+CCollisionManager::PointLineContact CCollisionManager::testPointLine(
+                                        const Vector2d& _vecP1,  const Vector2d& _vecP0,
+                                        const Vector2d& _vecLA1, const Vector2d& _vecLB1,
+                                        const Vector2d& _vecLA0, const Vector2d& _vecLB0)
 {
     METHOD_ENTRY("CCollisionManager::testPointLine")
     
@@ -1036,9 +1176,12 @@ double CCollisionManager::testPointLine(const Vector2d& _vecP1,  const Vector2d&
     double fCy = (_vecP1 - _vecP0 - _vecLA1 + _vecLA0)[1];
     double fDx = (_vecLB0 - _vecLA0 - _vecLB1 + _vecLA1)[0];
     double fDy = (_vecLB0 - _vecLA0 - _vecLB1 + _vecLA1)[1];
-    double fT = -1.0;
     
-    if ((fDx == 0.0) && (fDy == 0.0))
+    CCollisionManager::PointLineContact Contact;
+    Contact.fT = -1.0;
+    Contact.fAlpha = -1.0;
+    
+    if ((std::abs(fDx) < 0.001) && (std::abs(fDy) < 0.001))
     {
         double fTmpA = fBx*fCy-fBy*fCx;
         double fTmpB = fAx*fCy-fAy*fCx;
@@ -1048,13 +1191,23 @@ double CCollisionManager::testPointLine(const Vector2d& _vecP1,  const Vector2d&
         double fTmpT = -1.0;
         if ((fAlpha >= 0.0) && (fAlpha <= 1.0))
         {
-            /// \todo Optimise here and add similar code segments!
-            /// \todo Implement cases for fCx==0!
-            if (fCx != 0.0)
+            if (std::abs(fCx) > 0.001)
             {
                 fTmpT = (fAx+fAlpha*fBx) / (fCx);
                 if (fTmpT >= 0.0)
-                    fT = fTmpT;
+                {
+                    Contact.fT = fTmpT;
+                    Contact.fAlpha = fAlpha;
+                }
+            }
+            else
+            {
+                fTmpT = (fAy+fAlpha*fBy) / (fCy);
+                if (fTmpT >= 0.0)
+                {
+                    Contact.fT = fTmpT;
+                    Contact.fAlpha = fAlpha;
+                }
             }
         }
     }
@@ -1067,7 +1220,7 @@ double CCollisionManager::testPointLine(const Vector2d& _vecP1,  const Vector2d&
         double fTmpR = fTmpB*fTmpB-4*fTmpA*fTmpC;
         double fAlpha1 = -1.0;
         double fAlpha2 = -1.0;
-        
+                
         if (fTmpR != 0)
         {
             fAlpha1 = (-fTmpB + sqrt(fTmpR)) / (2*fTmpA);
@@ -1086,12 +1239,15 @@ double CCollisionManager::testPointLine(const Vector2d& _vecP1,  const Vector2d&
         }
         if ((fTmpT1 >= 0.0))
         {
-            fT = fTmpT1;
+            Contact.fT = fTmpT1;
+            Contact.fAlpha = fAlpha1;
         }
-        if ((fTmpT2 >= 0.0) && (fTmpT2 < fT))
+        if ((fTmpT2 >= 0.0) && (fTmpT2 < Contact.fT))
         {
-            fT = fTmpT2;
+            Contact.fT = fTmpT2;
+            Contact.fAlpha = fAlpha2;
         }
     }
-    return fT;
+    
+    return Contact;
 }

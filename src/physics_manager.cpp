@@ -162,6 +162,12 @@ void CPhysicsManager::addGlobalForces()
 
         (*ci)->addAcceleration(m_vecConstantGravitation);
     };
+    
+    for (std::list< CDebris* >::const_iterator ci = m_Debris.begin();
+        ci != m_Debris.end(); ++ci)
+    {
+        (*ci)->setForce(Vector2d(0.0, -9.81));
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

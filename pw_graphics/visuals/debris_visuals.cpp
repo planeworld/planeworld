@@ -33,8 +33,6 @@ CDebrisVisuals::CDebrisVisuals(CDebris* _pDebris): m_pDebris(_pDebris)
 {
     METHOD_ENTRY("CDebrisVisuals::CDebrisVisuals")
     CTOR_CALL("CDebrisVisuals::CDebrisVisuals")
-    
-    METHOD_EXIT("CDebrisVisuals::CDebrisVisuals")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,8 +44,6 @@ CDebrisVisuals::~CDebrisVisuals()
 {
     METHOD_ENTRY("CDebrisVisuals::~CDebrisVisuals()");
     DTOR_CALL("CDebrisVisuals::~CDebrisVisuals()");
-
-    METHOD_EXIT("CDebrisVisuals::~CDebrisVisuals()");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,8 +56,6 @@ CDebrisVisuals::~CDebrisVisuals()
 void CDebrisVisuals::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CDebrisVisuals::draw()");
-
-    m_Graphics.dots((*m_pDebris->getPositions()),-_pCamera->getCenter());
-    
-    METHOD_EXIT("CDebrisVisuals::draw()");
+    m_Graphics.dots((*m_pDebris->getPositions()),-_pCamera->getCenter()+
+                      IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
 }

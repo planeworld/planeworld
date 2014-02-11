@@ -67,6 +67,7 @@ void runPhysics(CPhysicsManager* const _pPhysicsManager, bool* const _pbDone)
         _pPhysicsManager->collisionDetection();
         PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
         ++nCC;
+        if (nCC == 10000) nCC = 0;
     }
     INFO_MSG("Main", "Physics thread stopped.")
 }
@@ -155,7 +156,7 @@ int main(int argc, char *argv[])
 //         nY = (rand()%2000000) - 1000000;
 //         double fRad = (rand()%2) + 0.5;
         DEBUG_MSG("Main", "Stopping randomization.")
-        pPointMass->setMass(1.0e12);
+        pPointMass->setMass(10.0);
         pPointMass->setOrigin(nX, nY);
         pPointMass->setInertia(2000.0);
 
@@ -210,14 +211,14 @@ int main(int argc, char *argv[])
     }
 
     //--- Initialize Debris -------------------------------------------------//
-//     pDebris = new CDebris;
-//     MEM_ALLOC("pDebris")
-//     pDebrisVisuals = new CDebrisVisuals(pDebris);
-//     MEM_ALLOC("pDebrisVisuals")
-// 
-//     pDebris->setNumber(1000);
-//     pVisualsManager->addVisuals(pDebrisVisuals);
-//     pPhysicsManager->addDebris(pDebris);
+    pDebris = new CDebris;
+    MEM_ALLOC("pDebris")
+    pDebrisVisuals = new CDebrisVisuals(pDebris);
+    MEM_ALLOC("pDebrisVisuals")
+
+    pDebris->setNumber(5000);
+    pVisualsManager->addVisuals(pDebrisVisuals);
+    pPhysicsManager->addDebris(pDebris);
 
     //--- Initialize Rigidbody ----------------------------------------------//
 //     pBody1 = new CRigidBody;

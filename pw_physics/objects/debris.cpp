@@ -33,6 +33,8 @@ CDebris::CDebris() : m_fTimeFac(1.0)
     m_VelList.set_capacity(DEBRIS_DEFAULT_NUMBER);
     m_PosListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
     m_VelListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
+    
+    m_vecForce.setZero();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,7 +53,7 @@ void CDebris::dynamics(const double& _fStep)
     boost::circular_buffer<Vector2d>::iterator jt=m_VelList.begin();
     boost::circular_buffer<Vector2d>::iterator itPrev=m_PosListPrev.begin();
     boost::circular_buffer<Vector2d>::iterator jtPrev=m_VelListPrev.begin();
-    Vector2d vecStep = Vector2d(0.0,9.81) * _fStep * m_fTimeFac;;
+    Vector2d vecStep = m_vecForce * _fStep * m_fTimeFac;
     while (it != m_PosList.end())
     {
         (*itPrev) = (*it);
