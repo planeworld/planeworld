@@ -476,7 +476,7 @@ int main(int argc, char *argv[])
                 {
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
-                        pCamera->translateBy(0.1*Vector2d(double(vecMouse.x)/pCamera->getZoom(),double(vecMouse.y)/pCamera->getZoom()));
+                        pCamera->translateBy(0.2/GRAPHICS_PX_PER_METER * Vector2d(double(vecMouse.x)/pCamera->getZoom(),double(vecMouse.y)/pCamera->getZoom()));
                     }
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                     {
