@@ -23,7 +23,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
 #include "universe_scaled.h"
-#include "eigen2/Eigen/Core"
+#include <eigen3/Eigen/Core>
 
 //--- Standard header --------------------------------------------------------//
 #include <vector>

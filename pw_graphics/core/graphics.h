@@ -28,8 +28,8 @@
 
 //--- Misc header ------------------------------------------------------------//
 #include <boost/circular_buffer.hpp>
-#include "eigen2/Eigen/Core"
-#include "eigen2/Eigen/Geometry"
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Geometry>
 #include <SFML/OpenGL.hpp>
 // #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>

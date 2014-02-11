@@ -27,7 +27,7 @@
 #include "universe_scaled.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include "eigen2/Eigen/Core"
+#include <eigen3/Eigen/Core>
 
 using namespace Eigen;
 

@@ -22,7 +22,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
-#include "eigen2/Eigen/Core"
+#include <eigen3/Eigen/Core>
 
 using namespace Eigen;
 

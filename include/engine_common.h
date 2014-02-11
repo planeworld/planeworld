@@ -25,7 +25,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Misc header ------------------------------------------------------------//
-#include "eigen2/Eigen/Geometry"
+#include <eigen3/Eigen/Geometry>
 
 using namespace Eigen;
 
@@ -34,6 +34,9 @@ const double   SHAPE_DEFAULT_DEPTH = -15.0;
 const double   DEFAULT_CELL_SIZE = 1.0e12;
 const double   DEFAULT_CELL_SIZE_2 = 2.0e12;
 const Vector2d DEFAULT_CELL_SIZE_VEC(DEFAULT_CELL_SIZE,DEFAULT_CELL_SIZE);
+
+/// Default precision for approximation of comparisons
+const double DEFAULT_APPROX_PRECISION = 0.0001;
 
 /// Specifies bitcodes for additional visuals
 enum Visuals
@@ -56,5 +59,15 @@ enum ShapeDepths
     SHAPE_DEPTH_8 = 128,
     SHAPE_DEPTH_ALL = 255
 };
+
+inline bool isApproxZero(const double& _f1)
+{
+    return (std::abs(_f1) < DEFAULT_APPROX_PRECISION);
+}
+
+inline bool isApproxEqual(const double& _f1, const double& _f2)
+{
+    return (std::abs(_f1 - _f2) < DEFAULT_APPROX_PRECISION);
+}
 
 #endif

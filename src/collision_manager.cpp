@@ -190,7 +190,7 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
             double fB = 2.0 * vecA.dot(vecB);
             double fC = vecA.dot(vecA) - fR0*fR0;
             
-            if (fA != 0.0)
+            if (!isApproxZero(fA))
             {
                 double fR = fB*fB - 4.0*fA*fC;
                 if (fR >= 0.0)
@@ -770,7 +770,7 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
     
     double fT = 2.0;
     
-    if (vecB.squaredNorm() != 0.0)
+    if (!isApproxZero(vecB.squaredNorm()))
     {
         double fP = (vecA.dot(vecB)) / (vecB.squaredNorm());
         double fQ = (vecA.squaredNorm() - fR*fR) / (vecB.squaredNorm());
@@ -1049,7 +1049,7 @@ double CCollisionManager::testLineCircle(const Vector2d& _vecLA1, const Vector2d
         double fD = vecA[0] * vecD[1] - vecA[1] * vecD[0];
         double fN = vecA[0] * vecC[1] - vecA[1] * vecC[0];
         
-        if (fD != 0)
+        if (!isApproxZero(fD))
         {
             double fT1 = (fLength * fRA - fN) / fD;
             if (fT1 >= 0.0)
@@ -1071,7 +1071,7 @@ double CCollisionManager::testLineCircle(const Vector2d& _vecLA1, const Vector2d
         double fR1 = fB*fB - 4.0*fA*fC1;
         double fR2 = fB*fB + 4.0*fA*fC2;
         
-        if (fA != 0.0)
+        if (!isApproxZero(fA))
         {
             if (fR1 >= 0.0)
             {
@@ -1125,13 +1125,13 @@ double CCollisionManager::testPointCircle(const Vector2d& _vecP1, const Vector2d
     double fB = 2.0 * vecA.dot(vecB);
     double fC = vecA.dot(vecA) - _pC0->getRadius()*_pC0->getRadius();
     
-    if (fA != 0.0)
+    if (!isApproxZero(fA))
     {
         double fR = fB*fB - 4*fA*fC;
         if (fR >= 0.0)
         {
-            double fT1 = (-fB + sqrt(fR)) / (2*fA);
-            double fT2 = (-fB - sqrt(fR)) / (2*fA);
+            double fT1 = (-fB + sqrt(fR)) / (2.0*fA);
+            double fT2 = (-fB - sqrt(fR)) / (2.0*fA);
         
             if (fT1 >= 0.0)
             {
@@ -1181,7 +1181,7 @@ CCollisionManager::PointLineContact CCollisionManager::testPointLine(
     Contact.fT = -1.0;
     Contact.fAlpha = -1.0;
     
-    if ((std::abs(fDx) < 0.001) && (std::abs(fDy) < 0.001))
+    if (isApproxZero(fDx) && isApproxZero(fDy))
     {
         double fTmpA = fBx*fCy-fBy*fCx;
         double fTmpB = fAx*fCy-fAy*fCx;
@@ -1191,7 +1191,7 @@ CCollisionManager::PointLineContact CCollisionManager::testPointLine(
         double fTmpT = -1.0;
         if ((fAlpha >= 0.0) && (fAlpha <= 1.0))
         {
-            if (std::abs(fCx) > 0.001)
+            if (!isApproxZero(fCx))
             {
                 fTmpT = (fAx+fAlpha*fBx) / (fCx);
                 if (fTmpT >= 0.0)
@@ -1221,7 +1221,7 @@ CCollisionManager::PointLineContact CCollisionManager::testPointLine(
         double fAlpha1 = -1.0;
         double fAlpha2 = -1.0;
                 
-        if (fTmpR != 0)
+        if (!isApproxZero(fTmpR))
         {
             fAlpha1 = (-fTmpB + sqrt(fTmpR)) / (2*fTmpA);
             fAlpha2 = (-fTmpB - sqrt(fTmpR)) / (2*fTmpA);

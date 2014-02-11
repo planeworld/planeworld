@@ -10,7 +10,7 @@
       mass="10.0"
       origin_x="0.0"
       origin_y="-150.0"
-      dynamics="false"
+      dynamics="true"
       gravity="false"
     />
     <shape type="Polyline"

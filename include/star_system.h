@@ -26,7 +26,7 @@
 #include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include "eigen2/Eigen/Geometry"
+#include <eigen3/Eigen/Geometry>
 
 using namespace Eigen;
 
