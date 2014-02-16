@@ -25,6 +25,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
+#include "emitter.h"
 #include "universe.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -54,6 +55,7 @@ class CXMLImporter
         //--- Constant Methods -----------------------------------------------//
         CCamera*                        getCamera() const;
         Vector2d                        getGravity() const;
+        std::vector<IEmitter*>          getEmitters() const;
         std::vector<IObject*>           getObjects() const;
         std::vector<IObjectVisuals*>    getVisuals() const;
         const CUniverse&                getUniverse() const;
@@ -83,6 +85,7 @@ class CXMLImporter
         CCamera*                        m_pCamera;       ///< Main camera
         Vector2d                        m_vecGravity;    ///< Constant gravity vector
         std::string                     m_strCameraHook; ///< Camera hook
+        std::vector<IEmitter*>          m_Emitters;      ///< List of emitters
         std::map<std::string,IObject*>  m_Objects;       ///< List of objects
         std::vector<IObjectVisuals*>    m_Visuals;       ///< List of object visuals
         std::string                     m_strPath;       ///< Path to read data from
@@ -115,6 +118,19 @@ inline Vector2d CXMLImporter::getGravity() const
 {
     METHOD_ENTRY("CXMLImporter::getGravity")
     return m_vecGravity;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return imported emitters
+///
+/// \return List of emitters
+///
+////////////////////////////////////////////////////////////////////////////////
+inline std::vector<IEmitter*> CXMLImporter::getEmitters() const
+{
+    METHOD_ENTRY("CXMLImporter::getEmitters")
+    return m_Emitters;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -374,6 +374,7 @@ int main(int argc, char *argv[])
     pVisualsManager->addVisualsList(Universe.getVisuals());
     
     // Set initialisation state of all objects
+    pPhysicsManager->initEmitters();
     pPhysicsManager->initObjects();
     
 //     pEarth->setVelocity(Vector2d(29.78e3, 0.0));

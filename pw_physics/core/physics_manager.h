@@ -24,12 +24,14 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "collision_manager.h"
+#include "emitter.h"
 #include "joint.h"
 #include "universe.h"
 
 const double PHYSICS_DEFAULT_FREQUENCY = 100.0;
 
-typedef std::vector<IObject*> ObjectsType;
+typedef std::vector<IObject*>  ObjectsType;
+typedef std::vector<IEmitter*> EmittersType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -62,9 +64,11 @@ class CPhysicsManager
         void addGlobalForces();
         void addDebris(CDebris*);
         void addJoint(IJoint*);
+        void addEmitters(EmittersType);
         void addObject(IObject*);
         void addObjects(ObjectsType);
         void collisionDetection();
+        void initEmitters();
         void initObjects();
         void moveMasses(int);
         void accelerateTime();
@@ -87,6 +91,7 @@ class CPhysicsManager
 
         std::list<CDebris*> m_Debris;               ///< List of debris
         std::list<IJoint*>  m_JointList;            ///< List of joints
+        EmittersType        m_Emitters;             ///< List of emitters
         ObjectsType         m_DynamicObjects;       ///< List of dynamic objects
         ObjectsType         m_StaticObjects;        ///< List of static objects
 };

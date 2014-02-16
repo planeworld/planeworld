@@ -93,6 +93,22 @@ CPhysicsManager::~CPhysicsManager()
             DOM_MEMF(DEBUG_MSG("CDebris*", "Memory already freed."))
         }
     };
+    
+    for (EmittersType::iterator it = m_Emitters.begin();
+        it != m_Emitters.end(); ++it)
+    {
+        // Free memory if pointer is still existent
+        if ((*it) != 0)
+        {
+            delete (*it);
+            (*it) = 0;
+            MEM_FREED("CEmitter*")
+        }
+        else
+        {
+            DOM_MEMF(DEBUG_MSG("CEmitter*", "Memory already freed."))
+        }
+    };
 
     for (std::list< IJoint* >::iterator it = m_JointList.begin();
         it != m_JointList.end(); ++it)
@@ -184,6 +200,26 @@ void CPhysicsManager::addDebris(CDebris* _pDebris)
     METHOD_ENTRY("CPhysicsManager::addDebris")
 
     m_Debris.push_back(_pDebris);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a list of emitters to internal object list
+///
+/// \param _Emitters Emitters that should be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::addEmitters(EmittersType _Emitters)
+{
+    METHOD_ENTRY("CPhysicsManager::addEmitters")
+
+    EmittersType::const_iterator ci = _Emitters.begin();
+  
+    while (ci != _Emitters.end())
+    {
+        m_Emitters.push_back((*ci));
+        ++ci;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -300,6 +336,34 @@ void CPhysicsManager::moveMasses(int nTest)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Initialise all emitters
+///
+/// Emitters create objects or debris. Some emitters do just emit objects once,
+/// e.g. if they spatially distribute objects. Others emit on a timely basis.
+/// All emitted objects must be added to the list of objects that is handeled
+/// by the physics manager, so especially emitters that emit only once should
+/// be called before object initialisiation to be in a valid state at the
+/// beginning of the simulation.
+/// After emitation, emitters are destroyed if they are one time emitters. All
+/// others will be called frequently by the physics manager.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::initEmitters()
+{
+    METHOD_ENTRY("CPhysicsManager::initEmitters")
+
+    INFO_MSG("Physics Manager", "Initialising emitters.")
+
+    for (EmittersType::const_iterator ci = m_Emitters.begin();
+        ci != m_Emitters.end(); ++ci)
+    {
+        if ((*ci)->getMode() == EMITTER_EMIT_ONCE)
+            (*ci)->startEmitation();
+    };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Initialise all objects
 ///
 /// Initialisiation of all objects resets objects position, speed etc. to
@@ -309,7 +373,7 @@ void CPhysicsManager::moveMasses(int nTest)
 ///////////////////////////////////////////////////////////////////////////////
 void CPhysicsManager::initObjects()
 {
-    METHOD_ENTRY("CPhysicsManager::resetStates")
+    METHOD_ENTRY("CPhysicsManager::initObjects")
 
     m_Timer.stop();
     m_Timer.start();
