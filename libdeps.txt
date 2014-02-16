@@ -1,4 +1,4 @@
-eigen2
+eigen3
 boost
 
 SFML:
