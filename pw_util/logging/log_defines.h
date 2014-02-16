@@ -111,6 +111,11 @@
 #else
     #define DOM_MEMF(a)
 #endif
+#ifdef DOMAIN_STATS
+    #define DOM_STATS(a)          {CLog::s_Dom = LOG_DOMAIN_STATS; a CLog::s_Dom = LOG_DOMAIN_NONE;}
+#else
+    #define DOM_STATS(a)
+#endif
 #ifdef DOMAIN_VAR
     #define DOM_VAR(a)          {CLog::s_Dom = LOG_DOMAIN_VAR; a CLog::s_Dom = LOG_DOMAIN_NONE;}
 #else

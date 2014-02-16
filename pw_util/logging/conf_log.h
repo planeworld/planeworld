@@ -54,6 +54,8 @@
 ///			Defines if memory allocation should be logged
 /// \def DOMAIN_MEMORY_FREED
 ///			Defines if memory deallocation should be logged
+/// \def DOMAIN_VAR 
+///         Defines if statistics should be printed out
 /// \def DOMAIN_VAR	
 ///			Defines if variables should be printed out
 /// \def DOMAIN_FILEIO
@@ -88,8 +90,9 @@
 // #define DOMAIN_METHOD_EXIT
 // #define DOMAIN_CONSTRUCTOR
 // #define DOMAIN_DESTRUCTOR
-#define DOMAIN_MEMORY_ALLOCATED
-#define DOMAIN_MEMORY_FREED
+// #define DOMAIN_MEMORY_ALLOCATED
+// #define DOMAIN_MEMORY_FREED
+#define DOMAIN_STATS
 #define DOMAIN_VAR
 #define DOMAIN_FILEIO
 

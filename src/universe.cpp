@@ -119,7 +119,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             pStarSystem->setNumberOfPlanets(PoissionDistribution(Generator));
             nNrOfPlanets += pStarSystem->getNumberOfPlanets();
             
-            INFO_MSG("Universe Generator", "System name: " << pStarSystem->getName())
+            DOM_VAR(DEBUG_MSG("Universe Generator", "System name: " << pStarSystem->getName()))
             
             // Store the maximum number of planets
             if (pStarSystem->getNumberOfPlanets() > m_nNrOfPlanetsMax)
@@ -134,7 +134,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         }
     }
 
-    DOM_VAR(INFO_MSG("Universe generator", "Generated " << m_StarSystems.size() << " Stars."))
+    DOM_STATS(INFO_MSG("Universe generator", "Generated " << m_StarSystems.size() << " Stars."))
     DEBUG(
         DEBUG_MSG("Universe generator", "Distribution of spectral classes: ")
         Log.logSeparator();
@@ -146,7 +146,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         Log.logSeparator();
     )
 
-    DOM_VAR(INFO_MSG("Universe generator", "Generated "<< nNrOfPlanets << " planets."))
+    DOM_STATS(INFO_MSG("Universe generator", "Generated "<< nNrOfPlanets << " planets."))
     DEBUG(
         DEBUG_MSG("Universe generator", "Distribution of number of planet per star system: ")
         Log.logSeparator();

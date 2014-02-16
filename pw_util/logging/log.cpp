@@ -120,6 +120,7 @@ const LogColourSchemeType CLog::stringToColourScheme(const std::string& _strSche
 /// \param _Domain Domain the message should be associated with
 ///
 /// \bug Domains appear in logfile, even if loglevel is below DEBUG
+/// \todo Added domain to output.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
@@ -742,6 +743,11 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
         m_abDomain[LOG_DOMAIN_MEMORY_FREED] = true;
     #else
         m_abDomain[LOG_DOMAIN_MEMORY_FREED] = false;
+    #endif
+    #ifdef DOMAIN_STATS
+        m_abDomain[LOG_DOMAIN_STATS] = true;
+    #else
+        m_abDomain[LOG_DOMAIN_STATS] = false;
     #endif
     #ifdef DOMAIN_VAR
         m_abDomain[LOG_DOMAIN_VAR] = true;

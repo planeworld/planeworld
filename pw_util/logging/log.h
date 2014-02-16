@@ -53,6 +53,7 @@ typedef enum
     LOG_DOMAIN_DESTRUCTOR,
     LOG_DOMAIN_MEMORY_ALLOCATED,
     LOG_DOMAIN_MEMORY_FREED,
+    LOG_DOMAIN_STATS,
     LOG_DOMAIN_VAR,
     LOG_DOMAIN_FILEIO
 } LogDomainType;
@@ -67,7 +68,7 @@ typedef enum
     LOG_COLOUR_SCHEME_ONWHITE
 } LogColourSchemeType;
 
-const unsigned short LOG_NOD = 9u;              ///< Number of Domains
+const unsigned short LOG_NOD = 10u;             ///< Number of Domains
 const unsigned short LOG_COLSMAX_DEFAULT = 80u; ///< Default number for maximum columns
 const bool LOG_COLOR = true;                    ///< Color logging
 const bool LOG_NO_COLOR = false;                ///< Monochrom logging
