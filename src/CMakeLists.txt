@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/pw_util/math
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/core
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects
@@ -32,6 +33,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/core/physics_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/circle.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/double_buffered_shape.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/geometry.cpp
@@ -52,7 +54,6 @@ SET(SRCS
     collision_manager.cpp
     namegenerator.cpp
     parzival.cpp
-    physics_manager.cpp
     planeworld.cpp
     star_system.cpp
     universe.cpp
