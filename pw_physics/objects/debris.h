@@ -59,7 +59,8 @@ class CDebris : public IUniverseScaled
         boost::circular_buffer<Vector2d>* getVelocities();
         boost::circular_buffer<Vector2d>* getPreviousPositions();
         boost::circular_buffer<Vector2d>* getPreviousVelocities();
-
+        boost::circular_buffer<bool>*     getStates();
+        
         void                setDamping(const double&);
         void                setDepths(const int&);
         void                setForce(const Vector2d&);
@@ -79,6 +80,7 @@ class CDebris : public IUniverseScaled
         boost::circular_buffer<Vector2d> m_PosListPrev;             ///< Position of debris in previous time step
         boost::circular_buffer<Vector2d> m_VelList;                 ///< Velocity of derbis
         boost::circular_buffer<Vector2d> m_VelListPrev;             ///< Velocity of derbis in previous time step
+        boost::circular_buffer<bool>     m_StateList;               ///< Is the debris active or inactive
         
         double                  m_fDamping;                         ///< Damping of debris
         int                     m_nDepthlayers;                     ///< Depths in which debris exists
@@ -141,6 +143,20 @@ inline boost::circular_buffer<Vector2d>* CDebris::getPreviousVelocities()
     METHOD_ENTRY("CDebris::getPreviousVelocities")
     return &m_VelListPrev;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns states of the debris, defining if a debris is active or not.
+///
+/// \return List of states of the debris
+///
+////////////////////////////////////////////////////////////////////////////////
+inline boost::circular_buffer<bool>* CDebris::getStates()
+{
+    METHOD_ENTRY("CDebris::getStates")
+    return &m_StateList;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

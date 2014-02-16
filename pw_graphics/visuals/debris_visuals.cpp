@@ -52,6 +52,8 @@ CDebrisVisuals::~CDebrisVisuals()
 ///
 /// \param _pCamera Active camera for drawing visuals
 ///
+/// \todo Filter by debris state. Don't draw inactive debris.
+///
 ///////////////////////////////////////////////////////////////////////////////
 void CDebrisVisuals::draw(const CCamera* const _pCamera) const
 {

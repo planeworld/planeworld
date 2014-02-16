@@ -172,6 +172,7 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
     boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
     boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
     boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
+    boost::circular_buffer<bool>::iterator itState = _p2->getStates()->begin();
     
     Vector2d vecPOC;
     Vector2d vecC0 = _pC0->getCenter();
@@ -247,6 +248,7 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
         ++itPos;
         ++itPosP;
         ++itVel;
+        ++itState;
     }
 }
 

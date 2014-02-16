@@ -174,7 +174,7 @@ class CGraphics
         
     private:
         
-        //--- Variabels [private] --------------------------------------------//
+        //--- Variables [private] --------------------------------------------//
         sf::RenderWindow*       m_pWindow;      ///< Pointer to main sfml window
         
         Vector3d                m_vecCamPos;    ///< camera position

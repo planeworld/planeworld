@@ -33,6 +33,7 @@ CDebris::CDebris() : m_fTimeFac(1.0)
     m_VelList.set_capacity(DEBRIS_DEFAULT_NUMBER);
     m_PosListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
     m_VelListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
+    m_StateList.set_capacity(DEBRIS_DEFAULT_NUMBER);
     
     m_vecForce.setZero();
 }
@@ -53,14 +54,19 @@ void CDebris::dynamics(const double& _fStep)
     boost::circular_buffer<Vector2d>::iterator jt=m_VelList.begin();
     boost::circular_buffer<Vector2d>::iterator itPrev=m_PosListPrev.begin();
     boost::circular_buffer<Vector2d>::iterator jtPrev=m_VelListPrev.begin();
+    boost::circular_buffer<bool>::const_iterator ci=m_StateList.begin();
     Vector2d vecStep = m_vecForce * _fStep * m_fTimeFac;
     while (it != m_PosList.end())
     {
-        (*itPrev) = (*it);
-        (*jtPrev) = (*jt);
-        (*jt) += vecStep;
-        (*it) += (*jt) * _fStep;
-        ++it; ++jt; ++itPrev; ++jtPrev;
+        // Only if state is active
+        if ((*ci))
+        {
+            (*itPrev) = (*it);
+            (*jtPrev) = (*jt);
+            (*jt) += vecStep;
+            (*it) += (*jt) * _fStep;
+        }
+        ++it; ++jt; ++itPrev; ++jtPrev; ++ci;
     }
 }
 
@@ -106,9 +112,13 @@ void CDebris::setNumber(const int& _nN)
     METHOD_ENTRY("CDebris::setNumber")
 
     m_PosList.set_capacity(_nN);
+    m_StateList.set_capacity(_nN);
     m_PosListPrev.resize(_nN);
     for (int i=0; i<m_PosList.capacity();++i)
+    {
         m_PosList.push_back(Vector2d((rand()%20000000) - 10000000,(rand()%20000000) - 10000000)/100000);
+        m_StateList.push_back(true);
+    }
     m_VelList.resize(_nN);
     m_VelListPrev.resize(_nN);
 }
