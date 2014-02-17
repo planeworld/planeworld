@@ -86,6 +86,7 @@ const bool LOG_DYNSET_OFF = false;              ///< Dynamic changes of loglevel
 /// instances.
 ///
 /// \todo Greater buffer for looped logentries.
+/// \bug  Method entry/exit somehow doesn't work
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CLog
@@ -158,6 +159,7 @@ class CLog
         std::string     m_strColNotice;         ///< Color for notice text
         std::string     m_strColWarning;        ///< Color for warning text
         std::string     m_strColError;          ///< Color for error text
+        std::string     m_strColDom;            ///< Color for domain text
         std::string     m_strColRepetition;     ///< Color for log repetitions
 
 

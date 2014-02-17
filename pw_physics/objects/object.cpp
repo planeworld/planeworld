@@ -90,6 +90,8 @@ IObject::~IObject()
 ///
 /// \brief Update the cell of this object
 ///
+/// \todo Shouldn't this be a method of IUniverseScaled?!
+///
 ////////////////////////////////////////////////////////////////////////////////
 void IObject::updateCell()
 {
@@ -122,8 +124,8 @@ void IObject::updateCell()
     m_pIntPos->init(m_pIntPos->getValue()+vecUpdate);
     m_vecCell += vecUpdateCell;
     this->setCell(m_vecCell);
-    DEBUG_MSG("Object Interface","Cell update for " << m_strName << " is " <<
-               vecUpdateCell[0] << ", " << vecUpdateCell[1])
+    DOM_VAR(DEBUG_MSG("Object Interface","Cell update for " << m_strName << " is " <<
+                       vecUpdateCell[0] << ", " << vecUpdateCell[1]))
 }
 
 ///////////////////////////////////////////////////////////////////////////////
