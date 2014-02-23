@@ -58,6 +58,7 @@ class IUniverseScaled
         
         //--- Methods --------------------------------------------------------//
         virtual void            setCell(const Vector2i&);
+        virtual void            setCell(const int&, const int&);
 
     protected:
 
@@ -141,6 +142,24 @@ inline void IUniverseScaled::setCell(const Vector2i& _vecCell)
     METHOD_ENTRY("IUniverseScaled::setCell")
 
     m_vecCell = _vecCell;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set the grid cell of the entity
+///
+/// The universe is organised in cells that hold a double valued position. The
+/// cell is represented by an integer position index.
+///
+/// \param _nCellX Grid cell of the entity, x coordinate
+/// \param _nCellY Grid cell of the entity, y coordinate
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IUniverseScaled::setCell(const int& _nCellX, const int& _nCellY)
+{
+    METHOD_ENTRY("IUniverseScaled::setCell")
+
+    m_vecCell = Vector2i(_nCellX, _nCellY);
 }
 
 
