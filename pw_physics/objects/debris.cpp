@@ -72,6 +72,28 @@ void CDebris::dynamics(const double& _fStep)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Generate a new debris
+///
+/// This method generates a new debris. Because of using a circular buffer, a
+/// new debris might overwrite the oldest one if the maximum number of debris
+/// is reached.
+///
+/// \param _vecP Position of the new debris
+/// \param _vecV Velocity of the new debris
+///
+///////////////////////////////////////////////////////////////////////////////
+void CDebris::generate(const Vector2d& _vecP, const Vector2d& _vecV)
+{
+    METHOD_ENTRY("CDebris::generate")
+    
+    m_PosList.push_back(_vecP);
+    m_PosListPrev.push_back(_vecP);
+    m_VelList.push_back(_vecV);
+    m_VelListPrev.push_back(_vecV);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Specific initialisation
 ///
 /// This method initialises it's specific members.

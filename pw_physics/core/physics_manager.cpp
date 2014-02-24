@@ -19,6 +19,8 @@
 
 #include "physics_manager.h"
 
+#include "debris_emitter.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
@@ -102,7 +104,7 @@ CPhysicsManager::~CPhysicsManager()
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("CEmitter*")
+            MEM_FREED("IEmitter*")
         }
         else
         {
@@ -198,13 +200,25 @@ void CPhysicsManager::addGlobalForces()
 void CPhysicsManager::addDebris(CDebris* _pDebris)
 {
     METHOD_ENTRY("CPhysicsManager::addDebris")
-
     m_Debris.push_back(_pDebris);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Add a list of emitters to internal object list
+/// \brief Add an emitter to internal list of emitters
+///
+/// \param _Emitter Emitter that should be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::addEmitter(IEmitter* _Emitter)
+{
+    METHOD_ENTRY("CPhysicsManager::addEmitter")
+    m_Emitters.push_back(_Emitter);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a list of emitters to internal list of emitters
 ///
 /// \param _Emitters Emitters that should be added to list
 ///
@@ -218,6 +232,9 @@ void CPhysicsManager::addEmitters(EmittersType _Emitters)
     while (ci != _Emitters.end())
     {
         m_Emitters.push_back((*ci));
+        m_Debris.push_back(static_cast<CDebrisEmitter*>((*ci))->getDebris());
+        /// \todo Need to implement a WorldDataStorage class to avoid circular
+        ///       dependencies and separate data from algorith
         ++ci;
     }
 }
@@ -318,6 +335,11 @@ void CPhysicsManager::moveMasses(int nTest)
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
 
+    for (EmittersType::const_iterator ci = m_Emitters.begin();
+        ci != m_Emitters.end(); ++ci)
+    {
+        (*ci)->emit(1.0/m_fFrequency*m_fTimeAccel);
+    }
     for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
@@ -354,11 +376,20 @@ void CPhysicsManager::initEmitters()
 
     INFO_MSG("Physics Manager", "Initialising emitters.")
 
-    for (EmittersType::const_iterator ci = m_Emitters.begin();
-        ci != m_Emitters.end(); ++ci)
+    EmittersType::iterator it = m_Emitters.begin();
+    while (it != m_Emitters.end())
     {
-        if ((*ci)->getMode() == EMITTER_EMIT_ONCE)
-            (*ci)->startEmitation();
+        if ((*it)->getMode() == EMITTER_EMIT_ONCE)
+        {
+            (*it)->emit();
+            
+            delete (*it);
+            (*it) = 0;
+            MEM_FREED("CDebrisEmitter*")
+            
+            it = m_Emitters.erase(it);
+        }
+        ++it;
     };
 }
 

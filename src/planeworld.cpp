@@ -29,6 +29,7 @@
 #include <functional>
 
 //--- Program header ---------------------------------------------------------//
+#include "debris_emitter.h"
 #include "physics_manager.h"
 #include "planet.h"
 #include "planet_visuals.h"
@@ -114,6 +115,7 @@ int main(int argc, char *argv[])
     IObjectVisuals*     pObjectVisuals;
     CDebris*            pDebris;
     CDebrisVisuals*     pDebrisVisuals;
+    CDebrisEmitter*     pDebrisEmitter;
 //     CPointMass*         pPointMass;
     CRigidBody*         pPointMass;
     CPlanet*            pPlanet;
@@ -211,6 +213,14 @@ int main(int argc, char *argv[])
     }
 
     //--- Initialize Debris -------------------------------------------------//
+    pDebrisEmitter = new CDebrisEmitter;
+    MEM_ALLOC("pDebrisEmitter")
+    pDebrisEmitter->setFrequency(150.0);
+    pDebrisEmitter->setMode(EMITTER_MODE_SOURCE);
+    pDebrisEmitter->setCell(0, 0);
+    pDebrisEmitter->setMaxNumber(10);
+    pPhysicsManager->addEmitter(pDebrisEmitter);
+    
     pDebris = new CDebris;
     MEM_ALLOC("pDebris")
     pDebrisVisuals = new CDebrisVisuals(pDebris);

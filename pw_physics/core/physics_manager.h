@@ -31,7 +31,6 @@
 const double PHYSICS_DEFAULT_FREQUENCY = 100.0;
 
 typedef std::vector<IObject*>  ObjectsType;
-typedef std::vector<IEmitter*> EmittersType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -64,6 +63,7 @@ class CPhysicsManager
         void addGlobalForces();
         void addDebris(CDebris*);
         void addJoint(IJoint*);
+        void addEmitter(IEmitter*);
         void addEmitters(EmittersType);
         void addObject(IObject*);
         void addObjects(ObjectsType);

@@ -23,6 +23,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "debris.h"
 #include "emitter.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,14 +41,38 @@ class CDebrisEmitter : public IEmitter
         ~CDebrisEmitter();
         
         //--- Constant Methods -----------------------------------------------//
+        void emit(const double&);
         
         //--- Methods --------------------------------------------------------//
+        CDebris* getDebris(){return &m_Debris;}
+        
+        void setMaxNumber(const int&);
 
     private:
+        
+        //--- Variables [private] --------------------------------------------//
+        CDebris m_Debris;       ///< The debris instance
+
+        double  m_fResidual;    ///< Residual of debris emitation, since engine frequency differs from emitation frequency
+        int     m_nNrMax;       ///< Maximum number of debris
         
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the maximum number of debris for this emitter
+///
+/// \param _nNrMax Maximum number of debris.
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CDebrisEmitter::setMaxNumber(const int& _nNrMax)
+{
+    METHOD_ENTRY("IEmitter::setMode")
+    m_nNrMax = _nNrMax;
+    m_Debris.setNumber(m_nNrMax);
+}
 
 
 #endif

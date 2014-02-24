@@ -68,6 +68,7 @@ class CDebris : public IUniverseScaled
         void                setTimeFac(const double&);
         
         void                dynamics(const double&);
+        void                generate(const Vector2d&, const Vector2d&);
         void                init();
 
     protected:
