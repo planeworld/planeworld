@@ -127,7 +127,7 @@ inline const double CBody::getAngleVelocity() const
 ////////////////////////////////////////////////////////////////////////////////
 inline const ObjectType CBody::getObjectType() const
 {
-    METHOD_ENTRY("CCircle::getObjectType")
+    METHOD_ENTRY("CBody::getObjectType")
     return OBJECT_BODY;
 }
 

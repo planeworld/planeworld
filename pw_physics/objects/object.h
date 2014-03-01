@@ -153,7 +153,7 @@ class IObject : public IHookable, public IUniverseScaled
 ////////////////////////////////////////////////////////////////////////////////
 inline const ObjectType IObject::getObjectType() const
 {
-    METHOD_ENTRY("IShape::getObjectType")
+    METHOD_ENTRY("IObject::getObjectType")
     return OBJECT_NONE;
 }
 
