@@ -44,29 +44,6 @@ CVisualsManager::~CVisualsManager()
     METHOD_ENTRY("CVisualsManager::~CVisualsManager")
     DTOR_CALL("CVisualsManager::~CVisualsManager")
 
-    for (std::vector<IObjectVisuals*>::iterator it = m_ObjectVisuals.begin();
-        it != m_ObjectVisuals.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it) != 0)
-        {
-            delete (*it);
-            (*it) = 0;
-            MEM_FREED("IObjectVisuals*");
-        }
-    }
-    for (std::list<CDebrisVisuals*>::iterator it = m_DebrisVisuals.begin();
-        it != m_DebrisVisuals.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it) != 0)
-        {
-            delete (*it);
-            (*it) = 0;
-            MEM_FREED("CDebrisVisuals*");
-        }
-    }
-    
     // Free memory if pointer is still existent
     if (m_pCamera != 0)
     {
@@ -103,8 +80,8 @@ void CVisualsManager::drawBoundingBoxes() const
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
         
-        for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
-            ci != m_ObjectVisuals.end(); ++ci)
+        for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
+            ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
         {
             // Object bounding boxes
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
@@ -377,13 +354,13 @@ void CVisualsManager::drawWorld()
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
-    for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
-         ci != m_ObjectVisuals.end(); ++ci)
+    for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
+         ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
     {
         (*ci)->draw(m_pCamera);
     }
-    for (std::list<CDebrisVisuals*>::const_iterator ci = m_DebrisVisuals.begin();
-         ci != m_DebrisVisuals.end(); ++ci)
+    for (std::list<CDebrisVisuals*>::const_iterator ci = m_pDataStorage->getDebrisVisuals().begin();
+         ci != m_pDataStorage->getDebrisVisuals().end(); ++ci)
     {
         (*ci)->draw(m_pCamera);
     }
@@ -488,8 +465,8 @@ void CVisualsManager::drawWorld()
 //     font.loadFromFile("/home/bfeld/tmp/local/share/planeworld/data/consola.ttf");
 // 
 //     m_Graphics.getWindow()->pushGLStates();    
-//     for (std::vector<IObjectVisuals*>::const_iterator ci = m_ObjectVisuals.begin();
-//          ci != m_ObjectVisuals.end(); ++ci)
+//     for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
+//          ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
 //     {
 //         if (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() > 1.0)
 //         {
@@ -551,35 +528,4 @@ void CVisualsManager::drawWorld()
 //     }
 //     
 //     m_Graphics.getWindow()->popGLStates();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Adds visuals of an object to list
-///
-/// \param _pObjectVisuals Visuals that should be added to list
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::addVisuals(IObjectVisuals* _pObjectVisuals)
-{
-    METHOD_ENTRY("CVisualsManager::addVisuals")
-    m_ObjectVisuals.push_back(_pObjectVisuals);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Adds a list of visuals of an object to list
-///
-/// \param _VisualsList Visuals that should be added to list
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::addVisualsList(const std::vector<IObjectVisuals*>& _VisualsList)
-{
-    METHOD_ENTRY("CVisualsManager::addVisualsList")
-    
-    for (std::vector<IObjectVisuals*>::const_iterator ci  = _VisualsList.begin();
-                                         ci != _VisualsList.end(); ++ci)
-    {
-        m_ObjectVisuals.push_back(*ci);
-    }
 }

@@ -47,55 +47,6 @@ CPhysicsManager::~CPhysicsManager()
     METHOD_ENTRY("CPhysicsManager::~CPhysicsManager")
     DTOR_CALL("CPhysicsManager::~CPhysicsManager")
 
-    for (ObjectsType::iterator it = m_DynamicObjects.begin();
-        it != m_DynamicObjects.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it) != 0)
-        {
-            delete (*it);
-            (*it) = 0;
-            MEM_FREED("IObject*")
-        }
-        else
-        {
-            DOM_MEMF(DEBUG_MSG("IObject*", "Memory already freed."))
-        }
-    };
-    
-    
-    for (ObjectsType::iterator it = m_StaticObjects.begin();
-        it != m_StaticObjects.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it) != 0)
-        {
-            delete (*it);
-            (*it) = 0;
-            MEM_FREED("IObject*")
-        }
-        else
-        {
-            DOM_MEMF(DEBUG_MSG("IObject*", "Memory already freed."))
-        }
-    };
-        
-    for (std::list< CDebris* >::iterator it = m_Debris.begin();
-        it != m_Debris.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it) != 0)
-        {
-            delete (*it);
-            (*it) = 0;
-            MEM_FREED("CDebris*")
-        }
-        else
-        {
-            DOM_MEMF(DEBUG_MSG("CDebris*", "Memory already freed."))
-        }
-    };
-    
     for (EmittersType::iterator it = m_Emitters.begin();
         it != m_Emitters.end(); ++it)
     {
@@ -109,22 +60,6 @@ CPhysicsManager::~CPhysicsManager()
         else
         {
             DOM_MEMF(DEBUG_MSG("CEmitter*", "Memory already freed."))
-        }
-    };
-
-    for (std::list< IJoint* >::iterator it = m_JointList.begin();
-        it != m_JointList.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it) != 0)
-        {
-            delete (*it);
-            (*it) = 0;
-            MEM_FREED("IJoint*")
-        }
-        else
-        {
-            DOM_MEMF(DEBUG_MSG("IJoint*", "Memory already freed."))
         }
     };
 }
@@ -145,21 +80,21 @@ void CPhysicsManager::addGlobalForces()
     Vector2d vecCC;
     Vector2d vecG;
 
-    for (std::list< IJoint* >::const_iterator ci = m_JointList.begin();
-        ci != m_JointList.end(); ++ci)
+    for (std::list< IJoint* >::const_iterator ci = m_pDataStorage->getJoints().begin();
+        ci != m_pDataStorage->getJoints().end(); ++ci)
     {
         (*ci)->react();
     }
 
-    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
-        ci != m_DynamicObjects.end(); ++ci)
+    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
+        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
     {
         cj = ci;
         ++cj;
         
         if ((*ci)->getGravitationState() == true)
         {
-            while (cj != m_DynamicObjects.end())
+            while (cj != m_pDataStorage->getDynamicObjects().end())
             {
                 vecCC = (*ci)->getCOM() - (*cj)->getCOM() +
                         IUniverseScaled::cellToDouble((*ci)->getCell()-(*cj)->getCell());
@@ -181,26 +116,11 @@ void CPhysicsManager::addGlobalForces()
         (*ci)->addAcceleration(m_vecConstantGravitation);
     };
     
-    for (std::list< CDebris* >::const_iterator ci = m_Debris.begin();
-        ci != m_Debris.end(); ++ci)
+    for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
+        ci != m_pDataStorage->getDebris().end(); ++ci)
     {
         (*ci)->setForce(Vector2d(0.0, -9.81));
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add a debris to list
-///
-/// This method adds the given debris object to the list of debris.
-///
-/// \param _pDebris Debris that should be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addDebris(CDebris* _pDebris)
-{
-    METHOD_ENTRY("CPhysicsManager::addDebris")
-    m_Debris.push_back(_pDebris);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -231,72 +151,7 @@ void CPhysicsManager::addEmitters(EmittersType _Emitters)
   
     while (ci != _Emitters.end())
     {
-        m_Emitters.push_back((*ci));
-        m_Debris.push_back(static_cast<CDebrisEmitter*>((*ci))->getDebris());
-        /// \todo Need to implement a WorldDataStorage class to avoid circular
-        ///       dependencies and separate data from algorith
-        ++ci;
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add a joint to list
-///
-/// This method adds the given joint to the list of joints.
-///
-/// \param _pJoint Joint that should be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addJoint(IJoint* _pJoint)
-{
-    METHOD_ENTRY("CPhysicsManager::addJoint")
-
-    m_JointList.push_back(_pJoint);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add a object to list
-///
-/// This method adds the given object to the list of object, depending on their
-/// dynamics state. 
-///
-/// \param _pObject Mass that should be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addObject(IObject* _pObject)
-{
-    METHOD_ENTRY("CPhysicsManager::addObject")
-
-    if (_pObject->getDynamicsState())
-        m_DynamicObjects.push_back(_pObject);
-    else
-        m_StaticObjects.push_back(_pObject);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add a list of objects to internal object list
-///
-/// This method adds the given objects to the list of object, depending on their
-/// dynamics state. 
-///
-/// \param _Objects Objects that should be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addObjects(ObjectsType _Objects)
-{
-    METHOD_ENTRY("CPhysicsManager::addObjects")
-
-    ObjectsType::const_iterator ci = _Objects.begin();
-  
-    while (ci != _Objects.end())
-    {
-        if ((*ci)->getDynamicsState())
-            m_DynamicObjects.push_back((*ci));
-        else
-            m_StaticObjects.push_back((*ci));
+        this->addEmitter((*ci));
         ++ci;
     }
 }
@@ -311,9 +166,9 @@ void CPhysicsManager::collisionDetection()
     METHOD_ENTRY("CPhysicsManager::collisionDetection")
 
 //     m_ContactList.clear();
-    m_CollisionManager.setDebris(m_Debris);
-    m_CollisionManager.setDynamicObjects(m_DynamicObjects);
-    m_CollisionManager.setStaticObjects(m_StaticObjects);
+    m_CollisionManager.setDebris(m_pDataStorage->getDebris());
+    m_CollisionManager.setDynamicObjects(m_pDataStorage->getDynamicObjects());
+    m_CollisionManager.setStaticObjects(m_pDataStorage->getStaticObjects());
     m_CollisionManager.detectCollisions();
     
 //  for (ContactList::const_iterator ci = m_ContactList.begin();
@@ -340,16 +195,16 @@ void CPhysicsManager::moveMasses(int nTest)
     {
         (*ci)->emit(1.0/m_fFrequency*m_fTimeAccel);
     }
-    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
-        ci != m_DynamicObjects.end(); ++ci)
+    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
+        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
     {
         (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel);
         (*ci)->transform();
         (*ci)->clearForces();
     }
     {
-        for (std::list< CDebris* >::const_iterator ci = m_Debris.begin();
-            ci != m_Debris.end(); ++ci)
+        for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
+            ci != m_pDataStorage->getDebris().end(); ++ci)
         {
             (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel);
         }
@@ -379,7 +234,9 @@ void CPhysicsManager::initEmitters()
     EmittersType::iterator it = m_Emitters.begin();
     while (it != m_Emitters.end())
     {
-        if ((*it)->getMode() == EMITTER_EMIT_ONCE)
+        (*it)->setWorldDataStorage(m_pDataStorage);
+        (*it)->init();
+        if ((*it)->getMode() == EMITTER_MODE_EMIT_ONCE)
         {
             (*it)->emit();
             
@@ -389,7 +246,11 @@ void CPhysicsManager::initEmitters()
             
             it = m_Emitters.erase(it);
         }
-        ++it;
+        else
+        {
+            ++it;
+        }
+        
     };
 }
 
@@ -411,13 +272,13 @@ void CPhysicsManager::initObjects()
 
     INFO_MSG("Physics Manager", "Initialising objects.")
 
-    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
-        ci != m_DynamicObjects.end(); ++ci)
+    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
+        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
     {
         (*ci)->init();
     };
-    for (ObjectsType::const_iterator ci = m_StaticObjects.begin();
-        ci != m_StaticObjects.end(); ++ci)
+    for (ObjectsType::const_iterator ci = m_pDataStorage->getStaticObjects().begin();
+        ci != m_pDataStorage->getStaticObjects().end(); ++ci)
     {
         (*ci)->init();
     };
@@ -438,14 +299,27 @@ void CPhysicsManager::runCellUpdate() const
     CTimer Timer;
     Timer.start();
     
-    ObjectsType::const_iterator ci = m_DynamicObjects.begin();
+    double fFreq;
+
+    ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
     while (true)
     {
+        m_pDataStorage->lockObjects();
+        
         (*ci)->updateCell();
         // Use double frequency just to avoid any surprises
-        Timer.sleepRemaining(6.0e9*m_fTimeAccel*m_DynamicObjects.size()/DEFAULT_CELL_SIZE_2);
+        fFreq = 6.0e9*m_fTimeAccel*m_pDataStorage->getDynamicObjects().size()/DEFAULT_CELL_SIZE_2;
+        if (fFreq > m_fFrequency) fFreq = m_fFrequency;
         
-        if (++ci == m_DynamicObjects.end())
-            ci = m_DynamicObjects.begin();
+        m_pDataStorage->unlockObjects();
+                
+        Timer.sleepRemaining(fFreq);
+        
+        m_pDataStorage->lockObjects();
+        
+        if (++ci == m_pDataStorage->getDynamicObjects().end())
+            ci = m_pDataStorage->getDynamicObjects().begin();
+        
+        m_pDataStorage->unlockObjects();
     }
 }

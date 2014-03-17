@@ -25,12 +25,10 @@
 //--- Program header ---------------------------------------------------------//
 #include "collision_manager.h"
 #include "emitter.h"
-#include "joint.h"
 #include "universe.h"
+#include "world_data_storage_user.h"
 
 const double PHYSICS_DEFAULT_FREQUENCY = 100.0;
-
-typedef std::vector<IObject*>  ObjectsType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -44,7 +42,7 @@ typedef std::vector<IObject*>  ObjectsType;
 ///       allow online state change.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CPhysicsManager
+class CPhysicsManager : public IWorldDataStorageUser
 {
     
     public:
@@ -60,13 +58,10 @@ class CPhysicsManager
         //--- Methods --------------------------------------------------------//
         void setConstantGravity(const Vector2d&);
         void setUniverse(CUniverse* const);
+        
         void addGlobalForces();
-        void addDebris(CDebris*);
-        void addJoint(IJoint*);
         void addEmitter(IEmitter*);
         void addEmitters(EmittersType);
-        void addObject(IObject*);
-        void addObjects(ObjectsType);
         void collisionDetection();
         void initEmitters();
         void initObjects();
@@ -80,7 +75,6 @@ class CPhysicsManager
     private:
         
         CUniverse*          m_pUniverse;            ///< The procedurally generated universe
-        
         CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
 
         CTimer m_Timer;                             ///< Timer for physics
@@ -89,11 +83,7 @@ class CPhysicsManager
 
         Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
 
-        std::list<CDebris*> m_Debris;               ///< List of debris
-        std::list<IJoint*>  m_JointList;            ///< List of joints
         EmittersType        m_Emitters;             ///< List of emitters
-        ObjectsType         m_DynamicObjects;       ///< List of dynamic objects
-        ObjectsType         m_StaticObjects;        ///< List of static objects
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

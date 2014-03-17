@@ -26,7 +26,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
-#include "engine_common.h"
 #include "graphics.h"
 
 //--- Misc header ------------------------------------------------------------//

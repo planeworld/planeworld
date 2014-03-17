@@ -31,16 +31,18 @@
 //--- Program header ---------------------------------------------------------//
 #include "debris_emitter.h"
 #include "physics_manager.h"
-#include "planet.h"
 #include "planet_visuals.h"
+#include "objects_emitter.h"
 #include "pointmass.h"
-#include "rigidbody.h"
 #include "spring_visuals.h"
 #include "xfig_loader.h"
 #include "xml_importer.h"
 #include "visuals_manager.h"
 
 //--- Misc-Header ------------------------------------------------------------//
+
+//--- Global Variables -------------------------------------------------------//
+bool g_bPhysicsPaused = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -63,9 +65,12 @@ void runPhysics(CPhysicsManager* const _pPhysicsManager, bool* const _pbDone)
 
     while (!(*_pbDone))
     {
-        _pPhysicsManager->addGlobalForces();
-        _pPhysicsManager->moveMasses(nCC);
-        _pPhysicsManager->collisionDetection();
+        if (!g_bPhysicsPaused)
+        {
+            _pPhysicsManager->addGlobalForces();
+            _pPhysicsManager->moveMasses(nCC);
+            _pPhysicsManager->collisionDetection();
+        }
         PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
         ++nCC;
         if (nCC == 10000) nCC = 0;
@@ -116,6 +121,7 @@ int main(int argc, char *argv[])
     CDebris*            pDebris;
     CDebrisVisuals*     pDebrisVisuals;
     CDebrisEmitter*     pDebrisEmitter;
+    CObjectEmitter*     pObjectsEmitter;
 //     CPointMass*         pPointMass;
     CRigidBody*         pPointMass;
     CPlanet*            pPlanet;
@@ -133,6 +139,7 @@ int main(int argc, char *argv[])
     CSpring*            pSpring;
     CSpringVisuals*     pSpringVisuals;
     CUniverse           Universe;
+    CWorldDataStorage   WorldDataStorage;
     
     //--- Initialisation -----------------------------------------------------//
     pPhysicsManager = new CPhysicsManager;
@@ -207,119 +214,56 @@ int main(int argc, char *argv[])
         
 //         pVisualsManager->addVisuals(pRectVisuals);
         pObjectVisuals->addVisuals(pCircleVisuals);
-        pVisualsManager->addVisuals(pObjectVisuals);
+        
 //         pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
-        pPhysicsManager->addObject(pPointMass);
+        WorldDataStorage.addObject(pPointMass);
+        WorldDataStorage.addObjectVisuals(pObjectVisuals);
     }
 
+    //--- Initialize storage access for engine managers ---------------------//
+    pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
+    pVisualsManager->setWorldDataStorage(&WorldDataStorage);
+    
     //--- Initialize Debris -------------------------------------------------//
     pDebrisEmitter = new CDebrisEmitter;
     MEM_ALLOC("pDebrisEmitter")
-    pDebrisEmitter->setFrequency(150.0);
-    pDebrisEmitter->setMode(EMITTER_MODE_SOURCE);
+    pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
+    pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+    pDebrisEmitter->setAngle(0.0);
+    pDebrisEmitter->setAngleVariance(0.2);
+    pDebrisEmitter->setVelocity(20.0);
+    pDebrisEmitter->setVelocityVariance(1.0);
+    pDebrisEmitter->setFrequency(50.0);
     pDebrisEmitter->setCell(0, 0);
-    pDebrisEmitter->setMaxNumber(10);
+    pDebrisEmitter->setMaxNumber(1000);
     pPhysicsManager->addEmitter(pDebrisEmitter);
     
-    pDebris = new CDebris;
-    MEM_ALLOC("pDebris")
-    pDebrisVisuals = new CDebrisVisuals(pDebris);
-    MEM_ALLOC("pDebrisVisuals")
-
-    pDebris->setNumber(5000);
-    pVisualsManager->addVisuals(pDebrisVisuals);
-    pPhysicsManager->addDebris(pDebris);
-
-    //--- Initialize Rigidbody ----------------------------------------------//
-//     pBody1 = new CRigidBody;
-//     MEM_ALLOC("pBody1")
-// 
-//     XFigLoader.load(PLANEWORLD_DATA_DIR + "test.fig");
-//     pBody1->getGeometry()->setShapes(XFigLoader.getShapes());
-//     pBody1->setMass(150.0);
-//     pBody1->setInertia(2000.0);
-//     pBody1->setOrigin(Vector2d(3.0, 5.0));
-//     pBody1->setName("Rigidbody from .fig");
-// //  pBody1->disableDynamics();
-// //     pBody1->disableGravitation();
-// 
-//     pVisualsManager->addVisualsList(XFigLoader.getVisuals());
-//     pPhysicsManager->addObject(pBody1);
-//     
-//     //--- Initialize Rigidbody ----------------------------------------------//
-//     pBody2 = new CRigidBody;
-//     MEM_ALLOC("pBody2")
-// 
-//     pBody2->setMass(100.0);
-//     pBody2->setInertia(2000.0);
-//     pBody2->setOrigin(Vector2d(-20.0,-10.0));
-// //     pBody2->disableGravitation();
-// //  pBody2->setTimeFac(5.0);
-//     pBody2->setName("Rigidbody");
-// 
-//     pCircle = new CCircle();
-//     MEM_ALLOC("pCircle")
-//     pCircleVisuals = new CCircleVisuals(pCircle);
-//     MEM_ALLOC("pCircleVisuals")
-//     pCircle->setDepths(SHAPE_DEPTH_ALL);
-//     pCircle->setCenter( Vector2d(-2.0,0.0) );
-//     pCircle->setRadius(3.0);
-// 
-//     pBody2->getGeometry()->addShape(pCircle);
-//     pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
-// 
-//     pCircle = new CCircle();
-//     MEM_ALLOC("pCircle")
-//     pCircleVisuals = new CCircleVisuals(pCircle);
-//     MEM_ALLOC("pCircleVisuals")
-//     pCircle->setDepths(SHAPE_DEPTH_ALL);
-//     pCircle->setCenter( Vector2d(2.0,0.0) );
-//     pCircle->setRadius(2.0);
-// 
-//     pBody2->getGeometry()->addShape(pCircle);
-//     pCircle->setVisualsID(pVisualsManager->addVisuals(pCircleVisuals));
-// 
-//     pPolyLine = new CPolyLine;
-//     MEM_ALLOC("pPolyLine")
-//     pPolylineVisuals = new CPolylineVisuals(pPolyLine);
-//     MEM_ALLOC("pPolylineVisuals")
-//     pPolyLine->setLineType(GRAPHICS_LINETYPE_LOOP);
-//     pPolyLine->setDepths(SHAPE_DEPTH_ALL);
-//     pPolyLine->addVertex(0.0, -5.0);
-//     pPolyLine->addVertex(5.0, 5.0);
-//     pPolyLine->addVertex(-5.0, 5.0);
-// 
-//     pBody2->getGeometry()->addShape(pPolyLine);
-//     pPolyLine->setVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
-// 
-//     pPhysicsManager->addObject(pBody2);
-// 
-//     //--- Initialize Rigidbody ----------------------------------------------//
-//     pPolyLine = new CPolyLine();
-//     MEM_ALLOC("pPolyLine")
-//     pPolylineVisuals = new CPolylineVisuals(pPolyLine);
-//     MEM_ALLOC("pPolylineVisuals")
-//     pPolyLine->setLineType(GRAPHICS_LINETYPE_LOOP);
-//     pPolyLine->setDepths(SHAPE_DEPTH_ALL);
-//     pPolyLine->addVertex(0.0, -5.0);
-//     pPolyLine->addVertex(5.0, 5.0);
-//     pPolyLine->addVertex(-3.0, 5.0);
-//     pPolyLine->addVertex(-7.0, 0.0);
-// 
-//     pBody3 = new CRigidBody;
-//     MEM_ALLOC("pBody3")
-// 
-//     pBody3->setMass(250.0);
-//     pBody3->setInertia(3000.0);
-//     pBody3->setOrigin(Vector2d(15.0,-8.0));
-// //     pBody3->disableGravitation();
-//     pBody3->setName("Box");
-//     
-//     pBody3->getGeometry()->addShape(pPolyLine);
-//     pPolyLine->setVisualsID(pVisualsManager->addVisuals(pPolylineVisuals));
-// 
-//     pPhysicsManager->addObject(pBody3);
-//     
+    pDebrisEmitter = new CDebrisEmitter;
+    MEM_ALLOC("pDebrisEmitter")
+    pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
+    pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
+    pDebrisEmitter->setAngle(0.0);
+    pDebrisEmitter->setAngleVariance(0.2);
+    pDebrisEmitter->setVelocity(20.0);
+    pDebrisEmitter->setVelocityVariance(1.0);
+    pDebrisEmitter->setFrequency(50.0);
+    pDebrisEmitter->setLimits(-200.0, 200.0, 150.0, 200.0);
+    pDebrisEmitter->setCell(0, 0);
+    pDebrisEmitter->setMaxNumber(1000);
+    pPhysicsManager->addEmitter(pDebrisEmitter);
+    
+    pObjectsEmitter = new CObjectEmitter;
+    MEM_ALLOC("pObjectsEmitter")
+    pObjectsEmitter->setMode(EMITTER_MODE_TIMED);
+    pObjectsEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+    pObjectsEmitter->setAngle(M_PI);
+    pObjectsEmitter->setAngleVariance(0.2);
+    pObjectsEmitter->setVelocity(20.0);
+    pObjectsEmitter->setVelocityVariance(1.0);
+    pObjectsEmitter->setFrequency(2.0);
+    pObjectsEmitter->setCell(0, 0);
+    pPhysicsManager->addEmitter(pObjectsEmitter);
+    
     //--- Import from xml file ----------------------------------------------//
     {
         // XML-Importer is initialised in its own scope to free memory after
@@ -327,15 +271,16 @@ int main(int argc, char *argv[])
         // the list structure of pointers.
         CXMLImporter        XMLImporter;
         
+        XMLImporter.setWorldDataStorage(&WorldDataStorage);
         XMLImporter.import(argv[1]);
         pVisualsManager->setCamera(XMLImporter.getCamera());
-        pPhysicsManager->addObjects(XMLImporter.getObjects());
-        pVisualsManager->addVisualsList(XMLImporter.getVisuals());
+//         pPhysicsManager->addObjects(XMLImporter.getObjects());
+//         pVisualsManager->addVisualsList(XMLImporter.getVisuals());
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
         
         pCamera=XMLImporter.getCamera();
         
-        Universe.clone(XMLImporter.getUniverse());
+//         Universe.clone(XMLImporter.getUniverse());
     }
             
 //     //--- Initialize Springs ------------------------------------------------//
@@ -379,11 +324,9 @@ int main(int argc, char *argv[])
 //     pSpring->setVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
     
     pVisualsManager->setUniverse(&Universe);
-//     pPhysicsManager->setUniverse(&Universe);
-    pPhysicsManager->addObjects(Universe.getObjects());
-    pVisualsManager->addVisualsList(Universe.getVisuals());
-    
-    // Set initialisation state of all objects
+    pPhysicsManager->setUniverse(&Universe);
+
+    //--- Set initialisation state of all objects ----------------------------//
     pPhysicsManager->initEmitters();
     pPhysicsManager->initObjects();
     
@@ -407,8 +350,6 @@ int main(int argc, char *argv[])
     PhysicsThread.launch();
     CellUpdater.launch();
     INFO_MSG("Main", "Physics thread for cell update started.")
-    
-    
     
     //--- Prepare for querying relative mouse movement -----------------------//
     sf::Vector2i vecMouse;
@@ -478,6 +419,11 @@ int main(int argc, char *argv[])
                         case sf::Keyboard::G:
                         {
                             pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
+                            break;
+                        }
+                        case sf::Keyboard::P:
+                        {
+                            g_bPhysicsPaused ? g_bPhysicsPaused=false : g_bPhysicsPaused=true;
                             break;
                         }
                     }

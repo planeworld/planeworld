@@ -21,7 +21,6 @@
 #define DEBRIS_H
 
 //--- Program header ---------------------------------------------------------//
-#include "log.h"
 #include "universe_scaled.h"
 #include <eigen3/Eigen/Core>
 

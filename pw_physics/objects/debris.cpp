@@ -135,12 +135,12 @@ void CDebris::setNumber(const int& _nN)
 
     m_PosList.set_capacity(_nN);
     m_StateList.set_capacity(_nN);
-    m_PosListPrev.resize(_nN);
+    m_PosListPrev.set_capacity(_nN);
     for (int i=0; i<m_PosList.capacity();++i)
     {
-        m_PosList.push_back(Vector2d((rand()%20000000) - 10000000,(rand()%20000000) - 10000000)/100000);
+//         m_PosList.push_back(Vector2d((rand()%20000000) - 10000000,(rand()%20000000) - 10000000)/100000);
         m_StateList.push_back(true);
     }
-    m_VelList.resize(_nN);
-    m_VelListPrev.resize(_nN);
+    m_VelList.set_capacity(_nN);
+    m_VelListPrev.set_capacity(_nN);
 }

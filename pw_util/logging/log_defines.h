@@ -166,7 +166,7 @@
                                     CLog::s_strStr.str(""); \
                                     CLog::s_strStr << a; \
                                     Log.log("Destructor called", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
-    #define METHOD_ENTRY(a)         CLogMethodHelper ___LOGGING_ENTRY_EXIT_(a);
+    #define METHOD_ENTRY(a)         CLogMethodHelper(a);
     #define METHOD_EXIT(a)
     #define MEM_ALLOC(a)            DOM_MEMA( \
                                     CLog::s_strStr.str(""); \

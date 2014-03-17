@@ -43,22 +43,35 @@ class CDebrisEmitter : public IEmitter
         //--- Constant Methods -----------------------------------------------//
         void emit(const double&);
         
-        //--- Methods --------------------------------------------------------//
-        CDebris* getDebris(){return &m_Debris;}
+        const EmitterType getEmitterType() const;
         
-        void setMaxNumber(const int&);
+        //--- Methods --------------------------------------------------------//
+        void        init();
+        void        setMaxNumber(const int&);
 
     private:
         
         //--- Variables [private] --------------------------------------------//
-        CDebris m_Debris;       ///< The debris instance
-
-        double  m_fResidual;    ///< Residual of debris emitation, since engine frequency differs from emitation frequency
-        int     m_nNrMax;       ///< Maximum number of debris
+        CDebris*    m_pDebris;      ///< The debris instance
+        int         m_nNrMax;       ///< Maximum number of debris
         
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the emitters type - RTTI
+///
+/// \return Type: debris emitter
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const EmitterType CDebrisEmitter::getEmitterType() const
+{
+    METHOD_ENTRY("CDebrisEmitter::getEmitterType")
+    return EMITTER_DEBRIS;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -71,7 +84,7 @@ inline void CDebrisEmitter::setMaxNumber(const int& _nNrMax)
 {
     METHOD_ENTRY("IEmitter::setMode")
     m_nNrMax = _nNrMax;
-    m_Debris.setNumber(m_nNrMax);
+    m_pDebris->setNumber(_nNrMax);
 }
 
 

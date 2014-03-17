@@ -24,12 +24,14 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebrisEmitter::CDebrisEmitter() : m_fResidual(0.0), m_nNrMax(1)
+CDebrisEmitter::CDebrisEmitter() : m_nNrMax(1)
 {
     METHOD_ENTRY("CDebrisEmitter::CDebrisEmitter")
     CTOR_CALL("CDebrisEmitter::CDebrisEmitter")
     
-    m_Debris.setNumber(1);
+    m_pDebris = new CDebris;
+    MEM_ALLOC("m_pDebris")
+    m_pDebris->setNumber(1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,6 +43,26 @@ CDebrisEmitter::~CDebrisEmitter()
 {
     METHOD_ENTRY("CDebrisEmitter::~CDebrisEmitter")
     DTOR_CALL("CDebrisEmitter::~CDebrisEmitter")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Initialises the emitter
+///
+///////////////////////////////////////////////////////////////////////////////
+void CDebrisEmitter::init()
+{
+    METHOD_ENTRY("CDebrisEmitter::init")
+    
+    // Add debris
+    m_pDataStorage->addDebris(m_pDebris);
+    
+    // Create visuals
+    CDebrisVisuals* pDebrisVisuals = new CDebrisVisuals(m_pDebris);
+    MEM_ALLOC("pDebrisVisuals")
+    
+    // Add visuals
+    m_pDataStorage->addDebrisVisuals(pDebrisVisuals);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,20 +82,37 @@ void CDebrisEmitter::emit(const double& _fF)
 {
     METHOD_ENTRY("CDebrisEmitter::emit")
     
+    double nNrOfDebris;
+    
     if (_fF < 0.0)
     {
-        std::cout << "Emitting all debris once." << std::endl;
+        nNrOfDebris=m_nNrMax;
     }
     else
     {
         double fNrOfDebris = m_fFrequency * _fF + m_fResidual;
-        int    nNrOfDebris = static_cast<int>(fNrOfDebris);
+        nNrOfDebris = static_cast<int>(fNrOfDebris);
         m_fResidual = fNrOfDebris - nNrOfDebris;
-        
-        for (int i=0; i<nNrOfDebris; ++i)
-        {
-            m_Debris.generate(Vector2d(0.0,0.0+i), Vector2d(0.0, 1.0));
-        }
-        std::cout << "Emitting " << nNrOfDebris << " debris" << std::endl;
+    }
+    
+    switch (m_EmitterDistribution)
+    {
+        case EMITTER_DISTRIBUTION_CIRCULAR_FIELD:
+            break;
+        case EMITTER_DISTRIBUTION_RECTANGULAR_FIELD:
+            for (int i=0; i<nNrOfDebris; ++i)
+            {
+                double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
+                double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
+                m_pDebris->generate(Vector2d(fX, fY), Vector2d(0.0, 0.0));
+            }
+            break;
+        case EMITTER_DISTRIBUTION_POINT_SOURCE:
+            for (int i=0; i<nNrOfDebris; ++i)
+            {
+                double fAngle = m_NormalDist(m_Generator)*m_fAngleVariance + m_fAngle;
+                double fVelocity = m_NormalDist(m_Generator)*m_fVelocityVariance + m_fVelocity;
+                m_pDebris->generate(Vector2d(2.0,0.0), fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
+            }
     }
 }

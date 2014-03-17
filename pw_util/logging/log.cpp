@@ -463,7 +463,7 @@ void CLog::unsetDomain(const LogDomainType& _Domain)
 void CLog::setColourScheme(const LogColourSchemeType _ColourScheme)
 {
     METHOD_ENTRY("CLog::setColourScheme");
-
+    
     switch(_ColourScheme)
     {
         case LOG_COLOUR_SCHEME_DEFAULT:
@@ -798,7 +798,7 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
 ///////////////////////////////////////////////////////////////////////////////
 std::string CLog::convLogDom2Str(const LogDomainType& _LogDomain)
 {
-    METHOD_ENTRY("CLog::convLogDom2Str");
+    // METHOD_ENTRY("CLog::convLogDom2Str");
 
     std::string strOut;
 

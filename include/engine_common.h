@@ -32,7 +32,7 @@ using namespace Eigen;
 /// Default depth for drawing
 const double   SHAPE_DEFAULT_DEPTH = -15.0;
 const double   DEFAULT_CELL_SIZE = 1.0e12;
-const double   DEFAULT_CELL_SIZE_2 = 2.0e12;
+const double   DEFAULT_CELL_SIZE_2 = 2.0*DEFAULT_CELL_SIZE;
 const Vector2d DEFAULT_CELL_SIZE_VEC(DEFAULT_CELL_SIZE,DEFAULT_CELL_SIZE);
 
 /// Default precision for approximation of comparisons

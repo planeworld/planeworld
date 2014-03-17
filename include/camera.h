@@ -25,11 +25,9 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "graphics.h"
-#include "engine_common.h"
 #include "hookable.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include <eigen3/Eigen/Geometry>
 
 using namespace Eigen;
 

@@ -23,10 +23,8 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "engine_common.h"
-#include "debris_visuals.h"
-#include "object_visuals.h"
 #include "universe.h"
+#include "world_data_storage_user.h"
 
 const double VISUALS_DEFAULT_FREQUENCY = 60.0;
 
@@ -35,7 +33,7 @@ const double VISUALS_DEFAULT_FREQUENCY = 60.0;
 /// \brief Class for managing the visualisation
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CVisualsManager : virtual public CGraphicsBase
+class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUser
 {
     
     public:
@@ -56,9 +54,6 @@ class CVisualsManager : virtual public CGraphicsBase
         bool            initGraphics() const;
                 
         //--- Methods --------------------------------------------------------//
-        void            addVisuals(CDebrisVisuals*);
-        void            addVisuals(IObjectVisuals* const);
-        void            addVisualsList(const std::vector<IObjectVisuals*>&);
         void            setCamera(CCamera*);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
@@ -72,8 +67,6 @@ class CVisualsManager : virtual public CGraphicsBase
         double                          m_fFrequency;       ///< Frequency of visuals update
         int                             m_nVisualisations;  ///< Additional graphical output
         int                             m_nStarIndex;       ///< Indicates procedurally generated star
-        std::vector<IObjectVisuals*>    m_ObjectVisuals;    ///< List of object visuals
-        std::list<CDebrisVisuals*>      m_DebrisVisuals;    ///< List of debris visuals
         CCamera*                        m_pCamera;          ///< Camera for player view
 };
 
@@ -127,19 +120,6 @@ inline bool CVisualsManager::initGraphics() const
 {
     METHOD_ENTRY("CVisualsManager::getVisualisations")
     return (m_Graphics.init());
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add debris visuals to list
-///
-/// \param _pV Debris visuals
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::addVisuals(CDebrisVisuals* _pDebris)
-{
-    METHOD_ENTRY("CVisualsManager::addVisuals")
-    m_DebrisVisuals.push_back(_pDebris);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

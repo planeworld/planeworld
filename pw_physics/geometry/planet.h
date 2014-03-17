@@ -26,7 +26,6 @@
 #include "shape.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include <eigen3/Eigen/Geometry>
 #include "noise2d/noise.h"
 
 /// Specifies the major type of the planet which defines basic noise functions

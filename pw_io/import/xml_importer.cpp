@@ -60,25 +60,6 @@ CXMLImporter::~CXMLImporter()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return imported objects
-///
-/// \return List of objects
-///
-////////////////////////////////////////////////////////////////////////////////
-std::vector<IObject*> CXMLImporter::getObjects() const
-{
-    METHOD_ENTRY("CXMLImporter::getObjects")
-    
-    std::map<std::string, IObject*>::const_iterator ci;
-    std::vector<IObject*> TmpList;
-    for (ci = m_Objects.begin(); ci != m_Objects.end(); ++ci)
-        TmpList.push_back((*ci).second);
-
-    return TmpList;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Import an xml file
 ///
 /// \param _strFilename XML file to import
@@ -302,8 +283,9 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
         N = N.next_sibling();
     }
     
+    m_pDataStorage->addObject(pRigidBody);
+    m_pDataStorage->addObjectVisuals(pObjectVisuals);
     m_Objects.insert(std::pair<std::string,IObject*>(pRigidBody->getName(),pRigidBody));
-    m_Visuals.push_back(pObjectVisuals);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

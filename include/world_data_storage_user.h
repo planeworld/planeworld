@@ -9,61 +9,64 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       object_emitter.h
-/// \brief      Prototype of class "CObjectEmitter"
+/// \file       world_data_storage_user.h
+/// \brief      Prototype of interface "IWorldDataStorageUser"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2014-02-16
+/// \date       2014-02-24
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef OBJECT_EMITTER_H
-#define OBJECT_EMITTER_H
+#ifndef WORLD_DATA_STORAGE_USER_H
+#define WORLD_DATA_STORAGE_USER_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "emitter.h"
+#include "world_data_storage.h"
+
+//--- Misc header ------------------------------------------------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for a source that emits objects.
+/// \brief Interface for classes that use the world data storage
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CObjectEmitter : public IEmitter
+class IWorldDataStorageUser
 {
-    
+
     public:
-
-        //--- Constructor/Destructor -----------------------------------------//
-        CObjectEmitter();
-        ~CObjectEmitter();
    
-        //--- Constant Methods -----------------------------------------------//
-        const EmitterType getEmitterType() const;
-        
-        //--- Methods --------------------------------------------------------//
-        void emit(const double&);
-        void init();
+        //--- Constructor/Destructor -----------------------------------------//
+        IWorldDataStorageUser() : m_pDataStorage(0){}
 
-    private:
+        //--- Methods --------------------------------------------------------//
+        void setWorldDataStorage(CWorldDataStorage*);
         
+    protected:
+        
+        CWorldDataStorage*  m_pDataStorage;     ///< Pointer to storage for worlds data
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Get the emitters type - RTTI
+/// \brief Sets the instance of the worlds data storage.
 ///
-/// \return Type: object emitter
+/// \param _pDataStorage Instance of worlds data storage.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const EmitterType CObjectEmitter::getEmitterType() const
+inline void IWorldDataStorageUser::setWorldDataStorage(CWorldDataStorage* _pDataStorage)
 {
-    METHOD_ENTRY("CObjectEmitter::getEmitterType")
-    return EMITTER_OBJECT;
+    METHOD_ENTRY("IWorldDataStorageUser::setWorldDataStorage")
+    
+    if (m_pDataStorage != 0)
+    {
+        NOTICE_MSG("World Data Storage User", "Data storage instance already given, overwriting.")
+    }
+    
+    m_pDataStorage = _pDataStorage;
 }
-
 
 #endif

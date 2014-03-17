@@ -28,12 +28,12 @@ void CCollisionManager::detectCollisions()
 {
     METHOD_ENTRY("CCollisionManager::detectCollisions")
 
-    std::vector< IObject* >::const_iterator cj;
+    ObjectsType::const_iterator cj;
     
     //--------------------------------------------------------------------------
     // Test dynamic objects
     //--------------------------------------------------------------------------
-    for (std::vector<IObject*>::const_iterator ci = m_DynamicObjects.begin();
+    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
         cj = ci;
@@ -79,7 +79,7 @@ void CCollisionManager::detectCollisions()
     //--------------------------------------------------------------------------
     // Test static objects against debris
     //--------------------------------------------------------------------------
-    for (std::vector< IObject* >::const_iterator ci = m_StaticObjects.begin();
+    for (ObjectsType::const_iterator ci = m_StaticObjects.begin();
         ci != m_StaticObjects.end(); ++ci)
     {
         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
@@ -97,7 +97,7 @@ void CCollisionManager::detectCollisions()
     //--------------------------------------------------------------------------
     // Test dynamic objects against debris
     //--------------------------------------------------------------------------
-    for (std::vector< IObject* >::const_iterator ci = m_DynamicObjects.begin();
+    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
@@ -181,7 +181,11 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
 
     while (itPos != pPositions->end())
     {
-//         if (_p1->getGeometry()->getBoundingBox().isInside((*itPos)))
+        CBoundingBox BBox;
+        BBox.setLowerLeft((*itPos));
+        BBox.setUpperRight((*itPos));
+        BBox.update((*itPosP));
+        if (_p1->getGeometry()->getBoundingBox().overlaps(BBox))
         {
             double   fT   = 2.0;
             Vector2d vecA = (*itPosP) - vecC0;
@@ -315,71 +319,77 @@ void CCollisionManager::test(CPolyLine* _pP1, CPolyLine* _pP0, CBody* _p1, CDebr
     
     while (itPos != pPositions->end())
     {
-        ciP01 = _pP1->getVertices().begin();
-        ciP00 = _pP0->getVertices().begin();
-        ciP11 = ciP01;
-        ciP10 = ciP00;
-        ++ciP11;
-        ++ciP10;
-        ciPS1 = ciP11;
-        ciPS0 = ciP01;
-        
-        Vector2d vecPOC;
-        
-        double fT = 2.0;
-        double fAlpha = -1.0;
-        
-        while (ciP11 != _pP1->getVertices().end())
+        CBoundingBox BBox;
+        BBox.setLowerLeft((*itPos));
+        BBox.setUpperRight((*itPos));
+        BBox.update((*itPosP));
+        if (_p1->getGeometry()->getBoundingBox().overlaps(BBox))
         {
-            CCollisionManager::PointLineContact Contact;
-            Contact = this->testPointLine((*itPos), (*itPosP), (*ciP01), (*ciP11), (*ciP00), (*ciP10));
-            if ((Contact.fT >= 0.0) && (Contact.fT < fT))
+            ciP01 = _pP1->getVertices().begin();
+            ciP00 = _pP0->getVertices().begin();
+            ciP11 = ciP01;
+            ciP10 = ciP00;
+            ++ciP11;
+            ++ciP10;
+            ciPS1 = ciP11;
+            ciPS0 = ciP01;
+            
+            Vector2d vecPOC;
+            
+            double fT = 2.0;
+            double fAlpha = -1.0;
+            
+            while (ciP11 != _pP1->getVertices().end())
             {
-                fT     = Contact.fT;
-                fAlpha = Contact.fAlpha;
-                ciPS0  = ciP01;
-                ciPS1  = ciP11;
+                CCollisionManager::PointLineContact Contact;
+                Contact = this->testPointLine((*itPos), (*itPosP), (*ciP01), (*ciP11), (*ciP00), (*ciP10));
+                if ((Contact.fT >= 0.0) && (Contact.fT < fT))
+                {
+                    fT     = Contact.fT;
+                    fAlpha = Contact.fAlpha;
+                    ciPS0  = ciP01;
+                    ciPS1  = ciP11;
+                }
+                    
+                ++ciP01; ++ciP00; ++ciP11; ++ciP10;
             }
+            if (_pP1->getLineType() == GRAPHICS_LINETYPE_LOOP)
+            {
+                ciP11 = _pP1->getVertices().begin();
+                ciP10 = _pP1->getVertices().begin();
+
+                CCollisionManager::PointLineContact Contact;
+                Contact = this->testPointLine((*itPos), (*itPosP), (*ciP01), (*ciP11), (*ciP00), (*ciP10));
+                if ((Contact.fT >= 0.0) && (Contact.fT < fT))
+                {
+                    fT     = Contact.fT;
+                    fAlpha = Contact.fAlpha;
+                    ciPS0  = ciP01;
+                    ciPS1  = ciP11;
+                }
+            }
+            
+            if (fT<=1.0)
+            {
+                // Calculate point of contact
+                vecPOC = (*itPosP) + fT * ((*itPos) - (*itPosP));
                 
-            ++ciP01; ++ciP00; ++ciP11; ++ciP10;
-        }
-        if (_pP1->getLineType() == GRAPHICS_LINETYPE_LOOP)
-        {
-            ciP11 = _pP1->getVertices().begin();
-            ciP10 = _pP1->getVertices().begin();
+                // Projection onto segment and separation of orthogonal an tangential component
+                Vector2d vecNewVelTang = ((*itVel).dot(((*ciPS0)-(*ciPS1)).normalized())) * ((*ciPS0)-(*ciPS1)).normalized();
+                Vector2d vecNewVelOrth = vecNewVelTang - (*itVel);
+                
+                (*itVel) = (vecNewVelOrth * fDampTang + vecNewVelTang * fDampOrth) * 0.7071;
 
-            CCollisionManager::PointLineContact Contact;
-            Contact = this->testPointLine((*itPos), (*itPosP), (*ciP01), (*ciP11), (*ciP00), (*ciP10));
-            if ((Contact.fT >= 0.0) && (Contact.fT < fT))
-            {
-                fT     = Contact.fT;
-                fAlpha = Contact.fAlpha;
-                ciPS0  = ciP01;
-                ciPS1  = ciP11;
-            }
+                // Add the velocity of the object because debris' are virtually weightless.
+                // Otherwise, they would be passed in the next step
+                (*itVel) += _p1->getVelocity();
+                
+                // (*itPos)= vecPOC+(vecNewVelOrth)/(vecNewVelOrth).norm()*0.001;
+                // Cannot use POC here, because debris' are virtually weightless. Thus, the
+                // object moves on and does not care about POC position.
+                (*itPos)  = (*ciPS0) + fAlpha * ((*ciPS1)-(*ciPS0)) + vecNewVelOrth.normalized()*0.001;
+            } 
         }
-        
-        if (fT<=1.0)
-        {
-            // Calculate point of contact
-            vecPOC = (*itPosP) + fT * ((*itPos) - (*itPosP));
-            
-            // Projection onto segment and separation of orthogonal an tangential component
-            Vector2d vecNewVelTang = ((*itVel).dot(((*ciPS0)-(*ciPS1)).normalized())) * ((*ciPS0)-(*ciPS1)).normalized();
-            Vector2d vecNewVelOrth = vecNewVelTang - (*itVel);
-            
-            (*itVel) = (vecNewVelOrth * fDampTang + vecNewVelTang * fDampOrth) * 0.7071;
-
-            // Add the velocity of the object because debris' are virtually weightless.
-            // Otherwise, they would be passed in the next step
-            (*itVel) += _p1->getVelocity();
-            
-            // (*itPos)= vecPOC+(vecNewVelOrth)/(vecNewVelOrth).norm()*0.001;
-            // Cannot use POC here, because debris' are virtually weightless. Thus, the
-            // object moves on and does not care about POC position.
-            (*itPos)  = (*ciPS0) + fAlpha * ((*ciPS1)-(*ciPS0)) + vecNewVelOrth.normalized()*0.001;
-        } 
-        
         ++itPos;
         ++itPosP;
         ++itVel;

@@ -34,6 +34,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/debris_emitter.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/core/objects_emitter.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/physics_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/circle.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/double_buffered_shape.cpp

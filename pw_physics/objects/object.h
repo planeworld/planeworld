@@ -25,12 +25,10 @@
 #include "adams_moulton_integrator.h"
 #include "euler_integrator.h"
 
-#include "universe_scaled.h"
 #include "geometry.h"
 #include "hookable.h"
 
 //--- Standard header --------------------------------------------------------//
-#include <vector>
 
 /// Type definition for the AnchorIDs
 typedef uint AnchorIDType;
@@ -141,6 +139,8 @@ class IObject : public IHookable, public IUniverseScaled
 
         std::vector<Vector2d>   m_Anchors;                          ///< Anchors to joints
 };
+
+typedef std::list<IObject*>             ObjectsType;        ///< Specifies a list of objects
 
 //--- Implementation is done here for inline optimisation --------------------//
 

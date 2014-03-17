@@ -23,14 +23,14 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "debris.h"
+#include "debris_visuals.h"
 #include "joint.h"
-#include "object.h"
+#include "object_visuals.h"
 
-
-typedef std::list<IJoint*>      JointsType;
-typedef std::list<CDebris*>     DebrisType;
-typedef std::vector<IObject*>  ObjectsType;
+typedef std::list<IJoint*>              JointsType;         ///< Specifies a list of joints
+typedef std::list<CDebris*>             DebrisType;         ///< Specifies a list of debris
+typedef std::list<CDebrisVisuals*>      DebrisVisualsType;  ///< Specifies a list of debris visuals
+typedef std::vector<IObjectVisuals*>    ObjectVisualsType;  ///< Specifies a list of object visuals
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -41,29 +41,41 @@ class CWorldDataStorage
 {
     
     public:
-
+        
         //--- Constructor/Destructor -----------------------------------------//
         CWorldDataStorage();
         ~CWorldDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
-        const DebrisType&     getDebris() const;
-        const JointsType&     getJoints() const;
-        const ObjectsType&    getDynamicObjects() const;
-        const ObjectsType&    getStaticObjects() const;
+        const DebrisType&           getDebris() const;
+        const DebrisVisualsType&    getDebrisVisuals() const;
+        const JointsType&           getJoints() const;
+        const ObjectsType&          getDynamicObjects();
+        const ObjectsType&          getStaticObjects();
+        const ObjectVisualsType&    getObjectVisuals();
         
         //--- Methods --------------------------------------------------------//
         void addDebris(CDebris*);
+        void addDebrisVisuals(CDebrisVisuals*);
         void addJoint(IJoint*);
         void addObject(IObject*);
         void addObjects(ObjectsType);
+        void addObjectVisuals(IObjectVisuals*);
+        
+        void lockObjects(){m_ObjectMutex.lock();}
+        void unlockObjects(){m_ObjectMutex.unlock();}
         
     private:
                 
-        DebrisType          m_Debris;               ///< List of debris
-        JointsType          m_Joints;               ///< List of joints
-        ObjectsType         m_DynamicObjects;       ///< List of dynamic objects
-        ObjectsType         m_StaticObjects;        ///< List of static objects
+        DebrisType          m_Debris;                   ///< List of debris
+        DebrisVisualsType   m_DebrisVisuals;            ///< List of debris visuals
+        JointsType          m_Joints;                   ///< List of joints
+        ObjectsType         m_DynamicObjects;           ///< List of dynamic objects
+        ObjectsType         m_StaticObjects;            ///< List of static objects
+        ObjectVisualsType   m_ObjectVisuals;            ///< List of object visuals
+        
+        sf::Mutex           m_ObjectMutex;           ///< Mutex to lock object
+        sf::Mutex           m_ObjectVisualsMutex;    ///< Mutex to lock object visuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -79,6 +91,19 @@ inline const DebrisType& CWorldDataStorage::getDebris() const
 {
     METHOD_ENTRY("CWorldDataStorage::getDebris")
     return m_Debris;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns a list of debris visuals.
+///
+/// \return List of debris visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const DebrisVisualsType& CWorldDataStorage::getDebrisVisuals() const
+{
+    METHOD_ENTRY("CWorldDataStorage::getDebrisVisuals")
+    return m_DebrisVisuals;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,9 +126,10 @@ inline const JointsType& CWorldDataStorage::getJoints() const
 /// \return List of dynamic objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ObjectsType& CWorldDataStorage::getDynamicObjects() const
+inline const ObjectsType& CWorldDataStorage::getDynamicObjects() 
 {
     METHOD_ENTRY("CWorldDataStorage::getDynamicObjects")
+    sf::Lock lock(m_ObjectMutex);
     return m_DynamicObjects;
 }
 
@@ -114,10 +140,25 @@ inline const ObjectsType& CWorldDataStorage::getDynamicObjects() const
 /// \return List of static objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ObjectsType& CWorldDataStorage::getStaticObjects() const
+inline const ObjectsType& CWorldDataStorage::getStaticObjects() 
 {
     METHOD_ENTRY("CWorldDataStorage::getStaticObjects")
+    sf::Lock lock(m_ObjectMutex);
     return m_StaticObjects;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns a list of object visuals.
+///
+/// \return List of object visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ObjectVisualsType& CWorldDataStorage::getObjectVisuals()
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectVisuals")
+    sf::Lock lock(m_ObjectVisualsMutex);
+    return m_ObjectVisuals;
 }
 
 #endif

@@ -72,6 +72,22 @@ CWorldDataStorage::~CWorldDataStorage()
             DOM_MEMF(DEBUG_MSG("IObject*", "Memory already freed."))
         }
     };
+    
+    for (ObjectVisualsType::iterator it = m_ObjectVisuals.begin();
+        it != m_ObjectVisuals.end(); ++it)
+    {
+        // Free memory if pointer is still existent
+        if ((*it) != 0)
+        {
+            delete (*it);
+            (*it) = 0;
+            MEM_FREED("IObjectVisuals*")
+        }
+        else
+        {
+            DOM_MEMF(DEBUG_MSG("IObjectVisuals*", "Memory already freed."))
+        }
+    };
         
     for (DebrisType::iterator it = m_Debris.begin();
         it != m_Debris.end(); ++it)
@@ -86,6 +102,22 @@ CWorldDataStorage::~CWorldDataStorage()
         else
         {
             DOM_MEMF(DEBUG_MSG("CDebris*", "Memory already freed."))
+        }
+    };
+    
+    for (DebrisVisualsType::iterator it = m_DebrisVisuals.begin();
+        it != m_DebrisVisuals.end(); ++it)
+    {
+        // Free memory if pointer is still existent
+        if ((*it) != 0)
+        {
+            delete (*it);
+            (*it) = 0;
+            MEM_FREED("CDebrisVisuals*")
+        }
+        else
+        {
+            DOM_MEMF(DEBUG_MSG("CDebrisVisuals*", "Memory already freed."))
         }
     };
     
@@ -123,8 +155,23 @@ void CWorldDataStorage::addDebris(CDebris* _pDebris)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Add a joint to list
+/// \brief Add a debris visuals to list
 ///
+/// This method adds the given debris visual to the list of debris visuals.
+///
+/// \param _pDebrisVisuals Debris visual that should be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWorldDataStorage::addDebrisVisuals(CDebrisVisuals* _pDebrisVisuals)
+{
+    METHOD_ENTRY("CWorldDataStorage::addDebrisVisuals")
+    m_DebrisVisuals.push_back(_pDebrisVisuals);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a joint to list
+///new c++ 
 /// This method adds the given joint to the list of joints.
 ///
 /// \param _pJoint Joint that should be added to list
@@ -151,10 +198,12 @@ void CWorldDataStorage::addObject(IObject* _pObject)
 {
     METHOD_ENTRY("CWorldDataStorage::addObject")
 
+    m_ObjectMutex.lock();
     if (_pObject->getDynamicsState())
         m_DynamicObjects.push_back(_pObject);
     else
         m_StaticObjects.push_back(_pObject);
+    m_ObjectMutex.unlock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -175,10 +224,22 @@ void CWorldDataStorage::addObjects(ObjectsType _Objects)
   
     while (ci != _Objects.end())
     {
-        if ((*ci)->getDynamicsState())
-            m_DynamicObjects.push_back((*ci));
-        else
-            m_StaticObjects.push_back((*ci));
+        this->addObject((*ci));
         ++ci;
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a object visuals to internal list
+///
+/// \param _pObjectVisuals Objects visuals that should be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWorldDataStorage::addObjectVisuals(IObjectVisuals* _pObjectVisuals)
+{
+    METHOD_ENTRY("CWorldDataStorage::addObjectVisuals")
+    m_ObjectVisualsMutex.lock();
+    m_ObjectVisuals.push_back(_pObjectVisuals);
+    m_ObjectVisualsMutex.unlock();
 }

@@ -27,6 +27,7 @@
 #include "body.h"
 #include "emitter.h"
 #include "universe.h"
+#include "world_data_storage_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "pugixml.hpp"
@@ -43,7 +44,7 @@ typedef enum
 /// \brief Class for importing world data from xml files
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CXMLImporter 
+class CXMLImporter : public IWorldDataStorageUser
 {
 
     public:
@@ -56,8 +57,6 @@ class CXMLImporter
         CCamera*                        getCamera() const;
         Vector2d                        getGravity() const;
         EmittersType                    getEmitters() const;
-        std::vector<IObject*>           getObjects() const;
-        std::vector<IObjectVisuals*>    getVisuals() const;
         const CUniverse&                getUniverse() const;
                 
         //--- Methods --------------------------------------------------------//
@@ -81,14 +80,13 @@ class CXMLImporter
         void createUniverse(const pugi::xml_node&);
         void readObjectCore(IObject* const, const pugi::xml_node&);
         
-        CUniverse                       m_Universe;      ///< The procedurally generated universe
-        CCamera*                        m_pCamera;       ///< Main camera
-        Vector2d                        m_vecGravity;    ///< Constant gravity vector
-        std::string                     m_strCameraHook; ///< Camera hook
-        EmittersType                    m_Emitters;      ///< List of emitters
-        std::map<std::string,IObject*>  m_Objects;       ///< List of objects
-        std::vector<IObjectVisuals*>    m_Visuals;       ///< List of object visuals
-        std::string                     m_strPath;       ///< Path to read data from
+        CUniverse                       m_Universe;         ///< The procedurally generated universe
+        CCamera*                        m_pCamera;          ///< Main camera
+        Vector2d                        m_vecGravity;       ///< Constant gravity vector
+        std::string                     m_strCameraHook;    ///< Camera hook
+        EmittersType                    m_Emitters;         ///< List of emitters
+        std::map<std::string,IObject*>  m_Objects;          ///< List of objects
+        std::string                     m_strPath;          ///< Path to read data from
                 
 };
 
@@ -135,19 +133,6 @@ inline EmittersType CXMLImporter::getEmitters() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return imported object visuals
-///
-/// \return List of object visuals
-///
-////////////////////////////////////////////////////////////////////////////////
-inline std::vector<IObjectVisuals*> CXMLImporter::getVisuals() const
-{
-    METHOD_ENTRY("CXMLImporter::getVisuals")
-    return m_Visuals;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Return procedurally generated universe
 ///
 /// \return Procedurally generated universe
@@ -158,5 +143,6 @@ inline const CUniverse& CXMLImporter::getUniverse() const
     METHOD_ENTRY("CXMLImporter::getUniverse")
     return m_Universe;
 }
+
 
 #endif

@@ -49,8 +49,8 @@ class CCollisionManager
         //--- Methods --------------------------------------------------------//
         void detectCollisions();
         void setDebris(const std::list<CDebris*>&);
-        void setDynamicObjects(const std::vector<IObject*>&);
-        void setStaticObjects(const std::vector<IObject*>&);
+        void setDynamicObjects(const ObjectsType&);
+        void setStaticObjects(const ObjectsType&);
         
     private:
         
@@ -80,8 +80,8 @@ class CCollisionManager
                                           const Vector2d&, const Vector2d&, const Vector2d&);
         
         std::list<CDebris*>     m_Debris;           ///< List of debris
-        std::vector<IObject*>   m_DynamicObjects;   ///< List of dynamic objects
-        std::vector<IObject*>     m_StaticObjects;    ///< List of static objects
+        ObjectsType             m_DynamicObjects;   ///< List of dynamic objects
+        ObjectsType             m_StaticObjects;    ///< List of static objects
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -107,7 +107,7 @@ inline void CCollisionManager::setDebris(const std::list<CDebris*>& _DebrisList)
 /// \param _ObjList List of dynamic objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setDynamicObjects(const std::vector<IObject*>& _ObjList)
+inline void CCollisionManager::setDynamicObjects(const ObjectsType& _ObjList)
 {
     METHOD_ENTRY("CCollisionManager::setDynamicObjects")
 
@@ -121,7 +121,7 @@ inline void CCollisionManager::setDynamicObjects(const std::vector<IObject*>& _O
 /// \param _ObjList List of static objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setStaticObjects(const std::vector<IObject*>& _ObjList)
+inline void CCollisionManager::setStaticObjects(const ObjectsType& _ObjList)
 {
     METHOD_ENTRY("CCollisionManager::setStaticObjects")
 
