@@ -38,6 +38,7 @@ class CAdamsBashforthIntegrator : public IIntegrator<T>
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
+        CAdamsBashforthIntegrator();
         ~CAdamsBashforthIntegrator();
 
         //--- Constant Methods -----------------------------------------------//
@@ -73,7 +74,6 @@ template <class T>
 inline const T CAdamsBashforthIntegrator<T>::getPrevValue() const
 {
     METHOD_ENTRY("CAdamsBashforthIntegrator::getPrevValue")
-    METHOD_EXIT("CAdamsBashforthIntegrator::getPrevValue")
     return m_PrevValue;
 }
 
@@ -88,7 +88,6 @@ template <class T>
 inline const T CAdamsBashforthIntegrator<T>::getValue() const
 {
     METHOD_ENTRY("CAdamsBashforthIntegrator::getValue")
-    METHOD_EXIT("CAdamsBashforthIntegrator::getValue")
     return m_Value;
 }
 

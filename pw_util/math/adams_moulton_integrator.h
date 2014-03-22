@@ -38,6 +38,7 @@ class CAdamsMoultonIntegrator : public IIntegrator<T>
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
+        CAdamsMoultonIntegrator();
         ~CAdamsMoultonIntegrator();
 
         //--- Constant Methods -----------------------------------------------//
@@ -73,7 +74,6 @@ template <class T>
 inline const T CAdamsMoultonIntegrator<T>::getPrevValue() const
 {
     METHOD_ENTRY("CAdamsMoultonIntegrator::getPrevValue")
-    METHOD_EXIT("CAdamsMoultonIntegrator::getPrevValue")
     return m_PrevValue;
 }
 
@@ -88,7 +88,6 @@ template <class T>
 inline const T CAdamsMoultonIntegrator<T>::getValue() const
 {
     METHOD_ENTRY("CAdamsMoultonIntegrator::getValue")
-    METHOD_EXIT("CAdamsMoultonIntegrator::getValue")
     return m_Value;
 }
 

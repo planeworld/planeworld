@@ -19,16 +19,50 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+template <class T>
+CAdamsBashforthIntegrator<T>::CAdamsBashforthIntegrator() : m_PrevValue(0.0), m_Value(0.0)
+{
+    METHOD_ENTRY("CAdamsBashforthIntegrator::CAdamsBashforthIntegrator")
+    CTOR_CALL("CAdamsBashforthIntegrator::CAdamsBashforthIntegrator")
+    
+    m_Deriv[0] = 0.0;
+    m_Deriv[1] = 0.0;
+    m_Deriv[2] = 0.0;
+    m_Deriv[3] = 0.0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+template <>
+inline CAdamsBashforthIntegrator<Vector2d>::CAdamsBashforthIntegrator()
+{
+    METHOD_ENTRY("CAdamsBashforthIntegrator::CAdamsBashforthIntegrator")
+    CTOR_CALL("CAdamsBashforthIntegrator::CAdamsBashforthIntegrator")
+    
+    m_Deriv[0].setZero();
+    m_Deriv[1].setZero();
+    m_Deriv[2].setZero();
+    m_Deriv[3].setZero();
+    m_PrevValue.setZero();
+    m_Value.setZero();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Destructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template <class T>
 CAdamsBashforthIntegrator<T>::~CAdamsBashforthIntegrator()
 {
-    METHOD_ENTRY("CAdamsBashforthIntegrator::~CAdamsBashforthIntegrator()");
-    DTOR_CALL("CAdamsBashforthIntegrator::~CAdamsBashforthIntegrator()");
-    
-    METHOD_EXIT("CAdamsBashforthIntegrator::~CAdamsBashforthIntegrator()");
+    METHOD_ENTRY("CAdamsBashforthIntegrator::~CAdamsBashforthIntegrator")
+    DTOR_CALL("CAdamsBashforthIntegrator::~CAdamsBashforthIntegrator")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,7 +78,7 @@ CAdamsBashforthIntegrator<T>::~CAdamsBashforthIntegrator()
 template <class T>
 const T CAdamsBashforthIntegrator<T>::integrate(const T& _V, const double& _fStep)
 {
-    METHOD_ENTRY("CAdamsBashforthIntegrator::integrate(const Vector2d&, const double&)");
+    METHOD_ENTRY("CAdamsBashforthIntegrator::integrate")
 
     m_Deriv[3] = m_Deriv[2];
     m_Deriv[2] = m_Deriv[1];
@@ -58,7 +92,6 @@ const T CAdamsBashforthIntegrator<T>::integrate(const T& _V, const double& _fSte
                      m_Deriv[3] *  3.0/ 8.0) *
                     _fStep;
 
-    METHOD_EXIT("CAdamsBashforthIntegrator::integrate(const const Vector2d&, const double&)");
     return m_Value;
 }
 
@@ -82,7 +115,7 @@ const T CAdamsBashforthIntegrator<T>::integrateClip(const T& _V,
                                                     const double& _fStep,
                                                     const T& _Clip)
 {
-    METHOD_ENTRY("CAdamsBashforthIntegrator::integrate(const Vector2d&, const double&)");
+    METHOD_ENTRY("CAdamsBashforthIntegrator::integrate")
 
     m_Deriv[3] = m_Deriv[2];
     m_Deriv[2] = m_Deriv[1];
@@ -102,7 +135,6 @@ const T CAdamsBashforthIntegrator<T>::integrateClip(const T& _V,
     else if (nF <= -2)
         m_Value -= (nF+1)*_Clip;
 
-    METHOD_EXIT("CAdamsBashforthIntegrator::integrate(const const Vector2d&, const double&)");
     return m_Value;
 }
 
@@ -126,7 +158,7 @@ inline const Vector2d CAdamsBashforthIntegrator<Vector2d>::integrateClip(const V
                                                                          const double& _fStep,
                                                                          const Vector2d& _Clip)
 {
-    METHOD_ENTRY("CAdamsBashforthIntegrator::integrate(const Vector2d&, const double&)");
+    METHOD_ENTRY("CAdamsBashforthIntegrator::integrate")
 
     m_Deriv[3] = m_Deriv[2];
     m_Deriv[2] = m_Deriv[1];
@@ -151,7 +183,6 @@ inline const Vector2d CAdamsBashforthIntegrator<Vector2d>::integrateClip(const V
     else if (nF <= -2)
         m_Value[1] -= (nF+1)*_Clip[1];
 
-    METHOD_EXIT("CAdamsBashforthIntegrator::integrate(const const Vector2d&, const double&)");
     return m_Value;
 }
 
@@ -165,7 +196,7 @@ inline const Vector2d CAdamsBashforthIntegrator<Vector2d>::integrateClip(const V
 template <class T>
 void CAdamsBashforthIntegrator<T>::init(const T& _V)
 {
-    METHOD_ENTRY("init(const Vector2d&)");
+    METHOD_ENTRY("init")
 
     m_Value = _V;
     m_PrevValue = _V;
@@ -173,8 +204,6 @@ void CAdamsBashforthIntegrator<T>::init(const T& _V)
     m_Deriv[1]=0;
     m_Deriv[2]=0;
     m_Deriv[3]=0;
-
-    METHOD_EXIT("init(const Vector2d&)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,7 +216,7 @@ void CAdamsBashforthIntegrator<T>::init(const T& _V)
 template <>
 inline void CAdamsBashforthIntegrator<Vector2d>::init(const Vector2d& _V)
 {
-    METHOD_ENTRY("init(const Vector2d&)");
+    METHOD_ENTRY("init")
 
     m_Value = _V;
     m_PrevValue = _V;
@@ -195,8 +224,6 @@ inline void CAdamsBashforthIntegrator<Vector2d>::init(const Vector2d& _V)
     m_Deriv[1].setZero();
     m_Deriv[2].setZero();
     m_Deriv[3].setZero();
-
-    METHOD_EXIT("init(const Vector2d&)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -207,7 +234,7 @@ inline void CAdamsBashforthIntegrator<Vector2d>::init(const Vector2d& _V)
 template <class T>
 void CAdamsBashforthIntegrator<T>::reset()
 {
-    METHOD_ENTRY("CAdamsBashforthIntegrator::reset()");
+    METHOD_ENTRY("CAdamsBashforthIntegrator::reset")
 
     m_PrevValue=0;
     m_Value=0;
@@ -215,8 +242,6 @@ void CAdamsBashforthIntegrator<T>::reset()
     m_Deriv[1]=0;
     m_Deriv[2]=0;
     m_Deriv[3]=0;
-
-    METHOD_EXIT("CAdamsBashforthIntegrator::reset()");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -227,7 +252,7 @@ void CAdamsBashforthIntegrator<T>::reset()
 template <>
 inline void CAdamsBashforthIntegrator<Vector2d>::reset()
 {
-    METHOD_ENTRY("CAdamsBashforthIntegrator::reset()");
+    METHOD_ENTRY("CAdamsBashforthIntegrator::reset")
 
     m_PrevValue.setZero();
     m_Value.setZero();
@@ -235,6 +260,4 @@ inline void CAdamsBashforthIntegrator<Vector2d>::reset()
     m_Deriv[1].setZero();
     m_Deriv[2].setZero();
     m_Deriv[3].setZero();
-
-    METHOD_EXIT("CAdamsBashforthIntegrator::reset()");
 }

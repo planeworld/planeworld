@@ -35,6 +35,7 @@ class CEulerIntegrator : public IIntegrator<T>
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
+        CEulerIntegrator();
         ~CEulerIntegrator();
 
         //--- Constant Methods -----------------------------------------------//
@@ -68,9 +69,7 @@ class CEulerIntegrator : public IIntegrator<T>
 template <class T>
 inline const T CEulerIntegrator<T>::getPrevValue() const
 {
-    METHOD_ENTRY("CEulerIntegrator::getPrevValue()");
-    METHOD_EXIT("CEulerIntegrator::getPrevValue()");
-
+    METHOD_ENTRY("CEulerIntegrator::getPrevValue")
     return m_PrevValue;
 }
 
@@ -84,9 +83,7 @@ inline const T CEulerIntegrator<T>::getPrevValue() const
 template <class T>
 inline const T CEulerIntegrator<T>::getValue() const
 {
-    METHOD_ENTRY("CEulerIntegrator::getValue()");
-    METHOD_EXIT("CEulerIntegrator::getValue()");
-
+    METHOD_ENTRY("CEulerIntegrator::getValue")
     return m_Value;
 }
 

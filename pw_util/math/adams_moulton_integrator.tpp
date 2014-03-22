@@ -17,6 +17,45 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+template <class T>
+CAdamsMoultonIntegrator<T>::CAdamsMoultonIntegrator() : m_PrevValue(0.0), m_Value(0.0)
+{
+    METHOD_ENTRY("CAdamsMoultonIntegrator::CAdamsMoultonIntegrator")
+    CTOR_CALL("CAdamsMoultonIntegrator::CAdamsMoultonIntegrator")
+    
+    m_Deriv[0]=0.0;
+    m_Deriv[1]=0.0;
+    m_Deriv[2]=0.0;
+    m_Deriv[3]=0.0;
+    m_Deriv[4]=0.0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+template <>
+inline CAdamsMoultonIntegrator<Vector2d>::CAdamsMoultonIntegrator()
+{
+    METHOD_ENTRY("CAdamsMoultonIntegrator::CAdamsMoultonIntegrator")
+    CTOR_CALL("CAdamsMoultonIntegrator::CAdamsMoultonIntegrator")
+    
+    m_Deriv[0].setZero();
+    m_Deriv[1].setZero();
+    m_Deriv[2].setZero();
+    m_Deriv[3].setZero();
+    m_Deriv[4].setZero();
+    m_PrevValue.setZero();
+    m_Value.setZero();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Destructor
@@ -25,10 +64,8 @@
 template <class T>
 CAdamsMoultonIntegrator<T>::~CAdamsMoultonIntegrator()
 {
-    METHOD_ENTRY("CAdamsMoultonIntegrator::~CAdamsMoultonIntegrator()");
-    DTOR_CALL("CAdamsMoultonIntegrator::~CAdamsMoultonIntegrator()");
-    
-    METHOD_EXIT("CAdamsMoultonIntegrator::~CAdamsMoultonIntegrator()");
+    METHOD_ENTRY("CAdamsMoultonIntegrator::~CAdamsMoultonIntegrator")
+    DTOR_CALL("CAdamsMoultonIntegrator::~CAdamsMoultonIntegrator")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +82,7 @@ template <class T>
 const T CAdamsMoultonIntegrator<T>::integrate(const T& _V,
                                               const double& _fStep)
 {
-    METHOD_ENTRY("CAdamsMoultonIntegrator::integrate(const double&, const double&)");
+    METHOD_ENTRY("CAdamsMoultonIntegrator::integrate")
 
     m_Deriv[4] = m_Deriv[3];
     m_Deriv[3] = m_Deriv[2];
@@ -60,8 +97,6 @@ const T CAdamsMoultonIntegrator<T>::integrate(const T& _V,
                   m_Deriv[3] * 106.0/720.0 -
                   m_Deriv[4] * 19.0 /720.0) *
                   _fStep;
-                  
-    METHOD_EXIT("CAdamsMoultonIntegrator::integrate(const double&, const double&)");
     return m_Value;
 }
 
@@ -85,7 +120,7 @@ const T CAdamsMoultonIntegrator<T>::integrateClip(const T& _V,
                                                   const double& _fStep,
                                                   const T& _Clip)
 {
-    METHOD_ENTRY("CAdamsMoultonIntegrator::integrate(const double&, const double&)");
+    METHOD_ENTRY("CAdamsMoultonIntegrator::integrate")
 
     m_Deriv[4] = m_Deriv[3];
     m_Deriv[3] = m_Deriv[2];
@@ -107,7 +142,6 @@ const T CAdamsMoultonIntegrator<T>::integrateClip(const T& _V,
     else if (nF <= -2)
         m_Value -= (nF+1)*_Clip;
 
-    METHOD_EXIT("CAdamsMoultonIntegrator::integrate(const double&, const double&)");
     return m_Value;
 }
 
@@ -131,7 +165,7 @@ inline const Vector2d CAdamsMoultonIntegrator<Vector2d>::integrateClip(const Vec
                                                                 const double& _fStep,
                                                                 const Vector2d& _Clip)
 {
-    METHOD_ENTRY("CAdamsMoultonIntegrator::integrate(const double&, const double&)");
+    METHOD_ENTRY("CAdamsMoultonIntegrator::integrate")
 
     m_Deriv[4] = m_Deriv[3];
     m_Deriv[3] = m_Deriv[2];
@@ -158,7 +192,6 @@ inline const Vector2d CAdamsMoultonIntegrator<Vector2d>::integrateClip(const Vec
     else if (nF <= -2)
         m_Value[1] -= (nF+1)*_Clip[1];
 
-    METHOD_EXIT("CAdamsMoultonIntegrator::integrate(const double&, const double&)");
     return m_Value;
 }
 
@@ -172,7 +205,7 @@ inline const Vector2d CAdamsMoultonIntegrator<Vector2d>::integrateClip(const Vec
 template <class T>
 void CAdamsMoultonIntegrator<T>::init(const T& _V)
 {
-    METHOD_ENTRY("init(const double&)");
+    METHOD_ENTRY("init")
 
     m_Value = _V;
     m_PrevValue = _V;
@@ -182,7 +215,6 @@ void CAdamsMoultonIntegrator<T>::init(const T& _V)
     m_Deriv[3]=0;
     m_Deriv[4]=0;
 
-    METHOD_EXIT("init(const double&)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -195,7 +227,7 @@ void CAdamsMoultonIntegrator<T>::init(const T& _V)
 template <>
 inline void CAdamsMoultonIntegrator<Vector2d>::init(const Vector2d& _V)
 {
-    METHOD_ENTRY("init(const double&)");
+    METHOD_ENTRY("init")
 
     m_Value = _V;
     m_PrevValue = _V;
@@ -204,8 +236,6 @@ inline void CAdamsMoultonIntegrator<Vector2d>::init(const Vector2d& _V)
     m_Deriv[2].setZero();
     m_Deriv[3].setZero();
     m_Deriv[4].setZero();
-
-    METHOD_EXIT("init(const double&)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -216,7 +246,7 @@ inline void CAdamsMoultonIntegrator<Vector2d>::init(const Vector2d& _V)
 template <class T>
 void CAdamsMoultonIntegrator<T>::reset()
 {
-    METHOD_ENTRY("CAdamsMoultonIntegrator::reset()");
+    METHOD_ENTRY("CAdamsMoultonIntegrator::reset");
 
     m_PrevValue=0;
     m_Value=0;
@@ -225,8 +255,6 @@ void CAdamsMoultonIntegrator<T>::reset()
     m_Deriv[2]=0;
     m_Deriv[3]=0;
     m_Deriv[4]=0;
-    
-    METHOD_EXIT("CAdamsMoultonIntegrator::reset()");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -237,7 +265,7 @@ void CAdamsMoultonIntegrator<T>::reset()
 template <>
 inline void CAdamsMoultonIntegrator<Vector2d>::reset()
 {
-    METHOD_ENTRY("CAdamsMoultonIntegrator::reset()");
+    METHOD_ENTRY("CAdamsMoultonIntegrator::reset")
 
     m_PrevValue.setZero();
     m_Value.setZero();
@@ -246,6 +274,4 @@ inline void CAdamsMoultonIntegrator<Vector2d>::reset()
     m_Deriv[2].setZero();
     m_Deriv[3].setZero();
     m_Deriv[4].setZero();
-
-    METHOD_EXIT("CAdamsMoultonIntegrator::reset()");
 }

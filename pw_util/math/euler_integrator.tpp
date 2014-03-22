@@ -19,16 +19,41 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+template <class T>
+CEulerIntegrator<T>::CEulerIntegrator() : m_PrevValue(0.0), m_Value(0.0)
+{
+    METHOD_ENTRY("CEulerIntegrator::CEulerIntegrator")
+    CTOR_CALL("CEulerIntegrator::CEulerIntegrator")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Template specialisation
+///
+///////////////////////////////////////////////////////////////////////////////
+template <>
+inline CEulerIntegrator<Vector2d>::CEulerIntegrator()
+{
+    METHOD_ENTRY("CEulerIntegrator::CEulerIntegrator")
+    DTOR_CALL("CEulerIntegrator::CEulerIntegrator")
+    
+    m_PrevValue.setZero();
+    m_Value.setZero();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Destructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template <class T>
 CEulerIntegrator<T>::~CEulerIntegrator()
 {
-    METHOD_ENTRY("CEulerIntegrator::~CEulerIntegrator()");
-    DTOR_CALL("CEulerIntegrator::~CEulerIntegrator()");
-    
-    METHOD_EXIT("CEulerIntegrator::~CEulerIntegrator()");
+    METHOD_ENTRY("CEulerIntegrator::~CEulerIntegrator")
+    DTOR_CALL("CEulerIntegrator::~CEulerIntegrator")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,7 +75,6 @@ const T CEulerIntegrator<T>::integrate(const T& _V,
     m_PrevValue = m_Value;
     m_Value += _V * _fStep;
 
-    METHOD_EXIT("CEulerIntegrator::integrate")
     return m_Value;
 }
 
@@ -85,7 +109,6 @@ const T CEulerIntegrator<T>::integrateClip(const T& _V,
     else if (nF <= -2)
         m_Value -= (nF+1)*_Clip;
     
-    METHOD_EXIT("CEulerIntegrator::integrate")
     return m_Value;
 }
 
@@ -125,7 +148,6 @@ inline const Vector2d CEulerIntegrator<Vector2d>::integrateClip(const Vector2d& 
     else if (nF <= -2)
         m_Value[1] -= (nF+1)*_Clip[1];
     
-    METHOD_EXIT("CEulerIntegrator::integrate")
     return m_Value;
 }
 
@@ -143,8 +165,6 @@ void CEulerIntegrator<T>::init(const T& _V)
 
     m_Value = _V;
     m_PrevValue = _V;
-
-    METHOD_EXIT("init")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,8 +179,6 @@ void CEulerIntegrator<T>::reset()
 
     m_PrevValue=0;
     m_Value=0;
-
-    METHOD_EXIT("CEulerIntegrator::reset")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -175,6 +193,4 @@ inline void CEulerIntegrator<Vector2d>::reset()
 
     m_PrevValue.setZero();
     m_Value.setZero();
-
-    METHOD_EXIT("CEulerIntegrator::reset")
 }
