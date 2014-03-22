@@ -399,10 +399,18 @@ void CLog::setLoglevel(const LogLevelType& _Loglevel)
             if (_Loglevel < m_LogLevel)
             {
                 DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
+                #ifdef DOMAIN_MEMORY
+                if (m_LogLevel == LOG_LEVEL_DEBUG)
+                    m_nMemCounter = 0;
+                #endif
                 m_LogLevel = _Loglevel;
             }
-            else
+            else if (_Loglevel > m_LogLevel)
             {
+                #ifdef DOMAIN_MEMORY
+                if (_Loglevel == LOG_LEVEL_DEBUG)
+                    m_nMemCounter = 0;
+                #endif
                 m_LogLevel = _Loglevel;
                 DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
             }
