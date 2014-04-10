@@ -35,9 +35,9 @@ IObject::IObject(): m_bGravitation(true),
     CTOR_CALL("IObject::IObject")
     
     m_pIntPos = new CAdamsMoultonIntegrator<Vector2d>;
-    MEM_ALLOC("m_pIntPos")
+    MEM_ALLOC("CAdamsMoultonIntegrator")
     m_pIntVel = new CAdamsBashforthIntegrator<Vector2d>;
-    MEM_ALLOC("m_pIntVel")
+    MEM_ALLOC("CAdamsBashforthIntegrator")
 
     m_vecOrigin0.setZero();
     m_vecCOM.setZero();
@@ -45,8 +45,6 @@ IObject::IObject(): m_bGravitation(true),
     m_vecCell.setZero();
 
     m_Lifetime.start();
-
-    METHOD_EXIT("IObject::IObject")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,14 +61,14 @@ IObject::~IObject()
     {
         delete m_pIntPos;
         m_pIntPos = 0;
-        MEM_FREED("m_pIntPos")
+        MEM_FREED("CAdamsMoultonIntegrator")
     }
 
     if (m_pIntVel != 0)
     {
         delete m_pIntVel;
         m_pIntVel = 0;
-        MEM_FREED("m_pIntVel")
+        MEM_FREED("CAdamsBashforthIntegrator")
     }
 
     m_Lifetime.stop();
@@ -82,8 +80,6 @@ IObject::~IObject()
         DEBUG_MSG("Object", "Gametime (" << m_strName << "): "
                 << m_Lifetime.getTime()*m_fTimeFac)
     )
-
-    METHOD_EXIT("IObject::~IObject")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,10 +162,7 @@ void IObject::init()
     m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue()+m_vecCOM);
     this->setCell(m_vecCell);
    
-    m_vecForce.setZero();
     m_pIntPos->init(m_vecOrigin0);
-    m_pIntVel->reset();
-
     this->myInit();
 
     METHOD_EXIT("IObject::init")
@@ -216,13 +209,13 @@ void IObject::setNewIntegrator(const IntegratorType& _IntType)
     if (m_pIntPos != 0)
     {
         delete m_pIntPos;
-        MEM_FREED("m_pIntPos")
+        MEM_FREED("CAdamsMoultonIntegrator")
         m_pIntPos = 0;
     }
     if (m_pIntVel != 0)
     {
         delete m_pIntVel;
-        MEM_FREED("m_pIntVel")
+        MEM_FREED("CAdamsBashforthIntegrator")
         m_pIntVel = 0;
     }
 
@@ -231,20 +224,20 @@ void IObject::setNewIntegrator(const IntegratorType& _IntType)
         case INTEGRATOR_EULER:
             m_pIntPos = new CEulerIntegrator<Vector2d>;
             m_pIntVel = new CEulerIntegrator<Vector2d>;
-            MEM_ALLOC("m_pIntPos")
-            MEM_ALLOC("m_pIntVel")
+            MEM_ALLOC("CEulerIntegrator")
+            MEM_ALLOC("CEulerIntegrator")
             break;
         case INTEGRATOR_ADAMS_BASHFORTH:
             m_pIntPos = new CAdamsBashforthIntegrator<Vector2d>;
             m_pIntVel = new CAdamsBashforthIntegrator<Vector2d>;
-            MEM_ALLOC("m_pIntPos")
-            MEM_ALLOC("m_pIntVel")
+            MEM_ALLOC("CAdamsBashforthIntegrator")
+            MEM_ALLOC("CAdamsBashforthIntegrator")
             break;
         case INTEGRATOR_ADAMS_MOULTON:
             m_pIntPos = new CAdamsMoultonIntegrator<Vector2d>;
             m_pIntVel = new CAdamsMoultonIntegrator<Vector2d>;
-            MEM_ALLOC("m_pIntPos")
-            MEM_ALLOC("m_pIntVel")
+            MEM_ALLOC("CAdamsMoultonIntegrator")
+            MEM_ALLOC("CAdamsMoultonIntegrator")
             break;
     }
 

@@ -40,8 +40,9 @@ class IVisuals : virtual public CGraphicsBase
         virtual ~IVisuals(){}
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void draw(const CCamera* const,
-                          const IObject* const) const = 0;
+        virtual IVisuals* clone(CDoubleBufferedShape* const) const = 0;
+        virtual void      draw(const CCamera* const,
+                               const IObject* const) const = 0;
                           
         
                 

@@ -30,7 +30,32 @@ CGeometry::CGeometry()
     CTOR_CALL("CGeometry::CGeometry")
     
     m_pShapes = new std::list<CDoubleBufferedShape*>();
-    MEM_ALLOC("m_pShapes")
+    MEM_ALLOC("ShapeList")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy Constructor
+///
+/// \param _Geom Geometry that should be copied
+///
+///////////////////////////////////////////////////////////////////////////////
+CGeometry::CGeometry(const CGeometry& _Geom)
+{
+    METHOD_ENTRY("CGeometry::CGeometry")
+    CTOR_CALL("CGeometry::CGeometry")
+    
+    m_AABB = _Geom.m_AABB;
+
+    m_pShapes = new std::list<CDoubleBufferedShape*>();
+    MEM_ALLOC("ShapeList")
+    
+    DBShapesType::const_iterator ci=_Geom.m_pShapes->begin();
+    while (ci != _Geom.m_pShapes->end())
+    {
+        m_pShapes->push_back((*ci)->clone());
+        ++ci;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,21 +72,82 @@ CGeometry::~CGeometry()
         it != m_pShapes->end(); ++it)
     {
         // Free memory if pointer is still existent
-        if ((*it) != 0)
+        if ((*it) != nullptr)
         {
             delete (*it);
-            (*it) = 0;
-            MEM_FREED("CDoubleBufferedShape*")
+            (*it) = nullptr;
+            MEM_FREED("CDoubleBufferedShape")
         }
     }
     
     // Free memory if pointer is still existent
-    if (m_pShapes != 0)
+    if (m_pShapes != nullptr)
     {
         delete m_pShapes;
-        m_pShapes = 0;
-        MEM_FREED("m_pShapes")
+        m_pShapes = nullptr;
+        MEM_FREED("ShapeList")
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones geometry
+///
+/// \param _Geom Geometry that should be copied
+///
+/// \return Pointer to cloned geometry
+///
+////////////////////////////////////////////////////////////////////////////////
+CGeometry& CGeometry::operator=(const CGeometry& _Geom)
+{
+    METHOD_ENTRY("CGeometry::operator=")
+    
+    m_AABB = _Geom.m_AABB;
+
+    // Free memory if pointer is still existent
+    if (m_pShapes != nullptr)
+    {
+        delete m_pShapes;
+        m_pShapes = nullptr;
+        MEM_FREED("ShapeList")
+    }
+    m_pShapes = new std::list<CDoubleBufferedShape*>();
+    MEM_ALLOC("ShapeList")
+    
+    DBShapesType::const_iterator ci=_Geom.m_pShapes->begin();
+    while (ci != _Geom.m_pShapes->end())
+    {
+        m_pShapes->push_back((*ci)->clone());
+        ++ci;
+    }
+    
+    return *this;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones geometry
+///
+/// \return Pointer to cloned geometry
+///
+////////////////////////////////////////////////////////////////////////////////
+CGeometry* CGeometry::clone() const
+{
+    METHOD_ENTRY("CGeometry::clone")
+    
+    CGeometry* pClone = new CGeometry;
+    MEM_ALLOC("CGeometry")
+    
+    DBShapesType::const_iterator ci=m_pShapes->begin();
+    while (ci != m_pShapes->end())
+    {
+        pClone->m_pShapes->push_back((*ci)->clone());
+        ++ci;
+    }
+    
+    pClone->m_AABB = m_AABB;
+    
+    return pClone;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

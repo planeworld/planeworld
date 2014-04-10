@@ -46,11 +46,12 @@ class IIntegrator
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        virtual ~IIntegrator(){};                       ///< Destructor
+        virtual ~IIntegrator(){};
         
         //--- Constant Methods -----------------------------------------------//
-        virtual const T getPrevValue() const = 0;
-        virtual const T getValue() const = 0;
+        virtual IIntegrator<T>* clone() const = 0;
+        virtual const T         getPrevValue() const = 0;
+        virtual const T         getValue() const = 0;
 
         //--- Methods --------------------------------------------------------//
         virtual const T integrate(const T&, const double&) = 0;

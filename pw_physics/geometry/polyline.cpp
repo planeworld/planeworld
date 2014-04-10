@@ -31,7 +31,7 @@ CPolyLine* CPolyLine::clone() const
     METHOD_ENTRY("CPolyLine::clone")
     
     CPolyLine* pClone = new CPolyLine();
-    MEM_ALLOC("pClone")
+    MEM_ALLOC("CPolyLine")
     
     pClone->m_LineType     = m_LineType;
     pClone->m_VertList     = m_VertList;

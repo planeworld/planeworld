@@ -55,7 +55,7 @@ CCircle* CCircle::clone() const
     METHOD_ENTRY("CCircle::clone");
     
     CCircle* pClone = new CCircle();
-    MEM_ALLOC("pClone")
+    MEM_ALLOC("CCircle")
         
     pClone->m_vecCenter    = m_vecCenter;
     pClone->m_vecCenter0   = m_vecCenter0;

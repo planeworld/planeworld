@@ -30,14 +30,12 @@ CBody::CBody() : m_fAngle(0.0), m_fInertia(1.0), m_fTorque(0.0)
     CTOR_CALL("CBody::CBody");
     
     m_pIntAng = new CAdamsMoultonIntegrator<double>;
-    MEM_ALLOC("m_pIntAng");
+    MEM_ALLOC("CAdamsMoultonIntegrator");
     m_pIntAngVel = new CAdamsBashforthIntegrator<double>;
-    MEM_ALLOC("m_pIntAngVel");
+    MEM_ALLOC("CAdamsBashforthIntegrator");
 
     // Default name for any body:
     m_strName = "Body";
-
-    METHOD_EXIT("CBody::CBody");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,17 +52,15 @@ CBody::~CBody()
     {
         delete m_pIntAng;
         m_pIntAng = 0;
-        MEM_FREED("m_pIntAng")
+        MEM_FREED("CAdamsMoultonIntegrator")
     }
 
     if (m_pIntAngVel != 0)
     {
         delete m_pIntAngVel;
         m_pIntAngVel = 0;
-        MEM_FREED("m_pIntAngVel")
+        MEM_FREED("CAdamsBashforthIntegrator")
     }
-
-    METHOD_EXIT("CBody::~CBody")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +81,6 @@ const Vector2d CBody::getAnchor(const int& _nID) const
 
     vecResult = Rotation * m_Anchors[_nID] + m_pIntPos->getValue();
 
-    METHOD_EXIT("CBody::getAnchor")
     return vecResult;
 }
 
@@ -100,10 +95,6 @@ void CBody::myInit()
 {
     METHOD_ENTRY("CBody::myInit")
 
-    m_fAngle = 0.0;
-    m_pIntAng->reset();
-    m_pIntAngVel->reset();
-    
     for (std::list< CDoubleBufferedShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
         ci != m_Geometry.getShapes()->end(); ++ci)
     {

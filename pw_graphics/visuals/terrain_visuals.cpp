@@ -49,6 +49,25 @@ CTerrainVisuals::~CTerrainVisuals()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Clone a terrain shape visual
+///
+/// \param _pShape Shape the visuals are attached to
+///
+/// \return Clone of terrain shape visual
+///
+///////////////////////////////////////////////////////////////////////////////
+IVisuals* CTerrainVisuals::clone(CDoubleBufferedShape* const _pShape) const
+{
+    METHOD_ENTRY("CTerrainVisuals::clone");
+    
+    CTerrainVisuals* pClone = new CTerrainVisuals(_pShape);
+    MEM_ALLOC("CTerrainVisuals")
+    
+    return pClone;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw the Terrain
 ///
 /// \note It is very important to do camera positioning after clipping.

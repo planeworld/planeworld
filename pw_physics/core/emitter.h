@@ -84,6 +84,7 @@ class IEmitter : public IUniverseScaled, public IWorldDataStorageUser
         void setFrequency(const double&);
         void setLimits(const double&, const double&, const double&, const double&);
         void setMode(const EmitterModeType&);
+        void setNumber(const u_int32_t&);
         void setVelocity(const double&);
         void setVelocityVariance(const double&);
 
@@ -95,6 +96,8 @@ class IEmitter : public IUniverseScaled, public IWorldDataStorageUser
         std::mt19937                            m_Generator;    ///< Generator for random distributions
         std::normal_distribution<double>        m_NormalDist;   ///< Normal distribution;
         std::uniform_real_distribution<double>  m_UniformDist;  ///< Uniform distribution;
+        
+        u_int32_t               m_nNr;                      ///< Maximum number of emitted entities
         
         double                  m_fAngle;                   ///< Angle for point source distribution
         double                  m_fAngleVariance;           ///< Angle variance for point source distribution
@@ -124,6 +127,7 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_MODE_EMIT_ONCE),
                               m_EmitterDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD),
                               m_NormalDist(0.0,1.0),
                               m_UniformDist(0.0,1.0),
+                              m_nNr(10),
                               m_fAngle(0.0),
                               m_fAngleVariance(1.0),
                               m_fFrequency(EMITTER_DEFAULT_FREQUENCY),
@@ -295,6 +299,19 @@ inline void IEmitter::setMode(const EmitterModeType& _EmM)
 {
     METHOD_ENTRY("IEmitter::setMode")
     m_EmitterMode = _EmM;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the number of emitted entities
+///
+/// \param _nNr Number of entities.
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void IEmitter::setNumber(const u_int32_t& _nNr)
+{
+    METHOD_ENTRY("IEmitter::setNumber")
+    m_nNr = _nNr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

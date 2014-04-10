@@ -52,7 +52,7 @@ CUniverse::~CUniverse()
     {
         delete m_StarSystems[i];
         m_StarSystems[i] = 0;
-        MEM_FREED("pStarSystem");
+        MEM_FREED("CStarSystem");
     }
     m_StarSystems.clear();
 }
@@ -169,11 +169,11 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     m_pStarVisuals = new CCircleVisuals(pShape);
     m_pStarObjectVisuals = new IObjectVisuals(m_pStar);
     
-    MEM_ALLOC("pStar");
-    MEM_ALLOC("pStarShape");
-    MEM_ALLOC("pShape")
-    MEM_ALLOC("pStarVisuals");
-    MEM_ALLOC("pStarObjectVisuals");
+    MEM_ALLOC("CRigidBody");
+    MEM_ALLOC("CCircle");
+    MEM_ALLOC("CDoubleBufferedShape")
+    MEM_ALLOC("CCircleVisuals");
+    MEM_ALLOC("IObjectVisuals");
 
     m_pStarObjectVisuals->addVisuals(m_pStarVisuals);
 
@@ -198,7 +198,7 @@ void CUniverse::clone(const CUniverse& _Universe)
                                                     ci!=_Universe.getStarSystems().end(); ++ci)
         {
             CStarSystem* pStarSystem = new CStarSystem();
-            MEM_ALLOC("pStarSystem");
+            MEM_ALLOC("CStarSystem");
             
             *pStarSystem = *(*ci);
             m_StarSystems.push_back((pStarSystem));

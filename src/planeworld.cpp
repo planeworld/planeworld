@@ -122,7 +122,6 @@ int main(int argc, char *argv[])
     CDebrisVisuals*     pDebrisVisuals;
     CDebrisEmitter*     pDebrisEmitter;
     CObjectEmitter*     pObjectsEmitter;
-//     CPointMass*         pPointMass;
     CRigidBody*         pPointMass;
     CPlanet*            pPlanet;
     CPlanetVisuals*     pPlanetVisuals;
@@ -132,7 +131,6 @@ int main(int argc, char *argv[])
     CRigidBody*         pBody2;
     CRigidBody*         pBody3;
     CRigidBody*         pBody4;
-//     CEngineManager      EngineManager;
     CPhysicsManager*    pPhysicsManager;
     CVisualsManager*    pVisualsManager;
     CXFigLoader         XFigLoader;
@@ -143,90 +141,17 @@ int main(int argc, char *argv[])
     
     //--- Initialisation -----------------------------------------------------//
     pPhysicsManager = new CPhysicsManager;
-    MEM_ALLOC("pPhysicsManager")
+    MEM_ALLOC("CPhysicsManager")
     pVisualsManager = new CVisualsManager;
-    MEM_ALLOC("pVisualsManager")
+    MEM_ALLOC("CVisualsManager")
     
-    int nNumberOfBoxes = 100;
-    
-    //--- Initialise particles -----------------------------------------------//
-    long nX;
-    long nY;
-    srand(234);
-    for (int i=0; i<nNumberOfBoxes; ++i)
-    {
-        pPointMass = new CRigidBody;
-        MEM_ALLOC("pPointMass")
-
-        DEBUG_MSG("Main", "Starting randomization...")
-        nX = (rand()%200) - 100;
-        nY = (rand()%200) - 100;
-//         nX = (rand()%2000000) - 1000000;
-//         nY = (rand()%2000000) - 1000000;
-//         double fRad = (rand()%2) + 0.5;
-        DEBUG_MSG("Main", "Stopping randomization.")
-        pPointMass->setMass(10.0);
-        pPointMass->setOrigin(nX, nY);
-        pPointMass->setInertia(2000.0);
-
-        std::stringstream test;
-        test << "PointMass_" << i;
-        pPointMass->setName(test.str());
-
-//         pPointMass->disableGravitation();
-//         pPointMass->disableDynamics();
-//         pPointMass->setTimeFac(1e-10);
-        pPointMass->setDepths(SHAPE_DEPTH_ALL);
-        
-        pCircle = new CCircle();
-//         pPlanet = new CPlanet();
-        MEM_ALLOC("pCircle")
-
-//         pRect->setDepths(SHAPE_DEPTH_ALL);
-//         pRect->setUL(Vector2d(-1.0, +1.0));
-//         pRect->setLR(Vector2d(+1.0, -1.0));
-        pCircle->setDepths(SHAPE_DEPTH_ALL);
-        pCircle->setCenter(1.0, 0.0);
-        pCircle->setRadius(1.0);
-//         pPlanet->setDepths(SHAPE_DEPTH_ALL);
-//         pPlanet->setCenter(0.0, 0.0);
-//         pPlanet->setRadius(100.0);
-//         pPlanet->setHeight(1.0);
-//         pPlanet->initTerrain();
-
-        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-        MEM_ALLOC("pShape")
-        pShape->buffer(pCircle);
-        pPointMass->getGeometry()->addShape(pShape);
-        
-        pCircleVisuals = new CCircleVisuals(pShape);
-//         pPlanetVisuals = new CPlanetVisuals(pPlanet);
-        MEM_ALLOC("pCircleVisuals")
-        
-        pObjectVisuals = new IObjectVisuals(pPointMass);
-//         pPlanetVisuals = new CPlanetVisuals(pPlanet);
-        MEM_ALLOC("pObjectVisuals")
-        
-//         pPointMass->getGeometry().addShape(pPlanet);
-        
-//         pPointMass->getGeometry().addShape(pRect);
-//         pPointMass->addVisuals(pRectVisuals);
-        
-//         pVisualsManager->addVisuals(pRectVisuals);
-        pObjectVisuals->addVisuals(pCircleVisuals);
-        
-//         pPlanet->setVisualsID(pVisualsManager->addVisuals(pPlanetVisuals));
-        WorldDataStorage.addObject(pPointMass);
-        WorldDataStorage.addObjectVisuals(pObjectVisuals);
-    }
-
     //--- Initialize storage access for engine managers ---------------------//
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
     pVisualsManager->setWorldDataStorage(&WorldDataStorage);
     
     //--- Initialize Debris -------------------------------------------------//
     pDebrisEmitter = new CDebrisEmitter;
-    MEM_ALLOC("pDebrisEmitter")
+    MEM_ALLOC("CDebrisEmitter")
     pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
     pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
     pDebrisEmitter->setAngle(0.0);
@@ -235,25 +160,43 @@ int main(int argc, char *argv[])
     pDebrisEmitter->setVelocityVariance(1.0);
     pDebrisEmitter->setFrequency(50.0);
     pDebrisEmitter->setCell(0, 0);
-    pDebrisEmitter->setMaxNumber(1000);
+    pDebrisEmitter->setNumber(1000);
     pPhysicsManager->addEmitter(pDebrisEmitter);
     
     pDebrisEmitter = new CDebrisEmitter;
-    MEM_ALLOC("pDebrisEmitter")
+    MEM_ALLOC("CDebrisEmitter")
     pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
     pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
-    pDebrisEmitter->setAngle(0.0);
-    pDebrisEmitter->setAngleVariance(0.2);
-    pDebrisEmitter->setVelocity(20.0);
-    pDebrisEmitter->setVelocityVariance(1.0);
     pDebrisEmitter->setFrequency(50.0);
     pDebrisEmitter->setLimits(-200.0, 200.0, 150.0, 200.0);
     pDebrisEmitter->setCell(0, 0);
-    pDebrisEmitter->setMaxNumber(1000);
+    pDebrisEmitter->setNumber(1000);
     pPhysicsManager->addEmitter(pDebrisEmitter);
     
+        CRigidBody* pTemplate = new CRigidBody;
+        pCircle = new CCircle;
+        MEM_ALLOC("CRigidBody")
+        MEM_ALLOC("CCircle")
+        
+        pCircle->setDepths(SHAPE_DEPTH_ALL);
+        pCircle->setCenter(0.0, 0.0);
+        pCircle->setRadius(2.0);
+
+        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+        MEM_ALLOC("CDoubleBufferedShape")
+        pShape->buffer(pCircle);
+        pTemplate->getGeometry()->addShape(pShape);
+    
+        pCircleVisuals = new CCircleVisuals(pShape);
+        MEM_ALLOC("CCircleVisuals")
+        
+        IObjectVisuals* pTemplateVisuals = new IObjectVisuals(pTemplate);
+        MEM_ALLOC("IObjectVisuals")
+        
+        pTemplateVisuals->addVisuals(pCircleVisuals);
+    
     pObjectsEmitter = new CObjectEmitter;
-    MEM_ALLOC("pObjectsEmitter")
+    MEM_ALLOC("CObjectsEmitter")
     pObjectsEmitter->setMode(EMITTER_MODE_TIMED);
     pObjectsEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
     pObjectsEmitter->setAngle(M_PI);
@@ -262,6 +205,17 @@ int main(int argc, char *argv[])
     pObjectsEmitter->setVelocityVariance(1.0);
     pObjectsEmitter->setFrequency(2.0);
     pObjectsEmitter->setCell(0, 0);
+    pObjectsEmitter->setTemplate(pTemplate, pTemplateVisuals);
+    pPhysicsManager->addEmitter(pObjectsEmitter);
+    
+    pObjectsEmitter = new CObjectEmitter;
+    MEM_ALLOC("CObjectsEmitter")
+    pObjectsEmitter->setMode(EMITTER_MODE_EMIT_ONCE);
+    pObjectsEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
+    pObjectsEmitter->setFrequency(2.0);
+    pObjectsEmitter->setLimits(-100.0, 100.0, -100.0, 100.0);
+    pObjectsEmitter->setCell(0, 0);
+    pObjectsEmitter->setNumber(100);
     pPhysicsManager->addEmitter(pObjectsEmitter);
     
     //--- Import from xml file ----------------------------------------------//
@@ -464,12 +418,12 @@ int main(int argc, char *argv[])
     if (pPhysicsManager != 0)
     {
         delete pPhysicsManager;
-        MEM_FREED("pPhysicsManager")
+        MEM_FREED("CPhysicsManager")
     }
     if (pVisualsManager != 0)
     {
         delete pVisualsManager;
-        MEM_FREED("pVisualsManager")
+        MEM_FREED("CVisualsManager")
     }
     
     return 0;

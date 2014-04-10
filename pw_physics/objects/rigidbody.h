@@ -39,6 +39,9 @@ class CRigidBody : public CBody
         CRigidBody();
         virtual ~CRigidBody();
 
+        //--- Constant Methods -----------------------------------------------//
+        virtual IObject* clone() const;
+        
         //--- Methods --------------------------------------------------------//
         virtual void addForce(const Vector2d&, const Vector2d&);
         virtual void clearForces();

@@ -25,6 +25,8 @@
 
 //--- Standard header --------------------------------------------------------//
 
+typedef std::list<CDoubleBufferedShape*> DBShapesType; ///< Specifies a list of double buffered shapes
+
 // Forward declarations
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,10 +41,12 @@ class CGeometry
     
         //--- Constructor/Destructor -----------------------------------------//
         CGeometry();
+        CGeometry(const CGeometry&);
         virtual ~CGeometry();
 
         //--- Constant methods -----------------------------------------------//
-        const std::list<CDoubleBufferedShape*>* const getShapes() const;
+        CGeometry*                clone() const;
+        const DBShapesType* const getShapes() const;
         
         //--- Methods --------------------------------------------------------//
         CBoundingBox& getBoundingBox();
@@ -53,13 +57,15 @@ class CGeometry
         void setShapes(std::list<CDoubleBufferedShape*>* const);
         void update();
         
+        CGeometry& operator=(const CGeometry&);
+        
     protected:
 
         //--- Abstract methods [protected] -----------------------------------//
 
         //-- Variables [protected] -------------------------------------------//
-        CBoundingBox m_AABB;                            ///< Bounding box
-        std::list<CDoubleBufferedShape*>* m_pShapes;    ///< Double buffered shapes
+        CBoundingBox    m_AABB;       ///< Bounding box
+        DBShapesType*   m_pShapes;    ///< Double buffered shapes
         
 };
 

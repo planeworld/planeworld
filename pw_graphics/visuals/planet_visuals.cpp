@@ -34,6 +34,25 @@ CPlanetVisuals::~CPlanetVisuals()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Clone a planet shape visual
+///
+/// \param _pShape Shape the visuals are attached to
+///
+/// \return Clone of planet shape visuals
+///
+///////////////////////////////////////////////////////////////////////////////
+IVisuals* CPlanetVisuals::clone(CDoubleBufferedShape* const _pShape) const
+{
+    METHOD_ENTRY("CCircleVisuals::clone");
+    
+    CPlanetVisuals* pClone = new CPlanetVisuals(_pShape);
+    MEM_ALLOC("CPlanetVisuals")
+    
+    return pClone;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw the Planet
 ///
 /// \param _pCamera Active camera for drawing visuals

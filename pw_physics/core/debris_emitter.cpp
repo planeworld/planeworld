@@ -24,13 +24,13 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebrisEmitter::CDebrisEmitter() : m_nNrMax(1)
+CDebrisEmitter::CDebrisEmitter()
 {
     METHOD_ENTRY("CDebrisEmitter::CDebrisEmitter")
     CTOR_CALL("CDebrisEmitter::CDebrisEmitter")
     
     m_pDebris = new CDebris;
-    MEM_ALLOC("m_pDebris")
+    MEM_ALLOC("CDebris")
     m_pDebris->setNumber(1);
 }
 
@@ -59,7 +59,7 @@ void CDebrisEmitter::init()
     
     // Create visuals
     CDebrisVisuals* pDebrisVisuals = new CDebrisVisuals(m_pDebris);
-    MEM_ALLOC("pDebrisVisuals")
+    MEM_ALLOC("CDebrisVisuals")
     
     // Add visuals
     m_pDataStorage->addDebrisVisuals(pDebrisVisuals);
@@ -86,7 +86,7 @@ void CDebrisEmitter::emit(const double& _fF)
     
     if (_fF < 0.0)
     {
-        nNrOfDebris=m_nNrMax;
+        nNrOfDebris=m_nNr;
     }
     else
     {

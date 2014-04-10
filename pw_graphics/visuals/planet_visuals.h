@@ -45,7 +45,8 @@ class CPlanetVisuals : public IVisuals
         ~CPlanetVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void draw(const CCamera* const, const IObject* const) const;
+        virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
+        virtual void        draw(const CCamera* const, const IObject* const) const;
                 
         //--- Methods --------------------------------------------------------//
         void                attach(CDoubleBufferedShape* const);

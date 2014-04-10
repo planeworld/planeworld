@@ -68,6 +68,26 @@ CAdamsMoultonIntegrator<T>::~CAdamsMoultonIntegrator()
     DTOR_CALL("CAdamsMoultonIntegrator::~CAdamsMoultonIntegrator")
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones integrator
+///
+/// \return Pointer to cloned integrator
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+IIntegrator<T>* CAdamsMoultonIntegrator<T>::clone() const
+{
+    METHOD_ENTRY("CAdamsMoultonIntegrator::clone")
+    
+    CAdamsMoultonIntegrator<T>* pClone = new CAdamsMoultonIntegrator;
+    MEM_ALLOC("CAdamsMoultonIntegrator")
+        
+    (*pClone) = (*this);
+    
+    return pClone;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Integrates the next timestep

@@ -43,7 +43,8 @@ class CCircleVisuals : public IVisuals
         ~CCircleVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual void draw(const CCamera* const, const IObject* const) const;
+        virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
+        virtual void        draw(const CCamera* const, const IObject* const) const;
                 
         //--- Methods --------------------------------------------------------//
         virtual void attach(CDoubleBufferedShape* const);

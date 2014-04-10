@@ -45,6 +45,8 @@ class CBody : public IObject
         virtual ~CBody();                               ///< Destructor
 
         //--- Constant Methods -----------------------------------------------//
+        IObject*            clone() const = 0;
+        
         const double        getHookAngle() const;
         
         const Vector2d      getAnchor(const int&) const;

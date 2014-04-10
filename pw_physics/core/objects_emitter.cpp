@@ -29,7 +29,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CObjectEmitter::CObjectEmitter()
+CObjectEmitter::CObjectEmitter() : m_pTemplate(nullptr),
+                                   m_pTemplateVisuals(nullptr) 
 {
     METHOD_ENTRY("CObjectEmitter::CObjectEmitter")
     CTOR_CALL("CObjectEmitter::CObjectEmitter")
@@ -44,16 +45,19 @@ CObjectEmitter::~CObjectEmitter()
 {
     METHOD_ENTRY("CObjectEmitter::~CObjectEmitter")
     DTOR_CALL("CObjectEmitter::~CObjectEmitter")
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Initialises the emitter
-///
-///////////////////////////////////////////////////////////////////////////////
-void CObjectEmitter::init()
-{
-    METHOD_ENTRY("CObjectEmitter::init")
+    
+    if (m_pTemplate != nullptr)
+    {
+        delete m_pTemplate;
+        MEM_FREED("CRigidBody")
+        m_pTemplate = nullptr;
+    }
+    if (m_pTemplateVisuals != nullptr)
+    {
+        delete m_pTemplateVisuals;
+        MEM_FREED("IObjectVisuals")
+        m_pTemplateVisuals = nullptr;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,81 +77,118 @@ void CObjectEmitter::emit(const double& _fF)
 {
     METHOD_ENTRY("CObjectEmitter::emit")
     
-//     double nNrOfObjects;
-//     
-//     if (_fF < 0.0)
-//     {
-//         nNrOfObjects=m_nNrMax;
-//     }
-//     else
-//     {
-//         double fNrOfObjects = m_fFrequency * _fF + m_fResidual;
-//         nNrOfObjects = static_cast<int>(fNrOfObjects);
-//         m_fResidual = fNrOfObjects - nNrOfObjects;
-//     }
+    double nNrOfObjects;
     
     if (_fF < 0.0)
     {
-        std::cout << "Emitting all objects once." << std::endl;
+        nNrOfObjects=m_nNr;
     }
     else
     {
         double fNrOfObjects = m_fFrequency * _fF + m_fResidual;
-        int    nNrOfObjects = static_cast<int>(fNrOfObjects);
+        nNrOfObjects = static_cast<int>(fNrOfObjects);
         m_fResidual = fNrOfObjects - nNrOfObjects;
-        
-        for (int i=0; i<nNrOfObjects; ++i)
-        {
-            CRigidBody* pRigidBody = new CRigidBody;
-            CCircle*    pCircle = new CCircle;
-            MEM_ALLOC("pRigidBody")
-            MEM_ALLOC("pCircle")
-            
-            pCircle->setDepths(SHAPE_DEPTH_ALL);
-            pCircle->setCenter(0.0, 0.0);
-            pCircle->setRadius(1.0);
-
-            CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-            MEM_ALLOC("pShape")
-            pShape->buffer(pCircle);
-            pRigidBody->getGeometry()->addShape(pShape);
-        
-            CCircleVisuals* pCircleVisuals = new CCircleVisuals(pShape);
-            MEM_ALLOC("pCircleVisuals")
-            
-            IObjectVisuals* pObjectVisuals = new IObjectVisuals(pRigidBody);
-            MEM_ALLOC("pObjectVisuals")
-            
-            pObjectVisuals->addVisuals(pCircleVisuals);
-            
-            double fAngle = m_NormalDist(m_Generator)*m_fAngleVariance + m_fAngle;
-            double fVelocity = m_NormalDist(m_Generator)*m_fVelocityVariance + m_fVelocity;
-            pRigidBody->setVelocity((Vector2d(-2.0,0.0), fVelocity*Vector2d(std::cos(fAngle), sin(fAngle))));
-            m_pDataStorage->addObject(pRigidBody);
-            m_pDataStorage->addObjectVisuals(pObjectVisuals);
-        }
     }
     
+    switch (m_EmitterDistribution)
+    {
+        case EMITTER_DISTRIBUTION_CIRCULAR_FIELD:
+            break;
+        case EMITTER_DISTRIBUTION_RECTANGULAR_FIELD:
+            for (int i=0; i<nNrOfObjects; ++i)
+            {
+                double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
+                double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
+                
+                IObject* pObject = m_pTemplate->clone();
+                IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
+                
+                pObject->setOrigin(Vector2d(fX, fY));
+                m_pDataStorage->addObject(pObject);
+                m_pDataStorage->addObjectVisuals(pObjectVisuals);
+                
+            }
+            break;
+        case EMITTER_DISTRIBUTION_POINT_SOURCE:
+            for (int i=0; i<nNrOfObjects; ++i)
+            {
+                double fAngle = m_NormalDist(m_Generator)*m_fAngleVariance + m_fAngle;
+                double fVelocity = m_NormalDist(m_Generator)*m_fVelocityVariance + m_fVelocity;
+                
+                IObject* pObject = m_pTemplate->clone();
+                IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
+                
+                pObject->setVelocity((Vector2d(-2.0,0.0), fVelocity*Vector2d(std::cos(fAngle), sin(fAngle))));
+                m_pDataStorage->addObject(pObject);
+                m_pDataStorage->addObjectVisuals(pObjectVisuals);
+            }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Initialises the emitter
+///
+///////////////////////////////////////////////////////////////////////////////
+void CObjectEmitter::init()
+{
+    METHOD_ENTRY("CObjectEmitter::init")
     
+    // Create default object if needed (circlular mass)
+    if (m_pTemplate == nullptr)
+    {
+        m_pTemplate = new CRigidBody;
+        CCircle*    pCircle = new CCircle;
+        MEM_ALLOC("CRigidBody")
+        MEM_ALLOC("CCircle")
+        
+        pCircle->setDepths(SHAPE_DEPTH_ALL);
+        pCircle->setCenter(0.0, 0.0);
+        pCircle->setRadius(1.0);
+
+        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+        MEM_ALLOC("CDoubleBufferedShape")
+        pShape->buffer(pCircle);
+        m_pTemplate->getGeometry()->addShape(pShape);
     
-//     switch (m_EmitterDistribution)
-//     {
-//         case EMITTER_DISTRIBUTION_CIRCULAR_FIELD:
-//             break;
-//         case EMITTER_DISTRIBUTION_RECTANGULAR_FIELD:
-//             for (int i=0; i<nNrOfDebris; ++i)
-//             {
-//                 double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
-//                 double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
-//                 m_pDebris->generate(Vector2d(fX, fY), Vector2d(0.0, 0.0));
-//             }
-//             break;
-//         case EMITTER_DISTRIBUTION_POINT_SOURCE:
-//             for (int i=0; i<nNrOfDebris; ++i)
-//             {
-//                 double fAngle = m_NormalDist(m_Generator)*m_fAngleVariance + m_fAngle;
-//                 double fVelocity = m_NormalDist(m_Generator)*m_fVelocityVariance + m_fVelocity;
-//                 m_pDebris->generate(Vector2d(2.0,0.0), fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
-//             }
-//     }
+        CCircleVisuals* pCircleVisuals = new CCircleVisuals(pShape);
+        MEM_ALLOC("CCircleVisuals")
+        
+        m_pTemplateVisuals = new IObjectVisuals(m_pTemplate);
+        MEM_ALLOC("IObjectVisuals")
+        
+        m_pTemplateVisuals->addVisuals(pCircleVisuals);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set the template for object emitation
+///
+/// \param _pObj  Object to be cloned and emitted
+/// \param _pObjV Object visuals to be cloned and emitted
+///
+///////////////////////////////////////////////////////////////////////////////
+void CObjectEmitter::setTemplate(IObject* const _pObj, IObjectVisuals* const _pObjV)
+{
+    METHOD_ENTRY("CObjectEmitter::setTemplate")
+    
+    if (m_pTemplate != nullptr)
+    {
+        delete m_pTemplate;
+        MEM_FREED("IObject")
+        m_pTemplate = nullptr;
+        NOTICE_MSG("Objects Emitter", "Template object already existing, replacing.");
+    }
+    if (m_pTemplateVisuals != nullptr)
+    {
+        delete m_pTemplateVisuals;
+        MEM_FREED("IObjectVisuals")
+        m_pTemplateVisuals = nullptr;
+        NOTICE_MSG("Objects Emitter", "Template object visuals already existing, replacing.");
+    }
+    
+    m_pTemplate = _pObj;
+    m_pTemplateVisuals = _pObjV;
+    
 }

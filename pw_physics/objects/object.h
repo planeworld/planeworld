@@ -65,6 +65,7 @@ class IObject : public IHookable, public IUniverseScaled
         virtual ~IObject();
 
         //--- Constant methods -----------------------------------------------//
+        virtual IObject*            clone() const = 0;                  ///< Clone object
         virtual const Vector2d      getAnchor(const int&) const = 0;    ///< Return anchor
         virtual const ObjectType    getObjectType() const;
         
@@ -81,8 +82,8 @@ class IObject : public IHookable, public IUniverseScaled
         const Vector2d              getVelocity() const;
 
         //--- Methods --------------------------------------------------------//
-        virtual void addForce(const Vector2d&,  const Vector2d&) = 0;   ///< Add a force
-        virtual void clearForces() = 0;                                 ///< Clear forces acting on object
+        virtual void        addForce(const Vector2d&,  const Vector2d&) = 0;   ///< Add a force
+        virtual void        clearForces() = 0;                                 ///< Clear forces acting on object
         
         void                addAcceleration(const Vector2d&);
         AnchorIDType        addAnchor(const Vector2d&);

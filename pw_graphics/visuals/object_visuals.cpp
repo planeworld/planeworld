@@ -37,9 +37,36 @@ IObjectVisuals::~IObjectVisuals()
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("IVisuals*");
+            MEM_FREED("IVisuals");
         }
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones object visuals
+///
+/// \param _pObj Object for these visuals
+///
+/// \return Pointer to cloned object visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+IObjectVisuals* IObjectVisuals::clone(IObject* const _pObj) const
+{
+    METHOD_ENTRY("IObjectVisuals::clone")
+    
+    IObjectVisuals* pClone = new IObjectVisuals(_pObj);
+    MEM_ALLOC("IObjectVisuals")
+    
+    std::vector<IVisuals*>::const_iterator  ci = m_Visuals.begin();
+    DBShapesType::const_iterator            cj=_pObj->getGeometry()->getShapes()->begin();
+    while(ci != m_Visuals.end())
+    {
+        pClone->m_Visuals.push_back((*ci)->clone((*cj)));
+        ++ci; ++cj;
+    }
+    
+    return pClone;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

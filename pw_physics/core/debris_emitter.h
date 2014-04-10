@@ -47,13 +47,12 @@ class CDebrisEmitter : public IEmitter
         
         //--- Methods --------------------------------------------------------//
         void        init();
-        void        setMaxNumber(const int&);
+        void        setNumber(const u_int32_t&);
 
     private:
         
         //--- Variables [private] --------------------------------------------//
         CDebris*    m_pDebris;      ///< The debris instance
-        int         m_nNrMax;       ///< Maximum number of debris
         
 };
 
@@ -80,10 +79,10 @@ inline const EmitterType CDebrisEmitter::getEmitterType() const
 /// \param _nNrMax Maximum number of debris.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void CDebrisEmitter::setMaxNumber(const int& _nNrMax)
+inline void CDebrisEmitter::setNumber(const u_int32_t& _nNrMax)
 {
     METHOD_ENTRY("IEmitter::setMode")
-    m_nNrMax = _nNrMax;
+    m_nNr = _nNrMax;
     m_pDebris->setNumber(_nNrMax);
 }
 

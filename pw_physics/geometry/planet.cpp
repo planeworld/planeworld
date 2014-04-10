@@ -73,7 +73,7 @@ CPlanet* CPlanet::clone() const
     METHOD_ENTRY("CPlanet::clone")
     
     CPlanet* pClone = new CPlanet();
-    MEM_ALLOC("pClone")
+    MEM_ALLOC("CPlanet")
         
     pClone->m_PlanetType        = m_PlanetType;
     pClone->m_fAngle            = m_fAngle;

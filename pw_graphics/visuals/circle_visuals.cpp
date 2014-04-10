@@ -49,6 +49,25 @@ CCircleVisuals::~CCircleVisuals()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Clone a circular shape visual
+///
+/// \param _pShape Shape the visuals are attached to
+///
+/// \return Clone of circular shape visuals
+///
+///////////////////////////////////////////////////////////////////////////////
+IVisuals* CCircleVisuals::clone(CDoubleBufferedShape* const _pShape) const
+{
+    METHOD_ENTRY("CCircleVisuals::clone");
+    
+    CCircleVisuals* pClone = new CCircleVisuals(_pShape);
+    MEM_ALLOC("CCircleVisuals")
+    
+    return pClone;
+}
+    
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw the Circle
 ///
 /// \param _pCamera Active camera for drawing visuals

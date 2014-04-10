@@ -48,11 +48,11 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("IObject*")
+            MEM_FREED("IObject")
         }
         else
         {
-            DOM_MEMF(DEBUG_MSG("IObject*", "Memory already freed."))
+            DOM_MEMF(DEBUG_MSG("IObject", "Memory already freed."))
         }
     };
     
@@ -65,11 +65,11 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("IObject*")
+            MEM_FREED("IObject")
         }
         else
         {
-            DOM_MEMF(DEBUG_MSG("IObject*", "Memory already freed."))
+            DOM_MEMF(DEBUG_MSG("IObject", "Memory already freed."))
         }
     };
     
@@ -81,11 +81,11 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("IObjectVisuals*")
+            MEM_FREED("IObjectVisuals")
         }
         else
         {
-            DOM_MEMF(DEBUG_MSG("IObjectVisuals*", "Memory already freed."))
+            DOM_MEMF(DEBUG_MSG("IObjectVisuals", "Memory already freed."))
         }
     };
         
@@ -97,11 +97,11 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("CDebris*")
+            MEM_FREED("CDebris")
         }
         else
         {
-            DOM_MEMF(DEBUG_MSG("CDebris*", "Memory already freed."))
+            DOM_MEMF(DEBUG_MSG("CDebris", "Memory already freed."))
         }
     };
     
@@ -113,11 +113,11 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("CDebrisVisuals*")
+            MEM_FREED("CDebrisVisuals")
         }
         else
         {
-            DOM_MEMF(DEBUG_MSG("CDebrisVisuals*", "Memory already freed."))
+            DOM_MEMF(DEBUG_MSG("CDebrisVisuals", "Memory already freed."))
         }
     };
     
@@ -129,11 +129,11 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("IJoint*")
+            MEM_FREED("IJoint")
         }
         else
         {
-            DOM_MEMF(DEBUG_MSG("IJoint*", "Memory already freed."))
+            DOM_MEMF(DEBUG_MSG("IJoint", "Memory already freed."))
         }
     };
 }

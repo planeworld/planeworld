@@ -49,6 +49,25 @@ CPolylineVisuals::~CPolylineVisuals()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Clone a polyline shape visual
+///
+/// \param _pShape Shape the visuals are attached to
+///
+/// \return Clone of polyline shape visuals
+///
+///////////////////////////////////////////////////////////////////////////////
+IVisuals* CPolylineVisuals::clone(CDoubleBufferedShape* const _pShape) const
+{
+    METHOD_ENTRY("CPolylineVisuals::clone");
+    
+    CPolylineVisuals* pClone = new CPolylineVisuals(_pShape);
+    MEM_ALLOC("CPolylineVisuals")
+    
+    return pClone;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw the polyline
 ///
 /// \param _pCamera Active camera for drawing visuals

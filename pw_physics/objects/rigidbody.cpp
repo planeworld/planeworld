@@ -31,8 +31,6 @@ CRigidBody::CRigidBody()
 
     // Default name for any rigidbody:
     m_strName = "Rigidbody";
-
-    METHOD_EXIT("CRigidBody::CRigidBody")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,8 +42,79 @@ CRigidBody::~CRigidBody()
 {
     METHOD_ENTRY("CRigidBody::~CRigidBody")
     DTOR_CALL("CRigidBody::~CRigidBody")
+}
 
-    METHOD_EXIT("CRigidBody::~CRigidBody")
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones a rigid body
+///
+/// \return Pointer to cloned rigid body
+///
+////////////////////////////////////////////////////////////////////////////////
+IObject* CRigidBody::clone() const
+{
+    METHOD_ENTRY("CRigidBody::clone")
+    
+    CRigidBody* pClone = new CRigidBody;
+    MEM_ALLOC("CRigidBody")
+
+    //--- Variables of IObject -----------------------------------------------//
+    
+    pClone->m_bGravitation = m_bGravitation;
+    pClone->m_bDynamics    = m_bDynamics;
+    // m_Lifetime: New individual object
+    pClone->m_fTimeFac     = m_fTimeFac;
+    pClone->m_Geometry     = m_Geometry;
+    pClone->m_vecOrigin0   = m_vecOrigin0;
+    pClone->m_vecCOM       = m_vecCOM;
+    // m_vecForce: No Forces on newly created Rigidbody;
+    pClone->m_fMass        = m_fMass;       
+    pClone->m_nDepthlayers = m_nDepthlayers;
+    
+    if (pClone->m_pIntPos != 0)
+    {
+        delete pClone->m_pIntPos;
+        MEM_FREED("IIntegrator")
+        pClone->m_pIntPos = 0;
+    }
+    pClone->m_pIntPos      = m_pIntPos->clone();
+    
+    if (pClone->m_pIntVel != 0)
+    {
+        delete pClone->m_pIntVel;
+        MEM_FREED("IIntegrator")
+        pClone->m_pIntVel = 0;
+    }
+    pClone->m_pIntVel      = m_pIntVel->clone();     
+    
+    // m_strName: Don't clone the name, this is an individual object
+    pClone->m_Anchors      = m_Anchors;
+    
+    //--- Variables of CBody -------------------------------------------------//
+    pClone->m_fAngle = m_fAngle;  
+    pClone->m_fInertia = m_fInertia;
+    pClone->m_fTorque = m_fTorque;
+    
+    if (pClone->m_pIntAng != 0)
+    {
+        delete pClone->m_pIntAng;
+        MEM_FREED("IIntegrator")
+        pClone->m_pIntAng = 0;
+    }
+    pClone->m_pIntAng      = m_pIntAng->clone();
+    
+    if (pClone->m_pIntAngVel != 0)
+    {
+        delete pClone->m_pIntAngVel;
+        MEM_FREED("IIntegrator")
+        pClone->m_pIntAngVel = 0;
+    }
+    pClone->m_pIntAngVel      = m_pIntAngVel->clone();
+    
+    //--- Variables of IUniverseScaled ---------------------------------------//
+    pClone->m_vecCell      = m_vecCell;
+    
+    return pClone;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,8 +132,6 @@ void CRigidBody::addForce(const Vector2d& _vecF, const Vector2d& _vecPOC)
     m_vecForce  +=  _vecF;
     m_fTorque   +=  (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[0] * _vecF[1] -
                     (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[1] * _vecF[0];
-                    
-    METHOD_EXIT("CRigidBody::addForce")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,8 +145,6 @@ void CRigidBody::clearForces()
 
     m_fTorque = 0.0;
     m_vecForce.setZero();
-
-    METHOD_EXIT("CRigidBody::clearForces")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,6 +166,4 @@ void CRigidBody::myDynamics(const double& _fStep)
     double fAngleAccel = m_fTorque / m_fInertia;
     double fAngleVel = m_pIntAngVel->integrate(fAngleAccel, _fStep*m_fTimeFac);
     m_fAngle = m_pIntAng->integrateClip(fAngleVel, _fStep*m_fTimeFac, 2.0*M_PI);
-    
-    METHOD_EXIT("CRigidBody::myDynamics")
 }

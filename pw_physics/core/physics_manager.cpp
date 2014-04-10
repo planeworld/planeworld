@@ -55,11 +55,11 @@ CPhysicsManager::~CPhysicsManager()
         {
             delete (*it);
             (*it) = 0;
-            MEM_FREED("IEmitter*")
+            MEM_FREED("IEmitter")
         }
         else
         {
-            DOM_MEMF(DEBUG_MSG("CEmitter*", "Memory already freed."))
+            DOM_MEMF(DEBUG_MSG("IEmitter", "Memory already freed."))
         }
     };
 }
@@ -242,7 +242,7 @@ void CPhysicsManager::initEmitters()
             
             delete (*it);
             (*it) = 0;
-            MEM_FREED("CDebrisEmitter*")
+            MEM_FREED("IEmitter")
             
             it = m_Emitters.erase(it);
         }
@@ -304,6 +304,7 @@ void CPhysicsManager::runCellUpdate() const
     ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
     while (true)
     {
+        // The locking is not very nice, should somehow be hidden
         m_pDataStorage->lockObjects();
         
         (*ci)->updateCell();

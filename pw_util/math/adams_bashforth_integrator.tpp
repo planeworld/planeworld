@@ -65,6 +65,26 @@ CAdamsBashforthIntegrator<T>::~CAdamsBashforthIntegrator()
     DTOR_CALL("CAdamsBashforthIntegrator::~CAdamsBashforthIntegrator")
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones integrator
+///
+/// \return Pointer to cloned integrator
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+IIntegrator<T>* CAdamsBashforthIntegrator<T>::clone() const
+{
+    METHOD_ENTRY("CAdamsBashforthIntegrator::clone")
+    
+    CAdamsBashforthIntegrator<T>* pClone = new CAdamsBashforthIntegrator;
+    MEM_ALLOC("CAdamsBashforthIntegrator")
+        
+    (*pClone) = (*this);
+    
+    return pClone;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Integrates the next timestep

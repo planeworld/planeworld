@@ -49,7 +49,7 @@ CVisualsManager::~CVisualsManager()
     {
         delete m_pCamera;
         m_pCamera = 0;
-        MEM_FREED("m_pCamera");
+        MEM_FREED("CCamera");
     }
 }
     

@@ -42,8 +42,9 @@ class CAdamsBashforthIntegrator : public IIntegrator<T>
         ~CAdamsBashforthIntegrator();
 
         //--- Constant Methods -----------------------------------------------//
-        const T  getPrevValue() const;
-        const T  getValue() const;
+        IIntegrator<T>* clone() const;
+        const T         getPrevValue() const;
+        const T         getValue() const;
 
         //--- Methods --------------------------------------------------------//
         const T  integrate(const T&, const double&);

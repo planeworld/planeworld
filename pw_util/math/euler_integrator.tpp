@@ -56,6 +56,26 @@ CEulerIntegrator<T>::~CEulerIntegrator()
     DTOR_CALL("CEulerIntegrator::~CEulerIntegrator")
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones integrator
+///
+/// \return Pointer to cloned integrator
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+IIntegrator<T>* CEulerIntegrator<T>::clone() const
+{
+    METHOD_ENTRY("CEulerIntegrator::clone")
+    
+    CEulerIntegrator<T>* pClone = new CEulerIntegrator;
+    MEM_ALLOC("CEulerIntegrator")
+        
+    (*pClone) = (*this);
+    
+    return pClone;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Integrates the next timestep 

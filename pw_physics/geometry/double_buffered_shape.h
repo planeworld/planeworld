@@ -46,9 +46,11 @@ class CDoubleBufferedShape
         ~CDoubleBufferedShape();                        ///< Destructor
         
         //--- Constant Methods -----------------------------------------------//
+        CDoubleBufferedShape* clone() const;
+        
         IShape* const getShapeBuf() const;
         IShape* const getShapeCur() const;
-		void 		  updateBuffer() const;
+        void          updateBuffer() const;
                         
         //--- Methods --------------------------------------------------------//
         void buffer(IShape* const);

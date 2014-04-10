@@ -142,7 +142,7 @@ bool CXMLImporter::import(const std::string& _strFilename,
         else
         {
 //             CRigidBody* pDefaultCam = new CRigidBody;
-//             MEM_ALLOC("pDefaultCam")
+//             MEM_ALLOC("CRigidBody")
 //             pDefaultCam->setName("DefaultCamera");
 //             pDefaultCam->disableDynamics();
 //             pDefaultCam->disableGravitation();
@@ -150,7 +150,7 @@ bool CXMLImporter::import(const std::string& _strFilename,
 //             m_Objects.insert(std::pair<std::string,IObject*>("pDefaultCam", pDefaultCam));
             
             m_pCamera = new CCamera;
-            MEM_ALLOC("m_pCamera")
+            MEM_ALLOC("CCamera")
 //             m_pCamera->setHook(pDefaultCam);
             m_pCamera->setViewport(600.0,400.0);
             
@@ -202,11 +202,11 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
     {
         delete m_pCamera;
         m_pCamera = 0;
-        MEM_FREED("m_pCamera");
+        MEM_FREED("CCamera");
         NOTICE_MSG("XML Importer", "More than one camera, creating new.")
     }
     m_pCamera = new CCamera;
-    MEM_ALLOC("pCamera")
+    MEM_ALLOC("CCamera")
     
     m_strCameraHook = _Node.attribute("hook").as_string();
     m_pCamera->setPosition(_Node.attribute("position_x").as_double(),
@@ -246,10 +246,10 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
     INFO_MSG("XML Importer", "Creating rigid body.");
     
     CRigidBody* pRigidBody = new CRigidBody;
-    MEM_ALLOC("pRigidBody")
+    MEM_ALLOC("CRigidBody")
     
     IObjectVisuals* pObjectVisuals = new IObjectVisuals(pRigidBody);
-    MEM_ALLOC("pObjectVisuals");
+    MEM_ALLOC("IObjectVisuals");
     
     pugi::xml_node N = _Node;
     
@@ -304,14 +304,14 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody,
     METHOD_ENTRY("CXMLImporter::createShapeCircle")
     
     CCircle* pCircle = new CCircle;
-    MEM_ALLOC("pCircle")
+    MEM_ALLOC("CCircle")
     
     pCircle->setRadius(_Node.attribute("radius").as_double());
     pCircle->setCenter(_Node.attribute("center_x").as_double(),
                        _Node.attribute("center_y").as_double());
     
     CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-    MEM_ALLOC("pShape")
+    MEM_ALLOC("CDoubleBufferedShape")
     
     pShape->buffer(pCircle);
         
@@ -348,7 +348,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
     METHOD_ENTRY("CXMLImporter::createShapePlanet")
     
     CPlanet* pPlanet = new CPlanet;
-    MEM_ALLOC("pPlanet")
+    MEM_ALLOC("CPlanet")
     
     pPlanet->setRadius(_Node.attribute("radius").as_double());
     pPlanet->setCenter(_Node.attribute("center_x").as_double(),
@@ -359,7 +359,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
     pPlanet->initTerrain();
     
     CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-    MEM_ALLOC("pShape")
+    MEM_ALLOC("CShape")
     pShape->buffer(pPlanet);
     static_cast<CPlanet*>(pShape->getShapeBuf())->initTerrain();
         
@@ -396,7 +396,7 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody,
     METHOD_ENTRY("CXMLImporter::createShapePolyline")
     
     CPolyLine* pPolyline = new CPolyLine;
-    MEM_ALLOC("pPolyline")
+    MEM_ALLOC("CPolyLine")
     
     if (std::string(_Node.attribute("line_type").as_string()) == "loop")
         pPolyline->setLineType(GRAPHICS_LINETYPE_LOOP);
@@ -432,7 +432,7 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody,
     }
     
     CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-    MEM_ALLOC("pShape")
+    MEM_ALLOC("CDoubleBufferedShape")
     pShape->buffer(pPolyline);
     
     // The shape might have visuals
@@ -468,7 +468,7 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody,
     METHOD_ENTRY("CXMLImporter::createShapeTerrain")
     
     CTerrain* pTerrain = new CTerrain;
-    MEM_ALLOC("pTerrain")
+    MEM_ALLOC("CTerrain")
     
     pTerrain->setWidth (_Node.attribute("width").as_double());
     pTerrain->setCenter(_Node.attribute("center_x").as_double(),
@@ -478,7 +478,7 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody,
     pTerrain->setGroundResolution(_Node.attribute("ground_resolution").as_double());
 
     CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-    MEM_ALLOC("pShape")
+    MEM_ALLOC("CDoubleBufferedShape")
     pShape->buffer(pTerrain);
     
     // The shape might have visuals
@@ -518,7 +518,7 @@ void CXMLImporter::createVisualsCircle(CDoubleBufferedShape* const _pCircle,
         if (std::string(_Node.attribute("type").as_string()) == "Circle")
         {
             CCircleVisuals* pCircleVisuals = new CCircleVisuals(_pCircle);
-            MEM_ALLOC("pCircleVisuals")
+            MEM_ALLOC("CCircleVisuals")
             
             _pObjectVisuals->addVisuals(pCircleVisuals);
         }
@@ -546,7 +546,7 @@ void CXMLImporter::createVisualsPlanet(CDoubleBufferedShape* const _pPlanet,
         if (std::string(_Node.attribute("type").as_string()) == "Planet")
         {
             CPlanetVisuals* pPlanetVisuals = new CPlanetVisuals(_pPlanet);
-            MEM_ALLOC("pPlanetVisuals")
+            MEM_ALLOC("CPlanetVisuals")
             
             _pObjectVisuals->addVisuals(pPlanetVisuals);
         }
@@ -574,7 +574,7 @@ void CXMLImporter::createVisualsPolyline(CDoubleBufferedShape* const _pPolyline,
         if (std::string(_Node.attribute("type").as_string()) == "Polyline")
         {
             CPolylineVisuals* pPolylineVisuals = new CPolylineVisuals(_pPolyline);
-            MEM_ALLOC("pPolylineVisuals")
+            MEM_ALLOC("CPolylineVisuals")
             
             _pObjectVisuals->addVisuals(pPolylineVisuals);
         }
@@ -602,7 +602,7 @@ void CXMLImporter::createVisualsTerrain(CDoubleBufferedShape* const _pTerrain,
         if (std::string(_Node.attribute("type").as_string()) == "Terrain")
         {
             CTerrainVisuals* pTerrainVisuals = new CTerrainVisuals(_pTerrain);
-            MEM_ALLOC("pTerrainVisuals")
+            MEM_ALLOC("CTerrainVisuals")
             
             _pObjectVisuals->addVisuals(pTerrainVisuals);
         }
