@@ -26,11 +26,13 @@
 //--- Standard header --------------------------------------------------------//
 #include <iostream>
 #include <iomanip>
+#include <map>
 #include <string>
 #include <sstream>
 
 //--- Misc header ------------------------------------------------------------//
 #include "timer.h"
+#include "SFML/System/Mutex.hpp"
 
 /// Represents logging level
 typedef enum 
@@ -124,6 +126,8 @@ class CLog
     private:
     
         //--- Variables ------------------------------------------------------//
+        sf::Mutex       m_Mutex;                ///< Mutex to lock writing to console        
+        
         LogLevelType    m_LogLevel;             ///< The loglevel
         LogLevelType    m_LogLevelCompiled;     ///< Info about the loglevel given by macros
                 
@@ -139,7 +143,8 @@ class CLog
         int             m_iProcessorCount;          ///< The number of available cpu cores
         
         #ifdef DOMAIN_MEMORY
-            int             m_nMemCounter;      ///< Counts memory (de)allocations
+            int                        m_nMemCounter;       ///< Counts memory (de)allocations
+            std::map<std::string, int> m_MemCounterMap;     ///< Counts memony (de)allocations per class
         #endif
         #ifdef DOMAIN_METHOD_HIERARCHY
             int             m_nHierLevel;       ///< Level in method hierarchy

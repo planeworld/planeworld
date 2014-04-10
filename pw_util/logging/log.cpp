@@ -41,13 +41,31 @@ CLog::~CLog()
         // The memory domain is given by the enclosing macro
         if (m_nMemCounter > 0)
         {
+            NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
             WARNING_MSG("Logging", "There may be memory leaks, please check: " << m_nMemCounter)
-            DEBUG_MSG("IMPORTANT", "The last message results from debug information. A lower loglevel won't display it.")
+            
+                std::cout << "\n";
+                std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
+                while (ci != m_MemCounterMap.end())
+                {
+                    if (ci->second != 0) std::cout << m_strColWarning;
+                    std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
+                    ++ci;
+                }
         }
         if (m_nMemCounter < 0)
         {
+            NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
             WARNING_MSG("Logging", "Maybe more memory freed than allocated, please check.")
-            DEBUG_MSG("IMPORTANT", "The last message results from debug information. A lower loglevel won't display it.")
+            
+                std::cout << "\n";
+                std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
+                while (ci != m_MemCounterMap.end())
+                {
+                    if (ci->second != 0) std::cout << m_strColWarning;
+                    std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
+                    ++ci;
+                }
         }
     #endif
 }
@@ -131,6 +149,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
 
     if (!m_bLock)
     {
+        m_Mutex.lock();
 
         std::string strDomFlag;
     
@@ -142,10 +161,18 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                 if (_Domain == LOG_DOMAIN_MEMORY_ALLOCATED)
                 {
                     ++m_nMemCounter;
+                    if (m_MemCounterMap.find(_strMessage) != m_MemCounterMap.end())
+                        m_MemCounterMap[_strMessage] += 1;
+                    else
+                        m_MemCounterMap[_strMessage] =  1;
                 }
                 if (_Domain == LOG_DOMAIN_MEMORY_FREED)
                 {
                     --m_nMemCounter;
+                    if (m_MemCounterMap.find(_strMessage) != m_MemCounterMap.end())
+                        m_MemCounterMap[_strMessage] -= 1;
+                    else
+                        m_MemCounterMap[_strMessage] = -1;
                 }
             #endif
             #ifdef DOMAIN_METHOD_HIERARCHY
@@ -282,6 +309,8 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
         m_strMsgBufMsg = _strMessage;
         m_MsgBufLevel = _Level;
         m_MsgBufDom = _Domain;
+        
+        m_Mutex.unlock();
     }
 }
 
