@@ -5,9 +5,11 @@
         name="Moon"
         mass="7.349e22"
         origin_x="0.0"
-        origin_y="-384.4e6"
+        origin_y="1.4999078e11"
         dynamics="true"
         gravity="true"
+        velocity_x="30.803e3"
+        velocity_y="0.0"
     />
     <shape
         type="Planet"

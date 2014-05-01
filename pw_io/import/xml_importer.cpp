@@ -878,10 +878,10 @@ void CXMLImporter::readObjectCore(IObject* const _pO, const pugi::xml_node& _Nod
         _pO->setName(checkAttributeString(_Node, "name", _pO->getName()));
         _pO->setMass(checkAttributeDouble(_Node, "mass", _pO->getMass()));
         _pO->setOrigin(checkAttributeDouble(_Node, "origin_x", _pO->getOrigin()[0]),
-                       checkAttributeDouble(_Node, "origin_x", _pO->getOrigin()[1]));
+                       checkAttributeDouble(_Node, "origin_y", _pO->getOrigin()[1]));
         _pO->setCell(Vector2i(
                      checkAttributeInt(_Node, "cell_x", _pO->getCell()[0]),
-                     checkAttributeInt(_Node, "cell_x", _pO->getCell()[1])));
+                     checkAttributeInt(_Node, "cell_y", _pO->getCell()[1])));
                                 
         if (checkAttributeBool(_Node, "gravity", _pO->getGravitationState()) == true)
             _pO->enableGravitation();
@@ -891,5 +891,8 @@ void CXMLImporter::readObjectCore(IObject* const _pO, const pugi::xml_node& _Nod
             _pO->enableDynamics();
         else
             _pO->disableDynamics();
+        _pO->setVelocity(Vector2d(
+                         checkAttributeDouble(_Node, "velocity_x", _pO->getVelocity()[0]),
+                         checkAttributeDouble(_Node, "velocity_y", _pO->getVelocity()[1])));
     }
 }

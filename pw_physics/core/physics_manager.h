@@ -150,8 +150,10 @@ inline void CPhysicsManager::setUniverse(CUniverse* const _pUniverse)
 inline void CPhysicsManager::accelerateTime()
 {
     METHOD_ENTRY("CPhysicsManager::accelerateTime")
-    if (m_fTimeAccel < 16.0)
+    if (m_fTimeAccel < 10000000.0)
         m_fTimeAccel *= 2.0;
+        
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,6 +165,7 @@ inline void CPhysicsManager::decelerateTime()
 {
     METHOD_ENTRY("CPhysicsManager::decelerateTime")
     m_fTimeAccel *= 0.5;
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,6 +177,7 @@ inline void CPhysicsManager::resetTime()
 {
     METHOD_ENTRY("CPhysicsManager::resetTime")
     m_fTimeAccel = 1.0;
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
 }
 
 #endif

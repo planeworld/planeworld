@@ -34,10 +34,10 @@ IObject::IObject(): m_bGravitation(true),
     METHOD_ENTRY("IObject::IObject")
     CTOR_CALL("IObject::IObject")
     
-    m_pIntPos = new CAdamsMoultonIntegrator<Vector2d>;
-    MEM_ALLOC("CAdamsMoultonIntegrator")
-    m_pIntVel = new CAdamsBashforthIntegrator<Vector2d>;
-    MEM_ALLOC("CAdamsBashforthIntegrator")
+    m_pIntPos = new CEulerIntegrator<Vector2d>;
+    MEM_ALLOC("CEulerIntegrator")
+    m_pIntVel = new CEulerIntegrator<Vector2d>;
+    MEM_ALLOC("CEulerIntegrator")
 
     m_vecOrigin0.setZero();
     m_vecCOM.setZero();
@@ -61,14 +61,14 @@ IObject::~IObject()
     {
         delete m_pIntPos;
         m_pIntPos = 0;
-        MEM_FREED("CAdamsMoultonIntegrator")
+        MEM_FREED("IIntegrator")
     }
 
     if (m_pIntVel != 0)
     {
         delete m_pIntVel;
         m_pIntVel = 0;
-        MEM_FREED("CAdamsBashforthIntegrator")
+        MEM_FREED("IIntegrator")
     }
 
     m_Lifetime.stop();
@@ -124,8 +124,13 @@ void IObject::updateCell()
     m_vecCell += vecUpdateCell;
     this->setCell(m_vecCell);
 
-    DOM_VAR(DEBUG_MSG("Object Interface","Cell update for " << m_strName << " is " <<
-                       vecUpdateCell[0] << ", " << vecUpdateCell[1]))
+    DEBUG(
+        if (std::abs(vecUpdateCell[0]) > 0 || std::abs(vecUpdateCell[1] > 0))
+        {
+            DOM_VAR(DEBUG_MSG("Object Interface","Cell update for " << m_strName << " is " <<
+                            vecUpdateCell[0] << ", " << vecUpdateCell[1]))
+        }
+    )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -213,13 +218,13 @@ void IObject::setNewIntegrator(const IntegratorType& _IntType)
     if (m_pIntPos != 0)
     {
         delete m_pIntPos;
-        MEM_FREED("CAdamsMoultonIntegrator")
+        MEM_FREED("IIntegrator")
         m_pIntPos = 0;
     }
     if (m_pIntVel != 0)
     {
         delete m_pIntVel;
-        MEM_FREED("CAdamsBashforthIntegrator")
+        MEM_FREED("IIntegrator")
         m_pIntVel = 0;
     }
 

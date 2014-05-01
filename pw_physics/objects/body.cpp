@@ -29,10 +29,10 @@ CBody::CBody() : m_fAngle(0.0), m_fInertia(1.0), m_fTorque(0.0)
     METHOD_ENTRY("CBody::CBody");
     CTOR_CALL("CBody::CBody");
     
-    m_pIntAng = new CAdamsMoultonIntegrator<double>;
-    MEM_ALLOC("CAdamsMoultonIntegrator");
-    m_pIntAngVel = new CAdamsBashforthIntegrator<double>;
-    MEM_ALLOC("CAdamsBashforthIntegrator");
+    m_pIntAng = new CEulerIntegrator<double>;
+    MEM_ALLOC("CEulerIntegrator");
+    m_pIntAngVel = new CEulerIntegrator<double>;
+    MEM_ALLOC("CEulerIntegrator");
 
     // Default name for any body:
     m_strName = "Body";
@@ -52,14 +52,14 @@ CBody::~CBody()
     {
         delete m_pIntAng;
         m_pIntAng = 0;
-        MEM_FREED("CAdamsMoultonIntegrator")
+        MEM_FREED("IIntegrator")
     }
 
     if (m_pIntAngVel != 0)
     {
         delete m_pIntAngVel;
         m_pIntAngVel = 0;
-        MEM_FREED("CAdamsBashforthIntegrator")
+        MEM_FREED("IIntegrator")
     }
 }
 
@@ -125,13 +125,13 @@ void CBody::mySetNewIntegrator(const IntegratorType& _IntType)
     if (m_pIntAng != 0)
     {
         delete m_pIntAng;
-        MEM_FREED("m_pIntAng");
+        MEM_FREED("IIntegrator");
         m_pIntAng = 0;
     }
     if (m_pIntAngVel != 0)
     {
         delete m_pIntAngVel;
-        MEM_FREED("m_pIntAngVel");
+        MEM_FREED("IIntegrator");
         m_pIntAngVel = 0;
     }
 
@@ -140,20 +140,20 @@ void CBody::mySetNewIntegrator(const IntegratorType& _IntType)
         case INTEGRATOR_EULER:
             m_pIntAng = new CEulerIntegrator<double>;
             m_pIntAngVel = new CEulerIntegrator<double>;
-            MEM_ALLOC("m_pIntAng")
-            MEM_ALLOC("m_pIntAngVel")
+            MEM_ALLOC("CEulerIntegrator")
+            MEM_ALLOC("CEulerIntegrator")
             break;
         case INTEGRATOR_ADAMS_BASHFORTH:
             m_pIntAng = new CAdamsBashforthIntegrator<double>;
             m_pIntAngVel = new CAdamsBashforthIntegrator<double>;
-            MEM_ALLOC("m_pIntAng")
-            MEM_ALLOC("m_pIntAngVel")
+            MEM_ALLOC("CAdamsMoultonIntegrator")
+            MEM_ALLOC("CAdamsMoultonIntegrator")
             break;
         case INTEGRATOR_ADAMS_MOULTON:
             m_pIntAng = new CAdamsMoultonIntegrator<double>;
             m_pIntAngVel = new CAdamsMoultonIntegrator<double>;
-            MEM_ALLOC("m_pIntAng")
-            MEM_ALLOC("m_pIntAngVel")
+            MEM_ALLOC("CAdamsBashforthIntegrator")
+            MEM_ALLOC("CAdamsBashforthIntegrator")
             break;
     }
 

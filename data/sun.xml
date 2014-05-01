@@ -5,9 +5,9 @@
         name="Sun"
         mass="1.989e30"
         origin_x="0.0"
-        origin_y="149606378.27e3"
+        origin_y="0.0"
         dynamics="true"
-        gravity="false"
+        gravity="true"
     />
     <shape
         type="Circle"

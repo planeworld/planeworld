@@ -164,6 +164,7 @@ void CRigidBody::myDynamics(const double& _fStep)
     METHOD_ENTRY("CRigidBody::myDynamics")
 
     Vector2d vecAccel = m_vecForce / m_fMass;
+    
     m_pIntVel->integrate(vecAccel, _fStep*m_fTimeFac);
     m_pIntPos->integrate(m_pIntVel->getValue(),_fStep*m_fTimeFac);
     

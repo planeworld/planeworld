@@ -100,13 +100,14 @@ void CPhysicsManager::addGlobalForces()
             {
                 vecCC = (*ci)->getCOM() - (*cj)->getCOM() +
                         IUniverseScaled::cellToDouble((*ci)->getCell()-(*cj)->getCell());
+                
                 fCCSqr = vecCC.squaredNorm();
-
+                
                 if (fCCSqr > 400.0)
                 {
                     vecG = vecCC.normalized() * ((*ci)->getMass() * (*cj)->getMass()) / fCCSqr
 //                             * 6.6742e+0;
-                        * 6.6742e-11;
+                        * 6.67384e-11;
                     if ((*cj)->getGravitationState() == true)
                         (*ci)->addForce(-vecG, (*ci)->getCOM());
                     (*cj)->addForce(vecG, (*cj)->getCOM());
