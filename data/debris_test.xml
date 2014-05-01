@@ -2,35 +2,27 @@
 <universe procedural_generation="false">
   <gravity
     vec_x="0.0"
-    vec_y="-1.81"
+    vec_y="-9.81"
   />
-  <object type="RigidBody">
-    <core
-      name="Ground"
-      mass="10.0"
-      origin_x="0.0"
-      origin_y="-150.0"
-      dynamics="true"
-      gravity="false"
-    />
-    <shape type="Polyline"
-      line_type="strip"
-      points="      -10000.0,3000.0;
-                    0.1,0.0;
-                    +10000.0,3000.0">
-      <visuals type="Polyline"/>
-    </shape>
-    <shape type="Polyline"
-        line_type="strip"
-        points="      -10.0,50.0;
-                      +10.0,50.0">
-        <visuals type="Polyline"/>
-    </shape>
-    <shape type="Polyline"
-        line_type="strip"
-        points="      +20.0,25.0;
-                      -20.0,25.0">
-        <visuals type="Polyline"/>
-    </shape>
-  </object>  
+  <emitter
+    type="object_emitter"
+    mode="timed"
+    distribution="rectangular_field"
+    limit_x_min="-100.0"
+    limit_x_max=" -50.0"
+    limit_y_min="-100.0"
+    limit_y_max=" -50.0"
+    number="50"
+    frequency="5.0"
+  />
+  <emitter
+    type="object_emitter"
+    mode="timed"
+    frequency="1.0"
+    distribution="point_source"
+    velocity="3.0"
+    velocity_std="1.0"
+    angle="30.0"
+    angle_std="5.0"
+  />
 </universe>

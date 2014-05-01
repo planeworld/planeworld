@@ -27,12 +27,12 @@
 #include <iostream>
 #include <iomanip>
 #include <map>
+#include <mutex>
 #include <string>
 #include <sstream>
 
 //--- Misc header ------------------------------------------------------------//
 #include "timer.h"
-#include "SFML/System/Mutex.hpp"
 
 /// Represents logging level
 typedef enum 
@@ -126,7 +126,7 @@ class CLog
     private:
     
         //--- Variables ------------------------------------------------------//
-        sf::Mutex       m_Mutex;                ///< Mutex to lock writing to console        
+        std::mutex      m_Mutex;                ///< Mutex to lock writing to console        
         
         LogLevelType    m_LogLevel;             ///< The loglevel
         LogLevelType    m_LogLevelCompiled;     ///< Info about the loglevel given by macros

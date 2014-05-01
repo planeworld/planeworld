@@ -79,6 +79,7 @@ class IObject : public IHookable, public IUniverseScaled
         const bool                  getGravitationState() const;
         const double                getMass() const;
         const std::string           getName() const;
+        const Vector2d              getOrigin() const;
         const Vector2d              getVelocity() const;
 
         //--- Methods --------------------------------------------------------//
@@ -299,6 +300,19 @@ inline const std::string IObject::getName() const
 {
     METHOD_ENTRY("IObject::getName")
     return (m_strName);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the origin of the object
+///
+/// \return Origin of the object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2d IObject::getOrigin() const
+{
+    METHOD_ENTRY("IObject::getOrigin")
+    return m_vecOrigin0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

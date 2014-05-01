@@ -21,6 +21,8 @@
 #define WORLD_DATA_STORAGE_H
 
 //--- Standard header --------------------------------------------------------//
+#include <mutex>
+#include <unordered_map>
 
 //--- Program header ---------------------------------------------------------//
 #include "debris_visuals.h"
@@ -54,6 +56,8 @@ class CWorldDataStorage
         const ObjectsType&          getStaticObjects();
         const ObjectVisualsType&    getObjectVisuals();
         
+        const ObjectsType::const_iterator recallDynamicObject(const std::string&);
+        
         //--- Methods --------------------------------------------------------//
         void addDebris(CDebris*);
         void addDebrisVisuals(CDebrisVisuals*);
@@ -61,6 +65,9 @@ class CWorldDataStorage
         void addObject(IObject*);
         void addObjects(ObjectsType);
         void addObjectVisuals(IObjectVisuals*);
+        
+        void memorizeDynamicObject(const std::string&,
+                                   const ObjectsType::const_iterator);
         
         void lockObjects(){m_ObjectMutex.lock();}
         void unlockObjects(){m_ObjectMutex.unlock();}
@@ -74,8 +81,10 @@ class CWorldDataStorage
         ObjectsType         m_StaticObjects;            ///< List of static objects
         ObjectVisualsType   m_ObjectVisuals;            ///< List of object visuals
         
-        sf::Mutex           m_ObjectMutex;           ///< Mutex to lock object
-        sf::Mutex           m_ObjectVisualsMutex;    ///< Mutex to lock object visuals
+        std::unordered_map<std::string, ObjectsType::const_iterator> m_DynamicObjectsMemory; ///< Stores index to specific object
+        
+        std::mutex           m_ObjectMutex;           ///< Mutex to lock object
+        std::mutex           m_ObjectVisualsMutex;    ///< Mutex to lock object visuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -129,7 +138,7 @@ inline const JointsType& CWorldDataStorage::getJoints() const
 inline const ObjectsType& CWorldDataStorage::getDynamicObjects() 
 {
     METHOD_ENTRY("CWorldDataStorage::getDynamicObjects")
-    sf::Lock lock(m_ObjectMutex);
+    std::lock_guard<std::mutex> lock(m_ObjectMutex);
     return m_DynamicObjects;
 }
 
@@ -143,7 +152,7 @@ inline const ObjectsType& CWorldDataStorage::getDynamicObjects()
 inline const ObjectsType& CWorldDataStorage::getStaticObjects() 
 {
     METHOD_ENTRY("CWorldDataStorage::getStaticObjects")
-    sf::Lock lock(m_ObjectMutex);
+    std::lock_guard<std::mutex> lock(m_ObjectMutex);
     return m_StaticObjects;
 }
 
@@ -157,7 +166,6 @@ inline const ObjectsType& CWorldDataStorage::getStaticObjects()
 inline const ObjectVisualsType& CWorldDataStorage::getObjectVisuals()
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectVisuals")
-    sf::Lock lock(m_ObjectVisualsMutex);
     return m_ObjectVisuals;
 }
 

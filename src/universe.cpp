@@ -134,7 +134,8 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         }
     }
 
-    DOM_STATS(INFO_MSG("Universe generator", "Generated " << m_StarSystems.size() << " Stars."))
+    DOM_STATS(
+    INFO_MSG("Universe generator", "Generated " << m_StarSystems.size() << " Stars.")
     DEBUG(
         DEBUG_MSG("Universe generator", "Distribution of spectral classes: ")
         Log.logSeparator();
@@ -146,16 +147,16 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         Log.logSeparator();
     )
 
-    DOM_STATS(INFO_MSG("Universe generator", "Generated "<< nNrOfPlanets << " planets."))
+    INFO_MSG("Universe generator", "Generated "<< nNrOfPlanets << " planets.")
     DEBUG(
-        DEBUG_MSG("Universe generator", "Distribution of number of planet per star system: ")
+        DEBUG_MSG("Universe generator", "Distribution of number of planets per star system: ")
         Log.logSeparator();
         
         for (int i=0; i<m_nNrOfPlanetsMax; ++i)
             std::cout << "Planets: " << i << ": " << std::string(double(vecNrOfPlanets[i]*nBar)/nNrOfPlanets,'#') << std::endl;
         
         Log.logSeparator();
-    )
+    ))
     
     // Reserve memory for star object
     m_pStar = new CRigidBody;

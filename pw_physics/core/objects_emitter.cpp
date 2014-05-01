@@ -107,13 +107,14 @@ void CObjectEmitter::emit(const double& _fF)
                 m_pDataStorage->addObject(pObject);
                 m_pDataStorage->addObjectVisuals(pObjectVisuals);
                 
+                pObject->init();
             }
             break;
         case EMITTER_DISTRIBUTION_POINT_SOURCE:
             for (int i=0; i<nNrOfObjects; ++i)
             {
-                double fAngle = m_NormalDist(m_Generator)*m_fAngleVariance + m_fAngle;
-                double fVelocity = m_NormalDist(m_Generator)*m_fVelocityVariance + m_fVelocity;
+                double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_fAngle;
+                double fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
                 
                 IObject* pObject = m_pTemplate->clone();
                 IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
@@ -121,6 +122,8 @@ void CObjectEmitter::emit(const double& _fF)
                 pObject->setVelocity((Vector2d(-2.0,0.0), fVelocity*Vector2d(std::cos(fAngle), sin(fAngle))));
                 m_pDataStorage->addObject(pObject);
                 m_pDataStorage->addObjectVisuals(pObjectVisuals);
+                
+                pObject->init();
             }
     }
 }

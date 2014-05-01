@@ -28,7 +28,7 @@
 #include "universe.h"
 #include "world_data_storage_user.h"
 
-const double PHYSICS_DEFAULT_FREQUENCY = 100.0;
+const double PHYSICS_DEFAULT_FREQUENCY = 200.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -61,7 +61,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         
         void addGlobalForces();
         void addEmitter(IEmitter*);
-        void addEmitters(EmittersType);
+        void addEmitters(const EmittersType&);
         void collisionDetection();
         void initEmitters();
         void initObjects();
@@ -69,8 +69,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         void accelerateTime();
         void decelerateTime();
         void resetTime();
-        
-        void runCellUpdate() const;
+        void runCellUpdate();
 
     private:
         
@@ -84,6 +83,9 @@ class CPhysicsManager : public IWorldDataStorageUser
         Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
 
         EmittersType        m_Emitters;             ///< List of emitters
+        
+        double  m_fCellUpdateResidual;              ///< Residual for calculation of cell update
+        bool    m_bCellUpdateFirst;                 ///< Indicates the first cell update (to initialise access)
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

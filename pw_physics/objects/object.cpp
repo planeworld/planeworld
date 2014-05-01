@@ -97,6 +97,7 @@ void IObject::updateCell()
     Vector2i vecUpdateCell;
     vecUpdate.setZero();
     vecUpdateCell.setZero();
+    
     if      (m_pIntPos->getValue()[0] >  DEFAULT_CELL_SIZE)
     {
         vecUpdate[0]     -= DEFAULT_CELL_SIZE_2;
@@ -118,8 +119,11 @@ void IObject::updateCell()
         vecUpdateCell[1] -= 1;
     }
     m_pIntPos->init(m_pIntPos->getValue()+vecUpdate);
+    /// \bug Bounding box must be updated with new relative position
+    
     m_vecCell += vecUpdateCell;
     this->setCell(m_vecCell);
+
     DOM_VAR(DEBUG_MSG("Object Interface","Cell update for " << m_strName << " is " <<
                        vecUpdateCell[0] << ", " << vecUpdateCell[1]))
 }

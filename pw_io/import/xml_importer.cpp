@@ -122,6 +122,10 @@ bool CXMLImporter::import(const std::string& _strFilename,
         {
             this->createCamera(N);
         }
+        else if (std::string(N.name()) == "emitter")
+        {
+            this->createEmitter(N);
+        }
         else if (std::string(N.name()) == "gravity")
         {
             this->createGravity(N);
@@ -159,6 +163,130 @@ bool CXMLImporter::import(const std::string& _strFilename,
     }
 
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Check node for attribute
+///
+/// The method will check a given attribute for its existence in the xml file.
+/// If existent, it will be returned, otherwise, a default value is given.
+///
+/// \param _Node Current node in xml tree
+/// \param _strAttr Attribute
+/// \param _bDef Default value
+///
+/// \return Attribute
+///
+////////////////////////////////////////////////////////////////////////////////
+const bool CXMLImporter::checkAttributeBool(const pugi::xml_node& _Node, 
+                                          const std::string& _strAttr,
+                                          const bool& _bDef) const
+{
+    METHOD_ENTRY("CXMLImporter::checkAttributeBool")
+    if (_Node.attribute(_strAttr.c_str()).empty())
+    {
+        NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                   " default value " << _bDef << ".")
+        return _bDef;
+    }
+    else
+    {
+        return _Node.attribute(_strAttr.c_str()).as_bool();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Check node for attribute
+///
+/// The method will check a given attribute for its existence in the xml file.
+/// If existent, it will be returned, otherwise, a default value is given.
+///
+/// \param _Node Current node in xml tree
+/// \param _strAttr Attribute
+/// \param _fDef Default value
+///
+/// \return Attribute
+///
+////////////////////////////////////////////////////////////////////////////////
+const double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node, 
+                                          const std::string& _strAttr,
+                                          const double& _fDef) const
+{
+    METHOD_ENTRY("CXMLImporter::checkAttributeDouble")
+    if (_Node.attribute(_strAttr.c_str()).empty())
+    {
+        NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                   " default value " << _fDef << ".")
+        return _fDef;
+    }
+    else
+    {
+        return _Node.attribute(_strAttr.c_str()).as_double();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Check node for attribute
+///
+/// The method will check a given attribute for its existence in the xml file.
+/// If existent, it will be returned, otherwise, a default value is given.
+///
+/// \param _Node Current node in xml tree
+/// \param _strAttr Attribute
+/// \param _nDef Default value
+///
+/// \return Attribute
+///
+////////////////////////////////////////////////////////////////////////////////
+const int CXMLImporter::checkAttributeInt(const pugi::xml_node& _Node, 
+                                          const std::string& _strAttr,
+                                          const int& _nDef) const
+{
+    METHOD_ENTRY("CXMLImporter::checkAttributeInt")
+    if (_Node.attribute(_strAttr.c_str()).empty())
+    {
+        NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                   " default value " << _nDef << ".")
+        return _nDef;
+    }
+    else
+    {
+        return _Node.attribute(_strAttr.c_str()).as_int();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Check node for attribute
+///
+/// The method will check a given attribute for its existence in the xml file.
+/// If existent, it will be returned, otherwise, a default value is given.
+///
+/// \param _Node Current node in xml tree
+/// \param _strAttr Attribute
+/// \param _strDef Default value
+///
+/// \return Attribute
+///
+////////////////////////////////////////////////////////////////////////////////
+const std::string CXMLImporter::checkAttributeString(const pugi::xml_node& _Node, 
+                                          const std::string& _strAttr,
+                                          const std::string& _strDef) const
+{
+    METHOD_ENTRY("CXMLImporter::checkAttributeString")
+    if (_Node.attribute(_strAttr.c_str()).empty())
+    {
+        NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                   " default value " << _strDef << ".")
+        return _strDef;
+    }
+    else
+    {
+        return _Node.attribute(_strAttr.c_str()).as_string();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -217,6 +345,107 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Create an emitter
+///
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::createEmitter")
+    
+    if (!_Node.empty())
+    {
+        std::string strType = checkAttributeString(_Node, "type", mapEmitterToString.at(EMITTER_DEFAULT_TYPE));
+        if (strType == "object_emitter")
+        {
+            INFO_MSG("XML Importer", "Creating object emitter.")
+            
+            CObjectEmitter* pObjEmitter = new CObjectEmitter;
+            MEM_ALLOC("CObjectEmitter")
+            
+            std::string strMode = checkAttributeString(_Node, "mode", mapEmitterModeToString.at(EMITTER_DEFAULT_MODE));
+            if (strMode == "emit_once")
+            {
+                pObjEmitter->setMode(EMITTER_MODE_EMIT_ONCE);
+            }
+            else if (strMode == "timed")
+            {
+                pObjEmitter->setMode(EMITTER_MODE_TIMED);
+                pObjEmitter->setFrequency(checkAttributeDouble(_Node, "frequency", EMITTER_DEFAULT_FREQUENCY));
+            }
+            else
+            {
+                WARNING_MSG("XML Importer", "Unknown mode " << strMode << ". Using default mode: " << 
+                                             mapEmitterModeToString.at(EMITTER_DEFAULT_MODE))
+                WARNING(
+                    std::cout << "  Known modes: " << std::endl;
+                    for (auto it = mapEmitterModeToString.cbegin(); it != mapEmitterModeToString.cend(); ++it)
+                    {
+                        std::cout << "    " << (*it).second << std::endl;
+                    }
+                )
+            }
+            
+            std::string strDist = checkAttributeString(_Node, "distribution", mapEmitterDistributionToString.at(EMITTER_DEFAULT_DISTRIBUTION));
+            if (strDist == "circular_field")
+            {
+                NOTICE_MSG("XML Importer", "Circular distribution not yet implemented.")
+                pObjEmitter->setDistribution(EMITTER_DISTRIBUTION_CIRCULAR_FIELD);
+            }
+            else if (strDist == "point_source")
+            {
+                pObjEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+                pObjEmitter->setVelocity(checkAttributeDouble(_Node, "velocity", EMITTER_DEFAULT_VELOCITY));
+                pObjEmitter->setVelocityStd(checkAttributeDouble(_Node, "velocity_std", EMITTER_DEFAULT_VELOCITY_STD));
+                pObjEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE))/180.0*M_PI);
+                pObjEmitter->setAngleStd((checkAttributeDouble(_Node, "angle_std", EMITTER_DEFAULT_ANGLE_STD))/180.0*M_PI);
+            }
+            else if (strDist == "rectangular_field")
+            {
+                pObjEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
+                pObjEmitter->setLimits(checkAttributeDouble(_Node, "limit_x_min", EMITTER_DEFAULT_LIMIT_MIN_X),
+                                       checkAttributeDouble(_Node, "limit_x_max", EMITTER_DEFAULT_LIMIT_MAX_X),
+                                       checkAttributeDouble(_Node, "limit_y_min", EMITTER_DEFAULT_LIMIT_MIN_Y),
+                                       checkAttributeDouble(_Node, "limit_y_max", EMITTER_DEFAULT_LIMIT_MAX_Y));
+                pObjEmitter->setNumber(_Node.attribute("number").as_uint());
+            }
+            else
+            {
+                WARNING_MSG("XML Importer", "Unknown distribution " << strDist << ". Using default distribution: " <<
+                                             mapEmitterDistributionToString.at(EMITTER_DEFAULT_DISTRIBUTION))
+                WARNING(
+                    std::cout << "  Known distributions: " << std::endl;
+                    for (auto it = mapEmitterDistributionToString.cbegin(); it != mapEmitterDistributionToString.cend(); ++it)
+                    {
+                        std::cout << "    " << (*it).second << std::endl;
+                    }
+                )
+            }
+            
+            m_Emitters.push_back(pObjEmitter);
+        }
+        else if (strType == "debris_emitter")
+        {
+            INFO_MSG("XML Importer", "Creating debris emitter.")
+            NOTICE_MSG("XML Importer", "Debris emitter creation not yet implemented.")
+        }
+        else
+        {
+            WARNING_MSG("XML Importer", "Unknown emitter " << strType << ". Aborting creation.")
+            WARNING(
+                std::cout << "  Known emitters: " << std::endl;
+                for (auto it = mapEmitterToString.cbegin(); it != mapEmitterToString.cend(); ++it)
+                {
+                    std::cout << "    " << (*it).second << std::endl;
+                }
+            )
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Create constant gravity for the whole universe
 ///
 /// \param _Node Current node in xml tree
@@ -228,8 +457,8 @@ void CXMLImporter::createGravity(const pugi::xml_node& _Node)
     
     INFO_MSG("XML Importer", "Setting constant gravity.")
     
-    m_vecGravity = Vector2d(_Node.attribute("vec_x").as_double(),
-                            _Node.attribute("vec_y").as_double());
+    m_vecGravity = Vector2d(checkAttributeDouble(_Node, "vec_x", 0.0),
+                            checkAttributeDouble(_Node, "vec_y", 0.0));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -623,7 +852,7 @@ void CXMLImporter::createUniverse(const pugi::xml_node& _Node)
     
     if (!_Node.empty())
     {
-        if (_Node.attribute("procedural_generation").as_bool() == true)
+        if (checkAttributeBool(_Node, "procedural_generation", false) == true)
         {
             m_Universe.generate(_Node.attribute("seed").as_int(),
                                 _Node.attribute("number_of_stars").as_int());
@@ -646,19 +875,19 @@ void CXMLImporter::readObjectCore(IObject* const _pO, const pugi::xml_node& _Nod
     
     if (!_Node.empty())
     {
-        _pO->setName(_Node.attribute("name").as_string());
-        _pO->setMass(_Node.attribute("mass").as_double());
-        _pO->setOrigin(_Node.attribute("origin_x").as_double(),
-                       _Node.attribute("origin_y").as_double());
+        _pO->setName(checkAttributeString(_Node, "name", _pO->getName()));
+        _pO->setMass(checkAttributeDouble(_Node, "mass", _pO->getMass()));
+        _pO->setOrigin(checkAttributeDouble(_Node, "origin_x", _pO->getOrigin()[0]),
+                       checkAttributeDouble(_Node, "origin_x", _pO->getOrigin()[1]));
         _pO->setCell(Vector2i(
-                     _Node.attribute("cell_x").as_int(),
-                     _Node.attribute("cell_y").as_int()));
+                     checkAttributeInt(_Node, "cell_x", _pO->getCell()[0]),
+                     checkAttributeInt(_Node, "cell_x", _pO->getCell()[1])));
                                 
-        if (_Node.attribute("gravity").as_bool() == true)
+        if (checkAttributeBool(_Node, "gravity", _pO->getGravitationState()) == true)
             _pO->enableGravitation();
         else
             _pO->disableGravitation();
-        if (_Node.attribute("dynamics").as_bool() == true)
+        if (checkAttributeBool(_Node, "dynamics", _pO->getDynamicsState()) == true)
             _pO->enableDynamics();
         else
             _pO->disableDynamics();

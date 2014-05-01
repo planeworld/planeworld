@@ -303,20 +303,20 @@ void CVisualsManager::drawGridHUD() const
 //         
 //         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         
-        // Now draw the text
-        std::stringstream oss;
-        oss << "Grid Resolution: " << fGrid << "m";
-        
-        m_Graphics.getWindow()->pushGLStates();
-        sf::Font font;
-        font.loadFromFile("/home/bfeld/tmp/local/share/planeworld/data/consola.ttf");
-        sf::Text text;
-        text.setString(oss.str());
-        text.setFont(font);
-        text.setCharacterSize(12);
-        text.setPosition(m_Graphics.getWidthScr()/2, 0.0f);
-        m_Graphics.getWindow()->draw(text);
-        m_Graphics.getWindow()->popGLStates();
+//         // Now draw the text
+//         std::stringstream oss;
+//         oss << "Grid Resolution: " << fGrid << "m";
+//         
+//         m_Graphics.getWindow()->pushGLStates();
+//         sf::Font font;
+//         font.loadFromFile("/home/bfeld/tmp/local/share/planeworld/data/consola.ttf");
+//         sf::Text text;
+//         text.setString(oss.str());
+//         text.setFont(font);
+//         text.setCharacterSize(12);
+//         text.setPosition(m_Graphics.getWidthScr()/2, 0.0f);
+//         m_Graphics.getWindow()->draw(text);
+//         m_Graphics.getWindow()->popGLStates();
     }
 }
 

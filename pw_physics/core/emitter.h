@@ -27,10 +27,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "world_data_storage_user.h"
 
-
-// Constants
-const double EMITTER_DEFAULT_FREQUENCY = 1.0; ///< Default frequency of emitter
-
+//--- Enumerations -----------------------------------------------------------//
 /// Specifies the type of the emitter
 typedef enum 
 {
@@ -42,9 +39,9 @@ typedef enum
 /// Specifies the type of possible distributions
 typedef enum 
 {
+    EMITTER_DISTRIBUTION_CIRCULAR_FIELD,
     EMITTER_DISTRIBUTION_POINT_SOURCE,
-    EMITTER_DISTRIBUTION_RECTANGULAR_FIELD,
-    EMITTER_DISTRIBUTION_CIRCULAR_FIELD
+    EMITTER_DISTRIBUTION_RECTANGULAR_FIELD
 } EmitterDistributionType;
 
 /// Specifies the mode for emitting world entities
@@ -53,6 +50,21 @@ typedef enum
     EMITTER_MODE_EMIT_ONCE,
     EMITTER_MODE_TIMED
 } EmitterModeType;
+
+//--- Constants --------------------------------------------------------------//
+const double EMITTER_DEFAULT_ANGLE = 0.0; ///< Default angle of emitted objects
+const double EMITTER_DEFAULT_ANGLE_STD = 1.0; ///< Default angle of velocity of emitted objects
+const double EMITTER_DEFAULT_LIMIT_MAX_X =  100.0; ///< Default distribution limits
+const double EMITTER_DEFAULT_LIMIT_MAX_Y =  100.0; ///< Default distribution limits
+const double EMITTER_DEFAULT_LIMIT_MIN_X = -100.0; ///< Default distribution limits
+const double EMITTER_DEFAULT_LIMIT_MIN_Y = -100.0; ///< Default distribution limits
+const double EMITTER_DEFAULT_FREQUENCY = 1.0; ///< Default frequency of emitter
+const double EMITTER_DEFAULT_VELOCITY = 10.0; ///< Default velocity of emitted objects
+const double EMITTER_DEFAULT_VELOCITY_STD = 1.0; ///< Default standard deviation of velocity of emitted objects
+
+const EmitterDistributionType EMITTER_DEFAULT_DISTRIBUTION = EMITTER_DISTRIBUTION_RECTANGULAR_FIELD; ///< Default emitter distribution
+const EmitterModeType EMITTER_DEFAULT_MODE = EMITTER_MODE_EMIT_ONCE; ///<  Default emitter mode
+const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter type
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -79,14 +91,14 @@ class IEmitter : public IUniverseScaled, public IWorldDataStorageUser
         virtual void init() = 0;
         
         void setAngle(const double&);
-        void setAngleVariance(const double&);
+        void setAngleStd(const double&);
         void setDistribution(const EmitterDistributionType&);
         void setFrequency(const double&);
         void setLimits(const double&, const double&, const double&, const double&);
         void setMode(const EmitterModeType&);
         void setNumber(const u_int32_t&);
         void setVelocity(const double&);
-        void setVelocityVariance(const double&);
+        void setVelocityStd(const double&);
 
     protected:
         
@@ -100,14 +112,14 @@ class IEmitter : public IUniverseScaled, public IWorldDataStorageUser
         u_int32_t               m_nNr;                      ///< Maximum number of emitted entities
         
         double                  m_fAngle;                   ///< Angle for point source distribution
-        double                  m_fAngleVariance;           ///< Angle variance for point source distribution
+        double                  m_fAngleStd;                ///< Angle standard deviation for point source distribution
         double                  m_fFrequency;               ///< Frequency of timed emitter
         double                  m_fMinX;                    ///< Minimum limit x direction, rectangular field
         double                  m_fMaxX;                    ///< Maximum limit x direction, rectangular field
         double                  m_fMinY;                    ///< Minimum limit y direction, rectangular field
         double                  m_fMaxY;                    ///< Maximum limit y direction, rectangular field
         double                  m_fVelocity;                ///< Velocity of emitted entities
-        double                  m_fVelocityVariance;        ///< Velocity variance of emitted entities
+        double                  m_fVelocityStd;             ///< Velocity standard deviation of emitted entities
         
         double                  m_fResidual;                ///< Residual of emitation, since engine frequency differs from emitation frequency
                 
@@ -116,6 +128,40 @@ class IEmitter : public IUniverseScaled, public IWorldDataStorageUser
 /// Specifies a list of emitters
 typedef std::list<IEmitter*> EmittersType;
 
+//--- Enum parser ------------------------------------------------------------//
+const std::map<EmitterType, std::string> mapEmitterToString = {
+    {EMITTER_DEBRIS, "debris_emitter"},
+    {EMITTER_OBJECT, "object_emitter"}
+}; ///< Map from EmitterType to string
+
+const std::map<std::string, EmitterType> mapStringToEmitter = {
+    {"debris_emitter", EMITTER_DEBRIS},
+    {"object_emitter", EMITTER_OBJECT}
+}; ///< Map from string to Emitter
+
+const std::map<EmitterDistributionType, std::string> mapEmitterDistributionToString = {
+    {EMITTER_DISTRIBUTION_CIRCULAR_FIELD, "circular_field"},
+    {EMITTER_DISTRIBUTION_POINT_SOURCE, "point_source"},
+    {EMITTER_DISTRIBUTION_RECTANGULAR_FIELD, "rectangular_field"}
+}; ///< Map from EmitterDistributionType to string
+
+const std::map<std::string, EmitterDistributionType> mapStringToEmitterDistribution = {
+    {"circular_field", EMITTER_DISTRIBUTION_CIRCULAR_FIELD},
+    {"point_source", EMITTER_DISTRIBUTION_POINT_SOURCE},
+    {"rectangular_field", EMITTER_DISTRIBUTION_RECTANGULAR_FIELD}
+}; ///< Map from string to EmitterDistributionType
+
+const std::map<EmitterModeType, std::string> mapEmitterModeToString = {
+    {EMITTER_MODE_EMIT_ONCE, "emit_once"},
+    {EMITTER_MODE_TIMED, "timed"}
+}; ///< Map from EmitterModeType to string
+
+const std::map<std::string, EmitterModeType> mapStringToEmitterMode = {
+    {"emit_once", EMITTER_MODE_EMIT_ONCE},
+    {"timed", EMITTER_MODE_TIMED}
+}; ///< Map from string to EmitterMode
+
+
 //--- Implementation is done here for inline optimisation --------------------//
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,20 +169,20 @@ typedef std::list<IEmitter*> EmittersType;
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_MODE_EMIT_ONCE),
-                              m_EmitterDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD),
+inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
+                              m_EmitterDistribution(EMITTER_DEFAULT_DISTRIBUTION),
                               m_NormalDist(0.0,1.0),
                               m_UniformDist(0.0,1.0),
                               m_nNr(10),
-                              m_fAngle(0.0),
-                              m_fAngleVariance(1.0),
+                              m_fAngle(EMITTER_DEFAULT_ANGLE),
+                              m_fAngleStd(EMITTER_DEFAULT_ANGLE_STD),
                               m_fFrequency(EMITTER_DEFAULT_FREQUENCY),
-                              m_fMinX(-1.0),
-                              m_fMaxX(1.0),
-                              m_fMinY(-1.0),
-                              m_fMaxY(1.0),
-                              m_fVelocity(1.0),
-                              m_fVelocityVariance(1.0),
+                              m_fMinX(EMITTER_DEFAULT_LIMIT_MIN_X),
+                              m_fMaxX(EMITTER_DEFAULT_LIMIT_MAX_X),
+                              m_fMinY(EMITTER_DEFAULT_LIMIT_MIN_Y),
+                              m_fMaxY(EMITTER_DEFAULT_LIMIT_MAX_Y),
+                              m_fVelocity(EMITTER_DEFAULT_VELOCITY),
+                              m_fVelocityStd(EMITTER_DEFAULT_VELOCITY_STD),
                               m_fResidual(0.0)
 {
     METHOD_ENTRY("IEmitter::IEmitter")
@@ -204,23 +250,23 @@ inline void IEmitter::setAngle(const double& _fA)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set angle variance of point source distribution
+/// \brief Set angle standard deviation of point source distribution
 ///
-/// \param _fAV Angle variance of point source distribution
+/// \param _fAV Angle standard deviation of point source distribution
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void IEmitter::setAngleVariance(const double& _fAV)
+inline void IEmitter::setAngleStd(const double& _fAV)
 {
-    METHOD_ENTRY("IEmitter::setAngleVariance")
+    METHOD_ENTRY("IEmitter::setAngleStd")
     
     if (m_EmitterDistribution != EMITTER_DISTRIBUTION_POINT_SOURCE)
     {
-        NOTICE_MSG("Emitter Interface", "Setting angle variance although distribution " 
+        NOTICE_MSG("Emitter Interface", "Setting angle standard deviation although distribution " 
                    "mode is not point_source. This does not have any effect.")
     }
     else
     {
-        m_fAngleVariance = _fAV;
+        m_fAngleStd = _fAV;
     }
 }
 
@@ -338,23 +384,23 @@ inline void IEmitter::setVelocity(const double& _fV)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set velocity variance for point source distribution
+/// \brief Set velocity standard deviation for point source distribution
 ///
-/// \param _fVV Velocity variance for point source distribution
+/// \param _fVStd Velocity standard deviation for point source distribution
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void IEmitter::setVelocityVariance(const double& _fVV)
+inline void IEmitter::setVelocityStd(const double& _fVStd)
 {
-    METHOD_ENTRY("IEmitter::setVelocityVariance")
+    METHOD_ENTRY("IEmitter::setVelocityStd")
     
     if (m_EmitterDistribution != EMITTER_DISTRIBUTION_POINT_SOURCE)
     {
-        NOTICE_MSG("Emitter Interface", "Setting velocity variance although distribution " 
+        NOTICE_MSG("Emitter Interface", "Setting velocity standard deviation although distribution " 
                    "mode is not point_source. This does not have any effect.")
     }
     else
     {
-        m_fVelocityVariance = _fVV;
+        m_fVelocityStd = _fVStd;
     }
 }
 

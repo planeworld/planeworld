@@ -243,3 +243,33 @@ void CWorldDataStorage::addObjectVisuals(IObjectVisuals* _pObjectVisuals)
     m_ObjectVisuals.push_back(_pObjectVisuals);
     m_ObjectVisualsMutex.unlock();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Store index of specific object
+///
+/// \param _strRef Reference name to access object
+/// \param _It Iterator pointing to object to be store
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWorldDataStorage::memorizeDynamicObject(const std::string& _strRef,
+                                              const ObjectsType::const_iterator _It)
+{
+    METHOD_ENTRY("CWorldDataStorage::memorizeDynamicObject")
+    m_DynamicObjectsMemory[_strRef] = _It;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get index of specific memorized object
+///
+/// \param _strRef Reference name to access object
+///
+/// \return Iterator pointing to memorized object
+///
+///////////////////////////////////////////////////////////////////////////////
+const ObjectsType::const_iterator CWorldDataStorage::recallDynamicObject(const std::string& _strRef)
+{
+    METHOD_ENTRY("CWorldDataStorage::recallDynamicObject")
+    return m_DynamicObjectsMemory.at(_strRef);
+}

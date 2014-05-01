@@ -50,6 +50,8 @@ class CRigidBody : public CBody
 
         //--- Methods [protected] --------------------------------------------//
         virtual void myDynamics(const double&);
+        
+        static uint32_t m_unNrOfRigidBodies;    ///< Static counter for name initialisation and tracking
 
 };
 

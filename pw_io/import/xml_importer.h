@@ -25,7 +25,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
-#include "emitter.h"
+#include "objects_emitter.h"
 #include "universe.h"
 #include "world_data_storage_user.h"
 
@@ -56,7 +56,7 @@ class CXMLImporter : public IWorldDataStorageUser
         //--- Constant Methods -----------------------------------------------//
         CCamera*                        getCamera() const;
         Vector2d                        getGravity() const;
-        EmittersType                    getEmitters() const;
+        const EmittersType&             getEmitters() const;
         const CUniverse&                getUniverse() const;
                 
         //--- Methods --------------------------------------------------------//
@@ -65,8 +65,26 @@ class CXMLImporter : public IWorldDataStorageUser
         
     private:
         
+        const bool          checkAttributeBool(const pugi::xml_node&,
+                                    const std::string&,
+                                    const bool&
+                                   ) const;
+        const double        checkAttributeDouble(const pugi::xml_node&,
+                                    const std::string&,
+                                    const double&
+                                   ) const;
+        const int           checkAttributeInt(const pugi::xml_node&,
+                                    const std::string&,
+                                    const int&
+                                   ) const;
+        const std::string   checkAttributeString(const pugi::xml_node&,
+                                    const std::string&,
+                                    const std::string&
+                                   ) const;
+
         bool checkFile(const pugi::xml_node&);
         void createCamera(const pugi::xml_node&);
+        void createEmitter(const pugi::xml_node&);
         void createGravity(const pugi::xml_node&);
         void createShapeCircle(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
         void createShapePlanet(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
@@ -125,7 +143,7 @@ inline Vector2d CXMLImporter::getGravity() const
 /// \return List of emitters
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline EmittersType CXMLImporter::getEmitters() const
+inline const EmittersType& CXMLImporter::getEmitters() const
 {
     METHOD_ENTRY("CXMLImporter::getEmitters")
     return m_Emitters;

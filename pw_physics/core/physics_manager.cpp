@@ -28,7 +28,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
-                                     m_fTimeAccel(1.0)
+                                     m_fTimeAccel(1.0),
+                                     m_fCellUpdateResidual(0.0),
+                                     m_bCellUpdateFirst(true)
                                    
 {
     METHOD_ENTRY("CPhysicsManager::CPhysicsManager")
@@ -143,7 +145,7 @@ void CPhysicsManager::addEmitter(IEmitter* _Emitter)
 /// \param _Emitters Emitters that should be added to list
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addEmitters(EmittersType _Emitters)
+void CPhysicsManager::addEmitters(const EmittersType& _Emitters)
 {
     METHOD_ENTRY("CPhysicsManager::addEmitters")
 
@@ -182,8 +184,6 @@ void CPhysicsManager::collisionDetection()
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Moves and rotates the masses
-///
-/// At the moment, this is just method for testing purposes.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CPhysicsManager::moveMasses(int nTest)
@@ -286,41 +286,43 @@ void CPhysicsManager::initObjects()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Method that is run as a thread which updates the cells of all objects.
+/// \brief Method that updates the cells of all objects.
 ///
 /// An object has a maximum speed of 3e9 m/s, which means it moves 
 /// cell update has to be checked every DEFAULT_GRID_SIZE_2 / 3e9 seconds. 
 /// Given n objects to be checked, the frequency should be
 /// n / (DEFAULT_GRID_SIZE_2 / 3e9) Hz
+/// Since the actual frequency might be higher than the frequency the method is
+/// called at, the number of objects updated is chosen accordingly.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::runCellUpdate() const
+void CPhysicsManager::runCellUpdate()
 {
-    CTimer Timer;
-    Timer.start();
+    METHOD_ENTRY("CPhysicsManager::runCellUpdate")
     
-    double fFreq;
+    // Use double frequency just to avoid any surprises
+    double fFreq = 6.0e9*m_fTimeAccel*m_pDataStorage->getDynamicObjects().size()/DEFAULT_CELL_SIZE_2;
 
-    ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
-    while (true)
+    double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
+    uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
+        
+    m_fCellUpdateResidual = fNrOfObj - nNrOfObj;
+    
+    for (uint32_t i=0; i<nNrOfObj; ++i)
     {
-        // The locking is not very nice, should somehow be hidden
-        m_pDataStorage->lockObjects();
+        // Initialise the iterator for dynamic cell update.
+        /// \todo Somehow, this doesn't work if initialised outside of loop. Evaluate.
+        if (m_bCellUpdateFirst)
+        {
+            m_pDataStorage->memorizeDynamicObject("CellUpdater", m_pDataStorage->getDynamicObjects().begin());
+            m_bCellUpdateFirst = false;
+        }
         
+        ObjectsType::const_iterator ci = m_pDataStorage->recallDynamicObject("CellUpdater");
         (*ci)->updateCell();
-        // Use double frequency just to avoid any surprises
-        fFreq = 6.0e9*m_fTimeAccel*m_pDataStorage->getDynamicObjects().size()/DEFAULT_CELL_SIZE_2;
-        if (fFreq > m_fFrequency) fFreq = m_fFrequency;
-        
-        m_pDataStorage->unlockObjects();
-                
-        Timer.sleepRemaining(fFreq);
-        
-        m_pDataStorage->lockObjects();
-        
         if (++ci == m_pDataStorage->getDynamicObjects().end())
             ci = m_pDataStorage->getDynamicObjects().begin();
-        
-        m_pDataStorage->unlockObjects();
+        m_pDataStorage->memorizeDynamicObject("CellUpdater", ci);
     }
+    
 }

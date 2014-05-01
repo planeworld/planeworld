@@ -82,7 +82,7 @@ void CDebrisEmitter::emit(const double& _fF)
 {
     METHOD_ENTRY("CDebrisEmitter::emit")
     
-    double nNrOfDebris;
+    uint32_t nNrOfDebris;
     
     if (_fF < 0.0)
     {
@@ -110,8 +110,8 @@ void CDebrisEmitter::emit(const double& _fF)
         case EMITTER_DISTRIBUTION_POINT_SOURCE:
             for (int i=0; i<nNrOfDebris; ++i)
             {
-                double fAngle = m_NormalDist(m_Generator)*m_fAngleVariance + m_fAngle;
-                double fVelocity = m_NormalDist(m_Generator)*m_fVelocityVariance + m_fVelocity;
+                double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_fAngle;
+                double fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
                 m_pDebris->generate(Vector2d(2.0,0.0), fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
             }
     }

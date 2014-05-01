@@ -27,6 +27,7 @@
 
 //--- Standard header --------------------------------------------------------//
 #include <functional>
+#include <thread>
 
 //--- Program header ---------------------------------------------------------//
 #include "debris_emitter.h"
@@ -70,6 +71,7 @@ void runPhysics(CPhysicsManager* const _pPhysicsManager, bool* const _pbDone)
             _pPhysicsManager->addGlobalForces();
             _pPhysicsManager->moveMasses(nCC);
             _pPhysicsManager->collisionDetection();
+            _pPhysicsManager->runCellUpdate();
         }
         PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
         ++nCC;
@@ -150,73 +152,73 @@ int main(int argc, char *argv[])
     pVisualsManager->setWorldDataStorage(&WorldDataStorage);
     
     //--- Initialize Debris -------------------------------------------------//
-    pDebrisEmitter = new CDebrisEmitter;
-    MEM_ALLOC("CDebrisEmitter")
-    pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
-    pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
-    pDebrisEmitter->setAngle(0.0);
-    pDebrisEmitter->setAngleVariance(0.2);
-    pDebrisEmitter->setVelocity(20.0);
-    pDebrisEmitter->setVelocityVariance(1.0);
-    pDebrisEmitter->setFrequency(50.0);
-    pDebrisEmitter->setCell(0, 0);
-    pDebrisEmitter->setNumber(1000);
-    pPhysicsManager->addEmitter(pDebrisEmitter);
-    
-    pDebrisEmitter = new CDebrisEmitter;
-    MEM_ALLOC("CDebrisEmitter")
-    pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
-    pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
-    pDebrisEmitter->setFrequency(50.0);
-    pDebrisEmitter->setLimits(-200.0, 200.0, 150.0, 200.0);
-    pDebrisEmitter->setCell(0, 0);
-    pDebrisEmitter->setNumber(1000);
-    pPhysicsManager->addEmitter(pDebrisEmitter);
-    
-        CRigidBody* pTemplate = new CRigidBody;
-        pCircle = new CCircle;
-        MEM_ALLOC("CRigidBody")
-        MEM_ALLOC("CCircle")
-        
-        pCircle->setDepths(SHAPE_DEPTH_ALL);
-        pCircle->setCenter(0.0, 0.0);
-        pCircle->setRadius(2.0);
-
-        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-        MEM_ALLOC("CDoubleBufferedShape")
-        pShape->buffer(pCircle);
-        pTemplate->getGeometry()->addShape(pShape);
-    
-        pCircleVisuals = new CCircleVisuals(pShape);
-        MEM_ALLOC("CCircleVisuals")
-        
-        IObjectVisuals* pTemplateVisuals = new IObjectVisuals(pTemplate);
-        MEM_ALLOC("IObjectVisuals")
-        
-        pTemplateVisuals->addVisuals(pCircleVisuals);
-    
-    pObjectsEmitter = new CObjectEmitter;
-    MEM_ALLOC("CObjectsEmitter")
-    pObjectsEmitter->setMode(EMITTER_MODE_TIMED);
-    pObjectsEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
-    pObjectsEmitter->setAngle(M_PI);
-    pObjectsEmitter->setAngleVariance(0.2);
-    pObjectsEmitter->setVelocity(20.0);
-    pObjectsEmitter->setVelocityVariance(1.0);
-    pObjectsEmitter->setFrequency(2.0);
-    pObjectsEmitter->setCell(0, 0);
-    pObjectsEmitter->setTemplate(pTemplate, pTemplateVisuals);
-    pPhysicsManager->addEmitter(pObjectsEmitter);
-    
-    pObjectsEmitter = new CObjectEmitter;
-    MEM_ALLOC("CObjectsEmitter")
-    pObjectsEmitter->setMode(EMITTER_MODE_EMIT_ONCE);
-    pObjectsEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
-    pObjectsEmitter->setFrequency(2.0);
-    pObjectsEmitter->setLimits(-100.0, 100.0, -100.0, 100.0);
-    pObjectsEmitter->setCell(0, 0);
-    pObjectsEmitter->setNumber(100);
-    pPhysicsManager->addEmitter(pObjectsEmitter);
+//     pDebrisEmitter = new CDebrisEmitter;
+//     MEM_ALLOC("CDebrisEmitter")
+//     pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
+//     pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+//     pDebrisEmitter->setAngle(0.0);
+//     pDebrisEmitter->setAngleVariance(0.2);
+//     pDebrisEmitter->setVelocity(20.0);
+//     pDebrisEmitter->setVelocityVariance(1.0);
+//     pDebrisEmitter->setFrequency(50.0);
+//     pDebrisEmitter->setCell(0, 0);
+//     pDebrisEmitter->setNumber(1000);
+//     pPhysicsManager->addEmitter(pDebrisEmitter);
+//     
+//     pDebrisEmitter = new CDebrisEmitter;
+//     MEM_ALLOC("CDebrisEmitter")
+//     pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
+//     pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
+//     pDebrisEmitter->setFrequency(50.0);
+//     pDebrisEmitter->setLimits(-200.0, 200.0, 150.0, 200.0);
+//     pDebrisEmitter->setCell(0, 0);
+//     pDebrisEmitter->setNumber(1000);
+//     pPhysicsManager->addEmitter(pDebrisEmitter);
+//     
+//         CRigidBody* pTemplate = new CRigidBody;
+//         pCircle = new CCircle;
+//         MEM_ALLOC("CRigidBody")
+//         MEM_ALLOC("CCircle")
+//         
+//         pCircle->setDepths(SHAPE_DEPTH_ALL);
+//         pCircle->setCenter(0.0, 0.0);
+//         pCircle->setRadius(2.0);
+// 
+//         CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+//         MEM_ALLOC("CDoubleBufferedShape")
+//         pShape->buffer(pCircle);
+//         pTemplate->getGeometry()->addShape(pShape);
+//     
+//         pCircleVisuals = new CCircleVisuals(pShape);
+//         MEM_ALLOC("CCircleVisuals")
+//         
+//         IObjectVisuals* pTemplateVisuals = new IObjectVisuals(pTemplate);
+//         MEM_ALLOC("IObjectVisuals")
+//         
+//         pTemplateVisuals->addVisuals(pCircleVisuals);
+//     
+//     pObjectsEmitter = new CObjectEmitter;
+//     MEM_ALLOC("CObjectsEmitter")
+//     pObjectsEmitter->setMode(EMITTER_MODE_TIMED);
+//     pObjectsEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+//     pObjectsEmitter->setAngle(M_PI);
+//     pObjectsEmitter->setAngleVariance(0.2);
+//     pObjectsEmitter->setVelocity(20.0);
+//     pObjectsEmitter->setVelocityVariance(1.0);
+//     pObjectsEmitter->setFrequency(2.0);
+//     pObjectsEmitter->setCell(0, 0);
+//     pObjectsEmitter->setTemplate(pTemplate, pTemplateVisuals);
+//     pPhysicsManager->addEmitter(pObjectsEmitter);
+//     
+//     pObjectsEmitter = new CObjectEmitter;
+//     MEM_ALLOC("CObjectsEmitter")
+//     pObjectsEmitter->setMode(EMITTER_MODE_EMIT_ONCE);
+//     pObjectsEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
+//     pObjectsEmitter->setFrequency(2.0);
+//     pObjectsEmitter->setLimits(-100.0, 100.0, -100.0, 100.0);
+//     pObjectsEmitter->setCell(0, 0);
+//     pObjectsEmitter->setNumber(100);
+//     pPhysicsManager->addEmitter(pObjectsEmitter);
     
     //--- Import from xml file ----------------------------------------------//
     {
@@ -231,10 +233,11 @@ int main(int argc, char *argv[])
 //         pPhysicsManager->addObjects(XMLImporter.getObjects());
 //         pVisualsManager->addVisualsList(XMLImporter.getVisuals());
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
+        pPhysicsManager->addEmitters(XMLImporter.getEmitters());
         
         pCamera=XMLImporter.getCamera();
         
-//         Universe.clone(XMLImporter.getUniverse());
+        Universe.clone(XMLImporter.getUniverse());
     }
             
 //     //--- Initialize Springs ------------------------------------------------//
@@ -291,19 +294,13 @@ int main(int argc, char *argv[])
 //     pCamera->setHook(pBody3);
     
     //--- Initialise graphics ------------------------------------------------//
-//     sf::RenderWindow Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
-//                             "Planeworld", sf::Style::Default, sf::ContextSettings(32));
     sf::RenderWindow Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
                             "Planeworld");
     
     pVisualsManager->setWindow(&Window);
     pVisualsManager->initGraphics();
     
-    sf::Thread PhysicsThread(std::bind(&runPhysics, pPhysicsManager, &bDone));
-    sf::Thread CellUpdater(std::bind(&CPhysicsManager::runCellUpdate,pPhysicsManager));
-    PhysicsThread.launch();
-    CellUpdater.launch();
-    INFO_MSG("Main", "Physics thread for cell update started.")
+    std::thread PhysicsThread(runPhysics, pPhysicsManager, &bDone);
     
     //--- Prepare for querying relative mouse movement -----------------------//
     sf::Vector2i vecMouse;
@@ -410,10 +407,8 @@ int main(int argc, char *argv[])
         Timer.sleepRemaining(pVisualsManager->getFrequency());
     }
 
-    CellUpdater.terminate();
-    CellUpdater.wait();
     INFO_MSG("Main", "Physics thread for cell update stopped.")
-    PhysicsThread.wait();
+    PhysicsThread.join();
 
     if (pPhysicsManager != 0)
     {
