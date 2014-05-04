@@ -167,7 +167,7 @@ void CCamera::update()
         m_vecHook = m_pHook->getHookPosition();
         m_vecHookCell = m_pHook->getHookCell();
     
-        Rotation2Dd HookRotation(M_PI_2);
+        Rotation2Dd HookRotation(M_PI_2+m_fHookAng);
         
         m_vecCenter = HookRotation * m_vecPosition + m_vecHook + IUniverseScaled::cellToDouble(m_vecHookCell);
 
@@ -192,7 +192,7 @@ void CCamera::update()
         m_BoundingBox.update(vecFrame[2]-IUniverseScaled::cellToDouble(m_vecCell));
         m_BoundingBox.update(vecFrame[3]-IUniverseScaled::cellToDouble(m_vecCell));
                     
-        m_Graphics.rotCamTo(M_PI_2+m_fAngle);
+        m_Graphics.rotCamTo(M_PI_2+m_fAngle+m_fHookAng);
     }
     else
     {

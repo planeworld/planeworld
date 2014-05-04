@@ -8,7 +8,8 @@
         origin_y="149606378.27e3"
         dynamics="true"
         gravity="true"
-        velocity_x="29.78e3"
+        velocity_x="-29.78e3"
+        angle_velocity="0.0041780742"
     />
     <shape
         type="Planet"

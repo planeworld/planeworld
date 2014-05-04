@@ -869,9 +869,9 @@ void CXMLImporter::createUniverse(const pugi::xml_node& _Node)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::readObjectCore(IObject* const _pO, const pugi::xml_node& _Node)
+void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _Node)
 {
-    METHOD_ENTRY("CXMLImporter::createRigidBody")
+    METHOD_ENTRY("CXMLImporter::readObjectCore")
     
     if (!_Node.empty())
     {
@@ -894,5 +894,6 @@ void CXMLImporter::readObjectCore(IObject* const _pO, const pugi::xml_node& _Nod
         _pO->setVelocity(Vector2d(
                          checkAttributeDouble(_Node, "velocity_x", _pO->getVelocity()[0]),
                          checkAttributeDouble(_Node, "velocity_y", _pO->getVelocity()[1])));
+        _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity())/180.0*M_PI);
     }
 }

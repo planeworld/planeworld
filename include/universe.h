@@ -29,6 +29,7 @@
 #include "object_visuals.h"
 #include "rigidbody.h"
 #include "star_system.h"
+#include "world_data_storage_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -49,7 +50,7 @@ const double UNIVERSE_CELL_SIZE=1.0e12;
 /// Sigma = m_nNrOfStars*30.857e15/(3*0.4)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CUniverse
+class CUniverse : public IWorldDataStorageUser
 {
     
     public:

@@ -177,6 +177,9 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     MEM_ALLOC("IObjectVisuals");
 
     m_pStarObjectVisuals->addVisuals(m_pStarVisuals);
+    
+//     m_pDataStorage->addObject(m_pStar);
+//     m_pDataStorage->addObjectVisuals(m_pStarObjectVisuals);
 
     m_Objects.push_back(m_pStar);
     m_Visuals.push_back(m_pStarObjectVisuals);
