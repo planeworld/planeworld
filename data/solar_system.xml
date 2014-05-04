@@ -6,7 +6,8 @@
 >
   <!-- Create the active camera -->
   <camera
-    hook="Sun"
+    hook="Earth"
+    enable_angle_hook="true"
     position_x="10.0"
     position_y="-1.0"
     viewport_width="600.0"

@@ -56,6 +56,9 @@ class CCamera : public CGraphicsBase, public IUniverseScaled
         const double&       getZoom() const;
         
         //--- Methods --------------------------------------------------------//
+        void enableAngleHook();
+        void disableAngleHook();
+        
         void setHook(IHookable*);
         void setPosition(const double&, const double&);
         void setViewport(const double&, const double&);
@@ -86,6 +89,8 @@ class CCamera : public CGraphicsBase, public IUniverseScaled
         double          m_fViewportHeight;          ///< Half of viewport height in m
         double          m_fAngle;                   ///< Camera angle
         double          m_fZoom;                    ///< Camera zoom
+        
+        bool            m_bAngleHook;               ///< Defines, if angle is hooked
         
         IHookable*      m_pHook;                    ///< Hook for the camera
 };
@@ -161,6 +166,28 @@ inline const double& CCamera::getZoom() const
 {
     METHOD_ENTRY("CCamera::getZoom")
     return m_fZoom;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Activates angle hook
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CCamera::enableAngleHook()
+{
+    METHOD_ENTRY("CCamera::enableAngleHook")
+    m_bAngleHook = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Deactivates angle hook
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CCamera::disableAngleHook()
+{
+    METHOD_ENTRY("CCamera::enableAngleHook")
+    m_bAngleHook = false;
 }
 
 #endif

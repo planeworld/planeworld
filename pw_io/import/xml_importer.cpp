@@ -341,6 +341,8 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
                            _Node.attribute("position_y").as_double());
     m_pCamera->setViewport(_Node.attribute("viewport_width").as_int(),
                            _Node.attribute("viewport_height").as_int());
+    if (checkAttributeBool(_Node, "enable_angle_hook", true)) m_pCamera->enableAngleHook();
+    else m_pCamera->disableAngleHook();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

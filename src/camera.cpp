@@ -29,7 +29,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 CCamera::CCamera() : m_fViewportWidth(GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT),
                      m_fViewportHeight(GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT),
-                     m_fHookAng(0.0), m_pHook(0)
+                     m_fHookAng(0.0), m_bAngleHook(true),
+                     m_pHook(0)
 {
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
@@ -69,9 +70,11 @@ void CCamera::setHook(IHookable* _pHook)
     METHOD_ENTRY("CCamera::setHook")
 
     m_pHook = _pHook;
-    m_fHookAng = m_pHook->getHookAngle();
     m_vecHook = m_pHook->getHookPosition();
     m_vecHookCell = m_pHook->getHookCell();
+    
+    if (m_bAngleHook) m_fHookAng = m_pHook->getHookAngle();
+    else m_fHookAng = 0.0;
 
     METHOD_EXIT("CCamera::setHook")
 }
@@ -163,7 +166,8 @@ void CCamera::update()
 
     if (m_pHook != 0)
     {
-        m_fHookAng = m_pHook->getHookAngle();
+        if (m_bAngleHook) m_fHookAng = m_pHook->getHookAngle();
+        else m_fHookAng = 0.0;
         m_vecHook = m_pHook->getHookPosition();
         m_vecHookCell = m_pHook->getHookCell();
     

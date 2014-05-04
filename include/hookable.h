@@ -48,6 +48,7 @@ class IHookable
         //--- Abstract methods [protected] -----------------------------------//
 
         //-- Variables [protected] -------------------------------------------//
+        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
