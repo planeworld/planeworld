@@ -396,6 +396,10 @@ int main(int argc, char *argv[])
                     }
                     break;
                 }
+                case sf::Event::MouseWheelMoved:
+                    pCamera->zoomBy(1.0+double(Event.mouseWheel.delta)*0.1);
+                    if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
+                    else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
                 default:
                     break;
             }
