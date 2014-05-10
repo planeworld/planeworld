@@ -12,17 +12,18 @@
     limit_x_max=" -50.0"
     limit_y_min="-100.0"
     limit_y_max=" -50.0"
-    number="500"
+    number="50"
     frequency="5.0"
   />
   <emitter
-    type="object_emitter"
-    mode="emit_once"
-    frequency="1.0"
+    type="debris_emitter"
+    mode="timed"
+    frequency="100.0"
     distribution="point_source"
-    velocity="3.0"
-    velocity_std="1.0"
-    angle="30.0"
+    velocity="50.0"
+    velocity_std="10.0"
+    angle="210.0"
     angle_std="5.0"
+    number="1000"
   />
 </universe>

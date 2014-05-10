@@ -431,6 +431,71 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
         {
             INFO_MSG("XML Importer", "Creating debris emitter.")
             NOTICE_MSG("XML Importer", "Debris emitter creation not yet implemented.")
+            
+            CDebrisEmitter* pDebrisEmitter = new CDebrisEmitter;
+            MEM_ALLOC("CDebrisEmitter")
+            
+            std::string strMode = checkAttributeString(_Node, "mode", mapEmitterModeToString.at(EMITTER_DEFAULT_MODE));
+            if (strMode == "emit_once")
+            {
+                pDebrisEmitter->setMode(EMITTER_MODE_EMIT_ONCE);
+            }
+            else if (strMode == "timed")
+            {
+                pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
+                pDebrisEmitter->setFrequency(checkAttributeDouble(_Node, "frequency", EMITTER_DEFAULT_FREQUENCY));
+            }
+            else
+            {
+                WARNING_MSG("XML Importer", "Unknown mode " << strMode << ". Using default mode: " << 
+                                             mapEmitterModeToString.at(EMITTER_DEFAULT_MODE))
+                WARNING(
+                    std::cout << "  Known modes: " << std::endl;
+                    for (auto it = mapEmitterModeToString.cbegin(); it != mapEmitterModeToString.cend(); ++it)
+                    {
+                        std::cout << "    " << (*it).second << std::endl;
+                    }
+                )
+            }
+            
+            std::string strDist = checkAttributeString(_Node, "distribution", mapEmitterDistributionToString.at(EMITTER_DEFAULT_DISTRIBUTION));
+            if (strDist == "circular_field")
+            {
+                NOTICE_MSG("XML Importer", "Circular distribution not yet implemented.")
+                pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_CIRCULAR_FIELD);
+            }
+            else if (strDist == "point_source")
+            {
+                pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+                pDebrisEmitter->setVelocity(checkAttributeDouble(_Node, "velocity", EMITTER_DEFAULT_VELOCITY));
+                pDebrisEmitter->setVelocityStd(checkAttributeDouble(_Node, "velocity_std", EMITTER_DEFAULT_VELOCITY_STD));
+                pDebrisEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE))/180.0*M_PI);
+                pDebrisEmitter->setAngleStd((checkAttributeDouble(_Node, "angle_std", EMITTER_DEFAULT_ANGLE_STD))/180.0*M_PI);
+                pDebrisEmitter->setNumber(checkAttributeInt(_Node, "number", DEBRIS_DEFAULT_NUMBER));
+            }
+            else if (strDist == "rectangular_field")
+            {
+                pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
+                pDebrisEmitter->setLimits(checkAttributeDouble(_Node, "limit_x_min", EMITTER_DEFAULT_LIMIT_MIN_X),
+                                       checkAttributeDouble(_Node, "limit_x_max", EMITTER_DEFAULT_LIMIT_MAX_X),
+                                       checkAttributeDouble(_Node, "limit_y_min", EMITTER_DEFAULT_LIMIT_MIN_Y),
+                                       checkAttributeDouble(_Node, "limit_y_max", EMITTER_DEFAULT_LIMIT_MAX_Y));
+                pDebrisEmitter->setNumber(checkAttributeInt(_Node, "number", DEBRIS_DEFAULT_NUMBER));
+            }
+            else
+            {
+                WARNING_MSG("XML Importer", "Unknown distribution " << strDist << ". Using default distribution: " <<
+                                             mapEmitterDistributionToString.at(EMITTER_DEFAULT_DISTRIBUTION))
+                WARNING(
+                    std::cout << "  Known distributions: " << std::endl;
+                    for (auto it = mapEmitterDistributionToString.cbegin(); it != mapEmitterDistributionToString.cend(); ++it)
+                    {
+                        std::cout << "    " << (*it).second << std::endl;
+                    }
+                )
+            }
+            
+            m_Emitters.push_back(pDebrisEmitter);
         }
         else
         {

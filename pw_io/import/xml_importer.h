@@ -25,6 +25,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "body.h"
+#include "debris_emitter.h"
 #include "objects_emitter.h"
 #include "universe.h"
 #include "world_data_storage_user.h"
