@@ -43,7 +43,8 @@ enum Visuals
 {
     VISUALS_OBJECT_BBOXES = 1,
     VISUALS_OBJECT_INTERSECTIONS = 2,
-    VISUALS_UNIVERSE_GRID = 4
+    VISUALS_UNIVERSE_GRID = 4,
+    VISUALS_OBJECT_TRAJECTORIES = 8
 };
 
 /// Specifies depthlayer bitcodes

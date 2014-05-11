@@ -804,8 +804,8 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
 //         _p1->transform();
 //         _p2->disableDynamics();
 //         _p2->transform();
-        _p1->setVelocity(Vector2d(0.0,0.0));
-        _p2->setVelocity(Vector2d(0.0,0.0));
+//         _p1->setVelocity(Vector2d(0.0,0.0));
+//         _p2->setVelocity(Vector2d(0.0,0.0));
     }
 }
 
@@ -926,8 +926,8 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
 //         _p1->transform();
 //         _p2->disableDynamics();
 //         _p2->transform();
-        _p1->setVelocity(Vector2d(0.0,0.0));
-        _p2->setVelocity(Vector2d(0.0,0.0));
+//         _p1->setVelocity(Vector2d(0.0,0.0));
+//         _p2->setVelocity(Vector2d(0.0,0.0));
     } 
 }
 
@@ -1017,8 +1017,8 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
 //         _p1->transform();
 //         _p2->disableDynamics();
 //         _p2->transform();
-        _p1->setVelocity(Vector2d(0.0,0.0));
-        _p2->setVelocity(Vector2d(0.0,0.0));
+//         _p1->setVelocity(Vector2d(0.0,0.0));
+//         _p2->setVelocity(Vector2d(0.0,0.0));
     } 
 }
 

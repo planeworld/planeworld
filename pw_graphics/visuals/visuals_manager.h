@@ -46,6 +46,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         void            drawBoundingBoxes() const;
         void            drawGrid() const;
         void            drawGridHUD() const;
+        void            drawTrajectories() const;
         void            drawWorld();
         void            finishFrame() const;
         const double    getFrequency() const;

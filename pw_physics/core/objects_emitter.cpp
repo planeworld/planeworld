@@ -145,6 +145,8 @@ void CObjectEmitter::init()
         MEM_ALLOC("CRigidBody")
         MEM_ALLOC("CCircle")
         
+        m_pTemplate->setMass(1.0e12);
+        
         pCircle->setDepths(SHAPE_DEPTH_ALL);
         pCircle->setCenter(0.0, 0.0);
         pCircle->setRadius(1.0);

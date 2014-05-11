@@ -378,6 +378,11 @@ int main(int argc, char *argv[])
                             g_bPhysicsPaused ? g_bPhysicsPaused=false : g_bPhysicsPaused=true;
                             break;
                         }
+                        case sf::Keyboard::T:
+                        {
+                            pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
+                            break;
+                        }
                     }
                     break;
                 }
@@ -405,6 +410,7 @@ int main(int argc, char *argv[])
             }
         }
         pVisualsManager->drawGrid();
+        pVisualsManager->drawTrajectories();
         pVisualsManager->drawWorld();
         pVisualsManager->drawBoundingBoxes();
         pVisualsManager->drawGridHUD();

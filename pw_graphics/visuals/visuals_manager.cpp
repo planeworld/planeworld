@@ -347,6 +347,47 @@ const bool CVisualsManager::getVisualisation(const int& _nVis) const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draws trajectories of objects
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawTrajectories() const
+{
+    METHOD_ENTRY("CVisualsManager::drawTrajectories")
+
+    if (m_nVisualisations & VISUALS_OBJECT_TRAJECTORIES)
+    {
+        
+        for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
+            ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
+        {
+            // Object trajectories
+            double fColourFade = 0.1;
+            m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, -15.0);
+            for (int i = (*ci)->getTrajectoryI(); i<OBJECT_TRAJECTORY_LENGTH; ++i)
+            {
+                m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
+                m_Graphics.addVertex((*ci)->getTrajectory()[i] - m_pCamera->getCenter() +
+                    IUniverseScaled::cellToDouble((*ci)->getTrajectoryCell()[i]-m_pCamera->getCell())
+                );
+                fColourFade += 0.9/OBJECT_TRAJECTORY_LENGTH;
+            }
+            for (int i = 0; i<(*ci)->getTrajectoryI(); ++i)
+            {
+                m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
+                m_Graphics.addVertex((*ci)->getTrajectory()[i] - m_pCamera->getCenter() +
+                    IUniverseScaled::cellToDouble((*ci)->getTrajectoryCell()[i]-m_pCamera->getCell())
+                );
+                fColourFade += 0.9/OBJECT_TRAJECTORY_LENGTH;
+            }
+            m_Graphics.endLine();
+        }
+        
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draws all visuals from list
 ///
 ////////////////////////////////////////////////////////////////////////////////

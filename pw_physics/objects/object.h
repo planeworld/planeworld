@@ -27,6 +27,7 @@
 
 #include "geometry.h"
 #include "hookable.h"
+#include <boost/concept_check.hpp>
 
 //--- Standard header --------------------------------------------------------//
 
@@ -40,6 +41,8 @@ typedef enum
     OBJECT_BODY,
     OBJECT_POINTMASS,
 } ObjectType;
+
+const int OBJECT_TRAJECTORY_LENGTH = 1000; ///< Default length of object trajetory
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -81,6 +84,9 @@ class IObject : public IHookable, public IUniverseScaled
         const std::string           getName() const;
         const Vector2d              getOrigin() const;
         const Vector2d              getVelocity() const;
+        const std::vector<Vector2d>&    getTrajectory() const {return m_Trajectory;}
+        const std::vector<Vector2i>&    getTrajectoryCell() const {return m_TrajectoryCell;}
+        const int                       getTrajectoryI() const {return m_nTrajectoryI;}
 
         //--- Methods --------------------------------------------------------//
         virtual void        addForce(const Vector2d&,  const Vector2d&) = 0;   ///< Add a force
@@ -140,6 +146,11 @@ class IObject : public IHookable, public IUniverseScaled
         std::string             m_strName;                          ///< Object's name
 
         std::vector<Vector2d>   m_Anchors;                          ///< Anchors to joints
+        
+        std::vector<Vector2d>   m_Trajectory;                       ///< Trajectory of object
+        std::vector<Vector2i>   m_TrajectoryCell;                   ///< Trajectory (cell part) of object
+        int32_t                 m_nTrajectoryI;                     ///< Index of first trajectory entry
+        
 };
 
 typedef std::list<IObject*>             ObjectsType;        ///< Specifies a list of objects

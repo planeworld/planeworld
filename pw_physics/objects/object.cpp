@@ -43,6 +43,18 @@ IObject::IObject(): m_bGravitation(true),
     m_vecCOM.setZero();
     m_vecForce.setZero();
     m_vecCell.setZero();
+    
+    m_Trajectory.resize(OBJECT_TRAJECTORY_LENGTH);
+    m_TrajectoryCell.resize(OBJECT_TRAJECTORY_LENGTH);
+    
+    for (auto it=m_Trajectory.begin(); it!=m_Trajectory.end(); ++it)
+    {
+        (*it).setZero();
+    }
+    for (auto it=m_TrajectoryCell.begin(); it!=m_TrajectoryCell.end(); ++it)
+    {
+        (*it).setZero();
+    }
 
     m_Lifetime.start();
 }
@@ -146,7 +158,12 @@ void IObject::dynamics(const double& _fTimeStep)
 
     // Call object specific dynamics if enabled
     if (m_bDynamics)
+    {
         this->myDynamics(_fTimeStep);
+        m_Trajectory[m_nTrajectoryI] = m_pIntPos->getValue();
+        m_TrajectoryCell[m_nTrajectoryI] = m_vecCell;
+        if (++m_nTrajectoryI == OBJECT_TRAJECTORY_LENGTH) m_nTrajectoryI = 0;
+    }
 
     METHOD_EXIT("IObject::dynamics")
     
@@ -170,11 +187,18 @@ void IObject::init()
     m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue()+m_vecCOM);
     m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue()+m_vecCOM);
     this->setCell(m_vecCell);
-   
+
     m_pIntPos->init(m_vecOrigin0);
     this->myInit();
 
-    METHOD_EXIT("IObject::init")
+    for (auto it=m_Trajectory.begin(); it!=m_Trajectory.end(); ++it)
+    {
+        (*it) = m_vecOrigin0;
+    }
+    for (auto it=m_TrajectoryCell.begin(); it!=m_TrajectoryCell.end(); ++it)
+    {
+        (*it) = m_vecCell;
+    }    
 }
 
 ////////////////////////////////////////////////////////////////////////////////
