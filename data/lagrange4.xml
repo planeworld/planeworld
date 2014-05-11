@@ -1,0 +1,41 @@
+<!DOCTYPE PlaneworldML>
+<universe
+  procedural_generation="true"
+  seed="1072"
+  number_of_stars="10000"
+>
+  <!-- Create the active camera -->
+  <camera
+    hook="Sun"
+    enable_angle_hook="true"
+    position_x="10.0"
+    position_y="-1.0"
+    viewport_width="600.0"
+    viewport_height="400.0"
+  />
+  
+  <object type="RigidBody">
+    <core
+        name="L4Object"
+        mass="500"
+        origin_x="-129562924.20e3"
+        origin_y="74803189.14e3"
+        velocity_x="-14.89e3"
+        velocity_y="-25.79023652e3"
+        dynamics="true"
+        gravity="true"
+    />
+    <shape
+        type="Circle"
+        radius="10"
+        center_x="0.0"
+        center_y="0.0">
+        <visuals type="Circle"/>
+    </shape>
+  </object>
+  
+  <object file="sun.xml"/> 
+  <object file="earth.xml"/>
+  <object file="jupiter.xml"/>
+  <object file="moon.xml"/>
+</universe>
