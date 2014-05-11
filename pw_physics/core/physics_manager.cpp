@@ -306,7 +306,9 @@ void CPhysicsManager::runCellUpdate()
 
     double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
     uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
-        
+
+    if (nNrOfObj > m_pDataStorage->getDynamicObjects().size()) nNrOfObj = m_pDataStorage->getDynamicObjects().size();
+    
     m_fCellUpdateResidual = fNrOfObj - nNrOfObj;
     
     for (uint32_t i=0; i<nNrOfObj; ++i)
