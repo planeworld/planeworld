@@ -27,7 +27,6 @@
 
 #include "geometry.h"
 #include "hookable.h"
-#include <boost/concept_check.hpp>
 
 //--- Standard header --------------------------------------------------------//
 
