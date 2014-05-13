@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+var ephemeris = require("./ephemeris_jpl.js")
+var convert = require("./convert.js");
+
+ephemeris.get("earth", "2014-05-13", function(err, res){
+    console.log(res)
+    var data = convert.ephemeris2vector(res.ephemeris);
+    console.log(data);
+});
+
+
+
