@@ -24,9 +24,9 @@
 #include "adams_bashforth_integrator.h"
 #include "adams_moulton_integrator.h"
 #include "euler_integrator.h"
-
 #include "geometry.h"
 #include "hookable.h"
+#include "trajectory.h"
 
 //--- Standard header --------------------------------------------------------//
 
@@ -83,9 +83,7 @@ class IObject : public IHookable, public IUniverseScaled
         const std::string           getName() const;
         const Vector2d              getOrigin() const;
         const Vector2d              getVelocity() const;
-        const std::vector<Vector2d>&    getTrajectory() const {return m_Trajectory;}
-        const std::vector<Vector2i>&    getTrajectoryCell() const {return m_TrajectoryCell;}
-        const int                       getTrajectoryI() const {return m_nTrajectoryI;}
+        const CTrajectory&          getTrajectory() const;
 
         //--- Methods --------------------------------------------------------//
         virtual void        addForce(const Vector2d&,  const Vector2d&) = 0;   ///< Add a force
@@ -146,10 +144,7 @@ class IObject : public IHookable, public IUniverseScaled
 
         std::vector<Vector2d>   m_Anchors;                          ///< Anchors to joints
         
-        std::vector<Vector2d>   m_Trajectory;                       ///< Trajectory of object
-        std::vector<Vector2i>   m_TrajectoryCell;                   ///< Trajectory (cell part) of object
-        int32_t                 m_nTrajectoryI;                     ///< Index of first trajectory entry
-        
+        CTrajectory             m_Trajectory;                       ///< Trajectory of object
 };
 
 typedef std::list<IObject*>             ObjectsType;        ///< Specifies a list of objects
@@ -336,6 +331,19 @@ inline const Vector2d IObject::getVelocity() const
 {
     METHOD_ENTRY("IObject::getVelocity")
     return (m_pIntVel->getValue());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the trajectory of the object
+///
+/// \return Trajectory of the object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CTrajectory& IObject::getTrajectory() const
+{
+    METHOD_ENTRY("IObject::getTrajectory")
+    return m_Trajectory;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

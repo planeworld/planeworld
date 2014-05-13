@@ -363,19 +363,12 @@ void CVisualsManager::drawTrajectories() const
             // Object trajectories
             double fColourFade = 0.1;
             m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, -15.0);
-            for (int i = (*ci)->getTrajectoryI(); i<OBJECT_TRAJECTORY_LENGTH; ++i)
+            for (TrajectoryType::const_iterator cj =  (*ci)->getTrajectory().getPositions().begin();
+                                                cj != (*ci)->getTrajectory().getPositions().end(); ++cj)
             {
                 m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
-                m_Graphics.addVertex((*ci)->getTrajectory()[i] - m_pCamera->getCenter() +
-                    IUniverseScaled::cellToDouble((*ci)->getTrajectoryCell()[i]-m_pCamera->getCell())
-                );
-                fColourFade += 0.9/OBJECT_TRAJECTORY_LENGTH;
-            }
-            for (int i = 0; i<(*ci)->getTrajectoryI(); ++i)
-            {
-                m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
-                m_Graphics.addVertex((*ci)->getTrajectory()[i] - m_pCamera->getCenter() +
-                    IUniverseScaled::cellToDouble((*ci)->getTrajectoryCell()[i]-m_pCamera->getCell())
+                m_Graphics.addVertex((*cj) - m_pCamera->getCenter() +
+                    IUniverseScaled::cellToDouble((*ci)->getTrajectory().getCell()-m_pCamera->getCell())
                 );
                 fColourFade += 0.9/OBJECT_TRAJECTORY_LENGTH;
             }
