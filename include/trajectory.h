@@ -24,6 +24,7 @@
 #include "universe_scaled.h"
 
 //--- Standard header --------------------------------------------------------//
+#include <mutex>
 
 //--- Misc header ------------------------------------------------------------//
 #include <boost/circular_buffer.hpp>
@@ -51,10 +52,15 @@ class CTrajectory : public IUniverseScaled
         //--- Methods --------------------------------------------------------//
         void  init(const Vector2d&, const Vector2i&);
         void  update(const Vector2d&, const Vector2i&);
+        
+        void  lock() const;
+        void  unlock() const;
 
     private:
 
         boost::circular_buffer<Vector2d>    m_Trajectory;       ///< Trajectory of object
+        
+        mutable std::mutex m_Mutex; ///< Mutex to lock access to trajectory
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -96,8 +102,31 @@ inline void CTrajectory::update(const Vector2d& _vecPos, const Vector2i& _vecCel
 {
     METHOD_ENTRY("CTrajectory::update")
     
+    std::lock_guard<std::mutex> lock(m_Mutex);
     m_Trajectory.push_back(_vecPos);
     m_vecCell = _vecCell;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Locks access to trajectory
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CTrajectory::lock() const
+{
+    METHOD_ENTRY("CTrajectory::lock")
+    m_Mutex.lock();    
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Locks access to trajectory
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CTrajectory::unlock() const
+{
+    METHOD_ENTRY("CTrajectory::unlock")
+    m_Mutex.unlock();    
 }
 
 #endif

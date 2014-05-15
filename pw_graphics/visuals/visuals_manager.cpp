@@ -360,6 +360,8 @@ void CVisualsManager::drawTrajectories() const
         for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
             ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
         {
+            (*ci)->getTrajectory().lock();
+            
             // Object trajectories
             double fColourFade = 0.1;
             m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, -15.0);
@@ -373,6 +375,8 @@ void CVisualsManager::drawTrajectories() const
                 fColourFade += 0.9/OBJECT_TRAJECTORY_LENGTH;
             }
             m_Graphics.endLine();
+            
+            (*ci)->getTrajectory().unlock();
         }
         
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
