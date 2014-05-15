@@ -41,8 +41,6 @@ typedef enum
     OBJECT_POINTMASS,
 } ObjectType;
 
-const int OBJECT_TRAJECTORY_LENGTH = 1000; ///< Default length of object trajetory
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Base class for general objects

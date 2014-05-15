@@ -372,7 +372,7 @@ void CVisualsManager::drawTrajectories() const
                 m_Graphics.addVertex((*cj) - m_pCamera->getCenter() +
                     IUniverseScaled::cellToDouble((*ci)->getTrajectory().getCell()-m_pCamera->getCell())
                 );
-                fColourFade += 0.9/OBJECT_TRAJECTORY_LENGTH;
+                fColourFade += 0.9/TRAJECTORY_CAPACITY;
             }
             m_Graphics.endLine();
             

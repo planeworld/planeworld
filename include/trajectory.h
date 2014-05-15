@@ -31,7 +31,9 @@
 
 typedef boost::circular_buffer<Vector2d> TrajectoryType; ///< Typedef for trajectory
 
-const int TRAJECTORY_CAPACITY = 1000; ///< Default length of trajetory
+//--- Constants --------------------------------------------------------------//
+const int TRAJECTORY_CAPACITY =  1000; ///< Default length of trajetory
+const int TRAJECTORY_RESOLUTION =   1; ///< Default temporal resolution of trajectory
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -59,6 +61,7 @@ class CTrajectory : public IUniverseScaled
     private:
 
         boost::circular_buffer<Vector2d>    m_Trajectory;       ///< Trajectory of object
+        uint8_t                             m_unUpdateCount;    ///< Counter for update of trajectory
         
         mutable std::mutex m_Mutex; ///< Mutex to lock access to trajectory
 };
@@ -70,7 +73,7 @@ class CTrajectory : public IUniverseScaled
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CTrajectory::CTrajectory()
+inline CTrajectory::CTrajectory() : m_unUpdateCount(0u)
 {
     METHOD_ENTRY("CTrajectory::CTrajectory")
     
@@ -102,9 +105,13 @@ inline void CTrajectory::update(const Vector2d& _vecPos, const Vector2i& _vecCel
 {
     METHOD_ENTRY("CTrajectory::update")
     
-    std::lock_guard<std::mutex> lock(m_Mutex);
-    m_Trajectory.push_back(_vecPos);
-    m_vecCell = _vecCell;
+    if (++m_unUpdateCount == TRAJECTORY_RESOLUTION)
+    {
+        std::lock_guard<std::mutex> lock(m_Mutex);
+        m_Trajectory.push_back(_vecPos);
+        m_vecCell = _vecCell;
+        m_unUpdateCount = 0;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
