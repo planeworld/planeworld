@@ -41,6 +41,15 @@ describe('ephemeris', function() {
             var object = ephemeris._parseObjectData(data);
             object.should.eql(reference_object);
         });
+
+        it('should parse sun data', function() {
+            var data =' Radius (photosphere)  = 1234.5(10^1) km \
+                        Mass (10^23 kg)       ~  5.43 ';
+
+            var object = ephemeris._parseObjectData(data);
+            object.should.eql(reference_object);
+        });
+        
     });
 
     describe('parseEphemeris', function() {

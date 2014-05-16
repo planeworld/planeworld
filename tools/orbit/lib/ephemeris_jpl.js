@@ -91,6 +91,9 @@ function parseObjectData(data) {
     parser_radius.add(' Equat. radius \\(1 bar\\) += +([0-9]*.[0-9]*).* km', function(match) {
        return parseFloat(match[1])*1000; 
     });
+    parser_radius.add(' Radius \\(photosphere\\) += +([0-9]*.[0-9]*)\\(10\\^([0-9]+)\\) km', function(match) {
+       return parseFloat(match[1]+"E"+match[2])*1000; 
+    });
     
 
     var parser_mass = new Parser();
@@ -98,7 +101,7 @@ function parseObjectData(data) {
     parser_mass.add(' Mass, 10\\^([0-9]+) kg = +([0-9]*.[0-9]*)', function(match) {
        return parseFloat(match[2]+"E"+match[1]);
     });
-    parser_mass.add(' Mass \\(10\\^([0-9]+) kg *\\) += +([0-9]*.[0-9]*)', function(match) {
+    parser_mass.add(' Mass \\(10\\^([0-9]+) kg *\\) +[=~] +([0-9]*.[0-9]*)', function(match) {
        return parseFloat(match[2]+"E"+match[1]);
     });
 
