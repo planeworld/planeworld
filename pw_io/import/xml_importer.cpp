@@ -73,10 +73,16 @@ bool CXMLImporter::import(const std::string& _strFilename,
     
     pugi::xml_document Doc;
     pugi::xml_parse_result Result = Doc.load_file(_strFilename.c_str());
-    
+
+    // First, devide given filename into path and filename. Be sure to create
+    // local path if no path is included ("planeworld example.xml", resulting
+    // in path "." and filename "example.xml").
     size_t Pos;
-    Pos       = _strFilename.find_last_of("/");
-    m_strPath = _strFilename.substr(0,Pos);
+    Pos = _strFilename.find_last_of("/");
+    if (Pos != _strFilename.npos)
+        m_strPath = _strFilename.substr(0,Pos);
+    else
+        m_strPath = ".";
     
     if (Result)
     {
@@ -140,8 +146,21 @@ bool CXMLImporter::import(const std::string& _strFilename,
         // Set hook, if camera given. Otherwise a default cam is used.
         if (m_pCamera != 0)
         {
-            INFO_MSG("XML Importer", "Camera Hook: " << m_strCameraHook)
-            m_pCamera->setHook(m_Objects[m_strCameraHook]);
+            INFO_MSG("XML Importer", "Camera hook: " << m_strCameraHook)
+            if (m_Objects.find(m_strCameraHook) != m_Objects.end())
+            {
+                m_pCamera->setHook(m_Objects[m_strCameraHook]);
+            }
+            else
+            {
+                WARNING_MSG("XML Importer", "Camera hook " << m_strCameraHook << " not found.")
+                m_pCamera = new CCamera;
+                MEM_ALLOC("CCamera")
+    //             m_pCamera->setHook(pDefaultCam);
+                m_pCamera->setViewport(600.0,400.0);
+                
+                INFO_MSG("XML Importer", "Default Camera created.")
+            }
         }
         else
         {
