@@ -1,0 +1,20 @@
+<!DOCTYPE PlaneworldML>
+<object type="RigidBody">
+    <core
+        name="jupiter"
+        mass="1.89813e+27"
+        origin_x="-340594202814.834"
+        origin_y="706132078185.0121"
+        velocity_x="-12040.855264921393"
+        velocity_y="-5106.639438992428"
+        dynamics="true"
+        gravity="true"
+    />
+    <shape
+        type="Circle"
+        radius="71492000"
+        center_x="0.0"
+        center_y="0.0">
+        <visuals type="Circle"/>
+    </shape>
+</object>

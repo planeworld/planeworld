@@ -1,0 +1,20 @@
+<!DOCTYPE PlaneworldML>
+<object type="RigidBody">
+    <core
+        name="earth"
+        mass="5.97219e+24"
+        origin_x="-93103239617.90454"
+        origin_y="-119056575214.16391"
+        velocity_x="23234.268333125452"
+        velocity_y="-18659.959636517528"
+        dynamics="true"
+        gravity="true"
+    />
+    <shape
+        type="Circle"
+        radius="6371010"
+        center_x="0.0"
+        center_y="0.0">
+        <visuals type="Circle"/>
+    </shape>
+</object>

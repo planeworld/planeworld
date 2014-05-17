@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+
+var ephemeris = require("./lib/ephemeris_jpl")
+var convert = require("./lib/convert");
+var xml = require("./lib/xml");
+
+
+for (var object_name in ephemeris.objects) {
+    if (ephemeris.objects.hasOwnProperty(object_name)) {
+
+        ephemeris.get(object_name, "2014-05-13", function(err, object){
+            var data = convert.ephemeris2vector(object.ephemeris);
+            object.position= data.position;
+            object.velocity= data.velocity;
+            
+            var xml_data = xml.object2xml(object);
+            console.log(xml_data);
+            fs.writeFile(object.name + ".xml", xml_data); 
+        });
+    }
+}
+
+
+
