@@ -10,6 +10,9 @@
         dynamics="true"
         gravity="true"
     />
+    <body_core
+        angle_velocity="0.0000017662732030182614"
+    />
     <shape
         type="Circle"
         radius="25559000"

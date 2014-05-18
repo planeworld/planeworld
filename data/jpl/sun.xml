@@ -1,17 +1,17 @@
 <!DOCTYPE PlaneworldML>
-<!-- Create sun -->
 <object type="RigidBody">
     <core
-        name="Sun"
-        mass="1.989e30"
-        origin_x="0.0"
-        origin_y="0.0"
+        name="sun"
+        mass="1.988544e+30"
         dynamics="true"
         gravity="true"
     />
+    <body_core
+        angle_velocity="5.0009426678931673e-8"
+    />
     <shape
         type="Circle"
-        radius="0.6957e9"
+        radius="696300000"
         center_x="0.0"
         center_y="0.0">
         <visuals type="Circle"/>
