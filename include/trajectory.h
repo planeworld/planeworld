@@ -29,7 +29,8 @@
 //--- Misc header ------------------------------------------------------------//
 #include <boost/circular_buffer.hpp>
 
-typedef boost::circular_buffer<Vector2d> TrajectoryType; ///< Typedef for trajectory
+typedef boost::circular_buffer<Vector2d> TrajectoryType;        ///< Typedef for trajectory
+typedef boost::circular_buffer<Vector2i> TrajectoryCellType;    ///< Typedef for trajectory (cell part)
 
 //--- Constants --------------------------------------------------------------//
 const int TRAJECTORY_CAPACITY =  1000; ///< Default length of trajetory
@@ -39,8 +40,12 @@ const int TRAJECTORY_RESOLUTION =   1; ///< Default temporal resolution of traje
 ///
 /// \brief Class for a storing a trajectory
 ///
+/// This class stores a trajectory for an object. It is aware of the cell grid.
+/// It is therefore possible, to draw trajectories that expand over several grid
+/// cells of the universe.
+///
 ////////////////////////////////////////////////////////////////////////////////
-class CTrajectory : public IUniverseScaled
+class CTrajectory
 {
     
     public:
@@ -49,7 +54,8 @@ class CTrajectory : public IUniverseScaled
         CTrajectory();
 
         //--- Constant methods -----------------------------------------------//
-        const TrajectoryType& getPositions() const;
+        const TrajectoryType&       getPositions() const;
+        const TrajectoryCellType&   getCells() const;
 
         //--- Methods --------------------------------------------------------//
         void  init(const Vector2d&, const Vector2i&);
@@ -60,7 +66,8 @@ class CTrajectory : public IUniverseScaled
 
     private:
 
-        boost::circular_buffer<Vector2d>    m_Trajectory;       ///< Trajectory of object
+        boost::circular_buffer<Vector2d>    m_Positions;        ///< Trajectory of object
+        boost::circular_buffer<Vector2i>    m_Cells;            ///< Trajectory of object (cell part)
         uint8_t                             m_unUpdateCount;    ///< Counter for update of trajectory
         
         mutable std::mutex m_Mutex; ///< Mutex to lock access to trajectory
@@ -77,7 +84,8 @@ inline CTrajectory::CTrajectory() : m_unUpdateCount(0u)
 {
     METHOD_ENTRY("CTrajectory::CTrajectory")
     
-    m_Trajectory.set_capacity(TRAJECTORY_CAPACITY);
+    m_Positions.set_capacity(TRAJECTORY_CAPACITY);
+    m_Cells.set_capacity(TRAJECTORY_CAPACITY);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +98,20 @@ inline CTrajectory::CTrajectory() : m_unUpdateCount(0u)
 inline const TrajectoryType& CTrajectory::getPositions() const
 {
     METHOD_ENTRY("CTrajectory::getPositions")
-    return m_Trajectory;
+    return m_Positions;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns cells of trajectory
+///
+/// \return Trajectory cells
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const TrajectoryCellType& CTrajectory::getCells() const
+{
+    METHOD_ENTRY("CTrajectory::getCells")
+    return m_Cells;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,8 +129,8 @@ inline void CTrajectory::update(const Vector2d& _vecPos, const Vector2i& _vecCel
     if (++m_unUpdateCount == TRAJECTORY_RESOLUTION)
     {
         std::lock_guard<std::mutex> lock(m_Mutex);
-        m_Trajectory.push_back(_vecPos);
-        m_vecCell = _vecCell;
+        m_Positions.push_back(_vecPos);
+        m_Cells.push_back(_vecCell);
         m_unUpdateCount = 0;
     }
 }

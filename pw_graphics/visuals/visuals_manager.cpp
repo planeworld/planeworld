@@ -362,17 +362,21 @@ void CVisualsManager::drawTrajectories() const
         {
             (*ci)->getTrajectory().lock();
             
-            // Object trajectories
+            // Draw objects trajectories
             double fColourFade = 0.1;
             m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, -15.0);
-            for (TrajectoryType::const_iterator cj =  (*ci)->getTrajectory().getPositions().begin();
-                                                cj != (*ci)->getTrajectory().getPositions().end(); ++cj)
+            
+            TrajectoryType::const_iterator cj = (*ci)->getTrajectory().getPositions().begin();
+            TrajectoryCellType::const_iterator ck = (*ci)->getTrajectory().getCells().begin();
+            while (cj != (*ci)->getTrajectory().getPositions().end())
             {
                 m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
                 m_Graphics.addVertex((*cj) - m_pCamera->getCenter() +
-                    IUniverseScaled::cellToDouble((*ci)->getTrajectory().getCell()-m_pCamera->getCell())
+                    IUniverseScaled::cellToDouble((*ck)-m_pCamera->getCell())
                 );
                 fColourFade += 0.9/TRAJECTORY_CAPACITY;
+                
+                ++cj; ++ck;
             }
             m_Graphics.endLine();
             
