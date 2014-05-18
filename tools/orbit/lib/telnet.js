@@ -139,20 +139,14 @@ Telnet.prototype._readUntil = function() {
         var match = this.readuntil_regexp.exec(this.data);
         if (match) {
             endpos = match.index+match[0].length;
-            this.readuntil_data+=this.data.slice(0, endpos);
+            var tmp_data=this.data.slice(0, endpos);
             this.data=this.data.slice(endpos);
 
-            var tmp_data = this.readuntil_data;
             var tmp_callback = this.readuntil_callback;
-            this.readuntil_data="";
             this.readuntil_callback=null;
             this.readuntil_regexp=null;
             
             tmp_callback(null, tmp_data);
-        }
-        else {
-            this.readuntil_data+=this.data;
-            this.data="";
         }
     }
 }
