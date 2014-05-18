@@ -10,6 +10,7 @@ module.exports.object2xml = function(object) {
     xml += '        origin_y="'+ object.position[1] +'"\n';
     xml += '        velocity_x="'+ object.velocity[0] +'"\n';
     xml += '        velocity_y="'+ object.velocity[1] +'"\n';
+    xml += '        angle_velocity="'+ object.rotation * 2*Math.PI/360 +'"\n';
     xml += '        dynamics="true"\n';
     xml += '        gravity="true"\n';
     xml += '    />\n';

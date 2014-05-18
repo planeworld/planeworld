@@ -105,6 +105,26 @@ function parseObjectData(data) {
        return parseFloat(match[2]+"E"+match[1]);
     });
 
+    var parser_rotation = new Parser();
+
+    parser_rotation.add(' Mean rot. rate, rad s\\^-1 += +([0-9]*.[0-9]*)\\*10\\^([+-]?[0-9]+)', function(match) {
+       return parseFloat(match[1]+"E"+match[2]);
+    });
+    parser_rotation.add(' Rot. rate ?\\(10\\^([+-]?[0-9]+) rad/s\\) += +([0-9]*.[0-9]*)', function(match) {
+       return parseFloat(match[2]+"E"+match[1]);
+    });
+    parser_rotation.add(' Sidereal rot. period += +([+-]?[0-9]*.[0-9]*) (d|hr)', function(match) {
+        if (match[2]=="d")
+            return 2*Math.PI/(parseFloat(match[1])*24*60*60);
+        else if (match[2]=="hr")
+            return 2*Math.PI/(parseFloat(match[1])*60*60);
+    });
+    parser_rotation.add(' Adopted sidereal per += +([+-]?[0-9]*.[0-9]*) (d|hr)', function(match) {
+        if (match[2]=="d")
+            return 2*Math.PI/(parseFloat(match[1])*24*60*60);
+        else if (match[2]=="hr")
+            return 2*Math.PI/(parseFloat(match[1])*60*60);
+    });
     
     var object = {};
     
@@ -116,6 +136,10 @@ function parseObjectData(data) {
     if (mass)
         object.mass = mass;
     
+    var rotation = parser_rotation.parse(data);
+    if (rotation)
+        object.rotation = rotation;
+
     return object;
 };
 
