@@ -14,7 +14,7 @@ module.exports.object2xml = function(object) {
     xml += '        gravity="true"\n';
     xml += '    />\n';
     xml += '    <shape\n';
-    xml += '        type="Cirlce"\n';
+    xml += '        type="Circle"\n';
     xml += '        radius="'+ object.radius +'"\n';
     xml += '        center_x="0.0"\n';
     xml += '        center_y="0.0">\n';
