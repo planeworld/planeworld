@@ -98,7 +98,7 @@ function parseObjectData(data) {
 
     var parser_mass = new Parser();
 
-    parser_mass.add(' Mass, 10\\^([0-9]+) kg = +([0-9]*.[0-9]*)', function(match) {
+    parser_mass.add(' Mass, 10\\^([0-9]+) kg += +([0-9]*.[0-9]*)', function(match) {
        return parseFloat(match[2]+"E"+match[1]);
     });
     parser_mass.add(' Mass \\(10\\^([0-9]+) kg *\\) +[=~] +([0-9]*.[0-9]*)', function(match) {

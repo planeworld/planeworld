@@ -20,7 +20,7 @@ describe('ephemeris', function() {
 
         it('should parse moon data', function() {
             var data =' Radius, km            = 12345.00+-0.03 \
-                        Mass, 10^23 kg = 5.43 ';
+                        Mass, 10^23 kg   =   5.43';
 
             var object = ephemeris._parseObjectData(data);
             object.should.eql(reference_object);
