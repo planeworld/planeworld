@@ -574,6 +574,10 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
         {
             this->readObjectCore(pRigidBody, N);
         }
+        else if (std::string(N.name()) == "body_core")
+        {
+            this->readBodyCore(pRigidBody, N);
+        }
         else if (std::string(N.name()) == "shape")
         {
             std::string strType(N.attribute("type").as_string());
@@ -949,6 +953,28 @@ void CXMLImporter::createUniverse(const pugi::xml_node& _Node)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Read information for object bodies.
+///
+/// While object core holds information of a point mass, body core adds
+/// information depending on volume (here area) like inertia.
+///
+/// \param _pO Object to read body information for
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::readBodyCore(CRigidBody* const _pO, const pugi::xml_node& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::readBodyCore")
+    
+    if (!_Node.empty())
+    {
+        _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity())/180.0*M_PI);
+        _pO->setInertia(checkAttributeDouble(_Node, "inertia", _pO->getInertia()));
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Read given objects core information
 ///
 /// \param _pO Object to read information for
@@ -963,11 +989,31 @@ void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _
     {
         _pO->setName(checkAttributeString(_Node, "name", _pO->getName()));
         _pO->setMass(checkAttributeDouble(_Node, "mass", _pO->getMass()));
-        _pO->setOrigin(checkAttributeDouble(_Node, "origin_x", _pO->getOrigin()[0]),
-                       checkAttributeDouble(_Node, "origin_y", _pO->getOrigin()[1]));
+        
+        // Origin might be given with no respect to grid, since user shouldn't have
+        // to care unless he really need to place objects with high precision far
+        // from the origin of the coordinate system. Therefore, the given values
+        // are separated into origin and cell if neccessary.
+        Vector2d vecGivenOrigin;
+        Vector2d vecOrigin;
+        Vector2i vecCell;
+        vecGivenOrigin[0] = checkAttributeDouble(_Node, "origin_x", _pO->getOrigin()[0]);
+        vecGivenOrigin[1] = checkAttributeDouble(_Node, "origin_y", _pO->getOrigin()[1]);
+        IObject::separateCenterCell(vecGivenOrigin, vecOrigin, vecCell);
+        
+        DOM_VAR(DEBUG_MSG("XML Importer", "Separating origin (" <<
+                           vecGivenOrigin[0] << ", " << vecGivenOrigin[1] <<
+                           ") into origin (" <<
+                           vecOrigin[0] << ", " << vecOrigin[1] <<
+                           ") and cell (" <<
+                           vecCell[0] << ", " << vecCell[1] <<
+                           ")."
+                ))
+        _pO->setOrigin(vecOrigin);
         _pO->setCell(Vector2i(
                      checkAttributeInt(_Node, "cell_x", _pO->getCell()[0]),
-                     checkAttributeInt(_Node, "cell_y", _pO->getCell()[1])));
+                     checkAttributeInt(_Node, "cell_y", _pO->getCell()[1])) +
+                     vecCell);
                                 
         if (checkAttributeBool(_Node, "gravity", _pO->getGravitationState()) == true)
             _pO->enableGravitation();
@@ -980,6 +1026,5 @@ void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _
         _pO->setVelocity(Vector2d(
                          checkAttributeDouble(_Node, "velocity_x", _pO->getVelocity()[0]),
                          checkAttributeDouble(_Node, "velocity_y", _pO->getVelocity()[1])));
-        _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity())/180.0*M_PI);
     }
 }
