@@ -6,10 +6,14 @@ module.exports.object2xml = function(object) {
     xml += '    <core\n';
     xml += '        name="'+ object.name +'"\n';
     xml += '        mass="'+ object.mass +'"\n';
-    xml += '        origin_x="'+ object.position[0] +'"\n';
-    xml += '        origin_y="'+ object.position[1] +'"\n';
-    xml += '        velocity_x="'+ object.velocity[0] +'"\n';
-    xml += '        velocity_y="'+ object.velocity[1] +'"\n';
+    if (object.position) {
+        xml += '        origin_x="'+ object.position[0] +'"\n';
+        xml += '        origin_y="'+ object.position[1] +'"\n';
+    }
+    if (object.velocity) {
+        xml += '        velocity_x="'+ object.velocity[0] +'"\n';
+        xml += '        velocity_y="'+ object.velocity[1] +'"\n';
+    }
     xml += '        angle_velocity="'+ object.rotation * 2*Math.PI/360 +'"\n';
     xml += '        dynamics="true"\n';
     xml += '        gravity="true"\n';

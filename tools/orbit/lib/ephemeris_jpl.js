@@ -28,35 +28,41 @@ module.exports.get = function(object_name, date, callback){
         client.readUntil(new RegExp("<cr>: "), function(err, res) {
             object = parseObjectData(res);
             object.name = object_name;
-            client.write("E\n");
-            client.readUntil(new RegExp("] : "), function(err, res) {
-                client.write("e\n", "ASCII");
+            if (object_name=="sun") {
+                client.close();
+                callback(null, object); 
+            }
+            else {
+                client.write("E\n");
                 client.readUntil(new RegExp("] : "), function(err, res) {
-                    client.write("10\n", "ASCII");
+                    client.write("e\n", "ASCII");
                     client.readUntil(new RegExp("] : "), function(err, res) {
-                        client.write("eclip\n", "ASCII");
+                        client.write("10\n", "ASCII");
                         client.readUntil(new RegExp("] : "), function(err, res) {
-                            client.write("2014-05-13\n", "ASCII");
+                            client.write("eclip\n", "ASCII");
                             client.readUntil(new RegExp("] : "), function(err, res) {
-                                client.write("2014-05-14\n", "ASCII");
+                                client.write("2014-05-13\n", "ASCII");
                                 client.readUntil(new RegExp("] : "), function(err, res) {
-                                    client.write("2d\n", "ASCII");
+                                    client.write("2014-05-14\n", "ASCII");
                                     client.readUntil(new RegExp("] : "), function(err, res) {
-                                        client.write("n\n", "ASCII");
+                                        client.write("2d\n", "ASCII");
                                         client.readUntil(new RegExp("] : "), function(err, res) {
-                                            client.write("J2000\n", "ASCII");
+                                            client.write("n\n", "ASCII");
                                             client.readUntil(new RegExp("] : "), function(err, res) {
-                                                client.write("1\n", "ASCII");
+                                                client.write("J2000\n", "ASCII");
                                                 client.readUntil(new RegExp("] : "), function(err, res) {
-                                                    client.write("NO\n", "ASCII");
+                                                    client.write("1\n", "ASCII");
                                                     client.readUntil(new RegExp("] : "), function(err, res) {
-                                                        client.write("YES\n", "ASCII");
+                                                        client.write("NO\n", "ASCII");
                                                         client.readUntil(new RegExp("] : "), function(err, res) {
-                                                            client.write("ABS\n", "ASCII");
-                                                            client.readUntil(new RegExp("\\? : "), function(err, res) {
-                                                                object.ephemeris = parseEphemeris(res);
-                                                                client.close();
-                                                                callback(null, object);
+                                                            client.write("YES\n", "ASCII");
+                                                            client.readUntil(new RegExp("] : "), function(err, res) {
+                                                                client.write("ABS\n", "ASCII");
+                                                                client.readUntil(new RegExp("\\? : "), function(err, res) {
+                                                                    object.ephemeris = parseEphemeris(res);
+                                                                    client.close();
+                                                                    callback(null, object);
+                                                                });
                                                             });
                                                         });
                                                     });
@@ -69,7 +75,7 @@ module.exports.get = function(object_name, date, callback){
                         });
                     });
                 });
-            });
+            }
         });
     });
 };
