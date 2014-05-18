@@ -97,6 +97,7 @@ class CXMLImporter : public IWorldDataStorageUser
         void createVisualsPolyline(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
         void createRigidBody(const pugi::xml_node&);
         void createUniverse(const pugi::xml_node&);
+        void readBodyCore(CRigidBody* const, const pugi::xml_node&);
         void readObjectCore(CRigidBody* const, const pugi::xml_node&);
         
         CUniverse                       m_Universe;         ///< The procedurally generated universe

@@ -9,7 +9,10 @@
         dynamics="true"
         gravity="true"
         velocity_x="-29.78e3"
+    />
+    <body_core
         angle_velocity="0.0041780742"
+        ineratia="8.0e37"
     />
     <shape
         type="Planet"

@@ -10,7 +10,10 @@
         gravity="true"
         velocity_x="-30.803e3"
         velocity_y="0.0"
+    />
+    <body_core
         angle_velocity="0.00014367816"
+        inertia="8.7389674e34"
     />
     <shape
         type="Planet"

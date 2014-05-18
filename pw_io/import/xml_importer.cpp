@@ -574,6 +574,10 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
         {
             this->readObjectCore(pRigidBody, N);
         }
+        else if (std::string(N.name()) == "body_core")
+        {
+            this->readBodyCore(pRigidBody, N);
+        }
         else if (std::string(N.name()) == "shape")
         {
             std::string strType(N.attribute("type").as_string());
@@ -949,6 +953,28 @@ void CXMLImporter::createUniverse(const pugi::xml_node& _Node)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Read information for object bodies.
+///
+/// While object core holds information of a point mass, body core adds
+/// information depending on volume (here area) like inertia.
+///
+/// \param _pO Object to read body information for
+/// \param _Node Current node in xml tree
+///
+////////////////////////////////////////////////////////////////////////////////
+void CXMLImporter::readBodyCore(CRigidBody* const _pO, const pugi::xml_node& _Node)
+{
+    METHOD_ENTRY("CXMLImporter::readBodyCore")
+    
+    if (!_Node.empty())
+    {
+        _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity())/180.0*M_PI);
+        _pO->setInertia(checkAttributeDouble(_Node, "inertia", _pO->getInertia()));
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Read given objects core information
 ///
 /// \param _pO Object to read information for
@@ -1000,6 +1026,5 @@ void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _
         _pO->setVelocity(Vector2d(
                          checkAttributeDouble(_Node, "velocity_x", _pO->getVelocity()[0]),
                          checkAttributeDouble(_Node, "velocity_y", _pO->getVelocity()[1])));
-        _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity())/180.0*M_PI);
     }
 }

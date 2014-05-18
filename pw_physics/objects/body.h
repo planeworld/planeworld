@@ -52,6 +52,7 @@ class CBody : public IObject
         const Vector2d      getAnchor(const int&) const;
         const double        getAngle() const;
         const double        getAngleVelocity() const;
+        const double        getInertia() const;
         const ObjectType    getObjectType() const;
         
         //--- Methods --------------------------------------------------------//
@@ -86,7 +87,6 @@ class CBody : public IObject
 inline const double CBody::getHookAngle() const
 {
     METHOD_ENTRY("CBody::getHookAngle")
-
     return m_pIntAng->getValue();
 }
 
@@ -100,8 +100,6 @@ inline const double CBody::getHookAngle() const
 inline const double CBody::getAngle() const
 {
     METHOD_ENTRY("CBody::getAngle")
-
-    METHOD_EXIT("CBody::getAngle")
     return m_pIntAng->getValue();
 }
 
@@ -115,9 +113,20 @@ inline const double CBody::getAngle() const
 inline const double CBody::getAngleVelocity() const
 {
     METHOD_ENTRY("CBody::getAngleVelocity")
-
-    METHOD_EXIT("CBody::getAngleVelocity")
     return m_pIntAngVel->getValue();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the inertia
+///
+/// \return inertia
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double CBody::getInertia() const
+{
+    METHOD_ENTRY("CBody::getInertia")
+    return m_fInertia;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,10 +152,7 @@ inline const ObjectType CBody::getObjectType() const
 inline void CBody::setAngleVelocity(const double& _fV)
 {
     METHOD_ENTRY("CBody::setAngleVelocity")
-
     m_pIntAngVel->init(_fV);
-
-    METHOD_EXIT("CBody::setAngleVelocity")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -159,10 +165,7 @@ inline void CBody::setAngleVelocity(const double& _fV)
 inline void CBody::setInertia(const double& _fInertia)
 {
     METHOD_ENTRY("CBody::setInertia(const double&)");
-
     m_fInertia = _fInertia;
-
-    METHOD_EXIT("CBody::setInertia(const double&)");
 }
 
 #endif
