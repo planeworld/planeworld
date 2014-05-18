@@ -360,26 +360,27 @@ void CVisualsManager::drawTrajectories() const
         for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
             ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
         {
-            // Object trajectories
+            (*ci)->getTrajectory().lock();
+            
+            // Draw objects trajectories
             double fColourFade = 0.1;
             m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, -15.0);
-            for (int i = (*ci)->getTrajectoryI(); i<OBJECT_TRAJECTORY_LENGTH; ++i)
+            
+            TrajectoryType::const_iterator cj = (*ci)->getTrajectory().getPositions().begin();
+            TrajectoryCellType::const_iterator ck = (*ci)->getTrajectory().getCells().begin();
+            while (cj != (*ci)->getTrajectory().getPositions().end())
             {
                 m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
-                m_Graphics.addVertex((*ci)->getTrajectory()[i] - m_pCamera->getCenter() +
-                    IUniverseScaled::cellToDouble((*ci)->getTrajectoryCell()[i]-m_pCamera->getCell())
+                m_Graphics.addVertex((*cj) - m_pCamera->getCenter() +
+                    IUniverseScaled::cellToDouble((*ck)-m_pCamera->getCell())
                 );
-                fColourFade += 0.9/OBJECT_TRAJECTORY_LENGTH;
-            }
-            for (int i = 0; i<(*ci)->getTrajectoryI(); ++i)
-            {
-                m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
-                m_Graphics.addVertex((*ci)->getTrajectory()[i] - m_pCamera->getCenter() +
-                    IUniverseScaled::cellToDouble((*ci)->getTrajectoryCell()[i]-m_pCamera->getCell())
-                );
-                fColourFade += 0.9/OBJECT_TRAJECTORY_LENGTH;
+                fColourFade += 0.9/TRAJECTORY_CAPACITY;
+                
+                ++cj; ++ck;
             }
             m_Graphics.endLine();
+            
+            (*ci)->getTrajectory().unlock();
         }
         
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
