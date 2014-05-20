@@ -19,12 +19,14 @@
 
 #include "world_data_storage.h"
 
+#include "rigidbody.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CWorldDataStorage::CWorldDataStorage()                                   
+CWorldDataStorage::CWorldDataStorage()                                  
 {
     METHOD_ENTRY("CWorldDataStorage::CWorldDataStorage")
     CTOR_CALL("CWorldDataStorage::CWorldDataStorage")
@@ -44,10 +46,10 @@ CWorldDataStorage::~CWorldDataStorage()
         it != m_DynamicObjects.end(); ++it)
     {
         // Free memory if pointer is still existent
-        if ((*it) != 0)
+        if (it->second != nullptr)
         {
-            delete (*it);
-            (*it) = 0;
+            delete it->second;
+            it->second = nullptr;
             MEM_FREED("IObject")
         }
         else
@@ -61,10 +63,10 @@ CWorldDataStorage::~CWorldDataStorage()
         it != m_StaticObjects.end(); ++it)
     {
         // Free memory if pointer is still existent
-        if ((*it) != 0)
+        if (it->second != nullptr)
         {
-            delete (*it);
-            (*it) = 0;
+            delete it->second;
+            it->second = nullptr;
             MEM_FREED("IObject")
         }
         else
@@ -199,10 +201,25 @@ void CWorldDataStorage::addObject(IObject* _pObject)
     METHOD_ENTRY("CWorldDataStorage::addObject")
 
     m_ObjectMutex.lock();
+    
+    // Since objects are stored in a map with their name as the key, we have to
+    // take care not to use the same name more than once (it's not a multimap,
+    // hence, it has to be unique).
+    
+    std::string strName = _pObject->getName();
+    
     if (_pObject->getDynamicsState())
-        m_DynamicObjects.push_back(_pObject);
+    {
+        while (!m_DynamicObjects.insert({_pObject->getName(), _pObject}).second)
+        {
+            _pObject->setName(_pObject->getName() + "_" + std::to_string(CRigidBody::getCount()));
+        }
+    }
     else
-        m_StaticObjects.push_back(_pObject);
+        while (!m_StaticObjects.insert({_pObject->getName(), _pObject}).second)
+        {
+            _pObject->setName(_pObject->getName() + "_" + std::to_string(CRigidBody::getCount()));
+        }
     m_ObjectMutex.unlock();
 }
 
@@ -224,7 +241,7 @@ void CWorldDataStorage::addObjects(ObjectsType _Objects)
   
     while (ci != _Objects.end())
     {
-        this->addObject((*ci));
+        this->addObject(ci->second);
         ++ci;
     }
 }

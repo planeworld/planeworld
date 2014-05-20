@@ -58,6 +58,7 @@ class CXMLImporter : public IWorldDataStorageUser
         CCamera*                        getCamera() const;
         Vector2d                        getGravity() const;
         const EmittersType&             getEmitters() const;
+        const std::string&              getPhysicsInterface() const;
         const CUniverse&                getUniverse() const;
                 
         //--- Methods --------------------------------------------------------//
@@ -105,8 +106,8 @@ class CXMLImporter : public IWorldDataStorageUser
         Vector2d                        m_vecGravity;       ///< Constant gravity vector
         std::string                     m_strCameraHook;    ///< Camera hook
         EmittersType                    m_Emitters;         ///< List of emitters
-        std::map<std::string,IObject*>  m_Objects;          ///< List of objects
         std::string                     m_strPath;          ///< Path to read data from
+        std::string                     m_strLuaPhysicsInterface; ///< Lua file for physics access
                 
 };
 
@@ -149,6 +150,19 @@ inline const EmittersType& CXMLImporter::getEmitters() const
 {
     METHOD_ENTRY("CXMLImporter::getEmitters")
     return m_Emitters;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return Lua physics interface
+///
+/// \return Lua physics interface
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::string& CXMLImporter::getPhysicsInterface() const
+{
+    METHOD_ENTRY("CXMLImporter::getPhysicsInterface")
+    return m_strLuaPhysicsInterface;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

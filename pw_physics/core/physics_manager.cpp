@@ -20,6 +20,9 @@
 #include "physics_manager.h"
 
 #include "debris_emitter.h"
+#include "physics_manager.h"
+
+CPhysicsManager* CPhysicsManager::m_pLuaThis;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -30,13 +33,15 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
                                      m_fTimeAccel(1.0),
                                      m_fCellUpdateResidual(0.0),
-                                     m_bCellUpdateFirst(true)
+                                     m_bCellUpdateFirst(true),
+                                     m_strLuaPhysicsInterface(PHYSICS_DEFAULT_LUA_INTERFACE)
                                    
 {
     METHOD_ENTRY("CPhysicsManager::CPhysicsManager")
     CTOR_CALL("CPhysicsManager::CPhysicsManager")
     
     m_vecConstantGravitation.setZero();
+    m_pLuaThis = this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +54,8 @@ CPhysicsManager::~CPhysicsManager()
     METHOD_ENTRY("CPhysicsManager::~CPhysicsManager")
     DTOR_CALL("CPhysicsManager::~CPhysicsManager")
 
+    lua_close(m_pLuaState);
+    
     for (EmittersType::iterator it = m_Emitters.begin();
         it != m_Emitters.end(); ++it)
     {
@@ -94,29 +101,29 @@ void CPhysicsManager::addGlobalForces()
         cj = ci;
         ++cj;
         
-        if ((*ci)->getGravitationState() == true)
+        if (ci->second->getGravitationState() == true)
         {
             while (cj != m_pDataStorage->getDynamicObjects().end())
             {
-                vecCC = (*ci)->getCOM() - (*cj)->getCOM() +
-                        IUniverseScaled::cellToDouble((*ci)->getCell()-(*cj)->getCell());
+                vecCC = ci->second->getCOM() - cj->second->getCOM() +
+                        IUniverseScaled::cellToDouble(ci->second->getCell()-cj->second->getCell());
                 
                 fCCSqr = vecCC.squaredNorm();
                 
                 if (fCCSqr > 400.0)
                 {
-                    vecG = vecCC.normalized() * ((*ci)->getMass() * (*cj)->getMass()) / fCCSqr
+                    vecG = vecCC.normalized() * (ci->second->getMass() * cj->second->getMass()) / fCCSqr
 //                             * 6.6742e+0;
                         * 6.67384e-11;
-                    if ((*cj)->getGravitationState() == true)
-                        (*ci)->addForce(-vecG, (*ci)->getCOM());
-                    (*cj)->addForce(vecG, (*cj)->getCOM());
+                    if (cj->second->getGravitationState() == true)
+                        ci->second->addForce(-vecG, ci->second->getCOM());
+                    cj->second->addForce(vecG, cj->second->getCOM());
                 }
                 ++cj;
             }
         }
 
-        (*ci)->addAcceleration(m_vecConstantGravitation);
+        ci->second->addAcceleration(m_vecConstantGravitation);
     };
     
     for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
@@ -190,6 +197,9 @@ void CPhysicsManager::collisionDetection()
 void CPhysicsManager::moveMasses(int nTest)
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
+    
+    lua_getglobal(m_pLuaState, "physics_interface");
+    lua_call(m_pLuaState,0,0);
 
     for (EmittersType::const_iterator ci = m_Emitters.begin();
         ci != m_Emitters.end(); ++ci)
@@ -199,9 +209,9 @@ void CPhysicsManager::moveMasses(int nTest)
     for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
         ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
     {
-        (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel);
-        (*ci)->transform();
-        (*ci)->clearForces();
+        ci->second->dynamics(1.0/m_fFrequency*m_fTimeAccel);
+        ci->second->transform();
+        ci->second->clearForces();
     }
     {
         for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
@@ -268,6 +278,15 @@ void CPhysicsManager::initObjects()
 {
     METHOD_ENTRY("CPhysicsManager::initObjects")
 
+    //--- Test Lua -----------------------------------------------------------//
+    m_pLuaState = luaL_newstate();
+ 
+    luaL_openlibs(m_pLuaState);
+    lua_register(m_pLuaState, "apply_acceleration", luaApplyAcceleration);
+    lua_register(m_pLuaState, "get_position", luaGetPosition);
+    luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str());
+ 
+    //--- Init objects -------------------------------------------------------//
     m_Timer.stop();
     m_Timer.start();
 
@@ -276,12 +295,12 @@ void CPhysicsManager::initObjects()
     for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
         ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
     {
-        (*ci)->init();
+        ci->second->init();
     };
     for (ObjectsType::const_iterator ci = m_pDataStorage->getStaticObjects().begin();
         ci != m_pDataStorage->getStaticObjects().end(); ++ci)
     {
-        (*ci)->init();
+        ci->second->init();
     };
 }
 
@@ -322,10 +341,59 @@ void CPhysicsManager::runCellUpdate()
         }
         
         ObjectsType::const_iterator ci = m_pDataStorage->recallDynamicObject("CellUpdater");
-        (*ci)->updateCell();
+        ci->second->updateCell();
         if (++ci == m_pDataStorage->getDynamicObjects().end())
             ci = m_pDataStorage->getDynamicObjects().begin();
         m_pDataStorage->memorizeDynamicObject("CellUpdater", ci);
     }
     
 }
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to apply force on object.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaApplyAcceleration(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaApplyAcceleration")
+
+    int nParam = lua_gettop(_pLuaState);
+    
+    Vector2d vecForce(lua_tonumber(_pLuaState, 2), lua_tonumber(_pLuaState, 3));
+    
+    size_t l;
+    
+    m_pLuaThis->m_pDataStorage->getDynamicObjects().at(lua_tolstring(_pLuaState, 1, &l))->addAcceleration(vecForce);
+    
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get object position.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetPosition(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetPosition")  
+    
+    int nParam = lua_gettop(_pLuaState);
+    size_t l;
+    
+    Vector2d vecPos(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(lua_tolstring(_pLuaState,1,&l))->getCOM());
+    
+    lua_pushnumber(_pLuaState, vecPos[0]);
+    lua_pushnumber(_pLuaState, vecPos[1]);
+    
+    return 2;
+}
+

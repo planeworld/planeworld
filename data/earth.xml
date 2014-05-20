@@ -12,7 +12,7 @@
     />
     <body_core
         angle_velocity="0.0041780742"
-        ineratia="8.0e37"
+        inertia="8.0e37"
     />
     <shape
         type="Planet"

@@ -147,11 +147,11 @@ int main(int argc, char *argv[])
     pVisualsManager = new CVisualsManager;
     MEM_ALLOC("CVisualsManager")
     
-    //--- Initialize storage access for engine managers ---------------------//
+    //--- Initialize storage access for engine managers ----------------------//
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
     pVisualsManager->setWorldDataStorage(&WorldDataStorage);
     
-    //--- Initialize Debris -------------------------------------------------//
+    //--- Initialize Debris --------------------------------------------------//
 //     pDebrisEmitter = new CDebrisEmitter;
 //     MEM_ALLOC("CDebrisEmitter")
 //     pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
@@ -234,6 +234,7 @@ int main(int argc, char *argv[])
 //         pVisualsManager->addVisualsList(XMLImporter.getVisuals());
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
         pPhysicsManager->addEmitters(XMLImporter.getEmitters());
+        pPhysicsManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
         
         pCamera=XMLImporter.getCamera();
         

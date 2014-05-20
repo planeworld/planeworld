@@ -360,15 +360,15 @@ void CVisualsManager::drawTrajectories() const
         for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
             ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
         {
-            (*ci)->getTrajectory().lock();
+            ci->second->getTrajectory().lock();
             
             // Draw objects trajectories
             double fColourFade = 0.1;
             m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, -15.0);
             
-            TrajectoryType::const_iterator cj = (*ci)->getTrajectory().getPositions().begin();
-            TrajectoryCellType::const_iterator ck = (*ci)->getTrajectory().getCells().begin();
-            while (cj != (*ci)->getTrajectory().getPositions().end())
+            TrajectoryType::const_iterator cj = ci->second->getTrajectory().getPositions().begin();
+            TrajectoryCellType::const_iterator ck = ci->second->getTrajectory().getCells().begin();
+            while (cj != ci->second->getTrajectory().getPositions().end())
             {
                 m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
                 m_Graphics.addVertex((*cj) - m_pCamera->getCenter() +
@@ -380,7 +380,7 @@ void CVisualsManager::drawTrajectories() const
             }
             m_Graphics.endLine();
             
-            (*ci)->getTrajectory().unlock();
+            ci->second->getTrajectory().unlock();
         }
         
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);

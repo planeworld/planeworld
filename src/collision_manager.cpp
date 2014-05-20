@@ -41,16 +41,16 @@ void CCollisionManager::detectCollisions()
         while (cj != m_DynamicObjects.end())
         {
             // Test for overlapping depthlayers
-            if (((*ci)->getDepths() & (*cj)->getDepths()) > 0)
+            if ((ci->second->getDepths() & cj->second->getDepths()) > 0)
             {
 
                 // Test for overlapping bounding boxes
-                if ((*ci)->getGeometry()->getBoundingBox().overlaps((*cj)->getGeometry()->getBoundingBox(),1))
+                if (ci->second->getGeometry()->getBoundingBox().overlaps(cj->second->getGeometry()->getBoundingBox(),1))
                 {
-                    switch((*ci)->getObjectType())
+                    switch(ci->second->getObjectType())
                     {
                         case OBJECT_BODY:
-                            this->test(static_cast<CBody*>((*ci)),static_cast<CBody*>((*cj)));
+                            this->test(static_cast<CBody*>(ci->second),static_cast<CBody*>(cj->second));
                             break;
                     }
 //                     CContact Contact;
@@ -85,10 +85,10 @@ void CCollisionManager::detectCollisions()
         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
             cj != m_Debris.end(); ++cj)
         {
-            switch((*ci)->getObjectType())
+            switch(ci->second->getObjectType())
             {
                 case OBJECT_BODY:
-                    this->test(static_cast<CBody*>((*ci)), (*cj));
+                    this->test(static_cast<CBody*>(ci->second), (*cj));
                     break;
             }
         }
@@ -103,10 +103,10 @@ void CCollisionManager::detectCollisions()
         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
             cj != m_Debris.end(); ++cj)
         {
-            switch((*ci)->getObjectType())
+            switch(ci->second->getObjectType())
             {
                 case OBJECT_BODY:
-                    this->test(static_cast<CBody*>((*ci)), (*cj));
+                    this->test(static_cast<CBody*>(ci->second), (*cj));
                     break;
             }
         }

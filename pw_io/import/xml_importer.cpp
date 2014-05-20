@@ -39,7 +39,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CXMLImporter::CXMLImporter() : m_pCamera(0)
+CXMLImporter::CXMLImporter() : m_pCamera(0),
+                               m_strLuaPhysicsInterface("physics_interface.lua")
 {
     METHOD_ENTRY("CXMLImporter::CXMLImporter")
     CTOR_CALL("CXMLImporter::CXMLImporter")
@@ -128,6 +129,10 @@ bool CXMLImporter::import(const std::string& _strFilename,
         {
             this->createCamera(N);
         }
+        else if (std::string(N.name()) == "config")
+        {
+            m_strLuaPhysicsInterface = checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
+        }        
         else if (std::string(N.name()) == "emitter")
         {
             this->createEmitter(N);
@@ -147,9 +152,13 @@ bool CXMLImporter::import(const std::string& _strFilename,
         if (m_pCamera != 0)
         {
             INFO_MSG("XML Importer", "Camera hook: " << m_strCameraHook)
-            if (m_Objects.find(m_strCameraHook) != m_Objects.end())
+            if (m_pDataStorage->getDynamicObjects().find(m_strCameraHook) != m_pDataStorage->getDynamicObjects().end())
             {
-                m_pCamera->setHook(m_Objects[m_strCameraHook]);
+                m_pCamera->setHook(m_pDataStorage->getDynamicObjects().at(m_strCameraHook));
+            }
+            else if (m_pDataStorage->getStaticObjects().find(m_strCameraHook) != m_pDataStorage->getStaticObjects().end())
+            {
+                m_pCamera->setHook(m_pDataStorage->getDynamicObjects().at(m_strCameraHook));
             }
             else
             {
@@ -604,7 +613,6 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
     
     m_pDataStorage->addObject(pRigidBody);
     m_pDataStorage->addObjectVisuals(pObjectVisuals);
-    m_Objects.insert(std::pair<std::string,IObject*>(pRigidBody->getName(),pRigidBody));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

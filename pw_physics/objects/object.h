@@ -29,6 +29,8 @@
 #include "trajectory.h"
 
 //--- Standard header --------------------------------------------------------//
+#include <unordered_map>
+
 
 /// Type definition for the AnchorIDs
 typedef uint AnchorIDType;
@@ -145,7 +147,7 @@ class IObject : public IHookable, public IUniverseScaled
         CTrajectory             m_Trajectory;                       ///< Trajectory of object
 };
 
-typedef std::list<IObject*>             ObjectsType;        ///< Specifies a list of objects
+typedef std::unordered_map<std::string, IObject*>  ObjectsType;    ///< Specifies a list of objects
 
 //--- Implementation is done here for inline optimisation --------------------//
 

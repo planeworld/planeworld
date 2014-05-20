@@ -38,13 +38,16 @@ class CRigidBody : public CBody
         //--- Constructor/Destructor -----------------------------------------//
         CRigidBody();
         virtual ~CRigidBody();
-
+        
         //--- Constant Methods -----------------------------------------------//
         virtual IObject* clone() const;
         
         //--- Methods --------------------------------------------------------//
         virtual void addForce(const Vector2d&, const Vector2d&);
         virtual void clearForces();
+        
+        //--- Static Methods -------------------------------------------------//
+        static uint32_t getCount();
 
     protected:
 
@@ -54,5 +57,20 @@ class CRigidBody : public CBody
         static uint32_t m_unNrOfRigidBodies;    ///< Static counter for name initialisation and tracking
 
 };
+
+//--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the absolute count of object instances
+///
+/// \return Count of object instances
+///
+////////////////////////////////////////////////////////////////////////////////
+inline uint32_t CRigidBody::getCount()
+{
+    METHOD_ENTRY("CBody::getCount")
+    return m_unNrOfRigidBodies;
+}
 
 #endif

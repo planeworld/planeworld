@@ -83,8 +83,8 @@ class CWorldDataStorage
         
         std::unordered_map<std::string, ObjectsType::const_iterator> m_DynamicObjectsMemory; ///< Stores index to specific object
         
-        std::mutex           m_ObjectMutex;           ///< Mutex to lock object
-        std::mutex           m_ObjectVisualsMutex;    ///< Mutex to lock object visuals
+        std::mutex           m_ObjectMutex;             ///< Mutex to lock object
+        std::mutex           m_ObjectVisualsMutex;      ///< Mutex to lock object visuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

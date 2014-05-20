@@ -5,13 +5,17 @@
   number_of_stars="10000"
 >
   <!-- Create the active camera -->
-  <camera
+  <!--<camera
     hook="Earth"
-    enable_angle_hook="true"
+    enable_angle_hook="false"
     position_x="10.0"
     position_y="-1.0"
     viewport_width="600.0"
     viewport_height="400.0"
+  />-->
+    
+  <config
+        physics_interface="physics_interface.lua"
   />
   
   <object file="sun.xml"/> 

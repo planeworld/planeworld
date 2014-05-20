@@ -1,5 +1,6 @@
 eigen3
 boost
+lua51
 
 SFML:
 openal

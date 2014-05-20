@@ -1,11 +1,12 @@
 PROJECT (planeworld)
 
 FIND_PACKAGE(OpenGL REQUIRED)
-
+FIND_PACKAGE(Lua51 REQUIRED)
 # FIND_PACKAGE(Boost)
 
 INCLUDE_DIRECTORIES (
     ${Boost_INCLUDE_DIRS}
+    ${LUA_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging
@@ -90,20 +91,13 @@ ADD_EXECUTABLE (planeworld ${SRCS})
 
 TARGET_LINK_LIBRARIES (planeworld
     ${OPENGL_gl_LIBRARY}
+    ${LUA_LIBRARY}
     noise2d
     sfml-system
     sfml-window
     sfml-graphics
 )
 
-# TARGET_LINK_LIBRARIES (starmap_ut
-#     ${OPENGL_gl_LIBRARY}
-#     sfml-window
-# )
-# 
-# INSTALL (TARGETS planeworld starmap_ut universe_ut
-#     RUNTIME DESTINATION bin
-# )
 INSTALL (TARGETS planeworld
     RUNTIME DESTINATION bin
 )

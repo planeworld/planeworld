@@ -28,7 +28,15 @@
 #include "universe.h"
 #include "world_data_storage_user.h"
 
-const double PHYSICS_DEFAULT_FREQUENCY = 200.0;
+//--- Misc header ------------------------------------------------------------//
+extern "C" {
+    #include "lua.h"
+    #include "lualib.h"
+    #include "lauxlib.h"
+}
+
+const double      PHYSICS_DEFAULT_FREQUENCY     = 200.0; ///< Default physics frequency
+const std::string PHYSICS_DEFAULT_LUA_INTERFACE = "physics_interface.lua"; ///< Default lua interface file
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -57,6 +65,7 @@ class CPhysicsManager : public IWorldDataStorageUser
 
         //--- Methods --------------------------------------------------------//
         void setConstantGravity(const Vector2d&);
+        void setPhysicsInterface(const std::string&);
         void setUniverse(CUniverse* const);
         
         void addGlobalForces();
@@ -76,16 +85,23 @@ class CPhysicsManager : public IWorldDataStorageUser
         CUniverse*          m_pUniverse;            ///< The procedurally generated universe
         CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
 
-        CTimer m_Timer;                             ///< Timer for physics
-        double m_fFrequency;                        ///< Frequency of physics calculation
-        double m_fTimeAccel;                        ///< Factor for global acceleration
+        CTimer              m_Timer;                ///< Timer for physics
+        double              m_fFrequency;           ///< Frequency of physics calculation
+        double              m_fTimeAccel;           ///< Factor for global acceleration
 
         Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
 
-        EmittersType        m_Emitters;             ///< List of emitters
+        EmittersType    m_Emitters;                 ///< List of emitters
         
-        double  m_fCellUpdateResidual;              ///< Residual for calculation of cell update
-        bool    m_bCellUpdateFirst;                 ///< Indicates the first cell update (to initialise access)
+        double          m_fCellUpdateResidual;      ///< Residual for calculation of cell update
+        bool            m_bCellUpdateFirst;         ///< Indicates the first cell update (to initialise access)
+        
+        ///--- Lua access ----------------------------------------------------//
+        lua_State*                 m_pLuaState;                 ///< Lua state for external access
+        std::string                m_strLuaPhysicsInterface;    ///< Lua physics interface file
+        static CPhysicsManager*    m_pLuaThis;                  ///< Store this-pointer for Lua access
+        static int                 luaApplyAcceleration(lua_State*);
+        static int                 luaGetPosition(lua_State*);
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -127,6 +143,19 @@ inline void CPhysicsManager::setConstantGravity(const Vector2d& _vecG)
 {
     METHOD_ENTRY("CPhysicsManager::setConstantGravity")
     m_vecConstantGravitation = _vecG;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the lua physics interface
+///
+/// \param _strPhysicsInterface Lua physics interface
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPhysicsManager::setPhysicsInterface(const std::string& _strPhysicsInterface)
+{
+    METHOD_ENTRY("CPhysicsManager::setPhysicsInterface")
+    m_strLuaPhysicsInterface = _strPhysicsInterface;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
