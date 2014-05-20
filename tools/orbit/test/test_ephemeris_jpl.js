@@ -7,12 +7,14 @@ describe('ephemeris', function() {
         var reference_object = {
             radius : 12345e3,
             mass : 543e21,
+            rotation : 987e-6
         };
     
     
         it('should parse earth data', function() {
             var data =' Mean radius, km          = 12345.0+-0.01 \
-                        Mass, 10^23 kg = 5.43+-0.0006 ';
+                        Mass, 10^23 kg = 5.43+-0.0006 \
+                        Mean rot. rate, rad s^-1 = 9.87*10^-4 ';
 
             var object = ephemeris._parseObjectData(data);
             object.should.eql(reference_object);
@@ -20,7 +22,7 @@ describe('ephemeris', function() {
 
         it('should parse moon data', function() {
             var data =' Radius, km            = 12345.00+-0.03 \
-                        Mass, 10^23 kg = 5.43 ';
+                        Mass, 10^23 kg   =   5.43';
 
             var object = ephemeris._parseObjectData(data);
             object.should.eql(reference_object);
@@ -28,7 +30,8 @@ describe('ephemeris', function() {
         
         it('should parse mercury data', function() {
             var data =' Mean radius (km)      =  12345(+-1) \
-                        Mass (10^23 kg )      =     5.43';
+                        Mass (10^23 kg )      =     5.43\
+                        Sidereal rot. period  =    0.07367989074613009 d ';
 
             var object = ephemeris._parseObjectData(data);
             object.should.eql(reference_object);
@@ -36,7 +39,38 @@ describe('ephemeris', function() {
         
         it('should parse venus data', function() {
             var data =' Equat. radius (1 bar) = 12345+-4 km \
-                        Mass (10^23 kg)       =  5.43+-.19 ';
+                        Mass (10^23 kg)       =  5.43+-.19 \
+                        Sidereal rot. period  =    -0.07367989074613009 d ';
+
+            reference_object.rotation*=-1;
+            var object = ephemeris._parseObjectData(data);
+            object.should.eql(reference_object);
+            reference_object.rotation*=-1;
+            
+        });
+
+        it('should parse mars data', function() {
+            var data =' Mean radius (km)      =  12345(+-1) \
+                        Mass (10^23 kg)       =  5.43 \
+                        Sidereal rot. period  =    1.7683173779071217 hr ';
+
+            var object = ephemeris._parseObjectData(data);
+            object.should.eql(reference_object);
+        });
+
+        it('should parse jupiter data', function() {
+            var data =' Mean radius (km)      =  12345(+-1) \
+                        Mass (10^23 kg)       =  5.43 \
+                        Rot. rate (10^-4 rad/s)  = 9.87 ';
+
+            var object = ephemeris._parseObjectData(data);
+            object.should.eql(reference_object);
+        });
+
+        it('should parse saturn data', function() {
+            var data =' Mean radius (km)      =  12345(+-1) \
+                        Mass (10^23 kg)       =  5.43 \
+                        Rot. rate(10^-4 rad/s)  = 9.87 ';
 
             var object = ephemeris._parseObjectData(data);
             object.should.eql(reference_object);
@@ -44,7 +78,8 @@ describe('ephemeris', function() {
 
         it('should parse sun data', function() {
             var data =' Radius (photosphere)  = 1234.5(10^1) km \
-                        Mass (10^23 kg)       ~  5.43 ';
+                        Mass (10^23 kg)       ~  5.43 \
+                        Adopted sidereal per  = 0.07367989074613009 d';
 
             var object = ephemeris._parseObjectData(data);
             object.should.eql(reference_object);

@@ -2,13 +2,16 @@
 <object type="RigidBody">
     <core
         name="moon"
-        mass="736.9e20"
+        mass="7.349e+22"
         origin_x="-93436982025.91873"
         origin_y="-119242871291.81197"
         velocity_x="22208.67879088407"
         velocity_y="-18237.798149853075"
         dynamics="true"
         gravity="true"
+    />
+    <body_core
+        angle_velocity="NaN"
     />
     <shape
         type="Circle"

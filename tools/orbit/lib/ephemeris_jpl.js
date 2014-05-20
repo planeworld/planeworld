@@ -28,35 +28,41 @@ module.exports.get = function(object_name, date, callback){
         client.readUntil(new RegExp("<cr>: "), function(err, res) {
             object = parseObjectData(res);
             object.name = object_name;
-            client.write("E\n");
-            client.readUntil(new RegExp("] : "), function(err, res) {
-                client.write("e\n", "ASCII");
+            if (object_name=="sun") {
+                client.close();
+                callback(null, object); 
+            }
+            else {
+                client.write("E\n");
                 client.readUntil(new RegExp("] : "), function(err, res) {
-                    client.write("10\n", "ASCII");
+                    client.write("e\n", "ASCII");
                     client.readUntil(new RegExp("] : "), function(err, res) {
-                        client.write("eclip\n", "ASCII");
+                        client.write("10\n", "ASCII");
                         client.readUntil(new RegExp("] : "), function(err, res) {
-                            client.write("2014-05-13\n", "ASCII");
+                            client.write("eclip\n", "ASCII");
                             client.readUntil(new RegExp("] : "), function(err, res) {
-                                client.write("2014-05-14\n", "ASCII");
+                                client.write("2014-05-13\n", "ASCII");
                                 client.readUntil(new RegExp("] : "), function(err, res) {
-                                    client.write("2d\n", "ASCII");
+                                    client.write("2014-05-14\n", "ASCII");
                                     client.readUntil(new RegExp("] : "), function(err, res) {
-                                        client.write("n\n", "ASCII");
+                                        client.write("2d\n", "ASCII");
                                         client.readUntil(new RegExp("] : "), function(err, res) {
-                                            client.write("J2000\n", "ASCII");
+                                            client.write("n\n", "ASCII");
                                             client.readUntil(new RegExp("] : "), function(err, res) {
-                                                client.write("1\n", "ASCII");
+                                                client.write("J2000\n", "ASCII");
                                                 client.readUntil(new RegExp("] : "), function(err, res) {
-                                                    client.write("NO\n", "ASCII");
+                                                    client.write("1\n", "ASCII");
                                                     client.readUntil(new RegExp("] : "), function(err, res) {
-                                                        client.write("YES\n", "ASCII");
+                                                        client.write("NO\n", "ASCII");
                                                         client.readUntil(new RegExp("] : "), function(err, res) {
-                                                            client.write("ABS\n", "ASCII");
-                                                            client.readUntil(new RegExp("\\? : "), function(err, res) {
-                                                                object.ephemeris = parseEphemeris(res);
-                                                                client.close();
-                                                                callback(null, object);
+                                                            client.write("YES\n", "ASCII");
+                                                            client.readUntil(new RegExp("] : "), function(err, res) {
+                                                                client.write("ABS\n", "ASCII");
+                                                                client.readUntil(new RegExp("\\? : "), function(err, res) {
+                                                                    object.ephemeris = parseEphemeris(res);
+                                                                    client.close();
+                                                                    callback(null, object);
+                                                                });
                                                             });
                                                         });
                                                     });
@@ -69,7 +75,7 @@ module.exports.get = function(object_name, date, callback){
                         });
                     });
                 });
-            });
+            }
         });
     });
 };
@@ -98,13 +104,33 @@ function parseObjectData(data) {
 
     var parser_mass = new Parser();
 
-    parser_mass.add(' Mass, 10\\^([0-9]+) kg = +([0-9]*.[0-9]*)', function(match) {
+    parser_mass.add(' Mass, 10\\^([0-9]+) kg += +([0-9]*.[0-9]*)', function(match) {
        return parseFloat(match[2]+"E"+match[1]);
     });
     parser_mass.add(' Mass \\(10\\^([0-9]+) kg *\\) +[=~] +([0-9]*.[0-9]*)', function(match) {
        return parseFloat(match[2]+"E"+match[1]);
     });
 
+    var parser_rotation = new Parser();
+
+    parser_rotation.add(' Mean rot. rate, rad s\\^-1 += +([0-9]*.[0-9]*)\\*10\\^([+-]?[0-9]+)', function(match) {
+       return parseFloat(match[1]+"E"+match[2]);
+    });
+    parser_rotation.add(' Rot. rate ?\\(10\\^([+-]?[0-9]+) rad/s\\) += +([0-9]*.[0-9]*)', function(match) {
+       return parseFloat(match[2]+"E"+match[1]);
+    });
+    parser_rotation.add(' Sidereal rot. period += +([+-]?[0-9]*.[0-9]*) (d|hr)', function(match) {
+        if (match[2]=="d")
+            return 2*Math.PI/(parseFloat(match[1])*24*60*60);
+        else if (match[2]=="hr")
+            return 2*Math.PI/(parseFloat(match[1])*60*60);
+    });
+    parser_rotation.add(' Adopted sidereal per += +([+-]?[0-9]*.[0-9]*) (d|hr)', function(match) {
+        if (match[2]=="d")
+            return 2*Math.PI/(parseFloat(match[1])*24*60*60);
+        else if (match[2]=="hr")
+            return 2*Math.PI/(parseFloat(match[1])*60*60);
+    });
     
     var object = {};
     
@@ -116,6 +142,10 @@ function parseObjectData(data) {
     if (mass)
         object.mass = mass;
     
+    var rotation = parser_rotation.parse(data);
+    if (rotation)
+        object.rotation = rotation;
+
     return object;
 };
 
