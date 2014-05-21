@@ -15,7 +15,8 @@
   />-->
     
   <config
-        physics_interface="physics_interface.lua"
+      physics_interface="physics_interface.lua"
+      physics_frequency="200.0"
   />
   
   <object file="sun.xml"/> 

@@ -4,6 +4,10 @@
     vec_x="0.0"
     vec_y="0.0"
   />
+  <config
+    physics_interface="physics_interface.lua"
+    physics_frequency="200.0"
+  />
   <emitter
     type="object_emitter"
     mode="emit_once"

@@ -65,6 +65,7 @@ class CPhysicsManager : public IWorldDataStorageUser
 
         //--- Methods --------------------------------------------------------//
         void setConstantGravity(const Vector2d&);
+        void setFrequency(const double&);
         void setPhysicsInterface(const std::string&);
         void setUniverse(CUniverse* const);
         
@@ -143,6 +144,19 @@ inline void CPhysicsManager::setConstantGravity(const Vector2d& _vecG)
 {
     METHOD_ENTRY("CPhysicsManager::setConstantGravity")
     m_vecConstantGravitation = _vecG;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set frequency for physics calculations
+///
+/// \param _fFrequency Frequency for physics calculations
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPhysicsManager::setFrequency(const double& _fFrequency)
+{
+    METHOD_ENTRY("CPhysicsManager::setFrequency")
+    m_fFrequency = _fFrequency;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

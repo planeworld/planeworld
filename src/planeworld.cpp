@@ -235,6 +235,7 @@ int main(int argc, char *argv[])
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
         pPhysicsManager->addEmitters(XMLImporter.getEmitters());
         pPhysicsManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
+        pPhysicsManager->setFrequency(XMLImporter.getPhysicsFrequency());
         
         pCamera=XMLImporter.getCamera();
         

@@ -40,7 +40,8 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CXMLImporter::CXMLImporter() : m_pCamera(0),
-                               m_strLuaPhysicsInterface("physics_interface.lua")
+                               m_strLuaPhysicsInterface("physics_interface.lua"),
+                               m_fPhysicsFrequency(200.0)
 {
     METHOD_ENTRY("CXMLImporter::CXMLImporter")
     CTOR_CALL("CXMLImporter::CXMLImporter")
@@ -132,6 +133,8 @@ bool CXMLImporter::import(const std::string& _strFilename,
         else if (std::string(N.name()) == "config")
         {
             m_strLuaPhysicsInterface = checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
+            m_fPhysicsFrequency = checkAttributeDouble(N, "physics_frequency", m_fPhysicsFrequency);
+            
         }        
         else if (std::string(N.name()) == "emitter")
         {
