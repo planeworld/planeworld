@@ -132,8 +132,12 @@ bool CXMLImporter::import(const std::string& _strFilename,
         }
         else if (std::string(N.name()) == "config")
         {
-            m_strLuaPhysicsInterface = checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
-            m_fPhysicsFrequency = checkAttributeDouble(N, "physics_frequency", m_fPhysicsFrequency);
+            if (checkFile(N));
+            else
+            {
+                m_strLuaPhysicsInterface = checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
+                m_fPhysicsFrequency = checkAttributeDouble(N, "physics_frequency", m_fPhysicsFrequency);
+            }
             
         }        
         else if (std::string(N.name()) == "emitter")
