@@ -61,6 +61,7 @@ class CXMLImporter : public IWorldDataStorageUser
         const double&                   getPhysicsFrequency() const;
         const std::string&              getPhysicsInterface() const;
         const CUniverse&                getUniverse() const;
+        const double&                   getVisualsFrequency() const;
                 
         //--- Methods --------------------------------------------------------//
         bool import(const std::string&,
@@ -110,6 +111,7 @@ class CXMLImporter : public IWorldDataStorageUser
         std::string                     m_strPath;          ///< Path to read data from
         std::string                     m_strLuaPhysicsInterface; ///< Lua file for physics access
         double                          m_fPhysicsFrequency;///< Frequency for physics calculations
+        double                          m_fVisualsFrequency;///< Frequency for visual update
                 
 };
 
@@ -191,6 +193,19 @@ inline const CUniverse& CXMLImporter::getUniverse() const
 {
     METHOD_ENTRY("CXMLImporter::getUniverse")
     return m_Universe;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return frequency for visual update
+///
+/// \return Frequency for visual update
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CXMLImporter::getVisualsFrequency() const
+{
+    METHOD_ENTRY("CXMLImporter::getVisualsFrequency")
+    return m_fVisualsFrequency;
 }
 
 

@@ -198,8 +198,11 @@ void CPhysicsManager::moveMasses(int nTest)
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
     
-    lua_getglobal(m_pLuaState, "physics_interface");
-    lua_call(m_pLuaState,0,0);
+    if (nTest % 1000 == 0)
+    {
+        lua_getglobal(m_pLuaState, "physics_interface");
+        lua_call(m_pLuaState,0,0);
+    }
 
     for (EmittersType::const_iterator ci = m_Emitters.begin();
         ci != m_Emitters.end(); ++ci)

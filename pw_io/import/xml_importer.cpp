@@ -25,12 +25,14 @@
 
 #include "circle.h"
 #include "circle_visuals.h"
+#include "physics_manager.h"
 #include "planet.h"
 #include "planet_visuals.h"
 #include "polyline.h"
 #include "polyline_visuals.h"
 #include "terrain.h"
 #include "terrain_visuals.h"
+#include "visuals_manager.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -41,7 +43,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 CXMLImporter::CXMLImporter() : m_pCamera(0),
                                m_strLuaPhysicsInterface("physics_interface.lua"),
-                               m_fPhysicsFrequency(200.0)
+                               m_fPhysicsFrequency(PHYSICS_DEFAULT_FREQUENCY),
+                               m_fVisualsFrequency(VISUALS_DEFAULT_FREQUENCY)
 {
     METHOD_ENTRY("CXMLImporter::CXMLImporter")
     CTOR_CALL("CXMLImporter::CXMLImporter")
@@ -137,6 +140,7 @@ bool CXMLImporter::import(const std::string& _strFilename,
             {
                 m_strLuaPhysicsInterface = checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
                 m_fPhysicsFrequency = checkAttributeDouble(N, "physics_frequency", m_fPhysicsFrequency);
+                m_fVisualsFrequency = checkAttributeDouble(N, "visuals_frequency", m_fVisualsFrequency);
             }
             
         }        

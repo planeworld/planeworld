@@ -74,8 +74,7 @@ void runPhysics(CPhysicsManager* const _pPhysicsManager, bool* const _pbDone)
             _pPhysicsManager->runCellUpdate();
         }
         PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
-        ++nCC;
-        if (nCC == 10000) nCC = 0;
+        if (++nCC == 10000) nCC = 0;
     }
     INFO_MSG("Main", "Physics thread stopped.")
 }
@@ -236,6 +235,7 @@ int main(int argc, char *argv[])
         pPhysicsManager->addEmitters(XMLImporter.getEmitters());
         pPhysicsManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
         pPhysicsManager->setFrequency(XMLImporter.getPhysicsFrequency());
+        pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
         
         pCamera=XMLImporter.getCamera();
         

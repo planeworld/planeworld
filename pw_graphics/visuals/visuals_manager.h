@@ -56,6 +56,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
                 
         //--- Methods --------------------------------------------------------//
         void            setCamera(CCamera*);
+        void            setFrequency(const double&);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
         void            setWindow(sf::RenderWindow* const);
@@ -134,6 +135,19 @@ inline void CVisualsManager::setCamera(CCamera* _pCamera)
 {
     METHOD_ENTRY("CVisualsManager::setCamera")
     m_pCamera = _pCamera;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the frequency for visual update
+///
+/// \param _fFrequency Frequency for visual update
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CVisualsManager::setFrequency(const double& _fFrequency)
+{
+    METHOD_ENTRY("CVisualsManager::setFrequency")
+    m_fFrequency = _fFrequency;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
