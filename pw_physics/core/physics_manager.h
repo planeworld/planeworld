@@ -74,6 +74,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         void addEmitters(const EmittersType&);
         void collisionDetection();
         void initEmitters();
+        bool initLua();
         void initObjects();
         void moveMasses(int);
         void accelerateTime();
@@ -101,7 +102,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         lua_State*                 m_pLuaState;                 ///< Lua state for external access
         std::string                m_strLuaPhysicsInterface;    ///< Lua physics interface file
         static CPhysicsManager*    m_pLuaThis;                  ///< Store this-pointer for Lua access
-        static int                 luaApplyAcceleration(lua_State*);
+        static int                 luaApplyForce(lua_State*);
         static int                 luaGetPosition(lua_State*);
 };
 

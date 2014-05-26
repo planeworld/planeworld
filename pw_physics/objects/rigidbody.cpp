@@ -31,10 +31,8 @@ CRigidBody::CRigidBody()
     METHOD_ENTRY("CRigidBody::CRigidBody")
     CTOR_CALL("CRigidBody::CRigidBody")
 
-    ++m_unNrOfRigidBodies;
-    
     // Default name for any rigidbody:
-    m_strName = "Rigidbody_" + std::to_string(m_unNrOfRigidBodies);
+    m_strName = "Rigidbody_" + std::to_string(m_unNrOfRigidBodies++);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

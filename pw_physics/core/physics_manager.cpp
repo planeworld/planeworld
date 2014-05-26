@@ -198,10 +198,13 @@ void CPhysicsManager::moveMasses(int nTest)
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
     
-    if (nTest % 1000 == 0)
+//     if (nTest % 100 == 0)
     {
         lua_getglobal(m_pLuaState, "physics_interface");
-        lua_call(m_pLuaState,0,0);
+        if (lua_pcall(m_pLuaState, 0, 0, 0) != 0)
+        {
+            WARNING_MSG("Physics Manager", "Couldn't call Lua function.")
+        }
     }
 
     for (EmittersType::const_iterator ci = m_Emitters.begin();
@@ -270,6 +273,33 @@ void CPhysicsManager::initEmitters()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Initialise Lua scripting engine
+///
+/// \return Initialisation succesful?
+///
+///////////////////////////////////////////////////////////////////////////////
+bool CPhysicsManager::initLua()
+{
+    METHOD_ENTRY("CPhysicsManager::initLua")
+
+    //--- Test Lua -----------------------------------------------------------//
+    m_pLuaState = luaL_newstate();
+ 
+    luaL_openlibs(m_pLuaState);
+    lua_register(m_pLuaState, "apply_force", luaApplyForce);
+    lua_register(m_pLuaState, "get_position", luaGetPosition);
+    if (luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str()) != 0)
+    {
+        ERROR_MSG("Physics Manager", "File " << m_strLuaPhysicsInterface <<
+                                     " could not be loaded.")
+        return false;
+    }
+    else
+        return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Initialise all objects
 ///
 /// Initialisiation of all objects resets objects position, speed etc. to
@@ -281,14 +311,6 @@ void CPhysicsManager::initObjects()
 {
     METHOD_ENTRY("CPhysicsManager::initObjects")
 
-    //--- Test Lua -----------------------------------------------------------//
-    m_pLuaState = luaL_newstate();
- 
-    luaL_openlibs(m_pLuaState);
-    lua_register(m_pLuaState, "apply_acceleration", luaApplyAcceleration);
-    lua_register(m_pLuaState, "get_position", luaGetPosition);
-    luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str());
- 
     //--- Init objects -------------------------------------------------------//
     m_Timer.stop();
     m_Timer.start();
@@ -361,17 +383,34 @@ void CPhysicsManager::runCellUpdate()
 /// \return Number of parameters returned to Lua script.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaApplyAcceleration(lua_State* _pLuaState)
+int CPhysicsManager::luaApplyForce(lua_State* _pLuaState)
 {
-    METHOD_ENTRY("luaApplyAcceleration")
+    METHOD_ENTRY("luaApplyForce")
 
     int nParam = lua_gettop(_pLuaState);
     
-    Vector2d vecForce(lua_tonumber(_pLuaState, 2), lua_tonumber(_pLuaState, 3));
-    
-    size_t l;
-    
-    m_pLuaThis->m_pDataStorage->getDynamicObjects().at(lua_tolstring(_pLuaState, 1, &l))->addAcceleration(vecForce);
+    if (nParam == 5)
+    {
+        // Read force vector and point of attack (POA).
+        Vector2d vecForce(lua_tonumber(_pLuaState, 2), lua_tonumber(_pLuaState, 3));
+        Vector2d vecPOA(lua_tonumber(_pLuaState, 4), lua_tonumber(_pLuaState, 5));
+        
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->addForce(vecForce, vecPOA);
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function apply_force (" << nParam << "/5).")
+    }
     
     return 0;
 }
@@ -390,12 +429,27 @@ int CPhysicsManager::luaGetPosition(lua_State* _pLuaState)
     METHOD_ENTRY("luaGetPosition")  
     
     int nParam = lua_gettop(_pLuaState);
-    size_t l;
-    
-    Vector2d vecPos(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(lua_tolstring(_pLuaState,1,&l))->getCOM());
-    
-    lua_pushnumber(_pLuaState, vecPos[0]);
-    lua_pushnumber(_pLuaState, vecPos[1]);
+
+    if (nParam == 1)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            Vector2d vecPos(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getCOM());
+            lua_pushnumber(_pLuaState, vecPos[0]);
+            lua_pushnumber(_pLuaState, vecPos[1]);
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_position (" << nParam << "/1).")
+    }
     
     return 2;
 }

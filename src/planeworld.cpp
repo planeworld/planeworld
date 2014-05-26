@@ -288,6 +288,8 @@ int main(int argc, char *argv[])
     //--- Set initialisation state of all objects ----------------------------//
     pPhysicsManager->initEmitters();
     pPhysicsManager->initObjects();
+    if (!pPhysicsManager->initLua()) return EXIT_FAILURE;
+    
     
 //     pEarth->setVelocity(Vector2d(29.78e3, 0.0));
 //     pEarth->setAngleVelocity(0.001);
@@ -434,5 +436,5 @@ int main(int argc, char *argv[])
         MEM_FREED("CVisualsManager")
     }
     
-    return 0;
+    return EXIT_SUCCESS;
 }
