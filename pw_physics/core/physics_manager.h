@@ -29,11 +29,7 @@
 #include "world_data_storage_user.h"
 
 //--- Misc header ------------------------------------------------------------//
-extern "C" {
-    #include "lua.h"
-    #include "lualib.h"
-    #include "lauxlib.h"
-}
+#include "lua.hpp"
 
 const double      PHYSICS_DEFAULT_FREQUENCY     = 200.0; ///< Default physics frequency
 const std::string PHYSICS_DEFAULT_LUA_INTERFACE = "physics_interface.lua"; ///< Default lua interface file
@@ -101,9 +97,12 @@ class CPhysicsManager : public IWorldDataStorageUser
         ///--- Lua access ----------------------------------------------------//
         lua_State*                 m_pLuaState;                 ///< Lua state for external access
         std::string                m_strLuaPhysicsInterface;    ///< Lua physics interface file
+        
         static CPhysicsManager*    m_pLuaThis;                  ///< Store this-pointer for Lua access
         static int                 luaApplyForce(lua_State*);
+        static int                 luaGetFrequency(lua_State*);
         static int                 luaGetPosition(lua_State*);
+        static int                 luaGetVelocity(lua_State*);
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

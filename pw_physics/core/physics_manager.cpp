@@ -204,6 +204,7 @@ void CPhysicsManager::moveMasses(int nTest)
         if (lua_pcall(m_pLuaState, 0, 0, 0) != 0)
         {
             WARNING_MSG("Physics Manager", "Couldn't call Lua function.")
+            WARNING_MSG("Physics Manager", "Lua Error: " << lua_tostring(m_pLuaState, -1))
         }
     }
 
@@ -287,11 +288,14 @@ bool CPhysicsManager::initLua()
  
     luaL_openlibs(m_pLuaState);
     lua_register(m_pLuaState, "apply_force", luaApplyForce);
+    lua_register(m_pLuaState, "get_frequency", luaGetFrequency);
     lua_register(m_pLuaState, "get_position", luaGetPosition);
+    lua_register(m_pLuaState, "get_velocity", luaGetVelocity);
     if (luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str()) != 0)
     {
         ERROR_MSG("Physics Manager", "File " << m_strLuaPhysicsInterface <<
                                      " could not be loaded.")
+        WARNING_MSG("Physics Manager", "Lua Error: " << lua_tostring(m_pLuaState, -1))
         return false;
     }
     else
@@ -417,6 +421,34 @@ int CPhysicsManager::luaApplyForce(lua_State* _pLuaState)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Lua access to get frequency.
+///
+/// \param _pLuaState Lua access to frequency
+///
+/// \return Frequency in Hz and time acceleration.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetFrequency(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetFrequency")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 0)
+    {
+        lua_pushnumber(_pLuaState, m_pLuaThis->m_fFrequency);
+        lua_pushnumber(_pLuaState, m_pLuaThis->m_fTimeAccel);
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_position (" << nParam << "/0).")
+    }
+    
+    return 2;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Lua access to get object position.
 ///
 /// \param _pLuaState Lua access to physics
@@ -449,6 +481,45 @@ int CPhysicsManager::luaGetPosition(lua_State* _pLuaState)
     else
     {
         WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_position (" << nParam << "/1).")
+    }
+    
+    return 2;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get object velocity.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetVelocity(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetVelocity")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 1)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            Vector2d vecVel(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getVelocity());
+            lua_pushnumber(_pLuaState, vecVel[0]);
+            lua_pushnumber(_pLuaState, vecVel[1]);
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_velocity (" << nParam << "/1).")
     }
     
     return 2;
