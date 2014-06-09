@@ -2,13 +2,15 @@
 <universe>
   <!-- Create the active camera -->
   <camera
-    hook="Sun"
+    hook="sun"
     enable_angle_hook="true"
     position_x="10.0"
     position_y=".0"
     viewport_width="600.0"
     viewport_height="400.0"
   />
+
+  <config file="config.xml"/>
   
   <object file="sun.xml"/> 
   <object file="mercury.xml"/>
