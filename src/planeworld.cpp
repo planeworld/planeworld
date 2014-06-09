@@ -86,7 +86,15 @@ void runPhysics(CPhysicsManager* const _pPhysicsManager, bool* const _pbDone)
 ///////////////////////////////////////////////////////////////////////////////
 void usage()
 {
-    std::cout << "Usage: planeworld UNIVERSE_DATA_FILE" << std::endl;
+    std::cout << "Usage: planeworld <DATA_DIRECTORY> <UNIVERSE_DATA_FILE>" << std::endl;
+    std::cout << "\nNotice: At the moment, planeworld must be called from within the "
+                 "scene directory, where the UNIVERSE_DATA_FILE is located. Otherwise, "
+                 "some files might not be found. "<< std::endl;
+    std::cout << "\nDATA_DIRECTORY must be given to find global resources like font "
+                 "files, which are not depending on the currently loaded scene." << std::endl;
+    std::cout << "\nExamples: " << std::endl;
+    std::cout << "Within scene directory call: planeworld .. scene.xml" << std::endl;
+    std::cout << "Within scene directory call: planeworld /home/user/planeworld/data scene.xml" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +110,7 @@ void usage()
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if (argc != 3)
     {
         usage();
         return EXIT_FAILURE;
@@ -227,7 +235,7 @@ int main(int argc, char *argv[])
         CXMLImporter        XMLImporter;
         
         XMLImporter.setWorldDataStorage(&WorldDataStorage);
-        XMLImporter.import(argv[1]);
+        XMLImporter.import(argv[2]);
         pVisualsManager->setCamera(XMLImporter.getCamera());
 //         pPhysicsManager->addObjects(XMLImporter.getObjects());
 //         pVisualsManager->addVisualsList(XMLImporter.getVisuals());
@@ -301,6 +309,7 @@ int main(int argc, char *argv[])
     sf::RenderWindow Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
                             "Planeworld");
     
+    pVisualsManager->setDataPath(argv[1]);
     pVisualsManager->setWindow(&Window);
     pVisualsManager->initGraphics();
     

@@ -32,6 +32,8 @@ CVisualsManager::CVisualsManager() : m_pUniverse(0),
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
+    
+    m_strDataPath = "/";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -303,20 +305,22 @@ void CVisualsManager::drawGridHUD() const
 //         
 //         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         
-//         // Now draw the text
-//         std::stringstream oss;
-//         oss << "Grid Resolution: " << fGrid << "m";
-//         
-//         m_Graphics.getWindow()->pushGLStates();
-//         sf::Font font;
-//         font.loadFromFile("/home/bfeld/tmp/local/share/planeworld/data/consola.ttf");
-//         sf::Text text;
-//         text.setString(oss.str());
-//         text.setFont(font);
-//         text.setCharacterSize(12);
-//         text.setPosition(m_Graphics.getWidthScr()/2, 0.0f);
-//         m_Graphics.getWindow()->draw(text);
-//         m_Graphics.getWindow()->popGLStates();
+        // Now draw the text
+        std::stringstream oss;
+
+        if (fGrid < 1000.0)
+            oss << "Grid Resolution: " << fGrid << "m";
+        else
+            oss << "Grid Resolution: " << fGrid * 0.001 << "km";
+        
+        m_Graphics.getWindow()->pushGLStates();
+        sf::Text Text;
+        Text.setString(oss.str());
+        Text.setFont(m_Font);
+        Text.setCharacterSize(12);
+        Text.setPosition(m_Graphics.getWidthScr()/2, 0.0f);
+        m_Graphics.getWindow()->draw(Text);
+        m_Graphics.getWindow()->popGLStates();
     }
 }
 
@@ -501,11 +505,7 @@ void CVisualsManager::drawWorld()
     }
     m_Graphics.setPointSize(1.0);
     
-    // Draw names (this is quite hacked and just a proof of concept)
-    
-//     sf::Font font;
-//     font.loadFromFile("/home/bfeld/tmp/local/share/planeworld/data/consola.ttf");
-// 
+//     // Draw names (this is quite hacked and just a proof of concept)
 //     m_Graphics.getWindow()->pushGLStates();    
 //     for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
 //          ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
@@ -519,16 +519,13 @@ void CVisualsManager::drawWorld()
 //                              m_pCamera->getCell());
 //         
 //         // Now draw the text
-//         std::stringstream oss;
-//         oss << (*ci)->getObject()->getName();
-//         
 //         sf::Text text;
 //         double fColor = (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
 //         if (fColor > 255.0) fColor = 255.0;
 //         sf::Color color(255.0,255.0,255.0, fColor);
 //         
-//         text.setString(oss.str());
-//         text.setFont(font);
+//         text.setString((*ci)->getObject()->getName());
+//         text.setFont(m_Font);
 //         text.setCharacterSize(12);
 //         text.setColor(color);
 //         text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
@@ -551,15 +548,12 @@ void CVisualsManager::drawWorld()
 //                                       m_pCamera->getCell());
 //                 
 //                 // Now draw the text
-//                 std::stringstream oss;
-//                 oss << m_pUniverse->getStarSystems()[i]->getName();
-//                 
 //                 sf::Text text;
 //                 double fColor=0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
 //                 sf::Color color(0.8*255, fColor*255, 0.3*255);
 //                 
-//                 text.setString(oss.str());
-//                 text.setFont(font);
+//                 text.setString(m_pUniverse->getStarSystems()[i]->getName());
+//                 text.setFont(m_Font);
 //                 text.setCharacterSize(12);
 //                 text.setColor(color);
 //                 text.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
