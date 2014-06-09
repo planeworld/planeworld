@@ -53,7 +53,6 @@ class CDebrisEmitter : public IEmitter
         
         //--- Variables [private] --------------------------------------------//
         CDebris*    m_pDebris;      ///< The debris instance
-        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -81,10 +80,9 @@ inline const EmitterType CDebrisEmitter::getEmitterType() const
 ///////////////////////////////////////////////////////////////////////////////
 inline void CDebrisEmitter::setNumber(const u_int32_t& _nNrMax)
 {
-    METHOD_ENTRY("IEmitter::setMode")
+    METHOD_ENTRY("CDebrisEmitter::setMode")
     m_nNr = _nNrMax;
     m_pDebris->setNumber(_nNrMax);
 }
-
 
 #endif

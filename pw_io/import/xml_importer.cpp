@@ -437,6 +437,9 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
             else if (strDist == "point_source")
             {
                 pObjEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+                pObjEmitter->setOrigin(Vector2d(
+                                         checkAttributeDouble(_Node, "origin_x", 0.0),
+                                         checkAttributeDouble(_Node, "origin_y", 0.0)));
                 pObjEmitter->setVelocity(checkAttributeDouble(_Node, "velocity", EMITTER_DEFAULT_VELOCITY));
                 pObjEmitter->setVelocityStd(checkAttributeDouble(_Node, "velocity_std", EMITTER_DEFAULT_VELOCITY_STD));
                 pObjEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE))/180.0*M_PI);
@@ -445,6 +448,9 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
             else if (strDist == "rectangular_field")
             {
                 pObjEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
+                pObjEmitter->setOrigin(Vector2d(
+                                         checkAttributeDouble(_Node, "origin_x", 0.0),
+                                         checkAttributeDouble(_Node, "origin_y", 0.0)));
                 pObjEmitter->setLimits(checkAttributeDouble(_Node, "limit_x_min", EMITTER_DEFAULT_LIMIT_MIN_X),
                                        checkAttributeDouble(_Node, "limit_x_max", EMITTER_DEFAULT_LIMIT_MAX_X),
                                        checkAttributeDouble(_Node, "limit_y_min", EMITTER_DEFAULT_LIMIT_MIN_Y),
@@ -469,7 +475,6 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
         else if (strType == "debris_emitter")
         {
             INFO_MSG("XML Importer", "Creating debris emitter.")
-            NOTICE_MSG("XML Importer", "Debris emitter creation not yet implemented.")
             
             CDebrisEmitter* pDebrisEmitter = new CDebrisEmitter;
             MEM_ALLOC("CDebrisEmitter")
@@ -506,6 +511,9 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
             else if (strDist == "point_source")
             {
                 pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+                pDebrisEmitter->setOrigin(Vector2d(
+                                          checkAttributeDouble(_Node, "origin_x", 0.0),
+                                          checkAttributeDouble(_Node, "origin_y", 0.0)));
                 pDebrisEmitter->setVelocity(checkAttributeDouble(_Node, "velocity", EMITTER_DEFAULT_VELOCITY));
                 pDebrisEmitter->setVelocityStd(checkAttributeDouble(_Node, "velocity_std", EMITTER_DEFAULT_VELOCITY_STD));
                 pDebrisEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE))/180.0*M_PI);
@@ -515,6 +523,9 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
             else if (strDist == "rectangular_field")
             {
                 pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
+                pDebrisEmitter->setOrigin(Vector2d(
+                                          checkAttributeDouble(_Node, "origin_x", 0.0),
+                                          checkAttributeDouble(_Node, "origin_y", 0.0)));
                 pDebrisEmitter->setLimits(checkAttributeDouble(_Node, "limit_x_min", EMITTER_DEFAULT_LIMIT_MIN_X),
                                        checkAttributeDouble(_Node, "limit_x_max", EMITTER_DEFAULT_LIMIT_MAX_X),
                                        checkAttributeDouble(_Node, "limit_y_min", EMITTER_DEFAULT_LIMIT_MIN_Y),

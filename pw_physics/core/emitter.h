@@ -97,6 +97,7 @@ class IEmitter : public IUniverseScaled, public IWorldDataStorageUser
         void setLimits(const double&, const double&, const double&, const double&);
         void setMode(const EmitterModeType&);
         void setNumber(const u_int32_t&);
+        void setOrigin(const Vector2d&);
         void setVelocity(const double&);
         void setVelocityStd(const double&);
 
@@ -122,6 +123,8 @@ class IEmitter : public IUniverseScaled, public IWorldDataStorageUser
         double                  m_fVelocityStd;             ///< Velocity standard deviation of emitted entities
         
         double                  m_fResidual;                ///< Residual of emitation, since engine frequency differs from emitation frequency
+        
+        Vector2d                m_vecOrigin;                ///< Origin of emitter
                 
 };
 
@@ -358,6 +361,19 @@ inline void IEmitter::setNumber(const u_int32_t& _nNr)
 {
     METHOD_ENTRY("IEmitter::setNumber")
     m_nNr = _nNr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the origin for this emitter
+///
+/// \param _vecOrigin Origin of emitter
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void IEmitter::setOrigin(const Vector2d& _vecOrigin)
+{
+    METHOD_ENTRY("IEmitter::setOrigin")
+    m_vecOrigin = _vecOrigin;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

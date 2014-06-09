@@ -103,7 +103,7 @@ void CObjectEmitter::emit(const double& _fF)
                 IObject* pObject = m_pTemplate->clone();
                 IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
                 
-                pObject->setOrigin(Vector2d(fX, fY));
+                pObject->setOrigin(Vector2d(fX, fY)+m_vecOrigin);
                 m_pDataStorage->addObject(pObject);
                 m_pDataStorage->addObjectVisuals(pObjectVisuals);
                 
@@ -119,7 +119,7 @@ void CObjectEmitter::emit(const double& _fF)
                 IObject* pObject = m_pTemplate->clone();
                 IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
                 
-                pObject->setVelocity((Vector2d(-2.0,0.0), fVelocity*Vector2d(std::cos(fAngle), sin(fAngle))));
+                pObject->setVelocity((m_vecOrigin, fVelocity*Vector2d(std::cos(fAngle), sin(fAngle))));
                 m_pDataStorage->addObject(pObject);
                 m_pDataStorage->addObjectVisuals(pObjectVisuals);
                 
