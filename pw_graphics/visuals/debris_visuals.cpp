@@ -53,11 +53,23 @@ CDebrisVisuals::~CDebrisVisuals()
 /// \param _pCamera Active camera for drawing visuals
 ///
 /// \todo Filter by debris state. Don't draw inactive debris.
+/// \todo Single calling is not very performant (see commented call of "dots"
+///       for better reference).
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CDebrisVisuals::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CDebrisVisuals::draw()");
-    m_Graphics.dots((*m_pDebris->getPositions()),-_pCamera->getCenter()+
-                      IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
+    double fSizeR = 1.0 / m_pDebris->getPositions()->size();
+    u_int32_t i = 0;
+    for (boost::circular_buffer<Vector2d>::const_iterator ci = m_pDebris->getPositions()->begin();
+                                                          ci != m_pDebris->getPositions()->end(); ++ci)
+    {
+        m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2);
+        m_Graphics.dot((*ci) - _pCamera->getCenter() +
+                        IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
+        ++i;
+    }
+//     m_Graphics.dots((*m_pDebris->getPositions()),-_pCamera->getCenter()+
+//                       IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
 }
