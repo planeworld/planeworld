@@ -166,89 +166,11 @@ bool CGraphics::init()
     METHOD_ENTRY("CGraphics::init")
     
     m_pWindow->setMouseCursorVisible(false);
-//     const   SDL_VideoInfo*  pVideoInfo;
     
     //--------------------------------------------------------------------------
     // Initialize window and graphics
     //--------------------------------------------------------------------------
-    
-    // Enable vsync
-//  putenv("__GL_SYNC_TO_VBLANK=1");
-//  INFO_MSG("Graphics", "Enabling vsync.", LOG_DOMAIN_NONE);
-
-    // Initialize SDL-video and -timer
-//     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
-//     {
-//         ERROR_MSG("Graphics/SDL", "Could not initialise SDL.")
-//     }
-//     else
-//     {
-//         INFO_MSG("Graphics/SDL", "SDL initialised.")
-//     }
-//     
-//     // Set video-flags
-//     pVideoInfo = SDL_GetVideoInfo();
-//     
-//     if (0 == pVideoInfo)
-//     {
-//         ERROR_MSG("Graphics/SDL", "Could not get video information.")
-//         METHOD_EXIT("CGraphics::init")
-//         return (false);
-//     }
-//     m_nVideoFlags  = SDL_OPENGL;
-//     m_nVideoFlags |= SDL_GL_DOUBLEBUFFER;
-//     m_nVideoFlags |= SDL_RESIZABLE;
-//     m_nVideoFlags |= SDL_FULLSCREEN;
-
-    // Testing for SDL hardware acceleration is meaningless when only using OpenGL
-    //  // Test for hardware acceleration
-    //     if (pVideoInfo->hw_available)
-    //  {
-    //      m_nVideoFlags |= SDL_HWSURFACE;
-    //      INFO_MSG("Graphics/SDL", "Enabling hardware accelerated surfaces.", LOG_DOMAIN_NONE);
-    //  }
-    //     else
-    //  {
-    //      m_nVideoFlags |= SDL_SWSURFACE;
-    //      NOTICE_MSG("Graphics/SDL", "Hardware accelerated surfaces not supported.", LOG_DOMAIN_NONE);
-    //      NOTICE_MSG("Graphics/SDL", "-> Linux doesn't allow acceleration without DGA.", LOG_DOMAIN_NONE);
-    //  }
-    // 
-    //     // Test for hardware blitting
-    //     if (pVideoInfo->blit_hw)
-    //  {
-    //      m_nVideoFlags |= SDL_HWACCEL;
-    //      INFO_MSG("Graphics/SDL", "Enabling hardware accelerated blitting.", LOG_DOMAIN_NONE);
-    //  }
-    //     else
-    //  {
-    //      NOTICE_MSG("Graphics/SDL", "Hardware accelerated blitting not supported.", LOG_DOMAIN_NONE);
-    //      NOTICE_MSG("Graphics/SDL", "-> Linux doesn't allow acceleration without DGA.", LOG_DOMAIN_NONE);
-    //  }
-    
-    // Enable double buffering
-//     if (0 == SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 ))
-//     {
-//         INFO_MSG("Graphics/SDL_GL", "Enabling double-buffering.")
-//     }
-//     else
-//     {
-//         NOTICE_MSG("Graphics/SDL_GL", "Double-buffering not supported.")
-//     }
-//     
-//     // Enable cursor
-//     SDL_ShowCursor(SDL_ENABLE);
-//     
-//     // Initialize graphics
-//     if (SDL_SetVideoMode(m_unWidthScr, m_unHeightScr, 0, m_nVideoFlags) != 0)
-//     {
-//         INFO_MSG("Graphics/SDL", "Videomode set (" << m_unWidthScr << "x" << m_unHeightScr << ").")
-//     }
-//     else
-//     {
-//         ERROR_MSG("Graphics/SDL", "Could not set videomode.")
-//         return(false);
-//     }
+ 
     
 
     //--------------------------------------------------------------------------
