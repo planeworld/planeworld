@@ -71,19 +71,23 @@ class CXMLImporter : public IWorldDataStorageUser
         
         const bool          checkAttributeBool(const pugi::xml_node&,
                                     const std::string&,
-                                    const bool&
+                                    const bool&,
+                                    const bool = true
                                    ) const;
         const double        checkAttributeDouble(const pugi::xml_node&,
                                     const std::string&,
-                                    const double&
+                                    const double&,
+                                    const bool = true
                                    ) const;
         const int           checkAttributeInt(const pugi::xml_node&,
                                     const std::string&,
-                                    const int&
+                                    const int&,
+                                    const bool = true
                                    ) const;
         const std::string   checkAttributeString(const pugi::xml_node&,
                                     const std::string&,
-                                    const std::string&
+                                    const std::string&,
+                                    const bool = true
                                    ) const;
 
         bool checkFile(const pugi::xml_node&);

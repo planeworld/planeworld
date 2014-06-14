@@ -36,6 +36,10 @@
 
 //--- Misc header ------------------------------------------------------------//
 
+//--- Constants --------------------------------------------------------------//
+const bool XML_IMPORTER_DO_NOT_NOTICE = false;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
@@ -214,19 +218,29 @@ bool CXMLImporter::import(const std::string& _strFilename,
 /// \param _Node Current node in xml tree
 /// \param _strAttr Attribute
 /// \param _bDef Default value
+/// \param _bNotice Give notice if attribute not given
 ///
 /// \return Attribute
 ///
 ////////////////////////////////////////////////////////////////////////////////
 const bool CXMLImporter::checkAttributeBool(const pugi::xml_node& _Node, 
                                           const std::string& _strAttr,
-                                          const bool& _bDef) const
+                                          const bool& _bDef,
+                                          const bool _bNotice) const
 {
     METHOD_ENTRY("CXMLImporter::checkAttributeBool")
     if (_Node.attribute(_strAttr.c_str()).empty())
     {
-        NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
-                                   " default value " << _bDef << ".")
+        if (_bNotice)
+        {
+            NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                       " default value " << _bDef << ".")
+        }
+        else
+        {
+            DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                      " default value " << _bDef << ".")
+        }
         return _bDef;
     }
     else
@@ -245,19 +259,29 @@ const bool CXMLImporter::checkAttributeBool(const pugi::xml_node& _Node,
 /// \param _Node Current node in xml tree
 /// \param _strAttr Attribute
 /// \param _fDef Default value
+/// \param _bNotice Give notice if attribute not given
 ///
 /// \return Attribute
 ///
 ////////////////////////////////////////////////////////////////////////////////
 const double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node, 
                                           const std::string& _strAttr,
-                                          const double& _fDef) const
+                                          const double& _fDef,
+                                          const bool _bNotice) const
 {
     METHOD_ENTRY("CXMLImporter::checkAttributeDouble")
     if (_Node.attribute(_strAttr.c_str()).empty())
     {
-        NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
-                                   " default value " << _fDef << ".")
+        if (_bNotice)
+        {
+            NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                       " default value " << _fDef << ".")
+        }
+        else
+        {
+            DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                      " default value " << _fDef << ".")
+        }       
         return _fDef;
     }
     else
@@ -276,19 +300,29 @@ const double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node,
 /// \param _Node Current node in xml tree
 /// \param _strAttr Attribute
 /// \param _nDef Default value
+/// \param _bNotice Give notice if attribute not given
 ///
 /// \return Attribute
 ///
 ////////////////////////////////////////////////////////////////////////////////
 const int CXMLImporter::checkAttributeInt(const pugi::xml_node& _Node, 
                                           const std::string& _strAttr,
-                                          const int& _nDef) const
+                                          const int& _nDef,
+                                          const bool _bNotice) const
 {
     METHOD_ENTRY("CXMLImporter::checkAttributeInt")
     if (_Node.attribute(_strAttr.c_str()).empty())
     {
-        NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
-                                   " default value " << _nDef << ".")
+        if (_bNotice)
+        {
+            NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                       " default value " << _nDef << ".")
+        }
+        else
+        {
+            DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                      " default value " << _nDef << ".")
+        }
         return _nDef;
     }
     else
@@ -307,19 +341,29 @@ const int CXMLImporter::checkAttributeInt(const pugi::xml_node& _Node,
 /// \param _Node Current node in xml tree
 /// \param _strAttr Attribute
 /// \param _strDef Default value
+/// \param _bNotice Give notice if attribute not given
 ///
 /// \return Attribute
 ///
 ////////////////////////////////////////////////////////////////////////////////
 const std::string CXMLImporter::checkAttributeString(const pugi::xml_node& _Node, 
                                           const std::string& _strAttr,
-                                          const std::string& _strDef) const
+                                          const std::string& _strDef,
+                                          const bool _bNotice) const
 {
     METHOD_ENTRY("CXMLImporter::checkAttributeString")
     if (_Node.attribute(_strAttr.c_str()).empty())
     {
-        NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
-                                   " default value " << _strDef << ".")
+        if (_bNotice)
+        {
+            NOTICE_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                       " default value " << _strDef << ".")
+        }
+        else
+        {
+            DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
+                                       " default value " << _strDef << ".")
+        }   
         return _strDef;
     }
     else
@@ -1040,9 +1084,12 @@ void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _
                            ")."
                 ))
         _pO->setOrigin(vecOrigin);
+        // Set cell, but do not notice if attribute is missing. It is optional, since
+        // the cell might be implicitly given by position, it shouldn't be neccessarily
+        // exposed to the user.
         _pO->setCell(Vector2i(
-                     checkAttributeInt(_Node, "cell_x", _pO->getCell()[0]),
-                     checkAttributeInt(_Node, "cell_y", _pO->getCell()[1])) +
+                     checkAttributeInt(_Node, "cell_x", _pO->getCell()[0], XML_IMPORTER_DO_NOT_NOTICE),
+                     checkAttributeInt(_Node, "cell_y", _pO->getCell()[1], XML_IMPORTER_DO_NOT_NOTICE)) +
                      vecCell);
                                 
         if (checkAttributeBool(_Node, "gravity", _pO->getGravitationState()) == true)
