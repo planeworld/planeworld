@@ -400,39 +400,14 @@ void CVisualsManager::drawWorld()
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
-    for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
-         ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
-    {
-        (*ci)->draw(m_pCamera);
-    }
-    for (std::list<CDebrisVisuals*>::const_iterator ci = m_pDataStorage->getDebrisVisuals().begin();
-         ci != m_pDataStorage->getDebrisVisuals().end(); ++ci)
-    {
-        (*ci)->draw(m_pCamera);
-    }
-    for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
-    {
-        if (m_nStarIndex == i)
-        {
-            std::mt19937 LocalGenerator;
-            std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
-            
-            LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
-            
-            for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
-            {
-                m_Graphics.setColor(0.2,0.2,0.5);
-                m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
-                                    IUniverseScaled::cellToDouble(
-                                        m_pUniverse->getStarSystems()[i]->getCell()-
-                                        m_pCamera->getCell()),
-                                    std::fabs(OrbitDistribution(LocalGenerator))
-                                    );
-//                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
-            }
-        }
-    }
-    if (1.0e13 * m_Graphics.getResPMX() < 1.0)
+//     const double fStarfieldSizeX = 3.0e19; // * 2
+//     const double fStarfieldSizeY = 3.0e19; // * 2
+    
+//     const double fDefaultUnitSize = GRAPHICS_RIGHT_DEFAULT - GRAPHICS_LEFT_DEFAULT;
+//     const double fMaxZoom = fDefaultUnitSize / (2.0*fStarfieldSizeX);
+//     m_pCamera->zoomTo(fMaxZoom);
+    
+//     if (1.0e13 * m_Graphics.getResPMX() < 1.0)
     {
         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
         {
@@ -440,16 +415,25 @@ void CVisualsManager::drawWorld()
                               IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
             if (m_pCamera->getBoundingBox().isInside(vecPos))
             {
-                Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
-                                     m_pCamera->getCenter()+
+                Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()  - m_pCamera->getCenter() +
                                      IUniverseScaled::cellToDouble
                                      (m_pUniverse->getStarSystems()[i]->getCell()-
                                       m_pCamera->getCell());
                 double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
                 m_Graphics.setColor(0.8,fColor,0.3);
-                m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getNumberOfPlanets());
-                m_Graphics.dot(vecPosRel);
+                m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getStarType());
                 
+//                 double fDist = 1.0e19;
+//                 Vector2d vecPos = vecPosRel;
+//                 
+//                 double fLayerX = static_cast<int16_t>(vecPosRel[0] / (fStarfieldSizeX * 0.25)) * (fStarfieldSizeX * 0.25);
+//                 double fLayerY = static_cast<int16_t>(vecPosRel[1] / (fStarfieldSizeY * 0.25)) * (fStarfieldSizeY * 0.25);
+//                 
+//                 
+// //                 if ((std::abs(vecPosRel[0]) < fStarfieldSizeX) &&
+// //                     (std::abs(vecPosRel[1]) < fStarfieldSizeY))
+                    m_Graphics.dot(vecPosRel);
+                               
                 if (m_nStarIndex == i)
                 {
                     m_pUniverse->getStarSystems()[i]->setCell(m_pUniverse->m_pStar->getCell());
@@ -458,51 +442,51 @@ void CVisualsManager::drawWorld()
             }
         }
     }
-    else
-    {
-        for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
-        {
-            if (m_nStarIndex != i)
-            {
-                if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 200.1)
-                {
-                    double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
-                    m_pUniverse->m_pStar->setName(m_pUniverse->getStarSystems()[i]->getName());
-                    m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
-                    m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
-                    static_cast<CCircle*>(m_pUniverse->m_pStar->getGeometry()->getShapes()->front()->getShapeCur())->setRadius(
-                        double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9
-                    );
-                    m_pUniverse->m_pStar->getGeometry()->getShapes()->front()->updateBuffer();
-                    m_pUniverse->m_pStar->init();
-                    m_pUniverse->m_pStar->setVelocity(Vector2d(3.0e9,0.0));
-                    m_nStarIndex = i;
-                    
-                    std::mt19937 LocalGenerator;
-                    std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
-
-                    LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
-                    
-                    std::cout << m_pUniverse->m_pStar->getName() << std::endl;
-                    for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
-                    {
-                        m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
-                                          IUniverseScaled::cellToDouble(
-                                              m_pUniverse->getStarSystems()[i]->getCell()-
-                                              m_pCamera->getCell()),
-                                          std::fabs(OrbitDistribution(LocalGenerator))
-                                         );
-//                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
-                    }
-                }
-            }
-            else
-            {
-                m_pUniverse->getStarSystems()[i]->setCell(m_pUniverse->m_pStar->getCell());
-                m_pUniverse->getStarSystems()[i]->setCenter(m_pUniverse->m_pStar->getCOM());
-            }
-        }
-    }
+//     else
+//     {
+//         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+//         {
+//             if (m_nStarIndex != i)
+//             {
+//                 if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 200.1)
+//                 {
+//                     double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+//                     m_pUniverse->m_pStar->setName(m_pUniverse->getStarSystems()[i]->getName());
+//                     m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
+//                     m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
+//                     static_cast<CCircle*>(m_pUniverse->m_pStar->getGeometry()->getShapes()->front()->getShapeCur())->setRadius(
+//                         double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9
+//                     );
+//                     m_pUniverse->m_pStar->getGeometry()->getShapes()->front()->updateBuffer();
+//                     m_pUniverse->m_pStar->init();
+//                     m_pUniverse->m_pStar->setVelocity(Vector2d(3.0e9,0.0));
+//                     m_nStarIndex = i;
+//                     
+//                     std::mt19937 LocalGenerator;
+//                     std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
+// 
+//                     LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
+//                     
+//                     std::cout << m_pUniverse->m_pStar->getName() << std::endl;
+//                     for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
+//                     {
+//                         m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
+//                                           IUniverseScaled::cellToDouble(
+//                                               m_pUniverse->getStarSystems()[i]->getCell()-
+//                                               m_pCamera->getCell()),
+//                                           std::fabs(OrbitDistribution(LocalGenerator))
+//                                          );
+// //                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
+//                     }
+//                 }
+//             }
+//             else
+//             {
+//                 m_pUniverse->getStarSystems()[i]->setCell(m_pUniverse->m_pStar->getCell());
+//                 m_pUniverse->getStarSystems()[i]->setCenter(m_pUniverse->m_pStar->getCOM());
+//             }
+//         }
+//     }
     m_Graphics.setPointSize(1.0);
     
 //     // Draw names (this is quite hacked and just a proof of concept)
@@ -564,4 +548,37 @@ void CVisualsManager::drawWorld()
 //     }
 //     
 //     m_Graphics.getWindow()->popGLStates();
+    
+    for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
+         ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
+    {
+        (*ci)->draw(m_pCamera);
+    }
+    for (std::list<CDebrisVisuals*>::const_iterator ci = m_pDataStorage->getDebrisVisuals().begin();
+         ci != m_pDataStorage->getDebrisVisuals().end(); ++ci)
+    {
+        (*ci)->draw(m_pCamera);
+    }
+    for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+    {
+        if (m_nStarIndex == i)
+        {
+            std::mt19937 LocalGenerator;
+            std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
+            
+            LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
+            
+            for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
+            {
+                m_Graphics.setColor(0.2,0.2,0.5);
+                m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
+                                    IUniverseScaled::cellToDouble(
+                                        m_pUniverse->getStarSystems()[i]->getCell()-
+                                        m_pCamera->getCell()),
+                                    std::fabs(OrbitDistribution(LocalGenerator))
+                                    );
+//                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
+            }
+        }
+    }
 }
