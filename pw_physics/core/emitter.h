@@ -72,7 +72,7 @@ const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter ty
 ///        debris.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IEmitter : public IUniverseScaled, public IWorldDataStorageUser
+class IEmitter : public IUniverseScaled, public IWorldDataStorageUser, public IHooker
 {
     
     public:
@@ -100,7 +100,7 @@ class IEmitter : public IUniverseScaled, public IWorldDataStorageUser
         void setOrigin(const Vector2d&);
         void setVelocity(const double&);
         void setVelocityStd(const double&);
-
+        
     protected:
         
         EmitterModeType         m_EmitterMode;              ///< Emit mode

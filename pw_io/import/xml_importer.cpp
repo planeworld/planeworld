@@ -167,13 +167,14 @@ bool CXMLImporter::import(const std::string& _strFilename,
         if (m_pCamera != 0)
         {
             INFO_MSG("XML Importer", "Camera hook: " << m_strCameraHook)
-            if (m_pDataStorage->getDynamicObjects().find(m_strCameraHook) != m_pDataStorage->getDynamicObjects().end())
+            ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().find(m_strCameraHook);
+            if (ci != m_pDataStorage->getDynamicObjects().end())
             {
-                m_pCamera->setHook(m_pDataStorage->getDynamicObjects().at(m_strCameraHook));
+                (*ci).second->addHooker(m_pCamera);
             }
             else if (m_pDataStorage->getStaticObjects().find(m_strCameraHook) != m_pDataStorage->getStaticObjects().end())
             {
-                m_pCamera->setHook(m_pDataStorage->getDynamicObjects().at(m_strCameraHook));
+                (*m_pDataStorage->getStaticObjects().find(m_strCameraHook)).second->addHooker(m_pCamera);
             }
             else
             {

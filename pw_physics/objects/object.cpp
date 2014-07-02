@@ -278,6 +278,9 @@ void IObject::transform()
 
         // Call object specific transformation
         this->myTransform();
+        
+        // Update all entities hooked on this object
+        this->updateHookers();
     }
 
     METHOD_EXIT("IObject::transform")

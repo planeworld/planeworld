@@ -38,7 +38,7 @@ using namespace Eigen;
 /// \bug Camera reset positions camera to 0, instead of value in configuration.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CCamera : public CGraphicsBase, public IUniverseScaled
+class CCamera : public CGraphicsBase, public IUniverseScaled, public IHooker
 {
 
     public:
@@ -56,10 +56,6 @@ class CCamera : public CGraphicsBase, public IUniverseScaled
         const double&       getZoom() const;
         
         //--- Methods --------------------------------------------------------//
-        void enableAngleHook();
-        void disableAngleHook();
-        
-        void setHook(IHookable*);
         void setPosition(const double&, const double&);
         void setViewport(const double&, const double&);
         
@@ -74,25 +70,21 @@ class CCamera : public CGraphicsBase, public IUniverseScaled
 
     protected:
         
-        //--- Methods [protected] --------------------------------------------//
+        //--- Methods --------------------------------------------------------//
+        void myUpdateFromHooked();
+        void updateWithHook();
+        void updateWithoutHook();
 
         //--- Variables [protected] ------------------------------------------//
         std::vector<Vector2d>  m_vecFrame0;         ///< Initial camera frame
         CBoundingBox    m_BoundingBox;              ///< Cameras bounding box (for culling)
         Vector2d        m_vecPosition;              ///< Camera position
-        Vector2d        m_vecHook;                  ///< Hook position
-        Vector2i        m_vecHookCell;              ///< Cell position of hook
         Vector2d        m_vecCenter;                ///< Center of camera
-        double          m_fHookAng;                 ///< Hook angle
         double          m_fBoundingCircleRadius;    ///< Radius of Bounding circle
         double          m_fViewportWidth;           ///< Half of viewport width in m
         double          m_fViewportHeight;          ///< Half of viewport height in m
         double          m_fAngle;                   ///< Camera angle
         double          m_fZoom;                    ///< Camera zoom
-        
-        bool            m_bAngleHook;               ///< Defines, if angle is hooked
-        
-        IHookable*      m_pHook;                    ///< Hook for the camera
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -152,7 +144,7 @@ inline const double& CCamera::getBoundingCircleRadius() const
 inline const double CCamera::getAngle() const
 {
     METHOD_ENTRY("CCamera::getAngle")
-    return (m_fAngle+m_fHookAng);
+    return (m_fAngle+m_fHookAngle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,28 +158,6 @@ inline const double& CCamera::getZoom() const
 {
     METHOD_ENTRY("CCamera::getZoom")
     return m_fZoom;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Activates angle hook
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCamera::enableAngleHook()
-{
-    METHOD_ENTRY("CCamera::enableAngleHook")
-    m_bAngleHook = true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Deactivates angle hook
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCamera::disableAngleHook()
-{
-    METHOD_ENTRY("CCamera::enableAngleHook")
-    m_bAngleHook = false;
 }
 
 #endif

@@ -73,7 +73,7 @@ class IObject : public IHookable, public IUniverseScaled
         
         const double                getHookAngle() const;
         const Vector2i              getHookCell() const;
-        const Vector2d              getHookPosition() const;
+        const Vector2d              getHookOrigin() const;
         
         const Vector2d              getCOM() const;
         const int                   getDepths() const;
@@ -217,7 +217,7 @@ inline const Vector2i IObject::getHookCell() const
 /// \return Hook position
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d IObject::getHookPosition() const
+inline const Vector2d IObject::getHookOrigin() const
 {
     METHOD_ENTRY("IObject::getHookPosition")
 
