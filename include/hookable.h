@@ -51,7 +51,7 @@ class IHookable
         void addHooker(IHooker* const);
         void updateHookers();
 
-//     protected:
+    protected:
 
         //--- Constant methods -----------------------------------------------//
         virtual const double   getHookAngle() const = 0;
