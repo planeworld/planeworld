@@ -31,7 +31,9 @@
 //--- Misc header ------------------------------------------------------------//
 #include "lua.hpp"
 
-const double      PHYSICS_DEFAULT_FREQUENCY     = 200.0; ///< Default physics frequency
+const double      PHYSICS_DEFAULT_FREQUENCY     = 200.0;    ///< Default physics frequency
+const double      PHYSICS_DEBRIS_DEFAULT_FREQUENCY = 30.0;  ///< Default physics frequency for debris
+const double      PHYSICS_LUA_DEFAULT_FREQUENCY = 10.0;     ///< Default frequency for lua interface
 const std::string PHYSICS_DEFAULT_LUA_INTERFACE = "physics_interface.lua"; ///< Default lua interface file
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,6 +64,8 @@ class CPhysicsManager : public IWorldDataStorageUser
         //--- Methods --------------------------------------------------------//
         void setConstantGravity(const Vector2d&);
         void setFrequency(const double&);
+        void setFrequencyDebris(const double&);
+        void setFrequencyLua(const double&);
         void setPhysicsInterface(const std::string&);
         void setUniverse(CUniverse* const);
         
@@ -84,7 +88,9 @@ class CPhysicsManager : public IWorldDataStorageUser
         CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
 
         CTimer              m_Timer;                ///< Timer for physics
-        double              m_fFrequency;           ///< Frequency of physics calculation
+        double              m_fFrequency;           ///< Frequency of physics processing
+        double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
+        double              m_fFrequencyLua;        ///< Frequency of Lua interface
         double              m_fTimeAccel;           ///< Factor for global acceleration
 
         Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
@@ -148,15 +154,41 @@ inline void CPhysicsManager::setConstantGravity(const Vector2d& _vecG)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set frequency for physics calculations
+/// \brief Set frequency for physics processing
 ///
-/// \param _fFrequency Frequency for physics calculations
+/// \param _fFrequency Frequency for physics processing
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline void CPhysicsManager::setFrequency(const double& _fFrequency)
 {
     METHOD_ENTRY("CPhysicsManager::setFrequency")
     m_fFrequency = _fFrequency;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set frequency for debris physics processing
+///
+/// \param _fFrequency Frequency for debris physics processing
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPhysicsManager::setFrequencyDebris(const double& _fFrequency)
+{
+    METHOD_ENTRY("CPhysicsManager::setFrequencyDebris")
+    m_fFrequencyDebris = _fFrequency;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set frequency for Lua interface
+///
+/// \param _fFrequency Frequency for Lua interface
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPhysicsManager::setFrequencyLua(const double& _fFrequency)
+{
+    METHOD_ENTRY("CPhysicsManager::setFrequencyLua")
+    m_fFrequencyLua = _fFrequency;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

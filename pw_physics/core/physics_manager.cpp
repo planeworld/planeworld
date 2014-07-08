@@ -31,6 +31,8 @@ CPhysicsManager* CPhysicsManager::m_pLuaThis;
 ///////////////////////////////////////////////////////////////////////////////
 CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
+                                     m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
+                                     m_fFrequencyLua(PHYSICS_LUA_DEFAULT_FREQUENCY),
                                      m_fTimeAccel(1.0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
@@ -198,7 +200,7 @@ void CPhysicsManager::moveMasses(int nTest)
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
     
-//     if (nTest % 100 == 0)
+    if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyLua) == 0)
     {
         lua_getglobal(m_pLuaState, "physics_interface");
         if (lua_pcall(m_pLuaState, 0, 0, 0) != 0)
@@ -220,11 +222,12 @@ void CPhysicsManager::moveMasses(int nTest)
         ci->second->transform();
         ci->second->clearForces();
     }
+    if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
     {
         for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
             ci != m_pDataStorage->getDebris().end(); ++ci)
         {
-            (*ci)->dynamics(1.0/m_fFrequency*m_fTimeAccel);
+            (*ci)->dynamics(1.0/m_fFrequencyDebris*m_fTimeAccel);
         }
     }
 }
@@ -404,7 +407,8 @@ int CPhysicsManager::luaApplyForce(lua_State* _pLuaState)
         if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
             m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
         {
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->addForce(vecForce, vecPOA);
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->addForce(
+                vecForce * m_pLuaThis->m_fFrequency/m_pLuaThis->m_fFrequencyLua, vecPOA);
         }
         else
         {

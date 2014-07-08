@@ -65,6 +65,7 @@ class IHooker
         double          m_fHookAngle;       ///< Angle of hooked entity
         bool            m_bAngleIsHooked;   ///< Defines, if angle is hooked
         bool            m_bIsHooked;        ///< Defines, if hooker is hooked
+        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -113,8 +113,11 @@ IObject* CRigidBody::clone() const
     }
     pClone->m_pIntAngVel      = m_pIntAngVel->clone();
     
+    //--- Variables of IHookable ---------------------------------------------//
+    pClone->m_Hookers = m_Hookers;
+    
     //--- Variables of IUniverseScaled ---------------------------------------//
-    pClone->m_vecCell      = m_vecCell;
+    pClone->m_vecCell = m_vecCell;
     
     return pClone;
 }

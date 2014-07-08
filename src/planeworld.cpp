@@ -243,6 +243,8 @@ int main(int argc, char *argv[])
         pPhysicsManager->addEmitters(XMLImporter.getEmitters());
         pPhysicsManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
         pPhysicsManager->setFrequency(XMLImporter.getPhysicsFrequency());
+        pPhysicsManager->setFrequencyDebris(XMLImporter.getFrequencyDebris());
+        pPhysicsManager->setFrequencyLua(XMLImporter.getFrequencyLua());
         pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
         
         pCamera=XMLImporter.getCamera();
@@ -297,13 +299,6 @@ int main(int argc, char *argv[])
     pPhysicsManager->initEmitters();
     pPhysicsManager->initObjects();
     if (!pPhysicsManager->initLua()) return EXIT_FAILURE;
-    
-    
-//     pEarth->setVelocity(Vector2d(29.78e3, 0.0));
-//     pEarth->setAngleVelocity(0.001);
-//     pMoon->setVelocity(Vector2d(29.78e3+1.023e3, 0.0));
-    
-//     pCamera->setHook(pBody3);
     
     //--- Initialise graphics ------------------------------------------------//
     sf::RenderWindow Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),

@@ -58,6 +58,8 @@ class CXMLImporter : public IWorldDataStorageUser
         CCamera*                        getCamera() const;
         Vector2d                        getGravity() const;
         const EmittersType&             getEmitters() const;
+        const double&                   getFrequencyDebris() const;
+        const double&                   getFrequencyLua() const;
         const double&                   getPhysicsFrequency() const;
         const std::string&              getPhysicsInterface() const;
         const CUniverse&                getUniverse() const;
@@ -114,8 +116,13 @@ class CXMLImporter : public IWorldDataStorageUser
         EmittersType                    m_Emitters;         ///< List of emitters
         std::string                     m_strPath;          ///< Path to read data from
         std::string                     m_strLuaPhysicsInterface; ///< Lua file for physics access
-        double                          m_fPhysicsFrequency;///< Frequency for physics calculations
+        double                          m_fDebrisFrequency; ///< Frequency for debris processing
+        double                          m_fLuaFrequency;    ///< Frequency for lua interface
+        double                          m_fPhysicsFrequency;///< Frequency for physics processing
         double                          m_fVisualsFrequency;///< Frequency for visual update
+        
+        std::map<IHooker*, std::string> m_Hooks;            ///< List of hookers and related object names
+//         std::map<IHookable*, IHooker*>  m_Hooks;            ///< List of hookers and related hookables
                 
 };
 
@@ -158,6 +165,32 @@ inline const EmittersType& CXMLImporter::getEmitters() const
 {
     METHOD_ENTRY("CXMLImporter::getEmitters")
     return m_Emitters;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return frequency for debris physics processing
+///
+/// \return Frequency for debris physics processing
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CXMLImporter::getFrequencyDebris() const
+{
+    METHOD_ENTRY("CXMLImporter::getFrequencyDebris")
+    return m_fDebrisFrequency;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return frequency for Lua interface
+///
+/// \return Frequency for Lua interface
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CXMLImporter::getFrequencyLua() const
+{
+    METHOD_ENTRY("CXMLImporter::getFrequencyLua")
+    return m_fLuaFrequency;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

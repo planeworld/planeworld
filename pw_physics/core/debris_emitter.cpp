@@ -104,15 +104,17 @@ void CDebrisEmitter::emit(const double& _fF)
             {
                 double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
                 double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
-                m_pDebris->generate(Vector2d(fX, fY)+m_vecOrigin, Vector2d(0.0, 0.0));
+                m_pDebris->generate(Vector2d(fX, fY)+m_vecOrigin+m_vecHookOrigin, Vector2d(0.0, 0.0));
             }
             break;
         case EMITTER_DISTRIBUTION_POINT_SOURCE:
             for (int i=0; i<nNrOfDebris; ++i)
             {
-                double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_fAngle;
-                double fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
-                m_pDebris->generate(m_vecOrigin, fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
+                double      fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_fAngle + m_fHookAngle;
+                double      fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
+                Rotation2Dd Rotation(m_fAngle + m_fHookAngle);
+                m_pDebris->generate(m_vecHookOrigin + Rotation * m_vecOrigin,
+                                    fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
             }
     }
 }

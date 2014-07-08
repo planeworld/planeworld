@@ -5,6 +5,27 @@
     vec_y="0.0"
   />
   <config file="config.xml"/>
+  <object type="RigidBody">
+    <core
+        name="Ball"
+        mass="1.0"
+        origin_x="-20.0"
+        origin_y="10.0"
+        dynamics="true"
+        gravity="true"
+    />
+    <body_core
+        angle_velocity="36.0"
+        inertia="10.0"
+    />
+    <shape
+        type="Circle"
+        radius="10"
+        center_x="0.0"
+        center_y="0.0">
+        <visuals type="Circle"/>
+    </shape>
+  </object>
   <emitter
     type="object_emitter"
     mode="emit_once"
@@ -20,14 +41,15 @@
   />
   <emitter
     type="debris_emitter"
+    hook="Ball"
     mode="timed"
     frequency="100.0"
     distribution="point_source"
-    origin_x="100.0"
-    origin_y="100.0"
+    origin_x="15.1"
+    origin_y="0.0"
     velocity="50.0"
     velocity_std="10.0"
-    angle="210.0"
+    angle="0.0"
     angle_std="5.0"
     number="1000"
   />

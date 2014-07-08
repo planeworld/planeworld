@@ -2,4 +2,6 @@
     physics_interface="physics_interface.lua"
     physics_frequency="200.0"
     visuals_frequency="60.0"
+    debris_frequency="30.0"
+    lua_frequency="30.0"
 />

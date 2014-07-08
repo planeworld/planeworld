@@ -47,6 +47,8 @@ const bool XML_IMPORTER_DO_NOT_NOTICE = false;
 ///////////////////////////////////////////////////////////////////////////////
 CXMLImporter::CXMLImporter() : m_pCamera(0),
                                m_strLuaPhysicsInterface("physics_interface.lua"),
+                               m_fDebrisFrequency(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
+                               m_fLuaFrequency(PHYSICS_LUA_DEFAULT_FREQUENCY),
                                m_fPhysicsFrequency(PHYSICS_DEFAULT_FREQUENCY),
                                m_fVisualsFrequency(VISUALS_DEFAULT_FREQUENCY)
 {
@@ -143,6 +145,8 @@ bool CXMLImporter::import(const std::string& _strFilename,
             else
             {
                 m_strLuaPhysicsInterface = checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
+                m_fLuaFrequency  = checkAttributeDouble(N, "lua_frequency", m_fLuaFrequency);
+                m_fDebrisFrequency  = checkAttributeDouble(N, "debris_frequency", m_fDebrisFrequency);
                 m_fPhysicsFrequency = checkAttributeDouble(N, "physics_frequency", m_fPhysicsFrequency);
                 m_fVisualsFrequency = checkAttributeDouble(N, "visuals_frequency", m_fVisualsFrequency);
             }
@@ -164,45 +168,37 @@ bool CXMLImporter::import(const std::string& _strFilename,
     {
         // Camera hook must have been read by now
         // Set hook, if camera given. Otherwise a default cam is used.
-        if (m_pCamera != 0)
+        if (m_pCamera == nullptr)
         {
-            INFO_MSG("XML Importer", "Camera hook: " << m_strCameraHook)
-            ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().find(m_strCameraHook);
-            if (ci != m_pDataStorage->getDynamicObjects().end())
-            {
-                (*ci).second->addHooker(m_pCamera);
-            }
-            else if (m_pDataStorage->getStaticObjects().find(m_strCameraHook) != m_pDataStorage->getStaticObjects().end())
-            {
-                (*m_pDataStorage->getStaticObjects().find(m_strCameraHook)).second->addHooker(m_pCamera);
-            }
-            else
-            {
-                WARNING_MSG("XML Importer", "Camera hook " << m_strCameraHook << " not found.")
-                m_pCamera = new CCamera;
-                MEM_ALLOC("CCamera")
-    //             m_pCamera->setHook(pDefaultCam);
-                m_pCamera->setViewport(600.0,400.0);
-                
-                INFO_MSG("XML Importer", "Default Camera created.")
-            }
-        }
-        else
-        {
-//             CRigidBody* pDefaultCam = new CRigidBody;
-//             MEM_ALLOC("CRigidBody")
-//             pDefaultCam->setName("DefaultCamera");
-//             pDefaultCam->disableDynamics();
-//             pDefaultCam->disableGravitation();
-//             
-//             m_Objects.insert(std::pair<std::string,IObject*>("pDefaultCam", pDefaultCam));
-            
             m_pCamera = new CCamera;
             MEM_ALLOC("CCamera")
-//             m_pCamera->setHook(pDefaultCam);
             m_pCamera->setViewport(600.0,400.0);
             
             INFO_MSG("XML Importer", "Default Camera created.")
+        }
+        for (auto ci = m_Hooks.cbegin(); ci != m_Hooks.cend(); ++ci)
+        {
+            std::string strHookable = (*ci).second;
+            if (strHookable != "no_hook")
+            {
+                auto it = m_pDataStorage->getDynamicObjects().find(strHookable);
+                if (it != m_pDataStorage->getDynamicObjects().end())
+                {
+                    (*it).second->addHooker((*ci).first);
+                }
+                else
+                {
+                    it = m_pDataStorage->getStaticObjects().find(strHookable);
+                    if (it != m_pDataStorage->getStaticObjects().end())
+                    {
+                        (*it).second->addHooker((*ci).first);
+                    }
+                    else
+                    {
+                        WARNING_MSG("XML Importer", "Hook to unknown hookable: " << strHookable)
+                    }
+                }
+            }
         }
     }
 
@@ -410,12 +406,12 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
     INFO_MSG("XML Importer", "Creating camera.")
     
      // Free memory if pointer is already existent
-    if (m_pCamera != 0)
+    if (m_pCamera != nullptr)
     {
         delete m_pCamera;
         m_pCamera = 0;
         MEM_FREED("CCamera");
-        NOTICE_MSG("XML Importer", "More than one camera, creating new.")
+        NOTICE_MSG("XML Importer", "More than one camera, creating new one, deleting old one.")
     }
     m_pCamera = new CCamera;
     MEM_ALLOC("CCamera")
@@ -427,6 +423,11 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
                            _Node.attribute("viewport_height").as_int());
     if (checkAttributeBool(_Node, "enable_angle_hook", true)) m_pCamera->enableAngleHook();
     else m_pCamera->disableAngleHook();
+    
+    m_Hooks.insert(std::pair<IHooker*, std::string>(
+        m_pCamera,
+        checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE)
+    ));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -514,6 +515,10 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                     }
                 )
             }
+            m_Hooks.insert(std::pair<IHooker*, std::string>(
+                pObjEmitter,
+                checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE)
+            ));
             
             m_Emitters.push_back(pObjEmitter);
         }
@@ -589,7 +594,10 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                     }
                 )
             }
-            
+            m_Hooks.insert(std::pair<IHooker*, std::string>(
+                pDebrisEmitter,
+                checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE)
+            ));
             m_Emitters.push_back(pDebrisEmitter);
         }
         else
