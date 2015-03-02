@@ -70,7 +70,7 @@ class IObject : public IHookable, public IUniverseScaled
         virtual IObject*            clone() const = 0;                  ///< Clone object
         virtual const Vector2d      getAnchor(const int&) const = 0;    ///< Return anchor
         virtual const ObjectType    getObjectType() const;
-        
+        virtual const HookableType  getHookableType() const;
         const double                getHookAngle() const;
         const Vector2i              getHookCell() const;
         const Vector2d              getHookOrigin() const;
@@ -162,6 +162,19 @@ inline const ObjectType IObject::getObjectType() const
 {
     METHOD_ENTRY("IObject::getObjectType")
     return OBJECT_NONE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the type of hookable
+///
+/// \return Type of hookable
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const HookableType IObject::getHookableType() const
+{
+    METHOD_ENTRY("IObject::getHookableType")
+    return HOOKABLE_OBJECT;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

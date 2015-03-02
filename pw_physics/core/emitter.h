@@ -25,6 +25,8 @@
 #include <random>
 
 //--- Program header ---------------------------------------------------------//
+#include "hooker_positional.h"
+#include "universe_scaled.h"
 #include "world_data_storage_user.h"
 
 //--- Enumerations -----------------------------------------------------------//
@@ -72,7 +74,9 @@ const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter ty
 ///        debris.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IEmitter : public IUniverseScaled, public IWorldDataStorageUser, public IHooker
+class IEmitter : public IUniverseScaled,
+                 public IWorldDataStorageUser,
+                 public IHookerPositional
 {
     
     public:
@@ -190,6 +194,8 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
 {
     METHOD_ENTRY("IEmitter::IEmitter")
     CTOR_CALL("IEmitter::IEmitter")
+    
+    IHooker::m_strName += ": Emitter";
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -77,6 +77,20 @@ CPhysicsManager::~CPhysicsManager()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Register a thruster component which registers the emitter.
+///
+/// \param _pThruster Thruster component which should be registered.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::registerComponent(const CThruster* const _pThruster)
+{
+    METHOD_ENTRY("CPhysicsManager::registerComponent")
+    this->addEmitter(_pThruster->getEmitter());
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Add global forces to all objects
 ///
 /// This method adds global forces to all objects, for example gravitation.
@@ -210,8 +224,8 @@ void CPhysicsManager::moveMasses(int nTest)
         }
     }
 
-    for (EmittersType::const_iterator ci = m_Emitters.begin();
-        ci != m_Emitters.end(); ++ci)
+    for (EmittersType::const_iterator ci = m_Emitters.cbegin();
+        ci != m_Emitters.cend(); ++ci)
     {
         (*ci)->emit(1.0/m_fFrequency*m_fTimeAccel);
     }

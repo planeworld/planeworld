@@ -21,10 +21,16 @@
 #define HOOKABLE_H
 
 //--- Program header ---------------------------------------------------------//
-#include "hooker.h"
+#include "hooker_positional.h"
 
 //--- Standard header --------------------------------------------------------//
-#include <list>
+
+/// specifies the type of shape
+typedef enum 
+{
+    HOOKABLE_NONE,
+    HOOKABLE_OBJECT,
+} HookableType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -45,7 +51,8 @@ class IHookable
         //--- Constructor/Destructor -----------------------------------------//
 
         //--- Constant methods -----------------------------------------------//
-        
+        virtual const HookableType getHookableType() const;
+                const HookersType& getHookers() const;
         
         //--- Methods --------------------------------------------------------//
         void addHooker(IHooker* const);
@@ -59,10 +66,36 @@ class IHookable
         virtual const Vector2d getHookOrigin() const = 0;
 
         //--- Variables ------------------------------------------------------//
-        std::list<IHooker*> m_Hookers; ///< Entities hooked to this hookable
+        HookersType m_Hookers;              ///< Entities hooked to this hookable
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the type of hookable
+///
+/// \return Type of hookable
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const HookableType IHookable::getHookableType() const
+{
+    METHOD_ENTRY("IHookable::getHookableType")
+    return HOOKABLE_NONE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the hookers hooked to this hookable
+///
+/// \return List of hookers
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const HookersType& IHookable::getHookers() const
+{
+    METHOD_ENTRY("IHookable::getHookers")
+    return m_Hookers;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -74,7 +107,7 @@ class IHookable
 inline void IHookable::addHooker(IHooker* const _pHooker)
 {
     METHOD_ENTRY("IHookable::addHooker")
-    m_Hookers.push_back(_pHooker);    
+    m_Hookers.push_back(_pHooker); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,11 +122,18 @@ inline void IHookable::updateHookers()
     METHOD_ENTRY("IHookable::updateHookers")
     for (auto ci=m_Hookers.cbegin(); ci != m_Hookers.cend(); ++ci)
     {
-        (*ci)->updateFromHooked(this->getHookCell(),
-                                this->getHookOrigin(),
-                                this->getHookAngle()
-        );
+        switch((*ci)->getHookerType())
+        {
+            case HOOKER_META:
+                // Meta information. No update information from hookable needed.
+                break;
+            case HOOKER_POSITIONAL:
+                static_cast<IHookerPositional*>((*ci))->updateFromHookable(this->getHookCell(),
+                                          this->getHookOrigin(),
+                                          this->getHookAngle()
+                );
+        }
     }
 }
 
-#endif
+#endif // HOOKABLE_H

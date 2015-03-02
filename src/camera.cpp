@@ -36,6 +36,8 @@ CCamera::CCamera() : m_fViewportWidth(GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAU
     m_vecCell.setZero();
     m_vecFrame0.resize(4);
     
+    IHooker::m_strName += ": Camera";
+    
     this->reset();
 }
 
@@ -271,9 +273,9 @@ void CCamera::zoomTo(const double& _fZoom)
 /// appropriately.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCamera::myUpdateFromHooked()
+void CCamera::myUpdateFromHookable()
 {
-    METHOD_ENTRY("CCamera::updateFromHooked")
+    METHOD_ENTRY("CCamera::myUpdateFromHookable")
     
     updateWithHook();
 }

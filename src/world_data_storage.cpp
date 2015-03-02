@@ -56,7 +56,7 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             DOM_MEMF(DEBUG_MSG("IObject", "Memory already freed."))
         }
-    };
+    }
     
     
     for (ObjectsType::iterator it = m_StaticObjects.begin();
@@ -73,71 +73,71 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             DOM_MEMF(DEBUG_MSG("IObject", "Memory already freed."))
         }
-    };
+    }
     
     for (ObjectVisualsType::iterator it = m_ObjectVisuals.begin();
         it != m_ObjectVisuals.end(); ++it)
     {
         // Free memory if pointer is still existent
-        if ((*it) != 0)
+        if ((*it) != nullptr)
         {
             delete (*it);
-            (*it) = 0;
+            (*it) = nullptr;
             MEM_FREED("IObjectVisuals")
         }
         else
         {
             DOM_MEMF(DEBUG_MSG("IObjectVisuals", "Memory already freed."))
         }
-    };
+    }
         
     for (DebrisType::iterator it = m_Debris.begin();
         it != m_Debris.end(); ++it)
     {
         // Free memory if pointer is still existent
-        if ((*it) != 0)
+        if ((*it) != nullptr)
         {
             delete (*it);
-            (*it) = 0;
+            (*it) = nullptr;
             MEM_FREED("CDebris")
         }
         else
         {
             DOM_MEMF(DEBUG_MSG("CDebris", "Memory already freed."))
         }
-    };
+    }
     
     for (DebrisVisualsType::iterator it = m_DebrisVisuals.begin();
         it != m_DebrisVisuals.end(); ++it)
     {
         // Free memory if pointer is still existent
-        if ((*it) != 0)
+        if ((*it) != nullptr)
         {
             delete (*it);
-            (*it) = 0;
+            (*it) = nullptr;
             MEM_FREED("CDebrisVisuals")
         }
         else
         {
             DOM_MEMF(DEBUG_MSG("CDebrisVisuals", "Memory already freed."))
         }
-    };
+    }
     
     for (JointsType::iterator it = m_Joints.begin();
         it != m_Joints.end(); ++it)
     {
         // Free memory if pointer is still existent
-        if ((*it) != 0)
+        if ((*it) != nullptr)
         {
             delete (*it);
-            (*it) = 0;
+            (*it) = nullptr;
             MEM_FREED("IJoint")
         }
         else
         {
             DOM_MEMF(DEBUG_MSG("IJoint", "Memory already freed."))
         }
-    };
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

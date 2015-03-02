@@ -14,6 +14,7 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/components
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects
@@ -55,6 +56,7 @@ SET(SRCS
     bounding_box.cpp
     camera.cpp
     collision_manager.cpp
+    hooker.cpp
     namegenerator.cpp
     parzival.cpp
     planeworld.cpp

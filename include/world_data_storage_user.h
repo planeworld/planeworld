@@ -38,7 +38,7 @@ class IWorldDataStorageUser
     public:
    
         //--- Constructor/Destructor -----------------------------------------//
-        IWorldDataStorageUser() : m_pDataStorage(0){}
+        IWorldDataStorageUser() : m_pDataStorage(nullptr){}
 
         //--- Methods --------------------------------------------------------//
         void setWorldDataStorage(CWorldDataStorage*);
@@ -61,7 +61,7 @@ inline void IWorldDataStorageUser::setWorldDataStorage(CWorldDataStorage* _pData
 {
     METHOD_ENTRY("IWorldDataStorageUser::setWorldDataStorage")
     
-    if (m_pDataStorage != 0)
+    if (m_pDataStorage != nullptr)
     {
         NOTICE_MSG("World Data Storage User", "Data storage instance already given, overwriting.")
     }

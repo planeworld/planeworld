@@ -45,7 +45,7 @@ const bool XML_IMPORTER_DO_NOT_NOTICE = false;
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CXMLImporter::CXMLImporter() : m_pCamera(0),
+CXMLImporter::CXMLImporter() : m_pCamera(nullptr),
                                m_strLuaPhysicsInterface("physics_interface.lua"),
                                m_fDebrisFrequency(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                m_fLuaFrequency(PHYSICS_LUA_DEFAULT_FREQUENCY),

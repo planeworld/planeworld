@@ -36,7 +36,7 @@ Usage
 |--------------------------|---------------------------------|
 | g                        | Show grid                       |
 | b                        | Show bounding boxes             |
-| i                        | Show intersections              |
+| n                        | Show names                      |
 | t                        | Show object trajectories        |
 | ESC                      | Quit                            |
 | +                        | Accelerate time (only key-pad +)|

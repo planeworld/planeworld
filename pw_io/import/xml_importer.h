@@ -122,8 +122,6 @@ class CXMLImporter : public IWorldDataStorageUser
         double                          m_fVisualsFrequency;///< Frequency for visual update
         
         std::map<IHooker*, std::string> m_Hooks;            ///< List of hookers and related object names
-//         std::map<IHookable*, IHooker*>  m_Hooks;            ///< List of hookers and related hookables
-                
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -21,18 +21,33 @@
 #define HOOKER_H
 
 //--- Program header ---------------------------------------------------------//
+#include "log.h"
 
 //--- Standard header --------------------------------------------------------//
+#include <list>
+#include <string>
+
+/// Specifies the type of hooker
+typedef enum 
+{
+    HOOKER_META,
+    HOOKER_POSITIONAL
+} HookerType;
+
+class IHookable;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Interface for meta objects to be hooked to their physical representation.
 ///
 /// This interface allows for hooking of meta objects, i.e. objects that have
-/// no physical representation but need to be positioned. This might be
-/// cameras, emitters, lights, control units, players, etc. This interface
-/// represents the hooker, i.e. the class that hooks to an object.
-/// Physical objects will be connected by joints.
+/// no physical representation but need to be bound to physical object. Reason
+/// might be the deletion of physical objects. Hence, their hooks e.g. cameras,
+/// emitters, lights, control units, players, components, visuals, etc. need to 
+/// be destroyed, too. The examples show that their are different classes of 
+/// hooks, like positional hooks, where an update has to be triggered by the
+/// hookable. For instance, a camera hooked to a physical object has to be
+/// continously updated in its position.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class IHooker
@@ -42,31 +57,29 @@ class IHooker
     
         //--- Constructor/Destructor -----------------------------------------//
         IHooker();
+        virtual ~IHooker();
         
         //--- Constant methods -----------------------------------------------//
+        virtual const HookerType    getHookerType() const;
+                const std::string   getName() const;
         
         //--- Methods --------------------------------------------------------//
-        virtual void updateFromHooked(const Vector2i&,
-                                      const Vector2d&,
-                                      const double&
-                                     );
-                                       
-        void enableAngleHook();
-        void disableAngleHook();
-
+        virtual bool hook(IHookable* const);
+        virtual void updateFromHookable();
+        
     protected:
         
-        //--- Methods ------------.-------------------------------------------//
-        virtual void myUpdateFromHooked();
+        //--- Methods --------------------------------------------------------//
 
-        //--- Variables ----------.-------------------------------------------//
-        Vector2d        m_vecHookOrigin;    ///< Origin of hooked entity
-        Vector2i        m_vecHookCell;      ///< Cell of hooked entity
-        double          m_fHookAngle;       ///< Angle of hooked entity
-        bool            m_bAngleIsHooked;   ///< Defines, if angle is hooked
+        //--- Variables ------------------------------------------------------//
         bool            m_bIsHooked;        ///< Defines, if hooker is hooked
+        std::string     m_strName;          ///< Name of hooker
+        
+        IHookable*      m_pHookable;        ///< Hookable to refer to
         
 };
+
+typedef std::list<IHooker*> HookersType;    ///< Specifies a list of hookers
 
 //--- Implementation is done here for inline optimisation --------------------//
 
@@ -75,76 +88,40 @@ class IHooker
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IHooker::IHooker() : m_fHookAngle(0.0),
-                            m_bAngleIsHooked(true),
-                            m_bIsHooked(false)
+inline IHooker::IHooker() : m_bIsHooked(false),
+                            m_pHookable(nullptr)
 {
-    METHOD_ENTRY("CCamera::IHooker")
+    METHOD_ENTRY("IHooker::IHooker")
     CTOR_CALL("IHooker::IHooker")
     
-    m_vecHookCell.setZero();
-    m_vecHookOrigin.setZero();
+    // Default name for any hooker
+    m_strName = "Meta_Hook";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Updates hooker triggered by hooked entity
+/// \brief Get the hooker type
 ///
-/// \param _vecCell Cell of hooked entitiy
-/// \param _vecOrigin Origin of hooked entity
-/// \param _fAngle Angle of hooked Entity
+/// \return Type of hooker (meta). HOOKER_META is the default hook.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IHooker::updateFromHooked(const Vector2i& _vecCell,
-                                      const Vector2d& _vecOrigin,
-                                      const double& _fAngle)
+inline const HookerType IHooker::getHookerType() const
 {
-    METHOD_ENTRY("IHooker::updateFromHooked")
-    m_vecHookCell = _vecCell;
-    m_vecHookOrigin = _vecOrigin;
-    m_fHookAngle = _fAngle;
-    
-    // If this method is called, a hook is present, hence:
-    m_bIsHooked = true;
-    
-    this->myUpdateFromHooked();
+    METHOD_ENTRY("IHooker::getHookerType")
+    return HOOKER_META;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Activates angle hook
+/// \brief Returns the name of the hooker
+///
+/// \return Name of the hooker
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IHooker::enableAngleHook()
+inline const std::string IHooker::getName() const
 {
-    METHOD_ENTRY("CCamera::enableAngleHook")
-    m_bAngleIsHooked = true;
+    METHOD_ENTRY("IHooker::getName")
+    return (m_strName);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Deactivates angle hook
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IHooker::disableAngleHook()
-{
-    METHOD_ENTRY("CCamera::enableAngleHook")
-    m_bAngleIsHooked = false;
-    m_fHookAngle = 0.0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Updates hooker triggered by hooked entity. 
-///
-/// Allows for additional processing within derived class. This might be useful
-/// if update has to be synced to physics frequency like the camera and its
-/// Bounding Box.
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IHooker::myUpdateFromHooked()
-{
-    METHOD_ENTRY("IHooker::myUpdateFromHooked")
-}
-
-#endif
+#endif // HOOKER_H

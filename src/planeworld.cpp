@@ -30,12 +30,14 @@
 #include <thread>
 
 //--- Program header ---------------------------------------------------------//
+#include "conf_pw.h"
 #include "debris_emitter.h"
 #include "physics_manager.h"
 #include "planet_visuals.h"
 #include "objects_emitter.h"
 #include "pointmass.h"
 #include "spring_visuals.h"
+#include "thruster.h"
 #include "xfig_loader.h"
 #include "xml_importer.h"
 #include "visuals_manager.h"
@@ -45,39 +47,41 @@
 //--- Global Variables -------------------------------------------------------//
 bool g_bPhysicsPaused = false;
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Runs the physics engine, called as a thread.
-///
-/// \param _pPhysicsManager Pointer to physics manager
-/// \param _pbDone Pointer to bool, indicating if program is stopped
-///
-///////////////////////////////////////////////////////////////////////////////
-void runPhysics(CPhysicsManager* const _pPhysicsManager, bool* const _pbDone)
-{
-    METHOD_ENTRY("runPhysics")
-    
-    INFO_MSG("Main", "Physics thread started.")
-    CTimer PhysicsTimer;
-    
-    PhysicsTimer.start();
-    
-    int nCC=0;
-
-    while (!(*_pbDone))
+#ifdef PW_MULTITHREADING
+    ////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// \brief Runs the physics engine, called as a thread.
+    ///
+    /// \param _pPhysicsManager Pointer to physics manager
+    /// \param _pbDone Pointer to bool, indicating if program is stopped
+    ///
+    ///////////////////////////////////////////////////////////////////////////////
+    void runPhysics(CPhysicsManager* const _pPhysicsManager, bool* const _pbDone)
     {
-        if (!g_bPhysicsPaused)
+        METHOD_ENTRY("runPhysics")
+        
+        INFO_MSG("Main", "Physics thread started.")
+        CTimer PhysicsTimer;
+        
+        PhysicsTimer.start();
+        
+        int nCC=0;
+
+        while (!(*_pbDone))
         {
-            _pPhysicsManager->addGlobalForces();
-            _pPhysicsManager->moveMasses(nCC);
-            _pPhysicsManager->collisionDetection();
-            _pPhysicsManager->runCellUpdate();
+            if (!g_bPhysicsPaused)
+            {
+                _pPhysicsManager->addGlobalForces();
+                _pPhysicsManager->moveMasses(nCC);
+                _pPhysicsManager->collisionDetection();
+                _pPhysicsManager->runCellUpdate();
+            }
+            PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
+            if (++nCC == 10000) nCC = 0;
         }
-        PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
-        if (++nCC == 10000) nCC = 0;
+        INFO_MSG("Main", "Physics thread stopped.")
     }
-    INFO_MSG("Main", "Physics thread stopped.")
-}
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -147,6 +151,7 @@ int main(int argc, char *argv[])
     CSpringVisuals*     pSpringVisuals;
     CUniverse           Universe;
     CWorldDataStorage   WorldDataStorage;
+    CThruster           Thruster;
     
     //--- Initialisation -----------------------------------------------------//
     pPhysicsManager = new CPhysicsManager;
@@ -246,10 +251,21 @@ int main(int argc, char *argv[])
         pPhysicsManager->setFrequencyDebris(XMLImporter.getFrequencyDebris());
         pPhysicsManager->setFrequencyLua(XMLImporter.getFrequencyLua());
         pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
-        
         pCamera=XMLImporter.getCamera();
-        
         Universe.clone(XMLImporter.getUniverse());
+    }
+    if (WorldDataStorage.getDynamicObjects().find("Ball") != WorldDataStorage.getDynamicObjects().end())
+    {
+      IHookable* pBallObject = (*(WorldDataStorage.getDynamicObjects().find("Ball"))).second;
+      Thruster.hook(pBallObject);
+      if (Thruster.init(pBallObject))
+      {
+          pPhysicsManager->registerComponent(&Thruster);
+      }
+      else
+      {
+          WARNING_MSG("Main", "Failed to hook thruster.")
+      }
     }
             
 //     //--- Initialize Springs ------------------------------------------------//
@@ -307,8 +323,10 @@ int main(int argc, char *argv[])
     pVisualsManager->setDataPath(argv[1]);
     pVisualsManager->setWindow(&Window);
     pVisualsManager->initGraphics();
-    
-    std::thread PhysicsThread(runPhysics, pPhysicsManager, &bDone);
+
+    #ifdef PW_MULTITHREADING    
+        std::thread PhysicsThread(runPhysics, pPhysicsManager, &bDone);
+    #endif
     
     //--- Prepare for querying relative mouse movement -----------------------//
     sf::Vector2i vecMouse;
@@ -323,7 +341,7 @@ int main(int argc, char *argv[])
         vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
         sf::Mouse::setPosition(vecMouseCenter,Window);
         
-        // Handle events
+        //--- Handle events ---//
         sf::Event Event;
         while (Window.pollEvent(Event))
         {
@@ -371,14 +389,19 @@ int main(int argc, char *argv[])
                             pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
                             break;
                         }
-                        case sf::Keyboard::I:
+                        case sf::Keyboard::F:
                         {
-                            pVisualsManager->toggleVisualisations(VISUALS_OBJECT_INTERSECTIONS);
+                            Thruster.fire();
                             break;
                         }
                         case sf::Keyboard::G:
                         {
                             pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
+                            break;
+                        }
+                        case sf::Keyboard::N:
+                        {
+                            pVisualsManager->toggleVisualisations(VISUALS_NAMES);
                             break;
                         }
                         case sf::Keyboard::P:
@@ -417,17 +440,43 @@ int main(int argc, char *argv[])
                     break;
             }
         }
+        #ifndef PW_MULTITHREADING
+            //--- Run Physics ---//
+            static int nCC=0;
+            if (!g_bPhysicsPaused)
+            {
+                pPhysicsManager->addGlobalForces();
+                pPhysicsManager->moveMasses(nCC);
+                pPhysicsManager->collisionDetection();
+                pPhysicsManager->runCellUpdate();
+            }
+            if (++nCC == 10000) nCC = 0;
+        #endif
+        
+        //--- Draw visuals ---//
+        #ifndef PW_MULTITHREADING
+            if (nCC % static_cast<int>(pPhysicsManager->getFrequency()/
+                                       pVisualsManager->getFrequency()) == 0)
+            {
+        #endif
         pVisualsManager->drawGrid();
         pVisualsManager->drawTrajectories();
         pVisualsManager->drawWorld();
         pVisualsManager->drawBoundingBoxes();
         pVisualsManager->drawGridHUD();
         pVisualsManager->finishFrame();
-        Timer.sleepRemaining(pVisualsManager->getFrequency());
+        #ifndef PW_MULTITHREADING
+            }
+            Timer.sleepRemaining(pPhysicsManager->getFrequency());
+        #else
+            Timer.sleepRemaining(pVisualsManager->getFrequency());
+        #endif
     }
 
-    INFO_MSG("Main", "Physics thread for cell update stopped.")
-    PhysicsThread.join();
+    #ifdef PW_MULTITHREADING
+        INFO_MSG("Main", "Physics thread stopped.")
+        PhysicsThread.join();
+    #endif
 
     if (pPhysicsManager != 0)
     {

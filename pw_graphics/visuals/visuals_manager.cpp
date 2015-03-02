@@ -489,65 +489,78 @@ void CVisualsManager::drawWorld()
 //     }
     m_Graphics.setPointSize(1.0);
     
-//     // Draw names (this is quite hacked and just a proof of concept)
-//     m_Graphics.getWindow()->pushGLStates();    
-//     for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
-//          ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
-//     {
-//         if (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() > 1.0)
-//         {
-//         Vector2d vecPosRel = (*ci)->getObject()->getCOM()-
-//                              m_pCamera->getCenter()+
-//                              IUniverseScaled::cellToDouble
-//                              ((*ci)->getObject()->getCell()-
-//                              m_pCamera->getCell());
-//         
-//         // Now draw the text
-//         sf::Text text;
-//         double fColor = (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
-//         if (fColor > 255.0) fColor = 255.0;
-//         sf::Color color(255.0,255.0,255.0, fColor);
-//         
-//         text.setString((*ci)->getObject()->getName());
-//         text.setFont(m_Font);
-//         text.setCharacterSize(12);
-//         text.setColor(color);
-//         text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
-// 
-//         m_Graphics.getWindow()->draw(text);
-//         }
-//     }
-//     if (1.0e9 * m_Graphics.getResPMX() < 1.0)
-//     {
-//         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
-//         {
-//             Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
-//                               IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
-//             if (m_pCamera->getBoundingBox().isInside(vecPos))
-//             {
-//                 Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
-//                                      m_pCamera->getCenter()+
-//                                      IUniverseScaled::cellToDouble
-//                                      (m_pUniverse->getStarSystems()[i]->getCell()-
-//                                       m_pCamera->getCell());
-//                 
-//                 // Now draw the text
-//                 sf::Text text;
-//                 double fColor=0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
-//                 sf::Color color(0.8*255, fColor*255, 0.3*255);
-//                 
-//                 text.setString(m_pUniverse->getStarSystems()[i]->getName());
-//                 text.setFont(m_Font);
-//                 text.setCharacterSize(12);
-//                 text.setColor(color);
-//                 text.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
-// 
-//                 m_Graphics.getWindow()->draw(text);
-//             }
-//         }
-//     }
-//     
-//     m_Graphics.getWindow()->popGLStates();
+    //--- Draw names (this is quite hacked and just a proof of concept) ------//
+    
+    if (m_nVisualisations & VISUALS_NAMES)
+    {
+        int nTextSize = 16;
+        m_Graphics.getWindow()->pushGLStates();    
+        for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
+            ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
+        {
+            if (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() > 1.0)
+            {
+            Vector2d vecPosRel = (*ci)->getObject()->getCOM()-
+                                m_pCamera->getCenter()+
+                                IUniverseScaled::cellToDouble
+                                ((*ci)->getObject()->getCell()-
+                                m_pCamera->getCell());
+            
+            // Now draw the text
+            sf::Text text;
+            double fColor = (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
+            if (fColor > 255.0) fColor = 255.0;
+            sf::Color color(255.0,255.0,255.0, fColor);
+            
+            std::string strHookers("");
+            auto cj = (*ci)->getObject()->getHookers().cbegin();
+            while (cj != (*ci)->getObject()->getHookers().cend())
+            {
+              strHookers += "\n" + (*cj)->getName();
+              ++cj;
+            }
+            
+            text.setString((*ci)->getObject()->getName() + strHookers);
+            text.setFont(m_Font);
+            text.setCharacterSize(nTextSize);
+            text.setColor(color);
+            text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+
+            m_Graphics.getWindow()->draw(text);
+            }
+        }
+        if (1.0e9 * m_Graphics.getResPMX() < 1.0)
+        {
+            for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+            {
+                Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
+                                  IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
+                if (m_pCamera->getBoundingBox().isInside(vecPos))
+                {
+                    Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
+                                        m_pCamera->getCenter()+
+                                        IUniverseScaled::cellToDouble
+                                        (m_pUniverse->getStarSystems()[i]->getCell()-
+                                          m_pCamera->getCell());
+                    
+                    // Now draw the text
+                    sf::Text text;
+                    double fColor=0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                    sf::Color color(0.8*255, fColor*255, 0.3*255);
+                    
+                    text.setString(m_pUniverse->getStarSystems()[i]->getName());
+                    text.setFont(m_Font);
+                    text.setCharacterSize(nTextSize);
+                    text.setColor(color);
+                    text.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
+
+                    m_Graphics.getWindow()->draw(text);
+                }
+            }
+        }
+        
+        m_Graphics.getWindow()->popGLStates();
+    }
     
     for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
          ci != m_pDataStorage->getObjectVisuals().end(); ++ci)

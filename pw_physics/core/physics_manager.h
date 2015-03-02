@@ -25,6 +25,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "collision_manager.h"
 #include "emitter.h"
+#include "thruster.h"
 #include "universe.h"
 #include "world_data_storage_user.h"
 
@@ -62,6 +63,8 @@ class CPhysicsManager : public IWorldDataStorageUser
         CUniverse* const getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
+        void registerComponent(const CThruster* const);
+        
         void setConstantGravity(const Vector2d&);
         void setFrequency(const double&);
         void setFrequencyDebris(const double&);

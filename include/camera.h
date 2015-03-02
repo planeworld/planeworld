@@ -25,7 +25,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "graphics.h"
-#include "hookable.h"
+#include "hooker_positional.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -38,7 +38,9 @@ using namespace Eigen;
 /// \bug Camera reset positions camera to 0, instead of value in configuration.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CCamera : public CGraphicsBase, public IUniverseScaled, public IHooker
+class CCamera : public CGraphicsBase,
+                public IUniverseScaled,
+                public IHookerPositional
 {
 
     public:
@@ -71,7 +73,7 @@ class CCamera : public CGraphicsBase, public IUniverseScaled, public IHooker
     protected:
         
         //--- Methods --------------------------------------------------------//
-        void myUpdateFromHooked();
+        void myUpdateFromHookable();
         void updateWithHook();
         void updateWithoutHook();
 
