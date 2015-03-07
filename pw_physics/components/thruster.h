@@ -23,7 +23,6 @@
 //--- Program header ---------------------------------------------------------//
 #include "debris_emitter.h"
 #include "hooker.h"
-#include "rigidbody.h"
 
 //--- Standard header --------------------------------------------------------//
 
@@ -44,32 +43,8 @@ class CThruster : public IHooker
         CDebrisEmitter* const getEmitter() const;
         
         //--- Methods --------------------------------------------------------//
-        bool init(IHookable* const _pBody)
-        {
-            if (_pBody->getHookableType() != HOOKABLE_OBJECT)
-            {
-                ERROR_MSG("Thruster", "Unable to init to this entity. Hookable should be an object.")
-                return false;
-            }
-            else
-            {
-              m_pEmitter = new CDebrisEmitter;
-              m_pEmitter->setOrigin(Vector2d(0.0, 15.0));
-              m_pEmitter->setNumber(1000);
-              m_pEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
-              m_pEmitter->setMode(EMITTER_MODE_TIMED);
-              m_pEmitter->setFrequency(10);
-              m_pEmitter->setVelocity(10.0);
-              m_pEmitter->setAngleStd(0.2);
-              m_pHookable->addHooker(m_pEmitter);
-            }
-         }
-         
-         void fire()
-         {
-           static_cast<IObject*>(m_pHookable)->addForce(Vector2d(0.0, 200.0),
-                                                        Vector2d(0.0, 0.0));
-         }
+        bool init(IHookable* const _pBody);
+        void fire();
          
     protected:
         
@@ -77,7 +52,6 @@ class CThruster : public IHooker
 
         //--- Variables ------------------------------------------------------//
         CDebrisEmitter* m_pEmitter;  ///< Emitter for thrust particle output
-//         IHookable*      m_pBody;     ///< Physical thruster representation
        
 };
 
