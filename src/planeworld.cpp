@@ -317,33 +317,31 @@ int main(int argc, char *argv[])
     if (!pPhysicsManager->initLua()) return EXIT_FAILURE;
     
     //--- Initialise graphics ------------------------------------------------//
-    sf::RenderWindow Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
-                            "Planeworld");
-    
     pVisualsManager->setDataPath(argv[1]);
-    pVisualsManager->setWindow(&Window);
     pVisualsManager->initGraphics();
-
+    
+    WindowHandleType* pWindow = pVisualsManager->getWindowHandle();
+    
     #ifdef PW_MULTITHREADING    
         std::thread PhysicsThread(runPhysics, pPhysicsManager, &bDone);
     #endif
     
     //--- Prepare for querying relative mouse movement -----------------------//
     sf::Vector2i vecMouse;
-    sf::Vector2i vecMouseCenter(sf::Vector2i(Window.getSize().x >> 1, Window.getSize().y >> 1));
-    sf::Mouse::setPosition(vecMouseCenter,Window);
+    sf::Vector2i vecMouseCenter(sf::Vector2i(pWindow->getSize().x >> 1, pWindow->getSize().y >> 1));
+    sf::Mouse::setPosition(vecMouseCenter,*pWindow);
     
     //--- Run the main loop --------------------------------------------------//
     Timer.start();
     while (!bDone)
     {
-        vecMouse = vecMouseCenter-sf::Mouse::getPosition(Window);
+        vecMouse = vecMouseCenter-sf::Mouse::getPosition(*pWindow);
         vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
-        sf::Mouse::setPosition(vecMouseCenter,Window);
+        sf::Mouse::setPosition(vecMouseCenter,*pWindow);
         
         //--- Handle events ---//
         sf::Event Event;
-        while (Window.pollEvent(Event))
+        while (pWindow->pollEvent(Event))
         {
             switch (Event.type)
             {

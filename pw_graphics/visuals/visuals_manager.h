@@ -52,6 +52,8 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         const double    getFrequency() const;
         const bool      getVisualisation(const int&) const;
         const int       getVisualisations() const;
+        WindowHandleType* const
+                        getWindowHandle() const;
         bool            initGraphics() const;
                 
         //--- Methods --------------------------------------------------------//
@@ -60,7 +62,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         void            setFrequency(const double&);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
-        void            setWindow(sf::RenderWindow* const);
+        void            setWindow(WindowHandleType* const);
         void            toggleVisualisations(const int&);
         void            unsetVisualisations(const int&);
 
@@ -114,6 +116,20 @@ inline const int CVisualsManager::getVisualisations() const
     METHOD_ENTRY("CVisualsManager::getVisualisations")
     return (m_nVisualisations);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns Window handle
+///
+/// \return Window handle
+///
+////////////////////////////////////////////////////////////////////////////////
+inline WindowHandleType* const CVisualsManager::getWindowHandle() const
+{
+    METHOD_ENTRY("CVisualsManager::getWindowHandle")
+    return (m_Graphics.getWindow());
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -211,7 +227,7 @@ inline void CVisualsManager::setVisualisations(const int& _nVis)
 /// \param _pWindow Window to draw on
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setWindow(sf::RenderWindow* const _pWindow)
+inline void CVisualsManager::setWindow(WindowHandleType* const _pWindow)
 {
     METHOD_ENTRY("CVisualsManager::setWindow")
     m_Graphics.setWindow(_pWindow);

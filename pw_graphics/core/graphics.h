@@ -39,6 +39,9 @@ using namespace Eigen;
 
 static sf::Window g_Window;                             ///< Main window
 
+/// Type definition for window handle to enable easy changes
+typedef sf::RenderWindow WindowHandleType;
+
 // Constants
 const unsigned short GRAPHICS_WIDTH_DEFAULT = 1440u;    ///< Default x-resolution
 const unsigned short GRAPHICS_HEIGHT_DEFAULT = 900u;    ///< Default y-resolution
@@ -120,7 +123,7 @@ class CGraphics
         void setPointSize(const double&) const;
         void setWidth(const double&) const;
         
-        sf::RenderWindow* const getWindow() const;
+        WindowHandleType* const getWindow() const;
 
         //--- Methods --------------------------------------------------------//
         bool init();
@@ -129,7 +132,7 @@ class CGraphics
         void setHeightScr(const unsigned short&);
         void swapBuffers();
         
-        void setWindow(sf::RenderWindow* const);
+        void setWindow(WindowHandleType* const);
 
         //
         //--- Methods for camera movement ------------------------------------//
@@ -175,7 +178,7 @@ class CGraphics
     private:
         
         //--- Variables [private] --------------------------------------------//
-        sf::RenderWindow*       m_pWindow;      ///< Pointer to main sfml window
+        WindowHandleType*       m_pWindow;      ///< Pointer to main window
         
         Vector3d                m_vecCamPos;    ///< camera position
         double                  m_fCamAng;      ///< camera angle
@@ -195,7 +198,7 @@ class CGraphics
 
         //--- Constructor/destructor [private] -------------------------------//
         CGraphics();
-        ~CGraphics(){};
+        ~CGraphics();
 
         //--- Operators [private] --------------------------------------------//
         CGraphics& operator=(const CGraphics&); ///< empty private operator=
@@ -399,9 +402,13 @@ inline void CGraphics::setWidth(const double& _fW) const
 /// \return Main window
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline sf::RenderWindow* const CGraphics::getWindow() const
+inline WindowHandleType* const CGraphics::getWindow() const
 {
     METHOD_ENTRY("CGraphics::getWindow")
+    if (m_pWindow == nullptr)
+    {
+        ERROR_MSG("Graphics", "No window handle. Maybe graphics wasn't initialised before.")
+    }
     return m_pWindow;
 }
 
@@ -444,7 +451,7 @@ inline void CGraphics::setHeightScr(const unsigned short& _unHeightScr)
 /// \param _pWindow Main window
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void CGraphics::setWindow(sf::RenderWindow* const _pWindow)
+inline void CGraphics::setWindow(WindowHandleType* const _pWindow)
 {
     METHOD_ENTRY("CGraphics::setWindow");
     m_pWindow = _pWindow;

@@ -27,7 +27,7 @@
 /// meyers-singleton.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CGraphics::CGraphics() : m_pWindow(0),
+CGraphics::CGraphics() : m_pWindow(nullptr),
                         m_fCamAng(0.0),
                         m_fCamZoom(1.0),
                         m_fDepth(GRAPHICS_DEPTH_DEFAULT),
@@ -42,6 +42,27 @@ CGraphics::CGraphics() : m_pWindow(0),
     CTOR_CALL("CGraphics::CGraphics")
     
     m_vecCamPos.setZero();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Destructor, frees memory.
+///
+/// The destructor is private, this is because of the implementation as a
+/// meyers-singleton.
+///
+///////////////////////////////////////////////////////////////////////////////
+CGraphics::~CGraphics()
+{
+    METHOD_ENTRY("CGraphics::CGraphics")
+    DTOR_CALL("CGraphics::CGraphics")
+    
+    if (m_pWindow != nullptr)
+    {
+        delete m_pWindow;
+        MEM_FREED("WindowHandleType")
+        m_pWindow = nullptr;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,13 +186,15 @@ bool CGraphics::init()
 {
     METHOD_ENTRY("CGraphics::init")
     
-    m_pWindow->setMouseCursorVisible(false);
-    
     //--------------------------------------------------------------------------
     // Initialize window and graphics
     //--------------------------------------------------------------------------
- 
-    
+    m_pWindow = new WindowHandleType(sf::VideoMode(m_unWidthScr, m_unHeightScr),
+                                     "Planeworld", sf::Style::Default, sf::ContextSettings(32,0,4,3,2));
+    MEM_ALLOC("WindowHandleType")
+    m_pWindow->setMouseCursorVisible(false);
+    m_pWindow->setVerticalSyncEnabled(true);
+    std::cout << "antialiasing level:" << m_pWindow->getSettings().antialiasingLevel << std::endl;
 
     //--------------------------------------------------------------------------
     // Setup OpenGL
