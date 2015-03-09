@@ -101,7 +101,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             ++vecNrOfStars[int(nNrOfStarTypes*fNumber)];
             
             CStarSystem* pStarSystem = new CStarSystem();
-            MEM_ALLOC("pStarSystem");
+            MEM_ALLOC("CStarSystem");
 
             double fDistance = NormalDistribution(Generator);
             double fAngle    = UniformDistribution(Generator);
