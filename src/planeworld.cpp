@@ -71,10 +71,20 @@ bool g_bPhysicsPaused = false;
         {
             if (!g_bPhysicsPaused)
             {
+                CTimer FrameTimePhysics;
+                FrameTimePhysics.start();
+                
                 _pPhysicsManager->addGlobalForces();
                 _pPhysicsManager->moveMasses(nCC);
                 _pPhysicsManager->collisionDetection();
                 _pPhysicsManager->runCellUpdate();
+                
+                FrameTimePhysics.stop();
+                if (FrameTimePhysics.getTime() > 1.0/_pPhysicsManager->getFrequency())
+                {
+                  NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << FrameTimePhysics.getTime() << 
+                                                "s of " << 1.0/_pPhysicsManager->getFrequency() << "s max.")
+                }
             }
             PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
             if (++nCC == 10000) nCC = 0;
@@ -443,10 +453,20 @@ int main(int argc, char *argv[])
             static int nCC=0;
             if (!g_bPhysicsPaused)
             {
+                CTimer FrameTimePhysics;
+                FrameTimePhysics.start();
+                
                 pPhysicsManager->addGlobalForces();
                 pPhysicsManager->moveMasses(nCC);
                 pPhysicsManager->collisionDetection();
                 pPhysicsManager->runCellUpdate();
+                
+                FrameTimePhysics.stop();
+                if (FrameTimePhysics.getTime() > 1.0/pPhysicsManager->getFrequency())
+                {
+                  NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << FrameTimePhysics.getTime() << 
+                                                "s of " << 1.0/pPhysicsManager->getFrequency() << "s max.")
+                }
             }
             if (++nCC == 10000) nCC = 0;
         #endif

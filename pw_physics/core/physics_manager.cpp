@@ -216,11 +216,21 @@ void CPhysicsManager::moveMasses(int nTest)
     
     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyLua) == 0)
     {
+        CTimer FrameTimeLua;
+        FrameTimeLua.start();
+        
         lua_getglobal(m_pLuaState, "physics_interface");
         if (lua_pcall(m_pLuaState, 0, 0, 0) != 0)
         {
             WARNING_MSG("Physics Manager", "Couldn't call Lua function.")
             WARNING_MSG("Physics Manager", "Lua Error: " << lua_tostring(m_pLuaState, -1))
+        }
+        
+        FrameTimeLua.stop();
+        if (FrameTimeLua.getTime() > 1.0/m_fFrequencyLua)
+        {
+          NOTICE_MSG("Physics Manager", "Execution time of Lua code is too large: " << FrameTimeLua.getTime() << 
+                                        "s of " << 1.0/m_fFrequencyLua << "s max.")
         }
     }
 
@@ -238,10 +248,20 @@ void CPhysicsManager::moveMasses(int nTest)
     }
     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
     {
+        CTimer FrameTimeDebris;
+        FrameTimeDebris.start();
+        
         for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
             ci != m_pDataStorage->getDebris().end(); ++ci)
         {
             (*ci)->dynamics(1.0/m_fFrequencyDebris*m_fTimeAccel);
+        }
+        
+        FrameTimeDebris.stop();
+        if (FrameTimeDebris.getTime() > 1.0/m_fFrequencyDebris)
+        {
+          NOTICE_MSG("Physics Manager", "Execution time of debris code is too large: " << FrameTimeDebris.getTime() << 
+                                        "s of " << 1.0/m_fFrequencyDebris << "s max.")
         }
     }
 }
