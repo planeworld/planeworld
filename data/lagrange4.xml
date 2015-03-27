@@ -14,7 +14,9 @@
     viewport_height="400.0"
   />
   
-  <object type="RigidBody">
+  <config file="config.xml"/>
+ 
+  <object type="rigidbody">
     <core
         name="L4Object"
         mass="500"
@@ -26,11 +28,11 @@
         gravity="true"
     />
     <shape
-        type="Circle"
+        type="shape_circle"
         radius="10"
         center_x="0.0"
         center_y="0.0">
-        <visuals type="Circle"/>
+        <visuals type="shape_visuals_circle"/>
     </shape>
   </object>
   

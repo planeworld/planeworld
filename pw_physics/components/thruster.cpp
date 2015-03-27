@@ -23,15 +23,16 @@
 ///
 /// \brief Initialises the thruster
 ///
-/// This method initialises a thruster. This includes creating an emitter for
-/// thruster output.
+/// This method initialises a thruster. This includes hooking an emitter for
+/// thruster output to the physical object.
 ///
 /// \param _pHookable The entity the thruster is hooked on
+/// \param _pEmitter The emitter for this thruster
 ///
 /// \return Returns if thruster initialisation was successful
 ///
 ///////////////////////////////////////////////////////////////////////////////
-bool CThruster::init(IHookable* const _pHookable)
+bool CThruster::init(IHookable* const _pHookable, IEmitter* const _pEmitter)
 {
     if (_pHookable->getHookableType() != HOOKABLE_OBJECT)
     {
@@ -40,15 +41,10 @@ bool CThruster::init(IHookable* const _pHookable)
     }
     else
     {
-      m_pEmitter = new CDebrisEmitter;
-      m_pEmitter->setOrigin(Vector2d(0.0, 15.0));
-      m_pEmitter->setNumber(1000);
-      m_pEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
-      m_pEmitter->setMode(EMITTER_MODE_TIMED);
-      m_pEmitter->setFrequency(10);
-      m_pEmitter->setVelocity(10.0);
-      m_pEmitter->setAngleStd(0.2);
-      m_pHookable->addHooker(m_pEmitter);
+      m_pEmitter = _pEmitter;
+      _pHookable->addHooker(_pEmitter);
+      _pHookable->addHooker(this);
+      return true;
     }
 }
 

@@ -21,7 +21,7 @@
 #define THRUSTER_H
 
 //--- Program header ---------------------------------------------------------//
-#include "debris_emitter.h"
+#include "emitter.h"
 #include "hooker.h"
 
 //--- Standard header --------------------------------------------------------//
@@ -40,20 +40,24 @@ class CThruster : public IHooker
         CThruster();
         
         //--- Constant methods -----------------------------------------------//
-        CDebrisEmitter* const getEmitter() const;
+        IEmitter* const getEmitter() const;
         
         //--- Methods --------------------------------------------------------//
-        bool init(IHookable* const _pBody);
+        bool init(IHookable* const _pBody, IEmitter* const);
         void fire();
+        void setEmitter(IEmitter* const);
          
     protected:
         
         //--- Methods --------------------------------------------------------//
 
         //--- Variables ------------------------------------------------------//
-        CDebrisEmitter* m_pEmitter;  ///< Emitter for thrust particle output
+        IEmitter* m_pEmitter;  ///< Emitter for thrust particle output
        
 };
+
+/// Specifies a list of thruster components
+typedef std::list<CThruster*> ComponentsType;
 
 //--- Implementation is done here for inline optimisation --------------------//
 
@@ -74,12 +78,25 @@ inline CThruster::CThruster() : m_pEmitter(nullptr)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Sets the emitter for this thruster.
+///
+/// \param _pEmitter Emitter to use for this thruster
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CThruster::setEmitter(IEmitter* const _pEmitter)
+{
+    METHOD_ENTRY("CThruster::setEmitter")
+    m_pEmitter = _pEmitter;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns the internal debris emitter
 ///
 /// \return Debris emitter
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CDebrisEmitter* const CThruster::getEmitter() const
+inline IEmitter* const CThruster::getEmitter() const
 {
     METHOD_ENTRY("CThruster::getEmitter")
     return m_pEmitter;    

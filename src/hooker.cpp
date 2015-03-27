@@ -46,7 +46,7 @@ bool IHooker::hook(IHookable* const _pHookable)
 
     if (_pHookable->getHookableType() != HOOKABLE_OBJECT)
     {
-        ERROR_MSG("Thruster", "Unable to hook to this entity. Hookable should be an object.")
+        ERROR_MSG("Hooker", "Unable to hook to this entity. Hookable should be an object.")
         return false;
     }
     else

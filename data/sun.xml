@@ -1,6 +1,6 @@
 <!DOCTYPE PlaneworldML>
 <!-- Create sun -->
-<object type="RigidBody">
+<object type="rigidbody">
     <core
         name="Sun"
         mass="1.989e30"
@@ -10,10 +10,10 @@
         gravity="true"
     />
     <shape
-        type="Circle"
+        type="shape_circle"
         radius="0.6957e9"
         center_x="0.0"
         center_y="0.0">
-        <visuals type="Circle"/>
+        <visuals type="shape_visuals_circle"/>
     </shape>
 </object>

@@ -5,6 +5,11 @@
     vec_y="0.0"
   />
   <config file="config.xml"/>
+  <object file="rigidbody.xml"/>
+  <component
+    hook="Ball">
+    <emitter file="emitter.xml" />
+  </component>
   <emitter
     type="object_emitter"
     mode="emit_once"
@@ -17,18 +22,5 @@
     limit_y_max=" 25.0"
     number="50"
     frequency="5.0"
-  />
-  <emitter
-    type="debris_emitter"
-    mode="timed"
-    frequency="100.0"
-    distribution="point_source"
-    origin_x="15.1"
-    origin_y="0.0"
-    velocity="50.0"
-    velocity_std="10.0"
-    angle="225.0"
-    angle_std="5.0"
-    number="1000"
   />
 </universe>

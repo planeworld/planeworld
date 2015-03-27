@@ -27,6 +27,7 @@
 #include "body.h"
 #include "debris_emitter.h"
 #include "objects_emitter.h"
+#include "thruster.h"
 #include "universe.h"
 #include "world_data_storage_user.h"
 
@@ -58,6 +59,7 @@ class CXMLImporter : public IWorldDataStorageUser
         CCamera*                        getCamera() const;
         Vector2d                        getGravity() const;
         const EmittersType&             getEmitters() const;
+        const std::string&              getFont() const;
         const double&                   getFrequencyDebris() const;
         const double&                   getFrequencyLua() const;
         const double&                   getPhysicsFrequency() const;
@@ -94,6 +96,7 @@ class CXMLImporter : public IWorldDataStorageUser
 
         bool checkFile(const pugi::xml_node&);
         void createCamera(const pugi::xml_node&);
+        void createComponent(const pugi::xml_node&);
         void createEmitter(const pugi::xml_node&);
         void createGravity(const pugi::xml_node&);
         void createShapeCircle(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
@@ -109,19 +112,26 @@ class CXMLImporter : public IWorldDataStorageUser
         void readBodyCore(CRigidBody* const, const pugi::xml_node&);
         void readObjectCore(CRigidBody* const, const pugi::xml_node&);
         
-        CUniverse                       m_Universe;         ///< The procedurally generated universe
-        CCamera*                        m_pCamera;          ///< Main camera
-        Vector2d                        m_vecGravity;       ///< Constant gravity vector
-        std::string                     m_strCameraHook;    ///< Camera hook
-        EmittersType                    m_Emitters;         ///< List of emitters
-        std::string                     m_strPath;          ///< Path to read data from
-        std::string                     m_strLuaPhysicsInterface; ///< Lua file for physics access
-        double                          m_fDebrisFrequency; ///< Frequency for debris processing
-        double                          m_fLuaFrequency;    ///< Frequency for lua interface
-        double                          m_fPhysicsFrequency;///< Frequency for physics processing
-        double                          m_fVisualsFrequency;///< Frequency for visual update
+        IEmitter*               m_pCurrentEmitter;              ///< Temporary variable for state machine
+        CBody*                  m_pCurrentBody;                 ///< Temporary variable for state machine
+        IObjectVisuals*         m_pCurrentObjectVisuals;        ///< Temporary variable for state machine
+        CDoubleBufferedShape*   m_pCurrentDoubleBufferedShape;  ///< Temporary variable for state machine
         
-        std::map<IHooker*, std::string> m_Hooks;            ///< List of hookers and related object names
+        CUniverse                       m_Universe;             ///< The procedurally generated universe
+        CCamera*                        m_pCamera;              ///< Main camera
+        Vector2d                        m_vecGravity;           ///< Constant gravity vector
+        std::string                     m_strCameraHook;        ///< Camera hook
+        ComponentsType                  m_Components;           ///< List of components
+        EmittersType                    m_Emitters;             ///< List of emitters
+        std::string                     m_strPath;              ///< Path to read data from
+        std::string                     m_strFont;              ///< Font to load
+        std::string                     m_strLuaPhysicsInterface; ///< Lua file for physics access
+        double                          m_fDebrisFrequency;     ///< Frequency for debris processing
+        double                          m_fLuaFrequency;        ///< Frequency for lua interface
+        double                          m_fPhysicsFrequency;    ///< Frequency for physics processing
+        double                          m_fVisualsFrequency;    ///< Frequency for visual update
+        
+        std::unordered_multimap<std::string, IHooker*> m_Hooks; ///< List of hookers and related object names
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -163,6 +173,19 @@ inline const EmittersType& CXMLImporter::getEmitters() const
 {
     METHOD_ENTRY("CXMLImporter::getEmitters")
     return m_Emitters;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return name and location of font
+///
+/// \return Name and location of font
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::string& CXMLImporter::getFont() const
+{
+    METHOD_ENTRY("CXMLImporter::getFont")
+    return m_strFont;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

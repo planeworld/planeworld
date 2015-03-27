@@ -194,7 +194,7 @@ bool CGraphics::init()
     MEM_ALLOC("WindowHandleType")
     m_pWindow->setMouseCursorVisible(false);
     m_pWindow->setVerticalSyncEnabled(true);
-    std::cout << "antialiasing level:" << m_pWindow->getSettings().antialiasingLevel << std::endl;
+    DOM_VAR(INFO_MSG("Graphics", "Antialiasing level:" << m_pWindow->getSettings().antialiasingLevel))
 
     //--------------------------------------------------------------------------
     // Setup OpenGL

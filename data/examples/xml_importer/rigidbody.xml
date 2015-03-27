@@ -1,0 +1,16 @@
+<!DOCTYPE PlaneworldML>
+<object type="rigidbody">
+    <core
+        name="Ball"
+        mass="1.0"
+        origin_x="-20.0"
+        origin_y="10.0"
+        dynamics="true"
+        gravity="true"
+    />
+    <body_core
+        angle_velocity="36.0"
+        inertia="10.0"
+    />
+    <shape file="ball_shape_circle.xml"/>
+</object>

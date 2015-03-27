@@ -1,6 +1,6 @@
 <!DOCTYPE PlaneworldML>
 <!-- Create planet earth -->
-<object type="RigidBody">
+<object type="rigidbody">
     <core
         name="Earth"
         mass="5.974e24"
@@ -15,13 +15,13 @@
         inertia="8.0e37"
     />
     <shape
-        type="Planet"
+        type="shape_planet"
         radius="6378.16e3"
         height_max="8000.0"
         sea_level="-0.2"
         ground_resolution="0.001"
         center_x="0.0"
         center_y="0.0">
-        <visuals type="Planet"/>
+        <visuals type="shape_visuals_planet"/>
     </shape>
 </object>

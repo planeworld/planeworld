@@ -100,15 +100,9 @@ bool g_bPhysicsPaused = false;
 ///////////////////////////////////////////////////////////////////////////////
 void usage()
 {
-    std::cout << "Usage: planeworld <DATA_DIRECTORY> <UNIVERSE_DATA_FILE>" << std::endl;
-    std::cout << "\nNotice: At the moment, planeworld must be called from within the "
-                 "scene directory, where the UNIVERSE_DATA_FILE is located. Otherwise, "
-                 "some files might not be found. "<< std::endl;
-    std::cout << "\nDATA_DIRECTORY must be given to find global resources like font "
-                 "files, which are not depending on the currently loaded scene." << std::endl;
+    std::cout << "Usage: planeworld <UNIVERSE_DATA_FILE>" << std::endl;
     std::cout << "\nExamples: " << std::endl;
-    std::cout << "Within scene directory call: planeworld .. scene.xml" << std::endl;
-    std::cout << "Within scene directory call: planeworld /home/user/planeworld/data scene.xml" << std::endl;
+    std::cout << "Within scene directory call: planeworld scene.xml" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +118,7 @@ void usage()
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
-    if (argc != 3)
+    if (argc != 2)
     {
         usage();
         return EXIT_FAILURE;
@@ -250,7 +244,7 @@ int main(int argc, char *argv[])
         CXMLImporter        XMLImporter;
         
         XMLImporter.setWorldDataStorage(&WorldDataStorage);
-        XMLImporter.import(argv[2]);
+        XMLImporter.import(argv[1]);
         pVisualsManager->setCamera(XMLImporter.getCamera());
 //         pPhysicsManager->addObjects(XMLImporter.getObjects());
 //         pVisualsManager->addVisualsList(XMLImporter.getVisuals());
@@ -261,22 +255,34 @@ int main(int argc, char *argv[])
         pPhysicsManager->setFrequencyDebris(XMLImporter.getFrequencyDebris());
         pPhysicsManager->setFrequencyLua(XMLImporter.getFrequencyLua());
         pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
+        pVisualsManager->setFont(XMLImporter.getFont());
         pCamera=XMLImporter.getCamera();
         Universe.clone(XMLImporter.getUniverse());
     }
-    if (WorldDataStorage.getDynamicObjects().find("Ball") != WorldDataStorage.getDynamicObjects().end())
-    {
-      IHookable* pBallObject = (*(WorldDataStorage.getDynamicObjects().find("Ball"))).second;
-      Thruster.hook(pBallObject);
-      if (Thruster.init(pBallObject))
-      {
-          pPhysicsManager->registerComponent(&Thruster);
-      }
-      else
-      {
-          WARNING_MSG("Main", "Failed to hook thruster.")
-      }
-    }
+//     if (WorldDataStorage.getDynamicObjects().find("Ball") != WorldDataStorage.getDynamicObjects().end())
+//     {
+//       CDebrisEmitter* m_pEmitter = new CDebrisEmitter;
+//       m_pEmitter->setOrigin(Vector2d(0.0, 15.0));
+//       m_pEmitter->setNumber(1000);
+//       m_pEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+//       m_pEmitter->setMode(EMITTER_MODE_TIMED);
+//       m_pEmitter->setFrequency(10);
+//       m_pEmitter->setVelocity(10.0);
+//       m_pEmitter->setAngle(0.0);
+//       m_pEmitter->setAngleStd(0.2);
+//       
+//       IHookable* pBallObject = (*(WorldDataStorage.getDynamicObjects().find("Ball"))).second;
+//       
+// 
+//       if (Thruster.init(pBallObject, m_pEmitter))
+//       {
+//           pPhysicsManager->registerComponent(&Thruster);
+//       }
+//       else
+//       {
+//           WARNING_MSG("Main", "Failed init thruster.")
+//       }
+//     }
             
 //     //--- Initialize Springs ------------------------------------------------//
 //     pSpring = new CSpring();
@@ -327,7 +333,6 @@ int main(int argc, char *argv[])
     if (!pPhysicsManager->initLua()) return EXIT_FAILURE;
     
     //--- Initialise graphics ------------------------------------------------//
-    pVisualsManager->setDataPath(argv[1]);
     pVisualsManager->initGraphics();
     
     WindowHandleType* pWindow = pVisualsManager->getWindowHandle();

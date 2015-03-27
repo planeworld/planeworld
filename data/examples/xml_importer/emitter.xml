@@ -1,0 +1,15 @@
+<!DOCTYPE PlaneworldML>
+<emitter
+    type="debris_emitter"
+    hook="Ball"
+    mode="timed"
+    frequency="100.0"
+    distribution="point_source"
+    origin_x="15.1"
+    origin_y="0.0"
+    velocity="50.0"
+    velocity_std="10.0"
+    angle="0.0"
+    angle_std="5.0"
+    number="1000"
+/>

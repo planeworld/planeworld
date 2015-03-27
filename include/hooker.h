@@ -65,6 +65,7 @@ class IHooker
         
         //--- Methods --------------------------------------------------------//
         virtual bool hook(IHookable* const);
+        virtual void setName(const std::string&);
         virtual void updateFromHookable();
         
     protected:
@@ -122,6 +123,19 @@ inline const std::string IHooker::getName() const
 {
     METHOD_ENTRY("IHooker::getName")
     return (m_strName);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the name of the hooker
+///
+/// \param _strName Name of the hooker
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IHooker::setName(const std::string& _strName)
+{
+    METHOD_ENTRY("IHooker::setName")
+    m_strName = _strName;
 }
 
 #endif // HOOKER_H

@@ -58,7 +58,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
                 
         //--- Methods --------------------------------------------------------//
         void            setCamera(CCamera*);
-        void            setDataPath(const std::string&);
+        void            setFont(const std::string&);
         void            setFrequency(const double&);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
@@ -74,7 +74,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         int                             m_nStarIndex;       ///< Indicates procedurally generated star
         CCamera*                        m_pCamera;          ///< Camera for player view
         
-        std::string                     m_strDataPath;      ///< Data path for resources
+        std::string                     m_strFont;          ///< Font name and location
         sf::Font                        m_Font;             ///< Font for displayed output
 };
 
@@ -159,24 +159,24 @@ inline void CVisualsManager::setCamera(CCamera* _pCamera)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets data path, to correctly load font
+/// \brief Sets font
 ///
-/// \param _strDataPath
+/// \param _strFont
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setDataPath(const std::string& _strDataPath)
+inline void CVisualsManager::setFont(const std::string& _strFont)
 {
-    METHOD_ENTRY("CVisualsManager::setDataPath")
-    m_strDataPath = _strDataPath;
+    METHOD_ENTRY("CVisualsManager::setFont")
+    m_strFont = _strFont;
     
-    if (!m_Font.loadFromFile(m_strDataPath+"/fonts/consola.ttf"))
+    if (!m_Font.loadFromFile(m_strFont))
     {
-        WARNING_MSG("Visuals Manager", "Couldn't find font file " << m_strDataPath <<
-                                       "/fonts/consola.ttf.")
+        WARNING_MSG("Visuals Manager", "Couldn't find font file " << m_strFont <<
+                                       ".")
     }
     else
     {
-        DOM_FIO(INFO_MSG("Visuals Manager", "Font " << m_strDataPath << "/fonts/consola.ttf"
+        DOM_FIO(INFO_MSG("Visuals Manager", "Font " << m_strFont << 
                                             " successfully loaded."))
     }
 }

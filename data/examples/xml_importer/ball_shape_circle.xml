@@ -1,0 +1,8 @@
+<!DOCTYPE PlaneworldML>
+<shape 
+    type="shape_circle"
+    radius="10"
+    center_x="0.0"
+    center_y="0.0">
+    <visuals type="shape_visuals_circle"/>
+</shape>

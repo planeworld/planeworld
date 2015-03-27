@@ -85,7 +85,15 @@ CPhysicsManager::~CPhysicsManager()
 void CPhysicsManager::registerComponent(const CThruster* const _pThruster)
 {
     METHOD_ENTRY("CPhysicsManager::registerComponent")
-    this->addEmitter(_pThruster->getEmitter());
+    if (_pThruster->getEmitter() != nullptr)
+    {
+        this->addEmitter(_pThruster->getEmitter()); ///< \todo not needed any more
+    }
+    else
+    {
+        NOTICE_MSG("Physics Manager", "Couldn't register thruster component. "
+                   "Probably CThruster::init wasn't called.")
+    }
 }
 
 

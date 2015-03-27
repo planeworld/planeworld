@@ -1,6 +1,6 @@
 <!DOCTYPE PlaneworldML>
 <!-- Create planet earth -->
-<object type="RigidBody">
+<object type="rigidbody">
     <core
         name="Jupiter"
         mass="1.899e27"
@@ -11,13 +11,13 @@
         velocity_y="-13.07e3"
     />
     <shape
-        type="Planet"
+        type="shape_planet"
         radius="71492e3"
         height_max="16000.0"
         sea_level="-0.2"
         ground_resolution="0.001"
         center_x="0.0"
         center_y="0.0">
-        <visuals type="Planet"/>
+        <visuals type="shape_visuals_planet"/>
     </shape>
 </object>

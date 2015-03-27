@@ -33,7 +33,7 @@ CVisualsManager::CVisualsManager() : m_pUniverse(0),
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
     
-    m_strDataPath = "/";
+    m_strFont = "consola.ttf";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -400,6 +400,9 @@ void CVisualsManager::drawWorld()
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
+    const double fRmax = 3.6e20;
+    const double fBGDensityFactor = 1.0e18; 
+    
 //     const double fStarfieldSizeX = 3.0e19; // * 2
 //     const double fStarfieldSizeY = 3.0e19; // * 2
     
@@ -413,12 +416,21 @@ void CVisualsManager::drawWorld()
         {
             Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
                               IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
+            Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter() - m_pCamera->getCenter() +
+                                     IUniverseScaled::cellToDouble
+                                     (m_pUniverse->getStarSystems()[i]->getCell() -
+                                      m_pCamera->getCell());
+            
+            double fRi = m_pCamera->getBoundingCircleRadius();
+            double fRs = vecPosRel.norm();
+            double fRo = fRi + fBGDensityFactor*(fRmax-fRi)/fRmax;
+            double fRbg = fRi * (fRs - fRi) / (fBGDensityFactor * (fRmax - fRi)/fRmax);
+//             Vector2d vecRbg = fRbg * vecPosRel.normalized();
+            Vector2d vecRbg = 1.0*(vecPosRel - fBGDensityFactor*vecPosRel.normalized());
+            
             if (m_pCamera->getBoundingBox().isInside(vecPos))
             {
-                Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()  - m_pCamera->getCenter() +
-                                     IUniverseScaled::cellToDouble
-                                     (m_pUniverse->getStarSystems()[i]->getCell()-
-                                      m_pCamera->getCell());
+                
                 double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
                 m_Graphics.setColor(0.8,fColor,0.3);
                 m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getStarType());
@@ -434,11 +446,20 @@ void CVisualsManager::drawWorld()
 // //                     (std::abs(vecPosRel[1]) < fStarfieldSizeY))
                     m_Graphics.dot(vecPosRel);
                                
-                if (m_nStarIndex == i)
-                {
-                    m_pUniverse->getStarSystems()[i]->setCell(m_pUniverse->m_pStar->getCell());
-                    m_pUniverse->getStarSystems()[i]->setCenter(m_pUniverse->m_pStar->getCOM());
-                }
+//                 if (m_nStarIndex == i)
+//                 {
+//                     m_pUniverse->getStarSystems()[i]->setCell(m_pUniverse->m_pStar->getCell());
+//                     m_pUniverse->getStarSystems()[i]->setCenter(m_pUniverse->m_pStar->getCOM());
+//                 }
+            }
+            if ((fRs > fRi) && (fRs > fBGDensityFactor) && (fRs < fRi + fBGDensityFactor))
+            {
+//             m_Graphics.setColor(0.0,0.0,1.0);
+//             m_Graphics.setPointSize(2.0);
+                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                m_Graphics.setColor(0.8,fColor,0.3);
+                m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getStarType());
+                m_Graphics.dot(vecRbg);
             }
         }
     }
