@@ -9,15 +9,15 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       debris_visuals.cpp
-/// \brief      Implementation of class "CDebrisVisuals"
+/// \file       debris_visuals_thruster.cpp
+/// \brief      Implementation of class "CDebrisVisualsThruster"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2011-05-10
+/// \date       2015-04-03
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "debris_visuals.h"
+#include "debris_visuals_thruster.h"
 
 //--- Program header ---------------------------------------------------------//
 #include "graphics.h"
@@ -29,10 +29,10 @@
 /// \param _pDebris Debris to attach when initialising 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebrisVisuals::CDebrisVisuals(CDebris* _pDebris): m_pDebris(_pDebris)
+CDebrisVisualsThruster::CDebrisVisualsThruster(CDebris* _pDebris): m_pDebris(_pDebris)
 {
-    METHOD_ENTRY("CDebrisVisuals::CDebrisVisuals")
-    CTOR_CALL("CDebrisVisuals::CDebrisVisuals")
+    METHOD_ENTRY("CDebrisVisualsThruster::CDebrisVisualsThruster")
+    CTOR_CALL("CDebrisVisualsThruster::CDebrisVisualsThruster")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,10 +40,10 @@ CDebrisVisuals::CDebrisVisuals(CDebris* _pDebris): m_pDebris(_pDebris)
 /// \brief Destructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebrisVisuals::~CDebrisVisuals()
+CDebrisVisualsThruster::~CDebrisVisualsThruster()
 {
-    METHOD_ENTRY("CDebrisVisuals::~CDebrisVisuals()");
-    DTOR_CALL("CDebrisVisuals::~CDebrisVisuals()");
+    METHOD_ENTRY("CDebrisVisualsThruster::~CDebrisVisualsThruster()");
+    DTOR_CALL("CDebrisVisualsThruster::~CDebrisVisualsThruster()");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,22 +57,20 @@ CDebrisVisuals::~CDebrisVisuals()
 ///       for better reference).
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CDebrisVisuals::draw(const CCamera* const _pCamera) const
+void CDebrisVisualsThruster::draw(const CCamera* const _pCamera) const
 {
-    METHOD_ENTRY("CDebrisVisuals::draw()");
-//     double fSizeR = 1.0 / m_pDebris->getPositions()->size();
-//     u_int32_t i = 0;
-//     
-//     for (boost::circular_buffer<Vector2d>::const_iterator ci = m_pDebris->getPositions()->begin();
-//                                                           ci != m_pDebris->getPositions()->end(); ++ci)
-//     {
-//         m_Graphics.setPointSize((double(m_pDebris->getPositions()->size()-i) * 0.05 + 3.0) * _pCamera->getZoom());
-//         m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
-//         m_Graphics.dot((*ci) - _pCamera->getCenter() +
-//                         IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
-//         ++i;
-//     }
-//     m_Graphics.setPointSize(1.0);
-    m_Graphics.dots((*m_pDebris->getPositions()),-_pCamera->getCenter()+
-                      IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
+    METHOD_ENTRY("CDebrisVisualsThruster::draw()");
+    double fSizeR = 1.0 / m_pDebris->getPositions()->size();
+    u_int32_t i = 0;
+    
+    for (boost::circular_buffer<Vector2d>::const_iterator ci = m_pDebris->getPositions()->begin();
+                                                          ci != m_pDebris->getPositions()->end(); ++ci)
+    {
+        m_Graphics.setPointSize((double(m_pDebris->getPositions()->size()-i) * 0.05 + 3.0) * _pCamera->getZoom());
+        m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
+        m_Graphics.dot((*ci) - _pCamera->getCenter() +
+                        IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
+        ++i;
+    }
+    m_Graphics.setPointSize(1.0);
 }

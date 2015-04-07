@@ -77,56 +77,61 @@ void CObjectEmitter::emit(const double& _fF)
 {
     METHOD_ENTRY("CObjectEmitter::emit")
     
-    double nNrOfObjects;
-    
-    if (_fF < 0.0)
+    /// \todo Activation could be checked in interface class IEmitter, calling
+    ///       a myEmit method if activated
+    if (m_bActive)
     {
-        nNrOfObjects=m_nNr;
-    }
-    else
-    {
-        double fNrOfObjects = m_fFrequency * _fF + m_fResidual;
-        nNrOfObjects = static_cast<int>(fNrOfObjects);
-        m_fResidual = fNrOfObjects - nNrOfObjects;
-    }
-    
-    switch (m_EmitterDistribution)
-    {
-        case EMITTER_DISTRIBUTION_CIRCULAR_FIELD:
-            break;
-        case EMITTER_DISTRIBUTION_RECTANGULAR_FIELD:
-            for (int i=0; i<nNrOfObjects; ++i)
-            {
-                double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
-                double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
-                
-                IObject* pObject = m_pTemplate->clone();
-                IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
-                
-                pObject->setOrigin(Vector2d(fX, fY)+m_vecOrigin);
-                m_pDataStorage->addObject(pObject);
-                m_pDataStorage->addObjectVisuals(pObjectVisuals);
-                
-                pObject->init();
-            }
-            break;
-        case EMITTER_DISTRIBUTION_POINT_SOURCE:
-            for (int i=0; i<nNrOfObjects; ++i)
-            {
-                double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_fAngle + m_fHookAngle;
-                double fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
-                Rotation2Dd Rotation(m_fAngle + m_fHookAngle);
-                                
-                IObject* pObject = m_pTemplate->clone();
-                IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
-                
-                pObject->setOrigin(Rotation * m_vecOrigin + m_vecHookOrigin);
-                pObject->setVelocity(fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
-                m_pDataStorage->addObject(pObject);
-                m_pDataStorage->addObjectVisuals(pObjectVisuals);
-                
-                pObject->init();
-            }
+        double nNrOfObjects;
+        
+        if (_fF < 0.0)
+        {
+            nNrOfObjects=m_nNr;
+        }
+        else
+        {
+            double fNrOfObjects = m_fFrequency * _fF + m_fResidual;
+            nNrOfObjects = static_cast<int>(fNrOfObjects);
+            m_fResidual = fNrOfObjects - nNrOfObjects;
+        }
+        
+        switch (m_EmitterDistribution)
+        {
+            case EMITTER_DISTRIBUTION_CIRCULAR_FIELD:
+                break;
+            case EMITTER_DISTRIBUTION_RECTANGULAR_FIELD:
+                for (int i=0; i<nNrOfObjects; ++i)
+                {
+                    double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
+                    double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
+                    
+                    IObject* pObject = m_pTemplate->clone();
+                    IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
+                    
+                    pObject->setOrigin(Vector2d(fX, fY)+m_vecOrigin);
+                    m_pDataStorage->addObject(pObject);
+                    m_pDataStorage->addObjectVisuals(pObjectVisuals);
+                    
+                    pObject->init();
+                }
+                break;
+            case EMITTER_DISTRIBUTION_POINT_SOURCE:
+                for (int i=0; i<nNrOfObjects; ++i)
+                {
+                    double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_fAngle + m_fHookAngle;
+                    double fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
+                    Rotation2Dd Rotation(m_fAngle + m_fHookAngle);
+                                    
+                    IObject* pObject = m_pTemplate->clone();
+                    IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
+                    
+                    pObject->setOrigin(Rotation * m_vecOrigin + m_vecHookOrigin);
+                    pObject->setVelocity(fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
+                    m_pDataStorage->addObject(pObject);
+                    m_pDataStorage->addObjectVisuals(pObjectVisuals);
+                    
+                    pObject->init();
+                }
+        }
     }
 }
 

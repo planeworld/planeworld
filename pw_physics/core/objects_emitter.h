@@ -9,7 +9,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       object_emitter.h
+/// \file       objects_emitter.h
 /// \brief      Prototype of class "CObjectEmitter"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)

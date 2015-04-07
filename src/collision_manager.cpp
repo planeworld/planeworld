@@ -283,10 +283,10 @@ void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CBody* _p1, CDebris* 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Tests circle shape against debris
+/// \brief Tests polyline shape against debris
 ///
-/// \param _pC1 Circle shape, time t1
-/// \param _pC0 Circle shape, time t0
+/// \param _pP1 Polyline shape, time t1
+/// \param _pP0 Polyline shape, time t0
 /// \param _p1 Object 1
 /// \param _p2 Debris
 ///
@@ -378,7 +378,7 @@ void CCollisionManager::test(CPolyLine* _pP1, CPolyLine* _pP0, CBody* _p1, CDebr
                 Vector2d vecNewVelTang = ((*itVel).dot(((*ciPS0)-(*ciPS1)).normalized())) * ((*ciPS0)-(*ciPS1)).normalized();
                 Vector2d vecNewVelOrth = vecNewVelTang - (*itVel);
                 
-                (*itVel) = (vecNewVelOrth * fDampTang + vecNewVelTang * fDampOrth) * 0.7071;
+                (*itVel) = (vecNewVelOrth * fDampOrth + vecNewVelTang * fDampTang) * 0.7071;
 
                 // Add the velocity of the object because debris' are virtually weightless.
                 // Otherwise, they would be passed in the next step

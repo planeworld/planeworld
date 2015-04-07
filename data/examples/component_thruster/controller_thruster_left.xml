@@ -1,0 +1,24 @@
+<!DOCTYPE PlaneworldML>
+<component
+    name="ControllerThrusterLeft"
+    hook="RocketBody"
+    thrust_max="5000"
+    angle="120.0"
+    origin_x="-5.8"
+    origin_y="12.0"
+    >
+    <emitter
+        type="debris_emitter"
+        debris_type="debris_dot"
+        mode="timed"
+        frequency="50.0"
+        distribution="point_source"
+        origin_x="-3.2"
+        origin_y="12.0"
+        velocity="5.0"
+        velocity_std="2.0"
+        angle="120.0"
+        angle_std="5.0"
+        number="100"
+    />
+</component>

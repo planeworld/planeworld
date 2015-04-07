@@ -26,13 +26,15 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "debris_visuals.h"
+#include "debris_visuals_thruster.h"
 #include "joint.h"
 #include "object_visuals.h"
 
-typedef std::list<IJoint*>              JointsType;         ///< Specifies a list of joints
-typedef std::list<CDebris*>             DebrisType;         ///< Specifies a list of debris
-typedef std::list<CDebrisVisuals*>      DebrisVisualsType;  ///< Specifies a list of debris visuals
-typedef std::vector<IObjectVisuals*>    ObjectVisualsType;  ///< Specifies a list of object visuals
+typedef std::list<IJoint*>                      JointsType;                 ///< Specifies a list of joints
+typedef std::list<CDebris*>                     DebrisType;                 ///< Specifies a list of debris
+typedef std::list<CDebrisVisuals*>              DebrisVisualsType;          ///< Specifies a list of debris visuals
+typedef std::list<CDebrisVisualsThruster*>      DebrisVisualsThrusterType;  ///< Specifies a list of debris visuals
+typedef std::vector<IObjectVisuals*>            ObjectVisualsType;          ///< Specifies a list of object visuals
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -49,18 +51,20 @@ class CWorldDataStorage
         ~CWorldDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
-        const DebrisType&           getDebris() const;
-        const DebrisVisualsType&    getDebrisVisuals() const;
-        const JointsType&           getJoints() const;
-        const ObjectsType&          getDynamicObjects();
-        const ObjectsType&          getStaticObjects();
-        const ObjectVisualsType&    getObjectVisuals();
+        const DebrisType&                   getDebris() const;
+        const DebrisVisualsType&            getDebrisVisuals() const;
+        const DebrisVisualsThrusterType&    getDebrisVisualsThruster() const;
+        const JointsType&                   getJoints() const;
+        const ObjectsType&                  getDynamicObjects();
+        const ObjectsType&                  getStaticObjects();
+        const ObjectVisualsType&            getObjectVisuals();
         
         const ObjectsType::const_iterator recallDynamicObject(const std::string&);
         
         //--- Methods --------------------------------------------------------//
         void addDebris(CDebris*);
         void addDebrisVisuals(CDebrisVisuals*);
+        void addDebrisVisualsThruster(CDebrisVisualsThruster*);
         void addJoint(IJoint*);
         void addObject(IObject*);
         void addObjects(ObjectsType);
@@ -74,17 +78,18 @@ class CWorldDataStorage
         
     private:
                 
-        DebrisType          m_Debris;                   ///< List of debris
-        DebrisVisualsType   m_DebrisVisuals;            ///< List of debris visuals
-        JointsType          m_Joints;                   ///< List of joints
-        ObjectsType         m_DynamicObjects;           ///< List of dynamic objects
-        ObjectsType         m_StaticObjects;            ///< List of static objects
-        ObjectVisualsType   m_ObjectVisuals;            ///< List of object visuals
+        DebrisType                  m_Debris;                   ///< List of debris
+        DebrisVisualsType           m_DebrisVisuals;            ///< List of debris visuals
+        DebrisVisualsThrusterType   m_DebrisVisualsThruster;    ///< List of debris visuals
+        JointsType                  m_Joints;                   ///< List of joints
+        ObjectsType                 m_DynamicObjects;           ///< List of dynamic objects
+        ObjectsType                 m_StaticObjects;            ///< List of static objects
+        ObjectVisualsType           m_ObjectVisuals;            ///< List of object visuals
         
         std::unordered_map<std::string, ObjectsType::const_iterator> m_DynamicObjectsMemory; ///< Stores index to specific object
         
-        std::mutex           m_ObjectMutex;             ///< Mutex to lock object
-        std::mutex           m_ObjectVisualsMutex;      ///< Mutex to lock object visuals
+        std::mutex                  m_ObjectMutex;              ///< Mutex to lock object
+        std::mutex                  m_ObjectVisualsMutex;       ///< Mutex to lock object visuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -113,6 +118,19 @@ inline const DebrisVisualsType& CWorldDataStorage::getDebrisVisuals() const
 {
     METHOD_ENTRY("CWorldDataStorage::getDebrisVisuals")
     return m_DebrisVisuals;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns a list of thruster debris visuals.
+///
+/// \return List of thruster debris visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const DebrisVisualsThrusterType& CWorldDataStorage::getDebrisVisualsThruster() const
+{
+    METHOD_ENTRY("CWorldDataStorage::getDebrisVisualsThruster")
+    return m_DebrisVisualsThruster;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

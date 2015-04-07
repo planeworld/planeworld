@@ -21,6 +21,7 @@
 #define EMITTER_H
 
 //--- Standard header --------------------------------------------------------//
+#include <chrono>
 #include <list>
 #include <random>
 
@@ -89,10 +90,16 @@ class IEmitter : public IUniverseScaled,
         virtual const EmitterType   getEmitterType() const;
         
         const EmitterModeType       getMode() const;
+        const double&               getVelocity() const;
+        const double&               getVelocityStd() const;
+        const bool&                 isActive() const;
         
         //--- Methods --------------------------------------------------------//
         virtual void emit(const double& = -1.0) = 0;
         virtual void init() = 0;
+        
+        void activate();
+        void deactivate();
         
         void setAngle(const double&);
         void setAngleStd(const double&);
@@ -116,6 +123,8 @@ class IEmitter : public IUniverseScaled,
         
         u_int32_t               m_nNr;                      ///< Maximum number of emitted entities
         
+        bool                    m_bActive;                  ///< Flags if emitter is activated
+        
         double                  m_fAngle;                   ///< Angle for point source distribution
         double                  m_fAngleStd;                ///< Angle standard deviation for point source distribution
         double                  m_fFrequency;               ///< Frequency of timed emitter
@@ -129,11 +138,10 @@ class IEmitter : public IUniverseScaled,
         double                  m_fResidual;                ///< Residual of emitation, since engine frequency differs from emitation frequency
         
         Vector2d                m_vecOrigin;                ///< Origin of emitter
-                
 };
 
 /// Specifies a list of emitters
-typedef std::list<IEmitter*> EmittersType;
+typedef std::unordered_multimap<std::string, IEmitter*> EmittersType;
 
 //--- Enum parser ------------------------------------------------------------//
 const std::map<EmitterType, std::string> mapEmitterToString = {
@@ -181,6 +189,7 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
                               m_NormalDist(0.0,1.0),
                               m_UniformDist(0.0,1.0),
                               m_nNr(10),
+                              m_bActive(true),
                               m_fAngle(EMITTER_DEFAULT_ANGLE),
                               m_fAngleStd(EMITTER_DEFAULT_ANGLE_STD),
                               m_fFrequency(EMITTER_DEFAULT_FREQUENCY),
@@ -194,6 +203,8 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
 {
     METHOD_ENTRY("IEmitter::IEmitter")
     CTOR_CALL("IEmitter::IEmitter")
+    
+    m_vecOrigin.setZero();
     
     IHooker::m_strName += ": Emitter";
 }
@@ -233,6 +244,69 @@ inline const EmitterModeType IEmitter::getMode() const
 {
     METHOD_ENTRY("IEmitter::getMode")
     return m_EmitterMode;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the emitters velocity
+///
+/// \return Emitter velocity
+///
+///////////////////////////////////////////////////////////////////////////////
+inline const double& IEmitter::getVelocity() const
+{
+    METHOD_ENTRY("IEmitter::getVelocity")
+    return m_fVelocity;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the emitters velocity standard deviation
+///
+/// \return Emitter velocity standard deviation
+///
+///////////////////////////////////////////////////////////////////////////////
+inline const double& IEmitter::getVelocityStd() const
+{
+    METHOD_ENTRY("IEmitter::getVelocityStd")
+    return m_fVelocityStd;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the activation state of emitter
+///
+/// \return Emitter active?
+///
+///////////////////////////////////////////////////////////////////////////////
+inline const bool& IEmitter::isActive() const
+{
+    METHOD_ENTRY("IEmitter::isActive")
+    return m_bActive;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Activates the emitter
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void IEmitter::activate()
+{
+    METHOD_ENTRY("IEmitter::activate")
+    
+    m_bActive = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Dectivates the emitter
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void IEmitter::deactivate()
+{
+    METHOD_ENTRY("IEmitter::deactivate")
+    
+    m_bActive = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

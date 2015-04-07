@@ -58,6 +58,7 @@ class CXMLImporter : public IWorldDataStorageUser
         //--- Constant Methods -----------------------------------------------//
         CCamera*                        getCamera() const;
         Vector2d                        getGravity() const;
+        const ComponentsType&           getComponents() const;
         const EmittersType&             getEmitters() const;
         const std::string&              getFont() const;
         const double&                   getFrequencyDebris() const;
@@ -160,6 +161,19 @@ inline Vector2d CXMLImporter::getGravity() const
 {
     METHOD_ENTRY("CXMLImporter::getGravity")
     return m_vecGravity;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return imported components
+///
+/// \return List of components
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ComponentsType& CXMLImporter::getComponents() const
+{
+    METHOD_ENTRY("CXMLImporter::getComponents")
+    return m_Components;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -63,8 +63,6 @@ class CPhysicsManager : public IWorldDataStorageUser
         CUniverse* const getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
-        void registerComponent(const CThruster* const);
-        
         void setConstantGravity(const Vector2d&);
         void setFrequency(const double&);
         void setFrequencyDebris(const double&);
@@ -73,9 +71,12 @@ class CPhysicsManager : public IWorldDataStorageUser
         void setUniverse(CUniverse* const);
         
         void addGlobalForces();
-        void addEmitter(IEmitter*);
+        void addComponent(CThruster* const);
+        void addComponents(const ComponentsType&);
+        void addEmitter(IEmitter* const);
         void addEmitters(const EmittersType&);
         void collisionDetection();
+        void initComponents();
         void initEmitters();
         bool initLua();
         void initObjects();
@@ -98,6 +99,7 @@ class CPhysicsManager : public IWorldDataStorageUser
 
         Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
 
+        ComponentsType  m_Components;               ///< List of components
         EmittersType    m_Emitters;                 ///< List of emitters
         
         double          m_fCellUpdateResidual;      ///< Residual for calculation of cell update
@@ -108,6 +110,8 @@ class CPhysicsManager : public IWorldDataStorageUser
         std::string                m_strLuaPhysicsInterface;    ///< Lua physics interface file
         
         static CPhysicsManager*    m_pLuaThis;                  ///< Store this-pointer for Lua access
+        static int                 luaActivateThruster(lua_State*);
+        static int                 luaDeactivateThruster(lua_State*);
         static int                 luaApplyForce(lua_State*);
         static int                 luaGetFrequency(lua_State*);
         static int                 luaGetPosition(lua_State*);

@@ -1,0 +1,24 @@
+<!DOCTYPE PlaneworldML>
+<component
+    name="MainThruster"
+    hook="RocketBody"
+    thrust_max="11500000"
+    angle="180.0"
+    origin_x="  0.0"
+    origin_y="-27.0"
+    >
+    <emitter
+        type="debris_emitter"
+        debris_type="debris_thrust"
+        mode="timed"
+        frequency="200.0"
+        distribution="point_source"
+        origin_x="  0.0"
+        origin_y="-27.5"
+        velocity="50.0"
+        velocity_std="20.0"
+        angle="180.0"
+        angle_std="10.0"
+        number="1000"
+    />
+</component>

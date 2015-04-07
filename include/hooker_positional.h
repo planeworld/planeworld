@@ -113,7 +113,7 @@ inline const HookerType IHookerPositional::getHookerType() const
 ///
 /// \param _vecCell Cell of hooked entitiy
 /// \param _vecOrigin Origin of hooked entity
-/// \param _fAngle Angle of hooked Entity
+/// \param _fAngle Angle of hooked entity
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline void IHookerPositional::updateFromHookable(const Vector2i& _vecCell,

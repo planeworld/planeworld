@@ -137,7 +137,7 @@ void CCamera::update()
     else
     {
         updateWithHook();
-        m_Graphics.rotCamTo(M_PI_2+m_fAngle+m_fHookAngle);
+        m_Graphics.rotCamTo(m_fAngle+m_fHookAngle);
     }
     
     m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
@@ -295,7 +295,7 @@ void CCamera::updateWithHook()
     std::vector<Vector2d>  vecFrame(4);
     Rotation2Dd            CameraRotation(m_fAngle);
     
-    Rotation2Dd HookRotation(M_PI_2+m_fHookAngle);
+    Rotation2Dd HookRotation(m_fHookAngle);
 
     m_vecCenter = HookRotation * m_vecPosition + m_vecHookOrigin + IUniverseScaled::cellToDouble(m_vecHookCell);
 

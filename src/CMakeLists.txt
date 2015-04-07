@@ -27,6 +27,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/circle_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals_thruster.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/object_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/planet_visuals.cpp    
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/polyline_visuals.cpp

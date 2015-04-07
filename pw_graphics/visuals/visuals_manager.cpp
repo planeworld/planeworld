@@ -9,7 +9,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       visuals.cpp
+/// \file       visuals_manager.h
 /// \brief      Implementation of class "CVisualsManager"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
@@ -521,33 +521,33 @@ void CVisualsManager::drawWorld()
         {
             if (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() > 1.0)
             {
-            Vector2d vecPosRel = (*ci)->getObject()->getCOM()-
-                                m_pCamera->getCenter()+
-                                IUniverseScaled::cellToDouble
-                                ((*ci)->getObject()->getCell()-
-                                m_pCamera->getCell());
-            
-            // Now draw the text
-            sf::Text text;
-            double fColor = (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
-            if (fColor > 255.0) fColor = 255.0;
-            sf::Color color(255.0,255.0,255.0, fColor);
-            
-            std::string strHookers("");
-            auto cj = (*ci)->getObject()->getHookers().cbegin();
-            while (cj != (*ci)->getObject()->getHookers().cend())
-            {
-              strHookers += "\n" + (*cj)->getName();
-              ++cj;
-            }
-            
-            text.setString((*ci)->getObject()->getName() + strHookers);
-            text.setFont(m_Font);
-            text.setCharacterSize(nTextSize);
-            text.setColor(color);
-            text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+                Vector2d vecPosRel = (*ci)->getObject()->getCOM()-
+                                    m_pCamera->getCenter()+
+                                    IUniverseScaled::cellToDouble
+                                    ((*ci)->getObject()->getCell()-
+                                    m_pCamera->getCell());
+                
+                // Now draw the text
+                sf::Text text;
+                double fColor = (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
+                if (fColor > 255.0) fColor = 255.0;
+                sf::Color color(255.0,255.0,255.0, fColor);
+                
+                std::string strHookers("");
+                auto cj = (*ci)->getObject()->getHookers().cbegin();
+                while (cj != (*ci)->getObject()->getHookers().cend())
+                {
+                  strHookers += "\n" + (*cj)->getName();
+                  ++cj;
+                }
+                
+                text.setString((*ci)->getObject()->getName() + strHookers);
+                text.setFont(m_Font);
+                text.setCharacterSize(nTextSize);
+                text.setColor(color);
+                text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
 
-            m_Graphics.getWindow()->draw(text);
+                m_Graphics.getWindow()->draw(text);
             }
         }
         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
@@ -590,6 +590,11 @@ void CVisualsManager::drawWorld()
     }
     for (std::list<CDebrisVisuals*>::const_iterator ci = m_pDataStorage->getDebrisVisuals().begin();
          ci != m_pDataStorage->getDebrisVisuals().end(); ++ci)
+    {
+        (*ci)->draw(m_pCamera);
+    }
+    for (std::list<CDebrisVisualsThruster*>::const_iterator ci = m_pDataStorage->getDebrisVisualsThruster().begin();
+         ci != m_pDataStorage->getDebrisVisualsThruster().end(); ++ci)
     {
         (*ci)->draw(m_pCamera);
     }

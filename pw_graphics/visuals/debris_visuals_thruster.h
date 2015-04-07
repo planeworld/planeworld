@@ -9,53 +9,48 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       rigidbody.h
-/// \brief      Prototype of class "CRigidBody"
+/// \file       debris_visuals_thruster.h
+/// \brief      Prototype of class "CDebrisVisualsThruster"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2009-10-18
+/// \date       2015-04-03
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef RIGIDBODY_H
-#define RIGIDBODY_H
+#ifndef DEBRIS_VISUALS_THRUSTER_H
+#define DEBRIS_VISUALS_THRUSTER_H
 
-// Standard-header
+//--- Standard header --------------------------------------------------------//
 
-// Program-header
-#include "body.h"
+//--- Program header ---------------------------------------------------------//
+#include "camera.h"
+#include "debris.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class representing rigid body
-/// 
+/// \brief Class for managing the visualisation of thruster output
+///
 ////////////////////////////////////////////////////////////////////////////////
-class CRigidBody : public CBody
+class CDebrisVisualsThruster : public CGraphicsBase
 {
     
     public:
-    
+
         //--- Constructor/Destructor -----------------------------------------//
-        CRigidBody();
-        virtual ~CRigidBody();
+        CDebrisVisualsThruster(CDebris*);
+        ~CDebrisVisualsThruster();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual IObject* clone() const;
-        
+        void draw(const CCamera* const) const;
+                
         //--- Methods --------------------------------------------------------//
-        virtual void addForce(const Vector2d&, const Vector2d&);
-        virtual void addForceLC(const Vector2d&, const Vector2d&);
-        virtual void clearForces();
+        void attach(CDebris*);
         
-        //--- Static Methods -------------------------------------------------//
-        static uint32_t getCount();
-
-    protected:
-
-        //--- Methods [protected] --------------------------------------------//
-        virtual void myDynamics(const double&);
+    private:
         
-        static uint32_t m_unNrOfRigidBodies;    ///< Static counter for name initialisation and tracking
+        CDebrisVisualsThruster();       ///< Constructor is private
+        
+        CDebris* m_pDebris;
 
 };
 
@@ -63,15 +58,15 @@ class CRigidBody : public CBody
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Get the absolute count of object instances
+/// \brief Attaches a debris to debris visuals
 ///
-/// \return Count of object instances
+/// \param _pDebris Debris to attach
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline uint32_t CRigidBody::getCount()
+inline void CDebrisVisualsThruster::attach(CDebris* _pDebris)
 {
-    METHOD_ENTRY("CBody::getCount")
-    return m_unNrOfRigidBodies;
+    METHOD_ENTRY("CDebrisVisualsThruster::attach")
+    m_pDebris = _pDebris;
 }
 
 #endif

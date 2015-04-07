@@ -101,20 +101,24 @@ inline const HookersType& IHookable::getHookers() const
 ///
 /// \brief Hooks entity to this hookable
 ///
+/// Note that this method does not set the hookable pointer for the hooker. This
+/// method is just used internally, hooker->hook should be called from outside
+/// to ensure correct pointer settings.
+///
+/// \todo Make this method private and a friend of hooker.
+///
 /// \param _pHooker Entity to be hooked
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline void IHookable::addHooker(IHooker* const _pHooker)
 {
     METHOD_ENTRY("IHookable::addHooker")
-    m_Hookers.push_back(_pHooker); 
+    m_Hookers.push_back(_pHooker);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Updates trajectory with a new value
-///
-/// \param _pHooker Entity to be hooked
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline void IHookable::updateHookers()

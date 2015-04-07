@@ -136,9 +136,35 @@ void CRigidBody::addForce(const Vector2d& _vecF, const Vector2d& _vecPOC)
 
     /// \todo Check if COM is handeled correctly when object is rotated
     m_vecForce  +=  _vecF;
+    m_fTorque   +=  (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[0] * _vecF[1] -
+                    (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[1] * _vecF[0];
+//     m_fTorque   +=  _vecPOC[0] * _vecF[1] - _vecPOC[1] * _vecF[0];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Adds a force to rigidbody (local coordinates given)
+///
+/// \param _vecF Force to be applied
+/// \param _vecPOC Point of contact
+///
+///////////////////////////////////////////////////////////////////////////////
+void CRigidBody::addForceLC(const Vector2d& _vecF, const Vector2d& _vecPOC)
+{
+    METHOD_ENTRY("CRigidBody::addForceLC")
+
+    /// \todo Check if COM is handeled correctly when object is rotated
+    
 //     m_fTorque   +=  (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[0] * _vecF[1] -
 //                     (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[1] * _vecF[0];
-    m_fTorque   +=  _vecPOC[0] * _vecF[1] - _vecPOC[1] * _vecF[0];
+    
+    Rotation2Dd Rotation(m_fAngle);
+    
+    m_vecForce  +=  Rotation * _vecF;
+    
+    Vector2d vecTmp = Rotation * _vecPOC;
+    Vector2d vecTmp2 = Rotation * _vecF;
+    m_fTorque   +=  vecTmp[0] * vecTmp2[1] - vecTmp[1] * vecTmp2[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -249,6 +249,7 @@ int main(int argc, char *argv[])
 //         pPhysicsManager->addObjects(XMLImporter.getObjects());
 //         pVisualsManager->addVisualsList(XMLImporter.getVisuals());
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
+        pPhysicsManager->addComponents(XMLImporter.getComponents());
         pPhysicsManager->addEmitters(XMLImporter.getEmitters());
         pPhysicsManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
         pPhysicsManager->setFrequency(XMLImporter.getPhysicsFrequency());
@@ -328,8 +329,9 @@ int main(int argc, char *argv[])
     pPhysicsManager->setUniverse(&Universe);
 
     //--- Set initialisation state of all objects ----------------------------//
-    pPhysicsManager->initEmitters();
     pPhysicsManager->initObjects();
+    pPhysicsManager->initEmitters();
+    pPhysicsManager->initComponents();
     if (!pPhysicsManager->initLua()) return EXIT_FAILURE;
     
     //--- Initialise graphics ------------------------------------------------//
@@ -400,11 +402,6 @@ int main(int argc, char *argv[])
                         case sf::Keyboard::B:
                         {
                             pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
-                            break;
-                        }
-                        case sf::Keyboard::F:
-                        {
-                            Thruster.fire();
                             break;
                         }
                         case sf::Keyboard::G:

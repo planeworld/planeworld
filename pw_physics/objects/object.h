@@ -87,6 +87,7 @@ class IObject : public IHookable, public IUniverseScaled
 
         //--- Methods --------------------------------------------------------//
         virtual void        addForce(const Vector2d&,  const Vector2d&) = 0;   ///< Add a force
+        virtual void        addForceLC(const Vector2d&,  const Vector2d&) = 0; ///< Add a force (local coordinates)
         virtual void        clearForces() = 0;                                 ///< Clear forces acting on object
         
         void                addAcceleration(const Vector2d&);

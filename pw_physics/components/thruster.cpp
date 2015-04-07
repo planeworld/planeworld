@@ -19,45 +19,81 @@
 
 #include "thruster.h"
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Initialises the thruster
+/// \brief Constructor
 ///
-/// This method initialises a thruster. This includes hooking an emitter for
-/// thruster output to the physical object.
-///
-/// \param _pHookable The entity the thruster is hooked on
-/// \param _pEmitter The emitter for this thruster
-///
-/// \return Returns if thruster initialisation was successful
-///
-///////////////////////////////////////////////////////////////////////////////
-bool CThruster::init(IHookable* const _pHookable, IEmitter* const _pEmitter)
+////////////////////////////////////////////////////////////////////////////////
+CThruster::CThruster() : m_bActive(true),
+                         m_fAngle(0.0),
+                         m_fThrust(1.0),
+                         m_fThrustMax(1.0),
+                         m_pEmitter(nullptr),
+                         m_fEmitterVelocity(1.0),
+                         m_fEmitterVelocityStd(0.0)
 {
-    if (_pHookable->getHookableType() != HOOKABLE_OBJECT)
+    METHOD_ENTRY("CThruster::CThruster")
+    CTOR_CALL("CThruster::CThruster")
+    
+    m_vecOrigin.setZero();
+    
+    IHooker::m_strName += ": Thruster";
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Activate thruster
+///
+/// This method sets the thrust member variable that is applied within the
+/// execute() method which is called by the physics manager periodically.
+///
+/// \param _fThrust Thrust (reactive force) to apply
+///
+///////////////////////////////////////////////////////////////////////////////
+void CThruster::activate(const double& _fThrust)
+{
+    METHOD_ENTRY("CThruster::activate")
+    
+    m_fThrust = _fThrust;
+    if (m_fThrust > m_fThrustMax)
     {
-        ERROR_MSG("Thruster", "Unable to init to this entity. Hookable should be an object.")
-        return false;
+      NOTICE_MSG("Thruster", "Exceeding maximum thrust, limiting to " << m_fThrustMax)
+      m_fThrust = m_fThrustMax;
     }
+    if (m_fThrust < 0.0) m_fThrust = 0.0;
+    if (m_fThrust == 0.0) this->deactivate();
     else
     {
-      m_pEmitter = _pEmitter;
-      _pHookable->addHooker(_pEmitter);
-      _pHookable->addHooker(this);
-      return true;
+      m_bActive = true;
+      m_pEmitter->activate();
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Apply thruster
+/// \brief Apply thrust
 ///
 /// This method applies a force depending on the orientation and position of
-/// the object the thruster is hooked on.
+/// the object the thruster is hooked on. This is clipped by maximum thrust
+/// value.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CThruster::fire()
+void CThruster::execute()
 {
-  static_cast<IObject*>(m_pHookable)->addForce(Vector2d(0.0, 200.0),
-                                              Vector2d(0.0, 0.0));
+    METHOD_ENTRY("CThruster::execute")
+
+    /// \todo Using positional hook is more elegant, but using addForceLC is
+    ///       probably more efficient
+    if (m_bActive)
+    {
+        Rotation2Dd HookRotation(m_fHookAngle);
+        Rotation2Dd ThrusterRotation(m_fAngle);
+        static_cast<IObject*>(m_pHookable)->addForce(HookRotation * (ThrusterRotation * Vector2d(0.0, -m_fThrust)),
+                                                     HookRotation * m_vecOrigin + m_vecHookOrigin);
+        if (m_fThrustMax != 0.0)
+        {
+            m_pEmitter->setVelocity(m_fThrust/m_fThrustMax * m_fEmitterVelocity);
+            m_pEmitter->setVelocityStd(m_fThrust/m_fThrustMax * m_fEmitterVelocityStd);
+        }
+    }
 }

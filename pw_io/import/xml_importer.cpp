@@ -239,14 +239,14 @@ bool CXMLImporter::import(const std::string& _strFilename,
                 auto it = m_pDataStorage->getDynamicObjects().find(strHookable);
                 if (it != m_pDataStorage->getDynamicObjects().end())
                 {
-                    (*it).second->addHooker((*ci).second);
+                    (*ci).second->hook((*it).second);
                 }
                 else
                 {
                     it = m_pDataStorage->getStaticObjects().find(strHookable);
                     if (it != m_pDataStorage->getStaticObjects().end())
                     {
-                        (*it).second->addHooker((*ci).second);
+                        (*ci).second->hook((*it).second);
                     }
                     else
                     {
@@ -333,7 +333,7 @@ const double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node,
         {
             DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
                                       " default value " << _fDef << ".")
-        }       
+        }
         return _fDef;
     }
     else
@@ -415,7 +415,7 @@ const std::string CXMLImporter::checkAttributeString(const pugi::xml_node& _Node
         {
             DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " not found. Using"
                                        " default value " << _strDef << ".")
-        }   
+        }
         return _strDef;
     }
     else
@@ -583,7 +583,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 ));
                 
                 m_pCurrentEmitter = pObjEmitter;
-                m_Emitters.push_back(pObjEmitter);
+                m_Emitters.insert(std::pair<std::string,IEmitter*>(pObjEmitter->getName(), pObjEmitter));
             }
             else if (strType == "debris_emitter")
             {
@@ -593,6 +593,9 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 MEM_ALLOC("CDebrisEmitter")
                 
                 pDebrisEmitter->setName(checkAttributeString(_Node, "name", pDebrisEmitter->getName()));
+                
+                std::string strDebrisType = checkAttributeString(_Node, "debris_type", mapDebrisTypeToString.at(pDebrisEmitter->getDebrisType()));
+                pDebrisEmitter->setDebrisType(mapStringToDebrisType.at(strDebrisType));
                 
                 std::string strMode = checkAttributeString(_Node, "mode", mapEmitterModeToString.at(EMITTER_DEFAULT_MODE));
                 if (strMode == "emit_once")
@@ -665,7 +668,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 ));
                 
                 m_pCurrentEmitter = pDebrisEmitter;
-                m_Emitters.push_back(pDebrisEmitter);
+                m_Emitters.insert(std::pair<std::string,IEmitter*>(pDebrisEmitter->getName(), pDebrisEmitter));
             }
             else
             {
@@ -697,57 +700,72 @@ void CXMLImporter::createComponent(const pugi::xml_node& _Node)
     {
         INFO_MSG("XML Importer", "Creating component.")
         
-        CThruster* pThruster = new CThruster;
-        MEM_ALLOC("CThruster")
-
-        // Read emitter information
-        pugi::xml_node N = _Node.first_child();
-
-        while (!N.empty())
+        std::string strThrusterHook = checkAttributeString(_Node, "hook", "no_hook");
+        
+        // Check, if a thruster hook is given, this is mandatory
+        if (strThrusterHook != "no_hook")
         {
-            if (std::string(N.name()) == "emitter")
-            {
-                this->createEmitter(N);
-                pThruster->setEmitter(m_pCurrentEmitter);
-                
-                // Hook the emitter and ensure it hasn't already been hooked
-//                 if (m_Hooks.find(checkAttributeString(_Node, "hook", "no_hook")
-//                 if ((m_Hooks.insert(std::pair<std::string,IHooker*>(
-//                                       checkAttributeString(_Node, "hook", "no_hook"),
-//                                       m_pCurrentEmitter
-//                                   ))).second == false)
+            CThruster* pThruster = new CThruster;
+            MEM_ALLOC("CThruster")
+            
+            // Read thruster information
+            pThruster->setName(checkAttributeString(_Node, "name", pThruster->getName()));
+            pThruster->setAngle(checkAttributeDouble(_Node, "angle", pThruster->getAngle())/180.0*M_PI);
+            pThruster->setOrigin(Vector2d(checkAttributeDouble(_Node, "origin_x", pThruster->getOrigin()[0]),
+                                          checkAttributeDouble(_Node, "origin_y", pThruster->getOrigin()[1])));
+            pThruster->setThrustMax(checkAttributeDouble(_Node, "thrust_max", 1.0));
+            
+            m_Hooks.insert(std::pair<std::string,IHooker*>(
+                strThrusterHook,
+                pThruster
+            ));
 
+            // Read emitter information
+            pugi::xml_node N = _Node.first_child();
+
+            while (!N.empty())
+            {
+                if (std::string(N.name()) == "emitter")
+                {
+                    this->createEmitter(N);
+                    pThruster->setEmitter(m_pCurrentEmitter);
+                    
+                    // Hook the emitter and ensure it hasn't already been hooked
+                    
+                    bool bDuplicate = false;
+                    auto ciRange = m_Hooks.equal_range(checkAttributeString(_Node, "hook", "no_hook"));
+                    auto ci = ciRange.first;
+                    while (ci != ciRange.second)
+                    {
+                      if ((*ci).second == m_pCurrentEmitter) bDuplicate = true;
+                      ++ci;
+                    }
+                    if (bDuplicate)
+                    {
+                        NOTICE_MSG("XML Importer", "Hook already defined in emitter definition. ")
+                    }
+                    else
+                    {
+                        m_Hooks.insert(std::pair<std::string,IHooker*>(
+                                              checkAttributeString(_Node, "hook", "no_hook"),
+                                              m_pCurrentEmitter
+                                          ));
+                    }
+                }
                 
-                bool bDuplicate = false;
-                auto ciRange = m_Hooks.equal_range(checkAttributeString(_Node, "hook", "no_hook"));
-                auto ci = ciRange.first;
-                while (ci != ciRange.second)
-                {
-                  if ((*ci).second == m_pCurrentEmitter) bDuplicate = true;
-                  ++ci;
-                }
-                if (bDuplicate)
-                {
-                    NOTICE_MSG("XML Importer", "Hook already defined in emitter definition. ")
-                }
-                else
-                {
-                    m_Hooks.insert(std::pair<std::string,IHooker*>(
-                                          checkAttributeString(_Node, "hook", "no_hook"),
-                                          m_pCurrentEmitter
-                                      ));
-                }
+                N = N.next_sibling();
             }
             
-            N = N.next_sibling();
+            pThruster->setEmitterVelocity(m_pCurrentEmitter->getVelocity());
+            pThruster->setEmitterVelocityStd(m_pCurrentEmitter->getVelocityStd());
+            
+            // Insert thruster to map
+            m_Components.insert(std::pair<std::string,CThruster*>(pThruster->getName(),pThruster));
         }
-        
-        m_Hooks.insert(std::pair<std::string,IHooker*>(
-            checkAttributeString(_Node, "hook", "no_hook"),
-            pThruster
-        ));
-        
-        m_Components.push_back(pThruster);
+        else
+        {
+            WARNING_MSG("XML Importer", "No hook for thruster found, which makes no sense. Thruster won't be created.")
+        }
     } // if (!checkFile(_Node))
 }
 

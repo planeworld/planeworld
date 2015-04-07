@@ -172,8 +172,25 @@ void CWorldDataStorage::addDebrisVisuals(CDebrisVisuals* _pDebrisVisuals)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Add a thruster debris visuals to list
+///
+/// This method adds the given thruster debris visual to the list of thruster
+/// debris visuals.
+///
+/// \param _pDebrisVisualsThruster Thruster debris visual that should be added
+///                                to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWorldDataStorage::addDebrisVisualsThruster(CDebrisVisualsThruster* _pDebrisVisualsThruster)
+{
+    METHOD_ENTRY("CWorldDataStorage::addDebrisVisualsThruster")
+    m_DebrisVisualsThruster.push_back(_pDebrisVisualsThruster);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Add a joint to list
-///new c++ 
+///
 /// This method adds the given joint to the list of joints.
 ///
 /// \param _pJoint Joint that should be added to list

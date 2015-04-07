@@ -58,14 +58,14 @@ CPhysicsManager::~CPhysicsManager()
 
     lua_close(m_pLuaState);
     
-    for (EmittersType::iterator it = m_Emitters.begin();
+    for (auto it = m_Emitters.begin();
         it != m_Emitters.end(); ++it)
     {
         // Free memory if pointer is still existent
-        if ((*it) != 0)
+        if ((*it).second != nullptr)
         {
-            delete (*it);
-            (*it) = 0;
+            delete (*it).second;
+            (*it).second = nullptr;
             MEM_FREED("IEmitter")
         }
         else
@@ -74,28 +74,6 @@ CPhysicsManager::~CPhysicsManager()
         }
     };
 }
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Register a thruster component which registers the emitter.
-///
-/// \param _pThruster Thruster component which should be registered.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::registerComponent(const CThruster* const _pThruster)
-{
-    METHOD_ENTRY("CPhysicsManager::registerComponent")
-    if (_pThruster->getEmitter() != nullptr)
-    {
-        this->addEmitter(_pThruster->getEmitter()); ///< \todo not needed any more
-    }
-    else
-    {
-        NOTICE_MSG("Physics Manager", "Couldn't register thruster component. "
-                   "Probably CThruster::init wasn't called.")
-    }
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -153,7 +131,40 @@ void CPhysicsManager::addGlobalForces()
     for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
         ci != m_pDataStorage->getDebris().end(); ++ci)
     {
-        (*ci)->setForce(Vector2d(0.0, -9.81));
+//         (*ci)->setForce(Vector2d(0.0, -1.81));
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a component to internal list of components
+///
+/// \param _pComponent Component that should be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::addComponent(CThruster* const _pComponent)
+{
+    METHOD_ENTRY("CPhysicsManager::addComponent")
+    m_Components.insert(std::pair<std::string,CThruster*>(_pComponent->getName(), _pComponent));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a list of components to internal list of components
+///
+/// \param _Components Components that should be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::addComponents(const ComponentsType& _Components)
+{
+    METHOD_ENTRY("CPhysicsManager::addComponents")
+
+    auto ci = _Components.cbegin();
+  
+    while (ci != _Components.cend())
+    {
+        this->addComponent((*ci).second);
+        ++ci;
     }
 }
 
@@ -161,13 +172,13 @@ void CPhysicsManager::addGlobalForces()
 ///
 /// \brief Add an emitter to internal list of emitters
 ///
-/// \param _Emitter Emitter that should be added to list
+/// \param _pEmitter Emitter that should be added to list
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addEmitter(IEmitter* _Emitter)
+void CPhysicsManager::addEmitter(IEmitter* const _pEmitter)
 {
     METHOD_ENTRY("CPhysicsManager::addEmitter")
-    m_Emitters.push_back(_Emitter);
+    m_Emitters.insert(std::pair<std::string,IEmitter*>(_pEmitter->getName(), _pEmitter));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -181,11 +192,11 @@ void CPhysicsManager::addEmitters(const EmittersType& _Emitters)
 {
     METHOD_ENTRY("CPhysicsManager::addEmitters")
 
-    EmittersType::const_iterator ci = _Emitters.begin();
+    auto ci = _Emitters.cbegin();
   
-    while (ci != _Emitters.end())
+    while (ci != _Emitters.cend())
     {
-        this->addEmitter((*ci));
+        this->addEmitter((*ci).second);
         ++ci;
     }
 }
@@ -242,10 +253,15 @@ void CPhysicsManager::moveMasses(int nTest)
         }
     }
 
-    for (EmittersType::const_iterator ci = m_Emitters.cbegin();
+    for (auto ci = m_Emitters.cbegin();
         ci != m_Emitters.cend(); ++ci)
     {
-        (*ci)->emit(1.0/m_fFrequency*m_fTimeAccel);
+        (*ci).second->emit(1.0/m_fFrequency*m_fTimeAccel);
+    }
+    for (auto ci = m_Components.cbegin();
+        ci != m_Components.cend(); ++ci)
+    {
+        (*ci).second->execute();
     }
     for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
         ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
@@ -276,6 +292,25 @@ void CPhysicsManager::moveMasses(int nTest)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Initialise all components
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::initComponents()
+{
+    METHOD_ENTRY("CPhysicsManager::initComponents")
+
+    INFO_MSG("Physics Manager", "Initialising components.")
+
+//     auto ci = m_Components.cbegin();
+//     while (ci != m_Components.cend())
+//     {
+//         (*ci)->init();
+//         ++ci;
+//     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Initialise all emitters
 ///
 /// Emitters create objects or debris. Some emitters do just emit objects once,
@@ -294,17 +329,17 @@ void CPhysicsManager::initEmitters()
 
     INFO_MSG("Physics Manager", "Initialising emitters.")
 
-    EmittersType::iterator it = m_Emitters.begin();
+    auto it = m_Emitters.begin();
     while (it != m_Emitters.end())
     {
-        (*it)->setWorldDataStorage(m_pDataStorage);
-        (*it)->init();
-        if ((*it)->getMode() == EMITTER_MODE_EMIT_ONCE)
+        (*it).second->setWorldDataStorage(m_pDataStorage);
+        (*it).second->init();
+        if ((*it).second->getMode() == EMITTER_MODE_EMIT_ONCE)
         {
-            (*it)->emit();
+            (*it).second->emit();
             
-            delete (*it);
-            (*it) = 0;
+            delete (*it).second;
+            (*it).second = nullptr;
             MEM_FREED("IEmitter")
             
             it = m_Emitters.erase(it);
@@ -314,7 +349,7 @@ void CPhysicsManager::initEmitters()
             ++it;
         }
         
-    };
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -332,6 +367,8 @@ bool CPhysicsManager::initLua()
     m_pLuaState = luaL_newstate();
  
     luaL_openlibs(m_pLuaState);
+    lua_register(m_pLuaState, "activate_thruster", luaActivateThruster);
+    lua_register(m_pLuaState, "deactivate_thruster", luaDeactivateThruster);
     lua_register(m_pLuaState, "apply_force", luaApplyForce);
     lua_register(m_pLuaState, "get_frequency", luaGetFrequency);
     lua_register(m_pLuaState, "get_position", luaGetPosition);
@@ -421,6 +458,83 @@ void CPhysicsManager::runCellUpdate()
         m_pDataStorage->memorizeDynamicObject("CellUpdater", ci);
     }
     
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Activates the given thruster
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaActivateThruster(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaActivateThruster")
+
+    int nParam = lua_gettop(_pLuaState);
+    
+    if (nParam == 2)
+    {
+        size_t l;
+        std::string     strThruster = lua_tolstring(_pLuaState,1,&l);
+        double          fThrust     = lua_tonumber (_pLuaState,2);
+        
+        auto itThruster  = m_pLuaThis->m_Components.find(strThruster);
+        if ( itThruster != m_pLuaThis->m_Components.end())
+        {
+            (*itThruster).second->activate(fThrust);
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown thruster " << strThruster)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function activate_thruster (" << nParam << "/2).")
+    }
+    
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Deactivates the given thruster
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaDeactivateThruster(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaDeactivateThruster")
+
+    int nParam = lua_gettop(_pLuaState);
+    
+    if (nParam == 1)
+    {
+        size_t l;
+        std::string strThruster = lua_tolstring(_pLuaState,1,&l);
+        
+        auto itThruster  = m_pLuaThis->m_Components.find(strThruster);
+        if ( itThruster != m_pLuaThis->m_Components.end())
+        {
+            (*itThruster).second->deactivate();
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown thruster " << strThruster)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function deactivate_thruster (" << nParam << "/1).")
+    }
+    
+    return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
