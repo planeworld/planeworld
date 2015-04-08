@@ -29,30 +29,4 @@
 
   <object file="rocket_body.xml"/>
   <object file="earth.xml" />
-    
-  
-  <!-- Create launch pad-->
-  <object type="rigidbody">
-    <core
-        name="Floor"
-        mass="1.0"
-        origin_x="0.0"
-        origin_y="0.0"
-        dynamics="false"
-        gravity="true"
-        velocity_x="0.0"
-        velocity_y="0.0"
-    />
-    <body_core
-        angle_velocity="0.0"
-        inertia="1.0"
-    />
-    <shape
-        type="shape_polyline"
-        line_type="strip"
-        points="-1000.0,  0.0;
-                 1000.0,  0.0">
-        <visuals type="shape_visuals_polyline"/>
-    </shape>
-  </object>
 </universe>
