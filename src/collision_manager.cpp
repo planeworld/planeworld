@@ -310,8 +310,6 @@ void CCollisionManager::test(CPolyLine* _pP1, CPolyLine* _pP0, CBody* _p1, CDebr
     std::list<Vector2d>::const_iterator ciP00;
     std::list<Vector2d>::const_iterator ciP11;
     std::list<Vector2d>::const_iterator ciP10;
-    ++ciP11;
-    ++ciP10;
     
     // Iterators storing the segment vertices of collision
     std::list<Vector2d>::const_iterator ciPS1;
