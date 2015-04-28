@@ -24,8 +24,8 @@
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CThruster::CThruster() : m_bActive(true),
-                         m_fAngle(0.0),
+CThruster::CThruster() : m_pThrusterBody(nullptr),
+                         m_bActive(true),
                          m_fThrust(1.0),
                          m_fThrustMax(1.0),
                          m_pEmitter(nullptr),
@@ -35,9 +35,7 @@ CThruster::CThruster() : m_bActive(true),
     METHOD_ENTRY("CThruster::CThruster")
     CTOR_CALL("CThruster::CThruster")
     
-    m_vecOrigin.setZero();
-    
-    IHooker::m_strName += ": Thruster";
+//     IHooker::m_strName += ": Thruster";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,14 +80,13 @@ void CThruster::execute()
 {
     METHOD_ENTRY("CThruster::execute")
 
-    /// \todo Using positional hook is more elegant, but using addForceLC is
-    ///       probably more efficient
     if (m_bActive)
     {
-        Rotation2Dd HookRotation(m_fHookAngle);
-        Rotation2Dd ThrusterRotation(m_fAngle);
-        static_cast<IObject*>(m_pHookable)->addForce(HookRotation * (ThrusterRotation * Vector2d(0.0, -m_fThrust)),
-                                                     HookRotation * m_vecOrigin + m_vecHookOrigin);
+        Rotation2Dd ThrusterRotation(m_KinematicsState.getAngle());
+        /*if (m_pThrusterBody == nullptr) std::cout << "nullptr" << std::endl;
+        else*/ 
+        m_pThrusterBody->addForce(ThrusterRotation * Vector2d(0.0,-m_fThrust), m_KinematicsState.getOrigin());
+        
         if (m_fThrustMax != 0.0)
         {
             m_pEmitter->setVelocity(m_fThrust/m_fThrustMax * m_fEmitterVelocity);

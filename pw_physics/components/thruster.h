@@ -22,7 +22,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "emitter.h"
-#include "hooker_positional.h"
+#include "kinematics_state_user.h"
+#include "object.h"
 
 //--- Standard header --------------------------------------------------------//
 
@@ -31,7 +32,7 @@
 /// \brief Class representing a thruster component
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CThruster : public IHookerPositional
+class CThruster : public IKinematicsStateUser
 {
     
     public:
@@ -40,8 +41,8 @@ class CThruster : public IHookerPositional
         CThruster();
         
         //--- Constant methods -----------------------------------------------//
-        const double&   getAngle() const;
-        const Vector2d& getOrigin() const;
+        const double    getAngle() const;
+        const Vector2d  getOrigin() const;
         
         IEmitter* const getEmitter() const;
         
@@ -54,6 +55,8 @@ class CThruster : public IHookerPositional
         void setAngle(const double&);
         void setOrigin(const Vector2d&);
         
+        void setObject(IObject* const _pObject) {m_pThrusterBody = _pObject;}
+        
         void setEmitter(IEmitter* const);
         void setThrustMax(const double&);
         void setEmitterVelocity(const double&);
@@ -64,16 +67,15 @@ class CThruster : public IHookerPositional
         //--- Methods --------------------------------------------------------//
 
         //--- Variables ------------------------------------------------------//
-        bool        m_bActive;      ///< Flags if thruster is activated
+        IObject*    m_pThrusterBody; 
       
-        double      m_fAngle;       ///< Angle of thrust vector
-        Vector2d    m_vecOrigin;    ///< Origin of thruster in local coordinates of hooked entity
-        
-        double      m_fThrust;      ///< Thrust applied to hooked object
-        double      m_fThrustMax;   ///< Maximum thrust of this thruster
+        bool        m_bActive;              ///< Flags if thruster is activated
+      
+        double      m_fThrust;              ///< Thrust applied to hooked object
+        double      m_fThrustMax;           ///< Maximum thrust of this thruster
         
         /// \todo Thruster might have more than one emitter. (De-)activation needs to be adressed then, too.
-        IEmitter*   m_pEmitter;     ///< Emitter for thrust particle output
+        IEmitter*   m_pEmitter;             ///< Emitter for thrust particle output
         double      m_fEmitterVelocity;     ///< Default emitter velocity
         double      m_fEmitterVelocityStd;  ///< Default emitter velocity standard deviation
        
@@ -111,7 +113,7 @@ inline void CThruster::deactivate()
 inline void CThruster::setAngle(const double& _fAngle)
 {
     METHOD_ENTRY("CThruster::setAngle")
-    m_fAngle = _fAngle;
+    m_KinematicsState.setAngle(_fAngle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +126,7 @@ inline void CThruster::setAngle(const double& _fAngle)
 inline void CThruster::setOrigin(const Vector2d& _vecOrigin)
 {
     METHOD_ENTRY("CThruster::setOrigin")
-    m_vecOrigin = _vecOrigin;
+    m_KinematicsState.setOrigin(_vecOrigin);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -193,10 +195,10 @@ inline void CThruster::setEmitterVelocityStd(const double& _fEmitterVelocityStd)
 /// \return Angle of thrust vector
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double& CThruster::getAngle() const
+inline const double CThruster::getAngle() const
 {
     METHOD_ENTRY("CThruster::getAngle")
-    return m_fAngle;    
+    return m_KinematicsState.getAngle();    
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -206,10 +208,10 @@ inline const double& CThruster::getAngle() const
 /// \return Origin of thruster
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d& CThruster::getOrigin() const
+inline const Vector2d CThruster::getOrigin() const
 {
     METHOD_ENTRY("CThruster::getOrigin")
-    return m_vecOrigin;    
+    return m_KinematicsState.getOrigin();    
 }
 
 ////////////////////////////////////////////////////////////////////////////////

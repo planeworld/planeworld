@@ -24,7 +24,7 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CBody::CBody() : m_fAngle(0.0), m_fInertia(1.0), m_fTorque(0.0)
+CBody::CBody() : m_fInertia(1.0), m_fTorque(0.0)
 {
     METHOD_ENTRY("CBody::CBody");
     CTOR_CALL("CBody::CBody");
@@ -77,7 +77,7 @@ const Vector2d CBody::getAnchor(const int& _nID) const
     METHOD_ENTRY("CBody::getAnchor")
 
     Vector2d vecResult;
-    Rotation2Dd Rotation(m_fAngle);
+    Rotation2Dd Rotation(m_KinematicsState.getLocalAngle());
 
     vecResult = Rotation * m_Anchors[_nID] + m_pIntPos->getValue();
 
@@ -94,12 +94,15 @@ const Vector2d CBody::getAnchor(const int& _nID) const
 void CBody::myInit()
 {
     METHOD_ENTRY("CBody::myInit")
+    
+    m_pIntAng->init(m_KinematicsState.getLocalAngle());
+    m_pIntAngVel->init(m_KinematicsState.getLocalAngleVelocity());
 
     for (std::list< CDoubleBufferedShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
         ci != m_Geometry.getShapes()->end(); ++ci)
     {
-        (*ci)->getShapeCur()->transform(m_fAngle, m_pIntPos->getValue());
-        (*ci)->getShapeBuf()->transform(m_fAngle, m_pIntPos->getValue());
+        (*ci)->getShapeCur()->transform(m_KinematicsState.getAngle(), m_KinematicsState.getOrigin());
+        (*ci)->getShapeBuf()->transform(m_KinematicsState.getAngle(), m_KinematicsState.getOrigin());
 
         // Update depthlayers
         m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
@@ -107,7 +110,6 @@ void CBody::myInit()
         // Update bounding box
         m_Geometry.updateBoundingBox((*ci)->getShapeCur()->getBoundingBox());
         m_Geometry.updateBoundingBox((*ci)->getShapeBuf()->getBoundingBox());
-        
     }
 }
 
@@ -156,9 +158,6 @@ void CBody::mySetNewIntegrator(const IntegratorType& _IntType)
             MEM_ALLOC("CAdamsBashforthIntegrator")
             break;
     }
-
-    METHOD_EXIT("CBody::mySetNewIntegrator")
-    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,7 +179,7 @@ void CBody::myTransform()
     for (std::list< CDoubleBufferedShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
         ci != m_Geometry.getShapes()->end(); ++ci)
     {
-        (*ci)->getShapeCur()->transform(m_fAngle, m_pIntPos->getValue());
+        (*ci)->getShapeCur()->transform(m_KinematicsState.getAngle(), m_KinematicsState.getOrigin());
 
         // Update depthlayers
         m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
@@ -188,6 +187,4 @@ void CBody::myTransform()
         // Update bounding box of current time step
         m_Geometry.updateBoundingBox((*ci)->getShapeCur()->getBoundingBox());
     }
-
-    METHOD_EXIT("CBody::myTransform")
 }

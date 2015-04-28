@@ -76,41 +76,41 @@ void CCollisionManager::detectCollisions()
 //         m_Graphics.setColor(1.0, 1.0, 1.0);
     }
     
-    //--------------------------------------------------------------------------
-    // Test static objects against debris
-    //--------------------------------------------------------------------------
-    for (ObjectsType::const_iterator ci = m_StaticObjects.begin();
-        ci != m_StaticObjects.end(); ++ci)
-    {
-        for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
-            cj != m_Debris.end(); ++cj)
-        {
-            switch(ci->second->getObjectType())
-            {
-                case OBJECT_BODY:
-                    this->test(static_cast<CBody*>(ci->second), (*cj));
-                    break;
-            }
-        }
-    }
-    
-    //--------------------------------------------------------------------------
-    // Test dynamic objects against debris
-    //--------------------------------------------------------------------------
-    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
-        ci != m_DynamicObjects.end(); ++ci)
-    {
-        for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
-            cj != m_Debris.end(); ++cj)
-        {
-            switch(ci->second->getObjectType())
-            {
-                case OBJECT_BODY:
-                    this->test(static_cast<CBody*>(ci->second), (*cj));
-                    break;
-            }
-        }
-    }
+//     //--------------------------------------------------------------------------
+//     // Test static objects against debris
+//     //--------------------------------------------------------------------------
+//     for (ObjectsType::const_iterator ci = m_StaticObjects.begin();
+//         ci != m_StaticObjects.end(); ++ci)
+//     {
+//         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
+//             cj != m_Debris.end(); ++cj)
+//         {
+//             switch(ci->second->getObjectType())
+//             {
+//                 case OBJECT_BODY:
+//                     this->test(static_cast<CBody*>(ci->second), (*cj));
+//                     break;
+//             }
+//         }
+//     }
+//     
+//     //--------------------------------------------------------------------------
+//     // Test dynamic objects against debris
+//     //--------------------------------------------------------------------------
+//     for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
+//         ci != m_DynamicObjects.end(); ++ci)
+//     {
+//         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
+//             cj != m_Debris.end(); ++cj)
+//         {
+//             switch(ci->second->getObjectType())
+//             {
+//                 case OBJECT_BODY:
+//                     this->test(static_cast<CBody*>(ci->second), (*cj));
+//                     break;
+//             }
+//         }
+//     }
     
     
     METHOD_EXIT("CCollisionManager::detectCollisions")

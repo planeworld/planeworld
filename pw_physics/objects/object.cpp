@@ -28,8 +28,7 @@ IObject::IObject(): m_bGravitation(true),
                 m_bDynamics(true),
                 m_fTimeFac(1.0),
                 m_fMass(1.0),
-                m_nDepthlayers(SHAPE_DEPTH_ALL),
-                m_strName("Object")
+                m_nDepthlayers(SHAPE_DEPTH_ALL)
 {
     METHOD_ENTRY("IObject::IObject")
     CTOR_CALL("IObject::IObject")
@@ -39,7 +38,6 @@ IObject::IObject(): m_bGravitation(true),
     m_pIntVel = new CEulerIntegrator<Vector2d>;
     MEM_ALLOC("CEulerIntegrator")
 
-    m_vecOrigin0.setZero();
     m_vecCOM.setZero();
     m_vecForce.setZero();
     m_vecCell.setZero();
@@ -150,9 +148,9 @@ void IObject::dynamics(const double& _fTimeStep)
         this->myDynamics(_fTimeStep);
         m_Trajectory.update(m_pIntPos->getValue(), m_vecCell);
     }
-
-    METHOD_EXIT("IObject::dynamics")
     
+    m_KinematicsState.setOrigin(m_pIntPos->getValue());
+    m_KinematicsState.setVelocity(m_pIntVel->getValue());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,7 +172,8 @@ void IObject::init()
     m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue()+m_vecCOM);
     this->setCell(m_vecCell);
 
-    m_pIntPos->init(m_vecOrigin0);
+    m_pIntPos->init(m_KinematicsState.getLocalOrigin());
+    m_pIntVel->init(m_KinematicsState.getLocalVelocity());
     this->myInit();
 }
 
@@ -253,9 +252,6 @@ void IObject::setNewIntegrator(const IntegratorType& _IntType)
 
     // Call object specific method
     this->mySetNewIntegrator(_IntType);
-
-    METHOD_EXIT("IObject::setNewIntegrator")
-    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -278,11 +274,5 @@ void IObject::transform()
 
         // Call object specific transformation
         this->myTransform();
-        
-        // Update all entities hooked on this object
-        this->updateHookers();
     }
-
-    METHOD_EXIT("IObject::transform")
-    
 }

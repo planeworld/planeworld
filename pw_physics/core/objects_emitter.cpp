@@ -107,7 +107,7 @@ void CObjectEmitter::emit(const double& _fF)
                     IObject* pObject = m_pTemplate->clone();
                     IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
                     
-                    pObject->setOrigin(Vector2d(fX, fY)+m_vecOrigin);
+                    pObject->setOrigin(Vector2d(fX, fY) + m_KinematicsState.getOrigin());
                     m_pDataStorage->addObject(pObject);
                     m_pDataStorage->addObjectVisuals(pObjectVisuals);
                     
@@ -117,14 +117,13 @@ void CObjectEmitter::emit(const double& _fF)
             case EMITTER_DISTRIBUTION_POINT_SOURCE:
                 for (int i=0; i<nNrOfObjects; ++i)
                 {
-                    double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_fAngle + m_fHookAngle;
+                    double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_KinematicsState.getAngle();;
                     double fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
-                    Rotation2Dd Rotation(m_fAngle + m_fHookAngle);
                                     
                     IObject* pObject = m_pTemplate->clone();
                     IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
                     
-                    pObject->setOrigin(Rotation * m_vecOrigin + m_vecHookOrigin);
+                    pObject->setOrigin(m_KinematicsState.getOrigin());
                     pObject->setVelocity(fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
                     m_pDataStorage->addObject(pObject);
                     m_pDataStorage->addObjectVisuals(pObjectVisuals);

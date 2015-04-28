@@ -6,7 +6,7 @@
 >
   <gravity
     vec_x="0.0"
-    vec_y="-9.81"
+    vec_y="0.0"
   />
   <config file="config.xml"/>
   

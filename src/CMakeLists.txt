@@ -58,7 +58,7 @@ SET(SRCS
     bounding_box.cpp
     camera.cpp
     collision_manager.cpp
-    hooker.cpp
+    kinematics_state.cpp
     namegenerator.cpp
     parzival.cpp
     planeworld.cpp

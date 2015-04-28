@@ -132,7 +132,9 @@ class CXMLImporter : public IWorldDataStorageUser
         double                          m_fPhysicsFrequency;    ///< Frequency for physics processing
         double                          m_fVisualsFrequency;    ///< Frequency for visual update
         
-        std::unordered_multimap<std::string, IHooker*> m_Hooks; ///< List of hookers and related object names
+        std::unordered_multimap<std::string, IKinematicsStateUser*> m_Hooks;                     ///< List of hooks and related object names
+        std::unordered_multimap<CThruster*, std::string>    m_ThrusterHooks;                     ///< List of thrusters and related object names
+        std::unordered_multimap<IKinematicsStateUser*, std::string> m_KinematicsStateReferences; ///< List of states to be referred to others
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

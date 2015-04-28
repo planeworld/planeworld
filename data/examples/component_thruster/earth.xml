@@ -5,10 +5,10 @@
         name="Earth"
         mass="5.974e24"
         origin_x="0.0"
-        origin_y="-6378.16e3"
-        dynamics="false"
-        gravity="true"
-        velocity_x="0.0"
+        origin_y="0.0"
+        dynamics="true"
+        gravity="false"
+        velocity_x="10.0"
     />
     <body_core
         angle_velocity="0.0041780742"

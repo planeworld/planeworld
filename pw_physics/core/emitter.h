@@ -26,7 +26,7 @@
 #include <random>
 
 //--- Program header ---------------------------------------------------------//
-#include "hooker_positional.h"
+#include "kinematics_state_user.h"
 #include "universe_scaled.h"
 #include "world_data_storage_user.h"
 
@@ -75,9 +75,9 @@ const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter ty
 ///        debris.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IEmitter : public IUniverseScaled,
-                 public IWorldDataStorageUser,
-                 public IHookerPositional
+class IEmitter : public IKinematicsStateUser,
+                 public IUniverseScaled,
+                 public IWorldDataStorageUser
 {
     
     public:
@@ -125,7 +125,6 @@ class IEmitter : public IUniverseScaled,
         
         bool                    m_bActive;                  ///< Flags if emitter is activated
         
-        double                  m_fAngle;                   ///< Angle for point source distribution
         double                  m_fAngleStd;                ///< Angle standard deviation for point source distribution
         double                  m_fFrequency;               ///< Frequency of timed emitter
         double                  m_fMinX;                    ///< Minimum limit x direction, rectangular field
@@ -136,8 +135,6 @@ class IEmitter : public IUniverseScaled,
         double                  m_fVelocityStd;             ///< Velocity standard deviation of emitted entities
         
         double                  m_fResidual;                ///< Residual of emitation, since engine frequency differs from emitation frequency
-        
-        Vector2d                m_vecOrigin;                ///< Origin of emitter
 };
 
 /// Specifies a list of emitters
@@ -190,7 +187,7 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
                               m_UniformDist(0.0,1.0),
                               m_nNr(10),
                               m_bActive(true),
-                              m_fAngle(EMITTER_DEFAULT_ANGLE),
+//                               m_fAngle(EMITTER_DEFAULT_ANGLE),
                               m_fAngleStd(EMITTER_DEFAULT_ANGLE_STD),
                               m_fFrequency(EMITTER_DEFAULT_FREQUENCY),
                               m_fMinX(EMITTER_DEFAULT_LIMIT_MIN_X),
@@ -204,9 +201,9 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
     METHOD_ENTRY("IEmitter::IEmitter")
     CTOR_CALL("IEmitter::IEmitter")
     
-    m_vecOrigin.setZero();
+//     m_vecOrigin.setZero();
     
-    IHooker::m_strName += ": Emitter";
+//     IHooker::m_strName += ": Emitter";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -327,7 +324,8 @@ inline void IEmitter::setAngle(const double& _fA)
     }
     else
     {
-        m_fAngle = _fA;
+        m_KinematicsState.setAngle(_fA);
+//         m_fAngle = _fA;
     }
 }
 
@@ -453,7 +451,8 @@ inline void IEmitter::setNumber(const u_int32_t& _nNr)
 inline void IEmitter::setOrigin(const Vector2d& _vecOrigin)
 {
     METHOD_ENTRY("IEmitter::setOrigin")
-    m_vecOrigin = _vecOrigin;
+//     m_vecOrigin = _vecOrigin;
+    m_KinematicsState.setOrigin(_vecOrigin);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

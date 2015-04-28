@@ -25,11 +25,9 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "graphics.h"
-#include "hooker_positional.h"
+#include "kinematics_state_user.h"
 
 //--- Misc header ------------------------------------------------------------//
-
-using namespace Eigen;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -39,8 +37,8 @@ using namespace Eigen;
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CCamera : public CGraphicsBase,
-                public IUniverseScaled,
-                public IHookerPositional
+                public IKinematicsStateUser,
+                public IUniverseScaled
 {
 
     public:
@@ -73,6 +71,7 @@ class CCamera : public CGraphicsBase,
     protected:
         
         //--- Methods --------------------------------------------------------//
+        void myHook();
         void myUpdateFromHookable();
         void updateWithHook();
         void updateWithoutHook();
@@ -80,12 +79,10 @@ class CCamera : public CGraphicsBase,
         //--- Variables [protected] ------------------------------------------//
         std::vector<Vector2d>  m_vecFrame0;         ///< Initial camera frame
         CBoundingBox    m_BoundingBox;              ///< Cameras bounding box (for culling)
-        Vector2d        m_vecPosition;              ///< Camera position
         Vector2d        m_vecCenter;                ///< Center of camera
         double          m_fBoundingCircleRadius;    ///< Radius of Bounding circle
         double          m_fViewportWidth;           ///< Half of viewport width in m
         double          m_fViewportHeight;          ///< Half of viewport height in m
-        double          m_fAngle;                   ///< Camera angle
         double          m_fZoom;                    ///< Camera zoom
 };
 
@@ -117,7 +114,7 @@ inline const CBoundingBox CCamera::getBoundingBox() const
 inline const Vector2d& CCamera::getCenter() const
 {
     METHOD_ENTRY("CCamera::getCenter")
-    return m_vecCenter;
+    return m_KinematicsState.getOrigin();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +143,7 @@ inline const double& CCamera::getBoundingCircleRadius() const
 inline const double CCamera::getAngle() const
 {
     METHOD_ENTRY("CCamera::getAngle")
-    return (m_fAngle+m_fHookAngle);
+    return (m_KinematicsState.getAngle());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

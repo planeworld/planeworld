@@ -255,6 +255,54 @@ bool CXMLImporter::import(const std::string& _strFilename,
                 }
             }
         }
+        for (auto ci = m_ThrusterHooks.cbegin(); ci != m_ThrusterHooks.cend(); ++ci)
+        {
+            std::string strHookable = (*ci).second;
+            if (strHookable != "no_hook")
+            {
+                auto it = m_pDataStorage->getDynamicObjects().find(strHookable);
+                if (it != m_pDataStorage->getDynamicObjects().end())
+                {
+                    (*ci).first->setObject((*it).second);
+                }
+                else
+                {
+                    it = m_pDataStorage->getStaticObjects().find(strHookable);
+                    if (it != m_pDataStorage->getStaticObjects().end())
+                    {
+                        (*ci).first->setObject((*it).second);
+                    }
+                    else
+                    {
+                        WARNING_MSG("XML Importer", "Hook to unknown hookable: " << strHookable)
+                    }
+                }
+            }
+        }
+        for (auto ci = m_KinematicsStateReferences.cbegin(); ci != m_KinematicsStateReferences.cend(); ++ci)
+        {
+            std::string strRef = (*ci).second;
+            if (strRef != "no_ref")
+            {
+                auto it = m_pDataStorage->getDynamicObjects().find(strRef);
+                if (it != m_pDataStorage->getDynamicObjects().end())
+                {
+                    (*ci).first->getKinematicsState().referTo((*it).second->getKinematicsState());
+                }
+                else
+                {
+                    it = m_pDataStorage->getStaticObjects().find(strRef);
+                    if (it != m_pDataStorage->getStaticObjects().end())
+                    {
+                        (*ci).first->getKinematicsState().referTo((*it).second->getKinematicsState());
+                    }
+                    else
+                    {
+                        WARNING_MSG("XML Importer", "Reference to unknown kinematics state user: " << strRef)
+                    }
+                }
+            }
+        }
     }
 
     return true;
@@ -297,7 +345,9 @@ const bool CXMLImporter::checkAttributeBool(const pugi::xml_node& _Node,
     }
     else
     {
-        return _Node.attribute(_strAttr.c_str()).as_bool();
+        bool bRet = _Node.attribute(_strAttr.c_str()).as_bool();
+        DOM_VAR(DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " = " << bRet << "."))
+        return bRet;
     }
 }
 
@@ -338,7 +388,9 @@ const double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node,
     }
     else
     {
-        return _Node.attribute(_strAttr.c_str()).as_double();
+        double fRet = _Node.attribute(_strAttr.c_str()).as_double();
+        DOM_VAR(DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " = " << fRet << "."))
+        return fRet;
     }
 }
 
@@ -379,7 +431,9 @@ const int CXMLImporter::checkAttributeInt(const pugi::xml_node& _Node,
     }
     else
     {
-        return _Node.attribute(_strAttr.c_str()).as_int();
+        int nRet = _Node.attribute(_strAttr.c_str()).as_int();
+        DOM_VAR(DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " = " << nRet << "."))
+        return nRet;
     }
 }
 
@@ -420,7 +474,9 @@ const std::string CXMLImporter::checkAttributeString(const pugi::xml_node& _Node
     }
     else
     {
-        return _Node.attribute(_strAttr.c_str()).as_string();
+        std::string strRet = _Node.attribute(_strAttr.c_str()).as_string();
+        DOM_VAR(DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " = " << strRet << "."))
+        return strRet;
     }
 }
 
@@ -478,10 +534,10 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
                               _Node.attribute("position_y").as_double());
         m_pCamera->setViewport(_Node.attribute("viewport_width").as_int(),
                               _Node.attribute("viewport_height").as_int());
-        if (checkAttributeBool(_Node, "enable_angle_hook", true)) m_pCamera->enableAngleHook();
-        else m_pCamera->disableAngleHook();
+//         if (checkAttributeBool(_Node, "enable_angle_hook", true)) m_pCamera->enableAngleHook();
+//         else m_pCamera->disableAngleHook();
         
-        m_Hooks.insert(std::pair<std::string,IHooker*>(
+        m_Hooks.insert(std::pair<std::string,IKinematicsStateUser*>(
             checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE),
             m_pCamera
         ));
@@ -577,7 +633,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                         }
                     )
                 }
-                m_Hooks.insert(std::pair<std::string,IHooker*>(
+                m_Hooks.insert(std::pair<std::string,IKinematicsStateUser*>(
                     checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE),
                     pObjEmitter
                 ));
@@ -662,11 +718,10 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                         }
                     )
                 }
-                m_Hooks.insert(std::pair<std::string,IHooker*>(
+                m_Hooks.insert(std::pair<std::string,IKinematicsStateUser*>(
                     checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE),
                     pDebrisEmitter
                 ));
-                
                 m_pCurrentEmitter = pDebrisEmitter;
                 m_Emitters.insert(std::pair<std::string,IEmitter*>(pDebrisEmitter->getName(), pDebrisEmitter));
             }
@@ -715,12 +770,16 @@ void CXMLImporter::createComponent(const pugi::xml_node& _Node)
                                           checkAttributeDouble(_Node, "origin_y", pThruster->getOrigin()[1])));
             pThruster->setThrustMax(checkAttributeDouble(_Node, "thrust_max", 1.0));
             
-            m_Hooks.insert(std::pair<std::string,IHooker*>(
+            m_Hooks.insert(std::pair<std::string,IKinematicsStateUser*>(
                 strThrusterHook,
                 pThruster
             ));
-
-            // Read emitter information
+            m_ThrusterHooks.insert(std::pair<CThruster*, std::string>(
+                pThruster,
+                strThrusterHook
+            ));
+            
+            // Read emitter and body information
             pugi::xml_node N = _Node.first_child();
 
             while (!N.empty())
@@ -746,7 +805,7 @@ void CXMLImporter::createComponent(const pugi::xml_node& _Node)
                     }
                     else
                     {
-                        m_Hooks.insert(std::pair<std::string,IHooker*>(
+                        m_Hooks.insert(std::pair<std::string,IKinematicsStateUser*>(
                                               checkAttributeString(_Node, "hook", "no_hook"),
                                               m_pCurrentEmitter
                                           ));
@@ -807,7 +866,6 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
         CRigidBody* pRigidBody = new CRigidBody;
         MEM_ALLOC("CRigidBody")
         m_pCurrentBody = pRigidBody;
-        
         
         IObjectVisuals* pObjectVisuals = new IObjectVisuals(pRigidBody);
         MEM_ALLOC("IObjectVisuals");
@@ -1268,6 +1326,11 @@ void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _
     
     if (!_Node.empty())
     {
+        std::string strRef = checkAttributeString(_Node, "kinematics_reference", "no_ref");
+        if (strRef != "no_ref")
+            m_KinematicsStateReferences.insert(
+            std::pair<IKinematicsStateUser*, std::string>(_pO, strRef));
+        
         _pO->setName(checkAttributeString(_Node, "name", _pO->getName()));
         _pO->setMass(checkAttributeDouble(_Node, "mass", _pO->getMass()));
         

@@ -22,15 +22,15 @@ function physics_interface()
     local F_y = 100.0 * Frametime
 
 --     if Object["p_y"] < 1000.0 then
-        activate_thruster("MainThruster",  K_p * (1000.0-Object["p_y"]) + K_v * (0.0 - Object["v_y"]))
-        activate_thruster("BoosterLeft",  K_p * (1000.0-Object["p_y"]) + K_v * (0.0 - Object["v_y"]))
-        activate_thruster("BoosterRight",  K_p * (1000.0-Object["p_y"]) + K_v * (0.0 - Object["v_y"]))
-        activate_thruster("ControllerThrusterLeft", 5000)
-        activate_thruster("ControllerThrusterRight", 5000)
+--         activate_thruster("MainThruster",  K_p * (1000.0-Object["p_y"]) + K_v * (0.0 - Object["v_y"]))
+--         activate_thruster("BoosterLeft",  K_p * (1000.0-Object["p_y"]) + K_v * (0.0 - Object["v_y"]))
+--         activate_thruster("BoosterRight",  K_p * (1000.0-Object["p_y"]) + K_v * (0.0 - Object["v_y"]))
+--         activate_thruster("ControllerThrusterLeft", 5000)
+--         activate_thruster("ControllerThrusterRight", 5000)
 --     end
-    if Object["p_y"] > 200.0 then
-        deactivate_thruster("ControllerThrusterLeft")
-    end
+--     if Object["p_y"] > 200.0 then
+--         deactivate_thruster("ControllerThrusterLeft")
+--     end
 end
 
 function output(_Object)

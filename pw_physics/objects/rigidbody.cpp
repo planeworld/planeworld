@@ -61,13 +61,13 @@ IObject* CRigidBody::clone() const
     MEM_ALLOC("CRigidBody")
 
     //--- Variables of IObject -----------------------------------------------//
-    
+
+    pClone->m_KinematicsState = m_KinematicsState;
     pClone->m_bGravitation = m_bGravitation;
     pClone->m_bDynamics    = m_bDynamics;
     // m_Lifetime: New individual object
     pClone->m_fTimeFac     = m_fTimeFac;
     pClone->m_Geometry     = m_Geometry;
-    pClone->m_vecOrigin0   = m_vecOrigin0;
     pClone->m_vecCOM       = m_vecCOM;
     // m_vecForce: No Forces on newly created Rigidbody;
     pClone->m_fMass        = m_fMass;       
@@ -93,7 +93,7 @@ IObject* CRigidBody::clone() const
     pClone->m_Anchors      = m_Anchors;
     
     //--- Variables of CBody -------------------------------------------------//
-    pClone->m_fAngle = m_fAngle;  
+//     pClone->m_fAngle = m_fAngle;  
     pClone->m_fInertia = m_fInertia;
     pClone->m_fTorque = m_fTorque;
     
@@ -114,7 +114,7 @@ IObject* CRigidBody::clone() const
     pClone->m_pIntAngVel      = m_pIntAngVel->clone();
     
     //--- Variables of IHookable ---------------------------------------------//
-    pClone->m_Hookers = m_Hookers;
+//     pClone->m_Hookers = m_Hookers;
     
     //--- Variables of IUniverseScaled ---------------------------------------//
     pClone->m_vecCell = m_vecCell;
@@ -158,7 +158,7 @@ void CRigidBody::addForceLC(const Vector2d& _vecF, const Vector2d& _vecPOC)
 //     m_fTorque   +=  (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[0] * _vecF[1] -
 //                     (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[1] * _vecF[0];
     
-    Rotation2Dd Rotation(m_fAngle);
+    Rotation2Dd Rotation(m_KinematicsState.getLocalAngle());
     
     m_vecForce  +=  Rotation * _vecF;
     
@@ -199,5 +199,6 @@ void CRigidBody::myDynamics(const double& _fStep)
     
     double fAngleAccel = m_fTorque / m_fInertia;
     double fAngleVel = m_pIntAngVel->integrate(fAngleAccel, _fStep*m_fTimeFac);
-    m_fAngle = m_pIntAng->integrateClip(fAngleVel, _fStep*m_fTimeFac, 2.0*M_PI);
+    m_KinematicsState.setAngleVelocity(fAngleVel);
+    m_KinematicsState.setAngle(m_pIntAng->integrateClip(fAngleVel, _fStep*m_fTimeFac, 2.0*M_PI));
 }

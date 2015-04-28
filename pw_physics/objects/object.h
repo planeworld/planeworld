@@ -25,7 +25,7 @@
 #include "adams_moulton_integrator.h"
 #include "euler_integrator.h"
 #include "geometry.h"
-#include "hookable.h"
+#include "kinematics_state_user.h"
 #include "trajectory.h"
 
 //--- Standard header --------------------------------------------------------//
@@ -56,7 +56,8 @@ typedef enum
 /// \todo Move depth information to shapes only. Then map information to object
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class IObject : public IHookable, public IUniverseScaled
+class IObject : public IKinematicsStateUser,
+                public IUniverseScaled
 {
     
     public:
@@ -70,11 +71,6 @@ class IObject : public IHookable, public IUniverseScaled
         virtual IObject*            clone() const = 0;                  ///< Clone object
         virtual const Vector2d      getAnchor(const int&) const = 0;    ///< Return anchor
         virtual const ObjectType    getObjectType() const;
-        virtual const HookableType  getHookableType() const;
-        const double                getHookAngle() const;
-        const Vector2i              getHookCell() const;
-        const Vector2d              getHookOrigin() const;
-        
         const Vector2d              getCOM() const;
         const int                   getDepths() const;
         const bool                  getDynamicsState() const;
@@ -131,7 +127,6 @@ class IObject : public IHookable, public IUniverseScaled
 
         CGeometry               m_Geometry;                         ///< Geometry of object
 
-        Vector2d                m_vecOrigin0;                       ///< Initial origin of object
         Vector2d                m_vecCOM;                           ///< Center of mass
         Vector2d                m_vecForce;                         ///< Resulting force applied
         
@@ -141,7 +136,7 @@ class IObject : public IHookable, public IUniverseScaled
         IIntegrator<Vector2d>*  m_pIntPos;                          ///< Position integrator
         IIntegrator<Vector2d>*  m_pIntVel;                          ///< Velocity integrator
 
-        std::string             m_strName;                          ///< Object's name
+//         std::string             m_strName;                          ///< Object's name
 
         std::vector<Vector2d>   m_Anchors;                          ///< Anchors to joints
         
@@ -167,75 +162,16 @@ inline const ObjectType IObject::getObjectType() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Get the type of hookable
-///
-/// \return Type of hookable
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const HookableType IObject::getHookableType() const
-{
-    METHOD_ENTRY("IObject::getHookableType")
-    return HOOKABLE_OBJECT;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Adds a specific acceleration to the body, for example gravitation
 ///
-/// \param _vecV Acceleration vector
+/// \param _vecA Acceleration vector
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::addAcceleration(const Vector2d& _vecV)
+inline void IObject::addAcceleration(const Vector2d& _vecA)
 {
     METHOD_ENTRY("IObject::addAcceleration")
 
-    this->addForce(_vecV*m_fMass, m_pIntPos->getValue()+m_vecCOM);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the hook angle
-///
-/// Hook angle is zero, since a basic point object has no angle.
-///
-/// \return Hook angle
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const double IObject::getHookAngle() const
-{
-    METHOD_ENTRY("IObject::getHookAngle")
-
-    return 0.0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the hook cell
-///
-/// \return The hook's cell
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const Vector2i IObject::getHookCell() const
-{
-    METHOD_ENTRY("IObject::getHookCell")
-
-    return m_vecCell;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the hook position
-///
-/// Hook position is the same as the center of mass of the object.
-///
-/// \return Hook position
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d IObject::getHookOrigin() const
-{
-    METHOD_ENTRY("IObject::getHookPosition")
-
-    return (m_vecCOM+m_pIntPos->getValue());
+    this->addForce(_vecA*m_fMass, m_pIntPos->getValue()+m_vecCOM);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -248,7 +184,8 @@ inline const Vector2d IObject::getHookOrigin() const
 inline const Vector2d IObject::getCOM() const
 {
     METHOD_ENTRY("IObject::getCOM")
-    return (m_vecCOM+m_pIntPos->getValue());
+//     return (m_vecCOM+m_pIntPos->getValue());
+    return m_KinematicsState.getLocalOrigin() + m_vecCOM;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -331,7 +268,7 @@ inline const std::string IObject::getName() const
 inline const Vector2d IObject::getOrigin() const
 {
     METHOD_ENTRY("IObject::getOrigin")
-    return m_vecOrigin0;
+    return m_KinematicsState.getLocalOrigin();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -344,7 +281,8 @@ inline const Vector2d IObject::getOrigin() const
 inline const Vector2d IObject::getVelocity() const
 {
     METHOD_ENTRY("IObject::getVelocity")
-    return (m_pIntVel->getValue());
+//     return (m_pIntVel->getValue());
+    return m_KinematicsState.getLocalVelocity();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -438,8 +376,8 @@ inline void IObject::setOrigin(const Vector2d& _vecOrigin)
 {
     METHOD_ENTRY("IObject::setOrigin")
 
-    m_vecOrigin0 = _vecOrigin;
-    m_pIntPos->init(_vecOrigin);
+    m_KinematicsState.setOrigin(_vecOrigin);
+    m_pIntPos->init(m_KinematicsState.getOrigin());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -454,10 +392,8 @@ inline void IObject::setOrigin(const double& _fX, const double& _fY)
 {
     METHOD_ENTRY("IObject::setOrigin")
 
-    m_vecOrigin0[0] = _fX;
-    m_vecOrigin0[1] = _fY;
-
-    m_pIntPos->init(m_vecOrigin0);
+    m_KinematicsState.setOrigin(Vector2d(_fX, _fY));
+    m_pIntPos->init(m_KinematicsState.getOrigin());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -545,6 +481,7 @@ inline void IObject::setVelocity(const Vector2d& _vecVel)
 {
     METHOD_ENTRY("IObject::setVelocity")
 
+    m_KinematicsState.setVelocity(_vecVel);
     m_pIntVel->init(_vecVel);
 }
 

@@ -37,7 +37,7 @@ CDebrisEmitter::CDebrisEmitter() : m_DebrisType(DEBRIS_TYPE_DOT)
     m_pDebris->setNumber(1);
     
     m_Generator.seed(m_unNrOfEmitters);
-    IHooker::m_strName += ": Debris_"+ std::to_string(m_unNrOfEmitters++);
+//     IHooker::m_strName += ": Debris_"+ std::to_string(m_unNrOfEmitters++);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,19 +125,27 @@ void CDebrisEmitter::emit(const double& _fF)
                 {
                     double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
                     double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
-                    m_pDebris->generate(Vector2d(fX, fY)+m_vecOrigin+m_vecHookOrigin, Vector2d(0.0, 0.0));
+                    m_pDebris->generate(Vector2d(fX, fY)+ m_KinematicsState.getOrigin(), Vector2d(0.0, 0.0));
                 }
                 break;
             case EMITTER_DISTRIBUTION_POINT_SOURCE:
                 for (int i=0; i<nNrOfDebris; ++i)
                 {
-                    double      fAngle = m_NormalDist(m_Generator)*m_fAngleStd +m_fAngle;
+                    double      fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_KinematicsState.getAngle();
                     double      fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
-                    Rotation2Dd Rotation(fAngle + m_fHookAngle);
-                    Rotation2Dd RotationHook(m_fHookAngle);
-                    
-                    m_pDebris->generate(m_vecHookOrigin + RotationHook * m_vecOrigin,
-                                        fVelocity*(Rotation*Vector2d(0.0, 1.0)) + static_cast<IObject*>(m_pHookable)->getVelocity());
+                    Rotation2Dd Rotation(fAngle);
+
+//                     if (m_bIsHooked)
+//                     {
+//                         m_pDebris->generate(m_KinematicsState.getOrigin(),
+//                                             fVelocity*(Rotation*Vector2d(0.0, 1.0)) +
+//                                             0.75*static_cast<IObject*>(m_pHookable)->getVelocity());
+//                     }
+//                     else
+                    {
+                        m_pDebris->generate(m_KinematicsState.getOrigin(),
+                                            fVelocity*(Rotation*Vector2d(0.0, 1.0)) + m_KinematicsState.getVelocity());
+                    }
                 }
         }
     }

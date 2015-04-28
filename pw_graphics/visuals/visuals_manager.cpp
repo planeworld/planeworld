@@ -534,12 +534,12 @@ void CVisualsManager::drawWorld()
                 sf::Color color(255.0,255.0,255.0, fColor);
                 
                 std::string strHookers("");
-                auto cj = (*ci)->getObject()->getHookers().cbegin();
-                while (cj != (*ci)->getObject()->getHookers().cend())
-                {
-                  strHookers += "\n" + (*cj)->getName();
-                  ++cj;
-                }
+//                 auto cj = (*ci)->getObject()->getHookers().cbegin();
+//                 while (cj != (*ci)->getObject()->getHookers().cend())
+//                 {
+//                   strHookers += "\n" + (*cj)->getName();
+//                   ++cj;
+//                 }
                 
                 text.setString((*ci)->getObject()->getName() + strHookers);
                 text.setFont(m_Font);
