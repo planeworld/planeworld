@@ -51,7 +51,7 @@ class CCamera : public CGraphicsBase,
         const CBoundingBox  getBoundingBox() const;
         const double&       getBoundingCircleRadius() const;
         
-        const Vector2d&     getCenter() const;
+        const Vector2d      getCenter() const;
         const double        getAngle() const;
         const double&       getZoom() const;
         
@@ -111,7 +111,7 @@ inline const CBoundingBox CCamera::getBoundingBox() const
 /// \return The camera's center
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d& CCamera::getCenter() const
+inline const Vector2d CCamera::getCenter() const
 {
     METHOD_ENTRY("CCamera::getCenter")
     return m_KinematicsState.getOrigin();

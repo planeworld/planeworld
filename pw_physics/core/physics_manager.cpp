@@ -72,7 +72,22 @@ CPhysicsManager::~CPhysicsManager()
         {
             DOM_MEMF(DEBUG_MSG("IEmitter", "Memory already freed."))
         }
-    };
+    }
+    for (auto it = m_Components.begin();
+        it != m_Components.end(); ++it)
+    {
+        // Free memory if pointer is still existent
+        if ((*it).second != nullptr)
+        {
+            delete (*it).second;
+            (*it).second = nullptr;
+            MEM_FREED("CThruster")
+        }
+        else
+        {
+            DOM_MEMF(DEBUG_MSG("CThruster", "Memory already freed."))
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

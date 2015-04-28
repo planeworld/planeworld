@@ -55,17 +55,17 @@ IObject::~IObject()
     METHOD_ENTRY("IObject::~IObject")
     DTOR_CALL("IObject::~IObject")
 
-    if (m_pIntPos != 0)
+    if (m_pIntPos != nullptr)
     {
         delete m_pIntPos;
-        m_pIntPos = 0;
+        m_pIntPos = nullptr;
         MEM_FREED("IIntegrator")
     }
 
-    if (m_pIntVel != 0)
+    if (m_pIntVel != nullptr)
     {
         delete m_pIntVel;
-        m_pIntVel = 0;
+        m_pIntVel = nullptr;
         MEM_FREED("IIntegrator")
     }
 
@@ -215,17 +215,17 @@ void IObject::setNewIntegrator(const IntegratorType& _IntType)
 {
     METHOD_ENTRY("IObject::setNewIntegrator")
 
-    if (m_pIntPos != 0)
+    if (m_pIntPos != nullptr)
     {
         delete m_pIntPos;
         MEM_FREED("IIntegrator")
-        m_pIntPos = 0;
+        m_pIntPos = nullptr;
     }
-    if (m_pIntVel != 0)
+    if (m_pIntVel != nullptr)
     {
         delete m_pIntVel;
         MEM_FREED("IIntegrator")
-        m_pIntVel = 0;
+        m_pIntVel = nullptr;
     }
 
     switch (_IntType)

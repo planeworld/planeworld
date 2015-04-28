@@ -48,17 +48,17 @@ CBody::~CBody()
     METHOD_ENTRY("CBody::~CBody")
     DTOR_CALL("CBody::~CBody")
     
-    if (m_pIntAng != 0)
+    if (m_pIntAng != nullptr)
     {
         delete m_pIntAng;
-        m_pIntAng = 0;
+        m_pIntAng = nullptr;
         MEM_FREED("IIntegrator")
     }
 
-    if (m_pIntAngVel != 0)
+    if (m_pIntAngVel != nullptr)
     {
         delete m_pIntAngVel;
-        m_pIntAngVel = 0;
+        m_pIntAngVel = nullptr;
         MEM_FREED("IIntegrator")
     }
 }
@@ -124,17 +124,17 @@ void CBody::mySetNewIntegrator(const IntegratorType& _IntType)
 {
     METHOD_ENTRY("CBody::mySetNewIntegrator")
 
-    if (m_pIntAng != 0)
+    if (m_pIntAng != nullptr)
     {
         delete m_pIntAng;
         MEM_FREED("IIntegrator");
-        m_pIntAng = 0;
+        m_pIntAng = nullptr;
     }
-    if (m_pIntAngVel != 0)
+    if (m_pIntAngVel != nullptr)
     {
         delete m_pIntAngVel;
         MEM_FREED("IIntegrator");
-        m_pIntAngVel = 0;
+        m_pIntAngVel = nullptr;
     }
 
     switch (_IntType)

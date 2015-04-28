@@ -73,19 +73,19 @@ IObject* CRigidBody::clone() const
     pClone->m_fMass        = m_fMass;       
     pClone->m_nDepthlayers = m_nDepthlayers;
     
-    if (pClone->m_pIntPos != 0)
+    if (pClone->m_pIntPos != nullptr)
     {
         delete pClone->m_pIntPos;
         MEM_FREED("IIntegrator")
-        pClone->m_pIntPos = 0;
+        pClone->m_pIntPos = nullptr;
     }
     pClone->m_pIntPos      = m_pIntPos->clone();
     
-    if (pClone->m_pIntVel != 0)
+    if (pClone->m_pIntVel != nullptr)
     {
         delete pClone->m_pIntVel;
         MEM_FREED("IIntegrator")
-        pClone->m_pIntVel = 0;
+        pClone->m_pIntVel = nullptr;
     }
     pClone->m_pIntVel      = m_pIntVel->clone();     
     
@@ -93,28 +93,24 @@ IObject* CRigidBody::clone() const
     pClone->m_Anchors      = m_Anchors;
     
     //--- Variables of CBody -------------------------------------------------//
-//     pClone->m_fAngle = m_fAngle;  
     pClone->m_fInertia = m_fInertia;
     pClone->m_fTorque = m_fTorque;
     
-    if (pClone->m_pIntAng != 0)
+    if (pClone->m_pIntAng != nullptr)
     {
         delete pClone->m_pIntAng;
         MEM_FREED("IIntegrator")
-        pClone->m_pIntAng = 0;
+        pClone->m_pIntAng = nullptr;
     }
     pClone->m_pIntAng      = m_pIntAng->clone();
     
-    if (pClone->m_pIntAngVel != 0)
+    if (pClone->m_pIntAngVel != nullptr)
     {
         delete pClone->m_pIntAngVel;
         MEM_FREED("IIntegrator")
-        pClone->m_pIntAngVel = 0;
+        pClone->m_pIntAngVel = nullptr;
     }
     pClone->m_pIntAngVel      = m_pIntAngVel->clone();
-    
-    //--- Variables of IHookable ---------------------------------------------//
-//     pClone->m_Hookers = m_Hookers;
     
     //--- Variables of IUniverseScaled ---------------------------------------//
     pClone->m_vecCell = m_vecCell;

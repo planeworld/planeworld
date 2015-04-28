@@ -992,7 +992,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
         pPlanet->initTerrain();
         
         CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-        MEM_ALLOC("CShape")
+        MEM_ALLOC("IShape")
         m_pCurrentDoubleBufferedShape = pShape;
         
         pShape->buffer(pPlanet);

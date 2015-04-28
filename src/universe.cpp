@@ -169,13 +169,15 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     m_pStar->getGeometry()->addShape(pShape);
     m_pStarVisuals = new CCircleVisuals(pShape);
     m_pStarObjectVisuals = new IObjectVisuals(m_pStar);
-    
+
     MEM_ALLOC("CRigidBody");
     MEM_ALLOC("CCircle");
     MEM_ALLOC("CDoubleBufferedShape")
     MEM_ALLOC("CCircleVisuals");
     MEM_ALLOC("IObjectVisuals");
 
+    /// \bug Local variables are not freed
+    
     m_pStarObjectVisuals->addVisuals(m_pStarVisuals);
     
 //     m_pDataStorage->addObject(m_pStar);
