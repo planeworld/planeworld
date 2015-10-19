@@ -77,7 +77,7 @@ IVisuals* CTerrainVisuals::clone(CDoubleBufferedShape* const _pShape) const
 /// \param _pObject Corresponding object
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CTerrainVisuals::draw(const CCamera* const _pCamera,
+void CTerrainVisuals::draw(CCamera* const _pCamera,
                            const IObject* const _pObject) const
 {
     METHOD_ENTRY("CTerrainVisuals::draw")

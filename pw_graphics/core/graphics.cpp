@@ -190,10 +190,10 @@ bool CGraphics::init()
     // Initialize window and graphics
     //--------------------------------------------------------------------------
     m_pWindow = new WindowHandleType(sf::VideoMode(m_unWidthScr, m_unHeightScr),
-                                     "Planeworld", sf::Style::Default, sf::ContextSettings(32,0,4,3,2));
+                                     "Planeworld", sf::Style::Default/*, sf::ContextSettings(32,0,4,3,2)*/);
     MEM_ALLOC("WindowHandleType")
     m_pWindow->setMouseCursorVisible(false);
-    m_pWindow->setVerticalSyncEnabled(true);
+    m_pWindow->setVerticalSyncEnabled(false);
     DOM_VAR(INFO_MSG("Graphics", "Antialiasing level:" << m_pWindow->getSettings().antialiasingLevel))
 
     //--------------------------------------------------------------------------
@@ -673,39 +673,21 @@ void CGraphics::showVec(const Vector2d& _vecV, const Vector2d& _vecPos) const
     // Catch nullvectors at first
     if (_vecV.norm() != 0.0)
     {
-        // Define temporary varible
-        double fAtan;
+        Vector2d vecFront   = _vecPos+_vecV;
+        Vector2d vecDir     = _vecV.normalized();
+        Vector2d vecFrontT  = vecFront - vecDir * 5.0/m_fCamZoom;
+        Vector2d vecFrontOL = vecFrontT + Vector2d(-vecDir[1],  vecDir[0]) * 2.0/m_fCamZoom;
+        Vector2d vecFrontOR = vecFrontT + Vector2d( vecDir[1], -vecDir[0]) * 2.0/m_fCamZoom;
 
-        // Use red for displaying forces
-//         glLineWidth(m_fCamZoom);
         glBegin(GL_LINE_STRIP);
             glVertex3d( _vecPos[0],_vecPos[1], -20.0);
-            glVertex3d( _vecV[0]+_vecPos[0],
-                        _vecV[1]+_vecPos[1],
-                        -20.0);
+            glVertex3d( vecFrontT[0], vecFrontT[1], -20.0);
         glEnd();
-        
-//      glPointSize(3.0);
-//      glBegin(GL_POINTS);
-//          glVertex3d( _vecPos[0],_vecPos[1], -50.0);
-//      glEnd();
-//      glPointSize(1.0);
-
-        fAtan = atan2(_vecV[1],_vecV[0]);
-
-        glBegin(GL_LINE_STRIP);
-            glVertex3d( sin(fAtan)*0.1*_vecV.norm() + _vecPos[0]+0.75*_vecV[0], 
-                        -cos(fAtan)*0.1*_vecV.norm() + _vecPos[1]+0.75*_vecV[1],
-                        -10.0);
-            glVertex3d( _vecV[0]+_vecPos[0],
-                        _vecV[1]+_vecPos[1],
-                        -10.0);
-            glVertex3d( -sin(fAtan)*0.1*_vecV.norm() + _vecPos[0]+0.75*_vecV[0], 
-                        cos(fAtan)*0.1*_vecV.norm() + _vecPos[1]+0.75*_vecV[1],
-                        -10.0);
+        glBegin(GL_TRIANGLE_STRIP);
+            glVertex3d( vecFrontOL[0], vecFrontOL[1], -10.0);
+            glVertex3d( vecFront[0], vecFront[1], -10.0);
+            glVertex3d( vecFrontOR[0], vecFrontOR[1], -10.0);
         glEnd();
-
-//         glLineWidth(1.0);
     }
 }
 

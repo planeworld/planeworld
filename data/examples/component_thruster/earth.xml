@@ -8,7 +8,7 @@
         origin_y="0.0"
         dynamics="true"
         gravity="false"
-        velocity_x="10.0"
+        velocity_x="0.0"
     />
     <body_core
         angle_velocity="0.0041780742"

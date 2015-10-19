@@ -48,14 +48,14 @@ class CCamera : public CGraphicsBase,
         virtual ~CCamera();
 
         //--- Constant Methods -----------------------------------------------//
-        const CBoundingBox  getBoundingBox() const;
-        const double&       getBoundingCircleRadius() const;
-        
         const Vector2d      getCenter() const;
         const double        getAngle() const;
         const double&       getZoom() const;
         
         //--- Methods --------------------------------------------------------//
+        const CBoundingBox  getBoundingBox();
+        const double&       getBoundingCircleRadius();
+        
         void setPosition(const double&, const double&);
         void setViewport(const double&, const double&);
         
@@ -90,22 +90,6 @@ class CCamera : public CGraphicsBase,
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns cameras bounding box
-///
-/// The bounding box of the camera is returned. It surrounds the viewport and
-/// can be used for culling.
-///
-/// \return The bounding box
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox CCamera::getBoundingBox() const
-{
-    METHOD_ENTRY("CCamera::getBoundingBox")
-    return m_BoundingBox;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Returns center of camera
 ///
 /// \return The camera's center
@@ -115,22 +99,6 @@ inline const Vector2d CCamera::getCenter() const
 {
     METHOD_ENTRY("CCamera::getCenter")
     return m_KinematicsState.getOrigin();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns radius of cameras bounding circle
-///
-/// The radius of the bounding circle of the camera is returned. The bounding
-/// circle surrounds the viewport and can be used for culling like the bbox.
-///
-/// \return The bounding circle's radius
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const double& CCamera::getBoundingCircleRadius() const
-{
-    METHOD_ENTRY("CCamera::BoundingCircleRadius")
-    return m_fBoundingCircleRadius;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

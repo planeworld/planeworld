@@ -36,6 +36,7 @@ Usage
 |--------------------------|---------------------------------|
 | g                        | Show grid                       |
 | b                        | Show bounding boxes             |
+| k                        | Show kinematics states          |
 | n                        | Show names                      |
 | t                        | Show object trajectories        |
 | ESC                      | Quit                            |

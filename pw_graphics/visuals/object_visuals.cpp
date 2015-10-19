@@ -80,7 +80,7 @@ IObjectVisuals* IObjectVisuals::clone(IObject* const _pObj) const
 /// \param _pCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void IObjectVisuals::draw(const CCamera* const _pCamera) const
+void IObjectVisuals::draw(CCamera* const _pCamera) const
 {
     METHOD_ENTRY("IObjectVisuals::draw")
     

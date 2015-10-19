@@ -409,6 +409,11 @@ int main(int argc, char *argv[])
                             pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
                             break;
                         }
+                        case sf::Keyboard::K:
+                        {
+                            pVisualsManager->toggleVisualisations(VISUALS_KINEMATICS_STATES);
+                            break;
+                        }
                         case sf::Keyboard::N:
                         {
                             pVisualsManager->toggleVisualisations(VISUALS_NAMES);
@@ -482,6 +487,7 @@ int main(int argc, char *argv[])
         pVisualsManager->drawGrid();
         pVisualsManager->drawTrajectories();
         pVisualsManager->drawWorld();
+        pVisualsManager->drawKinematicsStates();
         pVisualsManager->drawBoundingBoxes();
         pVisualsManager->drawGridHUD();
         pVisualsManager->finishFrame();

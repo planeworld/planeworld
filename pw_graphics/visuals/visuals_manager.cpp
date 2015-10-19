@@ -131,9 +131,9 @@ void CVisualsManager::drawBoundingBoxes() const
 void CVisualsManager::drawGrid() const
 {
     METHOD_ENTRY("CVisualsManager::drawGrid")
-
-    m_pCamera->update();
     
+        m_pCamera->update();
+
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
         // Default sub grid size every 1m
@@ -321,6 +321,36 @@ void CVisualsManager::drawGridHUD() const
         Text.setPosition(m_Graphics.getWidthScr()/2, 0.0f);
         m_Graphics.getWindow()->draw(Text);
         m_Graphics.getWindow()->popGLStates();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws information from the kinematics states
+///
+/// This method draws information from the kinematics states e.g. the local
+/// coordinate system and references.
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawKinematicsStates() const
+{
+    METHOD_ENTRY("CVisualsManager::drawKinematicsStates")
+    
+    if (m_nVisualisations & VISUALS_KINEMATICS_STATES)
+    {
+        for (auto ci =  m_pDataStorage->getObjectVisuals().cbegin();
+                  ci != m_pDataStorage->getObjectVisuals().cend(); ++ci)
+        {
+            this->drawKinematicsState((*ci)->getObject()->getKinematicsState(),
+                                      ((*ci)->getObject()->getGeometry()->getBoundingBox().getHeight() + 
+                                       (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth()) * 0.5 * 0.33
+                                     );
+//             m_Graphics.showVec((*ci)->getObject()->getForce(), (*ci)->getObject()->getKinematicsState().getOrigin() - m_pCamera->getKinematicsState().getOrigin());
+        }
+        
+        this->drawKinematicsState(m_pCamera->getKinematicsState(),m_pCamera->getBoundingCircleRadius() * 0.1);
+
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
 }
 
@@ -619,5 +649,71 @@ void CVisualsManager::drawWorld()
 //                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
             }
         }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws information from a kinematics state
+///
+/// This method draws information from a kinematics state e.g. the local
+/// coordinate system and references.
+///
+/// \param _KinematicsState kinematics State to be drawn
+/// \param _fSize Size of coordinate system that is drawn
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsState,
+                                          const double& _fSize) const
+{
+    METHOD_ENTRY("CVisualsManager::drawKinematicsState")
+    
+    if (_fSize * m_pCamera->getZoom() > 10.0)
+    {
+        double fTransparency = 0.5;
+      
+        m_Graphics.setColor(1.0, 1.0, 1.0, fTransparency);
+        m_Graphics.showVec(
+            _KinematicsState.getPosition(Vector2d(_fSize, 0.0))-
+            _KinematicsState.getOrigin(),
+            _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+        );
+        m_Graphics.showVec(
+            _KinematicsState.getPosition(Vector2d(0.0, _fSize))-
+            _KinematicsState.getOrigin(),
+            _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+        );
+        
+        // Now draw the text
+        std::stringstream oss;
+        
+        sf::Text text;
+        sf::Color color(255.0, 255.0, 255.0, 255.0 * fTransparency);
+        oss << "Local angle:    " <<  _KinematicsState.getLocalAngle() / M_PI * 180.0 << "\n";
+        oss << "Local origin:   " <<  _KinematicsState.getLocalOrigin()[0] << ", "
+                                  <<  _KinematicsState.getLocalOrigin()[1] << "\n";
+        oss << "Angle:          " <<  _KinematicsState.getAngle() / M_PI * 180.0 << "\n";
+        oss << "Origin:         " <<  _KinematicsState.getOrigin()[0] << ", "
+                                  <<  _KinematicsState.getOrigin()[1] << "\n";
+        text.setString(oss.str());
+        text.setFont(m_Font);
+        text.setCharacterSize(12.0);
+        text.setColor(color);
+        text.setPosition(m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[0],
+                        m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[1]);
+
+        m_Graphics.getWindow()->pushGLStates();
+        m_Graphics.getWindow()->draw(text);
+        m_Graphics.getWindow()->popGLStates();
+        
+        if (_KinematicsState.gotReference())
+        {
+            Vector2d vecRef = _KinematicsState.getReference()->getOrigin() - _KinematicsState.getOrigin();
+            m_Graphics.showVec(
+                vecRef,
+                _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+            );
+        }
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
 }

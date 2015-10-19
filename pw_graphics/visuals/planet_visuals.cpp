@@ -59,7 +59,7 @@ IVisuals* CPlanetVisuals::clone(CDoubleBufferedShape* const _pShape) const
 /// \param _pObject Corresponding object
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPlanetVisuals::draw(const CCamera* const _pCamera,
+void CPlanetVisuals::draw(CCamera* const _pCamera,
                           const IObject* const _pObject) const
 {
     METHOD_ENTRY("CPlanetVisuals::draw")

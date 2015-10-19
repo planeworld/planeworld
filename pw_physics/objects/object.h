@@ -77,6 +77,7 @@ class IObject : public IKinematicsStateUser,
         const bool                  getGravitationState() const;
         const double                getMass() const;
         const std::string           getName() const;
+        const Vector2d              getForce() const {return m_vecForce;}
         const Vector2d              getOrigin() const;
         const Vector2d              getVelocity() const;
         const CTrajectory&          getTrajectory() const;

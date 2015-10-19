@@ -42,7 +42,7 @@ class IObjectVisuals : virtual public CGraphicsBase
         //--- Constant Methods -----------------------------------------------//
         IObjectVisuals* clone(IObject* const) const;
         
-        virtual void draw(const CCamera* const) const;
+        virtual void draw(CCamera* const) const;
 
         virtual const std::vector<IVisuals*>& getShapeVisuals() const;
         

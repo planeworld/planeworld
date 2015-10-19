@@ -46,6 +46,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         void            drawBoundingBoxes() const;
         void            drawGrid() const;
         void            drawGridHUD() const;
+        void            drawKinematicsStates() const;
         void            drawTrajectories() const;
         void            drawWorld();
         void            finishFrame() const;
@@ -67,6 +68,8 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         void            unsetVisualisations(const int&);
 
     private:
+      
+        void            drawKinematicsState(const CKinematicsState&, const double&) const;
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         double                          m_fFrequency;       ///< Frequency of visuals update

@@ -55,8 +55,6 @@ class CKinematicsState
         CKinematicsState(const CKinematicsState&);
 
         //--- Constant methods -----------------------------------------------//
-        const Vector2i& getCell() const;
-        
         const Vector2d  getOrigin() const;
         const Vector2d  getVelocity() const;
         const double    getAngle() const;
@@ -77,6 +75,9 @@ class CKinematicsState
         const Vector2d         getLocalPosition(const Vector2d&) const;
         const Vector2d         getPosition(const Vector2d&) const;
         
+        const CKinematicsState* const getReference() const;
+        const bool&            gotReference() const;
+        
         //--- Methods --------------------------------------------------------//
         Vector2d& Origin();
         
@@ -96,12 +97,16 @@ class CKinematicsState
 
         //--- Variables ------------------------------------------------------//
         CKinematicsState* m_pReference; ///< Reference for this kinematic state
+        
+        bool        m_bGotReference;    ///< Flags if reference is given
       
         Vector2d    m_vecOrigin;        ///< Origin of local coordinates
         Vector2d    m_vecVelocity;      ///< Velocity
         double      m_fAngle;           ///< Orientation angle
         double      m_fAngleVelocity;   ///< Angle velocity
 };
+
+// typedef std::unordered_map<std::string, CKinematicsState*>  KinematicsStatesType;    ///< Specifies a list of kinematics states
 
 //--- Implementation is done here for inline optimisation --------------------//
 
@@ -111,6 +116,7 @@ class CKinematicsState
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline CKinematicsState::CKinematicsState() : m_pReference(nullptr),
+                                              m_bGotReference(false),
                                               m_fAngle(0.0),
                                               m_fAngleVelocity(0.0)
 {
@@ -186,6 +192,33 @@ inline const double& CKinematicsState::getLocalAngleVelocity() const
 {
     METHOD_ENTRY("CKinematicsState::getAngleVelocity")
     return m_fAngleVelocity;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns reference of this kinematics state
+///
+/// \return Reference of this kinematics state
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CKinematicsState* const CKinematicsState::getReference() const
+{
+    METHOD_ENTRY("CKinematicsState::getReference")
+    return m_pReference;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns flag to indicate if reference is given
+///
+/// \return Reference given (true/false)
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const bool& CKinematicsState::gotReference() const
+{
+    METHOD_ENTRY("CKinematicsState::gotReference")
+    return m_bGotReference;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -277,6 +310,7 @@ inline void CKinematicsState::setReference(CKinematicsState* const _pReference)
 {
     METHOD_ENTRY("CKinematicsState::setReference")
     m_pReference = _pReference;
+    m_bGotReference = true;
 }
 
 #endif // KINEMATICS_STATE_H

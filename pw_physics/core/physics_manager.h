@@ -115,7 +115,9 @@ class CPhysicsManager : public IWorldDataStorageUser
         static int                 luaApplyForce(lua_State*);
         static int                 luaGetFrequency(lua_State*);
         static int                 luaGetPosition(lua_State*);
+        static int                 luaGetPositionRef(lua_State*);
         static int                 luaGetVelocity(lua_State*);
+        static int                 luaGetVelocityRef(lua_State*);
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

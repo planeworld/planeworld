@@ -6,6 +6,9 @@ K_v = 100000.0
 Object = {}
 Object["name"] = "RocketBody"
 
+ObjectRef = {}
+ObjectRef["name2"] = "Earth"
+
 function physics_interface()
     
     frequency, factor = get_frequency()
@@ -13,8 +16,8 @@ function physics_interface()
     
 --     apply_force(Object["name"], "0.0", math.random()*200000000.0 - 100000000.0, "0.0", "0.0")
     
-    Object["p_x"], Object["p_y"] = get_position(Object["name"])
-    Object["v_x"], Object["v_y"] = get_velocity(Object["name"])
+    Object["p_x"], Object["p_y"] = get_position_ref(Object["name"], ObjectRef["name2"])
+    Object["v_x"], Object["v_y"] = get_velocity_ref(Object["name"], ObjectRef["name2"])
     
     output(Object)
     

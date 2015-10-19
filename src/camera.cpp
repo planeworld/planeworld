@@ -52,6 +52,41 @@ CCamera::~CCamera()
     DTOR_CALL("CCamera::~CCamera")
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns cameras bounding box
+///
+/// The bounding box of the camera is returned. It surrounds the viewport and
+/// can be used for culling.
+///
+/// \return The bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+const CBoundingBox CCamera::getBoundingBox()
+{
+    METHOD_ENTRY("CCamera::getBoundingBox")
+    this->updateWithHook();
+    return m_BoundingBox;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns radius of cameras bounding circle
+///
+/// The radius of the bounding circle of the camera is returned. The bounding
+/// circle surrounds the viewport and can be used for culling like the bbox.
+///
+/// \return The bounding circle's radius
+///
+////////////////////////////////////////////////////////////////////////////////
+const double& CCamera::getBoundingCircleRadius() 
+{
+    METHOD_ENTRY("CCamera::BoundingCircleRadius")
+    this->updateWithHook();
+    return m_fBoundingCircleRadius;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Sets the local position of the camera
@@ -140,8 +175,6 @@ void CCamera::update()
 //         m_Graphics.rotCamTo(m_KinematicsState.getAngleReferredTo(m_KinematicsStateReference));
     }
     
-    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
-                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
     m_BoundingBox.setCell(m_vecCell);
     
     m_Graphics.zoomCamTo(m_fZoom);
@@ -309,6 +342,9 @@ void CCamera::updateWithHook()
     m_BoundingBox.update(vecFrame[1]-IUniverseScaled::cellToDouble(m_vecCell));
     m_BoundingBox.update(vecFrame[2]-IUniverseScaled::cellToDouble(m_vecCell));
     m_BoundingBox.update(vecFrame[3]-IUniverseScaled::cellToDouble(m_vecCell));
+    
+    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
+                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

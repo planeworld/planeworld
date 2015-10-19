@@ -1,7 +1,10 @@
-eigen3
-boost
-lua51
+eigen3 - MPL 2.0
+boost - Boost Software License - Version 1.0 
+lua51 - MIT License
 
-SFML:
+SFML - zlib/png license
 openal
 glew
+
+libnoise2d - LGPL 2.1
+pugixml - MIT License

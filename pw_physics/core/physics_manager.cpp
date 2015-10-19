@@ -100,7 +100,7 @@ CPhysicsManager::~CPhysicsManager()
 void CPhysicsManager::addGlobalForces()
 {
     METHOD_ENTRY("CPhysicsManager::addGlobalForces")
-
+    
     ObjectsType::const_iterator cj;
     double fCCSqr;
     Vector2d vecCC;
@@ -117,6 +117,8 @@ void CPhysicsManager::addGlobalForces()
     {
         cj = ci;
         ++cj;
+        
+        ci->second->clearForces();
         
         if (ci->second->getGravitationState() == true)
         {
@@ -283,7 +285,6 @@ void CPhysicsManager::moveMasses(int nTest)
     {
         ci->second->dynamics(1.0/m_fFrequency*m_fTimeAccel);
         ci->second->transform();
-        ci->second->clearForces();
     }
     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
     {
@@ -387,7 +388,9 @@ bool CPhysicsManager::initLua()
     lua_register(m_pLuaState, "apply_force", luaApplyForce);
     lua_register(m_pLuaState, "get_frequency", luaGetFrequency);
     lua_register(m_pLuaState, "get_position", luaGetPosition);
+    lua_register(m_pLuaState, "get_position_ref", luaGetPositionRef);
     lua_register(m_pLuaState, "get_velocity", luaGetVelocity);
+    lua_register(m_pLuaState, "get_velocity_ref", luaGetVelocityRef);
     if (luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str()) != 0)
     {
         ERROR_MSG("Physics Manager", "File " << m_strLuaPhysicsInterface <<
@@ -624,7 +627,7 @@ int CPhysicsManager::luaGetFrequency(lua_State* _pLuaState)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Lua access to get object position.
+/// \brief Lua access to get objects position.
 ///
 /// \param _pLuaState Lua access to physics
 ///
@@ -644,7 +647,7 @@ int CPhysicsManager::luaGetPosition(lua_State* _pLuaState)
         if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
             m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
         {
-            Vector2d vecPos(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getCOM());
+            Vector2d vecPos(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getOrigin());
             lua_pushnumber(_pLuaState, vecPos[0]);
             lua_pushnumber(_pLuaState, vecPos[1]);
         }
@@ -663,7 +666,57 @@ int CPhysicsManager::luaGetPosition(lua_State* _pLuaState)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Lua access to get object velocity.
+/// \brief Lua access to get objects position with reference to another object.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetPositionRef(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetPositionRef")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 2)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        std::string strReference = lua_tolstring(_pLuaState,2,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strReference) != 
+                m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+            {
+                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState();
+                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strReference)->getKinematicsState();
+                Vector2d vecPos(KinObj.getOriginReferredTo(KinRef));
+                lua_pushnumber(_pLuaState, vecPos[0]);
+                lua_pushnumber(_pLuaState, vecPos[1]);
+            }
+            else
+            {
+                WARNING_MSG("Physics Manager", "Unknown reference " << strReference)
+            }
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_position (" << nParam << "/2).")
+    }
+    
+    return 2;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get objects velocity with reference to another object.
 ///
 /// \param _pLuaState Lua access to physics
 ///
@@ -700,3 +753,52 @@ int CPhysicsManager::luaGetVelocity(lua_State* _pLuaState)
     return 2;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get objects velocity.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetVelocityRef(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetVelocityRef")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 2)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        std::string strReference = lua_tolstring(_pLuaState,2,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strReference) != 
+                m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+            {
+                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState();
+                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strReference)->getKinematicsState();
+                Vector2d vecVel(KinObj.getVelocityReferredTo(KinRef));
+                lua_pushnumber(_pLuaState, vecVel[0]);
+                lua_pushnumber(_pLuaState, vecVel[1]);
+            }
+            else
+            {
+                WARNING_MSG("Physics Manager", "Unknown reference " << strReference)
+            }
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_velocity (" << nParam << "/2).")
+    }
+    
+    return 2;
+}
