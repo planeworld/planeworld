@@ -1,7 +1,10 @@
 PROJECT (planeworld)
 
+SET(THREADS_PREFER_PTHREAD_FLAG ON)
+
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Lua51 REQUIRED)
+FIND_PACKAGE(Threads REQUIRED)
 # FIND_PACKAGE(Boost)
 
 INCLUDE_DIRECTORIES (
@@ -100,6 +103,7 @@ TARGET_LINK_LIBRARIES (planeworld
     sfml-system
     sfml-window
     sfml-graphics
+    Threads::Threads
 )
 
 INSTALL (TARGETS planeworld

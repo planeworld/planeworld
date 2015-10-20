@@ -1,5 +1,5 @@
 PROJECT (planeworld)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1)
 
 ADD_SUBDIRECTORY(pw_util)
 ADD_SUBDIRECTORY(src)
