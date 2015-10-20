@@ -1,9 +1,7 @@
-PROJECT (planeworld)
-
 SET(THREADS_PREFER_PTHREAD_FLAG ON)
 
 FIND_PACKAGE(OpenGL REQUIRED)
-FIND_PACKAGE(Lua51 REQUIRED)
+FIND_PACKAGE(Lua REQUIRED)
 FIND_PACKAGE(Threads REQUIRED)
 # FIND_PACKAGE(Boost)
 
@@ -98,7 +96,7 @@ ADD_EXECUTABLE (planeworld ${SRCS})
 
 TARGET_LINK_LIBRARIES (planeworld
     ${OPENGL_gl_LIBRARY}
-    ${LUA_LIBRARY}
+    ${LUA_LIBRARIES}
     noise2d
     sfml-system
     sfml-window

@@ -1,5 +1,3 @@
-PROJECT (planeworld)
-
 INCLUDE_DIRECTORIES(.)
 
 SET(HDRS

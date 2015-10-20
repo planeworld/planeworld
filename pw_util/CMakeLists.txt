@@ -1,4 +1,2 @@
-PROJECT (planeworld)
-
 ADD_SUBDIRECTORY (logging)
 ADD_SUBDIRECTORY (math)
