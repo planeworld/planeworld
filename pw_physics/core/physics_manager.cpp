@@ -716,7 +716,7 @@ int CPhysicsManager::luaGetPositionRef(lua_State* _pLuaState)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Lua access to get objects velocity with reference to another object.
+/// \brief Lua access to get objects velocity.
 ///
 /// \param _pLuaState Lua access to physics
 ///
@@ -755,7 +755,7 @@ int CPhysicsManager::luaGetVelocity(lua_State* _pLuaState)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Lua access to get objects velocity.
+/// \brief Lua access to get objects velocity with reference to another object.
 ///
 /// \param _pLuaState Lua access to physics
 ///

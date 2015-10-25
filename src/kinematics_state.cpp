@@ -44,7 +44,7 @@ const CKinematicsState CKinematicsState::referredTo(const CKinematicsState& _Ref
                               _Reference.m_fAngleVelocity * Vector2d(- m_vecOrigin[1],
                                                                        m_vecOrigin[0]);
     Return.m_fAngle         = _Reference.m_fAngle + m_fAngle;
-    Return.m_fAngleVelocity = /*_Reference.m_fAngleVelocity + */m_fAngleVelocity;
+    Return.m_fAngleVelocity = _Reference.m_fAngleVelocity + m_fAngleVelocity;
     
     return Return;
 }
@@ -121,9 +121,9 @@ const double CKinematicsState::getAngle() const
 const double CKinematicsState::getAngleVelocity() const
 {
     METHOD_ENTRY("CKinematicsState::getAngleVelocity")
-//     if (m_bGotReference)
-//         return m_pReference->m_fAngleVelocity + m_fAngleVelocity;
-//     else
+    if (m_bGotReference)
+        return m_pReference->m_fAngleVelocity + m_fAngleVelocity;
+    else
         return m_fAngleVelocity;
 }
 
@@ -277,5 +277,5 @@ void CKinematicsState::referTo(const CKinematicsState& _Reference)
                         _Reference.m_fAngleVelocity * Vector2d(- m_vecOrigin[1],
                                                                  m_vecOrigin[0]);
     m_fAngle         += _Reference.m_fAngle;
-//     m_fAngleVelocity += _Reference.m_fAngleVelocity;
+    m_fAngleVelocity += _Reference.m_fAngleVelocity;
 }
