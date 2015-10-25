@@ -34,6 +34,11 @@ function physics_interface()
 --     if Object["p_y"] > 200.0 then
 --         deactivate_thruster("ControllerThrusterLeft")
 --     end
+    
+    if Object["v_y"] > 200.0 then
+        set_frequency(0.5)
+    end
+    
 end
 
 function output(_Object)

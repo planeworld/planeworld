@@ -646,7 +646,7 @@ void CVisualsManager::drawWorld()
                                         m_pCamera->getCell()),
                                     std::fabs(OrbitDistribution(LocalGenerator))
                                     );
-//                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
+                         std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
             }
         }
     }

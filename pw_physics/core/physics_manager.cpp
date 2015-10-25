@@ -391,6 +391,7 @@ bool CPhysicsManager::initLua()
     lua_register(m_pLuaState, "get_position_ref", luaGetPositionRef);
     lua_register(m_pLuaState, "get_velocity", luaGetVelocity);
     lua_register(m_pLuaState, "get_velocity_ref", luaGetVelocityRef);
+    lua_register(m_pLuaState, "set_frequency", luaSetFrequency);
     if (luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str()) != 0)
     {
         ERROR_MSG("Physics Manager", "File " << m_strLuaPhysicsInterface <<
@@ -801,4 +802,31 @@ int CPhysicsManager::luaGetVelocityRef(lua_State* _pLuaState)
     }
     
     return 2;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the frequency for lua calls.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaSetFrequency(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaSetFrequency")
+
+    int nParam = lua_gettop(_pLuaState);
+    
+    if (nParam == 1)
+    {
+        m_pLuaThis->m_fFrequencyLua = lua_tonumber(_pLuaState, 1);
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function set_frequency (" << nParam << "/1).")
+    }
+    
+    return 0;
 }
