@@ -69,8 +69,9 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 {
     METHOD_ENTRY("CUniverse::generate")
     
+    DEBUG(const int nBar=100;)
+    
     CNameGenerator StarNameGenerator(_nSeed);
-    const int nBar=100;
     const int nNrOfStarTypes=7;
     
     m_StarSystems.reserve(_nNumberOfStars);
@@ -80,12 +81,11 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     Generator.seed(_nSeed);
     
     // Density = m_nNrOfStars/(3.0*fSigma * 2.0*M_PI) = 0.4/30.857e15;
-    double fSigma = _nNumberOfStars * 30.857e15 / (0.4*3.0*2.0*M_PI);
+    double fSigma = _nNumberOfStars * 30.857e15;
 //     double fSigma = _nNumberOfStars * 30.857e8 / (0.4*3.0*2.0*M_PI);
     
     std::exponential_distribution<double>   ExponentialDistribution(3.5);
-    std::normal_distribution<double>        NormalDistribution(0.0, fSigma);
-    std::uniform_real_distribution<double>  UniformDistribution(0.0,2.0*M_PI);
+    std::uniform_real_distribution<double>  UniformDistribution(-fSigma,fSigma);
     std::poisson_distribution<int>          PoissionDistribution(4);
     std::vector<int> vecNrOfPlanets;
     std::vector<int> vecNrOfStars(nNrOfStarTypes,0);
@@ -103,11 +103,9 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             CStarSystem* pStarSystem = new CStarSystem();
             MEM_ALLOC("CStarSystem");
 
-            double fDistance = NormalDistribution(Generator);
-            double fAngle    = UniformDistribution(Generator);
             Vector2i vecCell;
             Vector2d vecCenter;
-            Vector2d vecPosition(fDistance*std::sin(fAngle),fDistance*std::cos(fAngle));
+            Vector2d vecPosition(UniformDistribution(Generator), UniformDistribution(Generator));
             
             IUniverseScaled::separateCenterCell(vecPosition,vecCenter,vecCell);
             

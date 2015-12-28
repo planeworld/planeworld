@@ -433,8 +433,14 @@ void CVisualsManager::drawWorld()
     const double fRmax = 3.6e20;
     const double fBGDensityFactor = 1.0e18; 
     
-//     const double fStarfieldSizeX = 3.0e19; // * 2
-//     const double fStarfieldSizeY = 3.0e19; // * 2
+    const double fStarfieldSizeX = 3.0e19; // * 2
+    const double fStarfieldSizeY = 3.0e19; // * 2
+    
+    const double fStarfieldBackgroundSizeX = 0.5 * fStarfieldSizeX;
+    const double fStarfieldBackgroundSizeY = 0.5 * fStarfieldSizeY;
+    
+    const double fScreenWidthAtZoomZeroInM  = m_Graphics.getWidthScr()/GRAPHICS_PX_PER_METER;
+    const double fScreenHeightAtZoomZeroInM = m_Graphics.getHeightScr()/GRAPHICS_PX_PER_METER;
     
 //     const double fDefaultUnitSize = GRAPHICS_RIGHT_DEFAULT - GRAPHICS_LEFT_DEFAULT;
 //     const double fMaxZoom = fDefaultUnitSize / (2.0*fStarfieldSizeX);
@@ -451,46 +457,28 @@ void CVisualsManager::drawWorld()
                                      (m_pUniverse->getStarSystems()[i]->getCell() -
                                       m_pCamera->getCell());
             
-            double fRi = m_pCamera->getBoundingCircleRadius();
-            double fRs = vecPosRel.norm();
-            double fRo = fRi + fBGDensityFactor*(fRmax-fRi)/fRmax;
-            double fRbg = fRi * (fRs - fRi) / (fBGDensityFactor * (fRmax - fRi)/fRmax);
-//             Vector2d vecRbg = fRbg * vecPosRel.normalized();
-            Vector2d vecRbg = 1.0*(vecPosRel - fBGDensityFactor*vecPosRel.normalized());
-            
+
+            // Draw stars in original scale
             if (m_pCamera->getBoundingBox().isInside(vecPos))
             {
                 
                 double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
                 m_Graphics.setColor(0.8,fColor,0.3);
                 m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getStarType());
-                
-//                 double fDist = 1.0e19;
-//                 Vector2d vecPos = vecPosRel;
-//                 
-//                 double fLayerX = static_cast<int16_t>(vecPosRel[0] / (fStarfieldSizeX * 0.25)) * (fStarfieldSizeX * 0.25);
-//                 double fLayerY = static_cast<int16_t>(vecPosRel[1] / (fStarfieldSizeY * 0.25)) * (fStarfieldSizeY * 0.25);
-//                 
-//                 
-// //                 if ((std::abs(vecPosRel[0]) < fStarfieldSizeX) &&
-// //                     (std::abs(vecPosRel[1]) < fStarfieldSizeY))
-                    m_Graphics.dot(vecPosRel);
-                               
-//                 if (m_nStarIndex == i)
-//                 {
-//                     m_pUniverse->getStarSystems()[i]->setCell(m_pUniverse->m_pStar->getCell());
-//                     m_pUniverse->getStarSystems()[i]->setCenter(m_pUniverse->m_pStar->getCOM());
-//                 }
+                m_Graphics.dot(vecPosRel);
             }
-            if ((fRs > fRi) && (fRs > fBGDensityFactor) && (fRs < fRi + fBGDensityFactor))
-            {
-//             m_Graphics.setColor(0.0,0.0,1.0);
-//             m_Graphics.setPointSize(2.0);
-                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
-                m_Graphics.setColor(0.8,fColor,0.3);
-                m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getStarType());
-                m_Graphics.dot(vecRbg);
-            }
+//             // Draw stars in reduced scale for background
+//             if (m_pCamera->getBoundingBox().isInside(1.0/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)) + m_pCamera->getCenter()+IUniverseScaled::cellToDouble(m_pCamera->getCell())))
+//             {
+//                 
+//                 double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+//                 m_Graphics.setColor(0.3,0.3,fColor);
+//                 m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getStarType());
+//                 
+//                 m_Graphics.dot(1.0/m_pCamera->getZoom()/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)));
+// 
+//             }
+//             
         }
     }
 //     else
@@ -563,15 +551,7 @@ void CVisualsManager::drawWorld()
                 if (fColor > 255.0) fColor = 255.0;
                 sf::Color color(255.0,255.0,255.0, fColor);
                 
-                std::string strHookers("");
-//                 auto cj = (*ci)->getObject()->getHookers().cbegin();
-//                 while (cj != (*ci)->getObject()->getHookers().cend())
-//                 {
-//                   strHookers += "\n" + (*cj)->getName();
-//                   ++cj;
-//                 }
-                
-                text.setString((*ci)->getObject()->getName() + strHookers);
+                text.setString((*ci)->getObject()->getName());
                 text.setFont(m_Font);
                 text.setCharacterSize(nTextSize);
                 text.setColor(color);
