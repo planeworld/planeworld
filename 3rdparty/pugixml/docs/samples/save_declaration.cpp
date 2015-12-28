@@ -4,10 +4,10 @@
 
 int main()
 {
-    //[code_save_declaration
+    // tag::code[]
     // get a test document
     pugi::xml_document doc;
-    doc.load("<foo bar='baz'><call>hey</call></foo>");
+    doc.load_string("<foo bar='baz'><call>hey</call></foo>");
 
     // add a custom declaration node
     pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
@@ -21,7 +21,7 @@ int main()
     // </foo>
     doc.save(std::cout);
     std::cout << std::endl;
-    //]
+    // end::code[]
 }
 
 // vim:et

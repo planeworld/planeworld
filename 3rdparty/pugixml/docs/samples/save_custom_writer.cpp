@@ -4,17 +4,17 @@
 #include <iostream>
 #include <cstring>
 
-//[code_save_custom_writer
+// tag::code[]
 struct xml_string_writer: pugi::xml_writer
 {
     std::string result;
 
     virtual void write(const void* data, size_t size)
     {
-        result += std::string(static_cast<const char*>(data), size);
+        result.append(static_cast<const char*>(data), size);
     }
 };
-//]
+// end::code[]
 
 struct xml_memory_writer: pugi::xml_writer
 {
@@ -94,7 +94,7 @@ int main()
 {
     // get a test document
     pugi::xml_document doc;
-    doc.load("<foo bar='baz'>hey</foo>");
+    doc.load_string("<foo bar='baz'>hey</foo>");
 
     // get contents as std::string (single pass)
     std::cout << "contents: [" << node_to_string(doc) << "]\n";
