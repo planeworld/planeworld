@@ -328,20 +328,23 @@ int main(int argc, char *argv[])
     pVisualsManager->setUniverse(&Universe);
     pPhysicsManager->setUniverse(&Universe);
 
-    //--- Set initialisation state of all objects ----------------------------//
+    //--- Initialise physics -------------------------------------------------//
     pPhysicsManager->initObjects();
     pPhysicsManager->initEmitters();
     pPhysicsManager->initComponents();
     if (!pPhysicsManager->initLua()) return EXIT_FAILURE;
     
+    #ifdef PW_MULTITHREADING    
+        std::thread PhysicsThread(runPhysics, pPhysicsManager, &bDone);
+    #endif
+    
     //--- Initialise graphics ------------------------------------------------//
     pVisualsManager->initGraphics();
     
     WindowHandleType* pWindow = pVisualsManager->getWindowHandle();
-    
-    #ifdef PW_MULTITHREADING    
-        std::thread PhysicsThread(runPhysics, pPhysicsManager, &bDone);
-    #endif
+        
+    bool bGraphicsOn = true;
+    bool bMouseCursorVisible = false;
     
     //--- Prepare for querying relative mouse movement -----------------------//
     sf::Vector2i vecMouse;
@@ -354,7 +357,8 @@ int main(int argc, char *argv[])
     {
         vecMouse = vecMouseCenter-sf::Mouse::getPosition(*pWindow);
         vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
-        sf::Mouse::setPosition(vecMouseCenter,*pWindow);
+        if (bGraphicsOn)
+            sf::Mouse::setPosition(vecMouseCenter,*pWindow);
         
         //--- Handle events ---//
         sf::Event Event;
@@ -429,6 +433,21 @@ int main(int argc, char *argv[])
                             pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
                             break;
                         }
+                        case sf::Keyboard::V:
+                        {
+                            bGraphicsOn ^= 1;
+                            bMouseCursorVisible ^= 1;
+                            pWindow->setMouseCursorVisible(bMouseCursorVisible);
+                            if (bGraphicsOn)
+                            {
+                                INFO_MSG("Main", "Graphics reactivated.")
+                            }
+                            else
+                            {
+                                INFO_MSG("Main", "Graphics deactivated, simulation still running...")
+                            }
+                            break;
+                        }
                     }
                     break;
                 }
@@ -478,19 +497,22 @@ int main(int argc, char *argv[])
             if (++nCC == 10000) nCC = 0;
         #endif
         
-        //--- Draw visuals ---//
         #ifndef PW_MULTITHREADING
             if (nCC % static_cast<int>(pPhysicsManager->getFrequency()/
                                        pVisualsManager->getFrequency()) == 0)
             {
         #endif
-        pVisualsManager->drawGrid();
-        pVisualsManager->drawTrajectories();
-        pVisualsManager->drawWorld();
-        pVisualsManager->drawKinematicsStates();
-        pVisualsManager->drawBoundingBoxes();
-        pVisualsManager->drawGridHUD();
-        pVisualsManager->finishFrame();
+        //--- Draw visuals if requested ---//
+        if (bGraphicsOn)
+        {
+            pVisualsManager->drawGrid();
+            pVisualsManager->drawTrajectories();
+            pVisualsManager->drawWorld();
+            pVisualsManager->drawKinematicsStates();
+            pVisualsManager->drawBoundingBoxes();
+            pVisualsManager->drawGridHUD();
+            pVisualsManager->finishFrame();
+        }
         #ifndef PW_MULTITHREADING
             }
             Timer.sleepRemaining(pPhysicsManager->getFrequency());

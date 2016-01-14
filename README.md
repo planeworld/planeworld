@@ -39,6 +39,7 @@ Usage
 | k                        | Show kinematics states          |
 | n                        | Show names                      |
 | t                        | Show object trajectories        |
+| v                        | Toggle graphics (on/off)        |
 | ESC                      | Quit                            |
 | +                        | Accelerate time (only key-pad +)|
 | -                        | Decelarate time                 |
