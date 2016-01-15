@@ -136,9 +136,15 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         DEBUG_MSG("Universe generator", "Distribution of spectral classes: ")
         Log.logSeparator();
         
-        for (int i=0; i<nNrOfStarTypes; ++i) {
+        int nMax = 0;
+        for (int i=0; i<nNrOfStarTypes; ++i)
+        {
+            if (vecNrOfStars[i] > nMax) nMax = vecNrOfStars[i];
+        }
+        for (int i=0; i<nNrOfStarTypes; ++i)
+        {
             std::cout << "Class " << this->starClassToString(i) << ": ";
-            std::cout << std::string(double(vecNrOfStars[i]*nBar)/_nNumberOfStars,'#') << std::endl;
+            std::cout << std::string(double(vecNrOfStars[i])/double(nMax)*60.0,'#') << std::endl;
         }
         Log.logSeparator();
     )
@@ -148,8 +154,11 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         DEBUG_MSG("Universe generator", "Distribution of number of planets per star system: ")
         Log.logSeparator();
         
+        int nMax = 0;
         for (int i=0; i<m_nNrOfPlanetsMax; ++i)
-            std::cout << "Planets: " << i << ": " << std::string(double(vecNrOfPlanets[i]*nBar)/nNrOfPlanets,'#') << std::endl;
+            if (vecNrOfPlanets[i] > nMax) nMax = vecNrOfPlanets[i];
+        for (int i=0; i<m_nNrOfPlanetsMax; ++i)
+            std::cout << "Planets: " << i << ": " << std::string(double(vecNrOfPlanets[i])/double(nMax) * 60.0,'#') << std::endl;
         
         Log.logSeparator();
     ))
