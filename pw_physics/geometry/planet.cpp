@@ -283,12 +283,12 @@ void CPlanet::myInitTerrain()
             if (m_nOctTrTp < 1) m_nOctTrTp = 1;
             
             INFO_MSG("Planet", "Generating Terrain (Mountains)")
-            DOM_VAR(INFO_MSG("Planet", "Number of Mountains:       " << fNrOfMountains))
-            DOM_VAR(INFO_MSG("Planet", "Number of Points:          " << fNrOfPoints))
-            DOM_VAR(INFO_MSG("Planet", "Minimum Frequency:         " << fMinF << "/m"))
-            DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:         " << fMaxF << "/m"))
-            DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Mountains: " << m_nOctMtTr))
-            DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Hills:     " << m_nOctHlTr))
+            DOM_VAR(DEBUG_MSG("Planet", "Number of Mountains:       " << fNrOfMountains))
+            DOM_VAR(DEBUG_MSG("Planet", "Number of Points:          " << fNrOfPoints))
+            DOM_VAR(DEBUG_MSG("Planet", "Minimum Frequency:         " << fMinF << "/m"))
+            DOM_VAR(DEBUG_MSG("Planet", "Maximum Frequency:         " << fMaxF << "/m"))
+            DOM_VAR(DEBUG_MSG("Planet", "Maximum Octaves Mountains: " << m_nOctMtTr))
+            DOM_VAR(DEBUG_MSG("Planet", "Maximum Octaves Hills:     " << m_nOctHlTr))
             
             // Reserve memory for noise functions
             m_Billow.resize(1);

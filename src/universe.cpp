@@ -117,8 +117,6 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             pStarSystem->setNumberOfPlanets(PoissionDistribution(Generator));
             nNrOfPlanets += pStarSystem->getNumberOfPlanets();
             
-            DOM_VAR(DEBUG_MSG("Universe Generator", "System name: " << pStarSystem->getName()))
-            
             // Store the maximum number of planets
             if (pStarSystem->getNumberOfPlanets() > m_nNrOfPlanetsMax)
             {

@@ -190,10 +190,11 @@ bool CGraphics::init()
     // Initialize window and graphics
     //--------------------------------------------------------------------------
     m_pWindow = new WindowHandleType(sf::VideoMode(m_unWidthScr, m_unHeightScr),
-                                     "Planeworld", sf::Style::Default/*, sf::ContextSettings(32,0,4,3,2)*/);
+                                     "Planeworld", sf::Style::Default);
     MEM_ALLOC("WindowHandleType")
     m_pWindow->setMouseCursorVisible(false);
     m_pWindow->setVerticalSyncEnabled(false);
+    DOM_VAR(INFO_MSG("Graphics", "Found OpenGL version: " << m_pWindow->getSettings().majorVersion << "." << m_pWindow->getSettings().minorVersion))
     DOM_VAR(INFO_MSG("Graphics", "Antialiasing level:" << m_pWindow->getSettings().antialiasingLevel))
 
     //--------------------------------------------------------------------------
