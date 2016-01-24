@@ -214,3 +214,63 @@ inline void CEulerIntegrator<Vector2d>::reset()
     m_PrevValue.setZero();
     m_Value.setZero();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+std::istream& CEulerIntegrator<T>::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CEulerIntegrator::myStreamIn")
+    
+    _is >> m_PrevValue;
+    _is >> m_Value;
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+template <>
+inline std::istream& CEulerIntegrator<Vector2d>::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CEulerIntegrator::myStreamIn")
+    
+    _is >> m_PrevValue[0] >> m_PrevValue[1];
+    _is >> m_Value[0] >> m_Value[1];
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CEulerIntegrator instance
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+std::ostream& CEulerIntegrator<T>::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CEulerIntegrator::myStreamOut")
+    
+    _os << m_PrevValue;
+    _os << m_Value;
+    
+    return _os;
+}

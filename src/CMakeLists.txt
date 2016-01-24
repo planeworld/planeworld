@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES (
     ${Boost_INCLUDE_DIRS}
     ${LUA_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src
+    ${CMAKE_HOME_DIRECTORY}/pw_io
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging
     ${CMAKE_HOME_DIRECTORY}/pw_util/math
@@ -41,7 +42,9 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/polyline_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/spring_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/terrain_visuals.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_io/game_state_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/debris_emitter.cpp
@@ -53,6 +56,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/geometry.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/planet.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/polyline.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/shape.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/terrain.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/body.cpp
@@ -71,6 +75,7 @@ SET(SRCS
     parzival.cpp
     planeworld.cpp
     star_system.cpp
+    unique_id.cpp
     universe.cpp
     world_data_storage.cpp
     

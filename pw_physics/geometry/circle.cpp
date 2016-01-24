@@ -112,3 +112,46 @@ void CCircle::transform( const double& _fAngle, const Vector2d& _vecV )
     m_AABB.setLowerLeft( m_vecCenter - Vector2d(m_fRadius,m_fRadius));
     m_AABB.setUpperRight(m_vecCenter + Vector2d(m_fRadius,m_fRadius));
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& CCircle::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CCircle::myStreamIn")
+    
+    _is >> m_vecCenter[0] >> m_vecCenter[1];
+    _is >> m_vecCenter0[0] >> m_vecCenter0[1];
+    _is >> m_fAngle;
+    _is >> m_fRadius;
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CCircle instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& CCircle::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CCircle::myStreamOut")
+    
+    _os << m_vecCenter[0] << m_vecCenter[1];
+    _os << m_vecCenter0[0] << m_vecCenter0[1];
+    _os << m_fAngle;
+    _os << m_fRadius;
+    _os << "CCircle::streamOut TEST";
+    
+    return _os;
+}

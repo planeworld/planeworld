@@ -32,6 +32,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "conf_pw.h"
 #include "debris_emitter.h"
+#include "game_state_manager.h"
 #include "physics_manager.h"
 #include "planet_visuals.h"
 #include "objects_emitter.h"
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
     CDebris*            pDebris;
     CDebrisVisuals*     pDebrisVisuals;
     CDebrisEmitter*     pDebrisEmitter;
+    CGameStateManager   GameStateManager;
     CObjectEmitter*     pObjectsEmitter;
     CRigidBody*         pPointMass;
     CPlanet*            pPlanet;
@@ -164,6 +166,7 @@ int main(int argc, char *argv[])
     MEM_ALLOC("CVisualsManager")
     
     //--- Initialize storage access for engine managers ----------------------//
+    GameStateManager.setWorldDataStorage(&WorldDataStorage);
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
     pVisualsManager->setWorldDataStorage(&WorldDataStorage);
     
@@ -520,7 +523,7 @@ int main(int argc, char *argv[])
             Timer.sleepRemaining(pVisualsManager->getFrequency());
         #endif
     }
-
+    
     #ifdef PW_MULTITHREADING
         INFO_MSG("Main", "Physics thread stopped.")
         PhysicsThread.join();
@@ -537,5 +540,7 @@ int main(int argc, char *argv[])
         MEM_FREED("CVisualsManager")
     }
     
+    GameStateManager.save();
+        
     return EXIT_SUCCESS;
 }

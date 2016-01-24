@@ -93,7 +93,7 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         {
             fAng = 0.0;
             fAngEnd = 2.0*M_PI;
-            LineT = GRAPHICS_LINETYPE_LOOP;
+            LineT = LineType::GRAPHICS_LINETYPE_LOOP;
         }
         else
         {
@@ -103,7 +103,7 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
             
             fAng = fAng0-fAlpha;
             fAngEnd = fAng0+fAlpha;
-            LineT = GRAPHICS_LINETYPE_STRIP;
+            LineT = LineType::GRAPHICS_LINETYPE_STRIP;
         }
 
         double fInc  = pPlanet->getGroundResolution() / fRad;
@@ -217,8 +217,8 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         m_Graphics.setWidth(1.0);
         
         // Determine LineType
-        if ((LineT == GRAPHICS_LINETYPE_LOOP) && (WaterlineList.size() != 0))
-          LineT = GRAPHICS_LINETYPE_STRIP;
+        if ((LineT == LineType::GRAPHICS_LINETYPE_LOOP) && (WaterlineList.size() != 0))
+          LineT = LineType::GRAPHICS_LINETYPE_STRIP;
         
         // Push back potential last line segment
         if (WaterlineTmp.size() != 0)
@@ -299,4 +299,40 @@ void CPlanetVisuals::attach(CDoubleBufferedShape* const _pPlanet)
     {
         ERROR_MSG("Planet Visuals", "Wrong shape attached to visuals.")
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& CPlanetVisuals::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CPlanetVisuals::myStreamIn")
+
+    /// \todo Has to be hooked to shape (CDoubleBufferedShape)
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CPlanetVisuals instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& CPlanetVisuals::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CPlanetVisuals::myStreamOut")
+
+    /// \todo Hook to shape (CDoubleBufferedShape) has to be stored/streamed
+    
+    return _os;
 }

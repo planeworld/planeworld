@@ -200,7 +200,7 @@ void CXFigLoader::load(const std::string& _strFilename)
                 MEM_ALLOC("pShape")
                 pPolylineVisuals = new CPolylineVisuals(pShape);
                 MEM_ALLOC("pPolylineVisuals")
-                pPolyLine->setLineType(GRAPHICS_LINETYPE_LOOP);
+                pPolyLine->setLineType(LineType::GRAPHICS_LINETYPE_LOOP);
                 pPolyLine->setDepths(SHAPE_DEPTH_ALL);
                 for (int i=0; i<nNPoints; ++i)
                 {

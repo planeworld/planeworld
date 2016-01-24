@@ -97,3 +97,44 @@ void CDoubleBufferedShape::buffer(IShape* const _pShape)
     m_pShapeCur = _pShape;
     m_pShapeBuf = _pShape->clone();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _DBS CDoubleBufferedShape instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CDoubleBufferedShape& _DBS)
+{
+    METHOD_ENTRY("CDoubleBufferedShape::operator>>")
+    
+    ///< \todo Implement streaming, need access to private members
+//     _is >> _DBS.m_pShapeCur;
+//     _is >> _DBS.m_pShapeBuf;
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _DBS CDoubleBufferedShape instance to stream
+///
+/// \return Stream with game state information of CDoubleBufferedShape instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CDoubleBufferedShape& _DBS)
+{
+    METHOD_ENTRY("CDoubleBufferedShape::operator<<")
+    
+    _os << _DBS.getShapeCur();
+    _os << _DBS.getShapeBuf();
+    
+    return _os;
+}

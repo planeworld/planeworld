@@ -110,7 +110,7 @@ void CTerrainVisuals::draw(CCamera* const _pCamera,
     fLeft = pTerrain->snapToTerrainGrid(fLeft);
     fRight = pTerrain->snapToTerrainGrid(fRight);
     
-    m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
+    m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
     
     while ( fLeft <= fRight)
     {
@@ -144,3 +144,40 @@ void CTerrainVisuals::attach(CDoubleBufferedShape* const _pTerrain)
         ERROR_MSG("Terrain Visuals", "Wrong shape attached to visuals.")
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& CTerrainVisuals::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CTerrainVisuals::myStreamIn")
+
+    /// \todo Has to be hooked to shape (CDoubleBufferedShape)
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CTerrainVisuals instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& CTerrainVisuals::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CTerrainVisuals::myStreamOut")
+
+    /// \todo Hook to shape (CDoubleBufferedShape) has to be stored/streamed
+    
+    return _os;
+}
+

@@ -19,6 +19,8 @@
 
 #include "polyline.h"
 
+#include <type_traits>
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Clones polyline
@@ -97,4 +99,58 @@ void CPolyLine::transform(const double& _fAngle, const Vector2d& _vecV)
         ++it;
         ++ci;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& CPolyLine::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CPolyLine::myStreamIn")
+    
+    // Cast streamable basetype to strongly typed enum LineType
+    std::underlying_type<LineType>::type nLinetype;
+    _is >> nLinetype; m_LineType = static_cast<LineType>(nLinetype);
+    
+//      _os << m_VertList.size();
+//     for (auto ci : m_VertList)
+//         _os << ci;
+//     for (auto ci : m_VertList0)
+//         _os << ci;
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CPolyLine instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& CPolyLine::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CPolyLine::myStreamOut")
+
+    // Cast strongly typed enum LineType to streamable base type
+    auto nLineType = static_cast<std::underlying_type<LineType>::type>(m_LineType);
+    
+    _os << nLineType;
+    _os << m_VertList.size();
+    for (auto ci : m_VertList)
+        _os << ci;
+    for (auto ci : m_VertList0)
+        _os << ci;
+    
+    _os << "CPolyLine::streamOut TEST";
+    
+    return _os;
 }

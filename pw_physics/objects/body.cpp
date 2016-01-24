@@ -188,3 +188,45 @@ void CBody::myTransform()
         m_Geometry.updateBoundingBox((*ci)->getShapeCur()->getBoundingBox());
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& CBody::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CBody::myStreamIn")
+    
+    _is >> m_fInertia;
+    _is >> m_fTorque;
+    _is >> m_pIntAng;
+    _is >> m_pIntAngVel;
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CBody instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& CBody::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CBody::myStreamOut")
+    
+    _os << m_fInertia;
+    _os << m_fTorque;
+    _os << m_pIntAng;
+    _os << m_pIntAngVel;
+    
+    return _os;
+}

@@ -98,7 +98,7 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
         {
             fAng = 0.0;
             fAngEnd = 2.0*M_PI;
-            LineT = GRAPHICS_LINETYPE_LOOP;
+            LineT = LineType::GRAPHICS_LINETYPE_LOOP;
         }
         else
         {
@@ -108,7 +108,7 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
             
             fAng = fAng0-fAlpha;
             fAngEnd = fAng0+fAlpha;
-            LineT = GRAPHICS_LINETYPE_STRIP;
+            LineT = LineType::GRAPHICS_LINETYPE_STRIP;
         }
 
         double fInc = CIRCLE_DEFAULT_RESOLUTION * m_Graphics.getResMPX() / fRad; 
@@ -149,4 +149,40 @@ void CCircleVisuals::attach(CDoubleBufferedShape* const _pCirc)
         ERROR_MSG("Circle Visuals", "Wrong shape attached to visuals.")
     }
     
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& CCircleVisuals::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CCircleVisuals::myStreamIn")
+    
+    /// \todo Has to be hooked to shape (CDoubleBufferedShape)
+
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CCircleVisuals instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& CCircleVisuals::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CCircleVisuals::myStreamOut")
+
+    /// \todo Hook to shape (CDoubleBufferedShape) has to be stored/streamed
+    
+    return _os;
 }

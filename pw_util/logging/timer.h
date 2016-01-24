@@ -24,6 +24,8 @@
 #define TIMER_H
 
 //--- Standard header --------------------------------------------------------//
+#include <istream>
+#include <ostream>
 #include <unistd.h>
 #include <sys/time.h>
 
@@ -53,6 +55,11 @@ class CTimer
         //--- Constant Methods -----------------------------------------------//
         double          getSplitTime();
         inline double   getTime() const {return m_fDiffTime;}       ///< returns difftime
+        
+        //--- Friends --------------------------------------------------------//
+        friend std::istream& operator>>(std::istream&, CTimer&);
+        friend std::ostream& operator<<(std::ostream&, CTimer&);
+        
     private:
 
         //--- Private Variables ----------------------------------------------//

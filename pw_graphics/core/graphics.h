@@ -69,12 +69,12 @@ const double GRAPHICS_DEG2RAD = M_PI / 180.0;           ///< Converts degree to 
 const double GRAPHICS_RAD2DEG = 180.0 / M_PI;           ///< Converts radiant to degree values
 
 /// specifies the type of line to be drawn
-typedef enum 
+enum class LineType
 {
     GRAPHICS_LINETYPE_SINGLE,
     GRAPHICS_LINETYPE_LOOP,
     GRAPHICS_LINETYPE_STRIP
-} LineType;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

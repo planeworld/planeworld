@@ -59,6 +59,10 @@ class CGeometry
         
         CGeometry& operator=(const CGeometry&);
         
+        //--- friends --------------------------------------------------------//
+        friend std::istream& operator>>(std::istream&, CGeometry&);
+        friend std::ostream& operator<<(std::ostream&, CGeometry&);
+        
     protected:
 
         //--- Abstract methods [protected] -----------------------------------//

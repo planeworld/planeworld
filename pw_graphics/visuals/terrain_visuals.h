@@ -50,8 +50,13 @@ class CTerrainVisuals : public IVisuals
         const CBoundingBox& getBoundingBox();
                 
     private:
-        
+      
+        //--- Constructor [private] ------------------------------------------//
         CTerrainVisuals();       ///< Constructor is private
+      
+        //--- Methods [private] ----------------------------------------------//
+        std::istream&       myStreamIn(std::istream&);
+        std::ostream&       myStreamOut(std::ostream&);
         
         //--- Variables [private] --------------------------------------------//
         CDoubleBufferedShape* m_pTerrain; ///< Pointer to corresponding shape

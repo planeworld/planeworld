@@ -52,8 +52,14 @@ class CCircleVisuals : public IVisuals
         
     private:
         
+        //--- Constructor [private] ------------------------------------------//
         CCircleVisuals();                   ///< Constructor is private
         
+        //--- Methods [private] ----------------------------------------------//
+        std::istream&       myStreamIn(std::istream&);
+        std::ostream&       myStreamOut(std::ostream&);
+        
+        //--- Variables [private] --------------------------------------------//
         CDoubleBufferedShape* m_pCircle;    ///< Pointer to buffered shape
 
 };

@@ -58,6 +58,10 @@ class CBoundingBox : public IUniverseScaled
         
         void update(const CBoundingBox&);
         void update(const Vector2d&);
+        
+        //--- friends --------------------------------------------------------//
+        friend std::istream& operator>>(std::istream&, CBoundingBox&);
+        friend std::ostream& operator<<(std::ostream&, CBoundingBox&);
 
     protected:
 

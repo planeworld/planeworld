@@ -106,3 +106,50 @@ double CTimer::getSplitTime()
     else
         return 0.0;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _Timer CTimer instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CTimer& _Timer)
+{
+    //METHOD_ENTRY("CTimer::operator>>")
+    
+    _is >> _Timer.m_Start.tv_sec;
+    _is >> _Timer.m_Start.tv_usec;
+    _is >> _Timer.m_Stop.tv_sec >> _Timer.m_Stop.tv_usec;
+    _is >> _Timer.m_TimeZone.tz_minuteswest >> _Timer.m_TimeZone.tz_dsttime;
+    _is >> _Timer.m_bFirstCall;
+    _is >> _Timer.m_fDiffTime;
+
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _Timer CTimer instance to stream
+///
+/// \return Stream with game state information of CTimer instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CTimer& _Timer)
+{
+    //METHOD_ENTRY("CTimer::operator<<")
+    
+    _os << _Timer.m_Start.tv_sec << _Timer.m_Start.tv_usec;
+    _os << _Timer.m_Stop.tv_sec << _Timer.m_Stop.tv_usec;
+    _os << _Timer.m_TimeZone.tz_minuteswest << _Timer.m_TimeZone.tz_dsttime;
+    _os << _Timer.m_bFirstCall;
+    _os << _Timer.m_fDiffTime;
+
+    return _os;
+}

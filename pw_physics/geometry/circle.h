@@ -58,6 +58,11 @@ class CCircle : public IShape
         
     protected:
 
+        //--- Protected methods ----------------------------------------------//
+        std::istream&       myStreamIn(std::istream&);
+        std::ostream&       myStreamOut(std::ostream&);
+
+        //--- Protected variables --------------------------------------------//
         Vector2d            m_vecCenter;                    ///< Center of circle
         Vector2d            m_vecCenter0;                   ///< Initial center of circle
         double              m_fAngle;                       ///< Angle, just for optical reasons

@@ -54,6 +54,10 @@ class CAdamsBashforthIntegrator : public IIntegrator<T>
         void     reset();
 
     protected:
+      
+        //--- Protected methods ----------------------------------------------//
+        std::istream& myStreamIn(std::istream&);
+        std::ostream& myStreamOut(std::ostream&);
 
         //--- Protected Variables --------------------------------------------//
         T    m_Deriv[4];      ///< Derivatives of previous timesteps

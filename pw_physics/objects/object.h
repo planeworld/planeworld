@@ -27,6 +27,7 @@
 #include "geometry.h"
 #include "kinematics_state_user.h"
 #include "trajectory.h"
+#include "unique_id.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <unordered_map>
@@ -110,7 +111,11 @@ class IObject : public IKinematicsStateUser,
         void                init();
         void                setNewIntegrator(const IntegratorType&);
         void                transform();
-
+        
+        //--- friends --------------------------------------------------------//
+        friend std::istream&    operator>>(std::istream&, IObject&);
+        friend std::ostream&    operator<<(std::ostream&, IObject&);
+        
     protected:
 
         //--- Abstract methods [protected] -----------------------------------//
@@ -118,8 +123,13 @@ class IObject : public IKinematicsStateUser,
         virtual void myInit() = 0;                                  ///< Initialise object -> total reset
         virtual void mySetNewIntegrator(const IntegratorType&) = 0; ///< Change type of integrator 
         virtual void myTransform() = 0;                             ///< Move and/or rotate a mass
+        
+        virtual std::istream& myStreamIn (std::istream&) = 0;       ///< Stream in from inherited class
+        virtual std::ostream& myStreamOut(std::ostream&) = 0;       ///< Stream out from inherited class
 
         //-- Variables [protected] -------------------------------------------//
+        CUniqueID               m_ID;                               ///< Identifier
+        
         bool                    m_bGravitation;                     ///< Does this object influence others by gravitation?
         bool                    m_bDynamics;                        ///< Dynamics calculations for object
 

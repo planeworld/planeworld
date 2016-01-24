@@ -104,6 +104,7 @@ class CPlanet : public IShape
     protected:
         
         void                myInitTerrain();
+        std::ostream&       myStreamOut(std::ostream&);
         
         PlanetType          m_PlanetType;               ///< Identifies type of planet
 

@@ -76,7 +76,11 @@ class CTerrain : public IShape
         void transform(const double&, const Vector2d&);
                         
     protected:
+          
+        //--- Protected methods ----------------------------------------------//
+        std::ostream&       myStreamOut(std::ostream&);
 
+        //--- Protected variables --------------------------------------------//
         std::vector<double> m_Cache;                    ///< Cached surface of terrain
         Vector2d            m_vecCenter;                ///< Center of terrain
         Vector2d            m_vecCenter0;               ///< Initial center of terrain

@@ -608,13 +608,13 @@ void CGraphics::polyline(const std::list<Vector2d>& _Vertices,
 
     switch(_LineType)
     {
-        case GRAPHICS_LINETYPE_SINGLE:
+        case LineType::GRAPHICS_LINETYPE_SINGLE:
             glBegin(GL_LINES);  
             break;
-        case GRAPHICS_LINETYPE_LOOP:
+        case LineType::GRAPHICS_LINETYPE_LOOP:
             glBegin(GL_LINE_LOOP);
             break;
-        case GRAPHICS_LINETYPE_STRIP:
+        case LineType::GRAPHICS_LINETYPE_STRIP:
             glBegin(GL_LINE_STRIP);
             break;
     }
@@ -712,13 +712,13 @@ void CGraphics::beginLine(const LineType& _LType, const double& _fDepth)
 
     switch(_LType)
     {
-        case GRAPHICS_LINETYPE_SINGLE:
+        case LineType::GRAPHICS_LINETYPE_SINGLE:
             glBegin(GL_LINES);  
             break;
-        case GRAPHICS_LINETYPE_LOOP:
+        case LineType::GRAPHICS_LINETYPE_LOOP:
             glBegin(GL_LINE_LOOP);
             break;
-        case GRAPHICS_LINETYPE_STRIP:
+        case LineType::GRAPHICS_LINETYPE_STRIP:
             glBegin(GL_LINE_STRIP);
             break;
     }

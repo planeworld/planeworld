@@ -295,3 +295,68 @@ inline void CAdamsMoultonIntegrator<Vector2d>::reset()
     m_Deriv[3].setZero();
     m_Deriv[4].setZero();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+std::istream& CAdamsMoultonIntegrator<T>::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CAdamsMoultonIntegrator::myStreamIn")
+    
+    _is >> m_Deriv[0] >> m_Deriv[1] >> m_Deriv[2] >> m_Deriv[3] >> m_Deriv[4];
+    _is >> m_PrevValue;
+    _is >> m_Value;
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+template <>
+inline std::istream& CAdamsMoultonIntegrator<Vector2d>::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CAdamsMoultonIntegrator::myStreamIn")
+    
+    _is >> m_Deriv[0][0] >> m_Deriv[0][1] >> m_Deriv[1][0] >> m_Deriv[1][1] >>
+           m_Deriv[2][0] >> m_Deriv[2][1] >> m_Deriv[3][0] >> m_Deriv[3][1] >>
+           m_Deriv[4][0] >> m_Deriv[4][0];
+    _is >> m_PrevValue[0] >> m_PrevValue[1];
+    _is >> m_Value[0] >> m_Value[1];
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CAdamsMoultonIntegrator instance
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+std::ostream& CAdamsMoultonIntegrator<T>::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CAdamsMoultonIntegrator::myStreamOut")
+    
+    _os << m_Deriv[0] << m_Deriv[1] << m_Deriv[2] << m_Deriv[3] << m_Deriv[4];
+    _os << m_PrevValue;
+    _os << m_Value;
+    
+    return _os;
+}

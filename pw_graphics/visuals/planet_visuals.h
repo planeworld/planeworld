@@ -54,9 +54,12 @@ class CPlanetVisuals : public IVisuals
                 
     private:
         
+        //--- Constructor [private] ------------------------------------------//
         CPlanetVisuals();       ///< Constructor is private
         
-        //--- Constant Methods [private] -------------------------------------//
+        //--- Methods [private] ----------------------------------------------//
+        std::istream&       myStreamIn(std::istream&);
+        std::ostream&       myStreamOut(std::ostream&);
         
         //--- Variables [private] --------------------------------------------//
         CDoubleBufferedShape* m_pPlanet;          ///< Pointer to corresponding shape

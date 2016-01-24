@@ -31,7 +31,7 @@ CWorldDataStorage::CWorldDataStorage()
     METHOD_ENTRY("CWorldDataStorage::CWorldDataStorage")
     CTOR_CALL("CWorldDataStorage::CWorldDataStorage")
 }
-
+#include <iomanip>
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Destructor, deletes objects
@@ -306,4 +306,54 @@ const ObjectsType::const_iterator CWorldDataStorage::recallDynamicObject(const s
 {
     METHOD_ENTRY("CWorldDataStorage::recallDynamicObject")
     return m_DynamicObjectsMemory.at(_strRef);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _WDS CWorldDataStorage instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
+{
+    METHOD_ENTRY("CWorldDataStorage::operator>>")
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _WDS CWorldDataStorage instance to stream
+///
+/// \return Stream with game state information of CWorldDataStorage instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
+{
+    METHOD_ENTRY("CWorldDataStorage::operator<<")
+
+    _os << _WDS.m_DynamicObjects.size();
+    for (auto ci : _WDS.m_DynamicObjects)
+    {
+        _os << *(ci.second);
+    }
+    _os << _WDS.m_StaticObjects.size();
+    for (auto ci : _WDS.m_StaticObjects)
+    {
+        _os << *(ci.second);
+    }
+//     _os << _WDS.m_ObjectVisuals.size();
+//     for (auto ci : _WDS.m_ObjectVisuals)
+//     {
+//         _os << *(ci.second);
+//     }    
+
+    return _os;
 }

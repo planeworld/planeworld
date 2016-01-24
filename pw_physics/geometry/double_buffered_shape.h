@@ -55,10 +55,14 @@ class CDoubleBufferedShape
         //--- Methods --------------------------------------------------------//
         void buffer(IShape* const);
         void swapBuffer();
+        
+        //--- Friends --------------------------------------------------------//
+        friend std::istream& operator>>(std::ostream&, CDoubleBufferedShape&);
+        friend std::ostream& operator<<(std::ostream&, CDoubleBufferedShape&);
 
     private:
 
-        //--- Private Variables ----------------------------------------------//
+        //--- Variables [private] --------------------------------------------//
         IShape*    m_pShapeCur;                         ///< Currently active shape
         IShape*    m_pShapeBuf;                         ///< Buffered shape
 };

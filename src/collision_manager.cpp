@@ -351,7 +351,7 @@ void CCollisionManager::test(CPolyLine* _pP1, CPolyLine* _pP0, CBody* _p1, CDebr
                     
                 ++ciP01; ++ciP00; ++ciP11; ++ciP10;
             }
-            if (_pP1->getLineType() == GRAPHICS_LINETYPE_LOOP)
+            if (_pP1->getLineType() == LineType::GRAPHICS_LINETYPE_LOOP)
             {
                 ciP11 = _pP1->getVertices().begin();
                 ciP10 = _pP1->getVertices().begin();
@@ -882,7 +882,7 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
         ++ciB01;
         ++ciB11;
     }
-    if (_pB0->getLineType() == GRAPHICS_LINETYPE_LOOP)
+    if (_pB0->getLineType() == LineType::GRAPHICS_LINETYPE_LOOP)
     {
         ciB11 = _pB1->getVertices().begin();
         ciB10 = _pB0->getVertices().begin();
@@ -986,7 +986,7 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
         }
         ++ciA01; ++ciA00; ++ciA11; ++ciA10;
     }
-    if (_pA1->getLineType() == GRAPHICS_LINETYPE_LOOP)
+    if (_pA1->getLineType() == LineType::GRAPHICS_LINETYPE_LOOP)
     {
         ciA11 = _pA1->getVertices().begin();
         ciA10 = _pA1->getVertices().begin();

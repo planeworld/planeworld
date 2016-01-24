@@ -105,3 +105,40 @@ void CPolylineVisuals::attach(CDoubleBufferedShape* const _pPolyline)
         ERROR_MSG("Polyline Visuals", "Wrong shape attached to visuals.")
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& CPolylineVisuals::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CPolylineVisuals::myStreamIn")
+    
+    /// \todo Has to be hooked to shape (CDoubleBufferedShape)
+
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CPolylineVisuals instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& CPolylineVisuals::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CPolylineVisuals::myStreamOut")
+
+    /// \todo Hook to shape (CDoubleBufferedShape) has to be stored/streamed
+    
+    return _os;
+}
+

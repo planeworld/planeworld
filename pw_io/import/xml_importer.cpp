@@ -1037,11 +1037,11 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody,
         MEM_ALLOC("CPolyLine")
         
         if (std::string(_Node.attribute("line_type").as_string()) == "loop")
-            pPolyline->setLineType(GRAPHICS_LINETYPE_LOOP);
+            pPolyline->setLineType(LineType::GRAPHICS_LINETYPE_LOOP);
         else if (std::string(_Node.attribute("line_type").as_string()) == "strip")
-            pPolyline->setLineType(GRAPHICS_LINETYPE_STRIP);
+            pPolyline->setLineType(LineType::GRAPHICS_LINETYPE_STRIP);
         else if (std::string(_Node.attribute("line_type").as_string()) == "single")
-            pPolyline->setLineType(GRAPHICS_LINETYPE_SINGLE);
+            pPolyline->setLineType(LineType::GRAPHICS_LINETYPE_SINGLE);
         
         std::string strPoints = _Node.attribute("points").as_string();
         size_t Pos;

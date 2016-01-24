@@ -234,6 +234,53 @@ void CPlanet::transform( const double& _fAngle, const Vector2d& _vecV )
                                                 m_fRadius+m_fHeightMax));
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CPlanet instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& CPlanet::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CPlanet::myStreamOut")
+    
+    _os << m_PlanetType;
+    _os << m_vecCenter;
+    _os << m_vecCenter0;
+    _os << m_fAngle;
+    _os << m_fGroundResolution;
+    _os << m_fHeightMax;
+    _os << m_fRadius;
+    _os << m_fSeaLevel;
+    _os << m_fSmoothness;
+    _os << m_nSeed;
+    
+//         noise::module::Module*     m_pSurface;          ///< Final surface noise function
+//         noise::module::Module*     m_pTerrainType;      ///< Final terrain type noise function
+//         
+//         std::vector<noise::module::Billow>      m_Billow;       ///< Billow modules
+//         std::vector<noise::module::Clamp>       m_Clamp;        ///< Clamp modules
+//         std::vector<noise::module::Perlin>      m_Perlin;       ///< Perlin modules
+//         std::vector<noise::module::RidgedMulti> m_RidgedMulti;  ///< RidgedMulti modules
+//         std::vector<noise::module::ScaleBias>   m_ScaleBias;    ///< Selector modules
+//         std::vector<noise::module::Select>      m_Selector;     ///< Selector modules
+//         std::vector<noise::module::Terrace>     m_Terrace;      ///< Terrace modules
+    
+    _os << m_fLacHlTr;
+    _os << m_fLacMtTr;
+    _os << m_fLacTrTp;
+    _os << m_nOctHlTr;
+    _os << m_nOctMtTr;
+    _os << m_nOctTrTp;
+    
+    _os << "CPlanet::streamOut TEST";
+    
+    return _os;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Initialises the planets terrain

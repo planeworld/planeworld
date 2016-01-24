@@ -48,8 +48,13 @@ class CPolylineVisuals : public IVisuals
         virtual const CBoundingBox& getBoundingBox();
         
     private:
-        
+      
+        //--- Constructor [private] ------------------------------------------//
         CPolylineVisuals();        ///< Constructor is private, copy constructor must be used
+
+        //--- Methods [private] ----------------------------------------------//
+        std::istream&       myStreamIn(std::istream&);
+        std::ostream&       myStreamOut(std::ostream&);
         
         CDoubleBufferedShape* m_pPolyline;
 

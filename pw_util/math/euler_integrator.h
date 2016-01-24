@@ -49,8 +49,12 @@ class CEulerIntegrator : public IIntegrator<T>
 
         void    init(const T&);
         void    reset();
-
+        
     protected:
+      
+        //--- Protected methods ----------------------------------------------//
+        std::istream& myStreamIn(std::istream&);
+        std::ostream& myStreamOut(std::ostream&);
 
         //--- Protected Variables --------------------------------------------//
         T   m_PrevValue;     ///< Calculated value of previous timestep

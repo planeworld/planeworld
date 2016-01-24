@@ -193,3 +193,49 @@ void CGeometry::update()
         (*it)->swapBuffer();
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _Geo CGeometry instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
+{
+    METHOD_ENTRY("CGeometry::operator>>")
+    
+    _is >> _Geo.m_AABB;
+    
+//     os << _Geo.getShapes()->size();
+//     for (auto ci : (*_Geo.m_pShapes))
+//         _os << (*ci);
+
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _Geo CGeometry instance to stream
+///
+/// \return Stream with game state information of CGeometry instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CGeometry& _Geo)
+{
+    METHOD_ENTRY("CGeometry::operator<<")
+    
+    _os << _Geo.m_AABB;
+    
+    _os << _Geo.getShapes()->size();
+    for (auto ci : (*_Geo.m_pShapes))
+        _os << (*ci);
+    
+    return _os;
+}

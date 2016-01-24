@@ -68,9 +68,16 @@ class IShape
         CBoundingBox&   getBoundingBox();
         void            setDepths(const int&);
         void            unsetDepths(const int&);
+        
+        //--- friends --------------------------------------------------------//
+        friend std::istream& operator>>(std::istream&, IShape* const);
+        friend std::ostream& operator<<(std::ostream&, IShape* const);
 
     protected:
 
+        virtual std::istream& myStreamIn (std::istream& _is){return _is;}
+        virtual std::ostream& myStreamOut(std::ostream&) = 0;
+      
         //--- Protected Variables --------------------------------------------//
         CBoundingBox    m_AABB;                             ///< Bounding box of shape
         int             m_nDepthlayers;                     ///< Depths in which shape exists

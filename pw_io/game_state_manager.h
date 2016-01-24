@@ -9,56 +9,50 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       visuals.h
-/// \brief      Prototype of class "IVisuals"
+/// \file       game_state_manager.h
+/// \brief      Prototype of class "CGameStateManager"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2010-04-08
+/// \date       2016-01-15
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef VISUALS_H
-#define VISUALS_H
+#ifndef GAME_STATE_MANAGER_H
+#define GAME_STATE_MANAGER_H
+
+//--- Program header ---------------------------------------------------------//
+#include "log.h"
+#include "world_data_storage_user.h"
 
 //--- Standard header --------------------------------------------------------//
 
-//--- Program header ---------------------------------------------------------//
-#include "camera.h"
-#include "object.h"
+//--- Misc. header -----------------------------------------------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for visualisation of world objects
+/// \brief Class for loading and saving the game state
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IVisuals : virtual public CGraphicsBase
+class CGameStateManager : public IWorldDataStorageUser
 {
     
     public:
-
+    
         //--- Constructor/Destructor -----------------------------------------//
-        virtual ~IVisuals(){}
-        
-        //--- Constant Methods -----------------------------------------------//
-        virtual IVisuals* clone(CDoubleBufferedShape* const) const = 0;
-        virtual void      draw(CCamera* const,
-                               const IObject* const) const = 0;
-                        
-        //--- Methods --------------------------------------------------------//
-        virtual void                attach(CDoubleBufferedShape* const) = 0;
-        virtual const CBoundingBox& getBoundingBox() = 0;
-        
-        //--- Friends --------------------------------------------------------//
-        friend std::istream& operator>>(std::istream&, IVisuals* const);
-        friend std::ostream& operator<<(std::ostream&, IVisuals* const);
-        
-    protected:
+        CGameStateManager();
+        CGameStateManager(const CGameStateManager());
 
-        //--- Protected methods ----------------------------------------------//
-        virtual std::istream& myStreamIn (std::istream&) = 0;
-        virtual std::ostream& myStreamOut(std::ostream&) = 0;
+        //--- Constant methods -----------------------------------------------//
+        bool save() const;
         
+        //--- Methods --------------------------------------------------------//
+        bool load();
+
+    private:
+
+        //--- Variables ------------------------------------------------------//
 };
 
+//--- Implementation is done here for inline optimisation --------------------//
 
-#endif
+#endif // GAME_STATE_MANAGER_H

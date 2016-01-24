@@ -61,9 +61,13 @@ class CBody : public IObject
 
     protected:
 
+        //--- Methods [protected] --------------------------------------------//
         void myInit();
         void mySetNewIntegrator(const IntegratorType&);
         void myTransform();
+        
+        std::istream& myStreamIn (std::istream&);
+        std::ostream& myStreamOut(std::ostream&);
 
         //--- Variables [protected] ------------------------------------------//
         double              m_fInertia;                 ///< The body's inertia

@@ -76,6 +76,10 @@ class CWorldDataStorage
         void lockObjects(){m_ObjectMutex.lock();}
         void unlockObjects(){m_ObjectMutex.unlock();}
         
+        //--- friends --------------------------------------------------------//
+        friend std::istream& operator>>(std::istream&, CWorldDataStorage&);
+        friend std::ostream& operator<<(std::ostream&, CWorldDataStorage&);
+        
     private:
                 
         DebrisType                  m_Debris;                   ///< List of debris

@@ -35,8 +35,8 @@ CTerrain::CTerrain() :  m_fDiversity(1.0),
                         m_fWidth(200.0),
                         m_nSeed(2)
 {
-    METHOD_ENTRY("CTerrain::CTerrain()");
-    CTOR_CALL("CTerrain::CTerrain()");
+    METHOD_ENTRY("CTerrain::CTerrain");
+    CTOR_CALL("CTerrain::CTerrain");
     
     m_vecCenter0.setZero();
 }
@@ -207,8 +207,6 @@ void CTerrain::init()
         
         Log.progressBar("Caching Terrain", i,ceil(fNrOfPoints));
     }
-
-    METHOD_EXIT("CTerrain::init")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -239,6 +237,23 @@ void CTerrain::transform( const double& _fAngle, const Vector2d& _vecV )
 //     m_AABB.setUpperRight(m_vecCenter + Vector2d(m_fWidth*0.5,m_fHeightMax));
     
     this->init();
-
-    METHOD_EXIT("CTerrain::transform")
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CTerrain instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& CTerrain::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CTerrain::myStreamOut")
+    
+    _os << "CTerrain::streamOut TEST";
+    
+    return _os;
+}
+

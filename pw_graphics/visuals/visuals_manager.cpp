@@ -177,7 +177,7 @@ void CVisualsManager::drawGrid() const
         // Vertical sub grid lines
         while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
         {
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.3);
+            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_SINGLE,-15.3);
                 m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                m_pCamera->getBoundingBox().getLowerLeft()[1]-
                                                m_pCamera->getCenter()[1]);
@@ -190,7 +190,7 @@ void CVisualsManager::drawGrid() const
         // Horizontal sub grid lines
         while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
         {
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.3);
+            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_SINGLE,-15.3);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
                                     m_pCamera->getCenter()[0],
                                     fGridTop-m_pCamera->getCenter()[1]);
@@ -221,7 +221,7 @@ void CVisualsManager::drawGrid() const
         // Vertical grid lines
         while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
         {
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_SINGLE,-15.2);
                 m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                 m_pCamera->getBoundingBox().getLowerLeft()[1]-
                                                 m_pCamera->getCenter()[1]);
@@ -234,7 +234,7 @@ void CVisualsManager::drawGrid() const
         // Horizontal grid lines
         while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
         {
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_SINGLE,-15.2);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
                                     m_pCamera->getCenter()[0],
                                     fGridTop-m_pCamera->getCenter()[1]);
@@ -398,7 +398,7 @@ void CVisualsManager::drawTrajectories() const
             
             // Draw objects trajectories
             double fColourFade = 0.1;
-            m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP, -15.0);
+            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_STRIP, -15.0);
             
             TrajectoryType::const_iterator cj = ci->second->getTrajectory().getPositions().begin();
             TrajectoryCellType::const_iterator ck = ci->second->getTrajectory().getCells().begin();

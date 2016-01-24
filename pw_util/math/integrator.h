@@ -58,11 +58,23 @@ class IIntegrator
         virtual const T integrateClip(const T&, const double&, const T&) = 0;
         virtual void    init(const T&) = 0;
         virtual void    reset() = 0;
+        
+        //--- friends --------------------------------------------------------//
+        template <class U>
+        friend std::istream& operator>>(std::istream&, IIntegrator<U>* const);
+        template <class U>
+        friend std::ostream& operator<<(std::ostream&, IIntegrator<U>* const);
 
     protected:
+      
+        //--- Protected Methods ----------------------------------------------//
+        virtual std::istream& myStreamIn(std::istream&) = 0;
+        virtual std::ostream& myStreamOut(std::ostream&) = 0;
 
         //--- Protected Variables --------------------------------------------//
 
 };
+
+#include "integrator.tpp"
 
 #endif

@@ -276,3 +276,69 @@ void IObject::transform()
         this->myTransform();
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _Obj IObject instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, IObject& _Obj)
+{
+    METHOD_ENTRY("IObject::operator>>")
+    
+    _is >> _Obj.m_bGravitation;
+    _is >> _Obj.m_bDynamics;
+    _is >> _Obj.m_Lifetime;
+    _is >> _Obj.m_fTimeFac;
+    _is >> _Obj.m_Geometry;
+    _is >> _Obj.m_vecCOM[0] >> _Obj.m_vecCOM[1];
+    _is >> _Obj.m_vecForce[0] >> _Obj.m_vecForce[1];
+    _is >> _Obj.m_fMass;
+    _is >> _Obj.m_nDepthlayers;
+    _is >> _Obj.m_pIntPos;
+    _is >> _Obj.m_pIntVel;
+//     _is >> _Obj.m_Anchors.size();
+//     for (auto ci : _Obj.m_Anchors)
+//         _is >> ci;
+//     _is << _Obj.m_Trajectory;
+
+    return _Obj.myStreamIn(_is);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _Obj IObject instance to stream
+///
+/// \return Stream with game state information of IObject instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, IObject& _Obj)
+{
+    METHOD_ENTRY("IObject::operator<<")
+    
+    _os << _Obj.m_bGravitation;
+    _os << _Obj.m_bDynamics;
+    _os << _Obj.m_Lifetime;
+    _os << _Obj.m_fTimeFac;
+    _os << _Obj.m_Geometry;
+    _os << _Obj.m_vecCOM[0] << _Obj.m_vecCOM[1];
+    _os << _Obj.m_vecForce[0] << _Obj.m_vecForce[1];
+    _os << _Obj.m_fMass;
+    _os << _Obj.m_nDepthlayers;
+    _os << _Obj.m_pIntPos;
+    _os << _Obj.m_pIntVel;
+    _os << _Obj.m_Anchors.size();
+    for (auto ci : _Obj.m_Anchors)
+        _os << ci;
+//     _os << _Obj.m_Trajectory;
+
+    return _Obj.myStreamOut(_os);
+}

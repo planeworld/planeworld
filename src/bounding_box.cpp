@@ -166,4 +166,50 @@ void CBoundingBox::update(const Vector2d& _vecPoint)
     if      (_vecPoint[1] < m_vecLowerLeft[1]) m_vecLowerLeft[1] = _vecPoint[1];
     else if (_vecPoint[1] > m_vecUpperRight[1]) m_vecUpperRight[1] = _vecPoint[1];
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _BB CBoundingBox instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CBoundingBox& _BB)
+{
+    METHOD_ENTRY("CBoundingBox::operator>>")
+    
+    _is >> _BB.m_vecLowerLeft[0] >> _BB.m_vecLowerLeft[1];
+    _is >> _BB.m_vecUpperRight[0] >> _BB.m_vecUpperRight[1];
+    
+    // From IUniverseScaled:
+    _is >> _BB.m_vecCell[0] >> _BB.m_vecCell[1];
+
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _BB CBoundingBox instance to stream
+///
+/// \return Stream with game state information of CBoundingBox instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CBoundingBox& _BB)
+{
+    METHOD_ENTRY("CBoundingBox::operator<<")
+    
+    _os << _BB.m_vecLowerLeft[0] << _BB.m_vecLowerLeft[1];
+    _os << _BB.m_vecUpperRight[0] << _BB.m_vecUpperRight[1];
+    
+    // From IUniverseScaled:
+    _os << _BB.m_vecCell[0] << _BB.m_vecCell[1];
+        
+    return _os;
+}
     

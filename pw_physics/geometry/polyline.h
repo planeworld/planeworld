@@ -59,7 +59,12 @@ class CPolyLine : public IShape
 
 
     protected:
+      
+        //--- Protected methods ----------------------------------------------//
+        std::istream&           myStreamIn(std::istream&);
+        std::ostream&           myStreamOut(std::ostream&);
 
+        //--- Protected variables --------------------------------------------//
         LineType                m_LineType;     ///< Type of polyline
         std::list<Vector2d>     m_VertList;     ///< List of vertices
         std::list<Vector2d>     m_VertList0;    ///< List of vertices
