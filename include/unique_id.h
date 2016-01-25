@@ -27,7 +27,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
 
-using UniqueIDType = uint32_t;
+using UIDType = uint32_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -44,7 +44,7 @@ class CUniqueID
         ~CUniqueID();
         
         //--- Constant Methods -----------------------------------------------//
-        const UniqueIDType& value() const;
+        const UIDType& value() const;
                 
         //--- Methods --------------------------------------------------------//
                 
@@ -53,10 +53,10 @@ class CUniqueID
         CUniqueID(const CUniqueID&){};                  ///< Copying not allowed
       
         //--- Variables [private] --------------------------------------------//
-               UniqueIDType             m_nID;          ///< Unique ID for this instance
+               UIDType             m_nUID;              ///< Unique ID for this instance
                
-        static UniqueIDType             s_nID;          ///< Unique ID counter
-        static std::deque<UniqueIDType> s_UnusedIDs;    ///< Storage for unused / released IDs
+        static UIDType             s_nUID;              ///< Unique ID counter
+        static std::deque<UIDType> s_UnusedUIDs;        ///< Storage for unused / released IDs
         
 };
 
@@ -69,10 +69,10 @@ class CUniqueID
 /// \return Unique ID value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const UniqueIDType& CUniqueID::value() const
+inline const UIDType& CUniqueID::value() const
 {
     METHOD_ENTRY("CUniqueID::value")
-    return m_nID;
+    return m_nUID;
 }
 
 #endif // CUniqueID

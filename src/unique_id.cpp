@@ -20,10 +20,10 @@
 #include "unique_id.h"
 
 /// Global counter for unique IDs.
-UniqueIDType CUniqueID::s_nID = 0;
+UIDType CUniqueID::s_nUID = 0;
 
 /// Global list for unused unique IDs
-std::deque<UniqueIDType> CUniqueID::s_UnusedIDs;
+std::deque<UIDType> CUniqueID::s_UnusedUIDs;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -38,12 +38,12 @@ CUniqueID::CUniqueID()
     METHOD_ENTRY("CUniqueID::CUniqueID")
     DTOR_CALL("CUniqueID::CUniqueID")
     
-    if (s_UnusedIDs.empty())
-        m_nID = s_nID++;
+    if (s_UnusedUIDs.empty())
+        m_nUID = s_nUID++;
     else
     {
-        m_nID = s_UnusedIDs.front();
-        s_UnusedIDs.pop_front();
+        m_nUID = s_UnusedUIDs.front();
+        s_UnusedUIDs.pop_front();
     }
 }
 
@@ -62,5 +62,5 @@ CUniqueID::~CUniqueID()
     METHOD_ENTRY("CUniqueID::~CUniqueID")
     DTOR_CALL("CUniqueID::~CUniqueID")
     
-    s_UnusedIDs.push_back(m_nID);
+    s_UnusedUIDs.push_back(m_nUID);
 }
