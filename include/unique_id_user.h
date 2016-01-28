@@ -9,51 +9,56 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       game_state_manager.h
-/// \brief      Prototype of class "CGameStateManager"
+/// \file       unique_id_user.h
+/// \brief      Prototype of interface "IWorldDataStorageUser"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2016-01-15
+/// \date       2014-02-24
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef GAME_STATE_MANAGER_H
-#define GAME_STATE_MANAGER_H
-
-//--- Program header ---------------------------------------------------------//
-#include "log.h"
-#include "world_data_storage_user.h"
+#ifndef UNIQUE_ID_USER_H
+#define UNIQUE_ID_USER_H
 
 //--- Standard header --------------------------------------------------------//
 
-//--- Misc. header -----------------------------------------------------------//
+//--- Program header ---------------------------------------------------------//
+#include "unique_id.h"
+
+//--- Misc header ------------------------------------------------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for loading and saving the game state
+/// \brief Interface for classes that use a engine wide unique id.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CGameStateManager : public IWorldDataStorageUser
+class IUniqueIDUser
 {
-    
+
     public:
-    
-        //--- Constructor/Destructor -----------------------------------------//
-        CGameStateManager();
-        CGameStateManager(const CGameStateManager());
-
-        //--- Constant methods -----------------------------------------------//
-        bool load() const;
-        bool save() const;
+   
+        //--- Constant Methods -----------------------------------------------//
+        const UIDType   getUID() const;
         
-        //--- Methods --------------------------------------------------------//
+    protected:
         
-
-    private:
-
-        //--- Variables ------------------------------------------------------//
+        //--- Protected variables --------------------------------------------//
+        CUniqueID       m_UID; ///< Identifier
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-#endif // GAME_STATE_MANAGER_H
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the objects unique id
+///
+/// \return Unique id of object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const UIDType IUniqueIDUser::getUID() const
+{
+    METHOD_ENTRY("IUniqueIDUser::getUID")
+    return m_UID.value();
+}
+
+#endif // UNIQUE_ID_USER_H

@@ -421,6 +421,14 @@ int main(int argc, char *argv[])
                             pVisualsManager->toggleVisualisations(VISUALS_KINEMATICS_STATES);
                             break;
                         }
+                        case sf::Keyboard::L:
+                        {
+                            /// \todo Really check if physics thread is paused before saving the simulation
+                            g_bPhysicsPaused=true;
+                            GameStateManager.load();
+                            g_bPhysicsPaused=false;
+                            break;
+                        }
                         case sf::Keyboard::N:
                         {
                             pVisualsManager->toggleVisualisations(VISUALS_NAMES);
@@ -428,7 +436,15 @@ int main(int argc, char *argv[])
                         }
                         case sf::Keyboard::P:
                         {
-                            g_bPhysicsPaused ? g_bPhysicsPaused=false : g_bPhysicsPaused=true;
+                            g_bPhysicsPaused ^= 1;
+                            break;
+                        }
+                        case sf::Keyboard::S:
+                        {
+                            /// \todo Really check if physics thread is paused before saving the simulation
+                            g_bPhysicsPaused=true;
+                            GameStateManager.save();
+                            g_bPhysicsPaused=false;
                             break;
                         }
                         case sf::Keyboard::T:

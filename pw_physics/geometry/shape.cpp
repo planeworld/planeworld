@@ -33,6 +33,8 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
 {
     METHOD_ENTRY("IShape::operator>>")
     
+    /// \todo Read UID
+    //  _is >> _pShape->m_UID.value();
     _is >> _pShape->m_AABB;
     _is >> _pShape->m_nDepthlayers;
     
@@ -52,6 +54,9 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
 std::ostream& operator<<(std::ostream& _os, IShape* const _pShape)
 {
     METHOD_ENTRY("IShape::operator<<")
+
+    // From IUniqueIDUser
+    _os << _pShape->m_UID.value();
     
     _os << _pShape->m_AABB;
     _os << _pShape->m_nDepthlayers;

@@ -291,13 +291,17 @@ std::istream& operator>>(std::istream& _is, IObject& _Obj)
 {
     METHOD_ENTRY("IObject::operator>>")
     
+    /// \todo Read UID
+//     _is >> _Obj.m_ID.value();
     _is >> _Obj.m_bGravitation;
     _is >> _Obj.m_bDynamics;
     _is >> _Obj.m_Lifetime;
     _is >> _Obj.m_fTimeFac;
     _is >> _Obj.m_Geometry;
-    _is >> _Obj.m_vecCOM[0] >> _Obj.m_vecCOM[1];
-    _is >> _Obj.m_vecForce[0] >> _Obj.m_vecForce[1];
+    _is >> _Obj.m_vecCOM[0];
+    _is >> _Obj.m_vecCOM[1];
+    _is >> _Obj.m_vecForce[0];
+    _is >> _Obj.m_vecForce[1];
     _is >> _Obj.m_fMass;
     _is >> _Obj.m_nDepthlayers;
     _is >> _Obj.m_pIntPos;
@@ -324,20 +328,25 @@ std::ostream& operator<<(std::ostream& _os, IObject& _Obj)
 {
     METHOD_ENTRY("IObject::operator<<")
     
-    _os << _Obj.m_bGravitation;
-    _os << _Obj.m_bDynamics;
-    _os << _Obj.m_Lifetime;
-    _os << _Obj.m_fTimeFac;
-    _os << _Obj.m_Geometry;
-    _os << _Obj.m_vecCOM[0] << _Obj.m_vecCOM[1];
-    _os << _Obj.m_vecForce[0] << _Obj.m_vecForce[1];
-    _os << _Obj.m_fMass;
-    _os << _Obj.m_nDepthlayers;
-    _os << _Obj.m_pIntPos;
-    _os << _Obj.m_pIntVel;
-    _os << _Obj.m_Anchors.size();
-    for (auto ci : _Obj.m_Anchors)
-        _os << ci;
+     // From IUniqueIDUser
+//     _os << _Obj.m_UID.value() << std::endl;
+    
+    _os << _Obj.m_bGravitation << std::endl;
+    _os << _Obj.m_bDynamics << std::endl;
+    _os << _Obj.m_Lifetime << std::endl;
+    _os << _Obj.m_fTimeFac << std::endl;
+    _os << _Obj.m_Geometry << std::endl;
+    _os << _Obj.m_vecCOM[0] << std::endl;
+    _os << _Obj.m_vecCOM[1] << std::endl;
+    _os << _Obj.m_vecForce[0] << std::endl;
+    _os << _Obj.m_vecForce[1] << std::endl;
+    _os << _Obj.m_fMass << std::endl;
+    _os << _Obj.m_nDepthlayers << std::endl;
+    _os << _Obj.m_pIntPos << std::endl;
+    _os << _Obj.m_pIntVel << std::endl;
+//     _os << _Obj.m_Anchors.size() << std::endl;
+//     for (auto ci : _Obj.m_Anchors)
+//         _os << ci;
 //     _os << _Obj.m_Trajectory;
 
     return _Obj.myStreamOut(_os);

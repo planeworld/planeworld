@@ -208,7 +208,11 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
 {
     METHOD_ENTRY("CGeometry::operator>>")
     
+    std::string strTmp;
+    _is >> strTmp;
     _is >> _Geo.m_AABB;
+    
+    /// \todo Stream in shapes
     
 //     os << _Geo.getShapes()->size();
 //     for (auto ci : (*_Geo.m_pShapes))
@@ -231,11 +235,13 @@ std::ostream& operator<<(std::ostream& _os, CGeometry& _Geo)
 {
     METHOD_ENTRY("CGeometry::operator<<")
     
-    _os << _Geo.m_AABB;
+    _os << "Geometry:" << std::endl;
+    _os << _Geo.m_AABB << std::endl;
     
-    _os << _Geo.getShapes()->size();
-    for (auto ci : (*_Geo.m_pShapes))
-        _os << (*ci);
+    /// \todo Stream out Shapes
+//     _os << _Geo.getShapes()->size();
+//     for (auto ci : (*_Geo.m_pShapes))
+//         _os << (*ci);
     
     return _os;
 }

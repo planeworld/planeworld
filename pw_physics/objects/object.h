@@ -27,7 +27,7 @@
 #include "geometry.h"
 #include "kinematics_state_user.h"
 #include "trajectory.h"
-#include "unique_id.h"
+#include "unique_id_user.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <unordered_map>
@@ -58,6 +58,7 @@ typedef enum
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class IObject : public IKinematicsStateUser,
+                public IUniqueIDUser,
                 public IUniverseScaled
 {
     
@@ -128,8 +129,6 @@ class IObject : public IKinematicsStateUser,
         virtual std::ostream& myStreamOut(std::ostream&) = 0;       ///< Stream out from inherited class
 
         //-- Variables [protected] -------------------------------------------//
-        CUniqueID               m_ID;                               ///< Identifier
-        
         bool                    m_bGravitation;                     ///< Does this object influence others by gravitation?
         bool                    m_bDynamics;                        ///< Dynamics calculations for object
 

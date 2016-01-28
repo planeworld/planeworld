@@ -37,7 +37,9 @@ Usage
 | g                        | Show grid                       |
 | b                        | Show bounding boxes             |
 | k                        | Show kinematics states          |
+| l                        | Load game state                 |
 | n                        | Show names                      |
+| s                        | Save game state                 |
 | t                        | Show object trajectories        |
 | v                        | Toggle graphics (on/off)        |
 | ESC                      | Quit                            |

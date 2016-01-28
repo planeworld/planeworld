@@ -240,6 +240,30 @@ void CWorldDataStorage::addObject(IObject* _pObject)
     m_ObjectMutex.unlock();
 }
 
+// ///////////////////////////////////////////////////////////////////////////////
+// ///
+// /// \brief Add a object to list
+// ///
+// /// This method adds the given object to the list of object, depending on their
+// /// dynamics state. 
+// ///
+// /// \param _pObject Object that should be added to list
+// ///
+// ///////////////////////////////////////////////////////////////////////////////
+// void CWorldDataStorage::addObject(IObject* _pObject)
+// {
+//     METHOD_ENTRY("CWorldDataStorage::addObject")
+// 
+//     m_ObjectMutex.lock();
+//     
+//     if (_pObject->getDynamicsState())
+//         m_DynamicObjects.insert({_pObject->getID(), _pObject});
+//     else
+//         m_StaticObjects.insert({_pObject->getID(), _pObject});
+//     m_ObjectMutex.unlock();
+// }
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Add a list of objects to internal object list
@@ -322,6 +346,24 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 {
     METHOD_ENTRY("CWorldDataStorage::operator>>")
     
+    ObjectsType::size_type Size;
+    _is >> Size;
+    
+    std::cout << "Number of objects: " << Size << std::endl;
+    for (auto i=0; i<Size; ++i)
+    {
+//         std::string::size_type strSize;
+//         _is >> strSize;
+//         std::cout << strSize << std::endl;
+        std::string strName;
+        _is >> strName;
+        std::cout << strName << std::endl;
+        CRigidBody* pObj = new CRigidBody;
+        _is >> *pObj;
+        std::cout << *pObj << std::endl;
+//         _WDS.addObject();
+    }
+        
     return _is;
 }
 
@@ -339,10 +381,11 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
 {
     METHOD_ENTRY("CWorldDataStorage::operator<<")
 
-    _os << _WDS.m_DynamicObjects.size();
+    _os << _WDS.m_DynamicObjects.size() << std::endl;
     for (auto ci : _WDS.m_DynamicObjects)
     {
-        _os << *(ci.second);
+        _os << ci.first << std::endl;
+        _os << *(ci.second) << std::endl;
     }
     _os << _WDS.m_StaticObjects.size();
     for (auto ci : _WDS.m_StaticObjects)

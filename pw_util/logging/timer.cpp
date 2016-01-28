@@ -121,10 +121,14 @@ std::istream& operator>>(std::istream& _is, CTimer& _Timer)
 {
     //METHOD_ENTRY("CTimer::operator>>")
     
+    std::string strTmp;
+    _is >> strTmp;
     _is >> _Timer.m_Start.tv_sec;
     _is >> _Timer.m_Start.tv_usec;
-    _is >> _Timer.m_Stop.tv_sec >> _Timer.m_Stop.tv_usec;
-    _is >> _Timer.m_TimeZone.tz_minuteswest >> _Timer.m_TimeZone.tz_dsttime;
+    _is >> _Timer.m_Stop.tv_sec;
+    _is >> _Timer.m_Stop.tv_usec;
+    _is >> _Timer.m_TimeZone.tz_minuteswest;
+    _is >> _Timer.m_TimeZone.tz_dsttime;
     _is >> _Timer.m_bFirstCall;
     _is >> _Timer.m_fDiffTime;
 
@@ -145,11 +149,13 @@ std::ostream& operator<<(std::ostream& _os, CTimer& _Timer)
 {
     //METHOD_ENTRY("CTimer::operator<<")
     
-    _os << _Timer.m_Start.tv_sec << _Timer.m_Start.tv_usec;
-    _os << _Timer.m_Stop.tv_sec << _Timer.m_Stop.tv_usec;
-    _os << _Timer.m_TimeZone.tz_minuteswest << _Timer.m_TimeZone.tz_dsttime;
-    _os << _Timer.m_bFirstCall;
-    _os << _Timer.m_fDiffTime;
+    _os << "Timer:" << std::endl;
+    _os << _Timer.m_Start.tv_sec << _Timer.m_Start.tv_usec << std::endl;
+    _os << _Timer.m_Stop.tv_sec << _Timer.m_Stop.tv_usec << std::endl;
+    _os << _Timer.m_TimeZone.tz_minuteswest << std::endl;
+    _os << _Timer.m_TimeZone.tz_dsttime << std::endl;
+    _os << _Timer.m_bFirstCall << std::endl;
+    _os << _Timer.m_fDiffTime << std::endl;
 
     return _os;
 }

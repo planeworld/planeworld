@@ -202,6 +202,8 @@ std::istream& CBody::myStreamIn(std::istream& _is)
 {
     METHOD_ENTRY("CBody::myStreamIn")
     
+    std::string strTmp;
+    _is >> strTmp;
     _is >> m_fInertia;
     _is >> m_fTorque;
     _is >> m_pIntAng;
@@ -223,6 +225,7 @@ std::ostream& CBody::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CBody::myStreamOut")
     
+    _os << "Body:" << std::endl;
     _os << m_fInertia;
     _os << m_fTorque;
     _os << m_pIntAng;

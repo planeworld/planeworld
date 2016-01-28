@@ -27,6 +27,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "graphics.h"
+#include "unique_id_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -47,7 +48,7 @@ typedef enum
 /// \brief Abstract class representing a simple shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IShape
+class IShape : public IUniqueIDUser
 {
     
     public:

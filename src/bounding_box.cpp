@@ -181,11 +181,18 @@ std::istream& operator>>(std::istream& _is, CBoundingBox& _BB)
 {
     METHOD_ENTRY("CBoundingBox::operator>>")
     
-    _is >> _BB.m_vecLowerLeft[0] >> _BB.m_vecLowerLeft[1];
-    _is >> _BB.m_vecUpperRight[0] >> _BB.m_vecUpperRight[1];
+    std::string strTmp;
+    
+    _is >> strTmp;
+    
+    _is >> _BB.m_vecLowerLeft[0];
+    _is >> _BB.m_vecLowerLeft[1];
+    _is >> _BB.m_vecUpperRight[0];
+    _is >> _BB.m_vecUpperRight[1];
     
     // From IUniverseScaled:
-    _is >> _BB.m_vecCell[0] >> _BB.m_vecCell[1];
+    _is >> _BB.m_vecCell[0];
+    _is >> _BB.m_vecCell[1];
 
     return _is;
 }
@@ -204,11 +211,16 @@ std::ostream& operator<<(std::ostream& _os, CBoundingBox& _BB)
 {
     METHOD_ENTRY("CBoundingBox::operator<<")
     
-    _os << _BB.m_vecLowerLeft[0] << _BB.m_vecLowerLeft[1];
-    _os << _BB.m_vecUpperRight[0] << _BB.m_vecUpperRight[1];
+    _os << "Bounding Box:" << std::endl;
+    
+    _os << _BB.m_vecLowerLeft[0] << std::endl;
+    _os << _BB.m_vecLowerLeft[1] << std::endl;
+    _os << _BB.m_vecUpperRight[0] << std::endl;
+    _os << _BB.m_vecUpperRight[1] << std::endl;
     
     // From IUniverseScaled:
-    _os << _BB.m_vecCell[0] << _BB.m_vecCell[1];
+    _os << _BB.m_vecCell[0] << std::endl;
+    _os << _BB.m_vecCell[1] << std::endl;
         
     return _os;
 }

@@ -229,6 +229,8 @@ std::istream& CEulerIntegrator<T>::myStreamIn(std::istream& _is)
 {
     METHOD_ENTRY("CEulerIntegrator::myStreamIn")
     
+    std::string strTmp;
+    _is >> strTmp;
     _is >> m_PrevValue;
     _is >> m_Value;
     
@@ -249,8 +251,12 @@ inline std::istream& CEulerIntegrator<Vector2d>::myStreamIn(std::istream& _is)
 {
     METHOD_ENTRY("CEulerIntegrator::myStreamIn")
     
-    _is >> m_PrevValue[0] >> m_PrevValue[1];
-    _is >> m_Value[0] >> m_Value[1];
+    std::string strTmp;
+    _is >> strTmp;
+    _is >> m_PrevValue[0];
+    _is >> m_PrevValue[1];
+    _is >> m_Value[0];
+    _is >> m_Value[1];
     
     return _is;
 }
@@ -269,8 +275,32 @@ std::ostream& CEulerIntegrator<T>::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CEulerIntegrator::myStreamOut")
     
-    _os << m_PrevValue;
-    _os << m_Value;
+    _os << "Euler Integrator:" << std::endl;
+    _os << m_PrevValue << std::endl;
+    _os << m_Value << std::endl;
+    
+    return _os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CEulerIntegrator instance
+///
+////////////////////////////////////////////////////////////////////////////////
+template <>
+inline std::ostream& CEulerIntegrator<Vector2d>::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CEulerIntegrator::myStreamOut")
+    
+    _os << "Euler Integrator:" << std::endl;
+    _os << m_PrevValue[0] << std::endl;
+    _os << m_PrevValue[1] << std::endl;
+    _os << m_Value[0] << std::endl;
+    _os << m_Value[1] << std::endl;
     
     return _os;
 }
