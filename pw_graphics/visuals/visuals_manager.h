@@ -43,19 +43,13 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         ~CVisualsManager();
         
         //--- Constant Methods -----------------------------------------------//
-        void            drawBoundingBoxes() const;
-        void            drawGrid() const;
-        void            drawGridHUD() const;
-        void            drawKinematicsStates() const;
-        void            drawTrajectories() const;
-        void            drawWorld();
-        void            finishFrame() const;
         const double    getFrequency() const;
         const bool      getVisualisation(const int&) const;
         const int       getVisualisations() const;
         WindowHandleType* const
                         getWindowHandle() const;
         bool            initGraphics() const;
+        void            processFrame() const;
                 
         //--- Methods --------------------------------------------------------//
         void            setCamera(CCamera*);
@@ -68,8 +62,16 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         void            unsetVisualisations(const int&);
 
     private:
-      
+
+        //--- Constant methods [private] -------------------------------------//
+        void            drawBoundingBoxes() const;
+        void            drawGrid() const;
+        void            drawGridHUD() const;
         void            drawKinematicsState(const CKinematicsState&, const double&) const;
+        void            drawKinematicsStates() const;
+        void            drawTrajectories() const;
+        void            drawWorld() const;
+        void            finishFrame() const;
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         double                          m_fFrequency;       ///< Frequency of visuals update

@@ -65,30 +65,13 @@ bool g_bPhysicsPaused = false;
         CTimer PhysicsTimer;
         
         PhysicsTimer.start();
-        
-        int nCC=0;
-
         while (!(*_pbDone))
         {
             if (!g_bPhysicsPaused)
             {
-                CTimer FrameTimePhysics;
-                FrameTimePhysics.start();
-                
-                _pPhysicsManager->addGlobalForces();
-                _pPhysicsManager->moveMasses(nCC);
-                _pPhysicsManager->collisionDetection();
-                _pPhysicsManager->runCellUpdate();
-                
-                FrameTimePhysics.stop();
-                if (FrameTimePhysics.getTime() > 1.0/_pPhysicsManager->getFrequency())
-                {
-                  NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << FrameTimePhysics.getTime() << 
-                                                "s of " << 1.0/_pPhysicsManager->getFrequency() << "s max.")
-                }
+                _pPhysicsManager->processFrame();
             }
             PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
-            if (++nCC == 10000) nCC = 0;
         }
         INFO_MSG("Main", "Physics thread stopped.")
     }
@@ -244,6 +227,9 @@ int main(int argc, char *argv[])
     sf::Mouse::setPosition(vecMouseCenter,*pWindow);
     
     //--- Run the main loop --------------------------------------------------//
+    #ifndef PW_MULTITHREADING
+        auto nFrame = 0u;
+    #endif
     Timer.start();
     while (!bDone)
     {
@@ -386,46 +372,23 @@ int main(int argc, char *argv[])
         }
         #ifndef PW_MULTITHREADING
             //--- Run Physics ---//
-            static int nCC=0;
             if (!g_bPhysicsPaused)
             {
-                CTimer FrameTimePhysics;
-                FrameTimePhysics.start();
-                
-                pPhysicsManager->addGlobalForces();
-                pPhysicsManager->moveMasses(nCC);
-                pPhysicsManager->collisionDetection();
-                pPhysicsManager->runCellUpdate();
-                
-                FrameTimePhysics.stop();
-                if (FrameTimePhysics.getTime() > 1.0/pPhysicsManager->getFrequency())
-                {
-                  NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << FrameTimePhysics.getTime() << 
-                                                "s of " << 1.0/pPhysicsManager->getFrequency() << "s max.")
-                }
+                pPhysicsManager->processFrame();
             }
-            if (++nCC == 10000) nCC = 0;
-        #endif
-        
-        #ifndef PW_MULTITHREADING
-            if (nCC % static_cast<int>(pPhysicsManager->getFrequency()/
+            if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()/
                                        pVisualsManager->getFrequency()) == 0)
             {
         #endif
-        //--- Draw visuals if requested ---//
-        if (bGraphicsOn)
-        {
-            pVisualsManager->drawGrid();
-            pVisualsManager->drawTrajectories();
-            pVisualsManager->drawWorld();
-            pVisualsManager->drawKinematicsStates();
-            pVisualsManager->drawBoundingBoxes();
-            pVisualsManager->drawGridHUD();
-            pVisualsManager->finishFrame();
-        }
+                //--- Draw visuals if requested ---//
+                if (bGraphicsOn)
+                {
+                    pVisualsManager->processFrame();
+                }
         #ifndef PW_MULTITHREADING
             }
             Timer.sleepRemaining(pPhysicsManager->getFrequency());
+            if (nFrame % 1000u == 0u) nFrame = 0u;
         #else
             Timer.sleepRemaining(pVisualsManager->getFrequency());
         #endif

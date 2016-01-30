@@ -33,6 +33,7 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                      m_fFrequencyLua(PHYSICS_LUA_DEFAULT_FREQUENCY),
+                                     m_fProcessingTime(0.0),
                                      m_fTimeAccel(1.0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
@@ -87,68 +88,6 @@ CPhysicsManager::~CPhysicsManager()
         {
             DOM_MEMF(DEBUG_MSG("CThruster", "Memory already freed."))
         }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add global forces to all objects
-///
-/// This method adds global forces to all objects, for example gravitation.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addGlobalForces()
-{
-    METHOD_ENTRY("CPhysicsManager::addGlobalForces")
-    
-    ObjectsType::const_iterator cj;
-    double fCCSqr;
-    Vector2d vecCC;
-    Vector2d vecG;
-
-    for (std::list< IJoint* >::const_iterator ci = m_pDataStorage->getJoints().begin();
-        ci != m_pDataStorage->getJoints().end(); ++ci)
-    {
-        (*ci)->react();
-    }
-
-    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
-        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
-    {
-        cj = ci;
-        ++cj;
-        
-        ci->second->clearForces();
-        
-        if (ci->second->getGravitationState() == true)
-        {
-            while (cj != m_pDataStorage->getDynamicObjects().end())
-            {
-                vecCC = ci->second->getCOM() - cj->second->getCOM() +
-                        IUniverseScaled::cellToDouble(ci->second->getCell()-cj->second->getCell());
-                
-                fCCSqr = vecCC.squaredNorm();
-                
-                if (fCCSqr > 400.0)
-                {
-                    vecG = vecCC.normalized() * (ci->second->getMass() * cj->second->getMass()) / fCCSqr
-//                             * 6.6742e+0;
-                        * 6.67384e-11;
-                    if (cj->second->getGravitationState() == true)
-                        ci->second->addForce(-vecG, ci->second->getCOM());
-                    cj->second->addForce(vecG, cj->second->getCOM());
-                }
-                ++cj;
-            }
-        }
-
-        ci->second->addAcceleration(m_vecConstantGravitation);
-    };
-    
-    for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
-        ci != m_pDataStorage->getDebris().end(); ++ci)
-    {
-//         (*ci)->setForce(Vector2d(0.0, -1.81));
     }
 }
 
@@ -215,94 +154,6 @@ void CPhysicsManager::addEmitters(const EmittersType& _Emitters)
     {
         this->addEmitter((*ci).second);
         ++ci;
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Tests all objects for collision
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::collisionDetection()
-{
-    METHOD_ENTRY("CPhysicsManager::collisionDetection")
-
-//     m_ContactList.clear();
-    m_CollisionManager.setDebris(m_pDataStorage->getDebris());
-    m_CollisionManager.setDynamicObjects(m_pDataStorage->getDynamicObjects());
-    m_CollisionManager.setStaticObjects(m_pDataStorage->getStaticObjects());
-    m_CollisionManager.detectCollisions();
-    
-//  for (ContactList::const_iterator ci = m_ContactList.begin();
-//      ci != m_ContactList.end(); ++ci)
-//  {
-//      (*ci).getObjectA()->disableDynamics();
-//      (*ci).getObjectB()->disableDynamics();
-//  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Moves and rotates the masses
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::moveMasses(int nTest)
-{
-    METHOD_ENTRY("CPhysicsManager::moveMasses")
-    
-    if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyLua) == 0)
-    {
-        CTimer FrameTimeLua;
-        FrameTimeLua.start();
-        
-        lua_getglobal(m_pLuaState, "physics_interface");
-        if (lua_pcall(m_pLuaState, 0, 0, 0) != 0)
-        {
-            WARNING_MSG("Physics Manager", "Couldn't call Lua function.")
-            WARNING_MSG("Physics Manager", "Lua Error: " << lua_tostring(m_pLuaState, -1))
-        }
-        
-        FrameTimeLua.stop();
-        if (FrameTimeLua.getTime() > 1.0/m_fFrequencyLua)
-        {
-          NOTICE_MSG("Physics Manager", "Execution time of Lua code is too large: " << FrameTimeLua.getTime() << 
-                                        "s of " << 1.0/m_fFrequencyLua << "s max.")
-        }
-    }
-
-    for (auto ci = m_Emitters.cbegin();
-        ci != m_Emitters.cend(); ++ci)
-    {
-        (*ci).second->emit(1.0/m_fFrequency*m_fTimeAccel);
-    }
-    for (auto ci = m_Components.cbegin();
-        ci != m_Components.cend(); ++ci)
-    {
-        (*ci).second->execute();
-    }
-    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
-        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
-    {
-        ci->second->dynamics(1.0/m_fFrequency*m_fTimeAccel);
-        ci->second->transform();
-    }
-    if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
-    {
-        CTimer FrameTimeDebris;
-        FrameTimeDebris.start();
-        
-        for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
-            ci != m_pDataStorage->getDebris().end(); ++ci)
-        {
-            (*ci)->dynamics(1.0/m_fFrequencyDebris*m_fTimeAccel);
-        }
-        
-        FrameTimeDebris.stop();
-        if (FrameTimeDebris.getTime() > 1.0/m_fFrequencyDebris)
-        {
-          NOTICE_MSG("Physics Manager", "Execution time of debris code is too large: " << FrameTimeDebris.getTime() << 
-                                        "s of " << 1.0/m_fFrequencyDebris << "s max.")
-        }
     }
 }
 
@@ -426,12 +277,195 @@ void CPhysicsManager::initObjects()
         ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
     {
         ci->second->init();
-    };
+    }
     for (ObjectsType::const_iterator ci = m_pDataStorage->getStaticObjects().begin();
         ci != m_pDataStorage->getStaticObjects().end(); ++ci)
     {
         ci->second->init();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Initialise all objects
+///
+/// Initialisiation of all objects resets objects position, speed etc. to
+/// their state at the beginning of the simulation. It has to be called at
+/// least once at start to ensure a proper state of fixed objects.
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::processFrame()
+{
+    METHOD_ENTRY("CPhysicsManager::processFrame")
+ 
+    static auto nFrame = 0u;
+    if (++nFrame == 10000) nFrame = 0;    
+    
+    CTimer ProcessingTimer;
+    ProcessingTimer.start();
+    
+    this->addGlobalForces();
+    this->moveMasses(nFrame);
+    this->collisionDetection();
+    this->updateCells();
+    
+    ProcessingTimer.stop();
+    m_fProcessingTime = ProcessingTimer.getTime();
+    if (m_fProcessingTime > 1.0/ m_fFrequency)
+    {
+        NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << m_fProcessingTime << 
+                                      "s of " << 1.0/m_fFrequency << "s max.")
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Moves and rotates the masses
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::moveMasses(int nTest) const
+{
+    METHOD_ENTRY("CPhysicsManager::moveMasses")
+    
+    if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyLua) == 0)
+    {
+        CTimer FrameTimeLua;
+        FrameTimeLua.start();
+        
+        lua_getglobal(m_pLuaState, "physics_interface");
+        if (lua_pcall(m_pLuaState, 0, 0, 0) != 0)
+        {
+            WARNING_MSG("Physics Manager", "Couldn't call Lua function.")
+            WARNING_MSG("Physics Manager", "Lua Error: " << lua_tostring(m_pLuaState, -1))
+        }
+        
+        FrameTimeLua.stop();
+        if (FrameTimeLua.getTime() > 1.0/m_fFrequencyLua)
+        {
+          NOTICE_MSG("Physics Manager", "Execution time of Lua code is too large: " << FrameTimeLua.getTime() << 
+                                        "s of " << 1.0/m_fFrequencyLua << "s max.")
+        }
+    }
+
+    for (auto ci = m_Emitters.cbegin();
+        ci != m_Emitters.cend(); ++ci)
+    {
+        (*ci).second->emit(1.0/m_fFrequency*m_fTimeAccel);
+    }
+    for (auto ci = m_Components.cbegin();
+        ci != m_Components.cend(); ++ci)
+    {
+        (*ci).second->execute();
+    }
+    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
+        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
+    {
+        ci->second->dynamics(1.0/m_fFrequency*m_fTimeAccel);
+        ci->second->transform();
+    }
+    if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
+    {
+        CTimer FrameTimeDebris;
+        FrameTimeDebris.start();
+        
+        for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
+            ci != m_pDataStorage->getDebris().end(); ++ci)
+        {
+            (*ci)->dynamics(1.0/m_fFrequencyDebris*m_fTimeAccel);
+        }
+        
+        FrameTimeDebris.stop();
+        if (FrameTimeDebris.getTime() > 1.0/m_fFrequencyDebris)
+        {
+          NOTICE_MSG("Physics Manager", "Execution time of debris code is too large: " << FrameTimeDebris.getTime() << 
+                                        "s of " << 1.0/m_fFrequencyDebris << "s max.")
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add global forces to all objects
+///
+/// This method adds global forces to all objects, for example gravitation.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::addGlobalForces()
+{
+    METHOD_ENTRY("CPhysicsManager::addGlobalForces")
+    
+    ObjectsType::const_iterator cj;
+    double fCCSqr;
+    Vector2d vecCC;
+    Vector2d vecG;
+
+    for (std::list< IJoint* >::const_iterator ci = m_pDataStorage->getJoints().begin();
+        ci != m_pDataStorage->getJoints().end(); ++ci)
+    {
+        (*ci)->react();
+    }
+
+    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
+        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
+    {
+        cj = ci;
+        ++cj;
+        
+        ci->second->clearForces();
+        
+        if (ci->second->getGravitationState() == true)
+        {
+            while (cj != m_pDataStorage->getDynamicObjects().end())
+            {
+                vecCC = ci->second->getCOM() - cj->second->getCOM() +
+                        IUniverseScaled::cellToDouble(ci->second->getCell()-cj->second->getCell());
+                
+                fCCSqr = vecCC.squaredNorm();
+                
+                if (fCCSqr > 400.0)
+                {
+                    vecG = vecCC.normalized() * (ci->second->getMass() * cj->second->getMass()) / fCCSqr
+//                             * 6.6742e+0;
+                        * 6.67384e-11;
+                    if (cj->second->getGravitationState() == true)
+                        ci->second->addForce(-vecG, ci->second->getCOM());
+                    cj->second->addForce(vecG, cj->second->getCOM());
+                }
+                ++cj;
+            }
+        }
+
+        ci->second->addAcceleration(m_vecConstantGravitation);
     };
+    
+    for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
+        ci != m_pDataStorage->getDebris().end(); ++ci)
+    {
+//         (*ci)->setForce(Vector2d(0.0, -1.81));
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests all objects for collision
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::collisionDetection()
+{
+    METHOD_ENTRY("CPhysicsManager::collisionDetection")
+
+//     m_ContactList.clear();
+    m_CollisionManager.setDebris(m_pDataStorage->getDebris());
+    m_CollisionManager.setDynamicObjects(m_pDataStorage->getDynamicObjects());
+    m_CollisionManager.setStaticObjects(m_pDataStorage->getStaticObjects());
+    m_CollisionManager.detectCollisions();
+    
+//  for (ContactList::const_iterator ci = m_ContactList.begin();
+//      ci != m_ContactList.end(); ++ci)
+//  {
+//      (*ci).getObjectA()->disableDynamics();
+//      (*ci).getObjectB()->disableDynamics();
+//  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -446,9 +480,9 @@ void CPhysicsManager::initObjects()
 /// called at, the number of objects updated is chosen accordingly.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::runCellUpdate()
+void CPhysicsManager::updateCells()
 {
-    METHOD_ENTRY("CPhysicsManager::runCellUpdate")
+    METHOD_ENTRY("CPhysicsManager::updateCells")
     
     // Use double frequency just to avoid any surprises
     double fFreq = 6.0e9*m_fTimeAccel*m_pDataStorage->getDynamicObjects().size()/DEFAULT_CELL_SIZE_2;

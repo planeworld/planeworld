@@ -31,7 +31,7 @@ CWorldDataStorage::CWorldDataStorage()
     METHOD_ENTRY("CWorldDataStorage::CWorldDataStorage")
     CTOR_CALL("CWorldDataStorage::CWorldDataStorage")
 }
-#include <iomanip>
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Destructor, deletes objects

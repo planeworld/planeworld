@@ -60,6 +60,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         
         //--- Constant Methods -----------------------------------------------//
         const double     getFrequency() const;
+        const double     getProcessingTime() const;
         CUniverse* const getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
@@ -70,24 +71,31 @@ class CPhysicsManager : public IWorldDataStorageUser
         void setPhysicsInterface(const std::string&);
         void setUniverse(CUniverse* const);
         
-        void addGlobalForces();
         void addComponent(CThruster* const);
         void addComponents(const ComponentsType&);
         void addEmitter(IEmitter* const);
         void addEmitters(const EmittersType&);
-        void collisionDetection();
         void initComponents();
         void initEmitters();
         bool initLua();
         void initObjects();
-        void moveMasses(int);
+        
+        void processFrame();
+        
         void accelerateTime();
         void decelerateTime();
         void resetTime();
-        void runCellUpdate();
 
     private:
         
+        //--- Constant methods [private] -------------------------------------//
+        void moveMasses(int) const;
+        
+        //--- Methods [private] ----------------------------------------------//
+        void addGlobalForces();
+        void collisionDetection();
+        void updateCells();
+      
         CUniverse*          m_pUniverse;            ///< The procedurally generated universe
         CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
 
@@ -95,6 +103,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         double              m_fFrequency;           ///< Frequency of physics processing
         double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
         double              m_fFrequencyLua;        ///< Frequency of Lua interface
+        double              m_fProcessingTime;      ///< Overall processing time
         double              m_fTimeAccel;           ///< Factor for global acceleration
 
         Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
@@ -134,6 +143,19 @@ inline const double CPhysicsManager::getFrequency() const
 {
     METHOD_ENTRY("CPhysicsManager::getFrequency()")
     return (m_fFrequency);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns overall processing time for physics calculations
+///
+/// \return Processing time in seconds
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double CPhysicsManager::getProcessingTime() const
+{
+    METHOD_ENTRY("CPhysicsManager::getProcessingTime()")
+    return (m_fProcessingTime);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

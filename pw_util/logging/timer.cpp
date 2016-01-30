@@ -66,6 +66,7 @@ void CTimer::stop()
 /// If a frequency is given for a loop (or a thread) the timer stop, measures
 /// the runtime between start and stop and sleeps for the rest of the time
 /// according to the frequency.
+/// Sleep remaining automatically calls the start and stop method of timer.
 ///
 /// \param _fFreq Frequency of the loop
 ///
