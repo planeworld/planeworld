@@ -121,7 +121,7 @@ void CDebrisEmitter::emit(const double& _fF)
             case EMITTER_DISTRIBUTION_CIRCULAR_FIELD:
                 break;
             case EMITTER_DISTRIBUTION_RECTANGULAR_FIELD:
-                for (int i=0; i<nNrOfDebris; ++i)
+                for (auto i=0u; i<nNrOfDebris; ++i)
                 {
                     double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
                     double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
@@ -129,7 +129,7 @@ void CDebrisEmitter::emit(const double& _fF)
                 }
                 break;
             case EMITTER_DISTRIBUTION_POINT_SOURCE:
-                for (int i=0; i<nNrOfDebris; ++i)
+                for (auto i=0u; i<nNrOfDebris; ++i)
                 {
                     double      fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_KinematicsState.getAngle();
                     double      fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;

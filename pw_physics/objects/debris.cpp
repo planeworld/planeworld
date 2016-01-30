@@ -136,7 +136,7 @@ void CDebris::setNumber(const int& _nN)
     m_PosList.set_capacity(_nN);
     m_StateList.set_capacity(_nN);
     m_PosListPrev.set_capacity(_nN);
-    for (int i=0; i<m_PosList.capacity();++i)
+    for (auto i=0u; i<m_PosList.capacity();++i)
     {
         m_StateList.push_back(true);
     }

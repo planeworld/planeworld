@@ -52,6 +52,10 @@ void CCollisionManager::detectCollisions()
                         case OBJECT_BODY:
                             this->test(static_cast<CBody*>(ci->second),static_cast<CBody*>(cj->second));
                             break;
+                        case OBJECT_POINTMASS:
+                            break;
+                        case OBJECT_NONE:
+                            break;
                     }
 //                     CContact Contact;
 //                     Contact = (*ci)->collidesWith((*cj));
@@ -146,6 +150,8 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
             case SHAPE_POLYLINE:
                 this->test(static_cast<CPolyLine*>((*ci)->getShapeCur()), static_cast<CPolyLine*>((*ci)->getShapeBuf()), _p1, _p2);
                 break;
+            case SHAPE_NONE:
+                break;
         }
         ++ci;
     }
@@ -168,7 +174,6 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
     boost::circular_buffer<Vector2d>* pPositions (_p2->getPositions());
     boost::circular_buffer<Vector2d>* pVelocities(_p2->getVelocities());
     boost::circular_buffer<Vector2d>* pPreviousPositions (_p2->getPreviousPositions());
-    boost::circular_buffer<Vector2d>* pPreviousVelocities(_p2->getPreviousVelocities());
     boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
     boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
     boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
@@ -273,7 +278,6 @@ void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CBody* _p1, CDebris* 
     boost::circular_buffer<Vector2d>* pPositions (_p2->getPositions());
     boost::circular_buffer<Vector2d>* pVelocities(_p2->getVelocities());
     boost::circular_buffer<Vector2d>* pPreviousPositions (_p2->getPreviousPositions());
-    boost::circular_buffer<Vector2d>* pPreviousVelocities(_p2->getPreviousVelocities());
     boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
     boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
     boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
@@ -298,7 +302,6 @@ void CCollisionManager::test(CPolyLine* _pP1, CPolyLine* _pP0, CBody* _p1, CDebr
     boost::circular_buffer<Vector2d>* pPositions (_p2->getPositions());
     boost::circular_buffer<Vector2d>* pVelocities(_p2->getVelocities());
     boost::circular_buffer<Vector2d>* pPreviousPositions (_p2->getPreviousPositions());
-    boost::circular_buffer<Vector2d>* pPreviousVelocities(_p2->getPreviousVelocities());
     boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
     boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
     boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
@@ -416,7 +419,6 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
     boost::circular_buffer<Vector2d>* pPositions (_p2->getPositions());
     boost::circular_buffer<Vector2d>* pVelocities(_p2->getVelocities());
     boost::circular_buffer<Vector2d>* pPreviousPositions (_p2->getPreviousPositions());
-    boost::circular_buffer<Vector2d>* pPreviousVelocities(_p2->getPreviousVelocities());
     boost::circular_buffer<Vector2d>::iterator itPos = pPositions->begin();
     boost::circular_buffer<Vector2d>::iterator itVel = pVelocities->begin();
     boost::circular_buffer<Vector2d>::iterator itPosP = pPreviousPositions->begin();
@@ -581,6 +583,10 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             pPoly0 = static_cast<CPolyLine*>((*cj)->getShapeBuf());
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
+                        case SHAPE_TERRAIN:
+                            break;
+                        case SHAPE_NONE:
+                            break;
                     }
                     break;
                 case SHAPE_PLANET:
@@ -611,6 +617,10 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
 //                             pPolyB0 = static_cast<CPolyLine*>((*cj0));
 //                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
 //                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
+                            break;
+                        case SHAPE_TERRAIN:
+                            break;
+                        case SHAPE_NONE:
                             break;
                     }
                     break;
@@ -657,8 +667,17 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
                         }
+                        case SHAPE_TERRAIN:
+                            break;
+                        case SHAPE_NONE:
+                            break;
                     }
                     break;
+                case SHAPE_TERRAIN:
+                    break;
+                case SHAPE_NONE:
+                    break;
+                          
             }
             ++cj;
         }
@@ -832,7 +851,6 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
     
     Vector2d vecA1 = _pA1->getCenter();
     Vector2d vecA0 = _pA0->getCenter();
-    double fRA = _pA0->getRadius();
     
     std::list<Vector2d>::const_iterator ciB01 = _pB1->getVertices().begin();
     std::list<Vector2d>::const_iterator ciB00 = _pB0->getVertices().begin();

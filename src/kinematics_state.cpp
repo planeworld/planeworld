@@ -92,7 +92,7 @@ const Vector2d CKinematicsState::getVelocity() const
         return vecResult;
     }
     else
-        m_vecVelocity;
+        return m_vecVelocity;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

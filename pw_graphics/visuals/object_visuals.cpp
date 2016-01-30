@@ -90,6 +90,7 @@ void IObjectVisuals::draw(CCamera* const _pCamera) const
                                                     ci != m_Visuals.end(); ++ci)
         {
             if ((*ci)->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+            {
                 if ((((*ci)->getBoundingBox().getWidth() * m_Graphics.getResPMX()) <  1.0) && 
                     (((*ci)->getBoundingBox().getHeight() * m_Graphics.getResPMY()) < 1.0))
                 {
@@ -100,6 +101,7 @@ void IObjectVisuals::draw(CCamera* const _pCamera) const
                 {
                     (*ci)->draw(_pCamera, m_pObject);
                 }
+            }
         }
     }
 }

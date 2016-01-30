@@ -350,7 +350,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
     _is >> Size;
     
     std::cout << "Number of objects: " << Size << std::endl;
-    for (auto i=0; i<Size; ++i)
+    for (auto i=0u; i<Size; ++i)
     {
 //         std::string::size_type strSize;
 //         _is >> strSize;

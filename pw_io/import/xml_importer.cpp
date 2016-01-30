@@ -132,7 +132,7 @@ bool CXMLImporter::import(const std::string& _strFilename,
         {
             if (!checkFile(N))
             {
-                if (N.attribute("type").value() != "")
+                if (!N.attribute("type").empty())
                 {
                     std::string strType = N.attribute("type").as_string();
                     if (strType == "rigidbody")

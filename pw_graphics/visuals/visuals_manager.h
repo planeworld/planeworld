@@ -74,7 +74,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         double                          m_fFrequency;       ///< Frequency of visuals update
         int                             m_nVisualisations;  ///< Additional graphical output
-        int                             m_nStarIndex;       ///< Indicates procedurally generated star
+        std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star
         CCamera*                        m_pCamera;          ///< Camera for player view
         
         std::string                     m_strFont;          ///< Font name and location

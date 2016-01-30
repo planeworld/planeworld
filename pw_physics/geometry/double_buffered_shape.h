@@ -63,8 +63,8 @@ class CDoubleBufferedShape
     private:
 
         //--- Variables [private] --------------------------------------------//
-        IShape*    m_pShapeCur;                         ///< Currently active shape
         IShape*    m_pShapeBuf;                         ///< Buffered shape
+        IShape*    m_pShapeCur;                         ///< Currently active shape
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

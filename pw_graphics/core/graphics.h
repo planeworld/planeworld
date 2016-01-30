@@ -183,6 +183,7 @@ class CGraphics
         Vector3d                m_vecCamPos;    ///< camera position
         double                  m_fCamAng;      ///< camera angle
         double                  m_fCamZoom;     ///< camera zoom
+        double                  m_fDepth;       ///< depth of lines in list
         double                  m_fDepthMax;    ///< maximum depth of levels
         double                  m_fDepthMin;    ///< minimum depth of levels
 
@@ -193,8 +194,6 @@ class CGraphics
         unsigned short          m_unHeightScr;  ///< Screen height
 
         std::list<Vector2d>     m_VertList;     ///< list, containing the coordinates of vertices
-        double                  m_fDepth;       ///< depth of lines in list
-        
 
         //--- Constructor/destructor [private] -------------------------------//
         CGraphics();

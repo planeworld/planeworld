@@ -133,28 +133,10 @@ int main(int argc, char *argv[])
     //--- Major instances ----------------------------------------------------//
     CGraphics&          Graphics = CGraphics::getInstance();
     CCamera*            pCamera;
-    CCircle*            pCircle;
-    CCircleVisuals*     pCircleVisuals;
-    IObjectVisuals*     pObjectVisuals;
-    CDebris*            pDebris;
-    CDebrisVisuals*     pDebrisVisuals;
-    CDebrisEmitter*     pDebrisEmitter;
     CGameStateManager   GameStateManager;
-    CObjectEmitter*     pObjectsEmitter;
-    CRigidBody*         pPointMass;
-    CPlanet*            pPlanet;
-    CPlanetVisuals*     pPlanetVisuals;
-    CPolyLine*          pPolyLine;
-    CPolylineVisuals*   pPolylineVisuals;
-    CRigidBody*         pBody1;
-    CRigidBody*         pBody2;
-    CRigidBody*         pBody3;
-    CRigidBody*         pBody4;
     CPhysicsManager*    pPhysicsManager;
     CVisualsManager*    pVisualsManager;
     CXFigLoader         XFigLoader;
-    CSpring*            pSpring;
-    CSpringVisuals*     pSpringVisuals;
     CUniverse           Universe;
     CWorldDataStorage   WorldDataStorage;
     CThruster           Thruster;
@@ -169,75 +151,6 @@ int main(int argc, char *argv[])
     GameStateManager.setWorldDataStorage(&WorldDataStorage);
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
     pVisualsManager->setWorldDataStorage(&WorldDataStorage);
-    
-    //--- Initialize Debris --------------------------------------------------//
-//     pDebrisEmitter = new CDebrisEmitter;
-//     MEM_ALLOC("CDebrisEmitter")
-//     pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
-//     pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
-//     pDebrisEmitter->setAngle(0.0);
-//     pDebrisEmitter->setAngleVariance(0.2);
-//     pDebrisEmitter->setVelocity(20.0);
-//     pDebrisEmitter->setVelocityVariance(1.0);
-//     pDebrisEmitter->setFrequency(50.0);
-//     pDebrisEmitter->setCell(0, 0);
-//     pDebrisEmitter->setNumber(1000);
-//     pPhysicsManager->addEmitter(pDebrisEmitter);
-//     
-//     pDebrisEmitter = new CDebrisEmitter;
-//     MEM_ALLOC("CDebrisEmitter")
-//     pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
-//     pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
-//     pDebrisEmitter->setFrequency(50.0);
-//     pDebrisEmitter->setLimits(-200.0, 200.0, 150.0, 200.0);
-//     pDebrisEmitter->setCell(0, 0);
-//     pDebrisEmitter->setNumber(1000);
-//     pPhysicsManager->addEmitter(pDebrisEmitter);
-//     
-//         CRigidBody* pTemplate = new CRigidBody;
-//         pCircle = new CCircle;
-//         MEM_ALLOC("CRigidBody")
-//         MEM_ALLOC("CCircle")
-//         
-//         pCircle->setDepths(SHAPE_DEPTH_ALL);
-//         pCircle->setCenter(0.0, 0.0);
-//         pCircle->setRadius(2.0);
-// 
-//         CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-//         MEM_ALLOC("CDoubleBufferedShape")
-//         pShape->buffer(pCircle);
-//         pTemplate->getGeometry()->addShape(pShape);
-//     
-//         pCircleVisuals = new CCircleVisuals(pShape);
-//         MEM_ALLOC("CCircleVisuals")
-//         
-//         IObjectVisuals* pTemplateVisuals = new IObjectVisuals(pTemplate);
-//         MEM_ALLOC("IObjectVisuals")
-//         
-//         pTemplateVisuals->addVisuals(pCircleVisuals);
-//     
-//     pObjectsEmitter = new CObjectEmitter;
-//     MEM_ALLOC("CObjectsEmitter")
-//     pObjectsEmitter->setMode(EMITTER_MODE_TIMED);
-//     pObjectsEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
-//     pObjectsEmitter->setAngle(M_PI);
-//     pObjectsEmitter->setAngleVariance(0.2);
-//     pObjectsEmitter->setVelocity(20.0);
-//     pObjectsEmitter->setVelocityVariance(1.0);
-//     pObjectsEmitter->setFrequency(2.0);
-//     pObjectsEmitter->setCell(0, 0);
-//     pObjectsEmitter->setTemplate(pTemplate, pTemplateVisuals);
-//     pPhysicsManager->addEmitter(pObjectsEmitter);
-//     
-//     pObjectsEmitter = new CObjectEmitter;
-//     MEM_ALLOC("CObjectsEmitter")
-//     pObjectsEmitter->setMode(EMITTER_MODE_EMIT_ONCE);
-//     pObjectsEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
-//     pObjectsEmitter->setFrequency(2.0);
-//     pObjectsEmitter->setLimits(-100.0, 100.0, -100.0, 100.0);
-//     pObjectsEmitter->setCell(0, 0);
-//     pObjectsEmitter->setNumber(100);
-//     pPhysicsManager->addEmitter(pObjectsEmitter);
     
     //--- Import from xml file ----------------------------------------------//
     {
@@ -263,31 +176,7 @@ int main(int argc, char *argv[])
         pCamera=XMLImporter.getCamera();
         Universe.clone(XMLImporter.getUniverse());
     }
-//     if (WorldDataStorage.getDynamicObjects().find("Ball") != WorldDataStorage.getDynamicObjects().end())
-//     {
-//       CDebrisEmitter* m_pEmitter = new CDebrisEmitter;
-//       m_pEmitter->setOrigin(Vector2d(0.0, 15.0));
-//       m_pEmitter->setNumber(1000);
-//       m_pEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
-//       m_pEmitter->setMode(EMITTER_MODE_TIMED);
-//       m_pEmitter->setFrequency(10);
-//       m_pEmitter->setVelocity(10.0);
-//       m_pEmitter->setAngle(0.0);
-//       m_pEmitter->setAngleStd(0.2);
-//       
-//       IHookable* pBallObject = (*(WorldDataStorage.getDynamicObjects().find("Ball"))).second;
-//       
-// 
-//       if (Thruster.init(pBallObject, m_pEmitter))
-//       {
-//           pPhysicsManager->registerComponent(&Thruster);
-//       }
-//       else
-//       {
-//           WARNING_MSG("Main", "Failed init thruster.")
-//       }
-//     }
-            
+
 //     //--- Initialize Springs ------------------------------------------------//
 //     pSpring = new CSpring();
 //     MEM_ALLOC("pSpring")
@@ -467,6 +356,8 @@ int main(int argc, char *argv[])
                             }
                             break;
                         }
+                        default:
+                            break;
                     }
                     break;
                 }

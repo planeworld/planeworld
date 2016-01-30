@@ -80,7 +80,6 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
     METHOD_ENTRY("CCircleVisuals::draw()");
     
     double   fRad      = static_cast<CCircle*>(m_pCircle->getShapeCur())->getRadius();
-    double   fPAng     = static_cast<CCircle*>(m_pCircle->getShapeCur())->getAngle();
     Vector2d vecCenter = static_cast<CCircle*>(m_pCircle->getShapeCur())->getCenter() - _pCamera->getCenter() +
                          IUniverseScaled::cellToDouble(_pObject->getCell() - _pCamera->getCell());
     

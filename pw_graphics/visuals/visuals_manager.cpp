@@ -430,17 +430,17 @@ void CVisualsManager::drawWorld()
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
-    const double fRmax = 3.6e20;
-    const double fBGDensityFactor = 1.0e18; 
+    //const double fRmax = 3.6e20;
+    //const double fBGDensityFactor = 1.0e18; 
     
-    const double fStarfieldSizeX = 3.0e19; // * 2
-    const double fStarfieldSizeY = 3.0e19; // * 2
+    //const double fStarfieldSizeX = 3.0e19; // * 2
+    //const double fStarfieldSizeY = 3.0e19; // * 2
     
-    const double fStarfieldBackgroundSizeX = 0.5 * fStarfieldSizeX;
-    const double fStarfieldBackgroundSizeY = 0.5 * fStarfieldSizeY;
+    //const double fStarfieldBackgroundSizeX = 0.5 * fStarfieldSizeX;
+    //const double fStarfieldBackgroundSizeY = 0.5 * fStarfieldSizeY;
     
-    const double fScreenWidthAtZoomZeroInM  = m_Graphics.getWidthScr()/GRAPHICS_PX_PER_METER;
-    const double fScreenHeightAtZoomZeroInM = m_Graphics.getHeightScr()/GRAPHICS_PX_PER_METER;
+    //const double fScreenWidthAtZoomZeroInM  = m_Graphics.getWidthScr()/GRAPHICS_PX_PER_METER;
+    //const double fScreenHeightAtZoomZeroInM = m_Graphics.getHeightScr()/GRAPHICS_PX_PER_METER;
     
 //     const double fDefaultUnitSize = GRAPHICS_RIGHT_DEFAULT - GRAPHICS_LEFT_DEFAULT;
 //     const double fMaxZoom = fDefaultUnitSize / (2.0*fStarfieldSizeX);
@@ -448,7 +448,7 @@ void CVisualsManager::drawWorld()
     
 //     if (1.0e13 * m_Graphics.getResPMX() < 1.0)
     {
-        for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+        for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
         {
             Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
                               IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
@@ -562,7 +562,7 @@ void CVisualsManager::drawWorld()
         }
         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
-            for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+            for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
             {
                 Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
                                   IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
@@ -608,7 +608,7 @@ void CVisualsManager::drawWorld()
     {
         (*ci)->draw(m_pCamera);
     }
-    for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
+    for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
     {
         if (m_nStarIndex == i)
         {

@@ -29,11 +29,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 CPlanet::CPlanet() : m_PlanetType(PLANET_TYPE_EARTHLIKE),
                      m_fAngle(0.0),
+                     m_fGroundResolution(1.0),
                      m_fHeightMax(10.0),
                      m_fRadius(1000.0),
                      m_fSeaLevel(0.0),
                      m_fSmoothness(1.0),
-                     m_fGroundResolution(1.0),
                      m_nSeed(1),
                      m_pSurface(0),
                      m_pTerrainType(0),
@@ -180,12 +180,12 @@ void CPlanet::setSampling(const double& _fMaxF)
     if (_fMaxF < fMaxF) fMaxF = _fMaxF;
     nOct = ceil(log2(fMaxF/fMinF)/log2(m_fLacMtTr));
     if (nOct < 1) nOct = 1;
-    for (int i=0; i<m_RidgedMulti.size(); ++i)
+    for (auto i=0u; i<m_RidgedMulti.size(); ++i)
         m_RidgedMulti[i].SetOctaveCountTmp(nOct);
     
     nOct = ceil(log2(fMaxF/fMinF)/log2(m_fLacHlTr));
     if (nOct < 1) nOct = 1;
-    for (int i=0; i<m_Billow.size(); ++i)
+    for (auto i=0u; i<m_Billow.size(); ++i)
         m_Billow[i].SetOctaveCountTmp(nOct);
     
 //     nOct = ceil(log2(fMaxF/(0.5*100.0/(2.0*M_PI*m_fRadius)))/log2(m_fLacTrTp));
@@ -202,9 +202,9 @@ void CPlanet::resetSampling()
 {
     METHOD_ENTRY("CPlanet::resetSampling")
     
-    for (int i=0; i<m_Billow.size(); ++i)
+    for (auto i=0u; i<m_Billow.size(); ++i)
         m_Billow[i].SetOctaveCountTmp(m_nOctHlTr);
-    for (int i=0; i<m_RidgedMulti.size(); ++i)
+    for (auto i=0u; i<m_RidgedMulti.size(); ++i)
         m_RidgedMulti[i].SetOctaveCountTmp(m_nOctMtTr);
 //     m_TerrainType.SetOctaveCountTmp(m_nOctTrTp);
 }
@@ -314,9 +314,6 @@ void CPlanet::myInitTerrain()
             m_fLacMtTr = 2.137;
             m_fLacTrTp = 2.317;
             
-            double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
-            double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
-            
             double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
             double fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
             
@@ -330,12 +327,17 @@ void CPlanet::myInitTerrain()
             if (m_nOctTrTp < 1) m_nOctTrTp = 1;
             
             INFO_MSG("Planet", "Generating Terrain (Mountains)")
-            DOM_VAR(DEBUG_MSG("Planet", "Number of Mountains:       " << fNrOfMountains))
-            DOM_VAR(DEBUG_MSG("Planet", "Number of Points:          " << fNrOfPoints))
-            DOM_VAR(DEBUG_MSG("Planet", "Minimum Frequency:         " << fMinF << "/m"))
-            DOM_VAR(DEBUG_MSG("Planet", "Maximum Frequency:         " << fMaxF << "/m"))
-            DOM_VAR(DEBUG_MSG("Planet", "Maximum Octaves Mountains: " << m_nOctMtTr))
-            DOM_VAR(DEBUG_MSG("Planet", "Maximum Octaves Hills:     " << m_nOctHlTr))
+            DOM_VAR(DEBUG(
+                double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
+                double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
+
+                DEBUG_MSG("Planet", "Number of Mountains:       " << fNrOfMountains)
+                DEBUG_MSG("Planet", "Number of Points:          " << fNrOfPoints)
+                DEBUG_MSG("Planet", "Minimum Frequency:         " << fMinF << "/m")
+                DEBUG_MSG("Planet", "Maximum Frequency:         " << fMaxF << "/m")
+                DEBUG_MSG("Planet", "Maximum Octaves Mountains: " << m_nOctMtTr)
+                DEBUG_MSG("Planet", "Maximum Octaves Hills:     " << m_nOctHlTr)
+            ))
             
             // Reserve memory for noise functions
             m_Billow.resize(1);
@@ -398,9 +400,6 @@ void CPlanet::myInitTerrain()
             m_fRadius = 120.0;
             m_fHeightMax = 60.0;
             
-            double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
-            double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
-            
             double fMinF = 1.0 / (0.2*m_fRadius*2.0*M_PI);
             double fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
             
@@ -414,12 +413,17 @@ void CPlanet::myInitTerrain()
             if (m_nOctTrTp < 1) m_nOctTrTp = 1;
             
             INFO_MSG("Planet", "Generating Terrain (Mountains)")
-            DOM_VAR(INFO_MSG("Planet", "Number of Mountains:       " << fNrOfMountains))
-            DOM_VAR(INFO_MSG("Planet", "Number of Points:          " << fNrOfPoints))
-            DOM_VAR(INFO_MSG("Planet", "Minimum Frequency:         " << fMinF << "/m"))
-            DOM_VAR(INFO_MSG("Planet", "Maximum Frequency:         " << fMaxF << "/m"))
-            DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Mountains: " << m_nOctMtTr))
-            DOM_VAR(INFO_MSG("Planet", "Maximum Octaves Hills:     " << m_nOctHlTr))
+            DOM_VAR(DEBUG(
+                double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
+                double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
+            
+              DEBUG_MSG("Planet", "Number of Mountains:       " << fNrOfMountains)
+              DEBUG_MSG("Planet", "Number of Points:          " << fNrOfPoints)
+              DEBUG_MSG("Planet", "Minimum Frequency:         " << fMinF << "/m")
+              DEBUG_MSG("Planet", "Maximum Frequency:         " << fMaxF << "/m")
+              DEBUG_MSG("Planet", "Maximum Octaves Mountains: " << m_nOctMtTr)
+              DEBUG_MSG("Planet", "Maximum Octaves Hills:     " << m_nOctHlTr)
+            ))
 
             // Reserve memory for noise functions
             m_Perlin.resize(1);
@@ -441,6 +445,11 @@ void CPlanet::myInitTerrain()
             m_pTerrainType = &m_Perlin[0];
             m_pSurface = &m_RidgedMulti[0];
             
+            break;
+        }
+        case PLANET_TYPE_ICE:
+        {
+            /// \todo Implement different planet types, here: ice
             break;
         }
     }

@@ -29,9 +29,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 CTerrain::CTerrain() :  m_fDiversity(1.0),
                         m_fAngle(0.0),
+                        m_fGroundResolution(1.0),
                         m_fHeightMax(100.0),
                         m_fSmoothness(1.0),
-                        m_fGroundResolution(1.0),
                         m_fWidth(200.0),
                         m_nSeed(2)
 {
@@ -98,12 +98,12 @@ const double CTerrain::getSurface(const double& _fX) const
 {
     METHOD_ENTRY("CTerrain::getSurface")
     
-    int      nX = static_cast<int>(
+    std::uint32_t nX = static_cast<std::uint32_t>(
                        (_fX+m_fWidth*0.5-m_vecCenter[0])/m_fGroundResolution
                  );
-    if ((nX < 0) || (nX >= m_Cache.size()))
+    if ((nX < 0u) || (nX >= m_Cache.size()))
     {
-        nX = 0;
+        nX = 0u;
     }
     return m_Cache[nX];
 }

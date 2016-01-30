@@ -48,7 +48,7 @@ CUniverse::~CUniverse()
     METHOD_ENTRY("CUniverse::~CUniverse");
     DTOR_CALL("CUniverse::~CUniverse");
     
-    for (int i=0; i<m_StarSystems.size(); ++i)
+    for (auto i=0u; i<m_StarSystems.size(); ++i)
     {
         delete m_StarSystems[i];
         m_StarSystems[i] = 0;
@@ -68,8 +68,6 @@ CUniverse::~CUniverse()
 void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 {
     METHOD_ENTRY("CUniverse::generate")
-    
-    DEBUG(const int nBar=100;)
     
     CNameGenerator StarNameGenerator(_nSeed);
     const int nNrOfStarTypes=7;
@@ -247,5 +245,6 @@ const std::string CUniverse::starClassToString(const int& _nClass) const
         case STAR_CLASS_A: return "A"; break;
         case STAR_CLASS_B: return "B"; break;
         case STAR_CLASS_O: return "O"; break;
+        default: return "Unknown";
     }
 }

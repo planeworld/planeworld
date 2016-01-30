@@ -90,7 +90,7 @@ class CBody : public IObject
 inline const double CBody::getHookAngle() const
 {
     METHOD_ENTRY("CBody::getHookAngle")
-    m_KinematicsState.getLocalAngle();
+    return m_KinematicsState.getLocalAngle();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

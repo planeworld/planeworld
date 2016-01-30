@@ -92,11 +92,11 @@ void CXFigLoader::load(const std::string& _strFilename)
     File.readString(); File.readString();
 
     //--- Read the objects, mainloop -----------------------------------------//
-    double fTmp;
-    int nTmp;
     int nCase;
-    int nDepth;
-    int nNPoints;
+    int nCenterX = 0;
+    int nCenterY = 0;
+    int nRadiusX = 1;
+    int nNPoints = 0;
     int nX, nY;
     
     while (!File.getStream().eof())
@@ -105,47 +105,51 @@ void CXFigLoader::load(const std::string& _strFilename)
         switch (nCase)
         {
             case 1:
-                {
-                DEBUG_MSG("XFig Loader", "Ellipse")
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring subtype: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring linestyle: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring thickness: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring pencolor: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring fillcolor: " << nTmp))
-                nDepth = File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, depth: " << nDepth))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring penstyle: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring area_fill: " << nTmp))
-                fTmp=File.readDouble();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring style_val: " << fTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring direction: " << nTmp))
-                fTmp=File.readDouble();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring angle: " << fTmp))
-                int nCenterX = File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, center_x: " << nCenterX))
-                int nCenterY = File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, center_y: " << nCenterY))
-                int nRadiusX = File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, radius_x: " << nRadiusX))
-                nTmp = File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, radius_y: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring start_x: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring start_y: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring end_x: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Ellipse, ignoring end_y: " << nTmp))
-
+                DOM_VAR(DEBUG(
+                    double fTmp;
+                    int nTmp;
+                    int nDepth;
+                    DEBUG_MSG("XFig Loader", "Ellipse")
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring subtype: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring linestyle: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring thickness: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring pencolor: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring fillcolor: " << nTmp)
+                    nDepth = File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, depth: " << nDepth)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring penstyle: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring area_fill: " << nTmp)
+                    fTmp=File.readDouble();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring style_val: " << fTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring direction: " << nTmp)
+                    fTmp=File.readDouble();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring angle: " << fTmp)
+                    nCenterX = File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, center_x: " << nCenterX)
+                    nCenterY = File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, center_y: " << nCenterY)
+                    nRadiusX = File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, radius_x: " << nRadiusX)
+                    nTmp = File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, radius_y: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring start_x: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring start_y: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring end_x: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Ellipse, ignoring end_y: " << nTmp)
+                ))
+                
                 // Add object to shapelist
                 pCircle = new CCircle;
                 MEM_ALLOC("pCircle")
@@ -159,41 +163,45 @@ void CXFigLoader::load(const std::string& _strFilename)
                 pShape->buffer(pCircle);
                 m_ShapeList.push_back(pCircle);
                 m_VisualsList.push_back(pCircleVisuals);
-                }
+                
                 break;
             case 2:
-                DEBUG_MSG("XFig Loader", "Polyline")
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring subtype: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring linestyle: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring thickness: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring pencolor: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring fillcolor: " << nTmp))
-                nDepth = File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, depth: " << nDepth))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring penstyle: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring area_fill: " << nTmp))
-                fTmp=File.readDouble();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring style_val: " << fTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring join_style: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring cap_style: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring radius: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring forward_arrow: " << nTmp))
-                nTmp=File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, ignoring backward_arrow: " << nTmp))
-                nNPoints = File.readInt();
-                DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, number of points: " << nNPoints))
-
+                DOM_VAR(DEBUG(
+                    double fTmp;
+                    int nTmp;
+                    int nDepth;
+                    DEBUG_MSG("XFig Loader", "Polyline")
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring subtype: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring linestyle: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring thickness: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring pencolor: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring fillcolor: " << nTmp)
+                    nDepth = File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, depth: " << nDepth)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring penstyle: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring area_fill: " << nTmp)
+                    fTmp=File.readDouble();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring style_val: " << fTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring join_style: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring cap_style: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring radius: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring forward_arrow: " << nTmp)
+                    nTmp=File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, ignoring backward_arrow: " << nTmp)
+                    nNPoints = File.readInt();
+                    DEBUG_MSG("XFig Loader", "Polyline, number of points: " << nNPoints)
+                ))
                 pPolyLine = new CPolyLine;
                 MEM_ALLOC("pPolyline")
                 pShape = new CDoubleBufferedShape;

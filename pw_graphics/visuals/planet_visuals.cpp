@@ -70,8 +70,8 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
     double   fHeight   = pPlanet->getHeight();
     double   fPAng     = pPlanet->getAngle();
     double   fSeaLevel = pPlanet->getSeaLevel();
-    int      nSeed     = pPlanet->getSeed();
-    double   fSmooth   = pPlanet->getSmoothness();
+    //int      nSeed     = pPlanet->getSeed();
+    //double   fSmooth   = pPlanet->getSmoothness();
     Vector2d vecCenter = pPlanet->getCenter()-_pCamera->getCenter() +
                          (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;
     
@@ -144,8 +144,6 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         
 //         double fZoom = _pCamera->getZoom() * fHeight;
 //         if (fZoom > 1.0) fZoom = 1.0;
-        
-        double fAngBak = fAng;
         
         double fHght;
         double fTerrainType;
@@ -229,10 +227,10 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         // Draw sea level
         m_Graphics.setWidth(2.0);
         m_Graphics.setColor(0.0,0.0,0.7);
-        for (int i=0; i<WaterlineList.size(); ++i)
+        for (auto i=0u; i<WaterlineList.size(); ++i)
         {
           m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
-          for (int j=0; j<WaterlineList[i].size(); ++j)
+          for (auto j=0u; j<WaterlineList[i].size(); ++j)
             m_Graphics.addVertex(WaterlineList[i][j]);
           m_Graphics.endLine();
         }
