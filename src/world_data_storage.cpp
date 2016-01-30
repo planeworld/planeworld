@@ -346,11 +346,11 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 {
     METHOD_ENTRY("CWorldDataStorage::operator>>")
     
-    ObjectsType::size_type Size;
-    _is >> Size;
+    ObjectsType::size_type nSize;
+    _is >> nSize;
     
-    std::cout << "Number of objects: " << Size << std::endl;
-    for (auto i=0u; i<Size; ++i)
+    std::cout << "Number of objects: " << nSize << std::endl;
+    for (auto i=0u; i<nSize; ++i)
     {
 //         std::string::size_type strSize;
 //         _is >> strSize;
@@ -362,6 +362,8 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
         _is >> *pObj;
         std::cout << *pObj << std::endl;
 //         _WDS.addObject();
+        Log.progressBar("Loading dynamic objects", i, nSize);
+        usleep(10000);
     }
         
     return _is;
@@ -381,11 +383,15 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
 {
     METHOD_ENTRY("CWorldDataStorage::operator<<")
 
-    _os << _WDS.m_DynamicObjects.size() << std::endl;
+    auto nSize=_WDS.m_DynamicObjects.size();
+    _os << nSize << std::endl;
+    std::uint32_t i=0u;
     for (auto ci : _WDS.m_DynamicObjects)
     {
         _os << ci.first << std::endl;
         _os << *(ci.second) << std::endl;
+        Log.progressBar("Saving dynamic objects", i++, nSize);
+        usleep(10000);
     }
     _os << _WDS.m_StaticObjects.size();
     for (auto ci : _WDS.m_StaticObjects)

@@ -17,6 +17,7 @@
 ///
 /// \note Timer does not use logging any longer, since it is used by
 ///       logging class.
+/// \todo Use std::chrono
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
