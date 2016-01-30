@@ -30,8 +30,7 @@
 #include <mutex>
 #include <string>
 #include <sstream>
-
-#include <unistd.h>
+#include <thread>
 
 //--- Misc header ------------------------------------------------------------//
 #include "timer.h"
