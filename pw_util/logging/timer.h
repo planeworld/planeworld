@@ -15,9 +15,8 @@
 /// \date       2009-06-29
 /// \author     bfeld
 ///
-/// \note Timer does not use logging any longer, since it is used by
-///       logging class.
-/// \todo Use std::chrono
+/// \note Timer does not use logging longer, since it is used by directly
+///       logging class and would cause recursive calls.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -25,15 +24,14 @@
 #define TIMER_H
 
 //--- Standard header --------------------------------------------------------//
+#include <chrono>
 #include <istream>
 #include <ostream>
-#include <unistd.h>
-#include <sys/time.h>
 
 //--- Program header ---------------------------------------------------------//
 
 /// Factor to upscale time from u-seconds to seconds
-const double TIMER_OUTPUT_SEC_FACTOR = 0.000001;
+constexpr double TIMER_OUTPUT_SEC_FACTOR = 0.000001;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -55,7 +53,7 @@ class CTimer
 
         //--- Constant Methods -----------------------------------------------//
         double          getSplitTime();
-        inline double   getTime() const {return m_fDiffTime;}       ///< returns difftime
+        inline double   getTime() const {return m_fDiffTime;}   ///< Returns time passed
         
         //--- Friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CTimer&);
@@ -64,13 +62,10 @@ class CTimer
     private:
 
         //--- Private Variables ----------------------------------------------//
-        struct timeval  m_Start;                        ///< Starting time
-        struct timeval  m_Stop;                         ///< Stopping time
-        struct timezone m_TimeZone;                     ///< Timezone
+        std::chrono::high_resolution_clock::time_point m_Start; ///< Starting time
+        std::chrono::high_resolution_clock::time_point m_Stop;  ///< Stopping time
 
-        bool    m_bFirstCall;                           ///< Flag for initialisation
-
-        double  m_fDiffTime;                            ///< Time between start and stop
+        double  m_fDiffTime = 0.0;                         ///< Time between start and stop
 
 };
 

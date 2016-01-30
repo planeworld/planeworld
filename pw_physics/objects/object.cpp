@@ -74,10 +74,6 @@ IObject::~IObject()
         DEBUG_MSG("Object", "Lifetime (" << m_strName << "): "
                 << m_Lifetime.getTime())
     )
-    DOM_STATS(
-        DEBUG_MSG("Object", "Gametime (" << m_strName << "): "
-                << m_Lifetime.getTime()*m_fTimeFac)
-    )
 }
 
 ////////////////////////////////////////////////////////////////////////////////

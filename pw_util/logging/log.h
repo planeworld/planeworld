@@ -31,6 +31,8 @@
 #include <string>
 #include <sstream>
 
+#include <unistd.h>
+
 //--- Misc header ------------------------------------------------------------//
 #include "timer.h"
 
