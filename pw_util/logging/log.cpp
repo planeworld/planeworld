@@ -242,7 +242,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_ERROR:
                         std::cout << m_strColError << std::left << std::setw(14) <<  "[error]";
-                        std::cout << m_strColDom << std::left << std::setw(14) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cerr << "  ";
@@ -253,7 +253,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_WARNING:
                         std::cout << m_strColWarning << std::left << std::setw(14) <<  "[warning]";
-                        std::cout << m_strColDom << std::left << std::setw(14) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << "  ";
@@ -264,7 +264,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_NOTICE:
                         std::cout << m_strColNotice << std::left << std::setw(14) <<  "[notice]";
-                        std::cout << m_strColDom << std::left << std::setw(14) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << "  ";
@@ -275,7 +275,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_INFO:
                         std::cout << m_strColInfo << std::left << std::setw(14) <<  "[info]";
-                        std::cout << m_strColDom << std::left << std::setw(14) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << "  ";
@@ -286,7 +286,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_DEBUG:
                         std::cout << m_strColDebug << std::left << std::setw(14) <<  "[debug]";
-                        std::cout << m_strColDom << std::left << std::setw(14) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << m_strColDefault << "  ";
@@ -845,22 +845,22 @@ std::string CLog::convLogDom2Str(const LogDomainType& _LogDomain)
             strOut  = "";
             break;
         case LOG_DOMAIN_METHOD_ENTRY:
-            strOut  = "method_entry";
+            strOut  = "calls";
             break;
         case LOG_DOMAIN_METHOD_EXIT:
-            strOut  = "method_exit";
+            strOut  = "calls";
             break;
         case LOG_DOMAIN_CONSTRUCTOR:
-            strOut  = "constructor";
+            strOut  = "obj";
             break;
         case LOG_DOMAIN_DESTRUCTOR:
-            strOut  = "destructor";
+            strOut  = "obj";
             break;
         case LOG_DOMAIN_MEMORY_ALLOCATED:
-            strOut  = "mem_alloc";
+            strOut  = "mem";
             break;
         case LOG_DOMAIN_MEMORY_FREED:
-            strOut  = "mem_freed";
+            strOut  = "mem";
             break;
         case LOG_DOMAIN_STATS:
             strOut  = "stats";
