@@ -142,7 +142,7 @@ inline const double CBody::getInertia() const
 inline const ObjectType CBody::getObjectType() const
 {
     METHOD_ENTRY("CBody::getObjectType")
-    return OBJECT_BODY;
+    return ObjectType::OBJECT_BODY;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

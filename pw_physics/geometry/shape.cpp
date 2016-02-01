@@ -33,8 +33,10 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
 {
     METHOD_ENTRY("IShape::operator>>")
     
-    /// \todo Read UID
-    //  _is >> _pShape->m_UID.value();
+    std::string strTmp;
+    _is >> strTmp;
+    
+    _is >> _pShape->m_UID;
     _is >> _pShape->m_AABB;
     _is >> _pShape->m_nDepthlayers;
     
@@ -55,11 +57,19 @@ std::ostream& operator<<(std::ostream& _os, IShape* const _pShape)
 {
     METHOD_ENTRY("IShape::operator<<")
 
-    // From IUniqueIDUser
-    _os << _pShape->m_UID.value();
+    // ShapeType has to be the first information, since object creation when
+    // loading depends on it.
+    // Cast strongly typed enum ShapeType to streamable base type
+    auto nShapeType = static_cast<std::underlying_type<ShapeType>::type>(_pShape->getShapeType());
+    _os << nShapeType << std::endl;
+
+    _os << "Shape:" << std::endl;
     
-    _os << _pShape->m_AABB;
-    _os << _pShape->m_nDepthlayers;
+    // From IUniqueIDUser
+    _os << _pShape->m_UID << std::endl;
+    
+    _os << _pShape->m_AABB << std::endl;
+    _os << _pShape->m_nDepthlayers << std::endl;
     
     return _pShape->myStreamOut(_os);
 }

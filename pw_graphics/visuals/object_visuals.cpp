@@ -105,3 +105,65 @@ void IObjectVisuals::draw(CCamera* const _pCamera) const
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _pObjVis IObjectVisuals instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, IObjectVisuals* const _pObjVis)
+{
+    METHOD_ENTRY("IObjectVisuals::operator>>")
+    
+    std::string strTmp;
+    _is >> strTmp;
+    
+    for (auto it : _pObjVis->m_Visuals)
+    {
+        if (it != nullptr)
+        {
+            delete it;
+            MEM_FREED("IVisuals")
+            it = nullptr;
+        }
+    }
+    
+    std::vector<IVisuals*>::size_type nSize;
+    _is >> nSize;
+
+     for (auto i=0u; i<nSize; ++i)
+    {
+//         IVisuals* pVisuals = new CDoubleBufferedShape;
+//         MEM_ALLOC("CDoubleBufferedShape")
+//         _is >> (*pDBShape);
+//         _Geo.m_pShapes->push_back(pDBShape);
+    }
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _pObjVis IObjectVisuals instance to stream
+///
+/// \return Stream with game state information of IObjectVisuals instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, IObjectVisuals* const _pObjVis)
+{
+    METHOD_ENTRY("IObjectVisuals::operator<<")
+    
+    _os << "ObjectVisuals:" << std::endl;
+    _os << _pObjVis->m_Visuals.size() << std::endl;
+
+    return _os;
+}
+

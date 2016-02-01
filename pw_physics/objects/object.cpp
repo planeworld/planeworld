@@ -278,36 +278,43 @@ void IObject::transform()
 /// \brief Input stream for game state information
 ///
 /// \param _is  Source stream
-/// \param _Obj IObject instance to stream
+/// \param _pObj IObject instance to stream
 ///
 /// \return Remaining stream with game state information
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::istream& operator>>(std::istream& _is, IObject& _Obj)
+std::istream& operator>>(std::istream& _is, IObject* const _pObj)
 {
     METHOD_ENTRY("IObject::operator>>")
     
-    /// \todo Read UID
-//     _is >> _Obj.m_ID.value();
-    _is >> _Obj.m_bGravitation;
-    _is >> _Obj.m_bDynamics;
-    _is >> _Obj.m_Lifetime;
-    _is >> _Obj.m_fTimeFac;
-    _is >> _Obj.m_Geometry;
-    _is >> _Obj.m_vecCOM[0];
-    _is >> _Obj.m_vecCOM[1];
-    _is >> _Obj.m_vecForce[0];
-    _is >> _Obj.m_vecForce[1];
-    _is >> _Obj.m_fMass;
-    _is >> _Obj.m_nDepthlayers;
-    _is >> _Obj.m_pIntPos;
-    _is >> _Obj.m_pIntVel;
-//     _is >> _Obj.m_Anchors.size();
-//     for (auto ci : _Obj.m_Anchors)
+    std::string strTmp;
+    _is >> strTmp;
+    
+    // From IKinematicsStateUser
+    _is >> _pObj->m_KinematicsState;
+    
+    // From IUniqueIDUser
+    _is >> _pObj->m_UID;
+    
+    _is >> _pObj->m_bGravitation;
+    _is >> _pObj->m_bDynamics;
+    _is >> _pObj->m_Lifetime;
+    _is >> _pObj->m_fTimeFac;
+    _is >> _pObj->m_Geometry;
+    _is >> _pObj->m_vecCOM[0];
+    _is >> _pObj->m_vecCOM[1];
+    _is >> _pObj->m_vecForce[0];
+    _is >> _pObj->m_vecForce[1];
+    _is >> _pObj->m_fMass;
+    _is >> _pObj->m_nDepthlayers;
+    _is >> _pObj->m_pIntPos;
+    _is >> _pObj->m_pIntVel;
+//     _is >> _pObj->m_Anchors.size();
+//     for (auto ci : _pObj->m_Anchors)
 //         _is >> ci;
-//     _is << _Obj.m_Trajectory;
+//     _is << _pObj->m_Trajectory;
 
-    return _Obj.myStreamIn(_is);
+    return _pObj->myStreamIn(_is);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -315,35 +322,46 @@ std::istream& operator>>(std::istream& _is, IObject& _Obj)
 /// \brief Output stream for game state information
 ///
 /// \param _os  Source stream
-/// \param _Obj IObject instance to stream
+/// \param _pObj IObject instance to stream
 ///
 /// \return Stream with game state information of IObject instance
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream& _os, IObject& _Obj)
+std::ostream& operator<<(std::ostream& _os, IObject* const _pObj)
 {
     METHOD_ENTRY("IObject::operator<<")
     
-     // From IUniqueIDUser
-//     _os << _Obj.m_UID.value() << std::endl;
-    
-    _os << _Obj.m_bGravitation << std::endl;
-    _os << _Obj.m_bDynamics << std::endl;
-    _os << _Obj.m_Lifetime << std::endl;
-    _os << _Obj.m_fTimeFac << std::endl;
-    _os << _Obj.m_Geometry << std::endl;
-    _os << _Obj.m_vecCOM[0] << std::endl;
-    _os << _Obj.m_vecCOM[1] << std::endl;
-    _os << _Obj.m_vecForce[0] << std::endl;
-    _os << _Obj.m_vecForce[1] << std::endl;
-    _os << _Obj.m_fMass << std::endl;
-    _os << _Obj.m_nDepthlayers << std::endl;
-    _os << _Obj.m_pIntPos << std::endl;
-    _os << _Obj.m_pIntVel << std::endl;
-//     _os << _Obj.m_Anchors.size() << std::endl;
-//     for (auto ci : _Obj.m_Anchors)
-//         _os << ci;
-//     _os << _Obj.m_Trajectory;
+    // ObjectType has to be the first information, since object creation when
+    // loading depends on it.
+    // Cast strongly typed enum ObjectType to streamable base type
+    auto nObjectType = static_cast<std::underlying_type<ObjectType>::type>(_pObj->getObjectType());
+    _os << nObjectType << std::endl;
 
-    return _Obj.myStreamOut(_os);
+    _os << "Object:" << std::endl;
+    
+    // From IKinematicsStateUser
+    _os << _pObj->m_KinematicsState << std::endl;
+    
+    // From IUniqueIDUser
+    _os << _pObj->m_UID << std::endl;
+    
+    _os << _pObj->m_bGravitation << std::endl;
+    _os << _pObj->m_bDynamics << std::endl;
+    _os << _pObj->m_Lifetime << std::endl;
+    _os << _pObj->m_fTimeFac << std::endl;
+    _os << _pObj->m_Geometry << std::endl;
+    _os << _pObj->m_vecCOM[0] << " " <<
+           _pObj->m_vecCOM[1] << std::endl;
+    _os << _pObj->m_vecForce[0] << " " <<
+           _pObj->m_vecForce[1] << std::endl;
+    _os << _pObj->m_fMass << std::endl;
+    _os << _pObj->m_nDepthlayers << std::endl;
+    _os << _pObj->m_pIntPos << std::endl;
+    _os << _pObj->m_pIntVel << std::endl;
+//     _os << _pObj->m_Anchors.size() << std::endl;
+//     for (auto ci : _pObj->m_Anchors)
+//         _os << ci;
+//     _os << _pObj->m_Trajectory;
+
+    return _pObj->myStreamOut(_os);
 }

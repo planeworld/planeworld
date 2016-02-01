@@ -139,7 +139,7 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
 void CCircleVisuals::attach(CDoubleBufferedShape* const _pCirc)
 {
     METHOD_ENTRY("CCircleVisuals::attach")
-    if (_pCirc->getShapeCur()->getShapeType() == SHAPE_CIRCLE)
+    if (_pCirc->getShapeCur()->getShapeType() == ShapeType::SHAPE_CIRCLE)
     {
         m_pCircle = _pCirc;
     }

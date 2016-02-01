@@ -46,7 +46,9 @@ class CUniqueID
         //--- Constant Methods -----------------------------------------------//
         const UIDType& value() const;
                 
-        //--- Methods --------------------------------------------------------//
+        //--- friends --------------------------------------------------------//
+        friend std::istream&    operator>>(std::istream&, CUniqueID&);
+        friend std::ostream&    operator<<(std::ostream&, CUniqueID&);
                 
     private:
         

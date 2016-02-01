@@ -339,9 +339,36 @@ std::ostream& CAdamsBashforthIntegrator<T>::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CAdamsBashforthIntegrator::myStreamOut")
     
-    _os << m_Deriv[0] << m_Deriv[1] << m_Deriv[2] << m_Deriv[3];
-    _os << m_PrevValue;
-    _os << m_Value;
+    _os << m_Deriv[0] << std::endl; 
+    _os << m_Deriv[1] << std::endl;
+    _os << m_Deriv[2] << std::endl;
+    _os << m_Deriv[3] << std::endl;
+    _os << m_PrevValue << std::endl;
+    _os << m_Value << std::endl;
+    
+    return _os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+///
+/// \return Stream with game state information of CAdamsBashforthIntegrator instance
+///
+////////////////////////////////////////////////////////////////////////////////
+template <>
+inline std::ostream& CAdamsBashforthIntegrator<Vector2d>::myStreamOut(std::ostream& _os)
+{
+    METHOD_ENTRY("CAdamsBashforthIntegrator::myStreamOut")
+    
+    _os << m_Deriv[0][0] << " " << m_Deriv[0][1] << std::endl; 
+    _os << m_Deriv[1][0] << " " << m_Deriv[1][1] << std::endl; 
+    _os << m_Deriv[2][0] << " " << m_Deriv[2][1] << std::endl; 
+    _os << m_Deriv[3][0] << " " << m_Deriv[3][1] << std::endl; 
+    _os << m_PrevValue[0] << " " << m_PrevValue[1] << std::endl;
+    _os << m_Value[0] << " " << m_Value[1] << std::endl;
     
     return _os;
 }

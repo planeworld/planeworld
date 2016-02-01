@@ -104,6 +104,7 @@ class CPlanet : public IShape
     protected:
         
         void                myInitTerrain();
+        std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
         
         PlanetType          m_PlanetType;               ///< Identifies type of planet
@@ -291,7 +292,7 @@ inline const noise::module::Module* const CPlanet::getTerrainType() const
 inline const ShapeType CPlanet::getShapeType() const
 {
     METHOD_ENTRY("CPlanet::getShapeType")
-    return SHAPE_PLANET;
+    return ShapeType::SHAPE_PLANET;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

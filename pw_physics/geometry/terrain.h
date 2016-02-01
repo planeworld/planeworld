@@ -78,6 +78,7 @@ class CTerrain : public IShape
     protected:
           
         //--- Protected methods ----------------------------------------------//
+        std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
 
         //--- Protected variables --------------------------------------------//
@@ -216,7 +217,7 @@ inline const double& CTerrain::getWidth() const
 inline const ShapeType CTerrain::getShapeType() const
 {
     METHOD_ENTRY("CTerrain::getShapeType")
-    return SHAPE_TERRAIN;
+    return ShapeType::SHAPE_TERRAIN;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

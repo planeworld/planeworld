@@ -289,7 +289,7 @@ void CPlanetVisuals::attach(CDoubleBufferedShape* const _pPlanet)
 {
     METHOD_ENTRY("CPlanetVisuals::attach")
 
-    if (_pPlanet->getShapeCur()->getShapeType() == SHAPE_PLANET)
+    if (_pPlanet->getShapeCur()->getShapeType() == ShapeType::SHAPE_PLANET)
     {
         m_pPlanet = _pPlanet;
     }

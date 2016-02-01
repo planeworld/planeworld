@@ -346,25 +346,75 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 {
     METHOD_ENTRY("CWorldDataStorage::operator>>")
     
-    ObjectsType::size_type nSize;
-    _is >> nSize;
+    // Delete all old data first
+    for (auto it : _WDS.m_DynamicObjects)
+    {
+        if (it.second != nullptr)
+        {
+            delete it.second;
+            it.second = nullptr;
+            MEM_FREED("IObject")
+        }
+    }
+    _WDS.m_DynamicObjects.clear();
+    for (auto it : _WDS.m_StaticObjects)
+    {
+        if (it.second != nullptr)
+        {
+            delete it.second;
+            it.second = nullptr;
+            MEM_FREED("IObject")
+        }
+    }
+    _WDS.m_StaticObjects.clear();
+    for (auto it : _WDS.m_ObjectVisuals)
+    {
+        if (it != nullptr)
+        {
+            delete it;
+            it = nullptr;
+            MEM_FREED("IObject")
+        }
+    }
+    _WDS.m_ObjectVisuals.clear();
     
+    ObjectsType::size_type nSize;
+    _is >> nSize;    
     std::cout << "Number of objects: " << nSize << std::endl;
     for (auto i=0u; i<nSize; ++i)
     {
-//         std::string::size_type strSize;
-//         _is >> strSize;
-//         std::cout << strSize << std::endl;
         std::string strName;
         _is >> strName;
+        
         std::cout << strName << std::endl;
-        CRigidBody* pObj = new CRigidBody;
-        _is >> *pObj;
-        std::cout << *pObj << std::endl;
-//         _WDS.addObject();
+        
+        // Cast streamable basetype to strongly typed enum ObjectType
+        std::underlying_type<ObjectType>::type nObjectType;
+        _is >> nObjectType;
+        
+        std::cout << nObjectType << std::endl;
+        ObjectType CurrentObjectType = static_cast<ObjectType>(nObjectType);
+        
+        switch (CurrentObjectType)
+        {
+            case ObjectType::OBJECT_BODY:
+            {
+                CRigidBody* pObj = new CRigidBody;
+                MEM_ALLOC("IObject")
+                _is >> pObj;
+                _WDS.addObject(pObj);
+                std::cout << pObj << std::endl;
+                break;
+            }
+            case ObjectType::OBJECT_POINTMASS:
+                break;
+            case ObjectType::OBJECT_NONE:
+                break;
+        }
         Log.progressBar("Loading dynamic objects", i, nSize);
-        usleep(10000);
     }
+    
+    std::cout << _WDS.getDynamicObjects().size() << std::endl;
         
     return _is;
 }
@@ -385,18 +435,18 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
 
     auto nSize=_WDS.m_DynamicObjects.size();
     _os << nSize << std::endl;
+    
     std::uint32_t i=0u;
     for (auto ci : _WDS.m_DynamicObjects)
     {
         _os << ci.first << std::endl;
-        _os << *(ci.second) << std::endl;
+        _os << ci.second << std::endl;
         Log.progressBar("Saving dynamic objects", i++, nSize);
-        usleep(10000);
     }
     _os << _WDS.m_StaticObjects.size();
     for (auto ci : _WDS.m_StaticObjects)
     {
-        _os << *(ci.second);
+        _os << ci.second;
     }
 //     _os << _WDS.m_ObjectVisuals.size();
 //     for (auto ci : _WDS.m_ObjectVisuals)

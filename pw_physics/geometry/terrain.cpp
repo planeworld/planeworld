@@ -241,6 +241,27 @@ void CTerrain::transform( const double& _fAngle, const Vector2d& _vecV )
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& CTerrain::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CTerrain::myStreamIn")
+    
+    std::string strTmp;
+    _is >> strTmp;
+    
+    /// \todo Implement streaming
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Output stream for game state information
 ///
 /// \param _os  Source stream
@@ -252,7 +273,9 @@ std::ostream& CTerrain::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CTerrain::myStreamOut")
     
-    _os << "CTerrain::streamOut TEST";
+    _os << "Terrain:" << std::endl;
+    
+    /// \todo Implement streaming
     
     return _os;
 }

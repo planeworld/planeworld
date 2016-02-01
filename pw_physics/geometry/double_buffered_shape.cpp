@@ -19,6 +19,11 @@
 
 #include "double_buffered_shape.h"
 
+#include "circle.h"
+#include "planet.h"
+#include "polyline.h"
+#include "terrain.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor, initialising members
@@ -40,17 +45,17 @@ CDoubleBufferedShape::~CDoubleBufferedShape()
     METHOD_ENTRY ( "CDoubleBufferedShape::~CDoubleBufferedShape" )
     DTOR_CALL ( "CDoubleBufferedShape::~CDoubleBufferedShape" )
     
-    if (m_pShapeBuf != 0)
+    if (m_pShapeBuf != nullptr)
     {
         delete m_pShapeBuf;
         MEM_FREED("IShape")
-        m_pShapeBuf = 0;
+        m_pShapeBuf = nullptr;
     }
-    if (m_pShapeCur != 0)
+    if (m_pShapeCur != nullptr)
     {
         delete m_pShapeCur;
         MEM_FREED("IShape")
-        m_pShapeCur = 0;
+        m_pShapeCur = nullptr;
     }
 }
 
@@ -85,12 +90,14 @@ void CDoubleBufferedShape::buffer(IShape* const _pShape)
 {
     METHOD_ENTRY ( "CDoubleBufferedShape::buffer")
     
-    if (m_pShapeCur != 0)
+    if (m_pShapeCur != nullptr)
     {
         delete m_pShapeBuf;
         MEM_FREED("IShape");
+        m_pShapeBuf = nullptr;
         delete m_pShapeCur;
         MEM_FREED("IShape");
+        m_pShapeCur = nullptr;
         NOTICE_MSG("Double buffered shape", "Shape already buffered. Deleting old shapes.")
     }
     
@@ -112,9 +119,62 @@ std::istream& operator>>(std::istream& _is, CDoubleBufferedShape& _DBS)
 {
     METHOD_ENTRY("CDoubleBufferedShape::operator>>")
     
-    ///< \todo Implement streaming, need access to private members
-//     _is >> _DBS.m_pShapeCur;
-//     _is >> _DBS.m_pShapeBuf;
+    std::string strTmp;
+    _is >> strTmp;
+    
+    // From IUniqueIDUser
+    _is >> _DBS.m_UID;
+    
+    if (_DBS.m_pShapeBuf != nullptr)
+    {
+        delete _DBS.m_pShapeBuf;
+        MEM_FREED("IShape")
+        _DBS.m_pShapeBuf = nullptr;
+    }
+    if (_DBS.m_pShapeCur != nullptr)
+    {
+        delete _DBS.m_pShapeCur;
+        MEM_FREED("IShape")
+        _DBS.m_pShapeCur = nullptr;
+    }
+    
+    // Cast streamable basetype to strongly typed enum ShapeType
+    std::underlying_type<ShapeType>::type nShapeType;
+    _is >> nShapeType;
+    ShapeType CurrentShapeType = static_cast<ShapeType>(nShapeType);
+
+    switch (CurrentShapeType)
+    {
+        case ShapeType::SHAPE_CIRCLE:
+            _DBS.m_pShapeBuf = new CCircle;
+            _DBS.m_pShapeCur = new CCircle;
+            MEM_ALLOC("IShape")
+            MEM_ALLOC("IShape")
+            break;
+        case ShapeType::SHAPE_PLANET:
+            _DBS.m_pShapeBuf = new CPlanet;
+            _DBS.m_pShapeCur = new CPlanet;
+            MEM_ALLOC("IShape")
+            MEM_ALLOC("IShape")
+            break;
+        case ShapeType::SHAPE_POLYLINE:
+            _DBS.m_pShapeBuf = new CPolyLine;
+            _DBS.m_pShapeCur = new CPolyLine;
+            MEM_ALLOC("IShape")
+            MEM_ALLOC("IShape")
+            break;
+        case ShapeType::SHAPE_TERRAIN:
+            _DBS.m_pShapeBuf = new CTerrain;
+            _DBS.m_pShapeCur = new CTerrain;
+            MEM_ALLOC("IShape")
+            MEM_ALLOC("IShape")
+            break;
+        case ShapeType::SHAPE_NONE:
+            break;
+    }
+    
+    _is >> _DBS.m_pShapeCur >> nShapeType;
+    _is >> _DBS.m_pShapeBuf;
     
     return _is;
 }
@@ -133,8 +193,13 @@ std::ostream& operator<<(std::ostream& _os, CDoubleBufferedShape& _DBS)
 {
     METHOD_ENTRY("CDoubleBufferedShape::operator<<")
     
-    _os << _DBS.getShapeCur();
-    _os << _DBS.getShapeBuf();
+    _os << "DoubleBufferedShape:" << std::endl;
+    
+    // From IUniqueIDUser
+    _os << _DBS.m_UID << std::endl;
+    
+    _os << _DBS.m_pShapeCur << std::endl;
+    _os << _DBS.m_pShapeBuf << std::endl;
     
     return _os;
 }

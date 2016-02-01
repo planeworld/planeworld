@@ -162,32 +162,32 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     ))
     
     // Reserve memory for star object
-    m_pStar = new CRigidBody;
-    m_pStar->setName("Procedurally_Generated_Star_Dummy");
-    m_pStar->enableDynamics();
-    m_pStar->enableGravitation();
-    m_pStarShape = new CCircle;
-    CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-    pShape->buffer(m_pStarShape);
-    m_pStar->getGeometry()->addShape(pShape);
-    m_pStarVisuals = new CCircleVisuals(pShape);
-    m_pStarObjectVisuals = new IObjectVisuals(m_pStar);
-
-    MEM_ALLOC("CRigidBody");
-    MEM_ALLOC("CCircle");
-    MEM_ALLOC("CDoubleBufferedShape")
-    MEM_ALLOC("CCircleVisuals");
-    MEM_ALLOC("IObjectVisuals");
-
-    /// \bug Local variables are not freed
-    
-    m_pStarObjectVisuals->addVisuals(m_pStarVisuals);
-    
-//     m_pDataStorage->addObject(m_pStar);
-//     m_pDataStorage->addObjectVisuals(m_pStarObjectVisuals);
-
-    m_Objects.push_back(m_pStar);
-    m_Visuals.push_back(m_pStarObjectVisuals);
+//     m_pStar = new CRigidBody;
+//     m_pStar->setName("Procedurally_Generated_Star_Dummy");
+//     m_pStar->enableDynamics();
+//     m_pStar->enableGravitation();
+//     m_pStarShape = new CCircle;
+//     CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
+//     pShape->buffer(m_pStarShape);
+//     m_pStar->getGeometry()->addShape(pShape);
+//     m_pStarVisuals = new CCircleVisuals(pShape);
+//     m_pStarObjectVisuals = new IObjectVisuals(m_pStar);
+// 
+//     MEM_ALLOC("CRigidBody");
+//     MEM_ALLOC("CCircle");
+//     MEM_ALLOC("CDoubleBufferedShape")
+//     MEM_ALLOC("CCircleVisuals");
+//     MEM_ALLOC("IObjectVisuals");
+// 
+//     /// \bug Local variables are not freed
+//     
+//     m_pStarObjectVisuals->addVisuals(m_pStarVisuals);
+//     
+// //     m_pDataStorage->addObject(m_pStar);
+// //     m_pDataStorage->addObjectVisuals(m_pStarObjectVisuals);
+// 
+//     m_Objects.push_back(m_pStar);
+//     m_Visuals.push_back(m_pStarObjectVisuals);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

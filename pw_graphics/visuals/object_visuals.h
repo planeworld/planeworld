@@ -51,6 +51,10 @@ class IObjectVisuals : virtual public CGraphicsBase
         //--- Methods --------------------------------------------------------//
         void addVisuals(IVisuals* const);
         
+        //--- friends --------------------------------------------------------//
+        friend std::istream&    operator>>(std::istream&, IObjectVisuals* const);
+        friend std::ostream&    operator<<(std::ostream&, IObjectVisuals* const);
+        
     protected:
         
         IObjectVisuals();                   ///< Constructor is private        

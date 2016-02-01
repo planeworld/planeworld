@@ -36,7 +36,7 @@
 /// shape from the user.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CDoubleBufferedShape
+class CDoubleBufferedShape : public IUniqueIDUser
 {
     
     public:
@@ -57,7 +57,7 @@ class CDoubleBufferedShape
         void swapBuffer();
         
         //--- Friends --------------------------------------------------------//
-        friend std::istream& operator>>(std::ostream&, CDoubleBufferedShape&);
+        friend std::istream& operator>>(std::istream&, CDoubleBufferedShape&);
         friend std::ostream& operator<<(std::ostream&, CDoubleBufferedShape&);
 
     private:

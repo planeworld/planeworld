@@ -105,7 +105,7 @@ inline const std::list<Vector2d>& CPolyLine::getVertices() const
 inline const ShapeType CPolyLine::getShapeType() const
 {
     METHOD_ENTRY("CPolyLine::getShapeType")
-    return SHAPE_POLYLINE;
+    return ShapeType::SHAPE_POLYLINE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

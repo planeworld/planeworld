@@ -30,6 +30,8 @@
 ///
 /// \brief Class for visualisation of world objects
 ///
+/// \todo Implement getVisualsType for istream creation
+///
 ////////////////////////////////////////////////////////////////////////////////
 class IVisuals : virtual public CGraphicsBase
 {

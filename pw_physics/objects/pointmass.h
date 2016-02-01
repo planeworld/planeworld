@@ -71,7 +71,7 @@ class CPointMass : public IObject
 inline const ObjectType CPointMass::getObjectType() const
 {
     METHOD_ENTRY("CCircle::getObjectType")
-    return OBJECT_POINTMASS;
+    return ObjectType::OBJECT_POINTMASS;
 }
 
 #endif

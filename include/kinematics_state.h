@@ -92,6 +92,10 @@ class CKinematicsState
         void setReference(CKinematicsState* const);
         
         void referTo(const CKinematicsState&);
+        
+        //--- friends --------------------------------------------------------//
+        friend std::istream&    operator>>(std::istream&, CKinematicsState&);
+        friend std::ostream&    operator<<(std::ostream&, CKinematicsState&);
 
     private:
 

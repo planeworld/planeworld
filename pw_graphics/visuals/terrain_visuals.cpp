@@ -134,7 +134,7 @@ void CTerrainVisuals::draw(CCamera* const _pCamera,
 void CTerrainVisuals::attach(CDoubleBufferedShape* const _pTerrain)
 {
     METHOD_ENTRY("CTerrainVisuals::attach")
-    if (_pTerrain->getShapeCur()->getShapeType() == SHAPE_TERRAIN)
+    if (_pTerrain->getShapeCur()->getShapeType() == ShapeType::SHAPE_TERRAIN)
     {
         m_pTerrain = _pTerrain;
     }

@@ -212,11 +212,28 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
     _is >> strTmp;
     _is >> _Geo.m_AABB;
     
-    /// \todo Stream in shapes
+    std::cout << _Geo.m_AABB << std::endl;
     
-//     os << _Geo.getShapes()->size();
-//     for (auto ci : (*_Geo.m_pShapes))
-//         _os << (*ci);
+    for (auto it : (*_Geo.m_pShapes))
+    {
+        if (it != nullptr)
+        {
+            delete it;
+            MEM_FREED("CDoubleBufferedShape")
+            it = nullptr;
+        }
+    }
+    
+    DBShapesType::size_type nSize;
+    _is >> nSize;
+    
+    for (auto i=0u; i<nSize; ++i)
+    {
+        CDoubleBufferedShape* pDBShape = new CDoubleBufferedShape;
+        MEM_ALLOC("CDoubleBufferedShape")
+        _is >> (*pDBShape);
+        _Geo.m_pShapes->push_back(pDBShape);
+    }
 
     return _is;
 }
@@ -237,11 +254,11 @@ std::ostream& operator<<(std::ostream& _os, CGeometry& _Geo)
     
     _os << "Geometry:" << std::endl;
     _os << _Geo.m_AABB << std::endl;
-    
-    /// \todo Stream out Shapes
-//     _os << _Geo.getShapes()->size();
-//     for (auto ci : (*_Geo.m_pShapes))
-//         _os << (*ci);
+    _os << _Geo.getShapes()->size() << std::endl;
+    for (auto ci : (*_Geo.m_pShapes))
+    {
+        _os << (*ci) << std::endl;
+    }
     
     return _os;
 }

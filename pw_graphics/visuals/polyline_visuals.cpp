@@ -96,7 +96,7 @@ void CPolylineVisuals::draw(CCamera* const _pCamera,
 void CPolylineVisuals::attach(CDoubleBufferedShape* const _pPolyline)
 {
     METHOD_ENTRY("CPolylineVisuals::attach")
-    if (_pPolyline->getShapeCur()->getShapeType() == SHAPE_POLYLINE)
+    if (_pPolyline->getShapeCur()->getShapeType() == ShapeType::SHAPE_POLYLINE)
     {
         m_pPolyline = _pPolyline;
     }

@@ -126,8 +126,13 @@ std::istream& CCircle::myStreamIn(std::istream& _is)
 {
     METHOD_ENTRY("CCircle::myStreamIn")
     
-    _is >> m_vecCenter[0] >> m_vecCenter[1];
-    _is >> m_vecCenter0[0] >> m_vecCenter0[1];
+    std::string strTmp;
+    _is >> strTmp;
+    
+    _is >> m_vecCenter[0];
+    _is >> m_vecCenter[1];
+    _is >> m_vecCenter0[0];
+    _is >> m_vecCenter0[1];
     _is >> m_fAngle;
     _is >> m_fRadius;
     
@@ -147,11 +152,14 @@ std::ostream& CCircle::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CCircle::myStreamOut")
     
-    _os << m_vecCenter[0] << m_vecCenter[1];
-    _os << m_vecCenter0[0] << m_vecCenter0[1];
-    _os << m_fAngle;
-    _os << m_fRadius;
-    _os << "CCircle::streamOut TEST";
+    _os << "Circle" << std::endl;
+    
+    _os << m_vecCenter[0] << " " <<
+           m_vecCenter[1] << std::endl;
+    _os << m_vecCenter0[0] << " " <<
+           m_vecCenter0[1] << std::endl;
+    _os << m_fAngle << std::endl;
+    _os << m_fRadius << std::endl;
     
     return _os;
 }

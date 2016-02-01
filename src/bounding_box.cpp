@@ -182,7 +182,6 @@ std::istream& operator>>(std::istream& _is, CBoundingBox& _BB)
     METHOD_ENTRY("CBoundingBox::operator>>")
     
     std::string strTmp;
-    
     _is >> strTmp;
     
     _is >> _BB.m_vecLowerLeft[0];
@@ -211,16 +210,16 @@ std::ostream& operator<<(std::ostream& _os, CBoundingBox& _BB)
 {
     METHOD_ENTRY("CBoundingBox::operator<<")
     
-    _os << "Bounding Box:" << std::endl;
+    _os << "BoundingBox:" << std::endl;
     
-    _os << _BB.m_vecLowerLeft[0] << std::endl;
-    _os << _BB.m_vecLowerLeft[1] << std::endl;
-    _os << _BB.m_vecUpperRight[0] << std::endl;
-    _os << _BB.m_vecUpperRight[1] << std::endl;
+    _os << _BB.m_vecLowerLeft[0] << " " <<
+           _BB.m_vecLowerLeft[1] << std::endl;
+    _os << _BB.m_vecUpperRight[0] << " " <<
+           _BB.m_vecUpperRight[1] << std::endl;
     
     // From IUniverseScaled:
-    _os << _BB.m_vecCell[0] << std::endl;
-    _os << _BB.m_vecCell[1] << std::endl;
+    _os << _BB.m_vecCell[0] << " " <<
+           _BB.m_vecCell[1] << std::endl;
         
     return _os;
 }

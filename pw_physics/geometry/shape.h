@@ -34,14 +34,14 @@
 using namespace Eigen;
 
 /// specifies the type of shape
-typedef enum 
+enum class ShapeType
 {
     SHAPE_NONE,
     SHAPE_CIRCLE,
     SHAPE_PLANET,
     SHAPE_POLYLINE,
     SHAPE_TERRAIN
-} ShapeType;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -109,7 +109,7 @@ inline int IShape::getDepths() const
 inline const ShapeType IShape::getShapeType() const
 {
     METHOD_ENTRY("IShape::getShapeType")
-    return SHAPE_NONE;
+    return ShapeType::SHAPE_NONE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -275,7 +275,7 @@ std::ostream& CEulerIntegrator<T>::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CEulerIntegrator::myStreamOut")
     
-    _os << "Euler Integrator:" << std::endl;
+    _os << "EulerIntegrator:" << std::endl;
     _os << m_PrevValue << std::endl;
     _os << m_Value << std::endl;
     
@@ -296,11 +296,11 @@ inline std::ostream& CEulerIntegrator<Vector2d>::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CEulerIntegrator::myStreamOut")
     
-    _os << "Euler Integrator:" << std::endl;
-    _os << m_PrevValue[0] << std::endl;
-    _os << m_PrevValue[1] << std::endl;
-    _os << m_Value[0] << std::endl;
-    _os << m_Value[1] << std::endl;
+    _os << "EulerIntegrator:" << std::endl;
+    _os << m_PrevValue[0] << " " <<
+           m_PrevValue[1] << std::endl;
+    _os << m_Value[0] << " " <<
+           m_Value[1] << std::endl;
     
     return _os;
 }

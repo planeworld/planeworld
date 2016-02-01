@@ -279,3 +279,63 @@ void CKinematicsState::referTo(const CKinematicsState& _Reference)
     m_fAngle         += _Reference.m_fAngle;
     m_fAngleVelocity += _Reference.m_fAngleVelocity;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _KS CKinematicsState instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CKinematicsState& _KS)
+{
+    METHOD_ENTRY("CKinematicsState::operator>>")
+    
+    /// \todo Stream reference by using UIDs
+    
+    std::string strTmp;
+    _is >> strTmp;
+    
+    _is >> _KS.m_bGotReference;
+    _is >> _KS.m_vecOrigin[0];
+    _is >> _KS.m_vecOrigin[1];
+    _is >> _KS.m_vecVelocity[0];
+    _is >> _KS.m_vecVelocity[1];
+    _is >> _KS.m_fAngle;
+    _is >> _KS.m_fAngleVelocity;
+
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _KS CKinematicsState instance to stream
+///
+/// \return Stream with game state information of IObject instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CKinematicsState& _KS)
+{
+    METHOD_ENTRY("CKinematicsState::operator<<")
+    
+    /// \todo Stream reference by using UIDs
+    
+    _os << "KinematicsState:" << std::endl;
+    
+    _os << _KS.m_bGotReference << std::endl;
+    _os << _KS.m_vecOrigin[0] << " " <<
+           _KS.m_vecOrigin[1] << std::endl;
+    _os << _KS.m_vecVelocity[0] << " " <<
+           _KS.m_vecVelocity[1] << std::endl;
+    _os << _KS.m_fAngle << std::endl;
+    _os << _KS.m_fAngleVelocity << std::endl;
+
+    return _os;
+}
+

@@ -49,12 +49,12 @@ void CCollisionManager::detectCollisions()
                 {
                     switch(ci->second->getObjectType())
                     {
-                        case OBJECT_BODY:
+                        case ObjectType::OBJECT_BODY:
                             this->test(static_cast<CBody*>(ci->second),static_cast<CBody*>(cj->second));
                             break;
-                        case OBJECT_POINTMASS:
+                        case ObjectType::OBJECT_POINTMASS:
                             break;
-                        case OBJECT_NONE:
+                        case ObjectType::OBJECT_NONE:
                             break;
                     }
 //                     CContact Contact;
@@ -71,7 +71,7 @@ void CCollisionManager::detectCollisions()
 //         {
 //             switch((*ci)->getObjectType())
 //             {
-//                 case OBJECT_BODY:
+//                 case ObjectType::OBJECT_BODY:
 //                     this->test(static_cast<CBody*>((*ci)), (*cj));
 //             }
 //         }
@@ -91,7 +91,7 @@ void CCollisionManager::detectCollisions()
 //         {
 //             switch(ci->second->getObjectType())
 //             {
-//                 case OBJECT_BODY:
+//                 case ObjectType::OBJECT_BODY:
 //                     this->test(static_cast<CBody*>(ci->second), (*cj));
 //                     break;
 //             }
@@ -109,7 +109,7 @@ void CCollisionManager::detectCollisions()
 //         {
 //             switch(ci->second->getObjectType())
 //             {
-//                 case OBJECT_BODY:
+//                 case ObjectType::OBJECT_BODY:
 //                     this->test(static_cast<CBody*>(ci->second), (*cj));
 //                     break;
 //             }
@@ -138,19 +138,19 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
     {
         switch((*ci)->getShapeCur()->getShapeType())
         {
-            case SHAPE_TERRAIN:
+            case ShapeType::SHAPE_TERRAIN:
                 this->test(static_cast<CTerrain*>((*ci)->getShapeCur()),_p2);
                 break;
-            case SHAPE_CIRCLE:
+            case ShapeType::SHAPE_CIRCLE:
                 this->test(static_cast<CCircle*>((*ci)->getShapeCur()), static_cast<CCircle*>((*ci)->getShapeBuf()), _p1, _p2);
                 break;
-            case SHAPE_PLANET:
+            case ShapeType::SHAPE_PLANET:
                 this->test(static_cast<CPlanet*>((*ci)->getShapeCur()), static_cast<CPlanet*>((*ci)->getShapeBuf()), _p1, _p2);
                 break;
-            case SHAPE_POLYLINE:
+            case ShapeType::SHAPE_POLYLINE:
                 this->test(static_cast<CPolyLine*>((*ci)->getShapeCur()), static_cast<CPolyLine*>((*ci)->getShapeBuf()), _p1, _p2);
                 break;
-            case SHAPE_NONE:
+            case ShapeType::SHAPE_NONE:
                 break;
         }
         ++ci;
@@ -555,10 +555,10 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
         {
             switch((*ci)->getShapeCur()->getShapeType())
             {
-                case SHAPE_CIRCLE:
+                case ShapeType::SHAPE_CIRCLE:
                     switch((*cj)->getShapeCur()->getShapeType())
                     {
-                        case SHAPE_CIRCLE:
+                        case ShapeType::SHAPE_CIRCLE:
                             CCircle* pCircA1;
                             CCircle* pCircB1;
                             CCircle* pCircA0;
@@ -569,10 +569,10 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             pCircB0 = static_cast<CCircle*>((*cj)->getShapeBuf());
                             this->test(pCircA1, pCircA0, pCircB1, pCircB0, _p1, _p2);
                             break;
-                        case SHAPE_PLANET:
+                        case ShapeType::SHAPE_PLANET:
 //                             this->getSurfaceOfInterest();
                             break;
-                        case SHAPE_POLYLINE:
+                        case ShapeType::SHAPE_POLYLINE:
                             CCircle* pCirc1;
                             CCircle* pCirc0;
                             CPolyLine* pPoly1;
@@ -583,16 +583,16 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             pPoly0 = static_cast<CPolyLine*>((*cj)->getShapeBuf());
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
-                        case SHAPE_TERRAIN:
+                        case ShapeType::SHAPE_TERRAIN:
                             break;
-                        case SHAPE_NONE:
+                        case ShapeType::SHAPE_NONE:
                             break;
                     }
                     break;
-                case SHAPE_PLANET:
+                case ShapeType::SHAPE_PLANET:
                     switch((*cj)->getShapeCur()->getShapeType())
                     {
-                        case SHAPE_CIRCLE:
+                        case ShapeType::SHAPE_CIRCLE:
 //                             CCircle* pCirc1;
 //                             CCircle* pCirc0;
 //                             CPolyLine* pPoly1;
@@ -603,10 +603,10 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
 //                             pPoly0 = static_cast<CPolyLine*>((*ci0));
 //                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
-                        case SHAPE_PLANET:
+                        case ShapeType::SHAPE_PLANET:
 //                             this->getSurfaceOfInterest();
                             break;
-                        case SHAPE_POLYLINE:
+                        case ShapeType::SHAPE_POLYLINE:
 //                             CPolyLine* pPolyA1;
 //                             CPolyLine* pPolyB1;
 //                             CPolyLine* pPolyA0;
@@ -618,16 +618,16 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
 //                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
 //                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
-                        case SHAPE_TERRAIN:
+                        case ShapeType::SHAPE_TERRAIN:
                             break;
-                        case SHAPE_NONE:
+                        case ShapeType::SHAPE_NONE:
                             break;
                     }
                     break;
-                case SHAPE_POLYLINE:
+                case ShapeType::SHAPE_POLYLINE:
                     switch((*cj)->getShapeCur()->getShapeType())
                     {
-                        case SHAPE_CIRCLE:
+                        case ShapeType::SHAPE_CIRCLE:
                         {
                             CCircle* pCirc1;
                             CCircle* pCirc0;
@@ -640,7 +640,7 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
                         }
-                        case SHAPE_PLANET:
+                        case ShapeType::SHAPE_PLANET:
                         {
 //                             CPlanet* pPlanet1;
 //                             CPlanet* pPlanet0;
@@ -653,7 +653,7 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
 //                             this->getSurfaceOfInterest();
                             break;
                         }
-                        case SHAPE_POLYLINE:
+                        case ShapeType::SHAPE_POLYLINE:
                         {
                             CPolyLine* pPolyA1;
                             CPolyLine* pPolyB1;
@@ -667,15 +667,15 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
                         }
-                        case SHAPE_TERRAIN:
+                        case ShapeType::SHAPE_TERRAIN:
                             break;
-                        case SHAPE_NONE:
+                        case ShapeType::SHAPE_NONE:
                             break;
                     }
                     break;
-                case SHAPE_TERRAIN:
+                case ShapeType::SHAPE_TERRAIN:
                     break;
-                case SHAPE_NONE:
+                case ShapeType::SHAPE_NONE:
                     break;
                           
             }
@@ -735,7 +735,7 @@ void CCollisionManager::getSurfaceOfInterest()
 //         
 //         double fInc = m_pPlanet->getGroundResolution() / m_pPlanet->getRadius();
 //         
-//         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
+//         m_Graphics.beginLine(LineT, ShapeType::SHAPE_DEFAULT_DEPTH);
 // 
 //             while ( fAng <= fAngEnd)
 //             {

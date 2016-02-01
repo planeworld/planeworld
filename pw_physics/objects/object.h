@@ -37,12 +37,12 @@
 typedef uint AnchorIDType;
 
 /// Specifies the type of the object
-typedef enum 
+enum class ObjectType
 {
     OBJECT_NONE,
     OBJECT_BODY,
     OBJECT_POINTMASS,
-} ObjectType;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -114,8 +114,8 @@ class IObject : public IKinematicsStateUser,
         void                transform();
         
         //--- friends --------------------------------------------------------//
-        friend std::istream&    operator>>(std::istream&, IObject&);
-        friend std::ostream&    operator<<(std::ostream&, IObject&);
+        friend std::istream&    operator>>(std::istream&, IObject* const);
+        friend std::ostream&    operator<<(std::ostream&, IObject* const);
         
     protected:
 
@@ -167,7 +167,7 @@ typedef std::unordered_map<std::string, IObject*>  ObjectsType;    ///< Specifie
 inline const ObjectType IObject::getObjectType() const
 {
     METHOD_ENTRY("IObject::getObjectType")
-    return OBJECT_NONE;
+    return ObjectType::OBJECT_NONE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

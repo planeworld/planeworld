@@ -226,10 +226,10 @@ std::ostream& CBody::myStreamOut(std::ostream& _os)
     METHOD_ENTRY("CBody::myStreamOut")
     
     _os << "Body:" << std::endl;
-    _os << m_fInertia;
-    _os << m_fTorque;
-    _os << m_pIntAng;
-    _os << m_pIntAngVel;
+    _os << m_fInertia << std::endl;
+    _os << m_fTorque << std::endl;
+    _os << m_pIntAng << std::endl;
+    _os << m_pIntAngVel << std::endl;
     
     return _os;
 }

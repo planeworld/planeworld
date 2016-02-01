@@ -236,6 +236,47 @@ void CPlanet::transform( const double& _fAngle, const Vector2d& _vecV )
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& CPlanet::myStreamIn(std::istream& _is)
+{
+    METHOD_ENTRY("CPlanet::myStreamIn")
+    
+    std::string strTmp;
+    _is >> strTmp;
+    
+    /// \todo Implement streaming of planet type and noise modules
+    
+//     _is >> m_PlanetType;
+    _is >> m_vecCenter[0];
+    _is >> m_vecCenter[1];
+    _is >> m_vecCenter0[0];
+    _is >> m_vecCenter0[1];
+    _is >> m_fAngle;
+    _is >> m_fGroundResolution;
+    _is >> m_fHeightMax;
+    _is >> m_fRadius;
+    _is >> m_fSeaLevel;
+    _is >> m_fSmoothness;
+    _is >> m_nSeed;
+    
+    _is >> m_fLacHlTr;
+    _is >> m_fLacMtTr;
+    _is >> m_fLacTrTp;
+    _is >> m_nOctHlTr;
+    _is >> m_nOctMtTr;
+    _is >> m_nOctTrTp;
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Output stream for game state information
 ///
 /// \param _os  Source stream
@@ -247,16 +288,22 @@ std::ostream& CPlanet::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CPlanet::myStreamOut")
     
-    _os << m_PlanetType;
-    _os << m_vecCenter;
-    _os << m_vecCenter0;
-    _os << m_fAngle;
-    _os << m_fGroundResolution;
-    _os << m_fHeightMax;
-    _os << m_fRadius;
-    _os << m_fSeaLevel;
-    _os << m_fSmoothness;
-    _os << m_nSeed;
+    _os << "Planet:" << std::endl;
+    
+    /// \todo Implement streaming of planet type and noise modules
+    
+//     _os << m_PlanetType << std::endl;
+    _os << m_vecCenter[0] << " " <<
+           m_vecCenter[1] << std::endl;
+    _os << m_vecCenter0[0] << " " <<
+           m_vecCenter0[1] << std::endl;
+    _os << m_fAngle << std::endl;
+    _os << m_fGroundResolution << std::endl;
+    _os << m_fHeightMax << std::endl;
+    _os << m_fRadius << std::endl;
+    _os << m_fSeaLevel << std::endl;
+    _os << m_fSmoothness << std::endl;
+    _os << m_nSeed << std::endl;
     
 //         noise::module::Module*     m_pSurface;          ///< Final surface noise function
 //         noise::module::Module*     m_pTerrainType;      ///< Final terrain type noise function
@@ -269,14 +316,12 @@ std::ostream& CPlanet::myStreamOut(std::ostream& _os)
 //         std::vector<noise::module::Select>      m_Selector;     ///< Selector modules
 //         std::vector<noise::module::Terrace>     m_Terrace;      ///< Terrace modules
     
-    _os << m_fLacHlTr;
-    _os << m_fLacMtTr;
-    _os << m_fLacTrTp;
-    _os << m_nOctHlTr;
-    _os << m_nOctMtTr;
-    _os << m_nOctTrTp;
-    
-    _os << "CPlanet::streamOut TEST";
+    _os << m_fLacHlTr << std::endl;
+    _os << m_fLacMtTr << std::endl;
+    _os << m_fLacTrTp << std::endl;
+    _os << m_nOctHlTr << std::endl;
+    _os << m_nOctMtTr << std::endl;
+    _os << m_nOctTrTp << std::endl;
     
     return _os;
 }

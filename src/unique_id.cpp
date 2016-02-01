@@ -64,3 +64,48 @@ CUniqueID::~CUniqueID()
     
     s_UnusedUIDs.push_back(m_nUID);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _UID CUniqueID instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CUniqueID& _UID)
+{
+    METHOD_ENTRY("CUniqueID::operator>>")
+    
+    std::string strTmp;
+    _is >> strTmp;
+    
+    /// \todo Stream static members (queue and uid counter)
+    _is >> _UID.m_nUID;
+
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _UID CUniqueID instance to stream
+///
+/// \return Stream with game state information of CUniqueID instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CUniqueID& _UID)
+{
+    METHOD_ENTRY("CUniqueID::operator<<")
+    
+    _os << "UID:" << std::endl;
+    
+    /// \todo Stream static members (queue and uid counter)
+    _os << _UID.m_nUID << std::endl;
+    
+    return _os;
+}
