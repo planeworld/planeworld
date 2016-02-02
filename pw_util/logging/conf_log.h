@@ -88,13 +88,13 @@
 #define DOMAIN_NONE
 // #define DOMAIN_METHOD_ENTRY
 // #define DOMAIN_METHOD_EXIT
-#define DOMAIN_CONSTRUCTOR
-#define DOMAIN_DESTRUCTOR
-#define DOMAIN_MEMORY_ALLOCATED
-#define DOMAIN_MEMORY_FREED
-#define DOMAIN_STATS
-#define DOMAIN_VAR
-#define DOMAIN_FILEIO
+// #define DOMAIN_CONSTRUCTOR
+// #define DOMAIN_DESTRUCTOR
+// #define DOMAIN_MEMORY_ALLOCATED
+// #define DOMAIN_MEMORY_FREED
+// #define DOMAIN_STATS
+// #define DOMAIN_VAR
+// #define DOMAIN_FILEIO
 
 //--- Allow global DEBUG definition typically passed by compiler ---//
 //==================================================================//

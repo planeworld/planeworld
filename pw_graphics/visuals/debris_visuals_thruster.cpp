@@ -61,16 +61,13 @@ void CDebrisVisualsThruster::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CDebrisVisualsThruster::draw()");
     double fSizeR = 1.0 / m_pDebris->getPositions()->size();
-    u_int32_t i = 0;
     
-    for (boost::circular_buffer<Vector2d>::const_iterator ci = m_pDebris->getPositions()->begin();
-                                                          ci != m_pDebris->getPositions()->end(); ++ci)
+    for (auto i=0u; i<m_pDebris->getPositions()->size(); ++i)
     {
         m_Graphics.setPointSize((double(m_pDebris->getPositions()->size()-i) * 0.05 + 3.0) * _pCamera->getZoom());
         m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
-        m_Graphics.dot((*ci) - _pCamera->getCenter() +
+        m_Graphics.dot(m_pDebris->getPositions()->at(i) - _pCamera->getCenter() +
                         IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
-        ++i;
     }
     m_Graphics.setPointSize(1.0);
 }

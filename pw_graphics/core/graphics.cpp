@@ -541,29 +541,25 @@ void CGraphics::dots(const std::vector<Vector2d>& _Dots,
 ///                   be shifted.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::dots(boost::circular_buffer<Vector2d>& _Dots,
+void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
                      const Vector2d& _vecOffset) const
 {
     METHOD_ENTRY("CGraphics::dots")
     
-    boost::circular_buffer<Vector2d>::const_iterator ci = _Dots.begin();
-
 //     glPointSize(1.0);
     glBegin(GL_POINTS);
         if (_vecOffset.isZero())
         {
-            while (ci != _Dots.end())
+            for (auto i=0u; i<_Dots.size(); ++i)
             {
-                glVertex3d( (*ci)[0], (*ci)[1], -10.0);
-                ++ci;
+                glVertex3d( _Dots[i][0], _Dots[i][1], -10.0);
             }
         }
         else
         {
-            while (ci != _Dots.end())
+            for (auto i=0u; i<_Dots.size(); ++i)
             {
-                glVertex3d( (*ci)[0]+_vecOffset[0], (*ci)[1]+_vecOffset[1], -10.0);
-                ++ci;
+                glVertex3d( _Dots[i][0]+_vecOffset[0], _Dots[i][1]+_vecOffset[1], -10.0);
             }
         }   
     glEnd();

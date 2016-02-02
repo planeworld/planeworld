@@ -31,6 +31,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "conf_pw.h"
+#include "circular_buffer.h"
 #include "debris_emitter.h"
 #include "game_state_manager.h"
 #include "physics_manager.h"
@@ -411,6 +412,6 @@ int main(int argc, char *argv[])
     }
     
     GameStateManager.save();
-        
+    
     return EXIT_SUCCESS;
 }

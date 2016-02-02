@@ -21,14 +21,14 @@
 #define DEBRIS_H
 
 //--- Program header ---------------------------------------------------------//
+#include "circular_buffer.h"
 #include "universe_scaled.h"
-#include <eigen3/Eigen/Core>
 
 //--- Standard header --------------------------------------------------------//
 #include <vector>
 
 //--- Misc header ------------------------------------------------------------//
-#include <boost/circular_buffer.hpp>
+#include <eigen3/Eigen/Core>
 
 const int DEBRIS_DEFAULT_NUMBER = 100;
 
@@ -54,11 +54,11 @@ class CDebris : public IUniverseScaled
         const int getDepths() const;
 
         //--- Methods --------------------------------------------------------//
-        boost::circular_buffer<Vector2d>* getPositions();
-        boost::circular_buffer<Vector2d>* getVelocities();
-        boost::circular_buffer<Vector2d>* getPreviousPositions();
-        boost::circular_buffer<Vector2d>* getPreviousVelocities();
-        boost::circular_buffer<bool>*     getStates();
+        CCircularBuffer<Vector2d>* getPositions();
+        CCircularBuffer<Vector2d>* getVelocities();
+        CCircularBuffer<Vector2d>* getPreviousPositions();
+        CCircularBuffer<Vector2d>* getPreviousVelocities();
+        CCircularBuffer<bool>*     getStates();
         
         void                setDamping(const double&);
         void                setDepths(const int&);
@@ -73,19 +73,19 @@ class CDebris : public IUniverseScaled
     protected:
 
         //-- Variables [protected] -------------------------------------------//
-        CTimer                  m_Lifetime;                         ///< Lifetime counter
-        double                  m_fTimeFac;                         ///< Factor of realtime
+        CTimer                  m_Lifetime;                  ///< Lifetime counter
+        double                  m_fTimeFac;                  ///< Factor of realtime
 
-        boost::circular_buffer<Vector2d> m_PosList;                 ///< Position of debris
-        boost::circular_buffer<Vector2d> m_PosListPrev;             ///< Position of debris in previous time step
-        boost::circular_buffer<Vector2d> m_VelList;                 ///< Velocity of derbis
-        boost::circular_buffer<Vector2d> m_VelListPrev;             ///< Velocity of derbis in previous time step
-        boost::circular_buffer<bool>     m_StateList;               ///< Is the debris active or inactive
+        CCircularBuffer<Vector2d> m_PosList;                 ///< Position of debris
+        CCircularBuffer<Vector2d> m_PosListPrev;             ///< Position of debris in previous time step
+        CCircularBuffer<Vector2d> m_VelList;                 ///< Velocity of derbis
+        CCircularBuffer<Vector2d> m_VelListPrev;             ///< Velocity of derbis in previous time step
+        CCircularBuffer<bool>     m_StateList;               ///< Is the debris active or inactive
         
-        double                  m_fDamping;                         ///< Damping of debris
-        int                     m_nDepthlayers;                     ///< Depths in which debris exists
+        double                  m_fDamping;                  ///< Damping of debris
+        int                     m_nDepthlayers;              ///< Depths in which debris exists
         
-        Vector2d                m_vecForce;                         ///< Gravitational force applied
+        Vector2d                m_vecForce;                  ///< Gravitational force applied
 
 };
 
@@ -99,7 +99,7 @@ class CDebris : public IUniverseScaled
 /// \return List of positions of debris
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline boost::circular_buffer<Vector2d>* CDebris::getPositions()
+inline CCircularBuffer<Vector2d>* CDebris::getPositions()
 {
     METHOD_ENTRY("CDebris::getPositions")
     return &m_PosList;
@@ -112,7 +112,7 @@ inline boost::circular_buffer<Vector2d>* CDebris::getPositions()
 /// \return List of velocities of debris
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline boost::circular_buffer<Vector2d>* CDebris::getVelocities()
+inline CCircularBuffer<Vector2d>* CDebris::getVelocities()
 {
     METHOD_ENTRY("CDebris::getVelocities")
     return &m_VelList;
@@ -125,7 +125,7 @@ inline boost::circular_buffer<Vector2d>* CDebris::getVelocities()
 /// \return List of positions of debris from previous timestep
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline boost::circular_buffer<Vector2d>* CDebris::getPreviousPositions()
+inline CCircularBuffer<Vector2d>* CDebris::getPreviousPositions()
 {
     METHOD_ENTRY("CDebris::getPreviousPositions")
     return &m_PosListPrev;
@@ -138,7 +138,7 @@ inline boost::circular_buffer<Vector2d>* CDebris::getPreviousPositions()
 /// \return List of velocities of debris from previous timestep
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline boost::circular_buffer<Vector2d>* CDebris::getPreviousVelocities()
+inline CCircularBuffer<Vector2d>* CDebris::getPreviousVelocities()
 {
     METHOD_ENTRY("CDebris::getPreviousVelocities")
     return &m_VelListPrev;
@@ -151,7 +151,7 @@ inline boost::circular_buffer<Vector2d>* CDebris::getPreviousVelocities()
 /// \return List of states of the debris
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline boost::circular_buffer<bool>* CDebris::getStates()
+inline CCircularBuffer<bool>* CDebris::getStates()
 {
     METHOD_ENTRY("CDebris::getStates")
     return &m_StateList;

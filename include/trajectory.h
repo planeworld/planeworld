@@ -21,16 +21,16 @@
 #define TRAJECTORY_H
 
 //--- Program header ---------------------------------------------------------//
+#include "circular_buffer.h"
 #include "universe_scaled.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <mutex>
 
 //--- Misc header ------------------------------------------------------------//
-#include <boost/circular_buffer.hpp>
 
-typedef boost::circular_buffer<Vector2d> TrajectoryType;        ///< Typedef for trajectory
-typedef boost::circular_buffer<Vector2i> TrajectoryCellType;    ///< Typedef for trajectory (cell part)
+typedef CCircularBuffer<Vector2d> TrajectoryType;        ///< Typedef for trajectory
+typedef CCircularBuffer<Vector2i> TrajectoryCellType;    ///< Typedef for trajectory (cell part)
 
 //--- Constants --------------------------------------------------------------//
 const int TRAJECTORY_CAPACITY =  1000; ///< Default length of trajetory
@@ -66,9 +66,9 @@ class CTrajectory
 
     private:
 
-        boost::circular_buffer<Vector2d>    m_Positions;        ///< Trajectory of object
-        boost::circular_buffer<Vector2i>    m_Cells;            ///< Trajectory of object (cell part)
-        uint8_t                             m_unUpdateCount;    ///< Counter for update of trajectory
+        CCircularBuffer<Vector2d>    m_Positions;        ///< Trajectory of object
+        CCircularBuffer<Vector2i>    m_Cells;            ///< Trajectory of object (cell part)
+        uint8_t                      m_unUpdateCount;    ///< Counter for update of trajectory
         
         mutable std::mutex m_Mutex; ///< Mutex to lock access to trajectory
 };
@@ -84,8 +84,8 @@ inline CTrajectory::CTrajectory() : m_unUpdateCount(0u)
 {
     METHOD_ENTRY("CTrajectory::CTrajectory")
     
-    m_Positions.set_capacity(TRAJECTORY_CAPACITY);
-    m_Cells.set_capacity(TRAJECTORY_CAPACITY);
+    m_Positions.reserve(TRAJECTORY_CAPACITY);
+    m_Cells.reserve(TRAJECTORY_CAPACITY);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

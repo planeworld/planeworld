@@ -10,14 +10,12 @@ IF(OPENMP_FOUND)
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 ENDIF()
 
-# FIND_PACKAGE(Boost)
-
 INCLUDE_DIRECTORIES (
-    ${Boost_INCLUDE_DIRS}
     ${LUA_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src
     ${CMAKE_HOME_DIRECTORY}/pw_io
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging
     ${CMAKE_HOME_DIRECTORY}/pw_util/math
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core

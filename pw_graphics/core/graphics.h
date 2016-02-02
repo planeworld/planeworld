@@ -24,10 +24,10 @@
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
+#include "circular_buffer.h"
 #include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include <boost/circular_buffer.hpp>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
 #include <SFML/OpenGL.hpp>
@@ -161,7 +161,7 @@ class CGraphics
         void circle(const Vector2d&, const double&) const;
         void dot(const Vector2d&) const;
         void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
-        void dots(boost::circular_buffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
+        void dots(CCircularBuffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void filledRect(const Vector2d&, const Vector2d&) const;
         void polyline(const std::list<Vector2d>&, const LineType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void rect(const Vector2d&, const Vector2d&) const;

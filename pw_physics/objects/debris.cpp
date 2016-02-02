@@ -29,11 +29,11 @@ CDebris::CDebris() : m_fTimeFac(1.0)
     METHOD_ENTRY("CDebris::CDebris")
     CTOR_CALL("CDebris::CDebris")
     
-    m_PosList.set_capacity(DEBRIS_DEFAULT_NUMBER);
-    m_VelList.set_capacity(DEBRIS_DEFAULT_NUMBER);
-    m_PosListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
-    m_VelListPrev.set_capacity(DEBRIS_DEFAULT_NUMBER);
-    m_StateList.set_capacity(DEBRIS_DEFAULT_NUMBER);
+    m_PosList.reserve(DEBRIS_DEFAULT_NUMBER);
+    m_VelList.reserve(DEBRIS_DEFAULT_NUMBER);
+    m_PosListPrev.reserve(DEBRIS_DEFAULT_NUMBER);
+    m_VelListPrev.reserve(DEBRIS_DEFAULT_NUMBER);
+    m_StateList.reserve(DEBRIS_DEFAULT_NUMBER);
     
     m_vecForce.setZero();
 }
@@ -50,23 +50,18 @@ void CDebris::dynamics(const double& _fStep)
 {
     METHOD_ENTRY("CDebris::dynamics")
     
-    boost::circular_buffer<Vector2d>::iterator it=m_PosList.begin();
-    boost::circular_buffer<Vector2d>::iterator jt=m_VelList.begin();
-    boost::circular_buffer<Vector2d>::iterator itPrev=m_PosListPrev.begin();
-    boost::circular_buffer<Vector2d>::iterator jtPrev=m_VelListPrev.begin();
-    boost::circular_buffer<bool>::const_iterator ci=m_StateList.begin();
     Vector2d vecStep = m_vecForce * _fStep * m_fTimeFac;
-    while (it != m_PosList.end())
+    for (auto i=0u; i<m_PosList.size(); ++i)
     {
         // Only if state is active
-        if ((*ci))
+        ///< \bug This doesn't work due to some vector internal bitset conversion
+//         if (m_StateList[i])
         {
-            (*itPrev) = (*it);
-            (*jtPrev) = (*jt);
-            (*jt) += vecStep;
-            (*it) += (*jt) * _fStep;
+            m_PosListPrev[i] = m_PosList[i];
+            m_VelList[i] = m_VelList[i];
+            m_VelList[i] += vecStep;
+            m_PosList[i] += m_VelList[i] * _fStep;
         }
-        ++it; ++jt; ++itPrev; ++jtPrev; ++ci;
     }
 }
 
@@ -133,13 +128,13 @@ void CDebris::setNumber(const int& _nN)
 {
     METHOD_ENTRY("CDebris::setNumber")
 
-    m_PosList.set_capacity(_nN);
-    m_StateList.set_capacity(_nN);
-    m_PosListPrev.set_capacity(_nN);
+    m_PosList.reserve(_nN);
+    m_StateList.reserve(_nN);
+    m_PosListPrev.reserve(_nN);
     for (auto i=0u; i<m_PosList.capacity();++i)
     {
         m_StateList.push_back(true);
     }
-    m_VelList.set_capacity(_nN);
-    m_VelListPrev.set_capacity(_nN);
+    m_VelList.reserve(_nN);
+    m_VelListPrev.reserve(_nN);
 }
