@@ -10,4 +10,4 @@ SET(HDRS
     integrator.h
 )
 
-INSTALL (FILES ${HDRS} DESTINATION include)
+#INSTALL (FILES ${HDRS} DESTINATION include)
