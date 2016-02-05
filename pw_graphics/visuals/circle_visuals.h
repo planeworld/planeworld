@@ -47,8 +47,7 @@ class CCircleVisuals : public IVisuals
         virtual void        draw(CCamera* const, const IObject* const) const;
                 
         //--- Methods --------------------------------------------------------//
-        virtual void attach(CDoubleBufferedShape* const);
-        virtual const CBoundingBox& getBoundingBox();
+        
         
     private:
         
@@ -58,25 +57,11 @@ class CCircleVisuals : public IVisuals
         //--- Methods [private] ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
-        
-        //--- Variables [private] --------------------------------------------//
-        CDoubleBufferedShape* m_pCircle;    ///< Pointer to buffered shape
 
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the bounding box of given shape of visual
-///
-/// \return Bounding box
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& CCircleVisuals::getBoundingBox()
-{
-    METHOD_ENTRY("CCircleVisuals::getBoundingBox")
-    return m_pCircle->getShapeCur()->getBoundingBox();
-}
+
 
 #endif

@@ -33,7 +33,7 @@ CCircleVisuals::CCircleVisuals(CDoubleBufferedShape* const _pCircle)
     METHOD_ENTRY("CCircleVisuals::CCircleVisuals")
     CTOR_CALL("CCircleVisuals::CCircleVisuals")
     
-    this->attach(_pCircle);
+    this->attachTo(_pCircle);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,8 +79,8 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
 {
     METHOD_ENTRY("CCircleVisuals::draw()");
     
-    double   fRad      = static_cast<CCircle*>(m_pCircle->getShapeCur())->getRadius();
-    Vector2d vecCenter = static_cast<CCircle*>(m_pCircle->getShapeCur())->getCenter() - _pCamera->getCenter() +
+    double   fRad      = static_cast<CCircle*>(m_pDBShape->getShapeCur())->getRadius();
+    Vector2d vecCenter = static_cast<CCircle*>(m_pDBShape->getShapeCur())->getCenter() - _pCamera->getCenter() +
                          IUniverseScaled::cellToDouble(_pObject->getCell() - _pCamera->getCell());
     
     if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&
@@ -127,27 +127,6 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
             }
         m_Graphics.endLine();
     }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a circle to circle visuals
-///
-/// \param _pCirc Circle to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-void CCircleVisuals::attach(CDoubleBufferedShape* const _pCirc)
-{
-    METHOD_ENTRY("CCircleVisuals::attach")
-    if (_pCirc->getShapeCur()->getShapeType() == ShapeType::SHAPE_CIRCLE)
-    {
-        m_pCircle = _pCirc;
-    }
-    else
-    {
-        ERROR_MSG("Circle Visuals", "Wrong shape attached to visuals.")
-    }
-    
 }
 
 ////////////////////////////////////////////////////////////////////////////////

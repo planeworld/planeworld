@@ -48,10 +48,6 @@ class CPlanetVisuals : public IVisuals
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, const IObject* const) const;
                 
-        //--- Methods --------------------------------------------------------//
-        void                attach(CDoubleBufferedShape* const);
-        const CBoundingBox& getBoundingBox();
-                
     private:
         
         //--- Constructor [private] ------------------------------------------//
@@ -60,9 +56,6 @@ class CPlanetVisuals : public IVisuals
         //--- Methods [private] ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
-        
-        //--- Variables [private] --------------------------------------------//
-        CDoubleBufferedShape* m_pPlanet;          ///< Pointer to corresponding shape
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -80,20 +73,7 @@ inline CPlanetVisuals::CPlanetVisuals(CDoubleBufferedShape* const _pPlanet)
     METHOD_ENTRY("CPlanetVisuals::CPlanetVisuals")
     CTOR_CALL("CPlanetVisuals::CPlanetVisuals")
     
-    this->attach(_pPlanet);
+    this->attachTo(_pPlanet);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the bounding box of given shape of visual
-///
-/// \return Bounding box
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& CPlanetVisuals::getBoundingBox()
-{
-    METHOD_ENTRY("CPlanetVisuals::getBoundingBox")
-    return m_pPlanet->getShapeCur()->getBoundingBox();
-}
-
-#endif
+#endif // PLANET_VISUALS_H

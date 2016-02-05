@@ -33,7 +33,7 @@ CTerrainVisuals::CTerrainVisuals(CDoubleBufferedShape* const _pTerrain)
     METHOD_ENTRY("CTerrainVisuals::CTerrainVisuals")
     CTOR_CALL("CTerrainVisuals::CTerrainVisuals")
     
-    this->attach(_pTerrain);
+    this->attachTo(_pTerrain);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ void CTerrainVisuals::draw(CCamera* const _pCamera,
 {
     METHOD_ENTRY("CTerrainVisuals::draw")
     
-    CTerrain* pTerrain = static_cast<CTerrain*>(m_pTerrain->getShapeCur());
+    CTerrain* pTerrain = static_cast<CTerrain*>(m_pDBShape->getShapeCur());
 
     double   fWidth    = pTerrain->getWidth();
     Vector2d vecCenter = pTerrain->getCenter();
@@ -122,26 +122,6 @@ void CTerrainVisuals::draw(CCamera* const _pCamera,
     }
 
     m_Graphics.endLine();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a terrain to terrain visuals
-///
-/// \param _pTerrain Terrain to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-void CTerrainVisuals::attach(CDoubleBufferedShape* const _pTerrain)
-{
-    METHOD_ENTRY("CTerrainVisuals::attach")
-    if (_pTerrain->getShapeCur()->getShapeType() == ShapeType::SHAPE_TERRAIN)
-    {
-        m_pTerrain = _pTerrain;
-    }
-    else
-    {
-        ERROR_MSG("Terrain Visuals", "Wrong shape attached to visuals.")
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

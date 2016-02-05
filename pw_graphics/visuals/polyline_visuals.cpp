@@ -33,7 +33,7 @@ CPolylineVisuals::CPolylineVisuals(CDoubleBufferedShape* const _pPolyline)
     METHOD_ENTRY("CPolylineVisuals::CPolylineVisuals")
     CTOR_CALL("CPolylineVisuals::CPolylineVisuals")
     
-    this->attach(_pPolyline);
+    this->attachTo(_pPolyline);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,31 +79,11 @@ void CPolylineVisuals::draw(CCamera* const _pCamera,
 {
     METHOD_ENTRY("CPolylineVisuals::draw")
 
-    CPolyLine* pPolyline = static_cast<CPolyLine*>(m_pPolyline->getShapeCur());
+    CPolyLine* pPolyline = static_cast<CPolyLine*>(m_pDBShape->getShapeCur());
     
     m_Graphics.polyline(pPolyline->getVertices(), pPolyline->getLineType(),
                         -_pCamera->getCenter() + 
                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a polyline to polyline visuals
-///
-/// \param _pPolyline Polyline to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-void CPolylineVisuals::attach(CDoubleBufferedShape* const _pPolyline)
-{
-    METHOD_ENTRY("CPolylineVisuals::attach")
-    if (_pPolyline->getShapeCur()->getShapeType() == ShapeType::SHAPE_POLYLINE)
-    {
-        m_pPolyline = _pPolyline;
-    }
-    else
-    {
-        ERROR_MSG("Polyline Visuals", "Wrong shape attached to visuals.")
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

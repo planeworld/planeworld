@@ -64,7 +64,7 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
 {
     METHOD_ENTRY("CPlanetVisuals::draw")
 
-    CPlanet* pPlanet = static_cast<CPlanet*>(m_pPlanet->getShapeCur());
+    CPlanet* pPlanet = static_cast<CPlanet*>(m_pDBShape->getShapeCur());
     
     double   fRad      = pPlanet->getRadius();
     double   fHeight   = pPlanet->getHeight();
@@ -275,27 +275,6 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         m_Graphics.setColor(1.0,1.0,1.0,1.0);
         
         pPlanet->resetSampling();
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a planet to planet visuals
-///
-/// \param _pPlanet Planet to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-void CPlanetVisuals::attach(CDoubleBufferedShape* const _pPlanet)
-{
-    METHOD_ENTRY("CPlanetVisuals::attach")
-
-    if (_pPlanet->getShapeCur()->getShapeType() == ShapeType::SHAPE_PLANET)
-    {
-        m_pPlanet = _pPlanet;
-    }
-    else
-    {
-        ERROR_MSG("Planet Visuals", "Wrong shape attached to visuals.")
     }
 }
 

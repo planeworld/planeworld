@@ -47,14 +47,17 @@ class IVisuals : virtual public CGraphicsBase
                                const IObject* const) const = 0;
                         
         //--- Methods --------------------------------------------------------//
-        virtual void                attach(CDoubleBufferedShape* const) = 0;
-        virtual const CBoundingBox& getBoundingBox() = 0;
+        virtual void                attachTo(CDoubleBufferedShape* const);
+        virtual const CBoundingBox& getBoundingBox();
         
         //--- Friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, IVisuals* const);
         friend std::ostream& operator<<(std::ostream&, IVisuals* const);
         
     protected:
+      
+        //--- Variables [protected] ------------------------------------------//
+        CDoubleBufferedShape* m_pDBShape;    ///< Pointer to buffered shape
 
         //--- Protected methods ----------------------------------------------//
         virtual std::istream& myStreamIn (std::istream&) = 0;
@@ -62,5 +65,38 @@ class IVisuals : virtual public CGraphicsBase
         
 };
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Attaches a shape to accordant shape visuals
+///
+/// \param _pShape Shape to attach to
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IVisuals::attachTo(CDoubleBufferedShape* const _pShape)
+{
+    METHOD_ENTRY("IVisuals::attach")
+//     if (_pShape->getShapeCur()->getShapeType() == ShapeType::SHAPE_CIRCLE)
+//     {
+        m_pDBShape = _pShape;
+//     }
+//     else
+//     {
+//         ERROR_MSG("Shape Visuals", "Wrong shape attached to visuals.")
+//     }
+    
+}
 
-#endif
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the bounding box of given shape of visual
+///
+/// \return Bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CBoundingBox& IVisuals::getBoundingBox()
+{
+    METHOD_ENTRY("IVisuals::getBoundingBox")
+    return m_pDBShape->getShapeCur()->getBoundingBox();
+}
+
+#endif // VISUALS_H

@@ -43,10 +43,6 @@ class CPolylineVisuals : public IVisuals
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, const IObject* const) const;
                 
-        //--- Methods --------------------------------------------------------//
-        void                        attach(CDoubleBufferedShape* const);
-        virtual const CBoundingBox& getBoundingBox();
-        
     private:
       
         //--- Constructor [private] ------------------------------------------//
@@ -55,24 +51,8 @@ class CPolylineVisuals : public IVisuals
         //--- Methods [private] ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
-        
-        CDoubleBufferedShape* m_pPolyline;
-
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the bounding box of given shape of visual
-///
-/// \return Bounding box
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& CPolylineVisuals::getBoundingBox()
-{
-    METHOD_ENTRY("CPolyLineVisuals::getBoundingBox")
-    return m_pPolyline->getShapeCur()->getBoundingBox();
-}
 
 #endif

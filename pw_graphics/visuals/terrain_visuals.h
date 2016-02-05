@@ -46,8 +46,6 @@ class CTerrainVisuals : public IVisuals
         virtual void        draw(CCamera* const, const IObject* const) const;
                 
         //--- Methods --------------------------------------------------------//
-        void                attach(CDoubleBufferedShape* const);
-        const CBoundingBox& getBoundingBox();
                 
     private:
       
@@ -57,24 +55,8 @@ class CTerrainVisuals : public IVisuals
         //--- Methods [private] ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
-        
-        //--- Variables [private] --------------------------------------------//
-        CDoubleBufferedShape* m_pTerrain; ///< Pointer to corresponding shape
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the bounding box of given shape of visual
-///
-/// \return Bounding box
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const CBoundingBox& CTerrainVisuals::getBoundingBox()
-{
-    METHOD_ENTRY("CTerrainVisuals::getBoundingBox")
-    return m_pTerrain->getShapeCur()->getBoundingBox();
-}
-
-#endif
+#endif // TERRAIN_VISUALS_H

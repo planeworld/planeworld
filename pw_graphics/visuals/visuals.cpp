@@ -33,6 +33,9 @@ std::istream& operator>>(std::istream& _is, IVisuals* const _pVis)
 {
     METHOD_ENTRY("IVisuals::operator>>")
     
+    std::string strTmp;
+    _is >> strTmp;
+    
     return _pVis->myStreamIn(_is);
 }
 
@@ -49,6 +52,8 @@ std::istream& operator>>(std::istream& _is, IVisuals* const _pVis)
 std::ostream& operator<<(std::ostream& _os, IVisuals* const _pVis)
 {
     METHOD_ENTRY("IShape::operator<<")
+    
+    _os << "Visuals:" << std::endl;
     
     return _pVis->myStreamOut(_os);
 }
