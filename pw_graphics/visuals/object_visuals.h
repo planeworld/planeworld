@@ -36,6 +36,7 @@ class IObjectVisuals : virtual public CGraphicsBase
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
+        IObjectVisuals();
         IObjectVisuals(IObject* const);
         virtual ~IObjectVisuals();
         
@@ -46,10 +47,12 @@ class IObjectVisuals : virtual public CGraphicsBase
 
         virtual const std::vector<IVisuals*>& getShapeVisuals() const;
         
-        IObject* const getObject() const;
+        IObject* const  getObject() const;
+        const UIDType&  getObjRef() const;
                 
         //--- Methods --------------------------------------------------------//
         void addVisuals(IVisuals* const);
+        void attachTo(IObject* const);
         
         //--- friends --------------------------------------------------------//
         friend std::istream&    operator>>(std::istream&, IObjectVisuals* const);
@@ -57,8 +60,8 @@ class IObjectVisuals : virtual public CGraphicsBase
         
     protected:
         
-        IObjectVisuals();                   ///< Constructor is private        
-        IObject* m_pObject;                 ///< Pointer to corresponding object
+        UIDType                m_ObjRef;    ///< UID refence to object
+        IObject*               m_pObject;   ///< Pointer to corresponding object
         std::vector<IVisuals*> m_Visuals;   ///< List of visuals
 
 };
@@ -67,12 +70,25 @@ class IObjectVisuals : virtual public CGraphicsBase
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Constructor
+///
+////////////////////////////////////////////////////////////////////////////////
+inline IObjectVisuals::IObjectVisuals() : m_ObjRef(0u),
+                                          m_pObject(nullptr)
+{
+    METHOD_ENTRY("IObjectVisuals")
+    CTOR_CALL("IObjectVisuals")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Constructor, initialises object pointer
 ///
 /// \param _pObject Pointer to object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IObjectVisuals::IObjectVisuals(IObject* const _pObject) : m_pObject(_pObject)
+inline IObjectVisuals::IObjectVisuals(IObject* const _pObject) :  m_ObjRef(_pObject->getUID()),
+                                                                  m_pObject(_pObject)
 {
     METHOD_ENTRY("IObjectVisuals")
     CTOR_CALL("IObjectVisuals")
@@ -106,6 +122,19 @@ inline IObject* const IObjectVisuals::getObject() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns UID reference to object
+///
+/// \return UID reference to object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const UIDType& IObjectVisuals::getObjRef() const
+{
+    METHOD_ENTRY("IObjectVisuals::getObjRef")
+    return m_ObjRef;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Add shape visuals to this object
 ///
 /// \param _pVisuals Shape visuals to add to this object
@@ -116,5 +145,20 @@ inline void IObjectVisuals::addVisuals(IVisuals* const _pVisuals)
     METHOD_ENTRY("addVisuals")
     m_Visuals.push_back(_pVisuals);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Attach visuals to physical object.
+///
+/// \param _pObj Object to attach visuals to.
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IObjectVisuals::attachTo(IObject* const _pObj)
+{
+    METHOD_ENTRY("attachTo")
+    m_pObject = _pObj;
+    m_ObjRef = _pObj->getUID();
+}
+
 
 #endif

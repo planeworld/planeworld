@@ -87,6 +87,7 @@ class CWorldDataStorage
         DebrisVisualsThrusterType   m_DebrisVisualsThruster;    ///< List of debris visuals
         JointsType                  m_Joints;                   ///< List of joints
 //         KinematicsStatesType        m_KinematicsStates;         ///< List of kinematics states
+        UIDUserType                 m_UIDUserRef;               ///< Store objects referred by their UID
         ObjectsType                 m_DynamicObjects;           ///< List of dynamic objects
         ObjectsType                 m_StaticObjects;            ///< List of static objects
         ObjectVisualsType           m_ObjectVisuals;            ///< List of object visuals

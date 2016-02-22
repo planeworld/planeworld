@@ -26,6 +26,16 @@
 #include "camera.h"
 #include "object.h"
 
+/// specifies the type of shape visuals
+enum class ShapeVisualsType
+{
+    NONE,
+    CIRCLE,
+    PLANET,
+    POLYLINE,
+    TERRAIN
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for visualisation of world objects
@@ -45,6 +55,9 @@ class IVisuals : virtual public CGraphicsBase
         virtual IVisuals* clone(CDoubleBufferedShape* const) const = 0;
         virtual void      draw(CCamera* const,
                                const IObject* const) const = 0;
+                               
+        const UIDType&                  getShpRef() const;
+        virtual const ShapeVisualsType  getShapeVisualsType() const;
                         
         //--- Methods --------------------------------------------------------//
         virtual void                attachTo(CDoubleBufferedShape* const);
@@ -57,13 +70,40 @@ class IVisuals : virtual public CGraphicsBase
     protected:
       
         //--- Variables [protected] ------------------------------------------//
-        CDoubleBufferedShape* m_pDBShape;    ///< Pointer to buffered shape
+        UIDType               m_ShpRef = 0u;    ///< UID refence to shape
+        CDoubleBufferedShape* m_pDBShape;       ///< Pointer to buffered shape
 
         //--- Protected methods ----------------------------------------------//
         virtual std::istream& myStreamIn (std::istream&) = 0;
         virtual std::ostream& myStreamOut(std::ostream&) = 0;
         
 };
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns UID reference to double buffered shape
+///
+/// \return UID reference to double buffered shape
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const UIDType& IVisuals::getShpRef() const
+{
+    METHOD_ENTRY("IVisuals::getShpRef")
+    return m_ShpRef;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the shape visuals type
+///
+/// \return Type of shape visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ShapeVisualsType IVisuals::getShapeVisualsType() const
+{
+    METHOD_ENTRY("IVisuals::getShapeVisualsType")
+    return ShapeVisualsType::NONE;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -75,15 +115,8 @@ class IVisuals : virtual public CGraphicsBase
 inline void IVisuals::attachTo(CDoubleBufferedShape* const _pShape)
 {
     METHOD_ENTRY("IVisuals::attach")
-//     if (_pShape->getShapeCur()->getShapeType() == ShapeType::SHAPE_CIRCLE)
-//     {
-        m_pDBShape = _pShape;
-//     }
-//     else
-//     {
-//         ERROR_MSG("Shape Visuals", "Wrong shape attached to visuals.")
-//     }
-    
+    m_pDBShape = _pShape;
+    m_ShpRef = _pShape->getUID();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

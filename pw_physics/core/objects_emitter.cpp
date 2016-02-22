@@ -149,7 +149,7 @@ void CObjectEmitter::init()
         m_pTemplate = new CRigidBody;
         CCircle*    pCircle = new CCircle;
         MEM_ALLOC("CRigidBody")
-        MEM_ALLOC("CCircle")
+        MEM_ALLOC("IShape")
         
         m_pTemplate->setMass(1.0e12);
         

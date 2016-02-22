@@ -21,6 +21,7 @@
 #define UNIQUE_ID_USER_H
 
 //--- Standard header --------------------------------------------------------//
+#include <unordered_map>
 
 //--- Program header ---------------------------------------------------------//
 #include "unique_id.h"
@@ -45,6 +46,8 @@ class IUniqueIDUser
         //--- Protected variables --------------------------------------------//
         CUniqueID       m_UID; ///< Identifier
 };
+
+typedef std::unordered_map<UIDType, IUniqueIDUser*> UIDUserType; ///< Stores entities by UID
 
 //--- Implementation is done here for inline optimisation --------------------//
 

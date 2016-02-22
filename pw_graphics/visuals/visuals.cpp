@@ -36,6 +36,8 @@ std::istream& operator>>(std::istream& _is, IVisuals* const _pVis)
     std::string strTmp;
     _is >> strTmp;
     
+    _is >> _pVis->m_ShpRef;
+    
     return _pVis->myStreamIn(_is);
 }
 
@@ -52,8 +54,15 @@ std::istream& operator>>(std::istream& _is, IVisuals* const _pVis)
 std::ostream& operator<<(std::ostream& _os, IVisuals* const _pVis)
 {
     METHOD_ENTRY("IShape::operator<<")
+
+    // ShapeVisualsType has to be the first information, since visuals creation
+    // when loading depends on it.
+    // Cast strongly typed enum ShapeVisualsType to streamable base type
+    auto nShpVisType = static_cast<std::underlying_type<ShapeVisualsType>::type>(_pVis->getShapeVisualsType());
+    _os << nShpVisType << std::endl;
     
     _os << "Visuals:" << std::endl;
+    _os << _pVis->m_ShpRef << std::endl;
     
     return _pVis->myStreamOut(_os);
 }

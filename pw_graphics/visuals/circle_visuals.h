@@ -39,20 +39,17 @@ class CCircleVisuals : public IVisuals
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
+        CCircleVisuals(){}
         CCircleVisuals(CDoubleBufferedShape* const);
         ~CCircleVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, const IObject* const) const;
-                
-        //--- Methods --------------------------------------------------------//
         
+        const ShapeVisualsType getShapeVisualsType() const;
         
     private:
-        
-        //--- Constructor [private] ------------------------------------------//
-        CCircleVisuals();                   ///< Constructor is private
         
         //--- Methods [private] ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
@@ -62,6 +59,17 @@ class CCircleVisuals : public IVisuals
 
 //--- Implementation is done here for inline optimisation --------------------//
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the shape visuals type
+///
+/// \return Type of shape visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ShapeVisualsType CCircleVisuals::getShapeVisualsType() const
+{
+    METHOD_ENTRY("CCircleVisuals::getShapeVisualsType")
+    return ShapeVisualsType::CIRCLE;
+}
 
-
-#endif
+#endif // CIRCLE_VISUALS_H

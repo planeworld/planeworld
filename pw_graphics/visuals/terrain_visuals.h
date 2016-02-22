@@ -38,19 +38,19 @@ class CTerrainVisuals : public IVisuals
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
+        CTerrainVisuals(){}
         CTerrainVisuals(CDoubleBufferedShape* const);
         ~CTerrainVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, const IObject* const) const;
+        
+        const ShapeVisualsType getShapeVisualsType() const;
                 
         //--- Methods --------------------------------------------------------//
                 
     private:
-      
-        //--- Constructor [private] ------------------------------------------//
-        CTerrainVisuals();       ///< Constructor is private
       
         //--- Methods [private] ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
@@ -58,5 +58,19 @@ class CTerrainVisuals : public IVisuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the shape visuals type
+///
+/// \return Type of shape visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ShapeVisualsType CTerrainVisuals::getShapeVisualsType() const
+{
+    METHOD_ENTRY("CTerrainVisuals::getShapeVisualsType")
+    return ShapeVisualsType::TERRAIN;
+}
+
 
 #endif // TERRAIN_VISUALS_H

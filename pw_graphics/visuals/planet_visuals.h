@@ -41,17 +41,17 @@ class CPlanetVisuals : public IVisuals
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
+        CPlanetVisuals(){}
         CPlanetVisuals(CDoubleBufferedShape* const);
         ~CPlanetVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, const IObject* const) const;
+        
+        const ShapeVisualsType getShapeVisualsType() const;
                 
     private:
-        
-        //--- Constructor [private] ------------------------------------------//
-        CPlanetVisuals();       ///< Constructor is private
         
         //--- Methods [private] ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
@@ -75,5 +75,19 @@ inline CPlanetVisuals::CPlanetVisuals(CDoubleBufferedShape* const _pPlanet)
     
     this->attachTo(_pPlanet);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the shape visuals type
+///
+/// \return Type of shape visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ShapeVisualsType CPlanetVisuals::getShapeVisualsType() const
+{
+    METHOD_ENTRY("CPlanetVisuals::getShapeVisualsType")
+    return ShapeVisualsType::PLANET;
+}
+
 
 #endif // PLANET_VISUALS_H

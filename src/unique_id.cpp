@@ -38,13 +38,13 @@ CUniqueID::CUniqueID()
     METHOD_ENTRY("CUniqueID::CUniqueID")
     DTOR_CALL("CUniqueID::CUniqueID")
     
-    if (s_UnusedUIDs.empty())
+//     if (s_UnusedUIDs.empty())
         m_nUID = s_nUID++;
-    else
-    {
-        m_nUID = s_UnusedUIDs.front();
-        s_UnusedUIDs.pop_front();
-    }
+//     else
+//     {
+//         m_nUID = s_UnusedUIDs.front();
+//         s_UnusedUIDs.pop_front();
+//     }
 }
 
 
@@ -62,7 +62,7 @@ CUniqueID::~CUniqueID()
     METHOD_ENTRY("CUniqueID::~CUniqueID")
     DTOR_CALL("CUniqueID::~CUniqueID")
     
-    s_UnusedUIDs.push_back(m_nUID);
+//     s_UnusedUIDs.push_back(m_nUID);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -84,6 +84,9 @@ std::istream& operator>>(std::istream& _is, CUniqueID& _UID)
     
     /// \todo Stream static members (queue and uid counter)
     _is >> _UID.m_nUID;
+    _is >> _UID.s_nUID;
+    
+    std::cout << "s_nUID:" << _UID.s_nUID << std::endl;
 
     return _is;
 }
@@ -106,6 +109,7 @@ std::ostream& operator<<(std::ostream& _os, CUniqueID& _UID)
     
     /// \todo Stream static members (queue and uid counter)
     _os << _UID.m_nUID << std::endl;
+    _os << _UID.s_nUID << std::endl;
     
     return _os;
 }

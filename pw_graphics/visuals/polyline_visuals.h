@@ -36,18 +36,18 @@ class CPolylineVisuals : public IVisuals
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
+        CPolylineVisuals(){}
         CPolylineVisuals(CDoubleBufferedShape* const);
         ~CPolylineVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, const IObject* const) const;
+        
+        const ShapeVisualsType getShapeVisualsType() const;
                 
     private:
       
-        //--- Constructor [private] ------------------------------------------//
-        CPolylineVisuals();        ///< Constructor is private, copy constructor must be used
-
         //--- Methods [private] ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
@@ -55,4 +55,18 @@ class CPolylineVisuals : public IVisuals
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-#endif
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the shape visuals type
+///
+/// \return Type of shape visuals
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const ShapeVisualsType CPolylineVisuals::getShapeVisualsType() const
+{
+    METHOD_ENTRY("CPolylineVisuals::getShapeVisualsType")
+    return ShapeVisualsType::POLYLINE;
+}
+
+
+#endif // POLYLINE_VISUALS_H

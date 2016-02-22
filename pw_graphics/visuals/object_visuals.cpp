@@ -19,6 +19,11 @@
 
 #include "object_visuals.h"
 
+#include "circle_visuals.h"
+#include "planet_visuals.h"
+#include "polyline_visuals.h"
+#include "terrain_visuals.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Destructor, freeing memory
@@ -133,15 +138,54 @@ std::istream& operator>>(std::istream& _is, IObjectVisuals* const _pObjVis)
         }
     }
     
+    _is >> _pObjVis->m_ObjRef;
+    
     std::vector<IVisuals*>::size_type nSize;
     _is >> nSize;
 
-     for (auto i=0u; i<nSize; ++i)
+    for (auto i=0u; i<nSize; ++i)
     {
-//         IVisuals* pVisuals = new CDoubleBufferedShape;
-//         MEM_ALLOC("CDoubleBufferedShape")
-//         _is >> (*pDBShape);
-//         _Geo.m_pShapes->push_back(pDBShape);
+        // Cast streamable basetype to strongly typed enum ObjectType
+        std::underlying_type<ShapeVisualsType>::type nShpVisType;
+        _is >> nShpVisType;
+        
+        switch (static_cast<ShapeVisualsType>(nShpVisType))
+        {
+            case ShapeVisualsType::CIRCLE:
+            {
+                CCircleVisuals* pShpVis = new CCircleVisuals;
+                MEM_ALLOC("CCircleVisuals")
+                _is >> pShpVis;
+                _pObjVis->addVisuals(pShpVis);
+                break;
+            }
+            case ShapeVisualsType::PLANET:
+            {
+                CPlanetVisuals* pShpVis = new CPlanetVisuals;
+                MEM_ALLOC("CPlanetVisuals")
+                _is >> pShpVis;
+                _pObjVis->addVisuals(pShpVis);
+                break;
+            }
+            case ShapeVisualsType::POLYLINE:
+            {
+                CPolylineVisuals* pShpVis = new CPolylineVisuals;
+                MEM_ALLOC("CPolylineVisuals")
+                _is >> pShpVis;
+                _pObjVis->addVisuals(pShpVis);
+                break;
+            }
+            case ShapeVisualsType::TERRAIN:
+            {
+                CTerrainVisuals* pShpVis = new CTerrainVisuals;
+                MEM_ALLOC("CTerrainVisuals")
+                _is >> pShpVis;
+                _pObjVis->addVisuals(pShpVis);
+                break;
+            }
+            case ShapeVisualsType::NONE:
+                break;
+        }
     }
     
     return _is;
@@ -162,7 +206,12 @@ std::ostream& operator<<(std::ostream& _os, IObjectVisuals* const _pObjVis)
     METHOD_ENTRY("IObjectVisuals::operator<<")
     
     _os << "ObjectVisuals:" << std::endl;
+    _os << _pObjVis->m_ObjRef << std::endl;
     _os << _pObjVis->m_Visuals.size() << std::endl;
+    for (auto ci : _pObjVis->m_Visuals)
+    {
+        _os << ci << std::endl;
+    }
 
     return _os;
 }

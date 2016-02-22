@@ -212,8 +212,6 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
     _is >> strTmp;
     _is >> _Geo.m_AABB;
     
-    std::cout << _Geo.m_AABB << std::endl;
-    
     for (auto it : (*_Geo.m_pShapes))
     {
         if (it != nullptr)

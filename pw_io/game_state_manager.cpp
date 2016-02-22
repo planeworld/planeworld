@@ -9,7 +9,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       game_state_manager.h
+/// \file       game_state_manager.cpp
 /// \brief      Implementation of class "CGameStateManager"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)

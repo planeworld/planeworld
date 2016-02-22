@@ -27,11 +27,8 @@
 #include "geometry.h"
 #include "kinematics_state_user.h"
 #include "trajectory.h"
-#include "unique_id_user.h"
 
 //--- Standard header --------------------------------------------------------//
-#include <unordered_map>
-
 
 /// Type definition for the AnchorIDs
 typedef uint AnchorIDType;

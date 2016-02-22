@@ -933,7 +933,7 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody,
     if (!checkFile(_Node))
     {
         CCircle* pCircle = new CCircle;
-        MEM_ALLOC("CCircle")
+        MEM_ALLOC("IShape")
         
         pCircle->setRadius(_Node.attribute("radius").as_double());
         pCircle->setCenter(_Node.attribute("center_x").as_double(),

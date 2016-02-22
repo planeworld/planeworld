@@ -41,6 +41,11 @@ CWorldDataStorage::~CWorldDataStorage()
 {
     METHOD_ENTRY("CWorldDataStorage::~CWorldDataStorage")
     DTOR_CALL("CWorldDataStorage::~CWorldDataStorage")
+    
+    // for (auto it : m_UIDUserRef)
+    // Do not delete objects here.
+    // Object pointers are stored in two maps, referring to their name and
+    // referring to their UID. Thus, they only need to be destroyed once.
 
     for (ObjectsType::iterator it = m_DynamicObjects.begin();
         it != m_DynamicObjects.end(); ++it)
@@ -237,7 +242,11 @@ void CWorldDataStorage::addObject(IObject* _pObject)
         {
             _pObject->setName(_pObject->getName() + "_" + std::to_string(CRigidBody::getCount()));
         }
-    m_ObjectMutex.unlock();
+        
+    m_ObjectMutex.unlock();    
+    
+    // Additionally, store a reference based on objects UID
+    m_UIDUserRef.insert({_pObject->getUID(),_pObject});
 }
 
 // ///////////////////////////////////////////////////////////////////////////////
@@ -346,6 +355,10 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 {
     METHOD_ENTRY("CWorldDataStorage::operator>>")
     
+    // Temporary reference to shape by UID to connect visuals with their shapes,
+    // after sequentually loading shapes and then visuals.
+    std::unordered_map<UIDType, CDoubleBufferedShape*> UIDShapeRef;
+    
     // Delete all old data first
     for (auto it : _WDS.m_DynamicObjects)
     {
@@ -373,48 +386,79 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
         {
             delete it;
             it = nullptr;
-            MEM_FREED("IObject")
+            MEM_FREED("IObjectVisuals")
         }
     }
     _WDS.m_ObjectVisuals.clear();
     
-    ObjectsType::size_type nSize;
-    _is >> nSize;    
-    std::cout << "Number of objects: " << nSize << std::endl;
-    for (auto i=0u; i<nSize; ++i)
+    //-------------------------------------------------------------------------
+    // Stream in all objects   
+    //-------------------------------------------------------------------------
     {
-        std::string strName;
-        _is >> strName;
-        
-        std::cout << strName << std::endl;
-        
-        // Cast streamable basetype to strongly typed enum ObjectType
-        std::underlying_type<ObjectType>::type nObjectType;
-        _is >> nObjectType;
-        
-        std::cout << nObjectType << std::endl;
-        ObjectType CurrentObjectType = static_cast<ObjectType>(nObjectType);
-        
-        switch (CurrentObjectType)
+        ObjectsType::size_type nSize;
+        _is >> nSize;    
+        std::cout << "Number of objects: " << nSize << std::endl;
+        for (auto i=0u; i<nSize; ++i)
         {
-            case ObjectType::OBJECT_BODY:
+            std::string strName;
+            _is >> strName;
+            
+      //         std::cout << strName << std::endl;
+            
+            // Cast streamable basetype to strongly typed enum ObjectType
+            std::underlying_type<ObjectType>::type nObjectType;
+            _is >> nObjectType;
+            
+            switch (static_cast<ObjectType>(nObjectType))
             {
-                CRigidBody* pObj = new CRigidBody;
-                MEM_ALLOC("IObject")
-                _is >> pObj;
-                _WDS.addObject(pObj);
-                std::cout << pObj << std::endl;
-                break;
+                case ObjectType::OBJECT_BODY:
+                {
+                    CRigidBody* pObj = new CRigidBody;
+                    MEM_ALLOC("CRigidBody")
+                    _is >> pObj;
+                    _WDS.addObject(pObj);
+                    
+                    for (auto ci : *(pObj->getGeometry()->getShapes()))
+                    {
+                        UIDShapeRef.insert({ci->getUID(),ci});
+                    }
+                    break;
+                }
+                case ObjectType::OBJECT_POINTMASS:
+                    break;
+                case ObjectType::OBJECT_NONE:
+                    break;
             }
-            case ObjectType::OBJECT_POINTMASS:
-                break;
-            case ObjectType::OBJECT_NONE:
-                break;
+            Log.progressBar("Loading objects", i, nSize);
         }
-        Log.progressBar("Loading dynamic objects", i, nSize);
     }
     
-    std::cout << _WDS.getDynamicObjects().size() << std::endl;
+    //-------------------------------------------------------------------------
+    // Stream in object visuals
+    //-------------------------------------------------------------------------
+    {
+        ObjectVisualsType::size_type nSize;
+        _is >> nSize;    
+        std::cout << "Number of object visuals: " << nSize << std::endl;
+        for (auto i=0u; i<nSize; ++i)
+        {
+            IObjectVisuals* pObjVis = new IObjectVisuals;
+            MEM_ALLOC("CObjectVisuals")
+            _is >> pObjVis;
+            
+            std::cout << pObjVis->getObjRef() << std::endl;
+            
+            pObjVis->attachTo(static_cast<IObject*>(_WDS.m_UIDUserRef[pObjVis->getObjRef()]));
+            _WDS.addObjectVisuals(pObjVis);
+            
+            for (auto ci : pObjVis->getShapeVisuals())
+            {
+                ci->attachTo(UIDShapeRef[ci->getShpRef()]);
+            }
+            
+            Log.progressBar("Loading object visuals", i, nSize);
+        }
+    }
         
     return _is;
 }
@@ -433,7 +477,10 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
 {
     METHOD_ENTRY("CWorldDataStorage::operator<<")
 
-    auto nSize=_WDS.m_DynamicObjects.size();
+    // Stream dynamic and static objects in one run, since they will be loaded
+    // all together and assigned to different lists implicitly.
+    auto nSize=_WDS.m_DynamicObjects.size() +
+               _WDS.m_StaticObjects.size();
     _os << nSize << std::endl;
     
     std::uint32_t i=0u;
@@ -443,16 +490,11 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
         _os << ci.second << std::endl;
         Log.progressBar("Saving dynamic objects", i++, nSize);
     }
-    _os << _WDS.m_StaticObjects.size();
-    for (auto ci : _WDS.m_StaticObjects)
+    _os << _WDS.m_ObjectVisuals.size() << std::endl;
+    for (auto ci : _WDS.m_ObjectVisuals)
     {
-        _os << ci.second;
-    }
-//     _os << _WDS.m_ObjectVisuals.size();
-//     for (auto ci : _WDS.m_ObjectVisuals)
-//     {
-//         _os << *(ci.second);
-//     }    
+        _os << ci << std::endl;
+    }    
 
     return _os;
 }
