@@ -21,6 +21,7 @@
 #define CAMERA_H
 
 //--- Standard header --------------------------------------------------------//
+#include <array>
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
@@ -77,7 +78,7 @@ class CCamera : public CGraphicsBase,
         void updateWithoutHook();
 
         //--- Variables [protected] ------------------------------------------//
-        std::vector<Vector2d>  m_vecFrame0;         ///< Initial camera frame
+        std::array<Vector2d,4>  m_vecFrame0;         ///< Initial camera frame
         CBoundingBox    m_BoundingBox;              ///< Cameras bounding box (for culling)
         Vector2d        m_vecCenter;                ///< Center of camera
         double          m_fBoundingCircleRadius;    ///< Radius of Bounding circle

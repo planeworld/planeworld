@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
     {
         vecMouse = vecMouseCenter-sf::Mouse::getPosition(*pWindow);
         vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
-        if (bGraphicsOn)
+        if (!bMouseCursorVisible)
             sf::Mouse::setPosition(vecMouseCenter,*pWindow);
         
         //--- Handle events ---//
@@ -253,8 +253,11 @@ int main(int argc, char *argv[])
                 }
                 case sf::Event::Resized:
                 {
-                    // adjust the viewport when the window is resized
+                    // Adjust the viewport when the window is resized
+                    vecMouseCenter = sf::Vector2i(pWindow->getSize().x >> 1, pWindow->getSize().y >> 1);
                     Graphics.resizeWindow(Event.size.width, Event.size.height);
+                    pCamera->setViewport(Graphics.getViewPort().right-Graphics.getViewPort().left - 20.0,
+                                         Graphics.getViewPort().top  -Graphics.getViewPort().bottom - 20.0);
                     break;
                 }
                 case sf::Event::KeyPressed:
@@ -333,6 +336,9 @@ int main(int argc, char *argv[])
                             bGraphicsOn ^= 1;
                             bMouseCursorVisible ^= 1;
                             pWindow->setMouseCursorVisible(bMouseCursorVisible);
+                            vecMouse.x=0;
+                            vecMouse.y=0;
+                            
                             if (bGraphicsOn)
                             {
                                 INFO_MSG("Main", "Graphics reactivated.")
@@ -350,23 +356,29 @@ int main(int argc, char *argv[])
                 }
                 case sf::Event::MouseMoved:
                 {
-                    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                    if (bGraphicsOn)
                     {
-                        pCamera->translateBy(0.2/GRAPHICS_PX_PER_METER * Vector2d(double(vecMouse.x)/pCamera->getZoom(),double(vecMouse.y)/pCamera->getZoom()));
+                        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                        {
+                            pCamera->translateBy(0.2/GRAPHICS_PX_PER_METER * Vector2d(double(vecMouse.x)/pCamera->getZoom(),double(vecMouse.y)/pCamera->getZoom()));
+                        }
+                        if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+                        {
+                            pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
+                            pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
+                            if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
+                            else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
+                        }
+                        break;
                     }
-                    if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+                }
+                case sf::Event::MouseWheelMoved:
+                    if (bGraphicsOn)
                     {
-                        pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
-                        pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
+                        pCamera->zoomBy(1.0+double(Event.mouseWheel.delta)*0.1);
                         if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
                         else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
                     }
-                    break;
-                }
-                case sf::Event::MouseWheelMoved:
-                    pCamera->zoomBy(1.0+double(Event.mouseWheel.delta)*0.1);
-                    if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
-                    else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
                 default:
                     break;
             }

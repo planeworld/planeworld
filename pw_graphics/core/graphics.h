@@ -76,6 +76,17 @@ enum class LineType
     GRAPHICS_LINETYPE_STRIP
 };
 
+// Structure containing viewport information
+struct ViewPort
+{
+    double left = GRAPHICS_LEFT_DEFAULT;        ///< Left plane of viewport
+    double right = GRAPHICS_RIGHT_DEFAULT;      ///< Right plane of viewport
+    double top = GRAPHICS_TOP_DEFAULT;          ///< Top plane of viewport
+    double bottom = GRAPHICS_BOTTOM_DEFAULT;    ///< Bottom plane of viewport
+    double near = GRAPHICS_NEAR_DEFAULT;        ///< Near plane of viewport
+    double far = GRAPHICS_FAR_DEFAULT;          ///< Far plane of viewport
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief graphics-wrapper
@@ -143,6 +154,8 @@ class CGraphics
         double      getCamAng() const;
         double      getCamZoom() const;
         
+        const ViewPort&    getViewPort() const;
+        
         //--- Methods --------------------------------------------------------//
         void applyCamMovement();
         void resetCam();
@@ -179,6 +192,8 @@ class CGraphics
         
         //--- Variables [private] --------------------------------------------//
         WindowHandleType*       m_pWindow;      ///< Pointer to main window
+        
+        ViewPort                m_ViewPort;     ///< Viewport for graphics
         
         Vector3d                m_vecCamPos;    ///< camera position
         double                  m_fCamAng;      ///< camera angle
@@ -259,7 +274,7 @@ inline double CGraphics::getDynPelSize() const
 inline double CGraphics::getResMPX() const
 {
     METHOD_ENTRY("CGraphics::getResMPX()");
-    return ((GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT) /
+    return ((m_ViewPort.right-m_ViewPort.left) /
             (m_fCamZoom * m_unWidthScr));
 }
 
@@ -273,7 +288,7 @@ inline double CGraphics::getResMPX() const
 inline double CGraphics::getResMPY() const
 {
     METHOD_ENTRY("CGraphics::getResMPY()");
-    return ((GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT) /
+    return ((m_ViewPort.top-m_ViewPort.bottom) /
             (m_fCamZoom * m_unHeightScr));
 }
 
@@ -288,7 +303,7 @@ inline double CGraphics::getResPMX() const
 {
     METHOD_ENTRY("CGraphics::getResPMX()");
     return ((m_fCamZoom * m_unWidthScr) / 
-            (GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT));
+            (m_ViewPort.right-m_ViewPort.left));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -302,7 +317,7 @@ inline double CGraphics::getResPMY() const
 {
     METHOD_ENTRY("CGraphics::getResPMY()");
     return ((m_fCamZoom * m_unHeightScr) / 
-            (GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT));
+            (m_ViewPort.top-m_ViewPort.bottom));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -497,6 +512,19 @@ inline double CGraphics::getCamZoom() const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns viewport information
+///
+/// \return Viewport information
+///
+///////////////////////////////////////////////////////////////////////////////
+inline const ViewPort& CGraphics::getViewPort() const
+{
+    METHOD_ENTRY("CGraphics::getViewPort()");
+    return m_ViewPort;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Add vertex to linelist
 ///
 /// The vertex is added at the current position in the linelist, specified by
@@ -546,4 +574,4 @@ inline void CGraphics::setDepth(const double& _fD)
     m_fDepth = _fD;
 }
 
-#endif
+#endif // GRAPHICS_H

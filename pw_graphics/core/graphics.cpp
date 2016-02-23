@@ -10,7 +10,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \file       graphics.cpp
-/// \brief      implementation of class "CGraphics"
+/// \brief      Implementation of class "CGraphics"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2009-10-18
@@ -31,8 +31,6 @@ CGraphics::CGraphics() : m_pWindow(nullptr),
                         m_fCamAng(0.0),
                         m_fCamZoom(1.0),
                         m_fDepth(GRAPHICS_DEPTH_DEFAULT),
-                        m_fDepthMax(GRAPHICS_FAR_DEFAULT),
-                        m_fDepthMin(GRAPHICS_NEAR_DEFAULT),
                         m_fDynPelSize(GRAPHICS_DYN_PEL_SIZE_DEFAULT),
                         m_nVideoFlags(0),
                         m_unWidthScr(GRAPHICS_WIDTH_DEFAULT),
@@ -85,10 +83,10 @@ Vector2d CGraphics::screen2World(const Vector2d& _vecV) const
     double fX;
     double fY;
         
-    fX = ((GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT) / m_unWidthScr * _vecV[0]+
-                    GRAPHICS_LEFT_DEFAULT) / m_fCamZoom;
-    fY = ((GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT) / m_unHeightScr * _vecV[1]+
-                    GRAPHICS_BOTTOM_DEFAULT) /  m_fCamZoom;
+    fX = ((m_ViewPort.right-m_ViewPort.left) / m_unWidthScr * _vecV[0]+
+                    m_ViewPort.left) / m_fCamZoom;
+    fY = ((m_ViewPort.top-m_ViewPort.bottom) / m_unHeightScr * _vecV[1]+
+                    m_ViewPort.bottom) /  m_fCamZoom;
     
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
@@ -120,10 +118,10 @@ Vector2d CGraphics::screen2World(const double& _fX, const double& _fY) const
     double fX;
     double fY;
         
-    fX = ((GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT) / m_unWidthScr * _fX+
-                    GRAPHICS_LEFT_DEFAULT) / m_fCamZoom;
-    fY = ((GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT) / m_unHeightScr * _fY+
-                    GRAPHICS_BOTTOM_DEFAULT) /  m_fCamZoom;
+    fX = ((m_ViewPort.right-m_ViewPort.left) / m_unWidthScr * _fX +
+           m_ViewPort.left) / m_fCamZoom;
+    fY = ((m_ViewPort.top-m_ViewPort.bottom) / m_unHeightScr * _fY +
+           m_ViewPort.bottom) /  m_fCamZoom;
     
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
@@ -149,8 +147,8 @@ Vector2d CGraphics::world2Screen(const Vector2d& _vecV) const
 
     Rotation2Dd Rot(m_fCamAng);
     
-    return (Rot*Vector2d(_vecV[0],-_vecV[1])*m_fCamZoom-Vector2d(GRAPHICS_LEFT_DEFAULT,-GRAPHICS_TOP_DEFAULT))
-            *m_unWidthScr/(GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT);
+    return (Rot*Vector2d(_vecV[0],-_vecV[1])*m_fCamZoom-Vector2d(m_ViewPort.left,-m_ViewPort.top))
+            *m_unWidthScr/(m_ViewPort.right-m_ViewPort.left);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -209,9 +207,9 @@ bool CGraphics::init()
     // Setup projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(GRAPHICS_LEFT_DEFAULT, GRAPHICS_RIGHT_DEFAULT,
-            GRAPHICS_BOTTOM_DEFAULT, GRAPHICS_TOP_DEFAULT,
-            GRAPHICS_NEAR_DEFAULT, GRAPHICS_FAR_DEFAULT);
+    glOrtho(m_ViewPort.left, m_ViewPort.right,
+            m_ViewPort.bottom, m_ViewPort.top,
+            m_ViewPort.near, m_ViewPort.far);
 
     // Enable blending
     glEnable(GL_BLEND);
@@ -282,37 +280,37 @@ bool CGraphics::init()
 bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeightScr)
 {
     METHOD_ENTRY("CGraphics::resizeWindow")
-
-//     if (SDL_SetVideoMode(_unWidthScr, _unHeightScr, 0, m_nVideoFlags) != 0)
-//     {
-//         INFO_MSG("Graphics/SDL", "Windowsize changed (" << m_unWidthScr << "x" << m_unHeightScr << ").")
-//     }
-//     else
-//     {
-//         ERROR_MSG("Graphics/SDL", "Could not set videomode.")
-//         METHOD_EXIT("CGraphics::resizeWindow")
-//         return(false);
-//     }
-
-    // Setup viewport
-//     glMatrixMode(GL_VIEWPORT);
-//     glLoadIdentity();
-    glViewport(0, 0, _unWidthScr, _unHeightScr);
-    INFO_MSG("Graphics", "Windowsize changed (" << m_unWidthScr << "x" << m_unHeightScr << ").")
-    // Setup projection
-//     glMatrixMode(GL_PROJECTION);
-//     glLoadIdentity();
-//     glOrtho(GRAPHICS_LEFT_DEFAULT, GRAPHICS_RIGHT_DEFAULT,
-//             GRAPHICS_BOTTOM_DEFAULT, GRAPHICS_TOP_DEFAULT,
-//             GRAPHICS_NEAR_DEFAULT, GRAPHICS_FAR_DEFAULT);
     
-    // Set default to matrixmode modelview
-//     glMatrixMode(GL_MODELVIEW);
-//     glLoadIdentity();
+    sf::FloatRect View(0,0,_unWidthScr,_unHeightScr);
+    m_pWindow->setView(sf::View(View));
+
+    m_ViewPort.right = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.top   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.left   = -m_ViewPort.right;
+    m_ViewPort.bottom = -m_ViewPort.top;
+    
+    // Setup viewport
+    glMatrixMode(GL_VIEWPORT);
+    glLoadIdentity();
+    glViewport(0, 0, _unWidthScr, _unHeightScr);
+    
+    // Setup projection
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(m_ViewPort.left, m_ViewPort.right,
+            m_ViewPort.bottom, m_ViewPort.top,
+            m_ViewPort.near, m_ViewPort.far);
+   
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     
     // Store resolution
     m_unWidthScr = _unWidthScr;
     m_unHeightScr = _unHeightScr;
+    
+    INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.right - m_ViewPort.left << "m x " <<
+                                                   m_ViewPort.top   - m_ViewPort.bottom << "m (" <<
+                                                   _unWidthScr << "x" << _unHeightScr << ").")
     
     return (true);
 }
@@ -732,13 +730,7 @@ void CGraphics::endLine()
 {
     METHOD_ENTRY("CGraphics::endLine")
 
-//     for (std::list<Vector2d>::const_iterator ci = m_VertList.begin();
-//         ci != m_VertList.end(); ++ci)
-//     {
-//         glVertex3d((*ci)[0], (*ci)[1], m_fDepth);
-//     }
     glEnd();
-//     m_VertList.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

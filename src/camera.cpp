@@ -27,14 +27,13 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CCamera::CCamera() : m_fViewportWidth(GRAPHICS_RIGHT_DEFAULT-GRAPHICS_LEFT_DEFAULT),
-                     m_fViewportHeight(GRAPHICS_TOP_DEFAULT-GRAPHICS_BOTTOM_DEFAULT)
+CCamera::CCamera() : m_fViewportWidth(m_Graphics.getViewPort().right-m_Graphics.getViewPort().left),
+                     m_fViewportHeight(m_Graphics.getViewPort().top-m_Graphics.getViewPort().bottom)
 {
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
     
     m_vecCell.setZero();
-    m_vecFrame0.resize(4);
     
 //     IHooker::m_strName += ": Camera";
     
@@ -114,16 +113,16 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
 {
     METHOD_ENTRY("CCamera::setViewport")
 
-    if ((_fW < GRAPHICS_RIGHT_DEFAULT - GRAPHICS_LEFT_DEFAULT) &&
-        (_fH < GRAPHICS_TOP_DEFAULT - GRAPHICS_BOTTOM_DEFAULT))
+    if ((_fW <= m_Graphics.getViewPort().right - m_Graphics.getViewPort().left) &&
+        (_fH <= m_Graphics.getViewPort().top   - m_Graphics.getViewPort().bottom))
     {
       m_fViewportWidth  = _fW*0.5;
       m_fViewportHeight = _fH*0.5;
     }
     else
     {
-      m_fViewportWidth  = (GRAPHICS_RIGHT_DEFAULT - GRAPHICS_LEFT_DEFAULT)*0.5;
-      m_fViewportHeight = (GRAPHICS_TOP_DEFAULT - GRAPHICS_BOTTOM_DEFAULT)*0.5;
+      m_fViewportWidth  = (m_Graphics.getViewPort().right - m_Graphics.getViewPort().left)*0.5;
+      m_fViewportHeight = (m_Graphics.getViewPort().top   - m_Graphics.getViewPort().bottom)*0.5;
       NOTICE_MSG("Camera", "Given viewport is larger than actual screen, resizing to screen size.")
       NOTICE(
         std::cout << "  Viewport: " << _fW << "m x " << _fH << "m" << std::endl;
@@ -322,7 +321,7 @@ void CCamera::updateWithHook()
 {
     METHOD_ENTRY("CCamera::updateWithHook")
     
-    std::vector<Vector2d>  vecFrame(4);
+    std::array<Vector2d,4> vecFrame;
     
     m_vecCenter = m_KinematicsState.getOrigin();// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
 
@@ -359,7 +358,7 @@ void CCamera::updateWithoutHook()
 {
     METHOD_ENTRY("CCamera::updateWithoutHook")
     
-    std::vector<Vector2d>   vecFrame(4);
+    std::array<Vector2d,4>  vecFrame;
     Vector2i                vecCell;
     
     IUniverseScaled::separateCenterCell(m_KinematicsState.getLocalOrigin(), m_KinematicsState.Origin(), vecCell);
