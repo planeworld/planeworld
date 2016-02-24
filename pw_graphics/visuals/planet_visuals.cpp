@@ -84,9 +84,9 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         double      fAngEnd;
         LineType    LineT;
         
-       std::vector<std::vector<Vector2d> > WaterlineList;
-       std::vector<Vector2d> WaterlineTmp;
-       bool bInWater = false;
+        std::vector<std::vector<Vector2d> > WaterlineList;
+        std::vector<Vector2d> WaterlineTmp;
+        bool bInWater = false;
 
         double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
         if (isnan(fAlpha))
@@ -137,8 +137,10 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         // Snap angle to ground resolution grid to avoid flickering.
         // If angle is started at arbitrary position, aliasing causes flickering when zooming
         // or moving, since height is always sampled at different positions.
-        fAng -= ((fAng/fInc)-floor(fAng/fInc))*fInc;
-        fAngEnd += ((fAng/fInc)-floor(fAng/fInc))*fInc;
+        double fAngleSampling = fAng-fPAng;
+        double fAngleSnap = fAngleSampling-floor(fAngleSampling/fInc)*fInc;
+        fAng    -= fAngleSnap;
+        fAngEnd += fAngleSnap;
         
         if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
         
