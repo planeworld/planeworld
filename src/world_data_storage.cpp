@@ -390,6 +390,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
         }
     }
     _WDS.m_ObjectVisuals.clear();
+    _WDS.m_UIDUserRef.clear();
     
     //-------------------------------------------------------------------------
     // Stream in all objects   
@@ -397,13 +398,11 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
     {
         ObjectsType::size_type nSize;
         _is >> nSize;    
-        std::cout << "Number of objects: " << nSize << std::endl;
+        DOM_VAR(INFO_MSG("World data storage", "Number of objects to load: " << nSize))
         for (auto i=0u; i<nSize; ++i)
         {
             std::string strName;
             _is >> strName;
-            
-      //         std::cout << strName << std::endl;
             
             // Cast streamable basetype to strongly typed enum ObjectType
             std::underlying_type<ObjectType>::type nObjectType;
@@ -416,6 +415,9 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
                     CRigidBody* pObj = new CRigidBody;
                     MEM_ALLOC("CRigidBody")
                     _is >> pObj;
+                    
+                    pObj->setName(strName);
+                    
                     _WDS.addObject(pObj);
                     
                     for (auto ci : *(pObj->getGeometry()->getShapes()))
@@ -439,16 +441,16 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
     {
         ObjectVisualsType::size_type nSize;
         _is >> nSize;    
-        std::cout << "Number of object visuals: " << nSize << std::endl;
+        DOM_VAR(INFO_MSG("World data storage", "Number of visuals to load: " << nSize))
         for (auto i=0u; i<nSize; ++i)
         {
             IObjectVisuals* pObjVis = new IObjectVisuals;
             MEM_ALLOC("CObjectVisuals")
             _is >> pObjVis;
             
-            std::cout << pObjVis->getObjRef() << std::endl;
-            
-            pObjVis->attachTo(static_cast<IObject*>(_WDS.m_UIDUserRef[pObjVis->getObjRef()]));
+            UIDType UID = pObjVis->getObjRef();
+            IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
+            pObjVis->attachTo(static_cast<IObject*>(pUIDUser));
             _WDS.addObjectVisuals(pObjVis);
             
             for (auto ci : pObjVis->getShapeVisuals())

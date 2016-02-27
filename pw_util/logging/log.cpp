@@ -56,7 +56,7 @@ CLog::~CLog()
         if (m_nMemCounter < 0)
         {
             NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
-            WARNING_MSG("Logging", "Maybe more memory freed than allocated, please check.")
+            WARNING_MSG("Logging", "Maybe more memory freed (" << -m_nMemCounter << " frees) than allocated, please check.")
             
                 std::cout << "\n";
                 std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();

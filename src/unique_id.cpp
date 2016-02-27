@@ -86,8 +86,6 @@ std::istream& operator>>(std::istream& _is, CUniqueID& _UID)
     _is >> _UID.m_nUID;
     _is >> _UID.s_nUID;
     
-    std::cout << "s_nUID:" << _UID.s_nUID << std::endl;
-
     return _is;
 }
 

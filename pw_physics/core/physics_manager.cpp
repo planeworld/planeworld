@@ -307,7 +307,7 @@ void CPhysicsManager::processFrame()
     this->addGlobalForces();
     this->moveMasses(nFrame);
     this->collisionDetection();
-    this->updateCells();
+//     this->updateCells();
     
     ProcessingTimer.stop();
     m_fProcessingTime = ProcessingTimer.getTime();
