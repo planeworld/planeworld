@@ -89,7 +89,7 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         bool bInWater = false;
 
         double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
-        if (isnan(fAlpha))
+        if (std::isnan(fAlpha))
         {
             fAng = 0.0;
             fAngEnd = 2.0*M_PI;
