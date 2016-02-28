@@ -34,7 +34,7 @@
 ///
 /// \brief Class representing a camera for a view on the scene
 ///
-/// \bug Camera reset positions camera to 0, instead of value in configuration.
+/// \todo Implement camera streaming capabilities.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CCamera : public CGraphicsBase,

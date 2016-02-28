@@ -250,7 +250,7 @@ std::istream& CPlanet::myStreamIn(std::istream& _is)
     std::string strTmp;
     _is >> strTmp;
     
-    /// \todo Implement streaming of planet type and noise modules
+    /// \todo Implement streaming of planet type
     
 //     _is >> m_PlanetType;
     _is >> m_vecCenter[0];
@@ -272,6 +272,10 @@ std::istream& CPlanet::myStreamIn(std::istream& _is)
     _is >> m_nOctMtTr;
     _is >> m_nOctTrTp;
     
+    // Terrain is initialised. This way, external noise modules don't need
+    // to be saved and loaded (they do not store an internal state).
+    this->initTerrain();
+    
     return _is;
 }
 
@@ -290,7 +294,7 @@ std::ostream& CPlanet::myStreamOut(std::ostream& _os)
     
     _os << "Planet:" << std::endl;
     
-    /// \todo Implement streaming of planet type and noise modules
+    /// \todo Implement streaming of planet type
     
 //     _os << m_PlanetType << std::endl;
     _os << m_vecCenter[0] << " " <<
@@ -304,17 +308,9 @@ std::ostream& CPlanet::myStreamOut(std::ostream& _os)
     _os << m_fSeaLevel << std::endl;
     _os << m_fSmoothness << std::endl;
     _os << m_nSeed << std::endl;
-    
-//         noise::module::Module*     m_pSurface;          ///< Final surface noise function
-//         noise::module::Module*     m_pTerrainType;      ///< Final terrain type noise function
-//         
-//         std::vector<noise::module::Billow>      m_Billow;       ///< Billow modules
-//         std::vector<noise::module::Clamp>       m_Clamp;        ///< Clamp modules
-//         std::vector<noise::module::Perlin>      m_Perlin;       ///< Perlin modules
-//         std::vector<noise::module::RidgedMulti> m_RidgedMulti;  ///< RidgedMulti modules
-//         std::vector<noise::module::ScaleBias>   m_ScaleBias;    ///< Selector modules
-//         std::vector<noise::module::Select>      m_Selector;     ///< Selector modules
-//         std::vector<noise::module::Terrace>     m_Terrace;      ///< Terrace modules
+   
+    // Noise modules don't need to be exported, since the planets will be
+    // initialised from parameters when loaded.
     
     _os << m_fLacHlTr << std::endl;
     _os << m_fLacMtTr << std::endl;
