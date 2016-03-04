@@ -30,7 +30,6 @@ INCLUDE_DIRECTORIES (
 )
 
 SET(SRCS
-    ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src/pugixml.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/circle_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals.cpp
@@ -108,6 +107,7 @@ TARGET_LINK_LIBRARIES (planeworld
     ${OPENGL_gl_LIBRARY}
     ${LUA_LIBRARIES}
     noise2d
+    pugixml
     sfml-system
     sfml-window
     sfml-graphics
