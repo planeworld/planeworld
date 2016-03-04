@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
         
         XMLImporter.setWorldDataStorage(&WorldDataStorage);
         XMLImporter.import(argv[1]);
-        pVisualsManager->setCamera(XMLImporter.getCamera());
+        WorldDataStorage.setCamera(XMLImporter.getCamera());
 //         pPhysicsManager->addObjects(XMLImporter.getObjects());
 //         pVisualsManager->addVisualsList(XMLImporter.getVisuals());
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());

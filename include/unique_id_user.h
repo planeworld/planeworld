@@ -10,10 +10,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \file       unique_id_user.h
-/// \brief      Prototype of interface "IWorldDataStorageUser"
+/// \brief      Prototype of interface "IUniqueIDUser"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2014-02-24
+/// \date       2016-01-28
 ///
 ////////////////////////////////////////////////////////////////////////////////
 

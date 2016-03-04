@@ -49,10 +49,10 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         WindowHandleType* const
                         getWindowHandle() const;
         bool            initGraphics() const;
-        void            processFrame() const;
                 
         //--- Methods --------------------------------------------------------//
-        void            setCamera(CCamera*);
+        void            processFrame();
+        
         void            setFont(const std::string&);
         void            setFrequency(const double&);
         void            setUniverse(CUniverse* const);
@@ -147,19 +147,6 @@ inline bool CVisualsManager::initGraphics() const
 {
     METHOD_ENTRY("CVisualsManager::getVisualisations")
     return (m_Graphics.init());
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets camera for visualisation
-///
-/// \param _pCamera Camera
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setCamera(CCamera* _pCamera)
-{
-    METHOD_ENTRY("CVisualsManager::setCamera")
-    m_pCamera = _pCamera;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

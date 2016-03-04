@@ -42,6 +42,14 @@ CWorldDataStorage::~CWorldDataStorage()
     METHOD_ENTRY("CWorldDataStorage::~CWorldDataStorage")
     DTOR_CALL("CWorldDataStorage::~CWorldDataStorage")
     
+    // Free memory if pointer is still existent
+    if (m_pCamera != nullptr)
+    {
+        delete m_pCamera;
+        m_pCamera = nullptr;
+        MEM_FREED("CCamera");
+    }
+    
     // for (auto it : m_UIDUserRef)
     // Do not delete objects here.
     // Object pointers are stored in two maps, referring to their name and
@@ -461,6 +469,19 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
             Log.progressBar("Loading object visuals", i, nSize);
         }
     }
+    
+    //-------------------------------------------------------------------------
+    // Stream in camera
+    //-------------------------------------------------------------------------
+    if (_WDS.m_pCamera != nullptr)
+    {
+        delete _WDS.m_pCamera;
+        MEM_FREED("CCamera")
+        _WDS.m_pCamera = nullptr;
+    }
+    _WDS.m_pCamera = new CCamera;
+    MEM_ALLOC("CCamera")
+    _is >> _WDS.m_pCamera;
         
     return _is;
 }
@@ -498,5 +519,7 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
         _os << ci << std::endl;
     }    
 
+    _os << _WDS.m_pCamera << std::endl;
+    
     return _os;
 }

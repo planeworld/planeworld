@@ -24,11 +24,10 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CVisualsManager::CVisualsManager() : m_pUniverse(0),
+CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
                                      m_nVisualisations(0),
-                                     m_nStarIndex(-1),
-                                     m_pCamera(0)
+                                     m_nStarIndex(-1)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -45,14 +44,6 @@ CVisualsManager::~CVisualsManager()
 {
     METHOD_ENTRY("CVisualsManager::~CVisualsManager")
     DTOR_CALL("CVisualsManager::~CVisualsManager")
-
-    // Free memory if pointer is still existent
-    if (m_pCamera != 0)
-    {
-        delete m_pCamera;
-        m_pCamera = 0;
-        MEM_FREED("CCamera");
-    }
 }
     
 ////////////////////////////////////////////////////////////////////////////////
@@ -699,10 +690,12 @@ void CVisualsManager::drawWorld() const
 /// \brief Processes one visual frame
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::processFrame() const
+void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
     
+    // Set active camera from WorldDataStorage
+    m_pCamera = m_pDataStorage->getCamera(); 
     this->drawGrid();
     this->drawTrajectories();
     this->drawWorld();

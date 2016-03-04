@@ -24,6 +24,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state.h"
+// #include "unique_id_referrer.h"
+// #include "unique_id_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -32,7 +34,8 @@
 /// \brief Interface for classes that use a kinematic state
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IKinematicsStateUser
+class IKinematicsStateUser /*: public IUniqueIDUser,
+                             public IUniqueIDReferrer*/
 {
 
     public:
@@ -50,9 +53,10 @@ class IKinematicsStateUser
                 
     protected:
         
-        CKinematicsState  m_KinematicsState; ///< Kinematics state data
+        CKinematicsState    m_KinematicsState;  ///< Kinematics state data
         
         std::string m_strName = {"TESTNAME"};
+        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -51,6 +51,7 @@ class CWorldDataStorage
         ~CWorldDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
+        CCamera* const                      getCamera() const;
         const DebrisType&                   getDebris() const;
         const DebrisVisualsType&            getDebrisVisuals() const;
         const DebrisVisualsThrusterType&    getDebrisVisualsThruster() const;
@@ -76,12 +77,16 @@ class CWorldDataStorage
         void lockObjects(){m_ObjectMutex.lock();}
         void unlockObjects(){m_ObjectMutex.unlock();}
         
+        void setCamera(CCamera* const);
+        
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CWorldDataStorage&);
         friend std::ostream& operator<<(std::ostream&, CWorldDataStorage&);
         
     private:
-                
+      
+        CCamera*                    m_pCamera;                  ///< Active camera for visuals
+      
         DebrisType                  m_Debris;                   ///< List of debris
         DebrisVisualsType           m_DebrisVisuals;            ///< List of debris visuals
         DebrisVisualsThrusterType   m_DebrisVisualsThruster;    ///< List of debris visuals
@@ -99,6 +104,19 @@ class CWorldDataStorage
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns active camera
+///
+/// \return Active camera
+///
+////////////////////////////////////////////////////////////////////////////////
+inline CCamera* const CWorldDataStorage::getCamera() const
+{
+    METHOD_ENTRY("CWorldDataStorage::getCamera")
+    return m_pCamera;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -193,4 +211,17 @@ inline const ObjectVisualsType& CWorldDataStorage::getObjectVisuals()
     return m_ObjectVisuals;
 }
 
-#endif
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the active camera
+///
+/// \param _pCam Active camera
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWorldDataStorage::setCamera(CCamera* const _pCam)
+{
+    METHOD_ENTRY("CWorldDataStorage::setCamera")
+    m_pCamera = _pCam;
+}
+
+#endif // WORLD_DATA_STORAGE_H

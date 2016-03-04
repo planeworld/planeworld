@@ -39,10 +39,8 @@ CGameStateManager::CGameStateManager()
 /// \bug Something is wrong with cell loading, e.g. commenting out cellUpdate
 ///      fixes one particular problem. Cell handling in visuals manager is 
 ///      concerned, too.
-/// \bug Visuals loading leads to a segmentation fault. Object visual id's are
-///      wrong. This somehow goes together with object pointer being null when
-///      saving and loading more than once. Loading once works, although not all
-///      visuals are drawn.
+/// \todo Streaming of classes which inherit from other classes shouldn't call
+///       (stream) members directly but calling superclass::operator<</>>.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 bool CGameStateManager::load() const

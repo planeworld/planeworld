@@ -378,3 +378,77 @@ void CCamera::updateWithoutHook()
     m_BoundingBox.update(vecFrame[2]);
     m_BoundingBox.update(vecFrame[3]);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _pCam CCamera instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CCamera* const _pCam)
+{
+    METHOD_ENTRY("CCamera::operator>>")
+    
+    std::string strTmp;
+    _is >> strTmp;
+    
+    // From IKinematicsStateUser
+    _is >> _pCam->m_KinematicsState;
+    
+    for (auto i=0u; i<4u; ++i)
+    {
+        _is >> _pCam->m_vecFrame0[i][0] >>
+               _pCam->m_vecFrame0[i][1];
+    }
+    _is >> _pCam->m_BoundingBox;
+    _is >> _pCam->m_vecCenter[0] >> _pCam->m_vecCenter[1];
+    _is >> _pCam->m_fBoundingCircleRadius;
+    _is >> _pCam->m_fViewportWidth;
+    _is >> _pCam->m_fViewportHeight;
+    _is >> _pCam->m_fZoom
+    ;
+    /// \todo Stream IUniverseScaled information
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os  Source stream
+/// \param _UID CCamera instance to stream
+///
+/// \return Stream with game state information of CCamera instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CCamera* const _pCam)
+{
+    METHOD_ENTRY("CCamera::operator<<")
+    
+    _os << "Camera:" << std::endl;
+    
+    // From IKinematicsStateUser
+    _os << _pCam->m_KinematicsState << std::endl;
+    
+    for (auto i=0u; i<4u; ++i)
+    {
+        _os << _pCam->m_vecFrame0[i][0] << " " <<
+               _pCam->m_vecFrame0[i][1] << std::endl;
+    }
+    _os << _pCam->m_BoundingBox << std::endl;
+    _os << _pCam->m_vecCenter[0] << " " <<
+           _pCam->m_vecCenter[1] << std::endl;
+    _os << _pCam->m_fBoundingCircleRadius << std::endl;
+    _os << _pCam->m_fViewportWidth << std::endl;
+    _os << _pCam->m_fViewportHeight << std::endl;
+    _os << _pCam->m_fZoom << std::endl;
+    
+    /// \todo Stream IUniverseScaled information
+    
+    return _os;
+}

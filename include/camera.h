@@ -68,6 +68,10 @@ class CCamera : public CGraphicsBase,
         void translateTo(const Vector2d&);
         void zoomBy(const double&);
         void zoomTo(const double&);
+        
+        //--- friends --------------------------------------------------------//
+        friend std::istream&    operator>>(std::istream&, CCamera* const);
+        friend std::ostream&    operator<<(std::ostream&, CCamera* const);
 
     protected:
         
