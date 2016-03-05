@@ -8,7 +8,7 @@ physics_frequency >= lua_frequency
 -->
 
 <config
-    font="fonts/consola.ttf"
+    font="fonts/AnkaCoder-C87-r.ttf"
     physics_interface="physics_interface.lua"
     physics_frequency="200.0"
     visuals_frequency="60.0"
