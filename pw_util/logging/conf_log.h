@@ -86,8 +86,8 @@
 //--- Uncomment one (only one!) level to be used for displaying ---//
 //=================================================================//
 
-#define LOGLEVEL_DEBUG
-// #define LOGLEVEL_INFO
+// #define LOGLEVEL_DEBUG
+#define LOGLEVEL_INFO
 // #define LOGLEVEL_NOTICE
 // #define LOGLEVEL_WARNING
 // #define LOGLEVEL_ERROR
@@ -101,11 +101,11 @@
 // #define DOMAIN_METHOD_EXIT
 // #define DOMAIN_CONSTRUCTOR
 // #define DOMAIN_DESTRUCTOR
-#define DOMAIN_MEMORY_ALLOCATED
-#define DOMAIN_MEMORY_FREED
-// #define DOMAIN_STATS
+// #define DOMAIN_MEMORY_ALLOCATED
+// #define DOMAIN_MEMORY_FREED
+#define DOMAIN_STATS
 #define DOMAIN_VAR
-// #define DOMAIN_FILEIO
+#define DOMAIN_FILEIO
 
 //--- Allow global DEBUG definition typically passed by compiler ---//
 //==================================================================//
