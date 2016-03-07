@@ -266,6 +266,8 @@ void CWorldDataStorage::addObject(IObject* _pObject)
     
     // Additionally, store a reference based on objects UID
     m_UIDUserRef.insert({_pObject->getUID(),_pObject});
+    // and a reference of its kinematics state
+    m_UIDUserRef.insert({_pObject->getKinematicsState().getUID(), _pObject});
 }
 
 // ///////////////////////////////////////////////////////////////////////////////
@@ -484,15 +486,25 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
     //-------------------------------------------------------------------------
     // Stream in camera
     //-------------------------------------------------------------------------
-    if (_WDS.m_pCamera != nullptr)
     {
-        delete _WDS.m_pCamera;
-        MEM_FREED("CCamera")
-        _WDS.m_pCamera = nullptr;
+        if (_WDS.m_pCamera != nullptr)
+        {
+            delete _WDS.m_pCamera;
+            MEM_FREED("CCamera")
+            _WDS.m_pCamera = nullptr;
+        }
+        _WDS.m_pCamera = new CCamera;
+        MEM_ALLOC("CCamera")
+        _is >> _WDS.m_pCamera;
+
+        /// \todo Clean up camera hooks via kinematics states and uids.
+        if (_WDS.m_pCamera->getKinematicsState().gotReference())
+        {
+            UIDType UID = _WDS.m_pCamera->getKinematicsState().getUIDRef();
+            IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
+            _WDS.m_pCamera->hook(static_cast<IKinematicsStateUser*>(static_cast<IObject*>(pUIDUser)));
+        }
     }
-    _WDS.m_pCamera = new CCamera;
-    MEM_ALLOC("CCamera")
-    _is >> _WDS.m_pCamera;
         
     return _is;
 }

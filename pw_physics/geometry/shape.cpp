@@ -47,7 +47,9 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
     std::string strTmp;
     _is >> strTmp;
     
+    // From IUniqueIDUser
     _is >> _pShape->m_UID;
+    
     _is >> _pShape->m_AABB;
     _is >> _pShape->m_nDepthlayers;
     

@@ -152,9 +152,6 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
 std::istream& CCircleVisuals::myStreamIn(std::istream& _is)
 {
     METHOD_ENTRY("CCircleVisuals::myStreamIn")
-    
-    /// \todo Has to be hooked to shape (CDoubleBufferedShape)
-
     return _is;
 }
 
@@ -170,8 +167,5 @@ std::istream& CCircleVisuals::myStreamIn(std::istream& _is)
 std::ostream& CCircleVisuals::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CCircleVisuals::myStreamOut")
-
-    /// \todo Hook to shape (CDoubleBufferedShape) has to be stored/streamed
-    
     return _os;
 }

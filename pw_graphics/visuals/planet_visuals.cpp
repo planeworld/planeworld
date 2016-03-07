@@ -303,9 +303,6 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
 std::istream& CPlanetVisuals::myStreamIn(std::istream& _is)
 {
     METHOD_ENTRY("CPlanetVisuals::myStreamIn")
-
-    /// \todo Has to be hooked to shape (CDoubleBufferedShape)
-    
     return _is;
 }
 
@@ -321,8 +318,5 @@ std::istream& CPlanetVisuals::myStreamIn(std::istream& _is)
 std::ostream& CPlanetVisuals::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CPlanetVisuals::myStreamOut")
-
-    /// \todo Hook to shape (CDoubleBufferedShape) has to be stored/streamed
-    
     return _os;
 }

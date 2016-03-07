@@ -147,9 +147,6 @@ void CTerrainVisuals::draw(CCamera* const _pCamera,
 std::istream& CTerrainVisuals::myStreamIn(std::istream& _is)
 {
     METHOD_ENTRY("CTerrainVisuals::myStreamIn")
-
-    /// \todo Has to be hooked to shape (CDoubleBufferedShape)
-    
     return _is;
 }
 
@@ -165,9 +162,6 @@ std::istream& CTerrainVisuals::myStreamIn(std::istream& _is)
 std::ostream& CTerrainVisuals::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CTerrainVisuals::myStreamOut")
-
-    /// \todo Hook to shape (CDoubleBufferedShape) has to be stored/streamed
-    
     return _os;
 }
 

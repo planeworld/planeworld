@@ -109,9 +109,6 @@ void CPolylineVisuals::draw(CCamera* const _pCamera,
 std::istream& CPolylineVisuals::myStreamIn(std::istream& _is)
 {
     METHOD_ENTRY("CPolylineVisuals::myStreamIn")
-    
-    /// \todo Has to be hooked to shape (CDoubleBufferedShape)
-
     return _is;
 }
 
@@ -127,9 +124,6 @@ std::istream& CPolylineVisuals::myStreamIn(std::istream& _is)
 std::ostream& CPolylineVisuals::myStreamOut(std::ostream& _os)
 {
     METHOD_ENTRY("CPolylineVisuals::myStreamOut")
-
-    /// \todo Hook to shape (CDoubleBufferedShape) has to be stored/streamed
-    
     return _os;
 }
 

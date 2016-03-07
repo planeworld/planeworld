@@ -316,6 +316,7 @@ int main(int argc, char *argv[])
                             /// \todo Really check if physics thread is paused before saving the simulation
                             g_bPhysicsPaused=true;
                             GameStateManager.load();
+                            pCamera=WorldDataStorage.getCamera();
                             g_bPhysicsPaused=false;
                             break;
                         }

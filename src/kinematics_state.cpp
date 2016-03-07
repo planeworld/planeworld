@@ -310,6 +310,12 @@ std::istream& operator>>(std::istream& _is, CKinematicsState& _KS)
     std::string strTmp;
     _is >> strTmp;
     
+    // From IUniqueIDUser
+    _is >> _KS.m_UID;
+    
+    // From IUniqueIDReferrer
+    _is >> _KS.m_UIDRef;
+    
     _is >> _KS.m_bGotReference;
     _is >> _KS.m_vecOrigin[0];
     _is >> _KS.m_vecOrigin[1];
@@ -338,6 +344,12 @@ std::ostream& operator<<(std::ostream& _os, CKinematicsState& _KS)
     /// \todo Stream reference by using UIDs
     
     _os << "KinematicsState:" << std::endl;
+    
+    // From IUniqueIDUser
+    _os << _KS.m_UID << std::endl;
+    
+    // From IUniqueIDReferrer
+    _os << _KS.m_UIDRef << std::endl;
     
     _os << _KS.m_bGotReference << std::endl;
     _os << _KS.m_vecOrigin[0] << " " <<

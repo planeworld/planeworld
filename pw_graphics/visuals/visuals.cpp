@@ -47,6 +47,7 @@ std::istream& operator>>(std::istream& _is, IVisuals* const _pVis)
     std::string strTmp;
     _is >> strTmp;
     
+    // From IUniqueIDReferrer
     _is >> _pVis->m_UIDRef;
     
     return _pVis->myStreamIn(_is);
@@ -73,6 +74,8 @@ std::ostream& operator<<(std::ostream& _os, IVisuals* const _pVis)
     _os << nShpVisType << std::endl;
     
     _os << "Visuals:" << std::endl;
+    
+    // From IUniqueIDReferrer
     _os << _pVis->m_UIDRef << std::endl;
     
     return _pVis->myStreamOut(_os);

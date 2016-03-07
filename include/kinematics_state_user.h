@@ -35,8 +35,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state.h"
-// #include "unique_id_referrer.h"
-// #include "unique_id_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -45,8 +43,7 @@
 /// \brief Interface for classes that use a kinematic state
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IKinematicsStateUser /*: public IUniqueIDUser,
-                             public IUniqueIDReferrer*/
+class IKinematicsStateUser
 {
 
     public:

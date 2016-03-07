@@ -33,6 +33,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "unique_id_referrer.h"
+#include "unique_id_user.h"
 
 //--- Standard header --------------------------------------------------------//
 
@@ -56,7 +58,8 @@ using namespace Eigen;
 /// planet.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CKinematicsState
+class CKinematicsState  : public IUniqueIDUser,
+                          public IUniqueIDReferrer
 {
     
     public:
@@ -324,6 +327,8 @@ inline void CKinematicsState::setAngleVelocity(const double& _fAngleVelocity)
 inline void CKinematicsState::setReference(CKinematicsState* const _pReference)
 {
     METHOD_ENTRY("CKinematicsState::setReference")
+    m_UIDRef = _pReference->getUID();
+    
     m_pReference = _pReference;
     m_bGotReference = true;
 }
