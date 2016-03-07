@@ -149,7 +149,7 @@ std::istream& operator>>(std::istream& _is, IObjectVisuals* const _pObjVis)
         }
     }
     
-    _is >> _pObjVis->m_ObjRef;
+    _is >> _pObjVis->m_UIDRef;
     
     std::vector<IVisuals*>::size_type nSize;
     _is >> nSize;
@@ -217,7 +217,7 @@ std::ostream& operator<<(std::ostream& _os, IObjectVisuals* const _pObjVis)
     METHOD_ENTRY("IObjectVisuals::operator<<")
     
     _os << "ObjectVisuals:" << std::endl;
-    _os << _pObjVis->m_ObjRef << std::endl;
+    _os << _pObjVis->m_UIDRef << std::endl;
     _os << _pObjVis->m_Visuals.size() << std::endl;
     for (auto ci : _pObjVis->m_Visuals)
     {

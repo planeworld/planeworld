@@ -467,7 +467,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
             MEM_ALLOC("CObjectVisuals")
             _is >> pObjVis;
             
-            UIDType UID = pObjVis->getObjRef();
+            UIDType UID = pObjVis->getUIDRef();
             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
             pObjVis->attachTo(static_cast<IObject*>(pUIDUser));
             _WDS.addObjectVisuals(pObjVis);

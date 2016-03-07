@@ -34,6 +34,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "unique_id_referrer.h"
 #include "visuals.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,7 +42,9 @@
 /// \brief Class for visualisation of world objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IObjectVisuals : virtual public CGraphicsBase
+class IObjectVisuals : virtual public CGraphicsBase,
+                               public IUniqueIDReferrer
+
 {
     
     public:
@@ -59,7 +62,6 @@ class IObjectVisuals : virtual public CGraphicsBase
         virtual const std::vector<IVisuals*>& getShapeVisuals() const;
         
         IObject* const  getObject() const;
-        const UIDType&  getObjRef() const;
                 
         //--- Methods --------------------------------------------------------//
         void addVisuals(IVisuals* const);
@@ -71,7 +73,6 @@ class IObjectVisuals : virtual public CGraphicsBase
         
     protected:
         
-        UIDType                m_ObjRef;    ///< UID refence to object
         IObject*               m_pObject;   ///< Pointer to corresponding object
         std::vector<IVisuals*> m_Visuals;   ///< List of visuals
 
@@ -84,8 +85,7 @@ class IObjectVisuals : virtual public CGraphicsBase
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IObjectVisuals::IObjectVisuals() : m_ObjRef(0u),
-                                          m_pObject(nullptr)
+inline IObjectVisuals::IObjectVisuals() : m_pObject(nullptr)
 {
     METHOD_ENTRY("IObjectVisuals")
     CTOR_CALL("IObjectVisuals")
@@ -98,11 +98,12 @@ inline IObjectVisuals::IObjectVisuals() : m_ObjRef(0u),
 /// \param _pObject Pointer to object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IObjectVisuals::IObjectVisuals(IObject* const _pObject) :  m_ObjRef(_pObject->getUID()),
-                                                                  m_pObject(_pObject)
+inline IObjectVisuals::IObjectVisuals(IObject* const _pObject) : m_pObject(_pObject)
 {
     METHOD_ENTRY("IObjectVisuals")
     CTOR_CALL("IObjectVisuals")
+    
+    m_UIDRef = _pObject->getUID();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,19 +134,6 @@ inline IObject* const IObjectVisuals::getObject() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns UID reference to object
-///
-/// \return UID reference to object
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const UIDType& IObjectVisuals::getObjRef() const
-{
-    METHOD_ENTRY("IObjectVisuals::getObjRef")
-    return m_ObjRef;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Add shape visuals to this object
 ///
 /// \param _pVisuals Shape visuals to add to this object
@@ -168,7 +156,7 @@ inline void IObjectVisuals::attachTo(IObject* const _pObj)
 {
     METHOD_ENTRY("attachTo")
     m_pObject = _pObj;
-    m_ObjRef = _pObj->getUID();
+    m_UIDRef = _pObj->getUID();
 }
 
 

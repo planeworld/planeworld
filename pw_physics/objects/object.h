@@ -65,8 +65,8 @@ enum class ObjectType
 /// \todo Move depth information to shapes only. Then map information to object
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class IObject : public IKinematicsStateUser,
-                public IUniqueIDUser,
+class IObject : public IUniqueIDUser,
+                public IKinematicsStateUser,
                 public IUniverseScaled
 {
     
