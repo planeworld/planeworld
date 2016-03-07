@@ -1324,6 +1324,7 @@ void CXMLImporter::readBodyCore(CRigidBody* const _pO, const pugi::xml_node& _No
     
     if (!_Node.empty())
     {
+        _pO->setAngle(checkAttributeDouble(_Node, "angle", _pO->getAngle())/180.0*M_PI);
         _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity())/180.0*M_PI);
         _pO->setInertia(checkAttributeDouble(_Node, "inertia", _pO->getInertia()));
     }

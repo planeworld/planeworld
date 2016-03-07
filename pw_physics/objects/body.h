@@ -67,6 +67,7 @@ class CBody : public IObject
         const ObjectType    getObjectType() const;
         
         //--- Methods --------------------------------------------------------//
+        void setAngle(const double&);
         void setAngleVelocity(const double&);
         void setInertia(const double&);
 
@@ -154,6 +155,20 @@ inline const ObjectType CBody::getObjectType() const
 {
     METHOD_ENTRY("CBody::getObjectType")
     return ObjectType::OBJECT_BODY;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set the angle of the body
+///
+/// \param _fAng Angle of body
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CBody::setAngle(const double& _fAng)
+{
+    METHOD_ENTRY("CBody::setAngle")
+    m_pIntAng->init(_fAng);
+    m_KinematicsState.setAngle(_fAng);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
