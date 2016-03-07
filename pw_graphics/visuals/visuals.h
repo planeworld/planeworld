@@ -35,6 +35,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "camera.h"
 #include "object.h"
+#include "unique_id_referrer.h"
 
 /// specifies the type of shape visuals
 enum class ShapeVisualsType
@@ -53,7 +54,8 @@ enum class ShapeVisualsType
 /// \todo Implement getVisualsType for istream creation
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IVisuals : virtual public CGraphicsBase
+class IVisuals : virtual public CGraphicsBase,
+                         public IUniqueIDReferrer
 {
     
     public:
@@ -66,7 +68,6 @@ class IVisuals : virtual public CGraphicsBase
         virtual void      draw(CCamera* const,
                                const IObject* const) const = 0;
                                
-        const UIDType&                  getShpRef() const;
         virtual const ShapeVisualsType  getShapeVisualsType() const;
                         
         //--- Methods --------------------------------------------------------//
@@ -80,7 +81,6 @@ class IVisuals : virtual public CGraphicsBase
     protected:
       
         //--- Variables [protected] ------------------------------------------//
-        UIDType               m_ShpRef = 0u;    ///< UID refence to shape
         CDoubleBufferedShape* m_pDBShape;       ///< Pointer to buffered shape
 
         //--- Protected methods ----------------------------------------------//
@@ -88,19 +88,6 @@ class IVisuals : virtual public CGraphicsBase
         virtual std::ostream& myStreamOut(std::ostream&) = 0;
         
 };
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns UID reference to double buffered shape
-///
-/// \return UID reference to double buffered shape
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const UIDType& IVisuals::getShpRef() const
-{
-    METHOD_ENTRY("IVisuals::getShpRef")
-    return m_ShpRef;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -126,7 +113,7 @@ inline void IVisuals::attachTo(CDoubleBufferedShape* const _pShape)
 {
     METHOD_ENTRY("IVisuals::attach")
     m_pDBShape = _pShape;
-    m_ShpRef = _pShape->getUID();
+    m_UIDRef = _pShape->getUID();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

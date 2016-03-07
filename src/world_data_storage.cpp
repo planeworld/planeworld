@@ -474,7 +474,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
             
             for (auto ci : pObjVis->getShapeVisuals())
             {
-                ci->attachTo(UIDShapeRef[ci->getShpRef()]);
+                ci->attachTo(UIDShapeRef[ci->getUIDRef()]);
             }
             
             Log.progressBar("Loading object visuals", i, nSize);
