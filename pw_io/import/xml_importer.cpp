@@ -101,16 +101,6 @@ bool CXMLImporter::import(const std::string& _strFilename,
     pugi::xml_document Doc;
     pugi::xml_parse_result Result = Doc.load_file(_strFilename.c_str());
 
-    // First, devide given filename into path and filename. Be sure to create
-    // local path if no path is included ("planeworld example.xml", resulting
-    // in path "." and filename "example.xml").
-    size_t Pos;
-    Pos = _strFilename.find_last_of("/");
-    if (Pos != _strFilename.npos)
-        m_strPath = _strFilename.substr(0,Pos);
-    else
-        m_strPath = ".";
-    
     if (Result)
     {
         DOM_FIO(INFO_MSG("XML Importer","XML file " << _strFilename << " parsed without errors."))
@@ -120,6 +110,19 @@ bool CXMLImporter::import(const std::string& _strFilename,
         WARNING_MSG("XML Importer", "XML file " << _strFilename << " parsed with errors.")
         WARNING_MSG("XML Importer", "Error description: " << Result.description())
     }
+    
+    // Save path -- kind of stack push, when recursively calling import
+    std::string strPath = m_strPath;
+    
+    // First, devide given filename into path and filename. Be sure to create
+    // local path if no path is included ("planeworld example.xml", resulting
+    // in path "." and filename "example.xml").
+    size_t Pos;
+    Pos = _strFilename.find_last_of("/");
+    if (Pos != _strFilename.npos)
+        m_strPath = _strFilename.substr(0,Pos);
+    else
+        m_strPath = ".";
     
     pugi::xml_node Root = Doc.first_child();
     pugi::xml_node N;
@@ -315,6 +318,9 @@ bool CXMLImporter::import(const std::string& _strFilename,
             }
         }
     }
+    
+    // Restore path -- kind of stack pop, when recursively calling import
+    m_strPath = strPath;
 
     return true;
 }
