@@ -281,12 +281,14 @@ int main(int argc, char *argv[])
                             break;
                         }
                         case sf::Keyboard::Add:
+                        case sf::Keyboard::A:
                         {
                             pPhysicsManager->accelerateTime();
                             break;
                         }
                         case sf::Keyboard::Subtract:
                         case sf::Keyboard::Dash:
+                        case sf::Keyboard::D:
                         {
                             pPhysicsManager->decelerateTime();
                             break;
