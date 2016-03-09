@@ -414,26 +414,26 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
         }
     }
     _WDS.m_ObjectVisuals.clear();
-    for (auto it : _WDS.m_Debris)
-    {
-        if (it != nullptr)
-        {
-            delete it;
-            it = nullptr;
-            MEM_FREED("CDebris")
-        }
-    }
-    _WDS.m_Debris.clear();
-    for (auto it : _WDS.m_DebrisVisuals)
-    {
-        if (it != nullptr)
-        {
-            delete it;
-            it = nullptr;
-            MEM_FREED("CDebrisVisuals")
-        }
-    }
-    _WDS.m_DebrisVisuals.clear();
+//     for (auto it : _WDS.m_Debris)
+//     {
+//         if (it != nullptr)
+//         {
+//             delete it;
+//             it = nullptr;
+//             MEM_FREED("CDebris")
+//         }
+//     }
+//     _WDS.m_Debris.clear();
+//     for (auto it : _WDS.m_DebrisVisuals)
+//     {
+//         if (it != nullptr)
+//         {
+//             delete it;
+//             it = nullptr;
+//             MEM_FREED("CDebrisVisuals")
+//         }
+//     }
+//     _WDS.m_DebrisVisuals.clear();
     
     _WDS.m_UIDUserRef.clear();
     
