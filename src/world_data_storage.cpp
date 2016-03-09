@@ -177,6 +177,9 @@ void CWorldDataStorage::addDebris(CDebris* _pDebris)
 {
     METHOD_ENTRY("CWorldDataStorage::addDebris")
     m_Debris.push_back(_pDebris);
+    
+    // Additionally, store a reference based on UID
+    m_UIDUserRef.insert({_pDebris->getUID(),_pDebris});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -411,6 +414,27 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
         }
     }
     _WDS.m_ObjectVisuals.clear();
+    for (auto it : _WDS.m_Debris)
+    {
+        if (it != nullptr)
+        {
+            delete it;
+            it = nullptr;
+            MEM_FREED("CDebris")
+        }
+    }
+    _WDS.m_Debris.clear();
+    for (auto it : _WDS.m_DebrisVisuals)
+    {
+        if (it != nullptr)
+        {
+            delete it;
+            it = nullptr;
+            MEM_FREED("CDebrisVisuals")
+        }
+    }
+    _WDS.m_DebrisVisuals.clear();
+    
     _WDS.m_UIDUserRef.clear();
     
     //-------------------------------------------------------------------------
@@ -505,6 +529,49 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
             _WDS.m_pCamera->hook(static_cast<IKinematicsStateUser*>(static_cast<IObject*>(pUIDUser)));
         }
     }
+    
+//     //-------------------------------------------------------------------------
+//     // Stream in all debris
+//     //-------------------------------------------------------------------------
+//     {
+//         DebrisType::size_type nSize;
+//         _is >> nSize;    
+//         DOM_VAR(INFO_MSG("World data storage", "Number of debris to load: " << nSize))
+//         for (auto i=0u; i<nSize; ++i)
+//         {
+//             CDebris* pDebris = new CDebris;
+//             MEM_ALLOC("CDebris")
+//             _is >> pDebris;
+//             
+//             _WDS.addDebris(pDebris);
+//             
+//             Log.progressBar("Loading debris", i, nSize);
+//         }
+//     }
+//     
+//     //-------------------------------------------------------------------------
+//     // Stream in debris visuals
+//     //-------------------------------------------------------------------------
+//     {
+//         DebrisVisualsType::size_type nSize;
+//         _is >> nSize;    
+//         DOM_VAR(INFO_MSG("World data storage", "Number of debris visuals to load: " << nSize))
+//         for (auto i=0u; i<nSize; ++i)
+//         {
+//             CDebrisVisuals* pDebVis = new CDebrisVisuals;
+//             MEM_ALLOC("CDebrisVisuals")
+//             _is >> pDebVis;
+//             
+//             UIDType UID = pDebVis->getUIDRef();
+//             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
+//             pDebVis->attachTo(static_cast<CDebris*>(pUIDUser));
+//             _WDS.addDebrisVisuals(pDebVis);
+//             
+//             Log.progressBar("Loading debris visuals", i, nSize);
+//         }
+//     }
+
+    /// \todo Implement DebrisEmitter serialisation to make debris work
         
     return _is;
 }
@@ -540,9 +607,22 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
     for (auto ci : _WDS.m_ObjectVisuals)
     {
         _os << ci << std::endl;
-    }    
+    }
 
     _os << _WDS.m_pCamera << std::endl;
+    
+//     _os << _WDS.m_Debris.size() << std::endl;
+//     for (auto ci : _WDS.m_Debris)
+//     {
+//         _os << ci << std::endl;
+//     }
+//     _os << _WDS.m_DebrisVisuals.size() << std::endl;
+//     for (auto ci : _WDS.m_DebrisVisuals)
+//     {
+//         _os << ci << std::endl;
+//     }
+    /// \todo Implement DebrisEmitter serialisation to make debris work
+    
     
     return _os;
 }

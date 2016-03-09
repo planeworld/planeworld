@@ -33,6 +33,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "circular_buffer.h"
+#include "unique_id_user.h"
 #include "universe_scaled.h"
 
 //--- Standard header --------------------------------------------------------//
@@ -53,7 +54,8 @@ using namespace Eigen;
 /// purposes, do not have any real mass and thus, do not influence other objects.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CDebris : public IUniverseScaled
+class CDebris : public IUniverseScaled,
+                public IUniqueIDUser
 {
     
     public:
@@ -81,6 +83,10 @@ class CDebris : public IUniverseScaled
         void                generate(const Vector2d&, const Vector2d&);
         void                init();
 
+        //--- friends --------------------------------------------------------//
+        friend std::istream&    operator>>(std::istream&, CDebris* const);
+        friend std::ostream&    operator<<(std::ostream&, CDebris* const);
+        
     protected:
 
         //-- Variables [protected] -------------------------------------------//
@@ -99,6 +105,8 @@ class CDebris : public IUniverseScaled
         Vector2d                m_vecForce;                  ///< Gravitational force applied
 
 };
+
+typedef std::vector<CDebris*>   DebrisType;                  ///< Specifies a list of debris
 
 //--- Implementation is done here for inline optimisation --------------------//
 

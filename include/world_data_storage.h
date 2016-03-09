@@ -42,8 +42,8 @@
 #include "object_visuals.h"
 
 typedef std::list<IJoint*>                      JointsType;                 ///< Specifies a list of joints
-typedef std::list<CDebris*>                     DebrisType;                 ///< Specifies a list of debris
-typedef std::list<CDebrisVisuals*>              DebrisVisualsType;          ///< Specifies a list of debris visuals
+typedef std::vector<CDebris*>                   DebrisType;                 ///< Specifies a list of debris
+typedef std::vector<CDebrisVisuals*>            DebrisVisualsType;          ///< Specifies a list of debris visuals
 typedef std::list<CDebrisVisualsThruster*>      DebrisVisualsThrusterType;  ///< Specifies a list of debris visuals
 typedef std::vector<IObjectVisuals*>            ObjectVisualsType;          ///< Specifies a list of object visuals
 

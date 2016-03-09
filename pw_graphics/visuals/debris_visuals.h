@@ -36,18 +36,21 @@
 //--- Program header ---------------------------------------------------------//
 #include "camera.h"
 #include "debris.h"
+#include "unique_id_referrer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the visualisation of a debris
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CDebrisVisuals : public CGraphicsBase
+class CDebrisVisuals : public CGraphicsBase,
+                       public IUniqueIDReferrer
 {
     
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
+        CDebrisVisuals();
         CDebrisVisuals(CDebris*);
         ~CDebrisVisuals();
         
@@ -55,12 +58,14 @@ class CDebrisVisuals : public CGraphicsBase
         void draw(const CCamera* const) const;
                 
         //--- Methods --------------------------------------------------------//
-        void attach(CDebris*);
+        void attachTo(CDebris*);
+        
+        //--- friends --------------------------------------------------------//
+        friend std::istream&    operator>>(std::istream&, CDebrisVisuals* const);
+        friend std::ostream&    operator<<(std::ostream&, CDebrisVisuals* const);
         
     private:
-        
-        CDebrisVisuals();       ///< Constructor is private
-        
+
         CDebris* m_pDebris;
 
 };
@@ -74,10 +79,11 @@ class CDebrisVisuals : public CGraphicsBase
 /// \param _pDebris Debris to attach
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CDebrisVisuals::attach(CDebris* _pDebris)
+inline void CDebrisVisuals::attachTo(CDebris* _pDebris)
 {
-    METHOD_ENTRY("CDebrisVisuals::attach")
+    METHOD_ENTRY("CDebrisVisuals::attachTo")
     m_pDebris = _pDebris;
+    m_UIDRef = _pDebris->getUID();
 }
 
 #endif

@@ -379,8 +379,8 @@ void CPhysicsManager::moveMasses(int nTest) const
         CTimer FrameTimeDebris;
         FrameTimeDebris.start();
         
-        for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
-            ci != m_pDataStorage->getDebris().end(); ++ci)
+        for (auto ci = m_pDataStorage->getDebris().cbegin();
+            ci != m_pDataStorage->getDebris().cend(); ++ci)
         {
             (*ci)->dynamics(1.0/m_fFrequencyDebris*m_fTimeAccel);
         }
@@ -449,8 +449,8 @@ void CPhysicsManager::addGlobalForces()
         ci->second->addAcceleration(m_vecConstantGravitation);
     };
     
-    for (std::list< CDebris* >::const_iterator ci = m_pDataStorage->getDebris().begin();
-        ci != m_pDataStorage->getDebris().end(); ++ci)
+    for (auto ci = m_pDataStorage->getDebris().cbegin();
+        ci != m_pDataStorage->getDebris().cend(); ++ci)
     {
 //         (*ci)->setForce(Vector2d(0.0, -1.81));
     }

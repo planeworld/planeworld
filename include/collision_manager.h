@@ -59,7 +59,7 @@ class CCollisionManager
                 
         //--- Methods --------------------------------------------------------//
         void detectCollisions();
-        void setDebris(const std::list<CDebris*>&);
+        void setDebris(const DebrisType&);
         void setDynamicObjects(const ObjectsType&);
         void setStaticObjects(const ObjectsType&);
         
@@ -90,7 +90,7 @@ class CCollisionManager
         PointLineContact    testPointLine(const Vector2d&, const Vector2d&, const Vector2d&,
                                           const Vector2d&, const Vector2d&, const Vector2d&);
         
-        std::list<CDebris*>     m_Debris;           ///< List of debris
+        DebrisType              m_Debris;           ///< List of debris
         ObjectsType             m_DynamicObjects;   ///< List of dynamic objects
         ObjectsType             m_StaticObjects;    ///< List of static objects
 };
@@ -104,7 +104,7 @@ class CCollisionManager
 /// \param _DebrisList List of debris
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setDebris(const std::list<CDebris*>& _DebrisList)
+inline void CCollisionManager::setDebris(const DebrisType& _DebrisList)
 {
     METHOD_ENTRY("CCollisionManager::setDebris")
 

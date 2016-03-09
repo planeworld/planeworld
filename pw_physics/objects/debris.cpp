@@ -96,6 +96,7 @@ void CDebris::generate(const Vector2d& _vecP, const Vector2d& _vecV)
     m_PosListPrev.push_back(_vecP);
     m_VelList.push_back(_vecV);
     m_VelListPrev.push_back(_vecV);
+    m_StateList.push_back(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -142,10 +143,87 @@ void CDebris::setNumber(const int& _nN)
     m_PosList.reserve(_nN);
     m_StateList.reserve(_nN);
     m_PosListPrev.reserve(_nN);
-    for (auto i=0u; i<m_PosList.capacity();++i)
-    {
-        m_StateList.push_back(true);
-    }
+//     for (auto i=0u; i<m_PosList.capacity();++i)
+//     {
+//         m_StateList.push_back(true);
+//     }
     m_VelList.reserve(_nN);
     m_VelListPrev.reserve(_nN);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _pDebris CDebris instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CDebris* const _pDebris)
+{
+    METHOD_ENTRY("CDebris::operator>>")
+    
+    std::string strTmp;
+    _is >> strTmp;
+    
+    /// \todo Stream data from IUniverseScaled
+    
+    // From IUniqueIDUser
+    _is >> _pDebris->m_UID;
+    
+    _is >> _pDebris->m_Lifetime;
+    _is >> _pDebris->m_fTimeFac;
+    
+    _is >> _pDebris->m_PosList;
+    _is >> _pDebris->m_PosListPrev;
+    _is >> _pDebris->m_VelList;
+    _is >> _pDebris->m_VelListPrev;
+    _is >> _pDebris->m_StateList;
+    
+    _is >> _pDebris->m_fDamping;
+    _is >> _pDebris->m_nDepthlayers;
+    _is >> _pDebris->m_vecForce[0] >> _pDebris->m_vecForce[1];
+    
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os Source stream
+/// \param _pDebris CDebris instance to stream
+///
+/// \return Stream with game state information of CDebris instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CDebris* const _pDebris)
+{
+    METHOD_ENTRY("CDebris::operator<<")
+    
+    _os << "Debris:" << std::endl;
+    
+    /// \todo Stream data from IUniverseScaled
+    
+    // From IUniqueIDUser
+    _os << _pDebris->m_UID << std::endl;
+    
+    _os << _pDebris->m_Lifetime << std::endl;
+    _os << _pDebris->m_fTimeFac << std::endl;
+    
+    _os << _pDebris->m_PosList << std::endl;
+    _os << _pDebris->m_PosListPrev << std::endl;
+    _os << _pDebris->m_VelList << std::endl;
+    _os << _pDebris->m_VelListPrev << std::endl;
+    _os << _pDebris->m_StateList << std::endl;
+    
+    _os << _pDebris->m_fDamping << std::endl;
+    _os << _pDebris->m_nDepthlayers << std::endl;
+    _os << _pDebris->m_vecForce[0] << " " << _pDebris->m_vecForce[1] << std::endl;
+    
+    return _os;
+}
+

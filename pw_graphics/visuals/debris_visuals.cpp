@@ -35,6 +35,17 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+CDebrisVisuals::CDebrisVisuals(): m_pDebris(nullptr)
+{
+    METHOD_ENTRY("CDebrisVisuals::CDebrisVisuals")
+    CTOR_CALL("CDebrisVisuals::CDebrisVisuals")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Copy Constructor
 ///
 /// \param _pDebris Debris to attach when initialising 
@@ -44,6 +55,7 @@ CDebrisVisuals::CDebrisVisuals(CDebris* _pDebris): m_pDebris(_pDebris)
 {
     METHOD_ENTRY("CDebrisVisuals::CDebrisVisuals")
     CTOR_CALL("CDebrisVisuals::CDebrisVisuals")
+    m_UIDRef = _pDebris->getUID();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,4 +85,49 @@ void CDebrisVisuals::draw(const CCamera* const _pCamera) const
     METHOD_ENTRY("CDebrisVisuals::draw()");
     m_Graphics.dots((*m_pDebris->getPositions()),-_pCamera->getCenter()+
                       IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Input stream for game state information
+///
+/// \param _is  Source stream
+/// \param _pDV CDebrisVisuals instance to stream
+///
+/// \return Remaining stream with game state information
+///
+////////////////////////////////////////////////////////////////////////////////
+std::istream& operator>>(std::istream& _is, CDebrisVisuals* const _pDV)
+{
+    METHOD_ENTRY("CDebrisVisuals::operator>>")
+    
+    std::string strTmp;
+    _is >> strTmp;
+    
+    // From IUniqueIDReferrer
+    _is >> _pDV->m_UIDRef;
+    
+    return _is;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output stream for game state information
+///
+/// \param _os Source stream
+/// \param _pDV CDebrisVisuals instance to stream
+///
+/// \return Stream with game state information of CDebrisVisuals instance
+///
+////////////////////////////////////////////////////////////////////////////////
+std::ostream& operator<<(std::ostream& _os, CDebrisVisuals* const _pDV)
+{
+    METHOD_ENTRY("CDebrisVisuals::operator<<")
+    
+    _os << "DebrisVisuals:" << std::endl;
+    
+    // From IUniqueIDReferrer
+    _os << _pDV->m_UIDRef << std::endl;
+    
+    return _os;
 }

@@ -148,6 +148,7 @@ std::istream& operator>>(std::istream& _is, IObjectVisuals* const _pObjVis)
             it = nullptr;
         }
     }
+    _pObjVis->m_Visuals.clear();
     
     // From IUniqueIDReferrer
     _is >> _pObjVis->m_UIDRef;

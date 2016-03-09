@@ -662,7 +662,7 @@ void CVisualsManager::drawWorld() const
     {
         (*ci)->draw(m_pCamera);
     }
-    for (std::list<CDebrisVisuals*>::const_iterator ci = m_pDataStorage->getDebrisVisuals().begin();
+    for (auto ci = m_pDataStorage->getDebrisVisuals().begin();
          ci != m_pDataStorage->getDebrisVisuals().end(); ++ci)
     {
         (*ci)->draw(m_pCamera);
