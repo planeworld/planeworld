@@ -50,6 +50,7 @@ class CPolyLine : public IShape
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
+        CPolyLine() : m_LineType(LineType::GRAPHICS_LINETYPE_STRIP){}
         virtual ~CPolyLine(){};
         
         //--- Constant Methods -----------------------------------------------//
