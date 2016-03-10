@@ -549,6 +549,7 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
         m_strCameraHook = _Node.attribute("hook").as_string();
         m_pCamera->setPosition(_Node.attribute("position_x").as_double(),
                               _Node.attribute("position_y").as_double());
+        m_pCamera->getKinematicsState().setAngle(_Node.attribute("angle").as_double()/180.0*M_PI);
         m_pCamera->setViewport(_Node.attribute("viewport_width").as_int(),
                               _Node.attribute("viewport_height").as_int());
         m_pCamera->zoomTo(GRAPHICS_PX_PER_METER/_Node.attribute("m_per_px").as_double());
