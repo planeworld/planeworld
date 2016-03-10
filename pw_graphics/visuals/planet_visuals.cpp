@@ -75,7 +75,7 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
 {
     METHOD_ENTRY("CPlanetVisuals::draw")
 
-    CPlanet* pPlanet = static_cast<CPlanet*>(m_pDBShape->getShapeCur());
+    CPlanet* pPlanet = static_cast<CPlanet*>(m_pRef->getShapeCur());
     
     double   fRad      = pPlanet->getRadius();
     double   fHeight   = pPlanet->getHeight();
@@ -116,7 +116,6 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
             fAngEnd = fAng0+fAlpha;
             LineT = LineType::GRAPHICS_LINETYPE_STRIP;
         }
-
         double fInc  = pPlanet->getGroundResolution() / fRad;
         
         // Subsample planet surface when zooming out.
@@ -154,6 +153,8 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         fAngEnd += fAngleSnap;
         
         if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+        
+//         double fAngBak = fAng;
         
 //         double fZoom = _pCamera->getZoom() * fHeight;
 //         if (fZoom > 1.0) fZoom = 1.0;
@@ -260,14 +261,14 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
 //                                                          std::sin(fAng-fPAng)*fRad);
 //                 fTerrainType = pPlanet->getTerrainType()->GetValue(std::cos(fAng-fPAng)*fRad,
 //                                                                     std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
-//                 if (fTerrainType < 0.5)
+// //                 if (fTerrainType < 0.5)
 //                 {
 //                     
-//                     double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(1.0,1.0,fAng/fInc);
-//                     double fAngGrass02 = fAng-noise::ValueNoise2D(1.0,1.0,fAng/fInc);
+//                     double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(fAng*100000,fAng,1);
+//                     double fAngGrass02 = fAng-noise::ValueNoise2D(fAng*100000,fAng,1);
 //                     double fHghtGrass01 = fabs(0.5-fTerrainType);
 //                     double fHghtGrass02 = 0.5*fabs(0.5-fTerrainType);
-//                     m_Graphics.beginLine(GRAPHICS_LINETYPE_STRIP,SHAPE_DEFAULT_DEPTH);
+//                     m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_STRIP,SHAPE_DEFAULT_DEPTH);
 //                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
 //                                                   vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 //                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
