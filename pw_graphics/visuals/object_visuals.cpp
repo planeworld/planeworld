@@ -100,7 +100,7 @@ void IObjectVisuals::draw(CCamera* const _pCamera) const
 {
     METHOD_ENTRY("IObjectVisuals::draw")
     
-    if (m_pObject->getGeometry()->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+    if (m_pRef->getGeometry()->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
     {
         for (std::vector<IVisuals*>::const_iterator ci  = m_Visuals.begin();
                                                     ci != m_Visuals.end(); ++ci)
@@ -111,11 +111,11 @@ void IObjectVisuals::draw(CCamera* const _pCamera) const
                     (((*ci)->getBoundingBox().getHeight() * m_Graphics.getResPMY()) < 1.0))
                 {
                     m_Graphics.dot((*ci)->getBoundingBox().getLowerLeft() - _pCamera->getCenter() + 
-                                    IUniverseScaled::cellToDouble(m_pObject->getCell()-_pCamera->getCell()));
+                                    IUniverseScaled::cellToDouble(m_pRef->getCell()-_pCamera->getCell()));
                 }
                 else
                 {
-                    (*ci)->draw(_pCamera, m_pObject);
+                    (*ci)->draw(_pCamera, m_pRef);
                 }
             }
         }

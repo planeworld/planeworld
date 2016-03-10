@@ -89,15 +89,15 @@ void CVisualsManager::drawBoundingBoxes() const
         {
             // Object bounding boxes
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-            m_Graphics.rect((*ci)->getObject()->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                            IUniverseScaled::cellToDouble((*ci)->getObject()->getCell()-m_pCamera->getCell()),
-                            (*ci)->getObject()->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                            IUniverseScaled::cellToDouble((*ci)->getObject()->getCell()-m_pCamera->getCell()));
+            m_Graphics.rect((*ci)->getRef()->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                            IUniverseScaled::cellToDouble((*ci)->getRef()->getCell()-m_pCamera->getCell()),
+                            (*ci)->getRef()->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                            IUniverseScaled::cellToDouble((*ci)->getRef()->getCell()-m_pCamera->getCell()));
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-            m_Graphics.filledRect((*ci)->getObject()->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                  IUniverseScaled::cellToDouble((*ci)->getObject()->getCell()-m_pCamera->getCell()),
-                                  (*ci)->getObject()->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                  IUniverseScaled::cellToDouble((*ci)->getObject()->getCell()-m_pCamera->getCell()));
+            m_Graphics.filledRect((*ci)->getRef()->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                                  IUniverseScaled::cellToDouble((*ci)->getRef()->getCell()-m_pCamera->getCell()),
+                                  (*ci)->getRef()->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                  IUniverseScaled::cellToDouble((*ci)->getRef()->getCell()-m_pCamera->getCell()));
             
             // Shape bounding boxes
             for (std::vector<IVisuals*>::const_iterator cj = (*ci)->getShapeVisuals().begin();
@@ -382,7 +382,7 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsSta
         
         if (_KinematicsState.gotReference())
         {
-            Vector2d vecRef = _KinematicsState.getReference()->getOrigin() - _KinematicsState.getOrigin();
+            Vector2d vecRef = _KinematicsState.getRef()->getOrigin() - _KinematicsState.getOrigin();
             m_Graphics.showVec(
                 vecRef,
                 _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
@@ -409,11 +409,11 @@ void CVisualsManager::drawKinematicsStates() const
         for (auto ci =  m_pDataStorage->getObjectVisuals().cbegin();
                   ci != m_pDataStorage->getObjectVisuals().cend(); ++ci)
         {
-            this->drawKinematicsState((*ci)->getObject()->getKinematicsState(),
-                                      ((*ci)->getObject()->getGeometry()->getBoundingBox().getHeight() + 
-                                       (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth()) * 0.5 * 0.33
+            this->drawKinematicsState((*ci)->getRef()->getKinematicsState(),
+                                      ((*ci)->getRef()->getGeometry()->getBoundingBox().getHeight() + 
+                                       (*ci)->getRef()->getGeometry()->getBoundingBox().getWidth()) * 0.5 * 0.33
                                      );
-//             m_Graphics.showVec((*ci)->getObject()->getForce(), (*ci)->getObject()->getKinematicsState().getOrigin() - m_pCamera->getKinematicsState().getOrigin());
+//             m_Graphics.showVec((*ci)->getRef()->getForce(), (*ci)->getRef()->getKinematicsState().getOrigin() - m_pCamera->getKinematicsState().getOrigin());
         }
         
         this->drawKinematicsState(m_pCamera->getKinematicsState(),m_pCamera->getBoundingCircleRadius() * 0.1);
@@ -601,21 +601,21 @@ void CVisualsManager::drawWorld() const
         for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
             ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
         {
-            if (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() > 1.0)
+            if (m_pCamera->getZoom() * (*ci)->getRef()->getGeometry()->getBoundingBox().getWidth() > 1.0)
             {
-                Vector2d vecPosRel = (*ci)->getObject()->getCOM()-
+                Vector2d vecPosRel = (*ci)->getRef()->getCOM()-
                                     m_pCamera->getCenter()+
                                     IUniverseScaled::cellToDouble
-                                    ((*ci)->getObject()->getCell()-
+                                    ((*ci)->getRef()->getCell()-
                                     m_pCamera->getCell());
                 
                 // Now draw the text
                 sf::Text text;
-                double fColor = (m_pCamera->getZoom() * (*ci)->getObject()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
+                double fColor = (m_pCamera->getZoom() * (*ci)->getRef()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
                 if (fColor > 255.0) fColor = 255.0;
                 sf::Color color(255.0,255.0,255.0, fColor);
                 
-                text.setString((*ci)->getObject()->getName());
+                text.setString((*ci)->getRef()->getName());
                 text.setFont(m_Font);
                 text.setCharacterSize(nTextSize);
                 text.setColor(color);

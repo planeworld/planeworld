@@ -90,7 +90,7 @@ void CPolylineVisuals::draw(CCamera* const _pCamera,
 {
     METHOD_ENTRY("CPolylineVisuals::draw")
 
-    CPolyLine* pPolyline = static_cast<CPolyLine*>(m_pDBShape->getShapeCur());
+    CPolyLine* pPolyline = static_cast<CPolyLine*>(m_pRef->getShapeCur());
     
     m_Graphics.polyline(pPolyline->getVertices(), pPolyline->getLineType(),
                         -_pCamera->getCenter() + 

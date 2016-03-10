@@ -35,6 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "unique_id.h"
+#include "unique_id_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -43,33 +44,86 @@
 /// \brief Interface for classes that refer to an unique id.
 ///
 ////////////////////////////////////////////////////////////////////////////////
+template <class T>
 class IUniqueIDReferrer
 {
 
     public:
    
         //--- Constant Methods -----------------------------------------------//
+        T* const        getRef() const;
         const UIDType   getUIDRef() const;
+        
+        //--- Methods --------------------------------------------------------//
+        void attachTo(T* const);
         
     protected:
         
-        //--- Protected variables --------------------------------------------//
-        UIDType       m_UIDRef = 0u; ///< Reference to unique identifier 
+        //--- Variables [protected] ------------------------------------------//
+        UIDType         m_UIDRef = 0u;      ///< Reference to unique identifier 
+        T*              m_pRef = nullptr;   ///< Pointer reference to UID user
+        
+        //--- Methods [protected] --------------------------------------------//
+        virtual void myAttachTo();
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns the reference to unique id
+/// \brief Attaches to UID user
 ///
-/// \return Reference to unique id
+/// \param _pRef UID user to attach to
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const UIDType IUniqueIDReferrer::getUIDRef() const
+template <class T>
+inline void IUniqueIDReferrer<T>::attachTo(T* const _pRef)
+{
+    METHOD_ENTRY("IUniqueIDReferrer::attachTo")
+    m_pRef   = _pRef;
+    m_UIDRef = _pRef->getUID();
+    
+    this->myAttachTo();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the reference to UID user
+///
+/// \return Reference to UID user
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+inline T* const IUniqueIDReferrer<T>::getRef() const
+{
+    METHOD_ENTRY("IUniqueIDReferrer::getRef")
+    return m_pRef;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the reference to unique id of UID user
+///
+/// \return Reference to unique id of UID user
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+inline const UIDType IUniqueIDReferrer<T>::getUIDRef() const
 {
     METHOD_ENTRY("IUniqueIDReferrer::getUIDRef")
     return m_UIDRef;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Method to give inherited classes the opportunity to do additional
+///        things when attaching.
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+inline void IUniqueIDReferrer<T>::myAttachTo()
+{
+    METHOD_ENTRY("IUniqueIDReferrer::myAttachTo")
 }
 
 #endif // UNIQUE_ID_REFERRER_H

@@ -71,10 +71,10 @@ const Vector2d CKinematicsState::getOrigin() const
 {
     METHOD_ENTRY("CKinematicsState::getOrigin")
     
-    if (m_pReference != nullptr)
+    if (m_pRef != nullptr)
     {
-        Rotation2Dd Rotation(m_pReference->m_fAngle);
-        Vector2d vecResult = m_pReference->m_vecOrigin + Rotation*m_vecOrigin;
+        Rotation2Dd Rotation(m_pRef->m_fAngle);
+        Vector2d vecResult = m_pRef->m_vecOrigin + Rotation*m_vecOrigin;
         
         return vecResult;
     }
@@ -95,10 +95,10 @@ const Vector2d CKinematicsState::getVelocity() const
     
     if (m_bGotReference)
     {
-        Rotation2Dd Rotation(m_pReference->m_fAngle);
+        Rotation2Dd Rotation(m_pRef->m_fAngle);
         Vector2d vecResult = Rotation * m_vecVelocity +
-                                        m_pReference->m_vecVelocity +
-                                        m_pReference->m_fAngleVelocity * Vector2d(- m_vecOrigin[1],
+                                        m_pRef->m_vecVelocity +
+                                        m_pRef->m_fAngleVelocity * Vector2d(- m_vecOrigin[1],
                                                                                     m_vecOrigin[0]);
         return vecResult;
     }
@@ -117,7 +117,7 @@ const double CKinematicsState::getAngle() const
 {
     METHOD_ENTRY("CKinematicsState::getAngle")
     if (m_bGotReference)
-        return m_pReference->m_fAngle + m_fAngle;
+        return m_pRef->m_fAngle + m_fAngle;
     else
         return m_fAngle;
 }
@@ -133,7 +133,7 @@ const double CKinematicsState::getAngleVelocity() const
 {
     METHOD_ENTRY("CKinematicsState::getAngleVelocity")
     if (m_bGotReference)
-        return m_pReference->m_fAngleVelocity + m_fAngleVelocity;
+        return m_pRef->m_fAngleVelocity + m_fAngleVelocity;
     else
         return m_fAngleVelocity;
 }
@@ -257,9 +257,9 @@ const Vector2d CKinematicsState::getPosition(const Vector2d& _vecLocal) const
     Rotation2Dd RotationLocal(m_fAngle);
     if (m_bGotReference)
     {
-        Rotation2Dd Rotation(m_pReference->m_fAngle);
+        Rotation2Dd Rotation(m_pRef->m_fAngle);
         Vector2d vecResult = Rotation * ((RotationLocal*_vecLocal) + m_vecOrigin)
-                            + m_pReference->m_vecOrigin;
+                            + m_pRef->m_vecOrigin;
         return vecResult;
     }
     else

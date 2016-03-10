@@ -55,7 +55,7 @@ enum class ShapeVisualsType
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class IVisuals : virtual public CGraphicsBase,
-                         public IUniqueIDReferrer
+                         public IUniqueIDReferrer<CDoubleBufferedShape>
 {
     
     public:
@@ -71,7 +71,6 @@ class IVisuals : virtual public CGraphicsBase,
         virtual const ShapeVisualsType  getShapeVisualsType() const;
                         
         //--- Methods --------------------------------------------------------//
-        virtual void                attachTo(CDoubleBufferedShape* const);
         virtual const CBoundingBox& getBoundingBox();
         
         //--- Friends --------------------------------------------------------//
@@ -80,9 +79,6 @@ class IVisuals : virtual public CGraphicsBase,
         
     protected:
       
-        //--- Variables [protected] ------------------------------------------//
-        CDoubleBufferedShape* m_pDBShape;       ///< Pointer to buffered shape
-
         //--- Protected methods ----------------------------------------------//
         virtual std::istream& myStreamIn (std::istream&) = 0;
         virtual std::ostream& myStreamOut(std::ostream&) = 0;
@@ -104,20 +100,6 @@ inline const ShapeVisualsType IVisuals::getShapeVisualsType() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Attaches a shape to accordant shape visuals
-///
-/// \param _pShape Shape to attach to
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IVisuals::attachTo(CDoubleBufferedShape* const _pShape)
-{
-    METHOD_ENTRY("IVisuals::attach")
-    m_pDBShape = _pShape;
-    m_UIDRef = _pShape->getUID();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Returns the bounding box of given shape of visual
 ///
 /// \return Bounding box
@@ -126,7 +108,7 @@ inline void IVisuals::attachTo(CDoubleBufferedShape* const _pShape)
 inline const CBoundingBox& IVisuals::getBoundingBox()
 {
     METHOD_ENTRY("IVisuals::getBoundingBox")
-    return m_pDBShape->getShapeCur()->getBoundingBox();
+    return m_pRef->getShapeCur()->getBoundingBox();
 }
 
 #endif // VISUALS_H

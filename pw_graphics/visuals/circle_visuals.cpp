@@ -90,8 +90,8 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
 {
     METHOD_ENTRY("CCircleVisuals::draw()");
     
-    double   fRad      = static_cast<CCircle*>(m_pDBShape->getShapeCur())->getRadius();
-    Vector2d vecCenter = static_cast<CCircle*>(m_pDBShape->getShapeCur())->getCenter() - _pCamera->getCenter()/* +
+    double   fRad      = static_cast<CCircle*>(m_pRef->getShapeCur())->getRadius();
+    Vector2d vecCenter = static_cast<CCircle*>(m_pRef->getShapeCur())->getCenter() - _pCamera->getCenter()/* +
                          IUniverseScaled::cellToDouble(_pObject->getCell() - _pCamera->getCell())*/;
 
                          if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&

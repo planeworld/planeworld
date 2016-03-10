@@ -105,7 +105,7 @@ inline bool IKinematicsStateUser::hook(IKinematicsStateUser* const _pKinematicsS
 {
     METHOD_ENTRY("IKinematicsStateUser::hook")
 
-    m_KinematicsState.setReference(&(_pKinematicsStateUser->getKinematicsState()));
+    m_KinematicsState.attachTo(&(_pKinematicsStateUser->getKinematicsState()));
     
     _pKinematicsStateUser->addHook(this);
     return true;

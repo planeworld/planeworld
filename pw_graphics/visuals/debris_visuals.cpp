@@ -38,7 +38,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebrisVisuals::CDebrisVisuals(): m_pDebris(nullptr)
+CDebrisVisuals::CDebrisVisuals()
 {
     METHOD_ENTRY("CDebrisVisuals::CDebrisVisuals")
     CTOR_CALL("CDebrisVisuals::CDebrisVisuals")
@@ -51,11 +51,11 @@ CDebrisVisuals::CDebrisVisuals(): m_pDebris(nullptr)
 /// \param _pDebris Debris to attach when initialising 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebrisVisuals::CDebrisVisuals(CDebris* _pDebris): m_pDebris(_pDebris)
+CDebrisVisuals::CDebrisVisuals(CDebris* _pDebris)
 {
     METHOD_ENTRY("CDebrisVisuals::CDebrisVisuals")
     CTOR_CALL("CDebrisVisuals::CDebrisVisuals")
-    m_UIDRef = _pDebris->getUID();
+    this->attachTo(_pDebris);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,8 +83,8 @@ CDebrisVisuals::~CDebrisVisuals()
 void CDebrisVisuals::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CDebrisVisuals::draw()");
-    m_Graphics.dots((*m_pDebris->getPositions()),-_pCamera->getCenter()+
-                      IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
+    m_Graphics.dots((*m_pRef->getPositions()),-_pCamera->getCenter()+
+                      IUniverseScaled::cellToDouble(m_pRef->getCell() - _pCamera->getCell()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

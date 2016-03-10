@@ -93,7 +93,7 @@ void CTerrainVisuals::draw(CCamera* const _pCamera,
 {
     METHOD_ENTRY("CTerrainVisuals::draw")
     
-    CTerrain* pTerrain = static_cast<CTerrain*>(m_pDBShape->getShapeCur());
+    CTerrain* pTerrain = static_cast<CTerrain*>(m_pRef->getShapeCur());
 
     double   fWidth    = pTerrain->getWidth();
     Vector2d vecCenter = pTerrain->getCenter();

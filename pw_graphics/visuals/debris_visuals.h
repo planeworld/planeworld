@@ -44,7 +44,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CDebrisVisuals : public CGraphicsBase,
-                       public IUniqueIDReferrer
+                       public IUniqueIDReferrer<CDebris>
 {
     
     public:
@@ -52,38 +52,17 @@ class CDebrisVisuals : public CGraphicsBase,
         //--- Constructor/Destructor -----------------------------------------//
         CDebrisVisuals();
         CDebrisVisuals(CDebris*);
-        ~CDebrisVisuals();
+        virtual ~CDebrisVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         void draw(const CCamera* const) const;
                 
-        //--- Methods --------------------------------------------------------//
-        void attachTo(CDebris*);
-        
         //--- friends --------------------------------------------------------//
         friend std::istream&    operator>>(std::istream&, CDebrisVisuals* const);
         friend std::ostream&    operator<<(std::ostream&, CDebrisVisuals* const);
         
-    private:
-
-        CDebris* m_pDebris;
-
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a debris to debris visuals
-///
-/// \param _pDebris Debris to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CDebrisVisuals::attachTo(CDebris* _pDebris)
-{
-    METHOD_ENTRY("CDebrisVisuals::attachTo")
-    m_pDebris = _pDebris;
-    m_UIDRef = _pDebris->getUID();
-}
-
-#endif
+#endif // DEBRIS_VISUALS_H
