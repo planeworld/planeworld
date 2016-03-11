@@ -69,7 +69,7 @@ void CTimer::stop()
                    ) *
                    TIMER_OUTPUT_SEC_FACTOR;
 }
-#include <iostream>
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Sleeps for the time that remains between stop and start given a frequency.
