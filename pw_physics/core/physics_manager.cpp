@@ -45,7 +45,6 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                      m_fFrequencyLua(PHYSICS_LUA_DEFAULT_FREQUENCY),
                                      m_fProcessingTime(0.0),
-                                     m_fTimeAccel(1.0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_strLuaPhysicsInterface(PHYSICS_DEFAULT_LUA_INTERFACE)
@@ -279,9 +278,6 @@ void CPhysicsManager::initObjects()
     METHOD_ENTRY("CPhysicsManager::initObjects")
 
     //--- Init objects -------------------------------------------------------//
-    m_Timer.stop();
-    m_Timer.start();
-
     INFO_MSG("Physics Manager", "Initialising objects.")
 
     for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
@@ -361,7 +357,7 @@ void CPhysicsManager::moveMasses(int nTest) const
     for (auto ci = m_Emitters.cbegin();
         ci != m_Emitters.cend(); ++ci)
     {
-        (*ci).second->emit(1.0/m_fFrequency*m_fTimeAccel);
+        (*ci).second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
     }
     for (auto ci = m_Components.cbegin();
         ci != m_Components.cend(); ++ci)
@@ -371,7 +367,7 @@ void CPhysicsManager::moveMasses(int nTest) const
     for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
         ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
     {
-        ci->second->dynamics(1.0/m_fFrequency*m_fTimeAccel);
+        ci->second->dynamics(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
         ci->second->transform();
     }
     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
@@ -382,7 +378,7 @@ void CPhysicsManager::moveMasses(int nTest) const
         for (auto ci = m_pDataStorage->getDebris().cbegin();
             ci != m_pDataStorage->getDebris().cend(); ++ci)
         {
-            (*ci)->dynamics(1.0/m_fFrequencyDebris*m_fTimeAccel);
+            (*ci)->dynamics(1.0/m_fFrequencyDebris*m_pDataStorage->getTimeScale());
         }
         
         FrameTimeDebris.stop();
@@ -496,7 +492,7 @@ void CPhysicsManager::updateCells()
     METHOD_ENTRY("CPhysicsManager::updateCells")
     
     // Use double frequency just to avoid any surprises
-    double fFreq = 6.0e9*m_fTimeAccel*m_pDataStorage->getDynamicObjects().size()/DEFAULT_CELL_SIZE_2;
+    double fFreq = 6.0e9*m_pDataStorage->getTimeScale()*m_pDataStorage->getDynamicObjects().size()/DEFAULT_CELL_SIZE_2;
 
     double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
     uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
@@ -661,7 +657,7 @@ int CPhysicsManager::luaGetFrequency(lua_State* _pLuaState)
     if (nParam == 0)
     {
         lua_pushnumber(_pLuaState, m_pLuaThis->m_fFrequency);
-        lua_pushnumber(_pLuaState, m_pLuaThis->m_fTimeAccel);
+        lua_pushnumber(_pLuaState, m_pLuaThis->m_pDataStorage->getTimeScale());
     }
     else
     {

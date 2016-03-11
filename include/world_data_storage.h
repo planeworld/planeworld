@@ -70,8 +70,10 @@ class CWorldDataStorage
         const ObjectsType&                  getDynamicObjects();
         const ObjectsType&                  getStaticObjects();
         const ObjectVisualsType&            getObjectVisuals();
+        const double&                       getTimeScale() const;
         
         const ObjectsType::const_iterator recallDynamicObject(const std::string&);
+        
         
         //--- Methods --------------------------------------------------------//
         void addDebris(CDebris*);
@@ -89,6 +91,7 @@ class CWorldDataStorage
         void unlockObjects(){m_ObjectMutex.unlock();}
         
         void setCamera(CCamera* const);
+        void setTimeScale(const double&);
         
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CWorldDataStorage&);
@@ -112,6 +115,8 @@ class CWorldDataStorage
         
         std::mutex                  m_ObjectMutex;              ///< Mutex to lock object
         std::mutex                  m_ObjectVisualsMutex;       ///< Mutex to lock object visuals
+        
+        double                      m_fTimeScale;               ///< Factor for global acceleration of time
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -224,6 +229,19 @@ inline const ObjectVisualsType& CWorldDataStorage::getObjectVisuals()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns the global time scale of the simulation
+///
+/// \return Global time scale of simulation
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CWorldDataStorage::getTimeScale() const
+{
+    METHOD_ENTRY("CWorldDataStorage::getTimeScale")
+    return m_fTimeScale;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Sets the active camera
 ///
 /// \param _pCam Active camera
@@ -234,5 +252,19 @@ inline void CWorldDataStorage::setCamera(CCamera* const _pCam)
     METHOD_ENTRY("CWorldDataStorage::setCamera")
     m_pCamera = _pCam;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the global time scale of the simulation
+///
+/// \param _fTimeScale Global time scale of the simulation
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWorldDataStorage::setTimeScale(const double& _fTimeScale)
+{
+    METHOD_ENTRY("CWorldDataStorage::setTimeScale")
+    m_fTimeScale = _fTimeScale;
+}
+
 
 #endif // WORLD_DATA_STORAGE_H

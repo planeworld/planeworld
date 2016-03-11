@@ -45,7 +45,8 @@
 ///
 /// \brief Class representing a camera for a view on the scene
 ///
-/// \todo Implement camera streaming capabilities.
+/// \todo Clean up to just use kinematics state without wrapping methods like
+///       setPosition.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CCamera : public CGraphicsBase,

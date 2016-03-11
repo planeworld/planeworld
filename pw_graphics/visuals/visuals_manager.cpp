@@ -43,7 +43,7 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
     
-    m_strFont = "consola.ttf";
+    m_strFont = "";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -493,6 +493,20 @@ void CVisualsManager::drawTrajectories() const
 void CVisualsManager::drawWorld() const
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
+    
+    // Now draw the text
+    std::stringstream oss;
+
+    oss << "Time Scale: " << m_pDataStorage->getTimeScale();
+    
+    m_Graphics.getWindow()->pushGLStates();
+    sf::Text Text;
+    Text.setString(oss.str());
+    Text.setFont(m_Font);
+    Text.setCharacterSize(12);
+    Text.setPosition(0.0f, 0.0f);
+    m_Graphics.getWindow()->draw(Text);
+    m_Graphics.getWindow()->popGLStates();
     
     //const double fRmax = 3.6e20;
     //const double fBGDensityFactor = 1.0e18; 

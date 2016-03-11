@@ -110,12 +110,10 @@ class CPhysicsManager : public IWorldDataStorageUser
         CUniverse*          m_pUniverse;            ///< The procedurally generated universe
         CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
 
-        CTimer              m_Timer;                ///< Timer for physics
         double              m_fFrequency;           ///< Frequency of physics processing
         double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
         double              m_fFrequencyLua;        ///< Frequency of Lua interface
         double              m_fProcessingTime;      ///< Overall processing time
-        double              m_fTimeAccel;           ///< Factor for global acceleration
 
         Vector2d m_vecConstantGravitation;          ///< Vector for constant gravitation
 
@@ -268,10 +266,10 @@ inline void CPhysicsManager::setUniverse(CUniverse* const _pUniverse)
 inline void CPhysicsManager::accelerateTime()
 {
     METHOD_ENTRY("CPhysicsManager::accelerateTime")
-    if (m_fTimeAccel < 10000000.0)
-        m_fTimeAccel *= 2.0;
+    if (m_pDataStorage->getTimeScale() < 10000000.0)
+        m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 2.0);
         
-    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_pDataStorage->getTimeScale()))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -282,8 +280,8 @@ inline void CPhysicsManager::accelerateTime()
 inline void CPhysicsManager::decelerateTime()
 {
     METHOD_ENTRY("CPhysicsManager::decelerateTime")
-    m_fTimeAccel *= 0.5;
-    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
+    m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 0.5);
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_pDataStorage->getTimeScale()))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -294,8 +292,8 @@ inline void CPhysicsManager::decelerateTime()
 inline void CPhysicsManager::resetTime()
 {
     METHOD_ENTRY("CPhysicsManager::resetTime")
-    m_fTimeAccel = 1.0;
-    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
+    m_pDataStorage->setTimeScale(1.0);
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_pDataStorage->getTimeScale()))
 }
 
 #endif

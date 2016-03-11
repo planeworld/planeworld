@@ -37,7 +37,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CWorldDataStorage::CWorldDataStorage()                                  
+CWorldDataStorage::CWorldDataStorage() : m_fTimeScale(1.0)                                 
 {
     METHOD_ENTRY("CWorldDataStorage::CWorldDataStorage")
     CTOR_CALL("CWorldDataStorage::CWorldDataStorage")
@@ -572,6 +572,8 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 //     }
 
     /// \todo Implement DebrisEmitter serialisation to make debris work
+    
+    _is >> _WDS.m_fTimeScale;
         
     return _is;
 }
@@ -623,6 +625,7 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
 //     }
     /// \todo Implement DebrisEmitter serialisation to make debris work
     
+    _os << _WDS.m_fTimeScale << std::endl;
     
     return _os;
 }
