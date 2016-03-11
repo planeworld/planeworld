@@ -64,7 +64,7 @@ void CTimer::stop()
 {
     m_Stop = std::chrono::high_resolution_clock::now();
     
-    m_fDiffTime += static_cast<double>(
+    m_fDiffTime = static_cast<double>(
                        std::chrono::duration_cast<std::chrono::microseconds>(m_Stop - m_Start).count()
                    ) *
                    TIMER_OUTPUT_SEC_FACTOR;
