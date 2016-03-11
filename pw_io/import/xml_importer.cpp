@@ -26,6 +26,9 @@
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2011-02-15
 ///
+/// \todo Implement suffix "_ref" to manipulate single parameters with respect
+///       to kinematics reference.
+///
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "xml_importer.h"
@@ -552,7 +555,7 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
         m_pCamera->getKinematicsState().setAngle(_Node.attribute("angle").as_double()/180.0*M_PI);
         m_pCamera->setViewport(_Node.attribute("viewport_width").as_int(),
                               _Node.attribute("viewport_height").as_int());
-        m_pCamera->zoomTo(GRAPHICS_PX_PER_METER/_Node.attribute("m_per_px").as_double());
+        m_pCamera->zoomTo(GRAPHICS_PX_PER_METER/checkAttributeDouble(_Node, "m_per_px", 0.5, false));
 //         if (checkAttributeBool(_Node, "enable_angle_hook", true)) m_pCamera->enableAngleHook();
 //         else m_pCamera->disableAngleHook();
         
