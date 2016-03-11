@@ -69,7 +69,7 @@ void CTimer::stop()
                    ) *
                    TIMER_OUTPUT_SEC_FACTOR;
 }
-
+#include <iostream>
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Sleeps for the time that remains between stop and start given a frequency.
@@ -85,7 +85,7 @@ void CTimer::stop()
 void CTimer::sleepRemaining(const double& _fFreq)
 {
     this->stop();
-    double fFrametime = 1.0e6/_fFreq-this->getTime();
+    double fFrametime = 1.0e6*(1.0/_fFreq-this->getTime());
     if (fFrametime > 0.0)
     {
         unsigned int unFrametime = static_cast<unsigned int>(fFrametime);
