@@ -211,7 +211,8 @@ int main(int argc, char *argv[])
 // 
 //     pPhysicsManager->addJoint(pSpring);
 //     pSpring->setVisualsID(pVisualsManager->addVisuals(pSpringVisuals));
-    
+ 
+    pVisualsManager->setPhysicsManager(pPhysicsManager);
     pVisualsManager->setUniverse(&Universe);
     pPhysicsManager->setUniverse(&Universe);
 
@@ -278,6 +279,21 @@ int main(int argc, char *argv[])
                         case sf::Keyboard::Escape:
                         {
                             bDone = true;
+                            break;
+                        }
+                        case sf::Keyboard::Num1:
+                        {
+                            pPhysicsManager->getSimTimerLocal()[0].toggle();
+                            break;
+                        }
+                        case sf::Keyboard::Num2:
+                        {
+                            pPhysicsManager->getSimTimerLocal()[1].toggle();
+                            break;
+                        }
+                        case sf::Keyboard::Num3:
+                        {
+                            pPhysicsManager->getSimTimerLocal()[2].toggle();
                             break;
                         }
                         case sf::Keyboard::Add:

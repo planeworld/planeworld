@@ -34,6 +34,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "physics_manager.h"
 #include "universe.h"
 #include "world_data_storage_user.h"
 
@@ -67,6 +68,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         void            setFont(const std::string&);
         void            setFrequency(const double&);
         void            setUniverse(CUniverse* const);
+        void            setPhysicsManager(CPhysicsManager* const);
         void            setVisualisations(const int&);
         void            setWindow(WindowHandleType* const);
         void            toggleVisualisations(const int&);
@@ -85,6 +87,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         void            finishFrame() const;
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
+        CPhysicsManager*                m_pPhysicsManager;  ///< Reference to physics
         double                          m_fFrequency;       ///< Frequency of visuals update
         int                             m_nVisualisations;  ///< Additional graphical output
         std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star
@@ -208,6 +211,19 @@ inline void CVisualsManager::setUniverse(CUniverse* const _pUniverse)
 {
     METHOD_ENTRY("CVisualsManager::setUniverse")
     m_pUniverse = _pUniverse;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets reference to physics to access its parameters
+///
+/// \param _pPhysMan Reference to physics manager
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CVisualsManager::setPhysicsManager(CPhysicsManager* const _pPhysMan)
+{
+    METHOD_ENTRY("CVisualsManager::setPhysicsManager")
+    m_pPhysicsManager = _pPhysMan;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

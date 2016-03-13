@@ -55,6 +55,7 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
     
     m_vecConstantGravitation.setZero();
     m_pLuaThis = this;
+    m_SimTimerGlobal.start();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,6 +69,7 @@ CPhysicsManager::~CPhysicsManager()
     DTOR_CALL("CPhysicsManager::~CPhysicsManager")
 
     lua_close(m_pLuaState);
+    m_SimTimerGlobal.stop();
     
     for (auto it = m_Emitters.begin();
         it != m_Emitters.end(); ++it)
@@ -305,6 +307,11 @@ void CPhysicsManager::processFrame()
 {
     METHOD_ENTRY("CPhysicsManager::processFrame")
  
+    m_SimTimerGlobal.inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+    m_SimTimerLocal[0].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+    m_SimTimerLocal[1].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+    m_SimTimerLocal[2].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+    
     static auto nFrame = 0u;
     if (++nFrame == 10000) nFrame = 0;    
     

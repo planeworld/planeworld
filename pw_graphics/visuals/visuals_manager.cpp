@@ -36,6 +36,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
+                                     m_pPhysicsManager(nullptr),
                                      m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
                                      m_nVisualisations(0),
                                      m_nStarIndex(-1)
@@ -496,14 +497,30 @@ void CVisualsManager::drawWorld() const
     
     // Now draw the text
     std::stringstream oss;
-
-    oss << "Time Scale: " << m_pDataStorage->getTimeScale();
     
+    oss << "Simulation time: "
+        << m_pPhysicsManager->getSimTimerGlobal().getYears() << "y "
+        << m_pPhysicsManager->getSimTimerGlobal().getDaysPart() << "d "
+        << m_pPhysicsManager->getSimTimerGlobal().getHoursPart() << "h "
+        << m_pPhysicsManager->getSimTimerGlobal().getMinutesPart() << "m "
+        << m_pPhysicsManager->getSimTimerGlobal().getSecondsPart() << "s" << std::endl;
+    for (auto i=0u; i<3; ++i)
+    {
+        if (m_pPhysicsManager->getSimTimerLocal()[i].isActive())
+        {
+            oss << "Local timer " << i+1 << ":   "
+                << m_pPhysicsManager->getSimTimerLocal()[i].getYears() << "y "
+                << m_pPhysicsManager->getSimTimerLocal()[i].getDaysPart() << "d "
+                << m_pPhysicsManager->getSimTimerLocal()[i].getHoursPart() << "h "
+                << m_pPhysicsManager->getSimTimerLocal()[i].getMinutesPart() << "m "
+                << m_pPhysicsManager->getSimTimerLocal()[i].getSecondsPart() << "s" << std::endl;
+        }
+    }
     m_Graphics.getWindow()->pushGLStates();
     sf::Text Text;
     Text.setString(oss.str());
     Text.setFont(m_Font);
-    Text.setCharacterSize(12);
+    Text.setCharacterSize(16);
     Text.setPosition(0.0f, 0.0f);
     m_Graphics.getWindow()->draw(Text);
     m_Graphics.getWindow()->popGLStates();

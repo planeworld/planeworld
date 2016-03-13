@@ -34,6 +34,9 @@ Usage
 
 | Key/Mouse                | Description                     |
 |--------------------------|---------------------------------|
+| 1                        | Toggle timer 1                  |
+| 2                        | Toggle timer 2                  |
+| 3                        | Toggle timer 3                  |
 | g                        | Show grid                       |
 | b                        | Show bounding boxes             |
 | k                        | Show kinematics states          |
