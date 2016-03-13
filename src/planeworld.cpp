@@ -281,6 +281,11 @@ int main(int argc, char *argv[])
                             bDone = true;
                             break;
                         }
+                        case sf::Keyboard::Num0:
+                        {
+                            pVisualsManager->toggleVisualisations(VISUALS_TIMERS);
+                            break;
+                        }
                         case sf::Keyboard::Num1:
                         {
                             pPhysicsManager->getSimTimerLocal()[0].toggle();

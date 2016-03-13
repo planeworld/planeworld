@@ -82,6 +82,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         void            drawGridHUD() const;
         void            drawKinematicsState(const CKinematicsState&, const double&) const;
         void            drawKinematicsStates() const;
+        void            drawTimers() const;
         void            drawTrajectories() const;
         void            drawWorld() const;
         void            finishFrame() const;

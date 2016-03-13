@@ -56,7 +56,8 @@ enum Visuals
     VISUALS_UNIVERSE_GRID = 2,
     VISUALS_OBJECT_TRAJECTORIES = 4,
     VISUALS_NAMES = 8,
-    VISUALS_KINEMATICS_STATES = 16
+    VISUALS_KINEMATICS_STATES = 16,
+    VISUALS_TIMERS = 32
 };
 
 /// Specifies depthlayer bitcodes
