@@ -306,14 +306,14 @@ void CCollisionManager::test(CPolyLine* _pP1, CPolyLine* _pP0, CBody* _p1, CDebr
     double fDampOrth = 0.5;
     double fDampTang = 1.0;
     
-    std::list<Vector2d>::const_iterator ciP01;
-    std::list<Vector2d>::const_iterator ciP00;
-    std::list<Vector2d>::const_iterator ciP11;
-    std::list<Vector2d>::const_iterator ciP10;
+    VertexListType::const_iterator ciP01;
+    VertexListType::const_iterator ciP00;
+    VertexListType::const_iterator ciP11;
+    VertexListType::const_iterator ciP10;
     
     // Iterators storing the segment vertices of collision
-    std::list<Vector2d>::const_iterator ciPS1;
-    std::list<Vector2d>::const_iterator ciPS0;
+    VertexListType::const_iterator ciPS1;
+    VertexListType::const_iterator ciPS0;
     
     for (auto i=0u; i<pPos->size(); ++i)
     {
@@ -842,11 +842,11 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
     Vector2d vecA1 = _pA1->getCenter();
     Vector2d vecA0 = _pA0->getCenter();
     
-    std::list<Vector2d>::const_iterator ciB01 = _pB1->getVertices().begin();
-    std::list<Vector2d>::const_iterator ciB00 = _pB0->getVertices().begin();
+    VertexListType::const_iterator ciB01 = _pB1->getVertices().begin();
+    VertexListType::const_iterator ciB00 = _pB0->getVertices().begin();
     
-    std::list<Vector2d>::const_iterator ciB11 = ciB01;
-    std::list<Vector2d>::const_iterator ciB10 = ciB00;
+    VertexListType::const_iterator ciB11 = ciB01;
+    VertexListType::const_iterator ciB10 = ciB00;
     ++ciB11;
     ++ciB10;
     
@@ -961,11 +961,11 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
 {
     METHOD_ENTRY("CCollisionManager::test")
     
-    std::list<Vector2d>::const_iterator ciA01 = _pA1->getVertices().begin();
-    std::list<Vector2d>::const_iterator ciA00 = _pA0->getVertices().begin();
+    VertexListType::const_iterator ciA01 = _pA1->getVertices().begin();
+    VertexListType::const_iterator ciA00 = _pA0->getVertices().begin();
     
-    std::list<Vector2d>::const_iterator ciA11 = ciA01;
-    std::list<Vector2d>::const_iterator ciA10 = ciA00;
+    VertexListType::const_iterator ciA11 = ciA01;
+    VertexListType::const_iterator ciA10 = ciA00;
     ++ciA11;
     ++ciA10;
     
@@ -975,8 +975,8 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
     
     while (ciA11 != _pA1->getVertices().end())
     {
-        std::list<Vector2d>::const_iterator ciB1 = _pB1->getVertices().begin();
-        std::list<Vector2d>::const_iterator ciB0 = _pB0->getVertices().begin();
+        VertexListType::const_iterator ciB1 = _pB1->getVertices().begin();
+        VertexListType::const_iterator ciB0 = _pB0->getVertices().begin();
         
         while (ciB1 != _pB1->getVertices().end())
         {
@@ -998,8 +998,8 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
     {
         ciA11 = _pA1->getVertices().begin();
         ciA10 = _pA1->getVertices().begin();
-        std::list<Vector2d>::const_iterator ciB1 = _pB1->getVertices().begin();
-        std::list<Vector2d>::const_iterator ciB0 = _pB0->getVertices().begin();
+        VertexListType::const_iterator ciB1 = _pB1->getVertices().begin();
+        VertexListType::const_iterator ciB0 = _pB0->getVertices().begin();
         
         while (ciB1 != _pB1->getVertices().end())
         {

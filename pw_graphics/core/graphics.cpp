@@ -605,7 +605,7 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR) const
 ///                   be shifted.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::polyline(const std::list<Vector2d>& _Vertices,
+void CGraphics::polyline(const VertexListType& _Vertices,
                          const LineType& _LineType,
                          const Vector2d& _vecOffset) const
 {
@@ -625,7 +625,7 @@ void CGraphics::polyline(const std::list<Vector2d>& _Vertices,
     }
     if (_vecOffset.isZero())
     {
-        for (std::list<Vector2d>::const_iterator ci = _Vertices.begin();
+        for (VertexListType::const_iterator ci = _Vertices.begin();
             ci != _Vertices.end(); ++ci)
         {
             glVertex3d((*ci)[0], (*ci)[1], -15.0);
@@ -633,7 +633,7 @@ void CGraphics::polyline(const std::list<Vector2d>& _Vertices,
     }
     else
     {
-        for (std::list<Vector2d>::const_iterator ci = _Vertices.begin();
+        for (VertexListType::const_iterator ci = _Vertices.begin();
             ci != _Vertices.end(); ++ci)
         {
             glVertex3d((*ci)[0]+_vecOffset[0], (*ci)[1]+_vecOffset[1], -15.0);

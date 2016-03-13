@@ -54,11 +54,11 @@ class CPolyLine : public IShape
         virtual ~CPolyLine(){};
         
         //--- Constant Methods -----------------------------------------------//
-        CPolyLine*                  clone() const;
+        CPolyLine*              clone() const;
         
-        const LineType&             getLineType() const;
-        const ShapeType             getShapeType() const;
-        const std::list<Vector2d>&  getVertices() const;
+        const LineType&         getLineType() const;
+        const ShapeType         getShapeType() const;
+        const VertexListType&   getVertices() const;
 
         //--- Methods --------------------------------------------------------//
         void addVertex(const Vector2d&);
@@ -78,8 +78,8 @@ class CPolyLine : public IShape
 
         //--- Protected variables --------------------------------------------//
         LineType                m_LineType;     ///< Type of polyline
-        std::list<Vector2d>     m_VertList;     ///< List of vertices
-        std::list<Vector2d>     m_VertList0;    ///< List of vertices
+        VertexListType          m_VertList;     ///< List of vertices
+        VertexListType          m_VertList0;    ///< List of vertices
 
 };
 
@@ -101,7 +101,7 @@ inline const LineType& CPolyLine::getLineType() const
 /// \brief Get pointer on array of vertices
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::list<Vector2d>& CPolyLine::getVertices() const
+inline const VertexListType& CPolyLine::getVertices() const
 {
     METHOD_ENTRY("CPolyLine::getVertices");
     return m_VertList;

@@ -91,8 +91,8 @@ void CPolyLine::transform(const double& _fAngle, const Vector2d& _vecV)
 
     Rotation2Dd Rotation(_fAngle);
 
-    std::list<Vector2d>::const_iterator ci = m_VertList0.begin();
-    std::list<Vector2d>::iterator it = m_VertList.begin();
+    VertexListType::const_iterator ci = m_VertList0.begin();
+    VertexListType::iterator it = m_VertList.begin();
     
     m_AABB.setLowerLeft( Rotation * (*ci) + _vecV);
     m_AABB.setUpperRight(Rotation * (*ci) + _vecV);
@@ -128,18 +128,29 @@ std::istream& CPolyLine::myStreamIn(std::istream& _is)
     std::string strTmp;
     _is >> strTmp;
     
+    m_VertList.clear();
+    m_VertList0.clear();
+    
     // Cast streamable basetype to strongly typed enum LineType
     std::underlying_type<LineType>::type nLinetype;
     _is >> nLinetype; m_LineType = static_cast<LineType>(nLinetype);
     
-    /// \todo Implement streaming of VertLists
+    VertexListType::size_type nSize;
+    _is >> nSize;
     
-//      _os << m_VertList.size();
-//     for (auto ci : m_VertList)
-//         _os << ci;
-//     for (auto ci : m_VertList0)
-//         _os << ci;
-    
+    for (auto i=0u; i<nSize; ++i)
+    {
+        Vector2d vecIn;
+        _is >> vecIn[0] >> vecIn[1];
+        m_VertList.push_back(vecIn);
+    }
+    for (auto i=0u; i<nSize; ++i)
+    {
+        Vector2d vecIn;
+        _is >> vecIn[0] >> vecIn[1];
+        m_VertList0.push_back(vecIn);
+    }
+        
     return _is;
 }
 
