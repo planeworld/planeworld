@@ -171,8 +171,8 @@ bool CXMLImporter::import(const std::string& _strFilename,
         {
             if (!checkFile(N))
             {
-                m_strLuaPhysicsInterface = checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
-                m_strFont = checkAttributeString(N, "font", m_strFont);
+                m_strLuaPhysicsInterface = strPath+"/"+checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
+                m_strFont = strPath+"/"+checkAttributeString(N, "font", m_strFont);
                 m_fLuaFrequency  = checkAttributeDouble(N, "lua_frequency", m_fLuaFrequency);
                 m_fDebrisFrequency  = checkAttributeDouble(N, "debris_frequency", m_fDebrisFrequency);
                 m_fPhysicsFrequency = checkAttributeDouble(N, "physics_frequency", m_fPhysicsFrequency);
