@@ -64,10 +64,7 @@ void CTimer::stop()
 {
     m_Stop = std::chrono::high_resolution_clock::now();
     
-    m_fDiffTime = static_cast<double>(
-                       std::chrono::duration_cast<std::chrono::microseconds>(m_Stop - m_Start).count()
-                   ) *
-                   TIMER_OUTPUT_SEC_FACTOR;
+    m_fDiffTime = std::chrono::duration<double>(m_Stop - m_Start).count();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +82,7 @@ void CTimer::stop()
 void CTimer::sleepRemaining(const double& _fFreq)
 {
     this->stop();
-    double fFrametime = 1.0e6*(1.0/_fFreq-this->getTime());
+    double fFrametime = 1.0e6*(1.0/_fFreq-m_fDiffTime);
     if (fFrametime > 0.0)
     {
         unsigned int unFrametime = static_cast<unsigned int>(fFrametime);
@@ -103,11 +100,9 @@ void CTimer::sleepRemaining(const double& _fFreq)
 ///////////////////////////////////////////////////////////////////////////////
 double CTimer::getSplitTime()
 {
-    return static_cast<double>(
-        std::chrono::duration_cast<std::chrono::microseconds>(
-          std::chrono::high_resolution_clock::now() - m_Start).count()
-        ) *
-        TIMER_OUTPUT_SEC_FACTOR;
+    return std::chrono::duration<double>(
+            std::chrono::high_resolution_clock::now() - m_Start
+        ).count();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
