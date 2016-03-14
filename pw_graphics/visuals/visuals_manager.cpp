@@ -364,10 +364,10 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsSta
         
         sf::Text text;
         sf::Color color(255.0, 255.0, 255.0, 255.0 * fTransparency);
-        oss << "Local angle:    " <<  _KinematicsState.getLocalAngle() / M_PI * 180.0 << "\n";
+        oss << "Local angle:    " <<  _KinematicsState.getLocalAngle() << "\n";
         oss << "Local origin:   " <<  _KinematicsState.getLocalOrigin()[0] << ", "
                                   <<  _KinematicsState.getLocalOrigin()[1] << "\n";
-        oss << "Angle:          " <<  _KinematicsState.getAngle() / M_PI * 180.0 << "\n";
+        oss << "Angle:          " <<  _KinematicsState.getAngle() << "\n";
         oss << "Origin:         " <<  _KinematicsState.getOrigin()[0] << ", "
                                   <<  _KinematicsState.getOrigin()[1] << "\n";
         text.setString(oss.str());

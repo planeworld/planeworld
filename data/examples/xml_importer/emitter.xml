@@ -9,7 +9,7 @@
     origin_y="0.0"
     velocity="50.0"
     velocity_std="10.0"
-    angle="0.0"
-    angle_std="5.0"
+    angle__deg="0.0"
+    angle_std__deg="5.0"
     number="1000"
 />

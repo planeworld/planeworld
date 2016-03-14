@@ -65,7 +65,7 @@ CXMLImporter::CXMLImporter() : m_pCurrentEmitter(nullptr),
                                m_pCurrentDoubleBufferedShape(nullptr),
                                m_pCamera(nullptr),
                                m_strPath(""),
-                               m_strFont("consola.ttf"),
+                               m_strFont(""),
                                m_strLuaPhysicsInterface("physics_interface.lua"),
                                m_fDebrisFrequency(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                m_fLuaFrequency(PHYSICS_LUA_DEFAULT_FREQUENCY),
@@ -393,7 +393,22 @@ const double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node,
                                           const bool _bNotice) const
 {
     METHOD_ENTRY("CXMLImporter::checkAttributeDouble")
-    if (_Node.attribute(_strAttr.c_str()).empty())
+    
+    bool        bFound = false;
+    double      fUnitConversion = 1.0;
+    std::string strUnit("");
+    
+    
+    if (!_Node.attribute((_strAttr+"__deg").c_str()).empty())
+    {
+        bFound = true;
+        fUnitConversion = M_PI / 180.0;
+        strUnit = "__deg";
+    }
+    if (!_Node.attribute(_strAttr.c_str()).empty())
+        bFound = true;
+    
+    if (!bFound)
     {
         if (_bNotice)
         {
@@ -409,7 +424,7 @@ const double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node,
     }
     else
     {
-        double fRet = _Node.attribute(_strAttr.c_str()).as_double();
+        double fRet = _Node.attribute((_strAttr+strUnit).c_str()).as_double()*fUnitConversion;
         DOM_VAR(DEBUG_MSG("XML Importer", "Attribute " << _strAttr << " = " << fRet << "."))
         return fRet;
     }
@@ -553,7 +568,7 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
         m_strCameraHook = _Node.attribute("hook").as_string();
         m_pCamera->setPosition(_Node.attribute("position_x").as_double(),
                               _Node.attribute("position_y").as_double());
-        m_pCamera->getKinematicsState().setAngle(_Node.attribute("angle").as_double()/180.0*M_PI);
+        m_pCamera->getKinematicsState().setAngle(checkAttributeDouble(_Node,"angle", 0.0, false));
         m_pCamera->setViewport(_Node.attribute("viewport_width").as_int(),
                               _Node.attribute("viewport_height").as_int());
         m_pCamera->zoomTo(GRAPHICS_PX_PER_METER/checkAttributeDouble(_Node, "m_per_px", 0.5, false));
@@ -629,8 +644,8 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                                             checkAttributeDouble(_Node, "origin_y", 0.0)));
                     pObjEmitter->setVelocity(checkAttributeDouble(_Node, "velocity", EMITTER_DEFAULT_VELOCITY));
                     pObjEmitter->setVelocityStd(checkAttributeDouble(_Node, "velocity_std", EMITTER_DEFAULT_VELOCITY_STD));
-                    pObjEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE))/180.0*M_PI);
-                    pObjEmitter->setAngleStd((checkAttributeDouble(_Node, "angle_std", EMITTER_DEFAULT_ANGLE_STD))/180.0*M_PI);
+                    pObjEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE)));
+                    pObjEmitter->setAngleStd((checkAttributeDouble(_Node, "angle_std", EMITTER_DEFAULT_ANGLE_STD)));
                 }
                 else if (strDist == "rectangular_field")
                 {
@@ -713,8 +728,8 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                                               checkAttributeDouble(_Node, "origin_y", 0.0)));
                     pDebrisEmitter->setVelocity(checkAttributeDouble(_Node, "velocity", EMITTER_DEFAULT_VELOCITY));
                     pDebrisEmitter->setVelocityStd(checkAttributeDouble(_Node, "velocity_std", EMITTER_DEFAULT_VELOCITY_STD));
-                    pDebrisEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE))/180.0*M_PI);
-                    pDebrisEmitter->setAngleStd((checkAttributeDouble(_Node, "angle_std", EMITTER_DEFAULT_ANGLE_STD))/180.0*M_PI);
+                    pDebrisEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE)));
+                    pDebrisEmitter->setAngleStd((checkAttributeDouble(_Node, "angle_std", EMITTER_DEFAULT_ANGLE_STD)));
                     pDebrisEmitter->setNumber(checkAttributeInt(_Node, "number", DEBRIS_DEFAULT_NUMBER));
                 }
                 else if (strDist == "rectangular_field")
@@ -788,7 +803,7 @@ void CXMLImporter::createComponent(const pugi::xml_node& _Node)
             
             // Read thruster information
             pThruster->setName(checkAttributeString(_Node, "name", pThruster->getName()));
-            pThruster->setAngle(checkAttributeDouble(_Node, "angle", pThruster->getAngle())/180.0*M_PI);
+            pThruster->setAngle(checkAttributeDouble(_Node, "angle", pThruster->getAngle()));
             pThruster->setOrigin(Vector2d(checkAttributeDouble(_Node, "origin_x", pThruster->getOrigin()[0]),
                                           checkAttributeDouble(_Node, "origin_y", pThruster->getOrigin()[1])));
             pThruster->setThrustMax(checkAttributeDouble(_Node, "thrust_max", 1.0));
@@ -1330,8 +1345,8 @@ void CXMLImporter::readBodyCore(CRigidBody* const _pO, const pugi::xml_node& _No
     
     if (!_Node.empty())
     {
-        _pO->setAngle(checkAttributeDouble(_Node, "angle", _pO->getAngle())/180.0*M_PI);
-        _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity())/180.0*M_PI);
+        _pO->setAngle(checkAttributeDouble(_Node, "angle", _pO->getAngle()));
+        _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity()));
         _pO->setInertia(checkAttributeDouble(_Node, "inertia", _pO->getInertia()));
     }
 }

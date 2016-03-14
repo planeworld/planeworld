@@ -12,7 +12,7 @@
         velocity_y="0.0"
     />
     <body_core
-        angle_velocity="0.00014367816"
+        angle_velocity="2.661666501955582e-6"
         inertia="8.7389674e34"
     />
     <shape

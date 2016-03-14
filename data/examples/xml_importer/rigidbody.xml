@@ -9,7 +9,7 @@
         gravity="true"
     />
     <body_core
-        angle_velocity="36.0"
+        angle_velocity__deg="36.0"
         inertia="10.0"
     />
     <shape file="ball_shape_circle.xml"/>

@@ -3,7 +3,7 @@
     name="BoosterLeft"
     hook="RocketBody"
     thrust_max="4400000"
-    angle="180.0"
+    angle__deg="180.0"
     origin_x=" -4.2"
     origin_y="-27.0"
     >
@@ -17,8 +17,8 @@
         origin_y="-27.5"
         velocity="100.0"
         velocity_std="10.0"
-        angle="180.0"
-        angle_std="10.0"
+        angle__deg="180.0"
+        angle_std__deg="10.0"
         number="1000"
     />
 </component>

@@ -76,7 +76,6 @@ const double GRAPHICS_DEPTH_DEFAULT = -15.0;            ///< Default drawing dep
 
 const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn-objects
 
-const double GRAPHICS_DEG2RAD = M_PI / 180.0;           ///< Converts degree to radiant values
 const double GRAPHICS_RAD2DEG = 180.0 / M_PI;           ///< Converts radiant to degree values
 
 /// specifies the type of line to be drawn
