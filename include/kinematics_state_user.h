@@ -55,7 +55,6 @@ class IKinematicsStateUser
         const std::string&  getName() {return m_strName;}
         
         //--- Methods --------------------------------------------------------//
-        void addHook(IKinematicsStateUser* const);
         bool hook(IKinematicsStateUser* const);
         void setName(const std::string& _strName){m_strName=_strName;}
                 
@@ -64,7 +63,6 @@ class IKinematicsStateUser
         CKinematicsState    m_KinematicsState;  ///< Kinematics state data
         
         std::string m_strName = {"TESTNAME"};
-        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -82,18 +80,6 @@ inline CKinematicsState& IKinematicsStateUser::getKinematicsState()
     return m_KinematicsState;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Adds a hook to this kinematics state user.
-///
-/// \param _pKinematicsStateUser Kinematics state user to be hooked
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IKinematicsStateUser::addHook(IKinematicsStateUser* const _pKinematicsStateUser)
-{
-    METHOD_ENTRY("IKinematicsStateUser::addHook")
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Hooks to another user of kinematics state
@@ -106,8 +92,6 @@ inline bool IKinematicsStateUser::hook(IKinematicsStateUser* const _pKinematicsS
     METHOD_ENTRY("IKinematicsStateUser::hook")
 
     m_KinematicsState.attachTo(&(_pKinematicsStateUser->getKinematicsState()));
-    
-    _pKinematicsStateUser->addHook(this);
     return true;
 }
 

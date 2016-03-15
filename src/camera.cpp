@@ -304,24 +304,6 @@ void CCamera::zoomTo(const double& _fZoom)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Update of the bounding box, frame and position, triggered by entity
-///        it is hooked on.
-///
-/// The graphics class relevant movement will be updated within another update
-/// method (above) which is triggered by the visuals manager to avoid conflicts
-/// due to different threads (like race conditions) and to sync graphics
-/// appropriately.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CCamera::myUpdateFromHookable()
-{
-    METHOD_ENTRY("CCamera::myUpdateFromHookable")
-    
-    updateWithHook();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Helper method. Update of the bounding box, frame and position.
 ///
 /// Update of bounding box etc is called from updateFromHooked as well as

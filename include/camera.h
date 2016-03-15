@@ -38,6 +38,7 @@
 #include "bounding_box.h"
 #include "graphics.h"
 #include "kinematics_state_user.h"
+#include "object_referrer.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -51,6 +52,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 class CCamera : public CGraphicsBase,
                 public IKinematicsStateUser,
+                public IObjectReferrer,
                 public IUniverseScaled
 {
 
@@ -88,8 +90,6 @@ class CCamera : public CGraphicsBase,
     protected:
         
         //--- Methods --------------------------------------------------------//
-        void myHook();
-        void myUpdateFromHookable();
         void updateWithHook();
         void updateWithoutHook();
 

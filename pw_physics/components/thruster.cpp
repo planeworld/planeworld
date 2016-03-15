@@ -35,11 +35,9 @@
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CThruster::CThruster() : m_pThrusterBody(nullptr),
-                         m_bActive(true),
+CThruster::CThruster() : m_bActive(true),
                          m_fThrust(1.0),
                          m_fThrustMax(1.0),
-                         m_pEmitter(nullptr),
                          m_fEmitterVelocity(1.0),
                          m_fEmitterVelocityStd(0.0)
 {
@@ -74,7 +72,7 @@ void CThruster::activate(const double& _fThrust)
     else
     {
       m_bActive = true;
-      m_pEmitter->activate();
+      IEmitterReferrer::m_pRef->activate();
     }
 }
 
@@ -94,14 +92,12 @@ void CThruster::execute()
     if (m_bActive)
     {
         Rotation2Dd ThrusterRotation(m_KinematicsState.getAngle());
-        /*if (m_pThrusterBody == nullptr) std::cout << "nullptr" << std::endl;
-        else*/ 
-        m_pThrusterBody->addForce(ThrusterRotation * Vector2d(0.0,-m_fThrust), m_KinematicsState.getOrigin());
+        IObjectReferrer::m_pRef->addForce(ThrusterRotation * Vector2d(0.0,-m_fThrust), m_KinematicsState.getOrigin());
         
         if (m_fThrustMax != 0.0)
         {
-            m_pEmitter->setVelocity(m_fThrust/m_fThrustMax * m_fEmitterVelocity);
-            m_pEmitter->setVelocityStd(m_fThrust/m_fThrustMax * m_fEmitterVelocityStd);
+            IEmitterReferrer::m_pRef->setVelocity(m_fThrust/m_fThrustMax * m_fEmitterVelocity);
+            IEmitterReferrer::m_pRef->setVelocityStd(m_fThrust/m_fThrustMax * m_fEmitterVelocityStd);
         }
     }
 }

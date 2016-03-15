@@ -87,6 +87,7 @@ const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter ty
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class IEmitter : public IKinematicsStateUser,
+                 public IUniqueIDUser,
                  public IUniverseScaled,
                  public IWorldDataStorageUser
 {

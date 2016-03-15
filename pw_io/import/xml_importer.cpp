@@ -281,14 +281,14 @@ bool CXMLImporter::import(const std::string& _strFilename,
                 auto it = m_pDataStorage->getDynamicObjects().find(strHookable);
                 if (it != m_pDataStorage->getDynamicObjects().end())
                 {
-                    (*ci).first->setObject((*it).second);
+                    (*ci).first->IObjectReferrer::attachTo((*it).second);
                 }
                 else
                 {
                     it = m_pDataStorage->getStaticObjects().find(strHookable);
                     if (it != m_pDataStorage->getStaticObjects().end())
                     {
-                        (*ci).first->setObject((*it).second);
+                        (*ci).first->IObjectReferrer::attachTo((*it).second);
                     }
                     else
                     {
@@ -825,7 +825,7 @@ void CXMLImporter::createComponent(const pugi::xml_node& _Node)
                 if (std::string(N.name()) == "emitter")
                 {
                     this->createEmitter(N);
-                    pThruster->setEmitter(m_pCurrentEmitter);
+                    pThruster->IEmitterReferrer::attachTo(m_pCurrentEmitter);
                     
                     // Hook the emitter and ensure it hasn't already been hooked
                     

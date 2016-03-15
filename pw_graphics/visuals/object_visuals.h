@@ -68,7 +68,7 @@ class IObjectVisuals : virtual public CGraphicsBase,
         friend std::ostream&    operator<<(std::ostream&, IObjectVisuals* const);
         
     protected:
-        
+      
         std::vector<IVisuals*> m_Visuals;   ///< List of visuals
 
 };
