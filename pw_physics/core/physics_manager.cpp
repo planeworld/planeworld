@@ -842,15 +842,14 @@ int CPhysicsManager::luaGetFrequency(lua_State* _pLuaState)
 
     if (nParam == 0)
     {
-        lua_pushnumber(_pLuaState, m_pLuaThis->m_fFrequency);
-        lua_pushnumber(_pLuaState, m_pLuaThis->m_pDataStorage->getTimeScale());
+        lua_pushnumber(_pLuaState, m_pLuaThis->m_fFrequency * m_pLuaThis->m_pDataStorage->getTimeScale());
     }
     else
     {
         WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_frequency (" << nParam << "/0).")
     }
     
-    return 2;
+    return 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
