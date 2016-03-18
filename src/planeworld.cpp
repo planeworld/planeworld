@@ -458,7 +458,5 @@ int main(int argc, char *argv[])
         MEM_FREED("CVisualsManager")
     }
     
-    GameStateManager.save();
-    
     return EXIT_SUCCESS;
 }

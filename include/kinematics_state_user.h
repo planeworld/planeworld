@@ -42,6 +42,9 @@
 ///
 /// \brief Interface for classes that use a kinematic state
 ///
+/// \todo Get rid of hooking by using a proper implementation of uid user and
+///       its virtual myAttachTo method if applicable
+///
 ////////////////////////////////////////////////////////////////////////////////
 class IKinematicsStateUser
 {

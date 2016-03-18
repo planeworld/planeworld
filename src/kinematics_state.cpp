@@ -97,9 +97,9 @@ const Vector2d CKinematicsState::getVelocity() const
     {
         Rotation2Dd Rotation(m_pRef->m_fAngle);
         Vector2d vecResult = Rotation * m_vecVelocity +
-                                        m_pRef->m_vecVelocity +
+                                        m_pRef->m_vecVelocity;
                                         m_pRef->m_fAngleVelocity * Vector2d(- m_vecOrigin[1],
-                                                                                    m_vecOrigin[0]);
+                                                                              m_vecOrigin[0]);
         return vecResult;
     }
     else
@@ -152,6 +152,22 @@ const double CKinematicsState::getAngleReferredTo(const CKinematicsState& _Refer
 {
     METHOD_ENTRY("CKinematicsState::getAngleReferredTo")
     return m_fAngle - _Reference.m_fAngle;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create angle velocity referred to given kinematics without changing the
+///        internal state.
+///
+/// \param _Reference Kinematics to refer to
+///
+/// \return Resulting angle velocity when referring to _Reference
+///
+////////////////////////////////////////////////////////////////////////////////
+const double CKinematicsState::getAngleVelocityReferredTo(const CKinematicsState& _Reference) const
+{
+    METHOD_ENTRY("CKinematicsState::getAngleVelocityReferredTo")
+    return m_fAngleVelocity - _Reference.m_fAngleVelocity;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

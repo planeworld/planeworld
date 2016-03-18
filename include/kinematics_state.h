@@ -80,6 +80,7 @@ class CKinematicsState  : public IUniqueIDUser,
         const double&   getLocalAngleVelocity() const;
         
         const double           getAngleReferredTo(const CKinematicsState&) const;
+        const double           getAngleVelocityReferredTo(const CKinematicsState&) const;
         const Vector2d         getOriginReferredTo(const CKinematicsState&) const;
         const Vector2d         getPositionReferredTo(const Vector2d&, const CKinematicsState&) const;
         const Vector2d         getVelocityReferredTo(const CKinematicsState&) const;

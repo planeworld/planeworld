@@ -249,6 +249,10 @@ bool CPhysicsManager::initLua()
     lua_register(m_pLuaState, "activate_thruster", luaActivateThruster);
     lua_register(m_pLuaState, "deactivate_thruster", luaDeactivateThruster);
     lua_register(m_pLuaState, "apply_force", luaApplyForce);
+    lua_register(m_pLuaState, "get_angle", luaGetAngle);
+    lua_register(m_pLuaState, "get_angle_ref", luaGetAngleRef);
+    lua_register(m_pLuaState, "get_angle_vel", luaGetAngleVelocity);
+    lua_register(m_pLuaState, "get_angle_vel_ref", luaGetAngleVelocityRef);
     lua_register(m_pLuaState, "get_frequency", luaGetFrequency);
     lua_register(m_pLuaState, "get_position", luaGetPosition);
     lua_register(m_pLuaState, "get_position_ref", luaGetPositionRef);
@@ -631,7 +635,7 @@ int CPhysicsManager::luaApplyForce(lua_State* _pLuaState)
         if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
             m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
         {
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->addForce(
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->addForceLC(
                 vecForce * m_pLuaThis->m_fFrequency/m_pLuaThis->m_fFrequencyLua, vecPOA);
         }
         else
@@ -645,6 +649,180 @@ int CPhysicsManager::luaApplyForce(lua_State* _pLuaState)
     }
     
     return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get objects angle.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetAngle(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetAngle")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 1)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            double fAng = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState().getAngle();
+            lua_pushnumber(_pLuaState, fAng);
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_angle (" << nParam << "/1).")
+    }
+    
+    return 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get objects angle with reference to another object.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetAngleRef(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetAngleRef")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 2)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        std::string strReference = lua_tolstring(_pLuaState,2,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strReference) != 
+                m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+            {
+                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState();
+                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strReference)->getKinematicsState();
+                double fAng = KinObj.getAngleReferredTo(KinRef);
+                lua_pushnumber(_pLuaState, fAng);
+            }
+            else
+            {
+                WARNING_MSG("Physics Manager", "Unknown reference " << strReference)
+            }
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_angle_ref (" << nParam << "/2).")
+    }
+    
+    return 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get objects angle velocity
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetAngleVelocity(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetAngleVelocity")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 1)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            double fAngVel = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState().getAngleVelocity();
+            lua_pushnumber(_pLuaState, fAngVel);
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_angle_vel (" << nParam << "/1).")
+    }
+    
+    return 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get objects angle velocity with reference to another object.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetAngleVelocityRef(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetAngleVelocityRef")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 2)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        std::string strReference = lua_tolstring(_pLuaState,2,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strReference) != 
+                m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+            {
+                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState();
+                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strReference)->getKinematicsState();
+                double fAngVel = KinObj.getAngleVelocityReferredTo(KinRef);
+                lua_pushnumber(_pLuaState, fAngVel);
+            }
+            else
+            {
+                WARNING_MSG("Physics Manager", "Unknown reference " << strReference)
+            }
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_angle_vel_ref (" << nParam << "/2).")
+    }
+    
+    return 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -669,7 +847,7 @@ int CPhysicsManager::luaGetFrequency(lua_State* _pLuaState)
     }
     else
     {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_position (" << nParam << "/0).")
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_frequency (" << nParam << "/0).")
     }
     
     return 2;

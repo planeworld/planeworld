@@ -155,7 +155,7 @@ void CDebrisEmitter::emit(const double& _fF)
 //                     else
                     {
                         m_pDebris->generate(m_KinematicsState.getOrigin(),
-                                            fVelocity*(Rotation*Vector2d(0.0, 1.0)) + m_KinematicsState.getVelocity());
+                                            fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());
                     }
                 }
         }

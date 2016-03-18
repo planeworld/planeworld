@@ -138,6 +138,10 @@ class CPhysicsManager : public IWorldDataStorageUser
         static int                 luaActivateThruster(lua_State*);
         static int                 luaDeactivateThruster(lua_State*);
         static int                 luaApplyForce(lua_State*);
+        static int                 luaGetAngle(lua_State*);
+        static int                 luaGetAngleRef(lua_State*);
+        static int                 luaGetAngleVelocity(lua_State*);
+        static int                 luaGetAngleVelocityRef(lua_State*);
         static int                 luaGetFrequency(lua_State*);
         static int                 luaGetPosition(lua_State*);
         static int                 luaGetPositionRef(lua_State*);
