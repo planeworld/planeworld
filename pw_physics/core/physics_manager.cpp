@@ -419,7 +419,7 @@ void CPhysicsManager::addGlobalForces()
         (*ci)->react();
     }
 
-    for (auto ci : m_pDataStorage->getDynamicObjects())
+    for (const auto ci : m_pDataStorage->getDynamicObjects())
         ci.second->clearForces();
 
     for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();

@@ -224,7 +224,7 @@ std::ostream& operator<<(std::ostream& _os, IObjectVisuals* const _pObjVis)
     _os << _pObjVis->m_UIDRef << std::endl;
     
     _os << _pObjVis->m_Visuals.size() << std::endl;
-    for (auto ci : _pObjVis->m_Visuals)
+    for (const auto ci : _pObjVis->m_Visuals)
     {
         _os << ci << std::endl;
     }

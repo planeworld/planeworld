@@ -174,12 +174,12 @@ std::ostream& CPolyLine::myStreamOut(std::ostream& _os)
     _os << nLineType << std::endl;
     
     _os << m_VertList.size() << std::endl;
-    for (auto ci : m_VertList)
+    for (const auto ci : m_VertList)
     {
         _os << ci[0] << " " <<
                ci[1] << std::endl;
     }
-    for (auto ci : m_VertList0)
+    for (const auto ci : m_VertList0)
     {
         _os << ci[0] << " " <<
                ci[1] << std::endl;

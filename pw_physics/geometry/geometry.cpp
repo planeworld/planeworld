@@ -264,7 +264,7 @@ std::ostream& operator<<(std::ostream& _os, CGeometry& _Geo)
     _os << "Geometry:" << std::endl;
     _os << _Geo.m_AABB << std::endl;
     _os << _Geo.getShapes()->size() << std::endl;
-    for (auto ci : (*_Geo.m_pShapes))
+    for (const auto ci : (*_Geo.m_pShapes))
     {
         _os << (*ci) << std::endl;
     }

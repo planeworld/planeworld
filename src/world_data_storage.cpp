@@ -465,7 +465,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
                     
                     _WDS.addObject(pObj);
                     
-                    for (auto ci : *(pObj->getGeometry()->getShapes()))
+                    for (const auto ci : *(pObj->getGeometry()->getShapes()))
                     {
                         UIDShapeRef.insert({ci->getUID(),ci});
                     }
@@ -498,7 +498,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
             pObjVis->attachTo(static_cast<IObject*>(pUIDUser));
             _WDS.addObjectVisuals(pObjVis);
             
-            for (auto ci : pObjVis->getShapeVisuals())
+            for (const auto ci : pObjVis->getShapeVisuals())
             {
                 ci->attachTo(UIDShapeRef[ci->getUIDRef()]);
             }
@@ -599,14 +599,14 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
     _os << nSize << std::endl;
     
     std::uint32_t i=0u;
-    for (auto ci : _WDS.m_DynamicObjects)
+    for (const auto ci : _WDS.m_DynamicObjects)
     {
         _os << ci.first << std::endl;
         _os << ci.second << std::endl;
         Log.progressBar("Saving dynamic objects", i++, nSize);
     }
     _os << _WDS.m_ObjectVisuals.size() << std::endl;
-    for (auto ci : _WDS.m_ObjectVisuals)
+    for (const auto ci : _WDS.m_ObjectVisuals)
     {
         _os << ci << std::endl;
     }
@@ -614,12 +614,12 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
     _os << _WDS.m_pCamera << std::endl;
     
 //     _os << _WDS.m_Debris.size() << std::endl;
-//     for (auto ci : _WDS.m_Debris)
+//     for (const auto ci : _WDS.m_Debris)
 //     {
 //         _os << ci << std::endl;
 //     }
 //     _os << _WDS.m_DebrisVisuals.size() << std::endl;
-//     for (auto ci : _WDS.m_DebrisVisuals)
+//     for (const auto ci : _WDS.m_DebrisVisuals)
 //     {
 //         _os << ci << std::endl;
 //     }

@@ -321,7 +321,7 @@ std::istream& operator>>(std::istream& _is, IObject* const _pObj)
     _is >> _pObj->m_pIntPos;
     _is >> _pObj->m_pIntVel;
 //     _is >> _pObj->m_Anchors.size();
-//     for (auto ci : _pObj->m_Anchors)
+//     for (const auto ci : _pObj->m_Anchors)
 //         _is >> ci;
 //     _is << _pObj->m_Trajectory;
 
@@ -370,7 +370,7 @@ std::ostream& operator<<(std::ostream& _os, IObject* const _pObj)
     _os << _pObj->m_pIntPos << std::endl;
     _os << _pObj->m_pIntVel << std::endl;
 //     _os << _pObj->m_Anchors.size() << std::endl;
-//     for (auto ci : _pObj->m_Anchors)
+//     for (const auto ci : _pObj->m_Anchors)
 //         _os << ci;
 //     _os << _pObj->m_Trajectory;
 
