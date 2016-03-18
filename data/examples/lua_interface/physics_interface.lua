@@ -2,8 +2,8 @@ math.randomseed(os.time())
 
 function physics_interface()
     
-    frequency, factor = get_frequency()
-    Frametime = 1.0/frequency * factor
+    frequency = get_frequency()
+    Frametime = 1.0/frequency
     
     output()
     

@@ -11,8 +11,8 @@ ObjectRef["name2"] = "Earth"
 
 function physics_interface()
     
-    frequency, factor = get_frequency()
-    Frametime = 1.0/frequency * factor
+    frequency = get_frequency()
+    Frametime = 1.0/frequency
     
 --     apply_force(Object["name"], "0.0", math.random()*200000000.0 - 100000000.0, "0.0", "0.0")
     
