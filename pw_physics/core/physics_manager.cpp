@@ -419,13 +419,14 @@ void CPhysicsManager::addGlobalForces()
         (*ci)->react();
     }
 
+    for (auto ci : m_pDataStorage->getDynamicObjects())
+        ci.second->clearForces();
+
     for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
         ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
     {
         cj = ci;
         ++cj;
-        
-        ci->second->clearForces();
         
         if (ci->second->getGravitationState() == true)
         {
@@ -433,7 +434,7 @@ void CPhysicsManager::addGlobalForces()
             {
                 vecCC = ci->second->getCOM() - cj->second->getCOM() +
                         IUniverseScaled::cellToDouble(ci->second->getCell()-cj->second->getCell());
-                
+
                 fCCSqr = vecCC.squaredNorm();
                 
                 if (fCCSqr > 400.0)
