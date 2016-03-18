@@ -1,5 +1,8 @@
 math.randomseed(os.time())
 
+io.write("Mass:    ", get_mass("Mass"), "\n")
+io.write("Inertia: ", get_inertia("Mass"), "\n")
+
 function physics_interface()
     
     frequency = get_frequency()
@@ -20,6 +23,8 @@ end
 
 function output()
     
+    io.write("Simulation time (y) ", get_time_years(), "\n")
+    io.write("Simulation time (s) ", get_time(), "\n")
     io.write("Position:           ", get_position("Mass"), "\n")
     io.write("Velocity:           ", get_velocity("Mass"), "\n")
     io.write("Angle:              ", get_angle("Mass"), "\n")

@@ -254,8 +254,12 @@ bool CPhysicsManager::initLua()
     lua_register(m_pLuaState, "get_angle_vel", luaGetAngleVelocity);
     lua_register(m_pLuaState, "get_angle_vel_ref", luaGetAngleVelocityRef);
     lua_register(m_pLuaState, "get_frequency", luaGetFrequency);
+    lua_register(m_pLuaState, "get_inertia", luaGetInertia);
+    lua_register(m_pLuaState, "get_mass", luaGetMass);
     lua_register(m_pLuaState, "get_position", luaGetPosition);
     lua_register(m_pLuaState, "get_position_ref", luaGetPositionRef);
+    lua_register(m_pLuaState, "get_time", luaGetTime);
+    lua_register(m_pLuaState, "get_time_years", luaGetTimeYears);
     lua_register(m_pLuaState, "get_velocity", luaGetVelocity);
     lua_register(m_pLuaState, "get_velocity_ref", luaGetVelocityRef);
     lua_register(m_pLuaState, "set_frequency", luaSetFrequency);
@@ -854,6 +858,89 @@ int CPhysicsManager::luaGetFrequency(lua_State* _pLuaState)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Lua access to get objects mass.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetMass(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetMass")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 1)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            double fMass = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getMass();
+            lua_pushnumber(_pLuaState, fMass);
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_mass (" << nParam << "/1).")
+    }
+    
+    return 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get objects inertia.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetInertia(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetInertia")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 1)
+    {
+        size_t l;
+        std::string strObject = lua_tolstring(_pLuaState,1,&l);
+        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        {
+            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getObjectType() == ObjectType::OBJECT_BODY)
+            {
+                double fInertia = static_cast<CBody*>(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject))->getInertia();
+                lua_pushnumber(_pLuaState, fInertia);
+            }
+            else
+            {
+                WARNING_MSG("Physics Manager", "Object " << strObject << " not of type OBJECT_BODY, no inertia available.")
+            }
+        }
+        else
+        {
+            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
+        }
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_mass (" << nParam << "/1).")
+    }
+    
+    return 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Lua access to get objects position.
 ///
 /// \param _pLuaState Lua access to physics
@@ -939,6 +1026,60 @@ int CPhysicsManager::luaGetPositionRef(lua_State* _pLuaState)
     }
     
     return 2;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get simulation time.
+///
+/// \param _pLuaState Lua access to simulation time
+///
+/// \return Simulation time in seconds.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetTime(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetTime")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 0)
+    {
+        lua_pushnumber(_pLuaState, m_pLuaThis->m_SimTimerGlobal.getSecondsRaw());
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_time (" << nParam << "/0).")
+    }
+    
+    return 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lua access to get years of simulation time.
+///
+/// \param _pLuaState Lua access to years of simulation time
+///
+/// \return Simulation time in years.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetTimeYears(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetTimeYears")  
+    
+    int nParam = lua_gettop(_pLuaState);
+
+    if (nParam == 0)
+    {
+        lua_pushnumber(_pLuaState, m_pLuaThis->m_SimTimerGlobal.getYears());
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_time_years (" << nParam << "/0).")
+    }
+    
+    return 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
