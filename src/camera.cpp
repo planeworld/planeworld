@@ -402,8 +402,7 @@ std::istream& operator>>(std::istream& _is, CCamera* const _pCam)
     _is >> _pCam->m_fBoundingCircleRadius;
     _is >> _pCam->m_fViewportWidth;
     _is >> _pCam->m_fViewportHeight;
-    _is >> _pCam->m_fZoom
-    ;
+    _is >> _pCam->m_fZoom;
     /// \todo Stream IUniverseScaled information
     
     return _is;
