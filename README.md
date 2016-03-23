@@ -7,30 +7,32 @@ Installation
 ------------
 
 ### libnoise2d
-> git clone path/to/libnoise.git
-> mkdir libnoise/build
-> cd libnoise/build
-> cmake ../
-> ccmake .
-Configure install path (e.g. ~/bin/)
-> make install
+
+    > git clone path/to/libnoise.git
+    > mkdir libnoise/build
+    > cd libnoise/build
+    > cmake ../
+    > ccmake .
+    Configure install path (e.g. ~/bin/)
+    > make install
 
 ### planeworld
-> git clone path/to/planeworld.git
-> cp planeworld/SETENV ~/bin/
-> source ~/bin/SETENV
-> mkdir planeworld/build
-> cd planeworld/build
-> cmake ../
-> ccmake .
-Configure install path (e.g. ~/bin/)
-> make install
+
+    > git clone path/to/planeworld.git
+    > cp planeworld/SETENV ~/bin/
+    > source ~/bin/SETENV
+    > mkdir planeworld/build
+    > cd planeworld/build
+    > cmake ../
+    > ccmake .
+    Configure install path (e.g. ~/bin/)
+    > make install
 
 
 Usage
 -----
 
-> planeworld ~/bin/share/planeworld/data/solar_system.xml
+    > planeworld ~/bin/share/planeworld/data/solar_system.xml
 
 | Key/Mouse                | Description                     |
 |--------------------------|---------------------------------|
@@ -47,8 +49,8 @@ Usage
 | t                        | Show object trajectories        |
 | v                        | Toggle graphics (on/off)        |
 | ESC                      | Quit                            |
-| +                        | Accelerate time (only key-pad +)|
-| -                        | Decelarate time                 |
+| + / a                    | Accelerate time (only key-pad +)|
+| - / d                    | Decelarate time                 |
 | RETURN/ENTER             | Reset time                      |     
 | p                        | Pause physics                   |
 | Mouse-Wheel              | Zoom                            |
