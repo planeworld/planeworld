@@ -199,12 +199,17 @@ void CRigidBody::myDynamics(const double& _fStep)
 {
     METHOD_ENTRY("CRigidBody::myDynamics")
 
-    Vector2d vecAccel = m_vecForce / m_fMass;
+    Vector2d vecAccel = m_vecForce;
+    
+    if (m_fMass > 0.0) vecAccel /= m_fMass;
     
     m_pIntVel->integrate(vecAccel, _fStep*m_fTimeFac);
     m_pIntPos->integrate(m_pIntVel->getValue(),_fStep*m_fTimeFac);
     
-    double fAngleAccel = m_fTorque / m_fInertia;
+    double fAngleAccel = m_fTorque;
+    
+    if (m_fInertia > 0.0) fAngleAccel /= m_fInertia;
+    
     double fAngleVel = m_pIntAngVel->integrate(fAngleAccel, _fStep*m_fTimeFac);
     m_KinematicsState.setAngleVelocity(fAngleVel);
     m_KinematicsState.setAngle(m_pIntAng->integrateClip(fAngleVel, _fStep*m_fTimeFac, 2.0*M_PI));
