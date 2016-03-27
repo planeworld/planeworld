@@ -45,6 +45,8 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                      m_fFrequencyLua(PHYSICS_LUA_DEFAULT_FREQUENCY),
                                      m_fProcessingTime(0.0),
+                                     m_fTimeAccel(1.0),
+                                     m_fTimeSlept(0.0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_bPaused(false),
@@ -305,6 +307,87 @@ void CPhysicsManager::initObjects()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Toggles physics processing from pause to running
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::togglePause()
+{
+    METHOD_ENTRY("CPhysicsManager::togglePause")
+    m_bPaused ^= 1;
+    INFO(
+        if (m_bPaused)
+        {
+            INFO_MSG("Physics Manager", "Physics processing paused.")
+        }
+        else
+        {
+            INFO_MSG("Physics Manager", "Physics processing resumed.")
+        }
+    )
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Accelerates time by factor 2
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::accelerateTime()
+{
+    METHOD_ENTRY("CPhysicsManager::accelerateTime")
+    if (m_fTimeSlept <= 0.0)
+    {
+        if (m_pDataStorage->getTimeScale() < 10000000.0)
+            m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 2.0);
+    }
+    else
+    {
+        if (m_pDataStorage->getTimeScale() < 1.0)
+            m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 2.0);
+        else
+            m_fTimeAccel *= 2.0;
+    }
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
+    DOM_VAR(INFO_MSG("Physics Manager", "Time scale        factor: " << m_pDataStorage->getTimeScale()))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Decelerates time by factor 2
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::decelerateTime()
+{
+    METHOD_ENTRY("CPhysicsManager::decelerateTime")
+    
+    if (m_pDataStorage->getTimeScale() > 1.0)
+        m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 0.5);
+    else
+    {
+        if (m_fTimeAccel > 1.0)
+            m_fTimeAccel *= 0.5;
+        else
+            m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 0.5);
+    }
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
+    DOM_VAR(INFO_MSG("Physics Manager", "Time scale        factor: " << m_pDataStorage->getTimeScale()))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Resets time acceleration factor
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::resetTime()
+{
+    METHOD_ENTRY("CPhysicsManager::resetTime")
+    m_pDataStorage->setTimeScale(1.0);
+    m_fTimeAccel = 1.0;
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
+    DOM_VAR(INFO_MSG("Physics Manager", "Time scale        factor: " << m_pDataStorage->getTimeScale()))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Initialise all objects
 ///
 /// Initialisiation of all objects resets objects position, speed etc. to
@@ -559,7 +642,7 @@ void CPhysicsManager::updateCells()
       while (m_bRunning)
       {
           this->processFrame();
-          PhysicsTimer.sleepRemaining(m_fFrequency);
+          m_fTimeSlept = PhysicsTimer.sleepRemaining(m_fFrequency * m_fTimeAccel);
       }
       INFO_MSG("Physics Manager", "Physics thread stopped.")
   }

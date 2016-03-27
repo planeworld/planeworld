@@ -454,6 +454,11 @@ void CVisualsManager::drawTimers() const
         }
         m_Graphics.getWindow()->pushGLStates();
         sf::Text Text;
+        if (m_pDataStorage->getTimeScale() > 1.0)
+        {
+            Text.setColor(sf::Color(255.0, 0.0, 0.0, 255.0));
+            oss << "\nWarning: Decreasing accuracy." << std::endl;
+        }
         Text.setString(oss.str());
         Text.setFont(m_Font);
         Text.setCharacterSize(12);

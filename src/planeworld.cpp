@@ -190,9 +190,6 @@ int main(int argc, char *argv[])
     pPhysicsManager->initComponents();
     if (!pPhysicsManager->initLua()) return EXIT_FAILURE;
     
-    bool   bIntegratorAcceleration = false;
-    double fCPUAcceleration = 1.0;
-    
     #ifdef PW_MULTITHREADING    
         std::thread PhysicsThread(&CPhysicsManager::run, pPhysicsManager);
     #endif
@@ -217,190 +214,188 @@ int main(int argc, char *argv[])
     Timer.start();
     while (!bDone)
     {
-        vecMouse = vecMouseCenter-sf::Mouse::getPosition(*pWindow);
-        vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
-        if (!bMouseCursorVisible)
-            sf::Mouse::setPosition(vecMouseCenter,*pWindow);
-        
-        //--- Handle events ---//
-        sf::Event Event;
-        while (pWindow->pollEvent(Event))
+        #ifndef PW_MULTITHREADING
+        if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()/
+                                    pVisualsManager->getFrequency()) == 0)
         {
-            switch (Event.type)
+        #endif
+            vecMouse = vecMouseCenter-sf::Mouse::getPosition(*pWindow);
+            vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
+            if (!bMouseCursorVisible)
+                sf::Mouse::setPosition(vecMouseCenter,*pWindow);
+            
+            //--- Handle events ---//
+            sf::Event Event;
+            while (pWindow->pollEvent(Event))
             {
-                case sf::Event::Closed:
+                switch (Event.type)
                 {
-                    // End the program
-                    bDone = true;
-                    break;
-                }
-                case sf::Event::Resized:
-                {
-                    // Adjust the viewport when the window is resized
-                    vecMouseCenter = sf::Vector2i(pWindow->getSize().x >> 1, pWindow->getSize().y >> 1);
-                    Graphics.resizeWindow(Event.size.width, Event.size.height);
-                    pCamera->setViewport(Graphics.getViewPort().right-Graphics.getViewPort().left - 20.0,
-                                         Graphics.getViewPort().top  -Graphics.getViewPort().bottom - 20.0);
-                    break;
-                }
-                case sf::Event::KeyPressed:
-                {
-                    switch (Event.key.code)
+                    case sf::Event::Closed:
                     {
-                        case sf::Keyboard::Escape:
-                        {
-                            bDone = true;
-                            break;
-                        }
-                        case sf::Keyboard::Num0:
-                        {
-                            pVisualsManager->toggleVisualisations(VISUALS_TIMERS);
-                            break;
-                        }
-                        case sf::Keyboard::Num1:
-                        {
-                            pPhysicsManager->getSimTimerLocal()[0].toggle();
-                            break;
-                        }
-                        case sf::Keyboard::Num2:
-                        {
-                            pPhysicsManager->getSimTimerLocal()[1].toggle();
-                            break;
-                        }
-                        case sf::Keyboard::Num3:
-                        {
-                            pPhysicsManager->getSimTimerLocal()[2].toggle();
-                            break;
-                        }
-                        case sf::Keyboard::Add:
-                        case sf::Keyboard::A:
-                        {
-                            if (bIntegratorAcceleration)
-                                pPhysicsManager->accelerateTime();
-                            else
-                                fCPUAcceleration += 10.0;
-                                std::cout << "CPU Accel: " << fCPUAcceleration << std::endl;
-                            break;
-                        }
-                        case sf::Keyboard::Subtract:
-                        case sf::Keyboard::Dash:
-                        case sf::Keyboard::D:
-                        {
-                            if (bIntegratorAcceleration)
-                                pPhysicsManager->decelerateTime();
-                            else
-                                if (fCPUAcceleration >= 11.0) fCPUAcceleration -= 10.0;
-                                std::cout << "CPU Accel: " << fCPUAcceleration << std::endl;
-                            break;
-                        }
-                        case sf::Keyboard::Return:
-                        {
-                            pPhysicsManager->resetTime();
-                            break;
-                        }
-                        case sf::Keyboard::B:
-                        {
-                            pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
-                            break;
-                        }
-                        case sf::Keyboard::G:
-                        {
-                            pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
-                            break;
-                        }
-                        case sf::Keyboard::K:
-                        {
-                            pVisualsManager->toggleVisualisations(VISUALS_KINEMATICS_STATES);
-                            break;
-                        }
-                        case sf::Keyboard::L:
-                        {
-                            /// \todo Really check if physics thread is paused before saving the simulation
-                            pPhysicsManager->pause();
-                            GameStateManager.load();
-                            pCamera=WorldDataStorage.getCamera();
-                            pPhysicsManager->togglePause();
-                            break;
-                        }
-                        case sf::Keyboard::N:
-                        {
-                            pVisualsManager->toggleVisualisations(VISUALS_NAMES);
-                            break;
-                        }
-                        case sf::Keyboard::P:
-                        {
-                            pPhysicsManager->togglePause();
-                            break;
-                        }
-                        case sf::Keyboard::S:
-                        {
-                            /// \todo Really check if physics thread is paused before saving the simulation
-                            pPhysicsManager->pause();
-                            GameStateManager.save();
-                            pPhysicsManager->togglePause();
-                            break;
-                        }
-                        case sf::Keyboard::T:
-                        {
-                            pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
-                            break;
-                        }
-                        case sf::Keyboard::V:
-                        {
-                            bGraphicsOn ^= 1;
-                            bMouseCursorVisible ^= 1;
-                            pWindow->setMouseCursorVisible(bMouseCursorVisible);
-                            vecMouse.x=0;
-                            vecMouse.y=0;
-                            
-                            if (bGraphicsOn)
-                            {
-                                INFO_MSG("Main", "Graphics reactivated.")
-                            }
-                            else
-                            {
-                                INFO_MSG("Main", "Graphics deactivated, simulation still running...")
-                            }
-                            break;
-                        }
-                        default:
-                            break;
+                        // End the program
+                        bDone = true;
+                        break;
                     }
-                    break;
-                }
-                case sf::Event::MouseMoved:
-                {
-                    if (bGraphicsOn)
+                    case sf::Event::Resized:
                     {
-                        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                        // Adjust the viewport when the window is resized
+                        vecMouseCenter = sf::Vector2i(pWindow->getSize().x >> 1, pWindow->getSize().y >> 1);
+                        Graphics.resizeWindow(Event.size.width, Event.size.height);
+                        pCamera->setViewport(Graphics.getViewPort().right-Graphics.getViewPort().left - 20.0,
+                                            Graphics.getViewPort().top  -Graphics.getViewPort().bottom - 20.0);
+                        break;
+                    }
+                    case sf::Event::KeyPressed:
+                    {
+                        switch (Event.key.code)
                         {
-                            pCamera->translateBy(0.2/GRAPHICS_PX_PER_METER * Vector2d(double(vecMouse.x)/pCamera->getZoom(),double(vecMouse.y)/pCamera->getZoom()));
-                        }
-                        if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-                        {
-                            pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
-                            pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
-                            if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
-                            else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
+                            case sf::Keyboard::Escape:
+                            {
+                                bDone = true;
+                                break;
+                            }
+                            case sf::Keyboard::Num0:
+                            {
+                                pVisualsManager->toggleVisualisations(VISUALS_TIMERS);
+                                break;
+                            }
+                            case sf::Keyboard::Num1:
+                            {
+                                pPhysicsManager->getSimTimerLocal()[0].toggle();
+                                break;
+                            }
+                            case sf::Keyboard::Num2:
+                            {
+                                pPhysicsManager->getSimTimerLocal()[1].toggle();
+                                break;
+                            }
+                            case sf::Keyboard::Num3:
+                            {
+                                pPhysicsManager->getSimTimerLocal()[2].toggle();
+                                break;
+                            }
+                            case sf::Keyboard::Add:
+                            case sf::Keyboard::A:
+                            {
+                                pPhysicsManager->accelerateTime();
+                                break;
+                            }
+                            case sf::Keyboard::Subtract:
+                            case sf::Keyboard::Dash:
+                            case sf::Keyboard::D:
+                            {
+                                pPhysicsManager->decelerateTime();
+                                break;
+                            }
+                            case sf::Keyboard::Return:
+                            {
+                                pPhysicsManager->resetTime();
+                                break;
+                            }
+                            case sf::Keyboard::B:
+                            {
+                                pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
+                                break;
+                            }
+                            case sf::Keyboard::G:
+                            {
+                                pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
+                                break;
+                            }
+                            case sf::Keyboard::K:
+                            {
+                                pVisualsManager->toggleVisualisations(VISUALS_KINEMATICS_STATES);
+                                break;
+                            }
+                            case sf::Keyboard::L:
+                            {
+                                /// \todo Really check if physics thread is paused before saving the simulation
+                                pPhysicsManager->pause();
+                                GameStateManager.load();
+                                pCamera=WorldDataStorage.getCamera();
+                                pPhysicsManager->togglePause();
+                                break;
+                            }
+                            case sf::Keyboard::N:
+                            {
+                                pVisualsManager->toggleVisualisations(VISUALS_NAMES);
+                                break;
+                            }
+                            case sf::Keyboard::P:
+                            {
+                                pPhysicsManager->togglePause();
+                                break;
+                            }
+                            case sf::Keyboard::S:
+                            {
+                                /// \todo Really check if physics thread is paused before saving the simulation
+                                pPhysicsManager->pause();
+                                GameStateManager.save();
+                                pPhysicsManager->togglePause();
+                                break;
+                            }
+                            case sf::Keyboard::T:
+                            {
+                                pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
+                                break;
+                            }
+                            case sf::Keyboard::V:
+                            {
+                                bGraphicsOn ^= 1;
+                                bMouseCursorVisible ^= 1;
+                                pWindow->setMouseCursorVisible(bMouseCursorVisible);
+                                vecMouse.x=0;
+                                vecMouse.y=0;
+                                
+                                if (bGraphicsOn)
+                                {
+                                    INFO_MSG("Main", "Graphics reactivated.")
+                                }
+                                else
+                                {
+                                    INFO_MSG("Main", "Graphics deactivated, simulation still running...")
+                                }
+                                break;
+                            }
+                            default:
+                                break;
                         }
                         break;
                     }
-                }
-                case sf::Event::MouseWheelMoved:
-                    if (bGraphicsOn)
+                    case sf::Event::MouseMoved:
                     {
-                        pCamera->zoomBy(1.0+double(Event.mouseWheel.delta)*0.1);
-                        if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
-                        else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
+                        if (bGraphicsOn)
+                        {
+                            if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                            {
+                                pCamera->translateBy(0.2/GRAPHICS_PX_PER_METER * Vector2d(double(vecMouse.x)/pCamera->getZoom(),double(vecMouse.y)/pCamera->getZoom()));
+                            }
+                            if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+                            {
+                                pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
+                                pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
+                                if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
+                                else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
+                            }
+                            break;
+                        }
                     }
-                default:
-                    break;
+                    case sf::Event::MouseWheelMoved:
+                        if (bGraphicsOn)
+                        {
+                            pCamera->zoomBy(1.0+double(Event.mouseWheel.delta)*0.1);
+                            if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
+                            else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
+                        }
+                    default:
+                        break;
+                }
             }
-        }
         #ifndef PW_MULTITHREADING
+        }
             //--- Run Physics ---//
             pPhysicsManager->processFrame();
-            if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()/
+            if (nFrame % static_cast<int>(pPhysicsManager->getFrequency()/
                                        pVisualsManager->getFrequency()) == 0)
             {
         #endif
@@ -411,7 +406,11 @@ int main(int argc, char *argv[])
                 }
         #ifndef PW_MULTITHREADING
             }
-            Timer.sleepRemaining(pPhysicsManager->getFrequency());
+            pPhysicsManager->setTimeSlept(
+              Timer.sleepRemaining(pPhysicsManager->getFrequency() * 
+                                   pPhysicsManager->getTimeAccel())
+            );
+            
             if (nFrame % 1000u == 0u) nFrame = 0u;
         #else
             Timer.sleepRemaining(pVisualsManager->getFrequency());

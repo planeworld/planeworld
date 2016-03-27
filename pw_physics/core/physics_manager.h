@@ -107,6 +107,9 @@ class CPhysicsManager : public IWorldDataStorageUser
         #ifdef PW_MULTITHREADING
           void run();
           void terminate();
+        #else
+          const double& getTimeAccel() const;
+          void setTimeSlept(const double&);
         #endif
 
     private:
@@ -126,6 +129,8 @@ class CPhysicsManager : public IWorldDataStorageUser
         double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
         double              m_fFrequencyLua;        ///< Frequency of Lua interface
         double              m_fProcessingTime;      ///< Overall processing time
+        double              m_fTimeAccel;           ///< Time acceleration of simulation
+        double              m_fTimeSlept;           ///< Sleep time of thread
 
         Vector2d                    m_vecConstantGravitation;   ///< Vector for constant gravitation
 
@@ -327,65 +332,6 @@ inline void CPhysicsManager::pause()
     INFO_MSG("Physics Manager", "Physics processing paused.")
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Toggles physics processing from pause to running
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::togglePause()
-{
-    METHOD_ENTRY("CPhysicsManager::togglePause")
-    m_bPaused ^= 1;
-    INFO(
-        if (m_bPaused)
-        {
-            INFO_MSG("Physics Manager", "Physics processing paused.")
-        }
-        else
-        {
-              INFO_MSG("Physics Manager", "Physics processing resumed.")
-        }
-    )
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Accelerates time by factor 2
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::accelerateTime()
-{
-    METHOD_ENTRY("CPhysicsManager::accelerateTime")
-    if (m_pDataStorage->getTimeScale() < 10000000.0)
-        m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 2.0);
-        
-    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_pDataStorage->getTimeScale()))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Decelerates time by factor 2
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::decelerateTime()
-{
-    METHOD_ENTRY("CPhysicsManager::decelerateTime")
-    m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 0.5);
-    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_pDataStorage->getTimeScale()))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Resets time acceleration factor
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::resetTime()
-{
-    METHOD_ENTRY("CPhysicsManager::resetTime")
-    m_pDataStorage->setTimeScale(1.0);
-    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_pDataStorage->getTimeScale()))
-}
-
 #ifdef PW_MULTITHREADING
   ////////////////////////////////////////////////////////////////////////////////
   ///
@@ -396,6 +342,32 @@ inline void CPhysicsManager::resetTime()
   {
       METHOD_ENTRY("CPhysicsManager::terminate")
       m_bRunning = false;
+  }
+#else
+  ////////////////////////////////////////////////////////////////////////////////
+  ///
+  /// \brief Returns time acceleration factor
+  ///
+  /// \return Time acceleration factor
+  ///
+  ////////////////////////////////////////////////////////////////////////////////
+  inline const double& CPhysicsManager::getTimeAccel() const
+  {
+      METHOD_ENTRY("CPhysicsManager::getTimeAccel")
+      return m_fTimeAccel;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ///
+  /// \brief Sets the time slept in main thread to cope with time acceleration
+  ///
+  /// \param _fTimeSlept Time the main thread slept
+  ///
+  ////////////////////////////////////////////////////////////////////////////////
+  inline void CPhysicsManager::setTimeSlept(const double& _fTimeSlept)
+  {
+      METHOD_ENTRY("CPhysicsManager::setTimeSlept")
+      m_fTimeSlept = _fTimeSlept;
   }
 #endif // PW_MULTITHREADING
 
