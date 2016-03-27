@@ -277,7 +277,11 @@ int main(int argc, char *argv[])
                             case sf::Keyboard::Add:
                             case sf::Keyboard::A:
                             {
-                                pPhysicsManager->accelerateTime();
+                                if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+                                    sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                                    pPhysicsManager->accelerateTime(PHYSICS_ALLOW_STEP_SIZE_INC);
+                                else
+                                    pPhysicsManager->accelerateTime();
                                 break;
                             }
                             case sf::Keyboard::Subtract:

@@ -330,14 +330,18 @@ void CPhysicsManager::togglePause()
 ///
 /// \brief Accelerates time by factor 2
 ///
+/// \param _bAllowTimeScaling Indicates if time scaling is allowed
+///
 ////////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::accelerateTime()
+void CPhysicsManager::accelerateTime(const bool _bAllowTimeScaling)
 {
     METHOD_ENTRY("CPhysicsManager::accelerateTime")
     if (m_fTimeSlept <= 0.0)
     {
         if (m_pDataStorage->getTimeScale() < 10000000.0)
-            m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 2.0);
+        {
+            if (_bAllowTimeScaling) m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 2.0);
+        }
     }
     else
     {
@@ -346,8 +350,7 @@ void CPhysicsManager::accelerateTime()
         else
             m_fTimeAccel *= 2.0;
     }
-    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
-    DOM_VAR(INFO_MSG("Physics Manager", "Time scale        factor: " << m_pDataStorage->getTimeScale()))
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration: " << m_fTimeAccel << ", " << m_pDataStorage->getTimeScale()))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -368,8 +371,7 @@ void CPhysicsManager::decelerateTime()
         else
             m_pDataStorage->setTimeScale(m_pDataStorage->getTimeScale() * 0.5);
     }
-    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
-    DOM_VAR(INFO_MSG("Physics Manager", "Time scale        factor: " << m_pDataStorage->getTimeScale()))
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration: " << m_fTimeAccel << ", " << m_pDataStorage->getTimeScale()))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -382,8 +384,7 @@ void CPhysicsManager::resetTime()
     METHOD_ENTRY("CPhysicsManager::resetTime")
     m_pDataStorage->setTimeScale(1.0);
     m_fTimeAccel = 1.0;
-    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_fTimeAccel))
-    DOM_VAR(INFO_MSG("Physics Manager", "Time scale        factor: " << m_pDataStorage->getTimeScale()))
+    DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration: " << m_fTimeAccel << ", " << m_pDataStorage->getTimeScale()))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

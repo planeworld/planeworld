@@ -50,6 +50,7 @@ Usage
 | v                        | Toggle graphics (on/off)        |
 | ESC                      | Quit                            |
 | + / a                    | Accelerate time (only key-pad +)|
+| + / a  and CTRL          | ... and allow timestep increment|
 | - / d                    | Decelarate time                 |
 | RETURN/ENTER             | Reset time                      |     
 | p                        | Pause physics                   |

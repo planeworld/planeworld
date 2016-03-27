@@ -45,6 +45,7 @@
 //--- Misc header ------------------------------------------------------------//
 #include "lua.hpp"
 
+const bool        PHYSICS_ALLOW_STEP_SIZE_INC   = true;     ///< Increasing step size when accelerating is allowed
 const double      PHYSICS_DEFAULT_FREQUENCY     = 200.0;    ///< Default physics frequency
 const double      PHYSICS_DEBRIS_DEFAULT_FREQUENCY = 30.0;  ///< Default physics frequency for debris
 const double      PHYSICS_LUA_DEFAULT_FREQUENCY = 10.0;     ///< Default frequency for lua interface
@@ -100,7 +101,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         void processFrame();
         void togglePause();
         
-        void accelerateTime();
+        void accelerateTime(const bool = false);
         void decelerateTime();
         void resetTime();
         
