@@ -874,6 +874,8 @@ void CXMLImporter::createComponent(const pugi::xml_node& _Node)
             pThruster->setEmitterVelocity(m_pCurrentEmitter->getVelocity());
             pThruster->setEmitterVelocityStd(m_pCurrentEmitter->getVelocityStd());
             
+            if (checkAttributeBool(_Node, "active", true) == false) pThruster->deactivate();
+            
             // Insert thruster to map
             m_Components.insert(std::pair<std::string,CThruster*>(pThruster->getName(),pThruster));
         }
