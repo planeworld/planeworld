@@ -37,7 +37,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CWorldDataStorage::CWorldDataStorage() : m_fTimeScale(1.0)                                 
+CWorldDataStorage::CWorldDataStorage() : m_pCamera(nullptr),
+                                         m_fTimeScale(1.0)                                 
 {
     METHOD_ENTRY("CWorldDataStorage::CWorldDataStorage")
     CTOR_CALL("CWorldDataStorage::CWorldDataStorage")

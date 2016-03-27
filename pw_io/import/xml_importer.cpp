@@ -139,6 +139,11 @@ bool CXMLImporter::import(const std::string& _strFilename,
             {
                 this->createUniverse(Root);
             }
+            else
+            {
+                ERROR_MSG("XML Importer", "Cannot import sub config. Please start with xml root file.")
+                return false;
+            }
             break;
         case IMPORT_MODE_OBJECT:
             N = Root;

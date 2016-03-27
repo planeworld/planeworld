@@ -57,6 +57,38 @@
 
 //--- Misc-Header ------------------------------------------------------------//
 
+#define CLEAN_UP_AND_EXIT_FAILURE { \
+    if (pPhysicsManager != nullptr) \
+    { \
+        delete pPhysicsManager;\
+        Log.log("Memory freed", "CPhysicsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pPhysicsManager = nullptr; \
+    } \
+    if (pVisualsManager != nullptr) \
+    { \
+        delete pVisualsManager; \
+        Log.log("Memory freed", "CVisualsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pVisualsManager = nullptr; \
+    } \
+    return EXIT_FAILURE; \
+}
+
+#define CLEAN_UP_AND_EXIT_SUCCESS { \
+    if (pPhysicsManager != nullptr) \
+    { \
+        delete pPhysicsManager; \
+        Log.log("Memory freed", "CPhysicsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pPhysicsManager = nullptr; \
+    } \
+    if (pVisualsManager != nullptr) \
+    { \
+        delete pVisualsManager; \
+        Log.log("Memory freed", "CVisualsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pVisualsManager = nullptr; \
+    } \
+    return EXIT_SUCCESS; \
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Usage to call program
@@ -95,10 +127,10 @@ int main(int argc, char *argv[])
 
     //--- Major instances ----------------------------------------------------//
     CGraphics&          Graphics = CGraphics::getInstance();
-    CCamera*            pCamera;
+    CCamera*            pCamera = nullptr;
     CGameStateManager   GameStateManager;
-    CPhysicsManager*    pPhysicsManager;
-    CVisualsManager*    pVisualsManager;
+    CPhysicsManager*    pPhysicsManager = nullptr;
+    CVisualsManager*    pVisualsManager = nullptr;
     CXFigLoader         XFigLoader;
     CUniverse           Universe;
     CWorldDataStorage   WorldDataStorage;
@@ -123,7 +155,7 @@ int main(int argc, char *argv[])
         CXMLImporter        XMLImporter;
         
         XMLImporter.setWorldDataStorage(&WorldDataStorage);
-        XMLImporter.import(argv[1]);
+        if (!XMLImporter.import(argv[1])) CLEAN_UP_AND_EXIT_FAILURE;
         WorldDataStorage.setCamera(XMLImporter.getCamera());
 //         pPhysicsManager->addObjects(XMLImporter.getObjects());
 //         pVisualsManager->addVisualsList(XMLImporter.getVisuals());
@@ -188,7 +220,7 @@ int main(int argc, char *argv[])
     pPhysicsManager->initObjects();
     pPhysicsManager->initEmitters();
     pPhysicsManager->initComponents();
-    if (!pPhysicsManager->initLua()) return EXIT_FAILURE;
+    if (!pPhysicsManager->initLua()) CLEAN_UP_AND_EXIT_FAILURE;
     
     #ifdef PW_MULTITHREADING    
         std::thread PhysicsThread(&CPhysicsManager::run, pPhysicsManager);
@@ -427,16 +459,5 @@ int main(int argc, char *argv[])
         PhysicsThread.join();
     #endif
 
-    if (pPhysicsManager != 0)
-    {
-        delete pPhysicsManager;
-        MEM_FREED("CPhysicsManager")
-    }
-    if (pVisualsManager != 0)
-    {
-        delete pVisualsManager;
-        MEM_FREED("CVisualsManager")
-    }
-    
-    return EXIT_SUCCESS;
+    CLEAN_UP_AND_EXIT_SUCCESS;
 }
