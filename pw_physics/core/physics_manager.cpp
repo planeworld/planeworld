@@ -545,13 +545,6 @@ void CPhysicsManager::updateCells()
   ///
   /// \brief Runs the physics engine, called as a thread.
   ///
-  /// \param _pPhysicsManager Pointer to physics manager
-  /// \param _pbDone Pointer to bool, indicating if program is stopped
-  /// \param _pfCPUAccel Acceleration factor -- increases update frequency (real time)
-  ///                    but not physics frequency
-  /// \param _pbIntAccel Indicates if acceleration is done by increasing time step
-  ///                    of integration
-  ///
   ///////////////////////////////////////////////////////////////////////////////
   void CPhysicsManager::run()
   {
@@ -567,9 +560,6 @@ void CPhysicsManager::updateCells()
       {
           this->processFrame();
           PhysicsTimer.sleepRemaining(m_fFrequency);
-  //         if (fSleepTime < 0.0) *_pbIntAccel = true;
-  //         else *_pbIntAccel = false;
-          
       }
       INFO_MSG("Physics Manager", "Physics thread stopped.")
   }
