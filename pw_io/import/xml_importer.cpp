@@ -66,7 +66,7 @@ CXMLImporter::CXMLImporter() : m_pCurrentEmitter(nullptr),
                                m_pCamera(nullptr),
                                m_strPath(""),
                                m_strFont(""),
-                               m_strLuaPhysicsInterface("physics_interface.lua"),
+                               m_strLuaPhysicsInterface(""),
                                m_fDebrisFrequency(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                m_fLuaFrequency(PHYSICS_LUA_DEFAULT_FREQUENCY),
                                m_fPhysicsFrequency(PHYSICS_DEFAULT_FREQUENCY),
@@ -172,7 +172,9 @@ bool CXMLImporter::import(const std::string& _strFilename,
         {
             if (!checkFile(N))
             {
-                m_strLuaPhysicsInterface = m_strPath+"/"+checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
+                std::string strLuaPhysicsInterface = checkAttributeString(N, "physics_interface", m_strLuaPhysicsInterface);
+                if (strLuaPhysicsInterface == "") m_strLuaPhysicsInterface = "";
+                else m_strLuaPhysicsInterface = m_strPath+"/"+strLuaPhysicsInterface;
                 m_strFont = m_strPath+"/"+checkAttributeString(N, "font", m_strFont);
                 m_fLuaFrequency  = checkAttributeDouble(N, "lua_frequency", m_fLuaFrequency);
                 m_fDebrisFrequency  = checkAttributeDouble(N, "debris_frequency", m_fDebrisFrequency);

@@ -50,7 +50,7 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_bPaused(false),
-                                     m_strLuaPhysicsInterface(PHYSICS_DEFAULT_LUA_INTERFACE)
+                                     m_strLuaPhysicsInterface("")
                                    
 {
     METHOD_ENTRY("CPhysicsManager::CPhysicsManager")
@@ -71,7 +71,7 @@ CPhysicsManager::~CPhysicsManager()
     METHOD_ENTRY("CPhysicsManager::~CPhysicsManager")
     DTOR_CALL("CPhysicsManager::~CPhysicsManager")
 
-    lua_close(m_pLuaState);
+    if (m_strLuaPhysicsInterface != "") lua_close(m_pLuaState);
     m_SimTimerGlobal.stop();
     
     for (auto it = m_Emitters.begin();
@@ -245,36 +245,38 @@ bool CPhysicsManager::initLua()
 {
     METHOD_ENTRY("CPhysicsManager::initLua")
 
-    //--- Test Lua -----------------------------------------------------------//
-    m_pLuaState = luaL_newstate();
- 
-    luaL_openlibs(m_pLuaState);
-    lua_register(m_pLuaState, "activate_thruster", luaActivateThruster);
-    lua_register(m_pLuaState, "deactivate_thruster", luaDeactivateThruster);
-    lua_register(m_pLuaState, "apply_force", luaApplyForce);
-    lua_register(m_pLuaState, "get_angle", luaGetAngle);
-    lua_register(m_pLuaState, "get_angle_ref", luaGetAngleRef);
-    lua_register(m_pLuaState, "get_angle_vel", luaGetAngleVelocity);
-    lua_register(m_pLuaState, "get_angle_vel_ref", luaGetAngleVelocityRef);
-    lua_register(m_pLuaState, "get_frequency", luaGetFrequency);
-    lua_register(m_pLuaState, "get_inertia", luaGetInertia);
-    lua_register(m_pLuaState, "get_mass", luaGetMass);
-    lua_register(m_pLuaState, "get_position", luaGetPosition);
-    lua_register(m_pLuaState, "get_position_ref", luaGetPositionRef);
-    lua_register(m_pLuaState, "get_time", luaGetTime);
-    lua_register(m_pLuaState, "get_time_years", luaGetTimeYears);
-    lua_register(m_pLuaState, "get_velocity", luaGetVelocity);
-    lua_register(m_pLuaState, "get_velocity_ref", luaGetVelocityRef);
-    lua_register(m_pLuaState, "set_frequency", luaSetFrequency);
-    if (luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str()) != 0)
+    //--- Init Lua -----------------------------------------------------------//
+    if (m_strLuaPhysicsInterface != "")
     {
-        ERROR_MSG("Physics Manager", "File " << m_strLuaPhysicsInterface <<
-                                     " could not be loaded.")
-        WARNING_MSG("Physics Manager", "Lua Error: " << lua_tostring(m_pLuaState, -1))
-        return false;
+        m_pLuaState = luaL_newstate();
+    
+        luaL_openlibs(m_pLuaState);
+        lua_register(m_pLuaState, "activate_thruster", luaActivateThruster);
+        lua_register(m_pLuaState, "deactivate_thruster", luaDeactivateThruster);
+        lua_register(m_pLuaState, "apply_force", luaApplyForce);
+        lua_register(m_pLuaState, "get_angle", luaGetAngle);
+        lua_register(m_pLuaState, "get_angle_ref", luaGetAngleRef);
+        lua_register(m_pLuaState, "get_angle_vel", luaGetAngleVelocity);
+        lua_register(m_pLuaState, "get_angle_vel_ref", luaGetAngleVelocityRef);
+        lua_register(m_pLuaState, "get_frequency", luaGetFrequency);
+        lua_register(m_pLuaState, "get_inertia", luaGetInertia);
+        lua_register(m_pLuaState, "get_mass", luaGetMass);
+        lua_register(m_pLuaState, "get_position", luaGetPosition);
+        lua_register(m_pLuaState, "get_position_ref", luaGetPositionRef);
+        lua_register(m_pLuaState, "get_time", luaGetTime);
+        lua_register(m_pLuaState, "get_time_years", luaGetTimeYears);
+        lua_register(m_pLuaState, "get_velocity", luaGetVelocity);
+        lua_register(m_pLuaState, "get_velocity_ref", luaGetVelocityRef);
+        lua_register(m_pLuaState, "set_frequency", luaSetFrequency);
+        if (luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str()) != 0)
+        {
+            ERROR_MSG("Physics Manager", "File " << m_strLuaPhysicsInterface <<
+                                        " could not be loaded.")
+            WARNING_MSG("Physics Manager", "Lua Error: " << lua_tostring(m_pLuaState, -1))
+            return false;
+        }
     }
-    else
-        return true;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -437,7 +439,8 @@ void CPhysicsManager::moveMasses(int nTest) const
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
     
-    if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyLua) == 0)
+    if ((nTest % static_cast<int>(m_fFrequency/m_fFrequencyLua) == 0) &&
+        (m_strLuaPhysicsInterface != ""))
     {
         CTimer FrameTimeLua;
         FrameTimeLua.start();

@@ -49,7 +49,6 @@ const bool        PHYSICS_ALLOW_STEP_SIZE_INC   = true;     ///< Increasing step
 const double      PHYSICS_DEFAULT_FREQUENCY     = 200.0;    ///< Default physics frequency
 const double      PHYSICS_DEBRIS_DEFAULT_FREQUENCY = 30.0;  ///< Default physics frequency for debris
 const double      PHYSICS_LUA_DEFAULT_FREQUENCY = 10.0;     ///< Default frequency for lua interface
-const std::string PHYSICS_DEFAULT_LUA_INTERFACE = "physics_interface.lua"; ///< Default lua interface file
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
