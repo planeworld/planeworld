@@ -9,6 +9,8 @@ Object["name"] = "RocketBody"
 ObjectRef = {}
 ObjectRef["name2"] = "Earth"
 
+pw.system.pause()
+
 function physics_interface()
     
     frequency = pw.system.get_frequency()

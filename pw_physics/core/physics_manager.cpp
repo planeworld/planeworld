@@ -256,6 +256,10 @@ bool CPhysicsManager::initLua()
           lua_newtable(m_pLuaState);
               lua_pushcfunction(m_pLuaState, luaGetFrequency);
               lua_setfield(m_pLuaState, -2, "get_frequency");
+              lua_pushcfunction(m_pLuaState, luaPause);
+              lua_setfield(m_pLuaState, -2, "pause");
+              lua_pushcfunction(m_pLuaState, luaResume);
+              lua_setfield(m_pLuaState, -2, "resume");
               lua_pushcfunction(m_pLuaState, luaSetFrequency);
               lua_setfield(m_pLuaState, -2, "set_frequency");
           lua_setfield(m_pLuaState, -2, "system");
@@ -1315,6 +1319,60 @@ int CPhysicsManager::luaGetVelocityRef(lua_State* _pLuaState)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Pauses the simulation
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaPause(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaPause")
+
+    int nParam = lua_gettop(_pLuaState);
+    
+    if (nParam == 0)
+    {
+        m_pLuaThis->m_bPaused = true;
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function pause (" << nParam << "/0).")
+    }
+    
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Resumes the simulation
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaResume(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaResume")
+
+    int nParam = lua_gettop(_pLuaState);
+    
+    if (nParam == 0)
+    {
+        m_pLuaThis->m_bPaused = false;
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function resume (" << nParam << "/0).")
+    }
+    
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Sets the frequency for lua calls.
 ///
 /// \param _pLuaState Lua access to physics
@@ -1339,3 +1397,4 @@ int CPhysicsManager::luaSetFrequency(lua_State* _pLuaState)
     
     return 0;
 }
+
