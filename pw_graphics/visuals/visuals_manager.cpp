@@ -147,9 +147,9 @@ void CVisualsManager::drawGrid() const
         double fGridTopCell;
         
         // Automatically scale grid depending on zoom level
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 100.0)
+        while ((m_pCamera->getBoundingCircleRadius() / fGrid) > 100.0)
             fGrid*=10.0;
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 10.0)
+        while ((m_pCamera->getBoundingCircleRadius() / fGrid) < 10.0)
             fGrid*=0.1;
         
         // If zoomed out to larger grids then universe cell, the bounding box
@@ -166,9 +166,9 @@ void CVisualsManager::drawGrid() const
         }
 
         // Snap sub grid to sub grid size
-        fGridLeft=(floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
+        fGridLeft=(std::floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
                           fGridLeftCell)/fGrid)+1.0)*fGrid-fGridLeftCell;
-        fGridTop =(floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
+        fGridTop =(std::floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
                           fGridTopCell )/fGrid)+1.0)*fGrid-fGridTopCell;
         
         // Change colour if on cell grid
@@ -273,9 +273,9 @@ void CVisualsManager::drawGridHUD() const
         double fGrid = 1.0;
         
         // Automatically scale grid depending on zoom level
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) > 100.0)
+        while ((m_pCamera->getBoundingCircleRadius() / fGrid) > 100.0)
             fGrid*=10.0;
-        while (((m_pCamera->getBoundingBox().getUpperRight()[0]-m_pCamera->getBoundingBox().getLowerLeft()[0]) / fGrid) < 10.0)
+        while ((m_pCamera->getBoundingCircleRadius() / fGrid) < 10.0)
             fGrid*=0.1;
 //         
 //         // Draw zoom scale
