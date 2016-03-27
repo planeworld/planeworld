@@ -178,6 +178,22 @@ bool CXMLImporter::import(const std::string& _strFilename,
                 m_fDebrisFrequency  = checkAttributeDouble(N, "debris_frequency", m_fDebrisFrequency);
                 m_fPhysicsFrequency = checkAttributeDouble(N, "physics_frequency", m_fPhysicsFrequency);
                 m_fVisualsFrequency = checkAttributeDouble(N, "visuals_frequency", m_fVisualsFrequency);
+                
+                if (m_fLuaFrequency > m_fPhysicsFrequency)
+                {
+                    m_fLuaFrequency=m_fPhysicsFrequency;
+                    NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fLuaFrequency << "Hz.")
+                }
+                if (m_fDebrisFrequency > m_fPhysicsFrequency)
+                {
+                    m_fDebrisFrequency=m_fPhysicsFrequency;
+                    NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fDebrisFrequency << "Hz.")
+                }
+                if (m_fVisualsFrequency > m_fPhysicsFrequency)
+                {
+                     m_fVisualsFrequency=m_fPhysicsFrequency;
+                    NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fVisualsFrequency << "Hz.")
+                }
             }
             
         }        
