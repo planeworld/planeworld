@@ -57,38 +57,6 @@
 
 //--- Misc-Header ------------------------------------------------------------//
 
-//--- Global Variables -------------------------------------------------------//
-bool g_bPhysicsPaused = false;
-
-#ifdef PW_MULTITHREADING
-    ////////////////////////////////////////////////////////////////////////////////
-    ///
-    /// \brief Runs the physics engine, called as a thread.
-    ///
-    /// \param _pPhysicsManager Pointer to physics manager
-    /// \param _pbDone Pointer to bool, indicating if program is stopped
-    ///
-    ///////////////////////////////////////////////////////////////////////////////
-    void runPhysics(CPhysicsManager* const _pPhysicsManager, bool* const _pbDone)
-    {
-        METHOD_ENTRY("runPhysics")
-        
-        INFO_MSG("Main", "Physics thread started.")
-        CTimer PhysicsTimer;
-        
-        PhysicsTimer.start();
-        while (!(*_pbDone))
-        {
-            if (!g_bPhysicsPaused)
-            {
-                _pPhysicsManager->processFrame();
-            }
-            PhysicsTimer.sleepRemaining(_pPhysicsManager->getFrequency());
-        }
-        INFO_MSG("Main", "Physics thread stopped.")
-    }
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Usage to call program
@@ -222,8 +190,11 @@ int main(int argc, char *argv[])
     pPhysicsManager->initComponents();
     if (!pPhysicsManager->initLua()) return EXIT_FAILURE;
     
+    bool   bIntegratorAcceleration = false;
+    double fCPUAcceleration = 1.0;
+    
     #ifdef PW_MULTITHREADING    
-        std::thread PhysicsThread(runPhysics, pPhysicsManager, &bDone);
+        std::thread PhysicsThread(&CPhysicsManager::run, pPhysicsManager);
     #endif
     
     //--- Initialise graphics ------------------------------------------------//
@@ -304,14 +275,22 @@ int main(int argc, char *argv[])
                         case sf::Keyboard::Add:
                         case sf::Keyboard::A:
                         {
-                            pPhysicsManager->accelerateTime();
+                            if (bIntegratorAcceleration)
+                                pPhysicsManager->accelerateTime();
+                            else
+                                fCPUAcceleration += 10.0;
+                                std::cout << "CPU Accel: " << fCPUAcceleration << std::endl;
                             break;
                         }
                         case sf::Keyboard::Subtract:
                         case sf::Keyboard::Dash:
                         case sf::Keyboard::D:
                         {
-                            pPhysicsManager->decelerateTime();
+                            if (bIntegratorAcceleration)
+                                pPhysicsManager->decelerateTime();
+                            else
+                                if (fCPUAcceleration >= 11.0) fCPUAcceleration -= 10.0;
+                                std::cout << "CPU Accel: " << fCPUAcceleration << std::endl;
                             break;
                         }
                         case sf::Keyboard::Return:
@@ -337,10 +316,10 @@ int main(int argc, char *argv[])
                         case sf::Keyboard::L:
                         {
                             /// \todo Really check if physics thread is paused before saving the simulation
-                            g_bPhysicsPaused=true;
+                            pPhysicsManager->pause();
                             GameStateManager.load();
                             pCamera=WorldDataStorage.getCamera();
-                            g_bPhysicsPaused=false;
+                            pPhysicsManager->togglePause();
                             break;
                         }
                         case sf::Keyboard::N:
@@ -350,15 +329,15 @@ int main(int argc, char *argv[])
                         }
                         case sf::Keyboard::P:
                         {
-                            g_bPhysicsPaused ^= 1;
+                            pPhysicsManager->togglePause();
                             break;
                         }
                         case sf::Keyboard::S:
                         {
                             /// \todo Really check if physics thread is paused before saving the simulation
-                            g_bPhysicsPaused=true;
+                            pPhysicsManager->pause();
                             GameStateManager.save();
-                            g_bPhysicsPaused=false;
+                            pPhysicsManager->togglePause();
                             break;
                         }
                         case sf::Keyboard::T:
@@ -420,10 +399,7 @@ int main(int argc, char *argv[])
         }
         #ifndef PW_MULTITHREADING
             //--- Run Physics ---//
-            if (!g_bPhysicsPaused)
-            {
-                pPhysicsManager->processFrame();
-            }
+            pPhysicsManager->processFrame();
             if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()/
                                        pVisualsManager->getFrequency()) == 0)
             {
@@ -443,6 +419,7 @@ int main(int argc, char *argv[])
     }
     
     #ifdef PW_MULTITHREADING
+        pPhysicsManager->terminate();
         INFO_MSG("Main", "Physics thread stopped.")
         PhysicsThread.join();
     #endif

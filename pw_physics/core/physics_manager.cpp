@@ -47,6 +47,7 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fProcessingTime(0.0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
+                                     m_bPaused(false),
                                      m_strLuaPhysicsInterface(PHYSICS_DEFAULT_LUA_INTERFACE)
                                    
 {
@@ -315,28 +316,31 @@ void CPhysicsManager::processFrame()
 {
     METHOD_ENTRY("CPhysicsManager::processFrame")
  
-    m_SimTimerGlobal.inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-    m_SimTimerLocal[0].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-    m_SimTimerLocal[1].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-    m_SimTimerLocal[2].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-    
-    static auto nFrame = 0u;
-    if (++nFrame == 10000) nFrame = 0;    
-    
-    CTimer ProcessingTimer;
-    ProcessingTimer.start();
-    
-    this->addGlobalForces();
-    this->moveMasses(nFrame);
-    this->collisionDetection();
-//     this->updateCells();
-    
-    ProcessingTimer.stop();
-    m_fProcessingTime = ProcessingTimer.getTime();
-    if (m_fProcessingTime > 1.0/ m_fFrequency)
+    if (!m_bPaused)
     {
-        NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << m_fProcessingTime << 
-                                      "s of " << 1.0/m_fFrequency << "s max.")
+        m_SimTimerGlobal.inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        m_SimTimerLocal[0].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        m_SimTimerLocal[1].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        m_SimTimerLocal[2].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        
+        static auto nFrame = 0u;
+        if (++nFrame == 10000) nFrame = 0;    
+        
+        CTimer ProcessingTimer;
+        ProcessingTimer.start();
+        
+        this->addGlobalForces();
+        this->moveMasses(nFrame);
+        this->collisionDetection();
+    //     this->updateCells();
+        
+        ProcessingTimer.stop();
+        m_fProcessingTime = ProcessingTimer.getTime();
+        if (m_fProcessingTime > 1.0/ m_fFrequency)
+        {
+            NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << m_fProcessingTime << 
+                                          "s of " << 1.0/m_fFrequency << "s max.")
+        }
     }
 }
 
@@ -535,6 +539,41 @@ void CPhysicsManager::updateCells()
     }
     
 }
+
+#ifdef PW_MULTITHREADING
+  ////////////////////////////////////////////////////////////////////////////////
+  ///
+  /// \brief Runs the physics engine, called as a thread.
+  ///
+  /// \param _pPhysicsManager Pointer to physics manager
+  /// \param _pbDone Pointer to bool, indicating if program is stopped
+  /// \param _pfCPUAccel Acceleration factor -- increases update frequency (real time)
+  ///                    but not physics frequency
+  /// \param _pbIntAccel Indicates if acceleration is done by increasing time step
+  ///                    of integration
+  ///
+  ///////////////////////////////////////////////////////////////////////////////
+  void CPhysicsManager::run()
+  {
+      METHOD_ENTRY("CPhysicsManager::run")
+      
+      INFO_MSG("Physics Manager", "Physics thread started.")
+      m_bRunning = true;
+      
+      CTimer PhysicsTimer;
+      
+      PhysicsTimer.start();
+      while (m_bRunning)
+      {
+          this->processFrame();
+          PhysicsTimer.sleepRemaining(m_fFrequency);
+  //         if (fSleepTime < 0.0) *_pbIntAccel = true;
+  //         else *_pbIntAccel = false;
+          
+      }
+      INFO_MSG("Physics Manager", "Physics thread stopped.")
+  }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 ///

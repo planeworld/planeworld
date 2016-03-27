@@ -35,6 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "collision_manager.h"
+#include "conf_pw.h"
 #include "emitter.h"
 #include "sim_timer.h"
 #include "thruster.h"
@@ -95,11 +96,18 @@ class CPhysicsManager : public IWorldDataStorageUser
         bool initLua();
         void initObjects();
         
+        void pause();
         void processFrame();
+        void togglePause();
         
         void accelerateTime();
         void decelerateTime();
         void resetTime();
+        
+        #ifdef PW_MULTITHREADING
+          void run();
+          void terminate();
+        #endif
 
     private:
         
@@ -126,6 +134,10 @@ class CPhysicsManager : public IWorldDataStorageUser
         
         double                      m_fCellUpdateResidual;      ///< Residual for calculation of cell update
         bool                        m_bCellUpdateFirst;         ///< Indicates the first cell update (to initialise access)
+        bool                        m_bPaused;                  ///< Indicates if physics caluculations are paused
+        #ifdef PW_MULTITHREADING
+          bool                      m_bRunning = false;         ///< Indicates if physics thread is running
+        #endif
         
         CSimTimer                   m_SimTimerGlobal;           ///< Simulation time since beginning of simulation
         std::array<CSimTimer,3>     m_SimTimerLocal;            ///< Local timer / stop watch in simulation time
@@ -302,6 +314,42 @@ inline void CPhysicsManager::setUniverse(CUniverse* const _pUniverse)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Pauses physics processing independend from current state
+/// 
+/// Pausing instead of toggling pause is needed, to definitely pause the physics
+/// in cases like loading or saving.
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPhysicsManager::pause()
+{
+    METHOD_ENTRY("CPhysicsManager::pause")
+    m_bPaused = true;
+    INFO_MSG("Physics Manager", "Physics processing paused.")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Toggles physics processing from pause to running
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CPhysicsManager::togglePause()
+{
+    METHOD_ENTRY("CPhysicsManager::togglePause")
+    m_bPaused ^= 1;
+    INFO(
+        if (m_bPaused)
+        {
+            INFO_MSG("Physics Manager", "Physics processing paused.")
+        }
+        else
+        {
+              INFO_MSG("Physics Manager", "Physics processing resumed.")
+        }
+    )
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Accelerates time by factor 2
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -338,4 +386,17 @@ inline void CPhysicsManager::resetTime()
     DOM_VAR(INFO_MSG("Physics Manager", "Time acceleration factor: " << m_pDataStorage->getTimeScale()))
 }
 
-#endif
+#ifdef PW_MULTITHREADING
+  ////////////////////////////////////////////////////////////////////////////////
+  ///
+  /// \brief Stops physics thread
+  ///
+  ////////////////////////////////////////////////////////////////////////////////
+  inline void CPhysicsManager::terminate()
+  {
+      METHOD_ENTRY("CPhysicsManager::terminate")
+      m_bRunning = false;
+  }
+#endif // PW_MULTITHREADING
+
+#endif // PHYSICS_MANAGER_H
