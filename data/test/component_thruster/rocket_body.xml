@@ -5,7 +5,7 @@
         name="RocketBody"
         mass="1290000.0"
         origin_x="0.0"
-        origin_y="6378.30e3"
+        origin_y="6378.20e3"
         dynamics="true"
         gravity="true"
         velocity_x="0.0"

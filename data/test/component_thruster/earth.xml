@@ -7,8 +7,8 @@
         origin_x="0.0"
         origin_y="0.0"
         dynamics="true"
-        gravity="false"
-        velocity_x="0.0"
+        gravity="true"
+        velocity_x="29780.0"
     />
     <body_core
         angle_velocity__deg="0.0041780742"
@@ -30,6 +30,17 @@
         line_type="strip"
         points="-1000.0,  6378.16e3;
                  1000.0,  6378.16e3">
+        <visuals type="shape_visuals_polyline"/>
+    </shape>
+    <shape
+        type="shape_polyline"
+        line_type="strip"
+        points="-500.0,  6378.16e3;
+                -100.0,  6378.18e3;
+                 -10.0,  6378.165e3;
+                  10.0,  6378.165e3;
+                 100.0,  6378.18e3;
+                 500.0,  6378.16e3">
         <visuals type="shape_visuals_polyline"/>
     </shape>
 </object>

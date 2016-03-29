@@ -18,7 +18,7 @@
         velocity="100.0"
         velocity_std="20.0"
         angle__deg="-90.0"
-        angle_std__deg="2.0"
+        angle_std__deg="5.0"
         number="1000"
     />
 </component>
