@@ -42,7 +42,9 @@
 //--- Misc header ------------------------------------------------------------//
 #include <eigen3/Eigen/Core>
 
-const int DEBRIS_DEFAULT_NUMBER = 100;
+const uint32_t DEBRIS_DEFAULT_NUMBER = 100;
+const uint8_t DEBRIS_STATE_ACTIVE = 0;
+const uint8_t DEBRIS_STATE_INACTIVE = 1;
 
 using namespace Eigen;
 
@@ -52,6 +54,9 @@ using namespace Eigen;
 ///
 /// Debris have a very limited physical accuracy. They are mainly for visual
 /// purposes, do not have any real mass and thus, do not influence other objects.
+///
+/// \Note The state is represented by a uint8_t, since bool specilisation for
+///       std::vector is a little restricted when accessing elements.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CDebris : public IUniverseScaled,
@@ -70,8 +75,7 @@ class CDebris : public IUniverseScaled,
         CCircularBuffer<Vector2d>* getPositions();
         CCircularBuffer<Vector2d>* getVelocities();
         CCircularBuffer<Vector2d>* getPreviousPositions();
-        CCircularBuffer<Vector2d>* getPreviousVelocities();
-        CCircularBuffer<bool>*     getStates();
+        CCircularBuffer<std::uint8_t>*  getStates();
         
         void                setDamping(const double&);
         void                setDepths(const int&);
@@ -81,7 +85,6 @@ class CDebris : public IUniverseScaled,
         
         void                dynamics(const double&);
         void                generate(const Vector2d&, const Vector2d&);
-        void                init();
 
         //--- friends --------------------------------------------------------//
         friend std::istream&    operator>>(std::istream&, CDebris* const);
@@ -96,8 +99,7 @@ class CDebris : public IUniverseScaled,
         CCircularBuffer<Vector2d> m_PosList;                 ///< Position of debris
         CCircularBuffer<Vector2d> m_PosListPrev;             ///< Position of debris in previous time step
         CCircularBuffer<Vector2d> m_VelList;                 ///< Velocity of derbis
-        CCircularBuffer<Vector2d> m_VelListPrev;             ///< Velocity of derbis in previous time step
-        CCircularBuffer<bool>     m_StateList;               ///< Is the debris active or inactive
+        CCircularBuffer<std::uint8_t>  m_StateList;          ///< Is the debris active or inactive
         
         double                  m_fDamping;                  ///< Damping of debris
         int                     m_nDepthlayers;              ///< Depths in which debris exists
@@ -109,7 +111,6 @@ class CDebris : public IUniverseScaled,
 typedef std::vector<CDebris*>   DebrisType;                  ///< Specifies a list of debris
 
 //--- Implementation is done here for inline optimisation --------------------//
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -152,32 +153,19 @@ inline CCircularBuffer<Vector2d>* CDebris::getPreviousPositions()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns velocities of the debris from previous timestep
-///
-/// \return List of velocities of debris from previous timestep
-///
-////////////////////////////////////////////////////////////////////////////////
-inline CCircularBuffer<Vector2d>* CDebris::getPreviousVelocities()
-{
-    METHOD_ENTRY("CDebris::getPreviousVelocities")
-    return &m_VelListPrev;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Returns states of the debris, defining if a debris is active or not.
 ///
 /// \return List of states of the debris
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CCircularBuffer<bool>* CDebris::getStates()
+inline CCircularBuffer<std::uint8_t>* CDebris::getStates()
 {
     METHOD_ENTRY("CDebris::getStates")
     return &m_StateList;
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Returns depthlayers
 ///

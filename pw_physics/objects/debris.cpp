@@ -43,7 +43,6 @@ CDebris::CDebris() : m_fTimeFac(1.0)
     m_PosList.reserve(DEBRIS_DEFAULT_NUMBER);
     m_VelList.reserve(DEBRIS_DEFAULT_NUMBER);
     m_PosListPrev.reserve(DEBRIS_DEFAULT_NUMBER);
-    m_VelListPrev.reserve(DEBRIS_DEFAULT_NUMBER);
     m_StateList.reserve(DEBRIS_DEFAULT_NUMBER);
     
     m_vecForce.setZero();
@@ -65,11 +64,9 @@ void CDebris::dynamics(const double& _fStep)
     for (auto i=0u; i<m_PosList.size(); ++i)
     {
         // Only if state is active
-        ///< \bug This doesn't work due to some vector internal bitset conversion
-//         if (m_StateList[i])
+        if (m_StateList[i] == DEBRIS_STATE_ACTIVE)
         {
             m_PosListPrev[i] = m_PosList[i];
-            m_VelList[i] = m_VelList[i];
             m_VelList[i] += vecStep;
             m_PosList[i] += m_VelList[i] * _fStep;
         }
@@ -95,38 +92,7 @@ void CDebris::generate(const Vector2d& _vecP, const Vector2d& _vecV)
     m_PosList.push_back(_vecP);
     m_PosListPrev.push_back(_vecP);
     m_VelList.push_back(_vecV);
-    m_VelListPrev.push_back(_vecV);
-    m_StateList.push_back(true);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Specific initialisation
-///
-/// This method initialises it's specific members.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CDebris::init()
-{
-    METHOD_ENTRY("CDebris::init")
-
-//     m_fAngle = 0.0;
-//     m_pIntAng->reset();
-//     m_pIntAngVel->reset();
-//     
-//     for (std::list< IShape* >::const_iterator ci = m_Geometry.getShapes().begin();
-//         ci != m_Geometry.getShapes().end(); ++ci)
-//     {
-//         (*ci)->transform(m_fAngle, m_pIntPos->getValue());
-// 
-//         // Update depthlayers
-//         m_nDepthlayers |= (*ci)->getDepths();
-// 
-//         // Update bounding box of current time step
-//         m_Geometry.updateBoundingBox((*ci)->getBoundingBox());
-//     }
-//     // Copy geometry to previous timestep
-//     m_Geometry.update();
+    m_StateList.push_back(1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,12 +109,11 @@ void CDebris::setNumber(const int& _nN)
     m_PosList.reserve(_nN);
     m_StateList.reserve(_nN);
     m_PosListPrev.reserve(_nN);
-//     for (auto i=0u; i<m_PosList.capacity();++i)
-//     {
-//         m_StateList.push_back(true);
-//     }
+    for (auto i=0u; i<m_PosList.capacity();++i)
+    {
+        m_StateList.push_back(DEBRIS_STATE_ACTIVE);
+    }
     m_VelList.reserve(_nN);
-    m_VelListPrev.reserve(_nN);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -179,7 +144,6 @@ std::istream& operator>>(std::istream& _is, CDebris* const _pDebris)
     _is >> _pDebris->m_PosList;
     _is >> _pDebris->m_PosListPrev;
     _is >> _pDebris->m_VelList;
-    _is >> _pDebris->m_VelListPrev;
     _is >> _pDebris->m_StateList;
     
     _is >> _pDebris->m_fDamping;
@@ -217,7 +181,6 @@ std::ostream& operator<<(std::ostream& _os, CDebris* const _pDebris)
     _os << _pDebris->m_PosList << std::endl;
     _os << _pDebris->m_PosListPrev << std::endl;
     _os << _pDebris->m_VelList << std::endl;
-    _os << _pDebris->m_VelListPrev << std::endl;
     _os << _pDebris->m_StateList << std::endl;
     
     _os << _pDebris->m_fDamping << std::endl;
