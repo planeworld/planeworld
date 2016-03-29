@@ -92,7 +92,7 @@ void CDebris::generate(const Vector2d& _vecP, const Vector2d& _vecV)
     m_PosList.push_back(_vecP);
     m_PosListPrev.push_back(_vecP);
     m_VelList.push_back(_vecV);
-    m_StateList.push_back(1);
+    m_StateList.push_back(DEBRIS_STATE_ACTIVE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
