@@ -274,7 +274,7 @@ bool CPhysicsManager::initLua()
           lua_newtable(m_pLuaState);
               lua_pushcfunction(m_pLuaState, luaActivateThruster);
               lua_setfield(m_pLuaState, -2, "activate_thruster");
-              lua_pushcfunction(m_pLuaState, luaApplyForce);
+              lua_pushcfunction(m_pLuaState, luaDeactivateThruster);
               lua_setfield(m_pLuaState, -2, "deactivate_thruster");
           lua_setfield(m_pLuaState, -2, "sim");
           lua_newtable(m_pLuaState);
