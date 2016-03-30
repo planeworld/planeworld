@@ -125,13 +125,14 @@ class CPhysicsManager : public IWorldDataStorageUser
         CUniverse*          m_pUniverse;            ///< The procedurally generated universe
         CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
 
+        double              m_fG;                   ///< Gravitational constant
         double              m_fFrequency;           ///< Frequency of physics processing
         double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
         double              m_fFrequencyLua;        ///< Frequency of Lua interface
         double              m_fProcessingTime;      ///< Overall processing time
         double              m_fTimeAccel;           ///< Time acceleration of simulation
         double              m_fTimeSlept;           ///< Sleep time of thread
-
+        
         Vector2d                    m_vecConstantGravitation;   ///< Vector for constant gravitation
 
         ComponentsType              m_Components;               ///< List of components
@@ -171,6 +172,9 @@ class CPhysicsManager : public IWorldDataStorageUser
         static int                 luaPause(lua_State*);
         static int                 luaResume(lua_State*);
         static int                 luaSetFrequency(lua_State*);
+        
+        static int                 luaGetVar(lua_State*);
+        static int                 luaSetVar(lua_State*);
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

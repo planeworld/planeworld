@@ -1,7 +1,14 @@
 math.randomseed(os.time())
 
+io.write("G read from C++: ", pw.universe.G, "\n")
+pw.universe.G = 42
+io.write("G modified by Lua and read from C++: ", pw.universe.G, "\n")
+io.write("Some more object data: \n")
 io.write("Mass:    ", pw.universe.get_mass("Mass"), "\n")
 io.write("Inertia: ", pw.universe.get_inertia("Mass"), "\n")
+io.write("Paused, press P to resume.\n\n")
+
+pw.system.pause()
 
 function physics_interface()
     

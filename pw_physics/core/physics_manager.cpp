@@ -41,6 +41,7 @@ CPhysicsManager* CPhysicsManager::m_pLuaThis;
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
+                                     m_fG(6.67408e-11),
                                      m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                      m_fFrequencyLua(PHYSICS_LUA_DEFAULT_FREQUENCY),
@@ -248,6 +249,13 @@ bool CPhysicsManager::initLua()
     //--- Init Lua -----------------------------------------------------------//
     if (m_strLuaPhysicsInterface != "")
     {
+        const struct luaL_Reg VarAccessMetaTable[] =
+        {
+          { "__index", luaGetVar},
+          { "__newindex", luaSetVar},
+          { NULL, NULL }
+        };
+      
         m_pLuaState = luaL_newstate();
         
         luaL_openlibs(m_pLuaState);
@@ -296,8 +304,14 @@ bool CPhysicsManager::initLua()
               lua_setfield(m_pLuaState, -2, "get_velocity");
               lua_pushcfunction(m_pLuaState, luaGetVelocityRef);
               lua_setfield(m_pLuaState, -2, "get_velocity_ref");
+              
+              luaL_newmetatable(m_pLuaState, "VarAccessMetaTable");
+              luaL_setfuncs(m_pLuaState, VarAccessMetaTable, 0);
+              lua_setmetatable(m_pLuaState, -2);
+              
           lua_setfield(m_pLuaState, -2, "universe");
         lua_setglobal(m_pLuaState, "pw");
+
         if (luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str()) != 0)
         {
             ERROR_MSG("Physics Manager", "File " << m_strLuaPhysicsInterface <<
@@ -570,7 +584,7 @@ void CPhysicsManager::addGlobalForces()
                 {
                     vecG = vecCC.normalized() * (ci->second->getMass() * cj->second->getMass()) / fCCSqr
 //                             * 6.6742e+0;
-                        * 6.67384e-11;
+                        * m_fG;
                     if (cj->second->getGravitationState() == true)
                         ci->second->addForce(-vecG, ci->second->getCOM());
                     cj->second->addForce(vecG, cj->second->getCOM());
@@ -1398,3 +1412,56 @@ int CPhysicsManager::luaSetFrequency(lua_State* _pLuaState)
     return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Gets an internal variable from Lua script
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaGetVar(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaGetVar")
+
+    const char* pKey = luaL_checkstring(_pLuaState, 2);
+
+    if (strcmp(pKey, "G") == 0)
+    {
+        lua_pushnumber(_pLuaState, m_pLuaThis->m_fG);
+        return 1;
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Unknown variable " << pKey << ".")
+    }
+    
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets an internal variable from Lua script
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaSetVar(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaSetVar")
+
+    const char* pKey = luaL_checkstring(_pLuaState, 2);
+    double      fVal = luaL_checknumber(_pLuaState, 3);
+
+    if (strcmp(pKey, "G") == 0)
+        m_pLuaThis->m_fG = fVal;
+    else
+    {
+        WARNING_MSG("Physics Manager", "Unknown variable " << pKey << ".")
+    }
+    
+    return 0;
+}
