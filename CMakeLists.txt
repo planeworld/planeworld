@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.1)
 
 ADD_SUBDIRECTORY(pw_util)
 ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(testing)
 
 
 INSTALL (DIRECTORY ./data DESTINATION share/planeworld)

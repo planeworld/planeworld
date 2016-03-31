@@ -199,12 +199,17 @@ bool CGraphics::init()
     // Initialize window and graphics
     //--------------------------------------------------------------------------
     m_pWindow = new WindowHandleType(sf::VideoMode(m_unWidthScr, m_unHeightScr),
-                                     "Planeworld", sf::Style::Default);
+                                     "Planeworld", sf::Style::Default,
+                                     sf::ContextSettings(24,8,4,3,3,sf::ContextSettings::Core)
+                                    );
     MEM_ALLOC("WindowHandleType")
     m_pWindow->setMouseCursorVisible(false);
     m_pWindow->setVerticalSyncEnabled(false);
     DOM_VAR(INFO_MSG("Graphics", "Found OpenGL version: " << m_pWindow->getSettings().majorVersion << "." << m_pWindow->getSettings().minorVersion))
-    DOM_VAR(INFO_MSG("Graphics", "Antialiasing level:" << m_pWindow->getSettings().antialiasingLevel))
+    DOM_VAR(INFO_MSG("Graphics", "Antialiasing level: " << m_pWindow->getSettings().antialiasingLevel))
+    DOM_VAR(INFO_MSG("Graphics", "Depth Buffer Bits: " << m_pWindow->getSettings().depthBits))
+    DOM_VAR(INFO_MSG("Graphics", "Stencil Buffer Bits: " << m_pWindow->getSettings().stencilBits))
+    DOM_VAR(INFO_MSG("Graphics", "Core Profile (1): " << m_pWindow->getSettings().attributeFlags))
 
     //--------------------------------------------------------------------------
     // Setup OpenGL
