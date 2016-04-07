@@ -261,55 +261,55 @@ bool CPhysicsManager::initLua()
         luaL_openlibs(m_pLuaState);
         
         lua_newtable(m_pLuaState);
-          lua_newtable(m_pLuaState);
-              lua_pushcfunction(m_pLuaState, luaGetFrequency);
-              lua_setfield(m_pLuaState, -2, "get_frequency");
-              lua_pushcfunction(m_pLuaState, luaPause);
-              lua_setfield(m_pLuaState, -2, "pause");
-              lua_pushcfunction(m_pLuaState, luaResume);
-              lua_setfield(m_pLuaState, -2, "resume");
-              lua_pushcfunction(m_pLuaState, luaSetFrequency);
-              lua_setfield(m_pLuaState, -2, "set_frequency");
-          lua_setfield(m_pLuaState, -2, "system");
-          lua_newtable(m_pLuaState);
-              lua_pushcfunction(m_pLuaState, luaActivateThruster);
-              lua_setfield(m_pLuaState, -2, "activate_thruster");
-              lua_pushcfunction(m_pLuaState, luaDeactivateThruster);
-              lua_setfield(m_pLuaState, -2, "deactivate_thruster");
-          lua_setfield(m_pLuaState, -2, "sim");
-          lua_newtable(m_pLuaState);
-              lua_pushcfunction(m_pLuaState, luaApplyForce);
-              lua_setfield(m_pLuaState, -2, "apply_force");
-              lua_pushcfunction(m_pLuaState, luaGetAngle);
-              lua_setfield(m_pLuaState, -2, "get_angle");
-              lua_pushcfunction(m_pLuaState, luaGetAngleRef);
-              lua_setfield(m_pLuaState, -2, "get_angle_ref");
-              lua_pushcfunction(m_pLuaState, luaGetAngleVelocity);
-              lua_setfield(m_pLuaState, -2, "get_angle_vel");
-              lua_pushcfunction(m_pLuaState, luaGetAngleVelocityRef);
-              lua_setfield(m_pLuaState, -2, "get_angle_vel_ref");
-              lua_pushcfunction(m_pLuaState, luaGetInertia);
-              lua_setfield(m_pLuaState, -2, "get_inertia");
-              lua_pushcfunction(m_pLuaState, luaGetMass);
-              lua_setfield(m_pLuaState, -2, "get_mass");
-              lua_pushcfunction(m_pLuaState, luaGetPosition);
-              lua_setfield(m_pLuaState, -2, "get_position");
-              lua_pushcfunction(m_pLuaState, luaGetPositionRef);
-              lua_setfield(m_pLuaState, -2, "get_position_ref");
-              lua_pushcfunction(m_pLuaState, luaGetTime);
-              lua_setfield(m_pLuaState, -2, "get_time");
-              lua_pushcfunction(m_pLuaState, luaGetTimeYears);
-              lua_setfield(m_pLuaState, -2, "get_time_years");
-              lua_pushcfunction(m_pLuaState, luaGetVelocity);
-              lua_setfield(m_pLuaState, -2, "get_velocity");
-              lua_pushcfunction(m_pLuaState, luaGetVelocityRef);
-              lua_setfield(m_pLuaState, -2, "get_velocity_ref");
+            lua_newtable(m_pLuaState);
+                lua_pushcfunction(m_pLuaState, luaGetFrequency);
+                lua_setfield(m_pLuaState, -2, "get_frequency");
+                lua_pushcfunction(m_pLuaState, luaPause);
+                lua_setfield(m_pLuaState, -2, "pause");
+                lua_pushcfunction(m_pLuaState, luaResume);
+                lua_setfield(m_pLuaState, -2, "resume");
+                lua_pushcfunction(m_pLuaState, luaSetFrequency);
+                lua_setfield(m_pLuaState, -2, "set_frequency");
+            lua_setfield(m_pLuaState, -2, "system");
+            lua_newtable(m_pLuaState);
+                lua_pushcfunction(m_pLuaState, luaActivateThruster);
+                lua_setfield(m_pLuaState, -2, "activate_thruster");
+                lua_pushcfunction(m_pLuaState, luaDeactivateThruster);
+                lua_setfield(m_pLuaState, -2, "deactivate_thruster");
+            lua_setfield(m_pLuaState, -2, "sim");
+            lua_newtable(m_pLuaState);
+                lua_pushcfunction(m_pLuaState, luaApplyForce);
+                lua_setfield(m_pLuaState, -2, "apply_force");
+                lua_pushcfunction(m_pLuaState, luaGetAngle);
+                lua_setfield(m_pLuaState, -2, "get_angle");
+                lua_pushcfunction(m_pLuaState, luaGetAngleRef);
+                lua_setfield(m_pLuaState, -2, "get_angle_ref");
+                lua_pushcfunction(m_pLuaState, luaGetAngleVelocity);
+                lua_setfield(m_pLuaState, -2, "get_angle_vel");
+                lua_pushcfunction(m_pLuaState, luaGetAngleVelocityRef);
+                lua_setfield(m_pLuaState, -2, "get_angle_vel_ref");
+                lua_pushcfunction(m_pLuaState, luaGetInertia);
+                lua_setfield(m_pLuaState, -2, "get_inertia");
+                lua_pushcfunction(m_pLuaState, luaGetMass);
+                lua_setfield(m_pLuaState, -2, "get_mass");
+                lua_pushcfunction(m_pLuaState, luaGetPosition);
+                lua_setfield(m_pLuaState, -2, "get_position");
+                lua_pushcfunction(m_pLuaState, luaGetPositionRef);
+                lua_setfield(m_pLuaState, -2, "get_position_ref");
+                lua_pushcfunction(m_pLuaState, luaGetTime);
+                lua_setfield(m_pLuaState, -2, "get_time");
+                lua_pushcfunction(m_pLuaState, luaGetTimeYears);
+                lua_setfield(m_pLuaState, -2, "get_time_years");
+                lua_pushcfunction(m_pLuaState, luaGetVelocity);
+                lua_setfield(m_pLuaState, -2, "get_velocity");
+                lua_pushcfunction(m_pLuaState, luaGetVelocityRef);
+                lua_setfield(m_pLuaState, -2, "get_velocity_ref");
+                
+                luaL_newmetatable(m_pLuaState, "VarAccessMetaTable");
+                luaL_setfuncs(m_pLuaState, VarAccessMetaTable, 0);
+                lua_setmetatable(m_pLuaState, -2);
               
-              luaL_newmetatable(m_pLuaState, "VarAccessMetaTable");
-              luaL_setfuncs(m_pLuaState, VarAccessMetaTable, 0);
-              lua_setmetatable(m_pLuaState, -2);
-              
-          lua_setfield(m_pLuaState, -2, "universe");
+            lua_setfield(m_pLuaState, -2, "universe");
         lua_setglobal(m_pLuaState, "pw");
 
         if (luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str()) != 0)
@@ -1454,13 +1454,13 @@ int CPhysicsManager::luaSetVar(lua_State* _pLuaState)
     METHOD_ENTRY("luaSetVar")
 
     const char* pKey = luaL_checkstring(_pLuaState, 2);
-    double      fVal = luaL_checknumber(_pLuaState, 3);
 
     if (strcmp(pKey, "G") == 0)
-        m_pLuaThis->m_fG = fVal;
+        m_pLuaThis->m_fG = luaL_checknumber(_pLuaState, 3);
     else
     {
-        WARNING_MSG("Physics Manager", "Unknown variable " << pKey << ".")
+        // Fall back to default lua creation of value within table
+        lua_rawset(m_pLuaThis->m_pLuaState, -3);
     }
     
     return 0;
