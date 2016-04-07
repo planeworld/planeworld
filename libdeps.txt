@@ -1,7 +1,8 @@
 eigen3 - MPL 2.0
-lua51 - MIT License
-pugixml - MIT Licence
-SFML - zlib/png license
+lua - MIT License
+pugixml - MIT License
+SFML - zlib/png License
+glm - MIT License
 openal
 glew
 

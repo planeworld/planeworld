@@ -178,8 +178,8 @@ void CGraphics::swapBuffers()
     // clear offscreen buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
     
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+//     glMatrixMode(GL_MODELVIEW);
+//     glLoadIdentity();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -215,27 +215,27 @@ bool CGraphics::init()
     // Setup OpenGL
     //--------------------------------------------------------------------------
 
-    // Setup viewport
-    glMatrixMode(GL_VIEWPORT);
-    glLoadIdentity();
-    glViewport(0, 0, m_unWidthScr, m_unHeightScr);
-    
-    // Setup projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(m_ViewPort.left, m_ViewPort.right,
-            m_ViewPort.bottom, m_ViewPort.top,
-            m_ViewPort.near, m_ViewPort.far);
-
-    // Enable blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    // Enable anti-aliasing
-    glEnable(GL_LINE_SMOOTH);
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_POLYGON_SMOOTH);
-    glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
+//     // Setup viewport
+//     glMatrixMode(GL_VIEWPORT);
+//     glLoadIdentity();
+//     glViewport(0, 0, m_unWidthScr, m_unHeightScr);
+//     
+//     // Setup projection
+//     glMatrixMode(GL_PROJECTION);
+//     glLoadIdentity();
+//     glOrtho(m_ViewPort.left, m_ViewPort.right,
+//             m_ViewPort.bottom, m_ViewPort.top,
+//             m_ViewPort.near, m_ViewPort.far);
+// 
+//     // Enable blending
+//     glEnable(GL_BLEND);
+//     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//     
+//     // Enable anti-aliasing
+//     glEnable(GL_LINE_SMOOTH);
+//     glShadeModel(GL_SMOOTH);
+//     glEnable(GL_POLYGON_SMOOTH);
+//     glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
 
 //     // Test for depthbuffer and enable if possible
 //     glEnable(GL_DEPTH_TEST);
@@ -248,13 +248,13 @@ bool CGraphics::init()
 //         INFO_MSG("OpenGL", "Enabling depthbuffer.")
 //     }
     
-    // clear buffers
-    glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-    
-    // set default to matrixmode modelview
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    
+//     // clear buffers
+//     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+//     
+//     // set default to matrixmode modelview
+//     glMatrixMode(GL_MODELVIEW);
+//     glLoadIdentity();
+
 //     GLfloat global_ambient[] = {0.0f,0.0f,0.0f,1.0f};
 //     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 //     
