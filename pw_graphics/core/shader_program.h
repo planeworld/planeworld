@@ -36,6 +36,7 @@
 //--- Standard header --------------------------------------------------------//
 #include <cstdint>
 #include <string>
+#include <vector>
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
@@ -59,11 +60,10 @@ class CShaderProgram
 
         //--- Constant Methods -----------------------------------------------//
         const GLuint getID() const;
-        
-        void         addShader(const CShader&) const;
         void         use() const;
         
         //--- Methods --------------------------------------------------------//
+        void addShader(const CShader&);
         void create();
         bool link();
                 
@@ -72,7 +72,8 @@ class CShaderProgram
     private:
         
         //--- Variables [protected] ------------------------------------------//
-        GLuint m_unID = 0; // ID of shader program
+        GLuint m_unID = 0;           // ID of shader program
+        std::vector<GLuint> Shaders; // Shaders attached to program
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -92,19 +93,6 @@ inline const GLuint CShaderProgram::getID() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Adds given shader to shader program
-///
-/// \param _Shader Shader to be added to program
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CShaderProgram::addShader(const CShader& _Shader) const
-{
-    METHOD_ENTRY("CShaderProgram::addShader")
-    glAttachShader(m_unID, _Shader.getID());
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Use this GL shader program 
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +100,20 @@ inline void CShaderProgram::use() const
 {
     METHOD_ENTRY("CShaderProgram::use")
     glUseProgram(m_unID);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Adds given shader to shader program
+///
+/// \param _Shader Shader to be added to program
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CShaderProgram::addShader(const CShader& _Shader)
+{
+    METHOD_ENTRY("CShaderProgram::addShader")
+    glAttachShader(m_unID, _Shader.getID());
+    Shaders.push_back(_Shader.getID());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -116,8 +116,29 @@ bool CShader::load(const std::string& _strFilename, const GLenum _Type)
         INFO_MSG("Shader", "Successfully compiled shader " << _strFilename)
     }
     
-    //--- Clean up ---//
     m_Type = _Type;
+    m_bIsLoaded = true;
     
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Deletes shader
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CShader::destroy()
+{
+    METHOD_ENTRY("CShader::destroy")
+    if (m_bIsLoaded)
+    {
+        glDeleteShader(m_unID);
+        m_bIsLoaded = false;
+        return true;
+    }
+    else
+    {
+      DEBUG_MSG("Shader", "Shader already destroyed.")
+      return false;
+    }
 }

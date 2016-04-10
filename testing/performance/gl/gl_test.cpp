@@ -164,10 +164,6 @@ int main(int argc, char *argv[])
     ShaderProgram.link();
     ShaderProgram.use();
 
-    //Always detach shaders after a successful link.
-//     glDetachShader(program, VertexShader.getID());
-//     glDetachShader(program, FragmentShader.getID());
-    
     while (nCount++ < 1000)
     {
         glClear(GL_COLOR_BUFFER_BIT);

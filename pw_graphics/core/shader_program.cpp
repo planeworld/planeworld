@@ -30,9 +30,6 @@
 
 #include "shader_program.h"
 
-//--- Standard header --------------------------------------------------------//
-#include <vector>
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Link GL shader program
@@ -65,11 +62,19 @@ bool CShaderProgram::link()
         std::cerr << std::endl;
         )
         glDeleteProgram(m_unID);
+        
         return false;
     }
     else
     {
         INFO_MSG("Shader Program", "Successfully linked shader program")
+        
+        // Detach shaders if succesfully linked
+        for (auto it : Shaders)
+        {
+            glDetachShader(m_unID, it);
+        }
+        Shaders.clear();
     }
     return true;
 }

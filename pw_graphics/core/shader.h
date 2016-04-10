@@ -55,23 +55,39 @@ class CShader
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
+        ~CShader();
 
         //--- Constant Methods -----------------------------------------------//
         const GLuint getID() const;
         
         //--- Methods --------------------------------------------------------//
         bool load(const std::string&, const GLenum);
+        bool destroy();
                 
         //--- friends --------------------------------------------------------//
 
     private:
         
-        //--- Variables [protected] ------------------------------------------//
+        //--- Variables [private] --------------------------------------------//
+        bool    m_bIsLoaded = false; // Indicates, if Shader is loaded and not deleted
+      
         GLenum m_Type = 0; // Type of shader
         GLuint m_unID = 0; // ID of shader
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Destructor, deletes shader if still loaded
+///
+////////////////////////////////////////////////////////////////////////////////
+inline CShader::~CShader()
+{
+    METHOD_ENTRY("CShader::getID")
+    DTOR_CALL("CShader::~CShader")
+    this->destroy();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -85,6 +101,5 @@ inline const GLuint CShader::getID() const
     METHOD_ENTRY("CShader::getID")
     return m_unID;
 }
-
 
 #endif // SHADER_H
