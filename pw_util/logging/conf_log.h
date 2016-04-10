@@ -86,8 +86,8 @@
 //--- Uncomment one (only one!) level to be used for displaying ---//
 //=================================================================//
 
-#define LOGLEVEL_DEBUG
-// #define LOGLEVEL_INFO
+// #define LOGLEVEL_DEBUG
+#define LOGLEVEL_INFO
 // #define LOGLEVEL_NOTICE
 // #define LOGLEVEL_WARNING
 // #define LOGLEVEL_ERROR

@@ -166,18 +166,16 @@ int main(int argc, char *argv[])
 
     while (nCount++ < 1000)
     {
-        glClear(GL_COLOR_BUFFER_BIT);
-        
         // Triangle
         glBindVertexArray(unVAO[0]);
 
         glBindBuffer(GL_ARRAY_BUFFER, unVBO[0]);
-        glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), fTriangle, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), fTriangle, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         glBindBuffer(GL_ARRAY_BUFFER, unVBO[1]);
-        glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), fTriangleColor, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), fTriangleColor, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -185,12 +183,12 @@ int main(int argc, char *argv[])
         glBindVertexArray(unVAO[1]);
 
         glBindBuffer(GL_ARRAY_BUFFER, unVBO[2]);
-        glBufferData(GL_ARRAY_BUFFER, 12*sizeof(float), fQuad, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 12*sizeof(float), fQuad, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         glBindBuffer(GL_ARRAY_BUFFER, unVBO[3]);
-        glBufferData(GL_ARRAY_BUFFER, 12*sizeof(float), fQuadColor, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 12*sizeof(float), fQuadColor, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
         

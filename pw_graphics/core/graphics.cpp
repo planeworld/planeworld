@@ -227,29 +227,29 @@ bool CGraphics::init()
 //             m_ViewPort.bottom, m_ViewPort.top,
 //             m_ViewPort.near, m_ViewPort.far);
 // 
-//     // Enable blending
-//     glEnable(GL_BLEND);
-//     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//     
-//     // Enable anti-aliasing
-//     glEnable(GL_LINE_SMOOTH);
-//     glShadeModel(GL_SMOOTH);
-//     glEnable(GL_POLYGON_SMOOTH);
-//     glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
-
-//     // Test for depthbuffer and enable if possible
-//     glEnable(GL_DEPTH_TEST);
-//     if (!glIsEnabled(GL_DEPTH_TEST))
-//     {
-//         WARNING_MSG("OpenGL", "Could not enable depthbuffer.")
-//     }
-//     else
-//     {
-//         INFO_MSG("OpenGL", "Enabling depthbuffer.")
-//     }
+    // Enable blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-//     // clear buffers
-//     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+    // Enable anti-aliasing
+    glEnable(GL_LINE_SMOOTH);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_POLYGON_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
+
+    // Test for depthbuffer and enable if possible
+    glEnable(GL_DEPTH_TEST);
+    if (!glIsEnabled(GL_DEPTH_TEST))
+    {
+        WARNING_MSG("OpenGL", "Could not enable depthbuffer.")
+    }
+    else
+    {
+        INFO_MSG("OpenGL", "Enabling depthbuffer.")
+    }
+    
+    // clear buffers
+    glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 //     
 //     // set default to matrixmode modelview
 //     glMatrixMode(GL_MODELVIEW);
