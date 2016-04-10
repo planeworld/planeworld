@@ -60,8 +60,9 @@ bool CShaderProgram::link()
         ERROR(
         for (auto ci : ErrorLog)
         {
-            ERROR_MSG("Shader Program", ci)
+            std::cerr << ci;
         }
+        std::cerr << std::endl;
         )
         glDeleteProgram(m_unID);
         return false;
@@ -70,4 +71,5 @@ bool CShaderProgram::link()
     {
         INFO_MSG("Shader Program", "Successfully linked shader program")
     }
+    return true;
 }

@@ -104,8 +104,9 @@ bool CShader::load(const std::string& _strFilename, const GLenum _Type)
         ERROR(
         for (auto ci : ErrorLog)
         {
-            ERROR_MSG("Shader", ci)
+            std::cerr << ci;
         }
+        std::cerr << std::endl;
         )
         glDeleteShader(m_unID);
         return false;
