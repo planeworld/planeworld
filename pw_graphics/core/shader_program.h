@@ -20,16 +20,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       shader.h
-/// \brief      Prototype of class "CShader"
+/// \file       shader_program.h
+/// \brief      Prototype of class "CShaderProgram"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2016-04-04
+/// \date       2016-04-09
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef SHADER_PROGRAM_H
+#define SHADER_PROGRAM_H
 
 #define GL_GLEXT_PROTOTYPES
 
@@ -39,6 +39,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "shader.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "GL/gl.h"
@@ -49,7 +50,7 @@
 /// \brief Class representing a vertex or fragment shader
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CShader
+class CShaderProgram
 {
 
     public:
@@ -59,16 +60,19 @@ class CShader
         //--- Constant Methods -----------------------------------------------//
         const GLuint getID() const;
         
+        void         addShader(const CShader&) const;
+        void         use() const;
+        
         //--- Methods --------------------------------------------------------//
-        bool load(const std::string&, const GLenum);
+        void create();
+        bool link();
                 
         //--- friends --------------------------------------------------------//
 
     private:
         
         //--- Variables [protected] ------------------------------------------//
-        GLenum m_Type = 0; // Type of shader
-        GLuint m_unID = 0; // ID of shader
+        GLuint m_unID = 0; // ID of shader program
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -80,11 +84,45 @@ class CShader
 /// \return ID of shader
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const GLuint CShader::getID() const
+inline const GLuint CShaderProgram::getID() const
 {
-    METHOD_ENTRY("CShader::getID")
+    METHOD_ENTRY("CShaderProgram::getID")
     return m_unID;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Adds given shader to shader program
+///
+/// \param _Shader Shader to be added to program
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CShaderProgram::addShader(const CShader& _Shader) const
+{
+    METHOD_ENTRY("CShaderProgram::addShader")
+    glAttachShader(m_unID, _Shader.getID());
+}
 
-#endif // SHADER_H
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Use this GL shader program 
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CShaderProgram::use() const
+{
+    METHOD_ENTRY("CShaderProgram::use")
+    glUseProgram(m_unID);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates GL shader program
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CShaderProgram::create()
+{
+    METHOD_ENTRY("CShaderProgram::create")
+    m_unID = glCreateProgram();
+}
+
+#endif // SHADER_PROGRAM_H

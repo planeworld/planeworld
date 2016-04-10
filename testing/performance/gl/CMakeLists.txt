@@ -16,6 +16,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader_program.cpp
     gl_test.cpp
 )
 
