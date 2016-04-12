@@ -47,7 +47,7 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fFrequencyLua(PHYSICS_LUA_DEFAULT_FREQUENCY),
                                      m_fProcessingTime(0.0),
                                      m_fTimeAccel(1.0),
-                                     m_fTimeSlept(0.0),
+                                     m_fTimeSlept(1.0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_bPaused(false),
@@ -262,6 +262,10 @@ bool CPhysicsManager::initLua()
         
         lua_newtable(m_pLuaState);
             lua_newtable(m_pLuaState);
+                lua_pushcfunction(m_pLuaState, luaAccelerateTime);
+                lua_setfield(m_pLuaState, -2, "accelerate_time");
+                lua_pushcfunction(m_pLuaState, luaDecelerateTime);
+                lua_setfield(m_pLuaState, -2, "decelerate_time");
                 lua_pushcfunction(m_pLuaState, luaGetFrequency);
                 lua_setfield(m_pLuaState, -2, "get_frequency");
                 lua_pushcfunction(m_pLuaState, luaPause);
@@ -695,6 +699,67 @@ void CPhysicsManager::updateCells()
       INFO_MSG("Physics Manager", "Physics thread stopped.")
   }
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Accelerates time by decreasing remaining sleep in between frames
+///        or increasing time step if forced to do so 
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaAccelerateTime(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaAccelerateTime")
+
+    int nParam = lua_gettop(_pLuaState);
+    
+    if (nParam == 0)
+    {
+        m_pLuaThis->accelerateTime();
+    }
+    else if (nParam == 1)
+    {
+        bool bAllowTimeScaling = lua_toboolean(_pLuaState,1);
+        m_pLuaThis->accelerateTime(bAllowTimeScaling);
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function luaAccelerateTime (" << nParam << "/1[max]).")
+    }
+    
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Decelerates time by decreasing remaining sleep in between frames or
+///        reducing time step.
+///
+/// \param _pLuaState Lua access to physics
+///
+/// \return Number of parameters returned to Lua script.
+///
+///////////////////////////////////////////////////////////////////////////////
+int CPhysicsManager::luaDecelerateTime(lua_State* _pLuaState)
+{
+    METHOD_ENTRY("luaDecelerateTime")
+
+    int nParam = lua_gettop(_pLuaState);
+    
+    if (nParam == 0)
+    {
+        m_pLuaThis->decelerateTime();
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function luaDecelerateTime (" << nParam << "/0).")
+    }
+    
+    return 0;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
