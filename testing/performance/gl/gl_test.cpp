@@ -45,11 +45,13 @@
 
 //--- Standard header --------------------------------------------------------//
 #include <iostream>
+#include <random>
 
 //--- Program header ---------------------------------------------------------//
 #include "graphics.h"
 #include "log.h"
 #include "shader_program.h"
+#include "timer.h"
 
 //--- Misc-Header ------------------------------------------------------------//
 #include "GL/gl.h"
@@ -62,7 +64,122 @@
 ///////////////////////////////////////////////////////////////////////////////
 void usage()
 {
+    METHOD_ENTRY("usage")
     std::cout << "Usage: gl_test" << std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Test performance by using one vbo per Shape
+///
+/// \param _nNrOfShapes Number of shapes to be drawn per frame
+/// \param _nNrOfFrames Number of frames to be drawn
+/// \param _BufferUsage How the buffer is used (STATIC, DYNAMIC, STREAM)
+/// \param _Mode        Which draw mode (TRIANGLE, LINE_LOOP)
+///
+/// \return Time in seconds for this test
+///
+///////////////////////////////////////////////////////////////////////////////
+const double testOneVBOPerShape(const std::uint32_t _nNrOfShapes,
+                                const std::uint32_t _nNrOfFrames,
+                                const GLenum        _BufferUsage,
+                                const GLenum        _Mode
+                               )
+{
+    METHOD_ENTRY("testOneVBOPerShape")
+    
+    CGraphics& Graphics=CGraphics::getInstance();
+    CTimer Timer;
+    
+    std::mt19937 Generator;
+    Generator.seed(23479);
+    std::uniform_real_distribution<float>  UniformDistribution(-0.3f, 0.3f);
+    
+    std::vector<float> vecShape(16);
+    std::vector<float> vecColor(16);
+    
+    vecShape[0] = -0.4f; vecShape[1] = 0.1f; vecShape[2] = 0.0f;
+    vecShape[3] =  0.4f; vecShape[4] = 0.1f; vecShape[5] = 0.0f;
+    vecShape[6] =  0.0f; vecShape[7] = 0.7f; vecShape[8] = 0.0f;
+    
+    vecColor[0] = 1.0f; vecColor[1] = 0.0f; vecColor[2] = 0.0f;
+    vecColor[3] = 0.0f; vecColor[4] = 1.0f; vecColor[5] = 0.0f;
+    vecColor[6] = 0.0f; vecColor[7] = 0.0f; vecColor[8] = 1.0f;
+    
+    GLuint* punVBO = new GLuint[_nNrOfShapes*2];
+    GLuint* punVAO = new GLuint[_nNrOfShapes];
+    MEM_ALLOC("GLuint")
+    MEM_ALLOC("GLuint")
+
+    INFO_MSG("GL Test", "Starting test with one VBO per shape")
+    INFO(
+        std::cout << "Draw mode:    ";
+        if (_Mode == GL_TRIANGLES)
+            std::cout << "GL_TRIANGLES" << std::endl;
+        else if (_Mode == GL_LINE_LOOP)
+            std::cout << "GL_LINE_LOOP" << std::endl;
+        std::cout << "Buffer usage: ";
+        if (_BufferUsage == GL_STATIC_DRAW)
+            std::cout << "GL_STATIC_DRAW" << std::endl;
+        else if (_BufferUsage == GL_DYNAMIC_DRAW)
+            std::cout << "GL_DYNAMIC_DRAW" << std::endl;
+        else if (_BufferUsage == GL_STREAM_DRAW)
+            std::cout << "GL_STREAM_DRAW" << std::endl;
+    )
+    
+    glGenBuffers(_nNrOfShapes*2, punVBO);
+    glGenVertexArrays(_nNrOfShapes, punVAO);
+    
+    Timer.start();
+    for (auto i=0u; i<_nNrOfFrames; ++i)
+    {
+        for (auto j=0u; j<_nNrOfShapes; ++j)
+        {
+            glBindVertexArray(punVAO[j]);
+            
+            vecShape[0] = -0.4f+UniformDistribution(Generator); vecShape[1] = -0.4f+UniformDistribution(Generator); vecShape[2] = 0.0f;
+            vecShape[3] =  0.4f+UniformDistribution(Generator); vecShape[4] = -0.4f+UniformDistribution(Generator); vecShape[5] = 0.0f;
+            vecShape[6] =  0.0f+UniformDistribution(Generator); vecShape[7] =  0.4f+UniformDistribution(Generator); vecShape[8] = 0.0f;
+            
+            glBindBuffer(GL_ARRAY_BUFFER, punVBO[0+j*2]);
+            glBufferData(GL_ARRAY_BUFFER, vecShape.size()*sizeof(float), &vecShape.front(), _BufferUsage);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+            
+            vecColor[0] = 1.0f+UniformDistribution(Generator); vecColor[1] = 0.0f; vecColor[2] = 0.0f;
+            vecColor[3] = 0.0f; vecColor[4] = 1.0f+UniformDistribution(Generator); vecColor[5] = 0.0f;
+            vecColor[6] = 0.0f; vecColor[7] = 0.0f; vecColor[8] = 1.0f+UniformDistribution(Generator);
+
+            glBindBuffer(GL_ARRAY_BUFFER, punVBO[1+j*2]);
+            glBufferData(GL_ARRAY_BUFFER, vecColor.size()*sizeof(float), &vecColor.front(), _BufferUsage);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+            
+            glBindVertexArray(punVAO[j]);
+            glDrawArrays(_Mode, 0, 3);
+        }
+        Graphics.swapBuffers();
+    }
+    Timer.stop();
+    double fTime = Timer.getTime();
+    INFO_MSG("GL Test", "Drawn " << _nNrOfShapes << " triangles in " <<
+                        _nNrOfFrames << " frames. Time: " << fTime << "s; " <<
+                        _nNrOfFrames/fTime << "fps")
+    
+    // Clean up
+    if (punVBO != nullptr)
+    {
+        delete[] punVBO;
+        MEM_FREED("GLuint")
+        punVBO = nullptr;
+    }
+    if (punVAO != nullptr)
+    {
+        delete[] punVAO;
+        MEM_FREED("GLuint")
+        punVAO = nullptr;
+    }
+    return Timer.getTime();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,68 +206,6 @@ int main(int argc, char *argv[])
     
     Graphics.init();
     
-    float fTriangle[9];
-    float fQuad[12];
-    float fTriangleColor[9];
-    float fQuadColor[12];
-
-    GLuint unVBO[4];
-    GLuint unVAO[2];
-
-    // Setup triangle vertices
-    fTriangle[0] = -0.4f; fTriangle[1] = 0.1f; fTriangle[2] = 0.0f;
-    fTriangle[3] = 0.4f; fTriangle[4] = 0.1f; fTriangle[5] = 0.0f;
-    fTriangle[6] = 0.0f; fTriangle[7] = 0.7f; fTriangle[8] = 0.0f;
-
-    // Setup triangle color
-
-    fTriangleColor[0] = 1.0f; fTriangleColor[1] = 0.0f; fTriangleColor[2] = 0.0f;
-    fTriangleColor[3] = 0.0f; fTriangleColor[4] = 1.0f; fTriangleColor[5] = 0.0f;
-    fTriangleColor[6] = 0.0f; fTriangleColor[7] = 0.0f; fTriangleColor[8] = 1.0f;
- 
-    // Setup quad vertices
- 
-    fQuad[0] = -0.2f; fQuad[1] = -0.1f; fQuad[2] = 0.0f;
-    fQuad[3] = -0.2f; fQuad[4] = -0.6f; fQuad[5] = 0.0f;
-    fQuad[6] = 0.2f; fQuad[7] = -0.1f; fQuad[8] = 0.0f;
-    fQuad[9] = 0.2f; fQuad[10] = -0.6f; fQuad[11] = 0.0f;
-
-    // Setup quad color
-
-    fQuadColor[0] = 1.0f; fQuadColor[1] = 0.0f; fQuadColor[2] = 0.0f;
-    fQuadColor[3] = 0.0f; fQuadColor[4] = 1.0f; fQuadColor[8] = 0.0f;
-    fQuadColor[6] = 0.0f; fQuadColor[7] = 0.0f; fQuadColor[5] = 1.0f;
-    fQuadColor[9] = 1.0f; fQuadColor[10] = 1.0f; fQuadColor[11] = 0.0f;
-
-    glGenVertexArrays(2, unVAO); // Generate two VAOs, one for triangle and one for quad
-    glGenBuffers(4, unVBO); // And four VBOs
-
-    glBindVertexArray(unVAO[0]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, unVBO[0]);
-    glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), fTriangle, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, unVBO[1]);
-    glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), fTriangleColor, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glBindVertexArray(unVAO[1]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, unVBO[2]);
-    glBufferData(GL_ARRAY_BUFFER, 12*sizeof(float), fQuad, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, unVBO[3]);
-    glBufferData(GL_ARRAY_BUFFER, 12*sizeof(float), fQuadColor, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    
-    std::uint64_t nCount = 0u;
-    
     CShader VertexShader;
     CShader FragmentShader;
     VertexShader.load("shader.vert", GL_VERTEX_SHADER);
@@ -164,40 +219,10 @@ int main(int argc, char *argv[])
     ShaderProgram.link();
     ShaderProgram.use();
 
-    while (nCount++ < 1000)
-    {
-        // Triangle
-        glBindVertexArray(unVAO[0]);
-
-        glBindBuffer(GL_ARRAY_BUFFER, unVBO[0]);
-        glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), fTriangle, GL_DYNAMIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, unVBO[1]);
-        glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), fTriangleColor, GL_DYNAMIC_DRAW);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-        // Quad
-        glBindVertexArray(unVAO[1]);
-
-        glBindBuffer(GL_ARRAY_BUFFER, unVBO[2]);
-        glBufferData(GL_ARRAY_BUFFER, 12*sizeof(float), fQuad, GL_DYNAMIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, unVBO[3]);
-        glBufferData(GL_ARRAY_BUFFER, 12*sizeof(float), fQuadColor, GL_DYNAMIC_DRAW);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        
-        glBindVertexArray(unVAO[0]);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        glBindVertexArray(unVAO[1]);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        
-        Graphics.swapBuffers();
-    }
+    testOneVBOPerShape(1000, 100, GL_STATIC_DRAW, GL_TRIANGLES);
+    testOneVBOPerShape(1000, 100, GL_DYNAMIC_DRAW, GL_TRIANGLES);
+    testOneVBOPerShape(1000, 100, GL_STREAM_DRAW, GL_TRIANGLES);
+    testOneVBOPerShape(1000, 100, GL_STATIC_DRAW, GL_LINE_LOOP);
+    testOneVBOPerShape(1000, 100, GL_DYNAMIC_DRAW, GL_LINE_LOOP);
+    testOneVBOPerShape(1000, 100, GL_STREAM_DRAW, GL_LINE_LOOP);
 }
