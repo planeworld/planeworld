@@ -785,7 +785,7 @@ int CPhysicsManager::luaActivateThruster(lua_State* _pLuaState)
         auto itThruster  = m_pLuaThis->m_Components.find(strThruster);
         if ( itThruster != m_pLuaThis->m_Components.end())
         {
-            (*itThruster).second->activate(fThrust);
+            lua_pushnumber(_pLuaState, (*itThruster).second->activate(fThrust));
         }
         else
         {
@@ -797,7 +797,7 @@ int CPhysicsManager::luaActivateThruster(lua_State* _pLuaState)
         WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function activate_thruster (" << nParam << "/2).")
     }
     
-    return 0;
+    return 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

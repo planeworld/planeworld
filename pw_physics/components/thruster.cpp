@@ -56,8 +56,10 @@ CThruster::CThruster() : m_bActive(true),
 ///
 /// \param _fThrust Thrust (reactive force) to apply
 ///
+/// \return Current thrust
+///
 ///////////////////////////////////////////////////////////////////////////////
-void CThruster::activate(const double& _fThrust)
+const double CThruster::activate(const double& _fThrust)
 {
     METHOD_ENTRY("CThruster::activate")
     
@@ -74,6 +76,8 @@ void CThruster::activate(const double& _fThrust)
       m_bActive = true;
       IEmitterReferrer::m_pRef->activate();
     }
+    
+    return m_fThrust;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

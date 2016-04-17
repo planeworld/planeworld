@@ -57,11 +57,12 @@ class CThruster : public IKinematicsStateUser,
         //--- Constant methods -----------------------------------------------//
         const double    getAngle() const;
         const Vector2d  getOrigin() const;
+        const double    getThrust() const;
         
         
         //--- Methods --------------------------------------------------------//
-        void activate(const double&);
-        void deactivate();
+        const double activate(const double&);
+        void         deactivate();
         
         void execute();
         
@@ -203,6 +204,19 @@ inline const Vector2d CThruster::getOrigin() const
 {
     METHOD_ENTRY("CThruster::getOrigin")
     return m_KinematicsState.getOrigin();    
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns current thrust
+///
+/// \return Current thrust
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double CThruster::getThrust() const
+{
+    METHOD_ENTRY("CThruster::getThrust")
+    return m_fThrust;    
 }
 
 #endif // THRUSTER_H
