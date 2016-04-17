@@ -70,6 +70,122 @@ void usage()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Creates random color for a shape of given size.
+///
+/// \param _pvecColor Color of shape to be created
+/// \param _Generator Generator for random numbers
+/// \param _Distribution Distribution of generated random numbers
+///
+///////////////////////////////////////////////////////////////////////////////
+void createColor(std::vector<float>* const _pvecColor,
+                 std::mt19937& _Generator, std::uniform_real_distribution<float>& _Distribution
+)
+{
+    METHOD_ENTRY("createColor")
+  
+    (*_pvecColor)[0] = _Distribution(_Generator)*0.5f+0.5f;
+    (*_pvecColor)[1] = _Distribution(_Generator)*0.5f+0.5f;
+    (*_pvecColor)[2] = _Distribution(_Generator)*0.5f+0.5f;
+    (*_pvecColor)[3] = _Distribution(_Generator)*0.5f+0.5f;
+    (*_pvecColor)[4] = _Distribution(_Generator)*0.5f+0.5f;
+    (*_pvecColor)[5] = _Distribution(_Generator)*0.5f+0.5f;
+    (*_pvecColor)[6] = _Distribution(_Generator)*0.5f+0.5f;
+    (*_pvecColor)[7] = _Distribution(_Generator)*0.5f+0.5f;
+    (*_pvecColor)[8] = _Distribution(_Generator)*0.5f+0.5f;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates a shape of given size with random position.
+///
+/// \param _pvecShape Shape to be created
+/// \param _Generator Generator for random numbers
+/// \param _Distribution Distribution of generated random numbers
+/// \param _fSizeMin  Minimum size of shapes
+/// \param _fSizeMax  Maximum size of shapes
+///
+///////////////////////////////////////////////////////////////////////////////
+void createShape(std::vector<float>* const _pvecShape,
+                 std::mt19937& _Generator, std::uniform_real_distribution<float>& _Distribution,
+                 float _fSizeMin, float _fSizeMax
+)
+{
+    METHOD_ENTRY("createShape")
+  
+    float fPosX = _Distribution(_Generator)*0.5f;
+    float fPosY = _Distribution(_Generator)*0.5f;
+    
+    (*_pvecShape)[0] = fPosX+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
+    (*_pvecShape)[1] = fPosY+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
+    (*_pvecShape)[2] = 0.0f;
+    (*_pvecShape)[3] = fPosX+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
+    (*_pvecShape)[4] = fPosY+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
+    (*_pvecShape)[5] = 0.0f;
+    (*_pvecShape)[6] = fPosX+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
+    (*_pvecShape)[7] = fPosY+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
+    (*_pvecShape)[8] = 0.0f;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output of test parameters
+///
+/// \param _nNrOfShapes Number of shapes to be drawn per frame
+/// \param _nNrOfShapesPerGroup Number of shapes that share one VBO
+/// \param _nNrOfFrames Number of frames to be drawn
+/// \param _BufferUsage How the buffer is used (STATIC, DYNAMIC, STREAM)
+/// \param _Mode        Which draw mode (TRIANGLE, LINE_LOOP)
+///
+///////////////////////////////////////////////////////////////////////////////
+void outputTestParameters(const std::uint32_t _nNrOfShapes,
+                          const std::uint32_t _nNrOfShapesPerGroup,
+                          const std::uint32_t _nNrOfFrames,
+                          const GLenum _BufferUsage,
+                          const GLenum _Mode)
+{
+    METHOD_ENTRY("outputTestParameters")
+    
+    INFO(
+        std::cout << "Draw mode:        ";
+        if (_Mode == GL_TRIANGLES)
+            std::cout << "GL_TRIANGLES" << std::endl;
+        else if (_Mode == GL_LINE_LOOP)
+            std::cout << "GL_LINE_LOOP" << std::endl;
+        std::cout << "Buffer usage:     ";
+        if (_BufferUsage == GL_STATIC_DRAW)
+            std::cout << "GL_STATIC_DRAW" << std::endl;
+        else if (_BufferUsage == GL_DYNAMIC_DRAW)
+            std::cout << "GL_DYNAMIC_DRAW" << std::endl;
+        else if (_BufferUsage == GL_STREAM_DRAW)
+            std::cout << "GL_STREAM_DRAW" << std::endl;
+        std::cout << "Number of frames: " << _nNrOfFrames << std::endl;
+        std::cout << "Number of shapes: " << _nNrOfShapes << std::endl;
+        std::cout << "  - per group:    " << _nNrOfShapesPerGroup << std::endl;
+    )
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Output of test parameters
+///
+/// \param _nNrOfFrames Number of frames
+/// \param _fTime       Processing time
+///
+///////////////////////////////////////////////////////////////////////////////
+void outputTestResult(const std::uint32_t _nNrOfFrames,
+                      const double fTime)
+{
+    METHOD_ENTRY("outputTestResult")
+    
+    INFO(
+        std::cout << "Time [s]:         " << fTime <<  std::endl;
+        std::cout << "Frequency [fps]:  " << "\033[1;32m" << _nNrOfFrames/fTime
+                                          << "\033[0;37m" << std::endl;
+    )
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Test performance by using one vbo per Shape
 ///
 /// \param _nNrOfShapes Number of shapes to be drawn per frame
@@ -93,31 +209,17 @@ const double testOneVBOPerShape(const std::uint32_t _nNrOfShapes,
     
     std::mt19937 Generator;
     Generator.seed(23479);
-    std::uniform_real_distribution<float>  UniformDistribution(-0.3f, 0.3f);
+    std::uniform_real_distribution<float>  UniformDistribution(-1.0f, 1.0f);
     
-    std::vector<float> vecShape(16);
-    std::vector<float> vecColor(16);
+    std::vector<float> vecShape(9);
+    std::vector<float> vecColor(9);
     
     GLuint* punVBO = new GLuint[_nNrOfShapes*2];
     GLuint* punVAO = new GLuint[_nNrOfShapes];
     MEM_ALLOC("GLuint")
     MEM_ALLOC("GLuint")
 
-    INFO_MSG("GL Test", "Starting test with one VBO per shape")
-    INFO(
-        std::cout << "Draw mode:    ";
-        if (_Mode == GL_TRIANGLES)
-            std::cout << "GL_TRIANGLES" << std::endl;
-        else if (_Mode == GL_LINE_LOOP)
-            std::cout << "GL_LINE_LOOP" << std::endl;
-        std::cout << "Buffer usage: ";
-        if (_BufferUsage == GL_STATIC_DRAW)
-            std::cout << "GL_STATIC_DRAW" << std::endl;
-        else if (_BufferUsage == GL_DYNAMIC_DRAW)
-            std::cout << "GL_DYNAMIC_DRAW" << std::endl;
-        else if (_BufferUsage == GL_STREAM_DRAW)
-            std::cout << "GL_STREAM_DRAW" << std::endl;
-    )
+    outputTestParameters(_nNrOfShapes, 1u, _nNrOfFrames, _BufferUsage, _Mode);
     
     glGenBuffers(_nNrOfShapes*2, punVBO);
     glGenVertexArrays(_nNrOfShapes, punVAO);
@@ -127,21 +229,16 @@ const double testOneVBOPerShape(const std::uint32_t _nNrOfShapes,
     {
         for (auto j=0u; j<_nNrOfShapes; ++j)
         {
+            createShape(&vecShape, Generator, UniformDistribution, 0.05f, 0.5f);
+            createColor(&vecColor, Generator, UniformDistribution);
+          
             glBindVertexArray(punVAO[j]);
-            
-            vecShape[0] = -0.4f+UniformDistribution(Generator); vecShape[1] = -0.4f+UniformDistribution(Generator); vecShape[2] = 0.0f;
-            vecShape[3] =  0.4f+UniformDistribution(Generator); vecShape[4] = -0.4f+UniformDistribution(Generator); vecShape[5] = 0.0f;
-            vecShape[6] =  0.0f+UniformDistribution(Generator); vecShape[7] =  0.4f+UniformDistribution(Generator); vecShape[8] = 0.0f;
             
             glBindBuffer(GL_ARRAY_BUFFER, punVBO[0+j*2]);
             glBufferData(GL_ARRAY_BUFFER, vecShape.size()*sizeof(float), &vecShape.front(), _BufferUsage);
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
             
-            vecColor[0] = 1.0f+UniformDistribution(Generator); vecColor[1] = 0.0f; vecColor[2] = 0.0f;
-            vecColor[3] = 0.0f; vecColor[4] = 1.0f+UniformDistribution(Generator); vecColor[5] = 0.0f;
-            vecColor[6] = 0.0f; vecColor[7] = 0.0f; vecColor[8] = 1.0f+UniformDistribution(Generator);
-
             glBindBuffer(GL_ARRAY_BUFFER, punVBO[1+j*2]);
             glBufferData(GL_ARRAY_BUFFER, vecColor.size()*sizeof(float), &vecColor.front(), _BufferUsage);
             glEnableVertexAttribArray(1);
@@ -159,9 +256,7 @@ const double testOneVBOPerShape(const std::uint32_t _nNrOfShapes,
     }
     Timer.stop();
     double fTime = Timer.getTime();
-    INFO_MSG("GL Test", "Drawn " << _nNrOfShapes << " triangles in " <<
-                        _nNrOfFrames << " frames. Time: " << fTime << "s; " <<
-                        _nNrOfFrames/fTime << "fps")
+    outputTestResult(_nNrOfFrames, fTime);
     
     // Clean up
     if (punVBO != nullptr)
@@ -204,10 +299,10 @@ const double testOneBufferedVBOPerShape(const std::uint32_t _nNrOfShapes,
     
     std::mt19937 Generator;
     Generator.seed(23479);
-    std::uniform_real_distribution<float>  UniformDistribution(-0.3f, 0.3f);
+    std::uniform_real_distribution<float>  UniformDistribution(-1.0f, 1.0f);
     
-    std::vector<float> vecShape(16);
-    std::vector<float> vecColor(16);
+    std::vector<float> vecShape(9);
+    std::vector<float> vecColor(9);
     
     GLuint* punVBO1 = new GLuint[_nNrOfShapes*2];
     GLuint* punVAO1 = new GLuint[_nNrOfShapes];
@@ -226,21 +321,7 @@ const double testOneBufferedVBOPerShape(const std::uint32_t _nNrOfShapes,
     MEM_ALLOC("GLuint")
     MEM_ALLOC("GLuint")
 
-    INFO_MSG("GL Test", "Starting test with one VBO per shape")
-    INFO(
-        std::cout << "Draw mode:    ";
-        if (_Mode == GL_TRIANGLES)
-            std::cout << "GL_TRIANGLES" << std::endl;
-        else if (_Mode == GL_LINE_LOOP)
-            std::cout << "GL_LINE_LOOP" << std::endl;
-        std::cout << "Buffer usage: ";
-        if (_BufferUsage == GL_STATIC_DRAW)
-            std::cout << "GL_STATIC_DRAW" << std::endl;
-        else if (_BufferUsage == GL_DYNAMIC_DRAW)
-            std::cout << "GL_DYNAMIC_DRAW" << std::endl;
-        else if (_BufferUsage == GL_STREAM_DRAW)
-            std::cout << "GL_STREAM_DRAW" << std::endl;
-    )
+    outputTestParameters(_nNrOfShapes, 1u, _nNrOfFrames, _BufferUsage, _Mode);
     
     glGenBuffers(_nNrOfShapes*2, punVBO1);
     glGenVertexArrays(_nNrOfShapes, punVAO1);
@@ -262,21 +343,16 @@ const double testOneBufferedVBOPerShape(const std::uint32_t _nNrOfShapes,
     {
         for (auto j=0u; j<_nNrOfShapes; ++j)
         {
+            createShape(&vecShape, Generator, UniformDistribution, 0.05f, 0.5f);
+            createColor(&vecColor, Generator, UniformDistribution);
+          
             glBindVertexArray(punVAOBack[j]);
-            
-            vecShape[0] = -0.4f+UniformDistribution(Generator); vecShape[1] = -0.4f+UniformDistribution(Generator); vecShape[2] = 0.0f;
-            vecShape[3] =  0.4f+UniformDistribution(Generator); vecShape[4] = -0.4f+UniformDistribution(Generator); vecShape[5] = 0.0f;
-            vecShape[6] =  0.0f+UniformDistribution(Generator); vecShape[7] =  0.4f+UniformDistribution(Generator); vecShape[8] = 0.0f;
             
             glBindBuffer(GL_ARRAY_BUFFER, punVBOBack[0+j*2]);
             glBufferData(GL_ARRAY_BUFFER, vecShape.size()*sizeof(float), &vecShape.front(), _BufferUsage);
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
             
-            vecColor[0] = 1.0f+UniformDistribution(Generator); vecColor[1] = 0.0f; vecColor[2] = 0.0f;
-            vecColor[3] = 0.0f; vecColor[4] = 1.0f+UniformDistribution(Generator); vecColor[5] = 0.0f;
-            vecColor[6] = 0.0f; vecColor[7] = 0.0f; vecColor[8] = 1.0f+UniformDistribution(Generator);
-
             glBindBuffer(GL_ARRAY_BUFFER, punVBOBack[1+j*2]);
             glBufferData(GL_ARRAY_BUFFER, vecColor.size()*sizeof(float), &vecColor.front(), _BufferUsage);
             glEnableVertexAttribArray(1);
@@ -298,9 +374,7 @@ const double testOneBufferedVBOPerShape(const std::uint32_t _nNrOfShapes,
     }
     Timer.stop();
     double fTime = Timer.getTime();
-    INFO_MSG("GL Test", "Drawn " << _nNrOfShapes << " triangles in " <<
-                        _nNrOfFrames << " frames. Time: " << fTime << "s; " <<
-                        _nNrOfFrames/fTime << "fps")
+    outputTestResult(_nNrOfFrames, fTime);
     
     // Clean up
     if (punVBO1 != nullptr)
@@ -381,75 +455,69 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
     
     std::mt19937 Generator;
     Generator.seed(23479);
-    std::uniform_real_distribution<float>  UniformDistribution(-0.3f, 0.3f);
+    std::uniform_real_distribution<float>  UniformDistribution(-1.0f, 1.0f);
     
-    std::vector<float> vecShape(16);
-    std::vector<float> vecColor(16);
+    std::vector<float> vecShape(9);
+    std::vector<float> vecColor(9);
     
-    GLuint* punVBO = new GLuint[_nNrOfShapes*2];
-    GLuint* punVAO = new GLuint[_nNrOfShapes];
+    if (_nNrOfShapes % _nNrOfShapesPerGroup != 0)
+    {
+        ERROR_MSG("GL Test", "Number of shapes per group does not fit in number of shapes")
+        return 0.0;
+    }
+    
+    GLuint* punVBO = new GLuint[_nNrOfShapes / _nNrOfShapesPerGroup * 2];
+    GLuint* punVAO = new GLuint[_nNrOfShapes / _nNrOfShapesPerGroup];
     MEM_ALLOC("GLuint")
     MEM_ALLOC("GLuint")
 
-    INFO_MSG("GL Test", "Starting test with one VBO per " << _nNrOfShapesPerGroup <<  " shapes")
-    INFO(
-        std::cout << "Draw mode:    ";
-        if (_Mode == GL_TRIANGLES)
-            std::cout << "GL_TRIANGLES" << std::endl;
-        else if (_Mode == GL_LINE_LOOP)
-            std::cout << "GL_LINE_LOOP" << std::endl;
-        std::cout << "Buffer usage: ";
-        if (_BufferUsage == GL_STATIC_DRAW)
-            std::cout << "GL_STATIC_DRAW" << std::endl;
-        else if (_BufferUsage == GL_DYNAMIC_DRAW)
-            std::cout << "GL_DYNAMIC_DRAW" << std::endl;
-        else if (_BufferUsage == GL_STREAM_DRAW)
-            std::cout << "GL_STREAM_DRAW" << std::endl;
-    )
+    outputTestParameters(_nNrOfShapes, _nNrOfShapesPerGroup, _nNrOfFrames, _BufferUsage, _Mode);
     
-    glGenBuffers(_nNrOfShapes*2, punVBO);
-    glGenVertexArrays(_nNrOfShapes, punVAO);
+    glGenBuffers(_nNrOfShapes / _nNrOfShapesPerGroup * 2, punVBO);
+    glGenVertexArrays(_nNrOfShapes / _nNrOfShapesPerGroup, punVAO);
     
     Timer.start();
     for (auto i=0u; i<_nNrOfFrames; ++i)
     {
-        for (auto j=0u; j<_nNrOfShapes; ++j)
+        for (auto k=0u; k< _nNrOfShapes / _nNrOfShapesPerGroup; ++k)
         {
-            glBindVertexArray(punVAO[j]);
+            glBindVertexArray(punVAO[k]);
             
-            vecShape[0] = -0.4f+UniformDistribution(Generator); vecShape[1] = -0.4f+UniformDistribution(Generator); vecShape[2] = 0.0f;
-            vecShape[3] =  0.4f+UniformDistribution(Generator); vecShape[4] = -0.4f+UniformDistribution(Generator); vecShape[5] = 0.0f;
-            vecShape[6] =  0.0f+UniformDistribution(Generator); vecShape[7] =  0.4f+UniformDistribution(Generator); vecShape[8] = 0.0f;
+            glBindBuffer(GL_ARRAY_BUFFER, punVBO[0+k*2]);
+            glBufferData(GL_ARRAY_BUFFER, _nNrOfShapesPerGroup * vecShape.size()*sizeof(float), nullptr, _BufferUsage);
+            glBindBuffer(GL_ARRAY_BUFFER, punVBO[1+k*2]);
+            glBufferData(GL_ARRAY_BUFFER, _nNrOfShapesPerGroup * vecColor.size()*sizeof(float), nullptr, _BufferUsage);
             
-            glBindBuffer(GL_ARRAY_BUFFER, punVBO[0+j*2]);
-            glBufferData(GL_ARRAY_BUFFER, vecShape.size()*sizeof(float), &vecShape.front(), _BufferUsage);
+            glBindBuffer(GL_ARRAY_BUFFER, punVBO[0+k*2]);
+            for (auto j=0u; j<_nNrOfShapesPerGroup; ++j)
+            {
+                createShape(&vecShape, Generator, UniformDistribution, 0.05f, 0.5f);
+                
+                glBufferSubData(GL_ARRAY_BUFFER, j*vecShape.size()*sizeof(float),
+                                                 vecShape.size()*sizeof(float), &vecShape.front());
+            }
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
             
-            vecColor[0] = 1.0f+UniformDistribution(Generator); vecColor[1] = 0.0f; vecColor[2] = 0.0f;
-            vecColor[3] = 0.0f; vecColor[4] = 1.0f+UniformDistribution(Generator); vecColor[5] = 0.0f;
-            vecColor[6] = 0.0f; vecColor[7] = 0.0f; vecColor[8] = 1.0f+UniformDistribution(Generator);
-
-            glBindBuffer(GL_ARRAY_BUFFER, punVBO[1+j*2]);
-            glBufferData(GL_ARRAY_BUFFER, vecColor.size()*sizeof(float), &vecColor.front(), _BufferUsage);
+            glBindBuffer(GL_ARRAY_BUFFER, punVBO[1+k*2]);
+            for (auto j=0u; j<_nNrOfShapesPerGroup; ++j)
+            {
+                createColor(&vecColor, Generator, UniformDistribution);
+                
+                glBufferSubData(GL_ARRAY_BUFFER, j*vecColor.size()*sizeof(float),
+                                                 vecColor.size()*sizeof(float), &vecColor.front());
+            }
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
             
-            glBindVertexArray(punVAO[j]);
-            glDrawArrays(_Mode, 0, 3);
-            
-            glBindBuffer(GL_ARRAY_BUFFER, punVBO[0+j*2]);
-            glBufferData(GL_ARRAY_BUFFER, vecShape.size()*sizeof(float), nullptr, _BufferUsage);
-            glBindBuffer(GL_ARRAY_BUFFER, punVBO[1+j*2]);
-            glBufferData(GL_ARRAY_BUFFER, vecColor.size()*sizeof(float), nullptr, _BufferUsage);
+            glBindVertexArray(punVAO[k]);
+            glDrawArrays(_Mode, 0*3*_nNrOfShapesPerGroup, 3*_nNrOfShapesPerGroup);
         }
         Graphics.swapBuffers();
     }
     Timer.stop();
     double fTime = Timer.getTime();
-    INFO_MSG("GL Test", "Drawn " << _nNrOfShapes << " triangles in " <<
-                        _nNrOfFrames << " frames. Time: " << fTime << "s; " <<
-                        _nNrOfFrames/fTime << "fps")
+    outputTestResult(_nNrOfFrames, fTime);
     
     // Clean up
     if (punVBO != nullptr)
@@ -463,6 +531,177 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
         delete[] punVAO;
         MEM_FREED("GLuint")
         punVAO = nullptr;
+    }
+    return Timer.getTime();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Test performance by using one buffered vbo per shape
+///
+/// \param _nNrOfShapes Number of shapes to be drawn per frame
+/// \param _nNrOfShapesPerGroup Number of shapes that share one VBO
+/// \param _nNrOfFrames Number of frames to be drawn
+/// \param _BufferUsage How the buffer is used (STATIC, DYNAMIC, STREAM)
+/// \param _Mode        Which draw mode (TRIANGLE, LINE_LOOP)
+///
+/// \return Time in seconds for this test
+///
+///////////////////////////////////////////////////////////////////////////////
+const double testOneBufferedVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
+                                const std::uint32_t _nNrOfShapesPerGroup,
+                                const std::uint32_t _nNrOfFrames,
+                                const GLenum        _BufferUsage,
+                                const GLenum        _Mode
+                               )
+{
+    METHOD_ENTRY("testOneBufferedVBOPerMultipleShapes")
+    
+    CGraphics& Graphics=CGraphics::getInstance();
+    CTimer Timer;
+    
+    std::mt19937 Generator;
+    Generator.seed(23479);
+    std::uniform_real_distribution<float>  UniformDistribution(-1.0f, 1.0f);
+    
+    std::vector<float> vecShape(9);
+    std::vector<float> vecColor(9);
+    
+    if (_nNrOfShapes % _nNrOfShapesPerGroup != 0)
+    {
+        ERROR_MSG("GL Test", "Number of shapes per group does not fit in number of shapes")
+        return 0.0;
+    }
+    
+    GLuint* punVBO1 = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup*2];
+    GLuint* punVAO1 = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup];
+    GLuint* punVBO2 = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup*2];
+    GLuint* punVAO2 = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup];
+    GLuint* punVBOFront = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup*2];
+    GLuint* punVBOBack = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup*2];
+    GLuint* punVAOFront = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup];
+    GLuint* punVAOBack = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup];
+    MEM_ALLOC("GLuint")
+    MEM_ALLOC("GLuint")
+    MEM_ALLOC("GLuint")
+    MEM_ALLOC("GLuint")
+    MEM_ALLOC("GLuint")
+    MEM_ALLOC("GLuint")
+    MEM_ALLOC("GLuint")
+    MEM_ALLOC("GLuint")
+
+    outputTestParameters(_nNrOfShapes, _nNrOfShapesPerGroup, _nNrOfFrames, _BufferUsage, _Mode);
+    
+    glGenBuffers(_nNrOfShapes/_nNrOfShapesPerGroup*2, punVBO1);
+    glGenVertexArrays(_nNrOfShapes/_nNrOfShapesPerGroup, punVAO1);
+    glGenBuffers(_nNrOfShapes/_nNrOfShapesPerGroup*2, punVBO2);
+    glGenVertexArrays(_nNrOfShapes/_nNrOfShapesPerGroup, punVAO2);
+    
+    for (auto i=0u; i<_nNrOfShapes/_nNrOfShapesPerGroup; ++i)
+    {
+        punVAOFront[i] = punVAO1[i];
+        punVAOBack[i] = punVAO2[i];
+        punVBOFront[0+i*2] = punVBO1[0+i*2];
+        punVBOFront[1+i*2] = punVBO1[1+i*2];
+        punVBOBack[0+i*2] = punVBO2[0+i*2];
+        punVBOBack[1+i*2] = punVBO2[1+i*2];
+    }
+    
+    Timer.start();
+    for (auto i=0u; i<_nNrOfFrames; ++i)
+    {
+        for (auto j=0u; j<_nNrOfShapes/_nNrOfShapesPerGroup; ++j)
+        {
+            glBindVertexArray(punVAOBack[j]);
+            
+            glBindBuffer(GL_ARRAY_BUFFER, punVBOBack[0+j*2]);
+            glBufferData(GL_ARRAY_BUFFER, _nNrOfShapesPerGroup * vecShape.size()*sizeof(float), nullptr, _BufferUsage);
+            glBindBuffer(GL_ARRAY_BUFFER, punVBOBack[1+j*2]);
+            glBufferData(GL_ARRAY_BUFFER, _nNrOfShapesPerGroup * vecColor.size()*sizeof(float), nullptr, _BufferUsage);
+            
+            glBindBuffer(GL_ARRAY_BUFFER, punVBOBack[0+j*2]);
+            for (auto k=0u; k<_nNrOfShapesPerGroup; ++k)
+            {
+                createShape(&vecShape, Generator, UniformDistribution, 0.05f, 0.5f);
+
+                glBufferSubData(GL_ARRAY_BUFFER, k*vecShape.size()*sizeof(float),
+                                                 vecShape.size()*sizeof(float), &vecShape.front());
+            }
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+            
+            glBindBuffer(GL_ARRAY_BUFFER, punVBOBack[1+j*2]);
+            for (auto k=0u; k<_nNrOfShapesPerGroup; ++k)
+            {
+                createColor(&vecColor, Generator, UniformDistribution);
+                
+                glBufferSubData(GL_ARRAY_BUFFER, k*vecColor.size()*sizeof(float),
+                                                 vecColor.size()*sizeof(float), &vecColor.front());
+            }
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+            
+            glBindVertexArray(punVAOFront[j]);
+            glDrawArrays(_Mode, 0, 3*_nNrOfShapesPerGroup);
+            
+            std::swap(punVAOFront[j], punVAOBack[j]);
+            std::swap(punVBOFront[0+j*2], punVBOBack[0+j*2]);
+            std::swap(punVBOFront[1+j*2], punVBOBack[1+j*2]);
+        }
+        Graphics.swapBuffers();
+    }
+    Timer.stop();
+    double fTime = Timer.getTime();
+    outputTestResult(_nNrOfFrames, fTime);
+    
+    // Clean up
+    if (punVBO1 != nullptr)
+    {
+        delete[] punVBO1;
+        MEM_FREED("GLuint")
+        punVBO1 = nullptr;
+    }
+    if (punVAO1 != nullptr)
+    {
+        delete[] punVAO1;
+        MEM_FREED("GLuint")
+        punVAO1 = nullptr;
+    }
+    if (punVBO2 != nullptr)
+    {
+        delete[] punVBO2;
+        MEM_FREED("GLuint")
+        punVBO2 = nullptr;
+    }
+    if (punVAO2 != nullptr)
+    {
+        delete[] punVAO2;
+        MEM_FREED("GLuint")
+        punVAO2 = nullptr;
+    }
+    if (punVBOFront != nullptr)
+    {
+        delete[] punVBOFront;
+        MEM_FREED("GLuint")
+        punVBOFront = nullptr;
+    }
+    if (punVAOFront != nullptr)
+    {
+        delete[] punVAOFront;
+        MEM_FREED("GLuint")
+        punVAOFront = nullptr;
+    }
+    if (punVBOBack != nullptr)
+    {
+        delete[] punVBOBack;
+        MEM_FREED("GLuint")
+        punVBOBack = nullptr;
+    }
+    if (punVAOBack != nullptr)
+    {
+        delete[] punVAOBack;
+        MEM_FREED("GLuint")
+        punVAOBack = nullptr;
     }
     return Timer.getTime();
 }
@@ -504,23 +743,32 @@ int main(int argc, char *argv[])
     ShaderProgram.link();
     ShaderProgram.use();
 
+    INFO_MSG("GL Test", "Starting test with one VBO per shape")
     testOneVBOPerShape(1000, 100, GL_STATIC_DRAW, GL_TRIANGLES);
     testOneVBOPerShape(1000, 100, GL_DYNAMIC_DRAW, GL_TRIANGLES);
     testOneVBOPerShape(1000, 100, GL_STREAM_DRAW, GL_TRIANGLES);
     testOneVBOPerShape(1000, 100, GL_STATIC_DRAW, GL_LINE_LOOP);
     testOneVBOPerShape(1000, 100, GL_DYNAMIC_DRAW, GL_LINE_LOOP);
     testOneVBOPerShape(1000, 100, GL_STREAM_DRAW, GL_LINE_LOOP);
+    INFO_MSG("GL Test", "Starting test with one buffered VBO per shape")
     testOneBufferedVBOPerShape(1000, 100, GL_STATIC_DRAW, GL_TRIANGLES);
     testOneBufferedVBOPerShape(1000, 100, GL_DYNAMIC_DRAW, GL_TRIANGLES);
     testOneBufferedVBOPerShape(1000, 100, GL_STREAM_DRAW, GL_TRIANGLES);
     testOneBufferedVBOPerShape(1000, 100, GL_STATIC_DRAW, GL_LINE_LOOP);
     testOneBufferedVBOPerShape(1000, 100, GL_DYNAMIC_DRAW, GL_LINE_LOOP);
     testOneBufferedVBOPerShape(1000, 100, GL_STREAM_DRAW, GL_LINE_LOOP);
-//     testOneVBOPerMultipleShapes(1000, 100, 100, GL_STATIC_DRAW, GL_TRIANGLES);
-//     testOneVBOPerMultipleShapes(1000, 100, 100, GL_DYNAMIC_DRAW, GL_TRIANGLES);
-//     testOneVBOPerMultipleShapes(1000, 100, 100, GL_STREAM_DRAW, GL_TRIANGLES);
-//     testOneVBOPerMultipleShapes(1000, 100, 100, GL_STATIC_DRAW, GL_LINE_LOOP);
-//     testOneVBOPerMultipleShapes(1000, 100, 100, GL_DYNAMIC_DRAW, GL_LINE_LOOP);
-//     testOneVBOPerMultipleShapes(1000, 100, 100, GL_STREAM_DRAW, GL_LINE_LOOP);
-//     testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_STREAM_DRAW, GL_LINE_LOOP);
+    INFO_MSG("GL Test", "Starting test with one VBO per multiple shapes")
+    testOneVBOPerMultipleShapes(1000, 100, 100, GL_STATIC_DRAW, GL_TRIANGLES);
+    testOneVBOPerMultipleShapes(1000, 100, 100, GL_DYNAMIC_DRAW, GL_TRIANGLES);
+    testOneVBOPerMultipleShapes(1000, 100, 100, GL_STREAM_DRAW, GL_TRIANGLES);
+    testOneVBOPerMultipleShapes(1000, 100, 100, GL_STATIC_DRAW, GL_LINE_LOOP);
+    testOneVBOPerMultipleShapes(1000, 100, 100, GL_DYNAMIC_DRAW, GL_LINE_LOOP);
+    testOneVBOPerMultipleShapes(1000, 100, 100, GL_STREAM_DRAW, GL_LINE_LOOP);
+    INFO_MSG("GL Test", "Starting test with one VBO per multiple buffered shapes")
+    testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_STATIC_DRAW, GL_TRIANGLES);
+    testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_DYNAMIC_DRAW, GL_TRIANGLES);
+    testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_STREAM_DRAW, GL_TRIANGLES);
+    testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_STATIC_DRAW, GL_LINE_LOOP);
+    testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_DYNAMIC_DRAW, GL_LINE_LOOP);
+    testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_STREAM_DRAW, GL_LINE_LOOP);
 }
