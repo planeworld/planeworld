@@ -37,10 +37,17 @@
 //--- Program header ---------------------------------------------------------//
 #include "circular_buffer.h"
 #include "log.h"
+#include "shader_program.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
+
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include "GL/glext.h"
+#include <glm/mat4x4.hpp>
+
 #include <SFML/OpenGL.hpp>
 // #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
@@ -204,22 +211,25 @@ class CGraphics
     private:
         
         //--- Variables [private] --------------------------------------------//
-        WindowHandleType*       m_pWindow;      ///< Pointer to main window
+        WindowHandleType*   m_pWindow;          ///< Pointer to main window
         
-        ViewPort                m_ViewPort;     ///< Viewport for graphics
+        ViewPort            m_ViewPort;         ///< Viewport for graphics
+        glm::mat4           m_matProjection;    ///< Projection matrix
         
-        Vector3d                m_vecCamPos;    ///< camera position
-        double                  m_fCamAng;      ///< camera angle
-        double                  m_fCamZoom;     ///< camera zoom
-        double                  m_fDepth;       ///< depth of lines in list
-        double                  m_fDepthMax;    ///< maximum depth of levels
-        double                  m_fDepthMin;    ///< minimum depth of levels
+        CShaderProgram      m_ShaderProgram;    ///< Basic shader program
+        
+        Vector3d            m_vecCamPos;        ///< camera position
+        double              m_fCamAng;          ///< camera angle
+        double              m_fCamZoom;         ///< camera zoom
+        double              m_fDepth;           ///< depth of lines in list
+        double              m_fDepthMax;        ///< maximum depth of levels
+        double              m_fDepthMin;        ///< minimum depth of levels
 
-        double                  m_fDynPelSize;  ///< pel-size for dynamically sized shapes
+        double              m_fDynPelSize;      ///< pel-size for dynamically sized shapes
         
-        int                     m_nVideoFlags;  ///< videoflags like fullscreen, resolution
-        unsigned short          m_unWidthScr;   ///< Screen width
-        unsigned short          m_unHeightScr;  ///< Screen height
+        int                 m_nVideoFlags;      ///< videoflags like fullscreen, resolution
+        unsigned short      m_unWidthScr;       ///< Screen width
+        unsigned short      m_unHeightScr;      ///< Screen height
 
         std::list<Vector2d>     m_VertList;     ///< list, containing the coordinates of vertices
 
@@ -229,11 +239,6 @@ class CGraphics
 
         //--- Operators [private] --------------------------------------------//
         CGraphics& operator=(const CGraphics&); ///< empty private operator=
-
-        //--- Methods [private] ----------------------------------------------//
-        void glSetPerspective(  const GLdouble&, const GLdouble&,
-                                const GLdouble&, const GLdouble&,
-                                const GLdouble&) const;
 
 };
 

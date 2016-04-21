@@ -30,6 +30,9 @@
 
 #include "graphics.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief constructor, initialising members.
@@ -214,19 +217,23 @@ bool CGraphics::init()
     //--------------------------------------------------------------------------
     // Setup OpenGL
     //--------------------------------------------------------------------------
-
-//     // Setup viewport
-//     glMatrixMode(GL_VIEWPORT);
-//     glLoadIdentity();
-//     glViewport(0, 0, m_unWidthScr, m_unHeightScr);
-//     
-//     // Setup projection
-//     glMatrixMode(GL_PROJECTION);
-//     glLoadIdentity();
-//     glOrtho(m_ViewPort.left, m_ViewPort.right,
-//             m_ViewPort.bottom, m_ViewPort.top,
-//             m_ViewPort.near, m_ViewPort.far);
-// 
+    CShader VertexShader;
+    CShader FragmentShader;
+    VertexShader.load("shader.vert", GL_VERTEX_SHADER);
+    FragmentShader.load("shader.frag", GL_FRAGMENT_SHADER);
+    
+    m_ShaderProgram.create();
+    m_ShaderProgram.addShader(VertexShader);
+    m_ShaderProgram.addShader(FragmentShader);
+    m_ShaderProgram.link();
+    m_ShaderProgram.use();
+    
+    m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
+                                        m_ViewPort.bottom, m_ViewPort.top,
+                                        m_ViewPort.near, m_ViewPort.far);
+    GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
+    glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
+    
     // Enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -250,34 +257,6 @@ bool CGraphics::init()
     
     // clear buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-//     
-//     // set default to matrixmode modelview
-//     glMatrixMode(GL_MODELVIEW);
-//     glLoadIdentity();
-
-//     GLfloat global_ambient[] = {0.0f,0.0f,0.0f,1.0f};
-//     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
-//     
-//     GLfloat LightAmbient[]= { 0.0f, 0.0f, 0.0f, 1.0f };
-//     GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 1.0f };
-//     GLfloat LightSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f };
-//     GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0e1f, 1.0f };
-//     
-//     glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
-//     glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
-//     glLightfv(GL_LIGHT1, GL_SPECULAR, LightSpecular);
-//     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
-//     glEnable(GL_LIGHT1);
-//     glEnable(GL_LIGHTING);
-//     glEnable(GL_RESCALE_NORMAL);
-//     glEnable(GL_NORMALIZE);
-//     glColorMaterial ( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
-//     glEnable ( GL_COLOR_MATERIAL );
-    
-//     float mcolor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-//     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mcolor);
-//     glFrontFace(GL_CCW);
-    
     return (true);
 }
 
@@ -305,20 +284,11 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     m_ViewPort.left   = -m_ViewPort.right;
     m_ViewPort.bottom = -m_ViewPort.top;
     
-    // Setup viewport
-    glMatrixMode(GL_VIEWPORT);
-    glLoadIdentity();
-    glViewport(0, 0, _unWidthScr, _unHeightScr);
-    
-    // Setup projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(m_ViewPort.left, m_ViewPort.right,
-            m_ViewPort.bottom, m_ViewPort.top,
-            m_ViewPort.near, m_ViewPort.far);
-   
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
+                                        m_ViewPort.bottom, m_ViewPort.top,
+                                        m_ViewPort.near, m_ViewPort.far);
+    GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
+    glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
     
     // Store resolution
     m_unWidthScr = _unWidthScr;
@@ -747,35 +717,5 @@ void CGraphics::endLine()
     METHOD_ENTRY("CGraphics::endLine")
 
     glEnd();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Setup perspective matrix for OpenGL
-///
-/// This method does the same as gluPerspective. It sets up the perspective
-/// matrix using fov and aspect ratio. In this case one can directly pass
-/// the resolution instead of aspect ratio.
-///
-/// \param _fFov    fov, viewing angle
-/// \param _fWidthScr   x-resolution of window
-/// \param _fHeightScr  y-resolution of window
-/// \param _fZNear  near clipping plane
-/// \param _fZFar   far clipping plane
-///
-///////////////////////////////////////////////////////////////////////////////
-void CGraphics::glSetPerspective(const GLdouble& _fFov, const GLdouble& _fWidthScr,
-                                const GLdouble& _fHeightScr, const GLdouble& _fZNear,
-                                const GLdouble& _fZFar) const
-{
-    METHOD_ENTRY("CGraphics::glSetPerspective")
-
-    GLdouble fXMin, fXMax, fYMin, fYMax;
-    
-    fYMax = _fZNear * std::tan(_fFov * M_PI / 360.0);
-    fYMin = -fYMax;
-    fXMin = fYMin * _fWidthScr/_fHeightScr;
-    fXMax = fYMax * _fWidthScr/_fHeightScr;
-    glFrustum(fXMin, fXMax, fYMin, fYMax, _fZNear, _fZFar);
 }
 

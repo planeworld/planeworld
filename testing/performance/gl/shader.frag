@@ -1,4 +1,4 @@
-#version 330
+#version 330 core
 
 smooth in vec3 theColor;
 out vec4 outputColor;

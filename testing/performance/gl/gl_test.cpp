@@ -50,7 +50,6 @@
 //--- Program header ---------------------------------------------------------//
 #include "graphics.h"
 #include "log.h"
-#include "shader_program.h"
 #include "timer.h"
 
 //--- Misc-Header ------------------------------------------------------------//
@@ -112,18 +111,18 @@ void createShape(std::vector<float>* const _pvecShape,
 {
     METHOD_ENTRY("createShape")
   
-    float fPosX = _Distribution(_Generator)*0.5f;
-    float fPosY = _Distribution(_Generator)*0.5f;
+    float fPosX = _Distribution(_Generator)*300.0f;
+    float fPosY = _Distribution(_Generator)*200.0f;
     
     (*_pvecShape)[0] = fPosX+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
     (*_pvecShape)[1] = fPosY+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
-    (*_pvecShape)[2] = 0.0f;
+    (*_pvecShape)[2] = -10.0f;
     (*_pvecShape)[3] = fPosX+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
     (*_pvecShape)[4] = fPosY+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
-    (*_pvecShape)[5] = 0.0f;
+    (*_pvecShape)[5] = -10.0f;
     (*_pvecShape)[6] = fPosX+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
     (*_pvecShape)[7] = fPosY+_Distribution(_Generator)*((_fSizeMax-_fSizeMin)+_fSizeMin);
-    (*_pvecShape)[8] = 0.0f;
+    (*_pvecShape)[8] = -10.0f;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,6 +150,10 @@ void outputTestParameters(const std::uint32_t _nNrOfShapes,
             std::cout << "GL_TRIANGLES" << std::endl;
         else if (_Mode == GL_LINE_LOOP)
             std::cout << "GL_LINE_LOOP" << std::endl;
+        else if (_Mode == GL_TRIANGLE_STRIP)
+            std::cout << "GL_TRIANGLE_STRIP" << std::endl;
+        else if (_Mode == GL_TRIANGLE_FAN)
+            std::cout << "GL_TRIANGLE_FAN" << std::endl;
         std::cout << "Buffer usage:     ";
         if (_BufferUsage == GL_STATIC_DRAW)
             std::cout << "GL_STATIC_DRAW" << std::endl;
@@ -229,7 +232,7 @@ const double testOneVBOPerShape(const std::uint32_t _nNrOfShapes,
     {
         for (auto j=0u; j<_nNrOfShapes; ++j)
         {
-            createShape(&vecShape, Generator, UniformDistribution, 0.05f, 0.5f);
+            createShape(&vecShape, Generator, UniformDistribution, 0.5f, 20.0f);
             createColor(&vecColor, Generator, UniformDistribution);
           
             glBindVertexArray(punVAO[j]);
@@ -343,7 +346,7 @@ const double testOneBufferedVBOPerShape(const std::uint32_t _nNrOfShapes,
     {
         for (auto j=0u; j<_nNrOfShapes; ++j)
         {
-            createShape(&vecShape, Generator, UniformDistribution, 0.05f, 0.5f);
+            createShape(&vecShape, Generator, UniformDistribution, 0.5f, 20.0f);
             createColor(&vecColor, Generator, UniformDistribution);
           
             glBindVertexArray(punVAOBack[j]);
@@ -468,13 +471,34 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
     
     GLuint* punVBO = new GLuint[_nNrOfShapes / _nNrOfShapesPerGroup * 2];
     GLuint* punVAO = new GLuint[_nNrOfShapes / _nNrOfShapesPerGroup];
+    GLuint* punIBO = new GLuint[_nNrOfShapes / _nNrOfShapesPerGroup];
+    MEM_ALLOC("GLuint")
     MEM_ALLOC("GLuint")
     MEM_ALLOC("GLuint")
 
     outputTestParameters(_nNrOfShapes, _nNrOfShapesPerGroup, _nNrOfFrames, _BufferUsage, _Mode);
     
+    glGenBuffers(_nNrOfShapes / _nNrOfShapesPerGroup, punIBO);
     glGenBuffers(_nNrOfShapes / _nNrOfShapesPerGroup * 2, punVBO);
     glGenVertexArrays(_nNrOfShapes / _nNrOfShapesPerGroup, punVAO);
+    
+    glEnable(GL_PRIMITIVE_RESTART);
+    glPrimitiveRestartIndex(_nNrOfShapesPerGroup*3);
+
+    std::vector<GLushort> vecIndices(_nNrOfShapesPerGroup*3+_nNrOfShapesPerGroup-1);
+    {
+        auto i=0u;
+        auto k=0u;
+        while (i<vecIndices.size())
+        {
+            for (auto j=0u; j<3; ++j)
+            {
+                vecIndices[i++] = k*3+j;
+            }
+            ++k;
+            vecIndices[i++] = _nNrOfShapesPerGroup*3;
+        }
+    }
     
     Timer.start();
     for (auto i=0u; i<_nNrOfFrames; ++i)
@@ -487,14 +511,16 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
             glBufferData(GL_ARRAY_BUFFER, _nNrOfShapesPerGroup * vecShape.size()*sizeof(float), nullptr, _BufferUsage);
             glBindBuffer(GL_ARRAY_BUFFER, punVBO[1+k*2]);
             glBufferData(GL_ARRAY_BUFFER, _nNrOfShapesPerGroup * vecColor.size()*sizeof(float), nullptr, _BufferUsage);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, punIBO[k]);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, vecIndices.size()*sizeof(GLushort), nullptr, _BufferUsage);
             
             glBindBuffer(GL_ARRAY_BUFFER, punVBO[0+k*2]);
             for (auto j=0u; j<_nNrOfShapesPerGroup; ++j)
             {
-                createShape(&vecShape, Generator, UniformDistribution, 0.05f, 0.5f);
+                createShape(&vecShape, Generator, UniformDistribution, 0.5f, 20.0f);
                 
                 glBufferSubData(GL_ARRAY_BUFFER, j*vecShape.size()*sizeof(float),
-                                                 vecShape.size()*sizeof(float), &vecShape.front());
+                                                   vecShape.size()*sizeof(float), &vecShape.front());
             }
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -505,13 +531,15 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
                 createColor(&vecColor, Generator, UniformDistribution);
                 
                 glBufferSubData(GL_ARRAY_BUFFER, j*vecColor.size()*sizeof(float),
-                                                 vecColor.size()*sizeof(float), &vecColor.front());
+                                                   vecColor.size()*sizeof(float), &vecColor.front());
             }
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
             
             glBindVertexArray(punVAO[k]);
-            glDrawArrays(_Mode, 0*3*_nNrOfShapesPerGroup, 3*_nNrOfShapesPerGroup);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, punIBO[k]);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, vecIndices.size()*sizeof(GLushort), &vecIndices.front(), _BufferUsage);
+            glDrawElements(_Mode, vecIndices.size(), GL_UNSIGNED_SHORT, 0);
         }
         Graphics.swapBuffers();
     }
@@ -531,6 +559,12 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
         delete[] punVAO;
         MEM_FREED("GLuint")
         punVAO = nullptr;
+    }
+    if (punIBO != nullptr)
+    {
+        delete[] punIBO;
+        MEM_FREED("GLuint")
+        punIBO = nullptr;
     }
     return Timer.getTime();
 }
@@ -581,6 +615,8 @@ const double testOneBufferedVBOPerMultipleShapes(const std::uint32_t _nNrOfShape
     GLuint* punVBOBack = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup*2];
     GLuint* punVAOFront = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup];
     GLuint* punVAOBack = new GLuint[_nNrOfShapes/_nNrOfShapesPerGroup];
+    GLuint* punIBO = new GLuint[_nNrOfShapes / _nNrOfShapesPerGroup];
+    MEM_ALLOC("GLuint")
     MEM_ALLOC("GLuint")
     MEM_ALLOC("GLuint")
     MEM_ALLOC("GLuint")
@@ -596,6 +632,7 @@ const double testOneBufferedVBOPerMultipleShapes(const std::uint32_t _nNrOfShape
     glGenVertexArrays(_nNrOfShapes/_nNrOfShapesPerGroup, punVAO1);
     glGenBuffers(_nNrOfShapes/_nNrOfShapesPerGroup*2, punVBO2);
     glGenVertexArrays(_nNrOfShapes/_nNrOfShapesPerGroup, punVAO2);
+    glGenBuffers(_nNrOfShapes/_nNrOfShapesPerGroup, punIBO);
     
     for (auto i=0u; i<_nNrOfShapes/_nNrOfShapesPerGroup; ++i)
     {
@@ -605,6 +642,23 @@ const double testOneBufferedVBOPerMultipleShapes(const std::uint32_t _nNrOfShape
         punVBOFront[1+i*2] = punVBO1[1+i*2];
         punVBOBack[0+i*2] = punVBO2[0+i*2];
         punVBOBack[1+i*2] = punVBO2[1+i*2];
+    }
+    glEnable(GL_PRIMITIVE_RESTART);
+    glPrimitiveRestartIndex(_nNrOfShapesPerGroup*3);
+
+    std::vector<GLushort> vecIndices(_nNrOfShapesPerGroup*3+_nNrOfShapesPerGroup-1);
+    {
+        auto i=0u;
+        auto k=0u;
+        while (i<vecIndices.size())
+        {
+            for (auto j=0u; j<3; ++j)
+            {
+                vecIndices[i++] = k*3+j;
+            }
+            ++k;
+            vecIndices[i++] = _nNrOfShapesPerGroup*3;
+        }
     }
     
     Timer.start();
@@ -618,14 +672,16 @@ const double testOneBufferedVBOPerMultipleShapes(const std::uint32_t _nNrOfShape
             glBufferData(GL_ARRAY_BUFFER, _nNrOfShapesPerGroup * vecShape.size()*sizeof(float), nullptr, _BufferUsage);
             glBindBuffer(GL_ARRAY_BUFFER, punVBOBack[1+j*2]);
             glBufferData(GL_ARRAY_BUFFER, _nNrOfShapesPerGroup * vecColor.size()*sizeof(float), nullptr, _BufferUsage);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, punIBO[j]);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, _nNrOfShapesPerGroup*sizeof(GLushort), nullptr, _BufferUsage);
             
             glBindBuffer(GL_ARRAY_BUFFER, punVBOBack[0+j*2]);
             for (auto k=0u; k<_nNrOfShapesPerGroup; ++k)
             {
-                createShape(&vecShape, Generator, UniformDistribution, 0.05f, 0.5f);
+                createShape(&vecShape, Generator, UniformDistribution, 0.5f, 20.0f);
 
                 glBufferSubData(GL_ARRAY_BUFFER, k*vecShape.size()*sizeof(float),
-                                                 vecShape.size()*sizeof(float), &vecShape.front());
+                                                   vecShape.size()*sizeof(float), &vecShape.front());
             }
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -636,13 +692,15 @@ const double testOneBufferedVBOPerMultipleShapes(const std::uint32_t _nNrOfShape
                 createColor(&vecColor, Generator, UniformDistribution);
                 
                 glBufferSubData(GL_ARRAY_BUFFER, k*vecColor.size()*sizeof(float),
-                                                 vecColor.size()*sizeof(float), &vecColor.front());
+                                                   vecColor.size()*sizeof(float), &vecColor.front());
             }
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
             
-            glBindVertexArray(punVAOFront[j]);
-            glDrawArrays(_Mode, 0, 3*_nNrOfShapesPerGroup);
+            glBindVertexArray(punVAOBack[j]);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, punIBO[j]);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, vecIndices.size()*sizeof(GLushort), &vecIndices.front(), _BufferUsage);
+            glDrawElements(_Mode, vecIndices.size(), GL_UNSIGNED_SHORT, 0);
             
             std::swap(punVAOFront[j], punVAOBack[j]);
             std::swap(punVBOFront[0+j*2], punVBOBack[0+j*2]);
@@ -703,6 +761,12 @@ const double testOneBufferedVBOPerMultipleShapes(const std::uint32_t _nNrOfShape
         MEM_FREED("GLuint")
         punVAOBack = nullptr;
     }
+    if (punIBO != nullptr)
+    {
+        delete[] punIBO;
+        MEM_FREED("GLuint")
+        punIBO = nullptr;
+    }
     return Timer.getTime();
 }
 
@@ -730,19 +794,6 @@ int main(int argc, char *argv[])
     
     Graphics.init();
     
-    CShader VertexShader;
-    CShader FragmentShader;
-    VertexShader.load("shader.vert", GL_VERTEX_SHADER);
-    FragmentShader.load("shader.frag", GL_FRAGMENT_SHADER);
-    
-    CShaderProgram ShaderProgram;
-    
-    ShaderProgram.create();
-    ShaderProgram.addShader(VertexShader);
-    ShaderProgram.addShader(FragmentShader);
-    ShaderProgram.link();
-    ShaderProgram.use();
-
     INFO_MSG("GL Test", "Starting test with one VBO per shape")
     testOneVBOPerShape(1000, 100, GL_STATIC_DRAW, GL_TRIANGLES);
     testOneVBOPerShape(1000, 100, GL_DYNAMIC_DRAW, GL_TRIANGLES);

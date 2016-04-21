@@ -31,6 +31,8 @@ INCLUDE_DIRECTORIES (
 
 SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader_program.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/circle_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals_thruster.cpp
