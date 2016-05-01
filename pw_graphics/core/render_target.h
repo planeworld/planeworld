@@ -64,9 +64,9 @@ class CRenderTarget
         );
 
         //--- Constant Methods -----------------------------------------------//
+        const GLuint                getIDTex() const;
         const std::vector<GLfloat>& getQuad() const;
         const std::vector<GLfloat>& getTexUV() const;
-        GLuint getIDTex() const {return m_unIDTex;}
         void bind() const;
         void unbind() const;
         
@@ -96,6 +96,19 @@ class CRenderTarget
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return id of texture to use as render target
+///
+/// \return ID of texture to use as render target
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const GLuint CRenderTarget::getIDTex() const
+{
+    METHOD_ENTRY("CRenderTarget::getIDTex")
+    return m_unIDTex;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
