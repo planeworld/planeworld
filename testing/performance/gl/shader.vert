@@ -3,12 +3,12 @@
 uniform mat4 matProjection;
 
 layout (location = 0) in vec3 inPosition;
-layout (location = 1) in vec3 inColor;
+layout (location = 1) in vec3 inColour;
 
-smooth out vec3 theColor;
+out vec3 vertColour;
 
 void main()
 {
    gl_Position = matProjection*vec4(inPosition, 1.0);
-   theColor = inColor;
+   vertColour = inColour;
 }

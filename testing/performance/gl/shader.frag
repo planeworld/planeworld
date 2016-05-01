@@ -1,9 +1,10 @@
 #version 330 core
 
-smooth in vec3 theColor;
-out vec4 outputColor;
+in vec3 vertColour;
+
+layout(location = 0) out vec4 outColour;
 
 void main()
 {
-   outputColor = vec4(theColor, 1.0);
+   outColour = vec4(vertColour, 1.0);
 }

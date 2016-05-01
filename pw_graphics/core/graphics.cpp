@@ -217,22 +217,22 @@ bool CGraphics::init()
     //--------------------------------------------------------------------------
     // Setup OpenGL
     //--------------------------------------------------------------------------
-    CShader VertexShader;
-    CShader FragmentShader;
-    VertexShader.load("shader.vert", GL_VERTEX_SHADER);
-    FragmentShader.load("shader.frag", GL_FRAGMENT_SHADER);
-    
-    m_ShaderProgram.create();
-    m_ShaderProgram.addShader(VertexShader);
-    m_ShaderProgram.addShader(FragmentShader);
-    m_ShaderProgram.link();
-    m_ShaderProgram.use();
-    
-    m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
-                                        m_ViewPort.bottom, m_ViewPort.top,
-                                        m_ViewPort.near, m_ViewPort.far);
-    GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
-    glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
+//     CShader VertexShader;
+//     CShader FragmentShader;
+//     VertexShader.load("shader.vert", GL_VERTEX_SHADER);
+//     FragmentShader.load("shader.frag", GL_FRAGMENT_SHADER);
+//     
+//     m_ShaderProgram.create();
+//     m_ShaderProgram.addShader(VertexShader);
+//     m_ShaderProgram.addShader(FragmentShader);
+//     m_ShaderProgram.link();
+//     m_ShaderProgram.use();
+//     
+//     m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
+//                                         m_ViewPort.bottom, m_ViewPort.top,
+//                                         m_ViewPort.near, m_ViewPort.far);
+//     GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
+//     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
     
     // Enable blending
     glEnable(GL_BLEND);
@@ -284,11 +284,11 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     m_ViewPort.left   = -m_ViewPort.right;
     m_ViewPort.bottom = -m_ViewPort.top;
     
-    m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
-                                        m_ViewPort.bottom, m_ViewPort.top,
-                                        m_ViewPort.near, m_ViewPort.far);
-    GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
-    glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
+//     m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
+//                                         m_ViewPort.bottom, m_ViewPort.top,
+//                                         m_ViewPort.near, m_ViewPort.far);
+//     GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
+//     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
     
     // Store resolution
     m_unWidthScr = _unWidthScr;

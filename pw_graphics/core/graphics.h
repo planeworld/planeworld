@@ -46,7 +46,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include "GL/glext.h"
-#include <glm/mat4x4.hpp>
+// #include <glm/mat4x4.hpp>
 
 #include <SFML/OpenGL.hpp>
 // #include <SFML/Window.hpp>
@@ -214,7 +214,7 @@ class CGraphics
         WindowHandleType*   m_pWindow;          ///< Pointer to main window
         
         ViewPort            m_ViewPort;         ///< Viewport for graphics
-        glm::mat4           m_matProjection;    ///< Projection matrix
+//         glm::mat4           m_matProjection;    ///< Projection matrix
         
         CShaderProgram      m_ShaderProgram;    ///< Basic shader program
         

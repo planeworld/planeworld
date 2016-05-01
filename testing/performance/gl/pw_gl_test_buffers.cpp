@@ -28,13 +28,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       gl_test.cpp
+/// \file       pw_gl_test_buffers.cpp
 /// \brief      Main program for OpenGL performance tests
-///
-/// Code is partly based on the tutorial #3 of Michal Bubnar, see
-/// http://mbsoftworks.sk/index.php?page=tutorials&series=1&tutorial=6
-/// and official OpenGL Tutorial 1, see
-/// https://www.opengl.org/wiki/Tutorial1:_Rendering_shapes_with_glDrawRangeElements,_VAO,_VBO,_shaders_%28C%2B%2B_/_freeGLUT%29
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2016-03-31
@@ -55,6 +50,9 @@
 //--- Misc-Header ------------------------------------------------------------//
 #include "GL/gl.h"
 #include "GL/glext.h"
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -64,7 +62,7 @@
 void usage()
 {
     METHOD_ENTRY("usage")
-    std::cout << "Usage: gl_test" << std::endl;
+    std::cout << "Usage: pw_gl_test_buffers" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -255,6 +253,7 @@ const double testOneVBOPerShape(const std::uint32_t _nNrOfShapes,
             glBindBuffer(GL_ARRAY_BUFFER, punVBO[1+j*2]);
             glBufferData(GL_ARRAY_BUFFER, vecColor.size()*sizeof(float), nullptr, _BufferUsage);
         }
+        
         Graphics.swapBuffers();
     }
     Timer.stop();
@@ -793,6 +792,25 @@ int main(int argc, char *argv[])
     CGraphics& Graphics = CGraphics::getInstance();
     
     Graphics.init();
+    
+    CShader VertexShader;
+    CShader FragmentShader;
+    CShaderProgram ShaderProgram;
+    
+    VertexShader.load("shader.vert", GL_VERTEX_SHADER);
+    FragmentShader.load("shader.frag", GL_FRAGMENT_SHADER);
+    ShaderProgram.create();
+    ShaderProgram.addShader(VertexShader);
+    ShaderProgram.addShader(FragmentShader);
+    ShaderProgram.link();
+    ShaderProgram.use();
+    
+    glm::mat4 matProjection = glm::ortho<float>(
+        Graphics.getViewPort().left, Graphics.getViewPort().right,
+        Graphics.getViewPort().bottom, Graphics.getViewPort().top,
+        Graphics.getViewPort().near, Graphics.getViewPort().far);
+    GLint nProjMatLoc=glGetUniformLocation(ShaderProgram.getID(), "matProjection");
+    glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(matProjection));
     
     INFO_MSG("GL Test", "Starting test with one VBO per shape")
     testOneVBOPerShape(1000, 100, GL_STATIC_DRAW, GL_TRIANGLES);
