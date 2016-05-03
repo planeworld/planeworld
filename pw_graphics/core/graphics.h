@@ -61,8 +61,10 @@ static sf::Window g_Window;                             ///< Main window
 typedef sf::RenderWindow WindowHandleType;
 
 // Constants
-const unsigned short GRAPHICS_WIDTH_DEFAULT = 1440u;    ///< Default x-resolution
-const unsigned short GRAPHICS_HEIGHT_DEFAULT = 900u;    ///< Default y-resolution
+const std::uint16_t GRAPHICS_WIDTH_DEFAULT = 1440u;    ///< Default x-resolution
+const std::uint16_t GRAPHICS_HEIGHT_DEFAULT = 900u;    ///< Default y-resolution
+
+const std::uint16_t GRAPHICS_SIZE_OF_INDEX_BUFFER = 10000; ///< Size of VBOs/VAOs/IBOs to keep all data
 
 const double GRAPHICS_PX_PER_METER = 2.0;               ///< Default resolution, pixel per meter
 const double GRAPHICS_FOV_DEFAULT = 45.0;               ///< Default fov
@@ -206,32 +208,49 @@ class CGraphics
         void setDepth(const double&);
         void beginLine(const LineType&, const double&);
         void endLine();
+        
+        void bufferGL(const GLenum, const std::vector<GLfloat>* const,
+                                    const std::vector<GLfloat>* const);
 
         
     private:
         
         //--- Variables [private] --------------------------------------------//
-        WindowHandleType*   m_pWindow;          ///< Pointer to main window
+        WindowHandleType*   m_pWindow;              ///< Pointer to main window
         
-        ViewPort            m_ViewPort;         ///< Viewport for graphics
+        ViewPort            m_ViewPort;             ///< Viewport for graphics
 //         glm::mat4           m_matProjection;    ///< Projection matrix
-        
-        CShaderProgram      m_ShaderProgram;    ///< Basic shader program
-        
-        Vector3d            m_vecCamPos;        ///< camera position
-        double              m_fCamAng;          ///< camera angle
-        double              m_fCamZoom;         ///< camera zoom
-        double              m_fDepth;           ///< depth of lines in list
-        double              m_fDepthMax;        ///< maximum depth of levels
-        double              m_fDepthMin;        ///< minimum depth of levels
 
-        double              m_fDynPelSize;      ///< pel-size for dynamically sized shapes
-        
-        int                 m_nVideoFlags;      ///< videoflags like fullscreen, resolution
-        unsigned short      m_unWidthScr;       ///< Screen width
-        unsigned short      m_unHeightScr;      ///< Screen height
+        GLushort            m_unIndexStart = 0u;    ///< Index to start next primitive with
+        GLushort            m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
 
-        std::list<Vector2d>     m_VertList;     ///< list, containing the coordinates of vertices
+        GLuint              m_unIBOLines = 0u;      ///< Index buffer object for lines
+        GLuint              m_unIBOLineLoop = 0u;   ///< Index buffer object for looped lines
+        GLuint              m_unIBOLineStrip = 0u;  ///< Index buffer object for line strips
+        GLuint              m_unVAO = 0u;           ///< Vertex array object
+        GLuint              m_unVBO = 0u;           ///< Vertex buffer (one for all single lines)
+        GLuint              m_unVBOColours = 0u;    ///< Colour buffer (one for all vertex colours)
+        
+        std::vector<GLushort>   m_vecIndicesLines;      ///< Indices for single lines within buffers
+        std::vector<GLushort>   m_vecIndicesLineLoop;   ///< Indices for looped lines within buffers
+        std::vector<GLushort>   m_vecIndicesLineStrip;  ///< Indices for line strips within buffers
+        
+//         CShaderProgram      m_ShaderProgram;    ///< Basic shader program
+        
+        Vector3d            m_vecCamPos;            ///< camera position
+        double              m_fCamAng;              ///< camera angle
+        double              m_fCamZoom;             ///< camera zoom
+        double              m_fDepth;               ///< depth of lines in list
+        double              m_fDepthMax;            ///< maximum depth of levels
+        double              m_fDepthMin;            ///< minimum depth of levels
+
+        double              m_fDynPelSize;          ///< pel-size for dynamically sized shapes
+        
+        int                 m_nVideoFlags;          ///< videoflags like fullscreen, resolution
+        unsigned short      m_unWidthScr;           ///< Screen width
+        unsigned short      m_unHeightScr;          ///< Screen height
+
+//         std::list<Vector2d>     m_VertList;     ///< list, containing the coordinates of vertices
 
         //--- Constructor/destructor [private] -------------------------------//
         CGraphics();

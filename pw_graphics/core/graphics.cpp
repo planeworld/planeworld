@@ -54,6 +54,9 @@ CGraphics::CGraphics() : m_pWindow(nullptr),
     CTOR_CALL("CGraphics::CGraphics")
     
     m_vecCamPos.setZero();
+    m_vecIndicesLines.reserve(m_unIndexMax);
+    m_vecIndicesLineStrip.reserve(m_unIndexMax);
+    m_vecIndicesLineLoop.reserve(m_unIndexMax);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -176,13 +179,32 @@ void CGraphics::swapBuffers()
 {
     METHOD_ENTRY("CGraphics::swapBuffers")
     
+    glBindVertexArray(m_unVAO);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLushort), &m_vecIndicesLines.front(), GL_STREAM_DRAW);
+    glDrawElements(GL_LINES, m_vecIndicesLines.size(), GL_UNSIGNED_SHORT, 0);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineStrip);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLushort), &m_vecIndicesLineStrip.front(), GL_STREAM_DRAW);
+    glDrawElements(GL_LINE_STRIP, m_vecIndicesLineStrip.size(), GL_UNSIGNED_SHORT, 0);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineLoop);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLushort), &m_vecIndicesLineLoop.front(), GL_STREAM_DRAW);
+    glDrawElements(GL_LINE_LOOP, m_vecIndicesLineLoop.size(), GL_UNSIGNED_SHORT, 0);
+    
     m_pWindow->display();
 
+    // Reserve gpu memory for all relevant buffers
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVAO);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    
     // clear offscreen buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-    
-//     glMatrixMode(GL_MODELVIEW);
-//     glLoadIdentity();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -255,7 +277,22 @@ bool CGraphics::init()
         INFO_MSG("OpenGL", "Enabling depthbuffer.")
     }
     
-    // clear buffers
+    //--------------------------------------------------------------------------
+    // Prepare OpenGL buffers (VBO, VAO, IBO, FBO)
+    //--------------------------------------------------------------------------
+    glGenBuffers(1, &m_unVBO);
+    glGenBuffers(1, &m_unVBOColours);
+    glGenVertexArrays(1, &m_unVAO);
+    
+    // Reserve GPU memory for all relevant buffers
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVAO);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    
+    // Clear buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
     return (true);
 }
@@ -719,3 +756,39 @@ void CGraphics::endLine()
     glEnd();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Buffers Vertex data for OpenGL rendering
+///
+/// \param _Mode OpenGL draw mode for vertices
+/// \param _pvecVertices Vector of vertices to be buffered
+/// \param _pvecColours  Vector of vertex colours to be buffered
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::bufferGL(const GLenum _Mode,
+                         const std::vector<GLfloat>* const _pvecVertices,
+                         const std::vector<GLfloat>* const _pvecColours)
+{
+    METHOD_ENTRY("CGraphics::bufferGL")
+
+    std::vector<GLushort> vecIndices;
+    
+    glBindVertexArray(m_unVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStart*sizeof(float),
+                                    _pvecVertices->size()*sizeof(float),
+                                     &(_pvecVertices->front()));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStart*sizeof(float),
+                                    _pvecColours->size()*sizeof(float),
+                                     &(_pvecColours->front()));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    
+//     m_vecIndicesLineStrip.push_back(m_unIndexStart);
+    
+    m_unIndexStart += _pvecVertices->size();
+}
