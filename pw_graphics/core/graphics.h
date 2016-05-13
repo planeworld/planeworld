@@ -46,7 +46,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include "GL/glext.h"
-// #include <glm/mat4x4.hpp>
+#include <glm/mat4x4.hpp>
 
 #include <SFML/OpenGL.hpp>
 // #include <SFML/Window.hpp>
@@ -219,8 +219,9 @@ class CGraphics
         WindowHandleType*   m_pWindow;              ///< Pointer to main window
         
         ViewPort            m_ViewPort;             ///< Viewport for graphics
-//         glm::mat4           m_matProjection;    ///< Projection matrix
+        glm::mat4           m_matProjection;        ///< Projection matrix
 
+        GLushort            m_unIndex = 0u;         ///< Pointer to current index in buffer
         GLushort            m_unIndexStart = 0u;    ///< Index to start next primitive with
         GLushort            m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
 
@@ -235,7 +236,12 @@ class CGraphics
         std::vector<GLushort>   m_vecIndicesLineLoop;   ///< Indices for looped lines within buffers
         std::vector<GLushort>   m_vecIndicesLineStrip;  ///< Indices for line strips within buffers
         
-//         CShaderProgram      m_ShaderProgram;    ///< Basic shader program
+        std::vector<GLushort>*  m_pvecIndex = nullptr;  ///< Pointer to current index buffer
+        
+        std::vector<GLfloat>    m_vecColours;           ///< Temporary buffer for colours of vertices
+        std::vector<GLfloat>    m_vecVertices;          ///< Temporary buffer for vertices
+        
+        CShaderProgram      m_ShaderProgram;    ///< Basic shader program
         
         Vector3d            m_vecCamPos;            ///< camera position
         double              m_fCamAng;              ///< camera angle
@@ -558,44 +564,6 @@ inline const ViewPort& CGraphics::getViewPort() const
 {
     METHOD_ENTRY("CGraphics::getViewPort()");
     return m_ViewPort;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add vertex to linelist
-///
-/// The vertex is added at the current position in the linelist, specified by
-/// the size-variable
-///
-/// \param _vecV Vertex
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CGraphics::addVertex(const Vector2d& _vecV)
-{
-    METHOD_ENTRY("CGraphics::addVertex(const Vector2d&)");
-
-    glVertex3d(_vecV[0], _vecV[1], m_fDepth);
-//     m_VertList.push_back(_vecV);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add vertex to linelist
-///
-/// The vertex is added at the current position in the linelist, specified by
-/// the size-variable
-///
-/// \param _fX Vertex x-position
-/// \param _fY Vertex y-position
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CGraphics::addVertex(const double& _fX, const double& _fY)
-{
-    METHOD_ENTRY("CGraphics::addVertex(const double&, const double&)");
-
-    glVertex3d(_fX, _fY, m_fDepth);
-    
-//     m_VertList.push_back(Vector2d(_fX, _fY));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

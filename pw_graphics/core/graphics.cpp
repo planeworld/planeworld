@@ -57,6 +57,9 @@ CGraphics::CGraphics() : m_pWindow(nullptr),
     m_vecIndicesLines.reserve(m_unIndexMax);
     m_vecIndicesLineStrip.reserve(m_unIndexMax);
     m_vecIndicesLineLoop.reserve(m_unIndexMax);
+    
+    m_vecColours.reserve(m_unIndexMax);
+    m_vecVertices.reserve(m_unIndexMax);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -202,6 +205,18 @@ void CGraphics::swapBuffers()
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineStrip);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineLoop);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    
+    m_unIndex = 0u;
+    m_unIndexStart = 0u;
+    m_vecIndicesLines.clear();
+    m_vecIndicesLineLoop.clear();
+    m_vecIndicesLineStrip.clear();
     
     // clear offscreen buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
@@ -239,22 +254,22 @@ bool CGraphics::init()
     //--------------------------------------------------------------------------
     // Setup OpenGL
     //--------------------------------------------------------------------------
-//     CShader VertexShader;
-//     CShader FragmentShader;
-//     VertexShader.load("shader.vert", GL_VERTEX_SHADER);
-//     FragmentShader.load("shader.frag", GL_FRAGMENT_SHADER);
-//     
-//     m_ShaderProgram.create();
-//     m_ShaderProgram.addShader(VertexShader);
-//     m_ShaderProgram.addShader(FragmentShader);
-//     m_ShaderProgram.link();
-//     m_ShaderProgram.use();
-//     
-//     m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
-//                                         m_ViewPort.bottom, m_ViewPort.top,
-//                                         m_ViewPort.near, m_ViewPort.far);
-//     GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
-//     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
+    CShader VertexShader;
+    CShader FragmentShader;
+    VertexShader.load("shader.vert", GL_VERTEX_SHADER);
+    FragmentShader.load("shader.frag", GL_FRAGMENT_SHADER);
+    
+    m_ShaderProgram.create();
+    m_ShaderProgram.addShader(VertexShader);
+    m_ShaderProgram.addShader(FragmentShader);
+    m_ShaderProgram.link();
+    m_ShaderProgram.use();
+    
+    m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
+                                        m_ViewPort.bottom, m_ViewPort.top,
+                                        m_ViewPort.near, m_ViewPort.far);
+    GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
+    glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
     
     // Enable blending
     glEnable(GL_BLEND);
@@ -282,6 +297,9 @@ bool CGraphics::init()
     //--------------------------------------------------------------------------
     glGenBuffers(1, &m_unVBO);
     glGenBuffers(1, &m_unVBOColours);
+    glGenBuffers(1, &m_unIBOLines);
+    glGenBuffers(1, &m_unIBOLineLoop);
+    glGenBuffers(1, &m_unIBOLineStrip);
     glGenVertexArrays(1, &m_unVAO);
     
     // Reserve GPU memory for all relevant buffers
@@ -291,6 +309,18 @@ bool CGraphics::init()
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineStrip);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineLoop);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    
+    glEnable(GL_PRIMITIVE_RESTART);
+    glPrimitiveRestartIndex(m_unIndexMax);
     
     // Clear buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
@@ -321,11 +351,11 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     m_ViewPort.left   = -m_ViewPort.right;
     m_ViewPort.bottom = -m_ViewPort.top;
     
-//     m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
-//                                         m_ViewPort.bottom, m_ViewPort.top,
-//                                         m_ViewPort.near, m_ViewPort.far);
-//     GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
-//     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
+    m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
+                                        m_ViewPort.bottom, m_ViewPort.top,
+                                        m_ViewPort.near, m_ViewPort.far);
+    GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
+    glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
     
     // Store resolution
     m_unWidthScr = _unWidthScr;
@@ -353,10 +383,11 @@ void CGraphics::applyCamMovement()
 {
     METHOD_ENTRY("CGraphics::applyCamMovement")
 
+//     glm::rotate<float>();
     glScaled(m_fCamZoom, m_fCamZoom, 1.0);
     glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
     glTranslated(-m_vecCamPos[0], -m_vecCamPos[1], 0.0);
-    
+//     
 //     GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0f, 1.0f };
 //     glLightf (GL_LIGHT1, GL_SPOT_CUTOFFB, 15.f);
 //     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);
@@ -711,6 +742,53 @@ void CGraphics::showVec(const Vector2d& _vecV, const Vector2d& _vecPos) const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Add vertex to linelist
+///
+/// The vertex is added at the current position in the linelist, specified by
+/// the size-variable
+///
+/// \param _vecV Vertex
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::addVertex(const Vector2d& _vecV)
+{
+    METHOD_ENTRY("CGraphics::addVertex(const Vector2d&)");
+
+    m_vecVertices.push_back(_vecV[0]);
+    m_vecVertices.push_back(_vecV[1]);
+    m_vecVertices.push_back(m_fDepth);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_pvecIndex->push_back(m_unIndex++);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add vertex to linelist
+///
+/// The vertex is added at the current position in the linelist, specified by
+/// the size-variable
+///
+/// \param _fX Vertex x-position
+/// \param _fY Vertex y-position
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::addVertex(const double& _fX, const double& _fY)
+{
+    METHOD_ENTRY("CGraphics::addVertex(const double&, const double&)");
+
+    m_vecVertices.push_back(_fX);
+    m_vecVertices.push_back(_fY);
+    m_vecVertices.push_back(m_fDepth);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_pvecIndex->push_back(m_unIndex++);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Define beginning of line to be drawn
 ///
 /// This method just specifies the start of a line list. The type of the list
@@ -730,13 +808,13 @@ void CGraphics::beginLine(const LineType& _LType, const double& _fDepth)
     switch(_LType)
     {
         case LineType::GRAPHICS_LINETYPE_SINGLE:
-            glBegin(GL_LINES);  
+            m_pvecIndex = &m_vecIndicesLines;
             break;
         case LineType::GRAPHICS_LINETYPE_LOOP:
-            glBegin(GL_LINE_LOOP);
+            m_pvecIndex = &m_vecIndicesLineLoop;
             break;
         case LineType::GRAPHICS_LINETYPE_STRIP:
-            glBegin(GL_LINE_STRIP);
+            m_pvecIndex = &m_vecIndicesLineStrip;
             break;
     }
 }
@@ -752,8 +830,28 @@ void CGraphics::beginLine(const LineType& _LType, const double& _fDepth)
 void CGraphics::endLine()
 {
     METHOD_ENTRY("CGraphics::endLine")
+    
+    m_pvecIndex->push_back(m_unIndexMax);
+    
+    glBindVertexArray(m_unVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStart*sizeof(float),
+                                     m_vecVertices.size()*sizeof(float),
+                                     &(m_vecVertices.front()));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glEnd();
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStart*sizeof(float),
+                                     m_vecColours.size()*sizeof(float),
+                                     &(m_vecColours.front()));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    
+    m_unIndexStart += m_vecVertices.size();
+
+    m_vecColours.clear();
+    m_vecVertices.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -771,8 +869,6 @@ void CGraphics::bufferGL(const GLenum _Mode,
 {
     METHOD_ENTRY("CGraphics::bufferGL")
 
-    std::vector<GLushort> vecIndices;
-    
     glBindVertexArray(m_unVAO);
     glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
     glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStart*sizeof(float),
@@ -788,7 +884,27 @@ void CGraphics::bufferGL(const GLenum _Mode,
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
     
-//     m_vecIndicesLineStrip.push_back(m_unIndexStart);
+    switch(_Mode)
+    {
+        case GL_LINES:
+            for (auto i=0u; i<_pvecVertices->size(); ++i)
+            {
+                m_vecIndicesLines.push_back(m_unIndexStart+i);
+            }
+            break;
+        case GL_LINE_LOOP:
+            for (auto i=0u; i<_pvecVertices->size(); ++i)
+            {
+                m_vecIndicesLineStrip.push_back(m_unIndexStart+i);
+            }
+            break;
+        case GL_LINE_STRIP:
+            for (auto i=0u; i<_pvecVertices->size(); ++i)
+            {
+                m_vecIndicesLineStrip.push_back(m_unIndexStart+i);
+            }
+            break;
+    }
     
     m_unIndexStart += _pvecVertices->size();
 }
