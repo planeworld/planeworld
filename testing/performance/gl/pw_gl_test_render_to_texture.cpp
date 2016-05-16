@@ -271,7 +271,7 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
         Graphics.getViewPort().left, Graphics.getViewPort().right,
         Graphics.getViewPort().bottom, Graphics.getViewPort().top,
         Graphics.getViewPort().near, Graphics.getViewPort().far);
-    GLint nProjMatLoc=glGetUniformLocation(ShaderProgram.getID(), "matProjection");
+    GLint nProjMatLoc=glGetUniformLocation(ShaderProgram.getID(), "matTransform");
     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(matProjection));
     
     CShader         TextureToScreenShader;
@@ -286,11 +286,13 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
     TextureToScreenShaderProgram.link();
     TextureToScreenShaderProgram.use();
     
+    glm::mat4 matProjection2 = glm::perspective(90.0f, float(Graphics.getWidthScr()/Graphics.getHeightScr()), 10.0f, 1000.0f) *
+                               glm::lookAt(glm::vec3(0,0,750), glm::vec3(0,0,0), glm::vec3(0,1,0));
     GLuint nProjMatLoc2=glGetUniformLocation(TextureToScreenShaderProgram.getID(), "matProjection");
-    glUniformMatrix4fv(nProjMatLoc2, 1, GL_FALSE, glm::value_ptr(matProjection));
+    glUniformMatrix4fv(nProjMatLoc2, 1, GL_FALSE, glm::value_ptr(matProjection2));
     GLuint texID = glGetUniformLocation(TextureToScreenShaderProgram.getID(), "RenderedTexture");
     
-    CRenderTarget   RenderTarget;
+    CRenderTarget RenderTarget;
     RenderTarget.init(Graphics.getWidthScr(), Graphics.getHeightScr());
     RenderTarget.setTarget(Graphics.getViewPort().left,  Graphics.getViewPort().bottom,
                            Graphics.getViewPort().right, Graphics.getViewPort().bottom,
@@ -315,7 +317,7 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
         RenderTarget.bind();
         glViewport(0, 0, Graphics.getWidthScr(), Graphics.getHeightScr());
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+
         for (auto k=0u; k< _nNrOfShapes / _nNrOfShapesPerGroup; ++k)
         {
             glBindVertexArray(punVAO[k]);

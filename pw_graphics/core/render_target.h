@@ -79,11 +79,11 @@ class CRenderTarget
         
         std::vector<GLfloat> m_vecTarget = {
                                     -1.0f, -1.0f, -10.0f,
-                                    1.0f, -1.0f, -10.0f,
+                                    1.0f, -1.0f,  -10.0f,
                                     -1.0f,  1.0f, -10.0f,
                                     -1.0f,  1.0f, -10.0f,
-                                    1.0f, -1.0f, -10.0f,
-                                    1.0f,  1.0f, -10.0f,
+                                    1.0f, -1.0f,  -10.0f,
+                                    1.0f,  1.0f,  -10.0f,
                                   }; ///< Target quad to map texture to
         std::vector<GLfloat> m_vecTexUV = {
                                     0.0f, 0.0f,

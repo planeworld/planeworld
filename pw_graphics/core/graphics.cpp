@@ -31,6 +31,7 @@
 #include "graphics.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,6 +58,8 @@ CGraphics::CGraphics() : m_pWindow(nullptr),
     m_vecIndicesLines.reserve(m_unIndexMax);
     m_vecIndicesLineStrip.reserve(m_unIndexMax);
     m_vecIndicesLineLoop.reserve(m_unIndexMax);
+    m_vecIndicesPoints.reserve(m_unIndexMax);
+    m_vecIndicesTriangles.reserve(m_unIndexMax);
     
     m_vecColours.reserve(m_unIndexMax);
     m_vecVertices.reserve(m_unIndexMax);
@@ -185,16 +188,24 @@ void CGraphics::swapBuffers()
     glBindVertexArray(m_unVAO);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLushort), &m_vecIndicesLines.front(), GL_STREAM_DRAW);
-    glDrawElements(GL_LINES, m_vecIndicesLines.size(), GL_UNSIGNED_SHORT, 0);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLuint), &m_vecIndicesLines.front(), GL_STREAM_DRAW);
+    glDrawElements(GL_LINES, m_vecIndicesLines.size(), GL_UNSIGNED_INT, 0);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineStrip);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLushort), &m_vecIndicesLineStrip.front(), GL_STREAM_DRAW);
-    glDrawElements(GL_LINE_STRIP, m_vecIndicesLineStrip.size(), GL_UNSIGNED_SHORT, 0);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLuint), &m_vecIndicesLineStrip.front(), GL_STREAM_DRAW);
+    glDrawElements(GL_LINE_STRIP, m_vecIndicesLineStrip.size(), GL_UNSIGNED_INT, 0);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineLoop);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLushort), &m_vecIndicesLineLoop.front(), GL_STREAM_DRAW);
-    glDrawElements(GL_LINE_LOOP, m_vecIndicesLineLoop.size(), GL_UNSIGNED_SHORT, 0);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLuint), &m_vecIndicesLineLoop.front(), GL_STREAM_DRAW);
+    glDrawElements(GL_LINE_LOOP, m_vecIndicesLineLoop.size(), GL_UNSIGNED_INT, 0);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesPoints.size()*sizeof(GLuint), &m_vecIndicesPoints.front(), GL_STREAM_DRAW);
+    glDrawElements(GL_POINTS, m_vecIndicesPoints.size(), GL_UNSIGNED_INT, 0);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesTriangles.size()*sizeof(GLuint), &m_vecIndicesTriangles.front(), GL_STREAM_DRAW);
+    glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
     
     m_pWindow->display();
 
@@ -206,17 +217,23 @@ void CGraphics::swapBuffers()
     glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineStrip);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineLoop);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesPoints.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesTriangles.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     
     m_unIndex = 0u;
     m_unIndexStart = 0u;
     m_vecIndicesLines.clear();
     m_vecIndicesLineLoop.clear();
     m_vecIndicesLineStrip.clear();
+    m_vecIndicesPoints.clear();
+    m_vecIndicesTriangles.clear();
     
     // clear offscreen buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
@@ -300,6 +317,8 @@ bool CGraphics::init()
     glGenBuffers(1, &m_unIBOLines);
     glGenBuffers(1, &m_unIBOLineLoop);
     glGenBuffers(1, &m_unIBOLineStrip);
+    glGenBuffers(1, &m_unIBOPoints);
+    glGenBuffers(1, &m_unIBOTriangles);
     glGenVertexArrays(1, &m_unVAO);
     
     // Reserve GPU memory for all relevant buffers
@@ -311,13 +330,19 @@ bool CGraphics::init()
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineStrip);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineLoop);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLushort), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesPoints.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesTriangles.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(m_unIndexMax);
@@ -383,10 +408,14 @@ void CGraphics::applyCamMovement()
 {
     METHOD_ENTRY("CGraphics::applyCamMovement")
 
-//     glm::rotate<float>();
-    glScaled(m_fCamZoom, m_fCamZoom, 1.0);
-    glRotated(-m_fCamAng*GRAPHICS_RAD2DEG, 0.0, 0.0, 1.0);
-    glTranslated(-m_vecCamPos[0], -m_vecCamPos[1], 0.0);
+//     glTranslated(-m_vecCamPos[0], -m_vecCamPos[1], 0.0);
+    
+    m_matScale = glm::scale(glm::vec3(GLfloat(m_fCamZoom), GLfloat(m_fCamZoom), 1.0f));
+    m_matRotate = glm::rotate(float(-m_fCamAng), glm::vec3(0.0f, 0.0f, 1.0f));
+    m_matTransform = m_matProjection * m_matScale * m_matRotate;
+
+    GLint nTransMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matTransform");
+    glUniformMatrix4fv(nTransMatLoc, 1, GL_FALSE, glm::value_ptr(m_matTransform));
 //     
 //     GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0f, 1.0f };
 //     glLightf (GL_LIGHT1, GL_SPOT_CUTOFFB, 15.f);
@@ -586,60 +615,6 @@ void CGraphics::dots(const std::vector<Vector2d>& _Dots,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Draw dots
-///
-/// \param _Dots List of dots to be drawn
-/// \param _vecOffset Offset for drawing, used e.g. when existing list should
-///                   be shifted.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
-                     const Vector2d& _vecOffset) const
-{
-    METHOD_ENTRY("CGraphics::dots")
-    
-//     glPointSize(1.0);
-    glBegin(GL_POINTS);
-        if (_vecOffset.isZero())
-        {
-            for (auto i=0u; i<_Dots.size(); ++i)
-            {
-                glVertex3d( _Dots[i][0], _Dots[i][1], -10.0);
-            }
-        }
-        else
-        {
-            for (auto i=0u; i<_Dots.size(); ++i)
-            {
-                glVertex3d( _Dots[i][0]+_vecOffset[0], _Dots[i][1]+_vecOffset[1], -10.0);
-            }
-        }   
-    glEnd();
-//     glPointSize(1.0);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Draw a filled rectangle
-///
-/// \param _vecLL   Lower left corner
-/// \param _vecUR   Upper right corner
-///
-///////////////////////////////////////////////////////////////////////////////
-void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR) const
-{
-    METHOD_ENTRY("CGraphics::filledRect")
-
-    glBegin(GL_QUADS);
-        glVertex3d(_vecLL[0], _vecLL[1], -15.0);
-        glVertex3d(_vecUR[0], _vecLL[1], -15.0);
-        glVertex3d(_vecUR[0], _vecUR[1], -15.0);
-        glVertex3d(_vecLL[0], _vecUR[1], -15.0);
-    glEnd();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Draw a polygon line
 ///
 /// \param _Vertices List of vertices
@@ -785,6 +760,119 @@ void CGraphics::addVertex(const double& _fX, const double& _fY)
     m_vecColours.push_back(1.0f);
     m_vecColours.push_back(1.0f);
     m_pvecIndex->push_back(m_unIndex++);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw dots
+///
+/// \param _Dots List of dots to be drawn
+/// \param _vecOffset Offset for drawing, used e.g. when existing list should
+///                   be shifted.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
+                     const Vector2d& _vecOffset)
+{
+    METHOD_ENTRY("CGraphics::dots")
+    
+    for (auto i=0u; i<_Dots.size(); ++i)
+    {
+        m_vecVertices.push_back(_Dots[i][0]+_vecOffset[0]);
+        m_vecVertices.push_back(_Dots[i][1]+_vecOffset[1]);
+        m_vecVertices.push_back(float(m_fDepth));
+        m_vecColours.push_back(1.0f);
+        m_vecColours.push_back(1.0f);
+        m_vecColours.push_back(1.0f);
+        m_vecIndicesPoints.push_back(m_unIndex++);
+    }
+
+    glBindVertexArray(m_unVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStart*sizeof(float),
+                                     m_vecVertices.size()*sizeof(float),
+                                     &(m_vecVertices.front()));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStart*sizeof(float),
+                                     m_vecColours.size()*sizeof(float),
+                                     &(m_vecColours.front()));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    
+    m_unIndexStart += m_vecVertices.size();
+    
+    m_vecColours.clear();
+    m_vecVertices.clear();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw a filled rectangle
+///
+/// \param _vecLL   Lower left corner
+/// \param _vecUR   Upper right corner
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR)
+{
+    METHOD_ENTRY("CGraphics::filledRect")
+
+    m_vecVertices.push_back(_vecLL[0]);
+    m_vecVertices.push_back(_vecLL[1]);
+    m_vecVertices.push_back(float(m_fDepth));
+    m_vecVertices.push_back(_vecUR[0]);
+    m_vecVertices.push_back(_vecLL[1]);
+    m_vecVertices.push_back(float(m_fDepth));
+    m_vecVertices.push_back(_vecLL[0]);
+    m_vecVertices.push_back(_vecUR[1]);
+    m_vecVertices.push_back(float(m_fDepth));
+    m_vecVertices.push_back(_vecUR[0]);
+    m_vecVertices.push_back(_vecUR[1]);
+    m_vecVertices.push_back(float(m_fDepth));
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecColours.push_back(1.0f);
+    m_vecIndicesTriangles.push_back(m_unIndex++);   // 1
+    m_vecIndicesTriangles.push_back(m_unIndex++);   // 2
+    m_vecIndicesTriangles.push_back(m_unIndex);     // 3
+    m_vecIndicesTriangles.push_back(m_unIndex);     // 3
+    m_vecIndicesTriangles.push_back(m_unIndex-1u);  // 2
+    m_vecIndicesTriangles.push_back(m_unIndex+1u);  // 4
+    m_unIndex += 2u;
+    
+    m_vecIndicesTriangles.push_back(m_unIndexMax);
+
+    glBindVertexArray(m_unVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStart*sizeof(float),
+                                     m_vecVertices.size()*sizeof(float),
+                                     &(m_vecVertices.front()));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStart*sizeof(float),
+                                     m_vecColours.size()*sizeof(float),
+                                     &(m_vecColours.front()));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    
+    m_unIndexStart += m_vecVertices.size();
+    
+    m_vecColours.clear();
+    m_vecVertices.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -61,10 +61,10 @@ static sf::Window g_Window;                             ///< Main window
 typedef sf::RenderWindow WindowHandleType;
 
 // Constants
-const std::uint16_t GRAPHICS_WIDTH_DEFAULT = 1440u;    ///< Default x-resolution
-const std::uint16_t GRAPHICS_HEIGHT_DEFAULT = 900u;    ///< Default y-resolution
+const std::uint16_t GRAPHICS_WIDTH_DEFAULT = 1440u;     ///< Default x-resolution
+const std::uint16_t GRAPHICS_HEIGHT_DEFAULT = 900u;     ///< Default y-resolution
 
-const std::uint16_t GRAPHICS_SIZE_OF_INDEX_BUFFER = 10000; ///< Size of VBOs/VAOs/IBOs to keep all data
+const GLuint GRAPHICS_SIZE_OF_INDEX_BUFFER = 1000000u;  ///< Size of VBOs/VAOs/IBOs to keep all data
 
 const double GRAPHICS_PX_PER_METER = 2.0;               ///< Default resolution, pixel per meter
 const double GRAPHICS_FOV_DEFAULT = 45.0;               ///< Default fov
@@ -84,8 +84,6 @@ const double GRAPHICS_FAR_DEFAULT = 1000.0;             ///< Default max depth
 const double GRAPHICS_DEPTH_DEFAULT = -15.0;            ///< Default drawing depth
 
 const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn-objects
-
-const double GRAPHICS_RAD2DEG = 180.0 / M_PI;           ///< Converts radiant to degree values
 
 /// specifies the type of line to be drawn
 enum class LineType
@@ -196,8 +194,6 @@ class CGraphics
         void circle(const Vector2d&, const double&) const;
         void dot(const Vector2d&) const;
         void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
-        void dots(CCircularBuffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
-        void filledRect(const Vector2d&, const Vector2d&) const;
         void polyline(const VertexListType&, const LineType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void rect(const Vector2d&, const Vector2d&) const;
         void showVec(const Vector2d&, const Vector2d&) const;
@@ -205,6 +201,8 @@ class CGraphics
         //--- Methods --------------------------------------------------------//
         void addVertex(const Vector2d&);
         void addVertex(const double&, const double&);
+        void dots(CCircularBuffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0));
+        void filledRect(const Vector2d&, const Vector2d&);
         void setDepth(const double&);
         void beginLine(const LineType&, const double&);
         void endLine();
@@ -219,24 +217,31 @@ class CGraphics
         WindowHandleType*   m_pWindow;              ///< Pointer to main window
         
         ViewPort            m_ViewPort;             ///< Viewport for graphics
+        glm::mat4           m_matTransform;         ///< Final transformation matrix
         glm::mat4           m_matProjection;        ///< Projection matrix
+        glm::mat4           m_matRotate;            ///< Rotation matrix
+        glm::mat4           m_matScale;             ///< Scale matrix
 
-        GLushort            m_unIndex = 0u;         ///< Pointer to current index in buffer
-        GLushort            m_unIndexStart = 0u;    ///< Index to start next primitive with
-        GLushort            m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
+        GLuint              m_unIndex = 0u;         ///< Pointer to current index in buffer
+        GLuint              m_unIndexStart = 0u;    ///< Index to start next primitive with
+        GLuint              m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
 
         GLuint              m_unIBOLines = 0u;      ///< Index buffer object for lines
         GLuint              m_unIBOLineLoop = 0u;   ///< Index buffer object for looped lines
         GLuint              m_unIBOLineStrip = 0u;  ///< Index buffer object for line strips
+        GLuint              m_unIBOPoints = 0u;     ///< Index buffer object for points
+        GLuint              m_unIBOTriangles = 0u;  ///< Index buffer object for triangles
         GLuint              m_unVAO = 0u;           ///< Vertex array object
         GLuint              m_unVBO = 0u;           ///< Vertex buffer (one for all single lines)
         GLuint              m_unVBOColours = 0u;    ///< Colour buffer (one for all vertex colours)
         
-        std::vector<GLushort>   m_vecIndicesLines;      ///< Indices for single lines within buffers
-        std::vector<GLushort>   m_vecIndicesLineLoop;   ///< Indices for looped lines within buffers
-        std::vector<GLushort>   m_vecIndicesLineStrip;  ///< Indices for line strips within buffers
+        std::vector<GLuint>   m_vecIndicesLines;        ///< Indices for single lines within buffers
+        std::vector<GLuint>   m_vecIndicesLineLoop;     ///< Indices for looped lines within buffers
+        std::vector<GLuint>   m_vecIndicesLineStrip;    ///< Indices for line strips within buffers
+        std::vector<GLuint>   m_vecIndicesPoints;       ///< Indices for points within buffers
+        std::vector<GLuint>   m_vecIndicesTriangles;    ///< Indices for triangles within buffers
         
-        std::vector<GLushort>*  m_pvecIndex = nullptr;  ///< Pointer to current index buffer
+        std::vector<GLuint>*  m_pvecIndex = nullptr;    ///< Pointer to current index buffer
         
         std::vector<GLfloat>    m_vecColours;           ///< Temporary buffer for colours of vertices
         std::vector<GLfloat>    m_vecVertices;          ///< Temporary buffer for vertices
@@ -255,8 +260,6 @@ class CGraphics
         int                 m_nVideoFlags;          ///< videoflags like fullscreen, resolution
         unsigned short      m_unWidthScr;           ///< Screen width
         unsigned short      m_unHeightScr;          ///< Screen height
-
-//         std::list<Vector2d>     m_VertList;     ///< list, containing the coordinates of vertices
 
         //--- Constructor/destructor [private] -------------------------------//
         CGraphics();

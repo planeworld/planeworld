@@ -75,10 +75,10 @@ void CVisualsManager::drawBoundingBoxes() const
                         m_pCamera->getBoundingBox().getUpperRight()-
                         m_pCamera->getCenter());
         m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
-        m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
-                              m_pCamera->getCenter(),
-                              m_pCamera->getBoundingBox().getUpperRight()-
-                              m_pCamera->getCenter());
+//         m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
+//                               m_pCamera->getCenter(),
+//                               m_pCamera->getBoundingBox().getUpperRight()-
+//                               m_pCamera->getCenter());
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
         m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
                           m_pCamera->getBoundingCircleRadius());

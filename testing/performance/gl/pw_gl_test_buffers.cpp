@@ -809,7 +809,7 @@ int main(int argc, char *argv[])
         Graphics.getViewPort().left, Graphics.getViewPort().right,
         Graphics.getViewPort().bottom, Graphics.getViewPort().top,
         Graphics.getViewPort().near, Graphics.getViewPort().far);
-    GLint nProjMatLoc=glGetUniformLocation(ShaderProgram.getID(), "matProjection");
+    GLint nProjMatLoc=glGetUniformLocation(ShaderProgram.getID(), "matTransform");
     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(matProjection));
     
     INFO_MSG("GL Test", "Starting test with one VBO per shape")
