@@ -61,7 +61,6 @@ class CCircle : public IShape
         const ShapeType     getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
-        void copy(const IShape* const);
         void transform(const double&, const Vector2d&);
         void setCenter(const Vector2d&);
         void setCenter(const double&, const double&);
@@ -72,6 +71,8 @@ class CCircle : public IShape
         //--- Protected methods ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
+        
+        void myCopy(const IShape* const);
 
         //--- Protected variables --------------------------------------------//
         Vector2d            m_vecCenter;                    ///< Center of circle

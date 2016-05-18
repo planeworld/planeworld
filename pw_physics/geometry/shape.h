@@ -65,19 +65,22 @@ class IShape : public IUniqueIDUser
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        IShape() : m_nDepthlayers(SHAPE_DEPTH_ALL){}        ///< Constructor
-        virtual ~IShape(){}                                 ///< Destructor
+        IShape();           ///< Constructor
+        virtual ~IShape(){} ///< Destructor
         
         //--- Constant Methods -----------------------------------------------//
         virtual IShape*             clone() const = 0;
-        int                         getDepths() const;
+
         virtual const ShapeType     getShapeType() const;
+        int                         getDepths() const;
                 
         //--- Methods --------------------------------------------------------//
-        virtual void copy(const IShape* const) = 0; ///< Copies shape attributes
         virtual void transform(const double&, const Vector2d&) = 0;  ///< Transforms the shape
 
         CBoundingBox&   getBoundingBox();
+        
+        void            associateMass(const double&);
+        void            copy(const IShape* const);
         void            setDepths(const int&);
         void            unsetDepths(const int&);
         
@@ -87,12 +90,17 @@ class IShape : public IUniqueIDUser
 
     protected:
 
-        virtual std::istream& myStreamIn (std::istream& _is){return _is;}
+        virtual std::istream& myStreamIn (std::istream&) = 0;
         virtual std::ostream& myStreamOut(std::ostream&) = 0;
+        
+        virtual void myCopy(const IShape* const) = 0; ///< Copies shape attributes
       
         //--- Protected Variables --------------------------------------------//
-        CBoundingBox    m_AABB;                             ///< Bounding box of shape
-        int             m_nDepthlayers;                     ///< Depths in which shape exists
+        CBoundingBox    m_AABB;                     ///< Bounding box of shape
+        bool            m_bIsValid = false;         ///< Indicates if shape data is valid
+        double          m_fAssociatedMass = 1.0;    ///< Mass of object, associated to this shape
+        int             m_nDepthlayers;             ///< Depths in which shape exists
+        Vector2d        m_vecCentroid;              ///< Centroid of this shape
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -134,6 +142,19 @@ inline CBoundingBox& IShape::getBoundingBox()
 {
     METHOD_ENTRY("IShape::getBoundingBox")
     return m_AABB;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief  Associates given mass of object to this shape
+///
+/// \param _fM Mass associated to this shape
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IShape::associateMass(const double& _fM)
+{
+    METHOD_ENTRY("IShape::associateMass")
+    m_fAssociatedMass = _fM;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

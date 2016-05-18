@@ -32,6 +32,39 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Constructor
+///
+////////////////////////////////////////////////////////////////////////////////
+IShape::IShape() : m_nDepthlayers(SHAPE_DEPTH_ALL)
+{
+    METHOD_ENTRY("IShape::IShape")
+    CTOR_CALL("IShape::IShape")
+    
+    m_vecCentroid.setZero();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies shape information and calls copy for inherited shapes
+///
+/// \param _pShape Shape to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void IShape::copy(const IShape* const _pShape)
+{
+    METHOD_ENTRY("IShape::copy")
+
+    m_AABB            = _pShape->m_AABB;
+    m_bIsValid        = _pShape->m_bIsValid;
+    m_fAssociatedMass = _pShape->m_fAssociatedMass;
+    m_nDepthlayers    = _pShape->m_nDepthlayers;
+    m_vecCentroid     = _pShape->m_vecCentroid;
+    
+    this->myCopy(_pShape);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Input stream for game state information
 ///
 /// \param _is  Source stream
@@ -51,7 +84,11 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
     _is >> _pShape->m_UID;
     
     _is >> _pShape->m_AABB;
+    _is >> _pShape->m_bIsValid;
+    _is >> _pShape->m_fAssociatedMass;
     _is >> _pShape->m_nDepthlayers;
+    _is >> _pShape->m_vecCentroid[0];
+    _is >> _pShape->m_vecCentroid[1];
     
     return _pShape->myStreamIn(_is);
 }
@@ -82,7 +119,11 @@ std::ostream& operator<<(std::ostream& _os, IShape* const _pShape)
     _os << _pShape->m_UID << std::endl;
     
     _os << _pShape->m_AABB << std::endl;
+    _os << _pShape->m_bIsValid << std::endl;
+    _os << _pShape->m_fAssociatedMass << std::endl;
     _os << _pShape->m_nDepthlayers << std::endl;
+    _os << _pShape->m_vecCentroid[0] << " " << 
+           _pShape->m_vecCentroid[1] << std::endl;
     
     return _pShape->myStreamOut(_os);
 }

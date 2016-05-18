@@ -46,35 +46,9 @@ CPolyLine* CPolyLine::clone() const
     CPolyLine* pClone = new CPolyLine();
     MEM_ALLOC("CPolyLine")
     
-    pClone->m_LineType     = m_LineType;
-    pClone->m_VertList     = m_VertList;
-    pClone->m_VertList0    = m_VertList0;
-    pClone->m_AABB         = m_AABB;
-    pClone->m_nDepthlayers = m_nDepthlayers;
+    pClone->copy(this);
     
     return pClone;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Copies information of a given polyline
-///
-/// This method does not create a new polyline, use clone in that case!
-///
-/// \param _pShape Shape to be copied
-///
-////////////////////////////////////////////////////////////////////////////////
-void CPolyLine::copy(const IShape* const _pShape)
-{
-    METHOD_ENTRY("CPolyLine::copy");
-    
-    const CPolyLine* const pPolyLine = static_cast<const CPolyLine* const>(_pShape);
-        
-    m_LineType     = pPolyLine->m_LineType;
-    m_VertList     = pPolyLine->m_VertList;
-    m_VertList0    = pPolyLine->m_VertList0;
-    m_AABB         = pPolyLine->m_AABB;
-    m_nDepthlayers = pPolyLine->m_nDepthlayers;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -186,4 +160,24 @@ std::ostream& CPolyLine::myStreamOut(std::ostream& _os)
     }
     
     return _os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies information of a given polyline
+///
+/// This method does not create a new polyline, use clone in that case!
+///
+/// \param _pShape Shape to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPolyLine::myCopy(const IShape* const _pShape)
+{
+    METHOD_ENTRY("CPolyLine::myCopy");
+    
+    const CPolyLine* const pPolyLine = static_cast<const CPolyLine* const>(_pShape);
+        
+    m_LineType     = pPolyLine->m_LineType;
+    m_VertList     = pPolyLine->m_VertList;
+    m_VertList0    = pPolyLine->m_VertList0;
 }

@@ -86,61 +86,9 @@ CPlanet* CPlanet::clone() const
     CPlanet* pClone = new CPlanet();
     MEM_ALLOC("CPlanet")
         
-    pClone->m_PlanetType        = m_PlanetType;
-    pClone->m_fAngle            = m_fAngle;
-    pClone->m_fGroundResolution = m_fGroundResolution;
-    pClone->m_fHeightMax        = m_fHeightMax;
-    pClone->m_fRadius           = m_fRadius;
-    pClone->m_fSeaLevel         = m_fSeaLevel;
-    pClone->m_fSmoothness       = m_fSmoothness;
-    pClone->m_nSeed             = m_nSeed;
-    pClone->m_vecCenter         = m_vecCenter;
-    pClone->m_vecCenter0        = m_vecCenter0;
-    pClone->m_fLacHlTr          = m_fLacHlTr;
-    pClone->m_fLacMtTr          = m_fLacMtTr;
-    pClone->m_fLacTrTp          = m_fLacTrTp;
-    pClone->m_nOctHlTr          = m_nOctHlTr;
-    pClone->m_nOctMtTr          = m_nOctMtTr;
-    pClone->m_nOctTrTp          = m_nOctTrTp;
-    pClone->m_AABB              = m_AABB;
-    pClone->m_nDepthlayers      = m_nDepthlayers;
+    pClone->copy(this);
     
     return pClone;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Copies information of a given planet shape.
-///
-/// This method does not create a new planet shape, use clone in that case!
-///
-/// \param _pShape Shape to be copied
-///
-////////////////////////////////////////////////////////////////////////////////
-void CPlanet::copy(const IShape* const _pShape)
-{
-    METHOD_ENTRY("CPlanet::copy");
-    
-    const CPlanet* const pPlanet = static_cast<const CPlanet* const>(_pShape);
-        
-    m_PlanetType        = pPlanet->m_PlanetType;
-    m_fAngle            = pPlanet->m_fAngle;
-    m_fGroundResolution = pPlanet->m_fGroundResolution;
-    m_fHeightMax        = pPlanet->m_fHeightMax;
-    m_fRadius           = pPlanet->m_fRadius;
-    m_fSeaLevel         = pPlanet->m_fSeaLevel;
-    m_fSmoothness       = pPlanet->m_fSmoothness;
-    m_nSeed             = pPlanet->m_nSeed;
-    m_vecCenter         = pPlanet->m_vecCenter;
-    m_vecCenter0        = pPlanet->m_vecCenter0;
-    m_fLacHlTr          = pPlanet->m_fLacHlTr;
-    m_fLacMtTr          = pPlanet->m_fLacMtTr;
-    m_fLacTrTp          = pPlanet->m_fLacTrTp;
-    m_nOctHlTr          = pPlanet->m_nOctHlTr;
-    m_nOctMtTr          = pPlanet->m_nOctMtTr;
-    m_nOctTrTp          = pPlanet->m_nOctTrTp;
-    m_AABB              = pPlanet->m_AABB;
-    m_nDepthlayers      = pPlanet->m_nDepthlayers;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -331,6 +279,39 @@ std::ostream& CPlanet::myStreamOut(std::ostream& _os)
     _os << m_nOctTrTp << std::endl;
     
     return _os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies information of a given planet shape.
+///
+/// This method does not create a new planet shape, use clone in that case!
+///
+/// \param _pShape Shape to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanet::myCopy(const IShape* const _pShape)
+{
+    METHOD_ENTRY("CPlanet::myCopy");
+    
+    const CPlanet* const pPlanet = static_cast<const CPlanet* const>(_pShape);
+        
+    m_PlanetType        = pPlanet->m_PlanetType;
+    m_fAngle            = pPlanet->m_fAngle;
+    m_fGroundResolution = pPlanet->m_fGroundResolution;
+    m_fHeightMax        = pPlanet->m_fHeightMax;
+    m_fRadius           = pPlanet->m_fRadius;
+    m_fSeaLevel         = pPlanet->m_fSeaLevel;
+    m_fSmoothness       = pPlanet->m_fSmoothness;
+    m_nSeed             = pPlanet->m_nSeed;
+    m_vecCenter         = pPlanet->m_vecCenter;
+    m_vecCenter0        = pPlanet->m_vecCenter0;
+    m_fLacHlTr          = pPlanet->m_fLacHlTr;
+    m_fLacMtTr          = pPlanet->m_fLacMtTr;
+    m_fLacTrTp          = pPlanet->m_fLacTrTp;
+    m_nOctHlTr          = pPlanet->m_nOctHlTr;
+    m_nOctMtTr          = pPlanet->m_nOctMtTr;
+    m_nOctTrTp          = pPlanet->m_nOctTrTp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

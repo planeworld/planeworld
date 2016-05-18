@@ -92,8 +92,6 @@ class CPlanet : public IShape
         const ShapeType                     getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
-        void copy(const IShape* const);
-        
         void initTerrain();
         
         void setPlanetType(const PlanetType&);
@@ -114,9 +112,11 @@ class CPlanet : public IShape
                         
     protected:
         
-        void                myInitTerrain();
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
+        
+        void                myInitTerrain();
+        void                myCopy(const IShape* const);
         
         PlanetType          m_PlanetType;               ///< Identifies type of planet
 

@@ -63,7 +63,6 @@ class CPolyLine : public IShape
         //--- Methods --------------------------------------------------------//
         void addVertex(const Vector2d&);
         void addVertex(const double&, const double&);
-        void copy(const IShape* const);
         void finish();
         void transform(const double&, const Vector2d&);
         
@@ -75,6 +74,8 @@ class CPolyLine : public IShape
         //--- Protected methods ----------------------------------------------//
         std::istream&           myStreamIn(std::istream&);
         std::ostream&           myStreamOut(std::ostream&);
+        
+        void myCopy(const IShape* const);
 
         //--- Protected variables --------------------------------------------//
         LineType                m_LineType;     ///< Type of polyline

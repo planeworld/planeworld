@@ -71,8 +71,6 @@ class CTerrain : public IShape
         const double                    snapToTerrainGrid(const double&) const;
 
         //--- Methods --------------------------------------------------------//
-        void copy(const IShape* const);
-        
         void init();
         
         void setCenter(const Vector2d&);
@@ -91,6 +89,8 @@ class CTerrain : public IShape
         //--- Protected methods ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
+        
+        void myCopy(const IShape* const);
 
         //--- Protected variables --------------------------------------------//
         std::vector<double> m_Cache;                    ///< Cached surface of terrain
