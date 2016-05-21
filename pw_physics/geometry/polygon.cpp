@@ -80,35 +80,67 @@ void CPolygon::addVertex(const double& _fX, const double& _fY)
     m_VertList0.push_back(Vector2d(_fX, _fY));
     m_VertList.push_back(Vector2d(_fX, _fY));
     
-    // Calculate COM, shape no longer valid
-    // COM is average of all line segments
+    // Shape is no longer valid
+    // Recalculate accordant parameters
     m_vecCentroid.setZero();
     m_fArea = 0.0;
     
     auto nSize        = m_VertList0.size();
     auto fLengthTotal = 0.0;
     auto fLength      = 0.0;
-    for (auto i=1u; i<nSize; ++i)
+    switch (m_PolygonType)
     {
-        fLength        = (m_VertList0[i]-m_VertList0[i-1u]).norm();
-        m_vecCentroid += (m_VertList0[i]+m_VertList0[i-1u])*0.5*fLength;
-        m_fArea       += (m_VertList0[i-1u][0]*m_VertList0[i][1]) -
-                         (m_VertList0[i-1u][1]*m_VertList0[i][0]);   
-        fLengthTotal  += fLength;
+        case PolygonType::LINE_LOOP:
+            for (auto i=1u; i<nSize; ++i)
+            {
+                fLength        = (m_VertList0[i]-m_VertList0[i-1u]).norm();
+                m_vecCentroid += (m_VertList0[i]+m_VertList0[i-1u])*0.5*fLength;
+                fLengthTotal  += fLength;
+            }
+            fLength = (m_VertList0[nSize-1]-m_VertList0[0]).norm();
+            m_vecCentroid += (m_VertList0[nSize-1]+m_VertList0[0])*0.5*fLength;
+            fLengthTotal  += fLength;
+            m_vecCentroid /= fLengthTotal;
+            break;
+        case PolygonType::LINE_SINGLE:
+        case PolygonType::LINE_STRIP:
+            for (auto i=1u; i<nSize; ++i)
+            {
+                fLength        = (m_VertList0[i]-m_VertList0[i-1u]).norm();
+                m_vecCentroid += (m_VertList0[i]+m_VertList0[i-1u])*0.5*fLength;
+                fLengthTotal  += fLength;
+            }
+            m_vecCentroid /= fLengthTotal;
+            break;
+        case PolygonType::FILLED:
+            for (auto i=1u; i<nSize; ++i)
+            {
+                m_fArea += (m_VertList0[i-1u][0]*m_VertList0[i][1]) -
+                           (m_VertList0[i-1u][1]*m_VertList0[i][0]);
+            }
+            m_fArea += (m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
+                       (m_VertList0[nSize-1][1]*m_VertList0[0][0]);
+            m_fArea *= 0.5;
+            
+            for (auto i=1u; i<nSize; ++i)
+            {
+                m_vecCentroid[0] += (m_VertList0[i-1u][0] + m_VertList0[i][0]) *
+                                    ((m_VertList0[i-1u][0]*m_VertList0[i][1]) -
+                                     (m_VertList0[i-1u][1]*m_VertList0[i][0]));
+                m_vecCentroid[1] += (m_VertList0[i-1u][1] + m_VertList0[i][1]) *
+                                    ((m_VertList0[i-1u][0]*m_VertList0[i][1]) -
+                                     (m_VertList0[i-1u][1]*m_VertList0[i][0]));
+            }
+            m_vecCentroid[0] += (m_VertList0[nSize-1][0] + m_VertList0[0][0]) *
+                                ((m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
+                                 (m_VertList0[nSize-1][1]*m_VertList0[0][0]));
+            m_vecCentroid[1] += (m_VertList0[nSize-1][1] + m_VertList0[0][1]) *
+                                ((m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
+                                 (m_VertList0[nSize-1][1]*m_VertList0[0][0]));
+            m_vecCentroid = 1.0/(6.0*m_fArea) * m_vecCentroid;
+            break;
     }
-    if (m_PolygonType == PolygonType::LINE_LOOP)
-    {
-        fLength = (m_VertList0[nSize-1]-m_VertList0[0]).norm();
-        m_vecCentroid += (m_VertList0[nSize-1]+m_VertList0[0])*0.5*fLength;
-        m_fArea       += (m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
-                         (m_VertList0[nSize-1][1]*m_VertList0[0][0]);
-        fLengthTotal  += fLength;
-        m_vecCentroid /= fLengthTotal;
-    }
-    else
-        m_vecCentroid /= fLengthTotal;
     
-    m_fArea   *= 0.5;
     m_bIsValid = false;
 }
 
