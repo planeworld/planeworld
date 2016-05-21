@@ -16,33 +16,33 @@
         inertia="10000000.0"
     />
     <shape
-        type="shape_polyline"
+        type="shape_polygon"
         line_type="loop"
         points=" -2.7, -27.0;
                   2.7, -27.0;
                   2.7,  18.0;
                   0.0,  27.0;
                  -2.7,  18.0">
-        <visuals type="shape_visuals_polyline"/>
+        <visuals type="shape_visuals_polygon"/>
     </shape>
     <shape
-        type="shape_polyline"
+        type="shape_polygon"
         line_type="loop"
         points=" -2.7, -27.0;
                  -5.7, -27.0;
                  -5.7,   0.0;
                  -4.2,   4.0;
                  -2.7,   0.0;">
-        <visuals type="shape_visuals_polyline"/>
+        <visuals type="shape_visuals_polygon"/>
     </shape>
     <shape
-        type="shape_polyline"
+        type="shape_polygon"
         line_type="loop"
         points="  2.7, -27.0;
                   5.7, -27.0;
                   5.7,   0.0;
                   4.2,   4.0;
                   2.7,   0.0;">
-        <visuals type="shape_visuals_polyline"/>
+        <visuals type="shape_visuals_polygon"/>
     </shape>    
 </object>

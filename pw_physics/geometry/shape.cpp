@@ -56,7 +56,8 @@ void IShape::copy(const IShape* const _pShape)
 
     m_AABB            = _pShape->m_AABB;
     m_bIsValid        = _pShape->m_bIsValid;
-    m_fAssociatedMass = _pShape->m_fAssociatedMass;
+    m_fMass = _pShape->m_fMass;
+    m_fArea           = _pShape->m_fArea;
     m_nDepthlayers    = _pShape->m_nDepthlayers;
     m_vecCentroid     = _pShape->m_vecCentroid;
     
@@ -85,7 +86,8 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
     
     _is >> _pShape->m_AABB;
     _is >> _pShape->m_bIsValid;
-    _is >> _pShape->m_fAssociatedMass;
+    _is >> _pShape->m_fMass;
+    _is >> _pShape->m_fArea;
     _is >> _pShape->m_nDepthlayers;
     _is >> _pShape->m_vecCentroid[0];
     _is >> _pShape->m_vecCentroid[1];
@@ -120,7 +122,8 @@ std::ostream& operator<<(std::ostream& _os, IShape* const _pShape)
     
     _os << _pShape->m_AABB << std::endl;
     _os << _pShape->m_bIsValid << std::endl;
-    _os << _pShape->m_fAssociatedMass << std::endl;
+    _os << _pShape->m_fMass << std::endl;
+    _os << _pShape->m_fArea << std::endl;
     _os << _pShape->m_nDepthlayers << std::endl;
     _os << _pShape->m_vecCentroid[0] << " " << 
            _pShape->m_vecCentroid[1] << std::endl;

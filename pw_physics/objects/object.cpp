@@ -178,6 +178,8 @@ void IObject::init()
     m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue()+m_vecCOM);
     m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue()+m_vecCOM);
     this->setCell(m_vecCell);
+    
+    m_Geometry.update();
 
     m_pIntPos->init(m_KinematicsState.getLocalOrigin());
     m_pIntVel->init(m_KinematicsState.getLocalVelocity());

@@ -41,6 +41,7 @@ CCircle::CCircle() : m_fAngle(0.0),m_fRadius(1.0)
     CTOR_CALL ("CCircle::CCircle");
     
     m_vecCenter0.setZero();
+    m_vecCenter.setZero();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,6 +95,69 @@ void CCircle::transform( const double& _fAngle, const Vector2d& _vecV )
     // Update bounding box
     m_AABB.setLowerLeft( m_vecCenter - Vector2d(m_fRadius,m_fRadius));
     m_AABB.setUpperRight(m_vecCenter + Vector2d(m_fRadius,m_fRadius));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines the center of the circle
+///
+/// \param _vecC Center of the circle
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::setCenter(const Vector2d& _vecC)
+{
+    METHOD_ENTRY("CCircle::setCenter")
+
+    m_vecCenter0 = _vecC;
+    m_vecCenter = _vecC;
+    
+    // Calculate COM, shape no longer valid
+    m_vecCentroid = m_vecCenter0;
+    m_fArea = M_PI * m_fRadius * m_fRadius;
+    m_bIsValid = false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines the center of the circle
+///
+/// \param _fX Center-x of the circle
+/// \param _fY Center-y of the circle
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::setCenter(const double& _fX, const double& _fY)
+{
+    METHOD_ENTRY("CCircle::setCenter")
+
+    m_vecCenter0[0] = _fX;
+    m_vecCenter0[1] = _fY;
+
+    m_vecCenter[0] = _fX;
+    m_vecCenter[1] = _fY;
+    
+    // Calculate COM, shape no longer valid
+    m_vecCentroid = m_vecCenter0;
+    m_fArea = M_PI * m_fRadius * m_fRadius;  
+    m_bIsValid = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines the center of the circle
+///
+/// \param _fRadius Radius of the circle
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::setRadius(const double& _fRadius)
+{
+    METHOD_ENTRY("CCircle::setRadius")
+
+    m_fRadius = _fRadius;
+    
+    // Changed COM, shape no longer valid
+    m_vecCentroid = m_vecCenter0;
+    m_bIsValid = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

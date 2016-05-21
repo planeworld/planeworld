@@ -72,7 +72,7 @@ void CSpringVisuals::draw(const CCamera* const _pCamera) const
     Vector2d vec21 = vec2 - vec1;
     Vector2d vecOrth = Vector2d(-vec21[1], vec21[0]).normalized()*2.0;
 
-    m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_STRIP, -15.0);
+    m_Graphics.beginLine(PolygonType::LINE_STRIP, -15.0);
     m_Graphics.addVertex(vec1);
 
     m_Graphics.addVertex(vec1+vec21*0.1);

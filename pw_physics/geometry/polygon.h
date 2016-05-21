@@ -20,16 +20,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       polyline.h
-/// \brief      Prototype of class "CPolyLine"
+/// \file       polygon.h
+/// \brief      Prototype of class "CPolygon"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2009-10-18
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef POLYLINE_H
-#define POLYLINE_H
+#ifndef POLYGON_H
+#define POLYGON_H
 
 //--- Standard header --------------------------------------------------------//
 
@@ -44,29 +44,28 @@
 /// \brief Class representing connected lines
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CPolyLine : public IShape
+class CPolygon : public IShape
 {
     
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        CPolyLine() : m_LineType(LineType::GRAPHICS_LINETYPE_STRIP){}
-        virtual ~CPolyLine(){};
+        CPolygon() : m_PolygonType(PolygonType::LINE_STRIP){}
+        virtual ~CPolygon(){};
         
         //--- Constant Methods -----------------------------------------------//
-        CPolyLine*              clone() const;
+        CPolygon*              clone() const;
         
-        const LineType&         getLineType() const;
+        const PolygonType&      getPolygonType() const;
         const ShapeType         getShapeType() const;
         const VertexListType&   getVertices() const;
 
         //--- Methods --------------------------------------------------------//
         void addVertex(const Vector2d&);
         void addVertex(const double&, const double&);
-        void finish();
         void transform(const double&, const Vector2d&);
         
-        void setLineType(const LineType&);
+        void setPolygonType(const PolygonType&);
 
 
     protected:
@@ -78,7 +77,7 @@ class CPolyLine : public IShape
         void myCopy(const IShape* const);
 
         //--- Protected variables --------------------------------------------//
-        LineType                m_LineType;     ///< Type of polyline
+        PolygonType             m_PolygonType;  ///< Type of polygon
         VertexListType          m_VertList;     ///< List of vertices
         VertexListType          m_VertList0;    ///< List of vertices
 
@@ -91,10 +90,10 @@ class CPolyLine : public IShape
 /// \brief Get the linetype
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const LineType& CPolyLine::getLineType() const
+inline const PolygonType& CPolygon::getPolygonType() const
 {
-    METHOD_ENTRY("CPolyLine::getLineType()");
-    return m_LineType;
+    METHOD_ENTRY("CPolygon::getPolygonType()");
+    return m_PolygonType;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,9 +101,9 @@ inline const LineType& CPolyLine::getLineType() const
 /// \brief Get pointer on array of vertices
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const VertexListType& CPolyLine::getVertices() const
+inline const VertexListType& CPolygon::getVertices() const
 {
-    METHOD_ENTRY("CPolyLine::getVertices");
+    METHOD_ENTRY("CPolygon::getVertices");
     return m_VertList;
 }
 
@@ -115,55 +114,24 @@ inline const VertexListType& CPolyLine::getVertices() const
 /// \return Type of shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeType CPolyLine::getShapeType() const
+inline const ShapeType CPolygon::getShapeType() const
 {
-    METHOD_ENTRY("CPolyLine::getShapeType")
-    return ShapeType::SHAPE_POLYLINE;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Adds a vertex to the current list of vertices
-///
-/// \param _vecV Vertex to be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CPolyLine::addVertex(const Vector2d& _vecV)
-{
-    METHOD_ENTRY("CPolyLine::addVertex");
-
-    m_VertList0.push_back(_vecV);
-    m_VertList.push_back(_vecV);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Adds a vertex to the current list of vertices
-///
-/// \param _fX Vertex x-coordinate to be added to list
-/// \param _fY Vertex y-coordinate to be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CPolyLine::addVertex(const double& _fX, const double& _fY)
-{
-    METHOD_ENTRY("CPolyLine::addVertex");
-
-    m_VertList0.push_back(Vector2d(_fX, _fY));
-    m_VertList.push_back(Vector2d(_fX, _fY));
+    METHOD_ENTRY("CPolygon::getShapeType")
+    return ShapeType::SHAPE_POLYGON;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Set the linetype
 ///
-/// \param _LT LineType
+/// \param _LT PolygonType
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CPolyLine::setLineType(const LineType& _LT)
+inline void CPolygon::setPolygonType(const PolygonType& _LT)
 {
-    METHOD_ENTRY("CPolyLine::setLineType(const LineType&)");
+    METHOD_ENTRY("CPolygon::setPolygonType(const PolygonType&)");
 
-    m_LineType = _LT;
+    m_PolygonType = _LT;
 }
 
 #endif

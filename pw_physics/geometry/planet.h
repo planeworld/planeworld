@@ -322,39 +322,6 @@ inline void CPlanet::setPlanetType(const PlanetType& _PlanetType)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Defines the center of the planet
-///
-/// \param _vecC Center of the planet
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPlanet::setCenter(const Vector2d& _vecC)
-{
-    METHOD_ENTRY("CPlanet::setCenter")
-
-    m_vecCenter0 = _vecC;
-    m_vecCenter = _vecC;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Defines the center of the planet
-///
-/// \param _fX Center-x of the planet
-/// \param _fY Center-y of the planet
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPlanet::setCenter(const double& _fX, const double& _fY)
-{
-    METHOD_ENTRY("CPlanet::setCenter")
-
-    m_vecCenter0[0] = _fX;
-    m_vecCenter0[1] = _fY;
-    m_vecCenter[0]  = _fX;
-    m_vecCenter[1]  = _fY;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Sets the ground resolution of the terrain
 ///
 /// The ground resolution defines the length of a minimum segment between two

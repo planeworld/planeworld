@@ -57,6 +57,7 @@ class CGeometry
 
         //--- Constant methods -----------------------------------------------//
         CGeometry*                clone() const;
+        const Vector2d&           getCOM() const;
         const DBShapesType* const getShapes() const;
         
         //--- Methods --------------------------------------------------------//
@@ -81,10 +82,24 @@ class CGeometry
         //-- Variables [protected] -------------------------------------------//
         CBoundingBox    m_AABB;       ///< Bounding box
         DBShapesType*   m_pShapes;    ///< Double buffered shapes
+        Vector2d        m_vecCOM;     ///< Center of mass
         
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return center of mass of the geometry
+///
+/// \return Center of mass
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2d& CGeometry::getCOM() const
+{
+    METHOD_ENTRY("CGeometry::getCOM")
+    return m_vecCOM;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

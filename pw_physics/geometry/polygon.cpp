@@ -20,35 +20,96 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       polyline.cpp
-/// \brief      Implementation of class "CPolyLine"
+/// \file       polygon.cpp
+/// \brief      Implementation of class "CPolygon"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2009-10-18
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "polyline.h"
+#include "polygon.h"
 
 #include <type_traits>
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Clones polyline
+/// \brief Clones polygon
 ///
-/// \return Pointer to cloned polyline
+/// \return Pointer to cloned polygon
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CPolyLine* CPolyLine::clone() const
+CPolygon* CPolygon::clone() const
 {
-    METHOD_ENTRY("CPolyLine::clone")
+    METHOD_ENTRY("CPolygon::clone")
     
-    CPolyLine* pClone = new CPolyLine();
-    MEM_ALLOC("CPolyLine")
+    CPolygon* pClone = new CPolygon();
+    MEM_ALLOC("CPolygon")
     
     pClone->copy(this);
     
     return pClone;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Adds a vertex to the current list of vertices
+///
+/// \param _vecV Vertex to be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPolygon::addVertex(const Vector2d& _vecV)
+{
+    METHOD_ENTRY("CPolygon::addVertex");
+
+    this->addVertex(_vecV[0], _vecV[1]);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Adds a vertex to the current list of vertices
+///
+/// \param _fX Vertex x-coordinate to be added to list
+/// \param _fY Vertex y-coordinate to be added to list
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPolygon::addVertex(const double& _fX, const double& _fY)
+{
+    METHOD_ENTRY("CPolygon::addVertex");
+
+    m_VertList0.push_back(Vector2d(_fX, _fY));
+    m_VertList.push_back(Vector2d(_fX, _fY));
+    
+    // Calculate COM, shape no longer valid
+    // COM is average of all line segments
+    m_vecCentroid.setZero();
+    m_fArea = 0.0;
+    
+    auto nSize        = m_VertList0.size();
+    auto fLengthTotal = 0.0;
+    auto fLength      = 0.0;
+    for (auto i=1u; i<nSize; ++i)
+    {
+        fLength        = (m_VertList0[i]-m_VertList0[i-1u]).norm();
+        m_vecCentroid += (m_VertList0[i]+m_VertList0[i-1u])*0.5*fLength;
+        m_fArea       += (m_VertList0[i-1u][0]*m_VertList0[i][1]) -
+                         (m_VertList0[i-1u][1]*m_VertList0[i][0]);   
+        fLengthTotal  += fLength;
+    }
+    if (m_PolygonType == PolygonType::LINE_LOOP)
+    {
+        fLength = (m_VertList0[nSize-1]-m_VertList0[0]).norm();
+        m_vecCentroid += (m_VertList0[nSize-1]+m_VertList0[0])*0.5*fLength;
+        m_fArea       += (m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
+                         (m_VertList0[nSize-1][1]*m_VertList0[0][0]);
+        fLengthTotal  += fLength;
+        m_vecCentroid /= fLengthTotal;
+    }
+    else
+        m_vecCentroid /= fLengthTotal;
+    
+    m_fArea   *= 0.5;
+    m_bIsValid = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,9 +120,9 @@ CPolyLine* CPolyLine::clone() const
 /// \param _vecV Translation vector
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPolyLine::transform(const double& _fAngle, const Vector2d& _vecV)
+void CPolygon::transform(const double& _fAngle, const Vector2d& _vecV)
 {
-    METHOD_ENTRY("CPolyLine::transform(const double&, const Vector2d&)");
+    METHOD_ENTRY("CPolygon::transform(const double&, const Vector2d&)");
 
     Rotation2Dd Rotation(_fAngle);
 
@@ -95,9 +156,9 @@ void CPolyLine::transform(const double& _fAngle, const Vector2d& _vecV)
 /// \return Remaining stream with game state information
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::istream& CPolyLine::myStreamIn(std::istream& _is)
+std::istream& CPolygon::myStreamIn(std::istream& _is)
 {
-    METHOD_ENTRY("CPolyLine::myStreamIn")
+    METHOD_ENTRY("CPolygon::myStreamIn")
     
     std::string strTmp;
     _is >> strTmp;
@@ -105,9 +166,9 @@ std::istream& CPolyLine::myStreamIn(std::istream& _is)
     m_VertList.clear();
     m_VertList0.clear();
     
-    // Cast streamable basetype to strongly typed enum LineType
-    std::underlying_type<LineType>::type nLinetype;
-    _is >> nLinetype; m_LineType = static_cast<LineType>(nLinetype);
+    // Cast streamable basetype to strongly typed enum PolygonType
+    std::underlying_type<PolygonType>::type nLinetype;
+    _is >> nLinetype; m_PolygonType = static_cast<PolygonType>(nLinetype);
     
     VertexListType::size_type nSize;
     _is >> nSize;
@@ -134,18 +195,18 @@ std::istream& CPolyLine::myStreamIn(std::istream& _is)
 ///
 /// \param _os  Source stream
 ///
-/// \return Stream with game state information of CPolyLine instance
+/// \return Stream with game state information of CPolygon instance
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream& CPolyLine::myStreamOut(std::ostream& _os)
+std::ostream& CPolygon::myStreamOut(std::ostream& _os)
 {
-    METHOD_ENTRY("CPolyLine::myStreamOut")
+    METHOD_ENTRY("CPolygon::myStreamOut")
 
-    _os << "Polyline:" << std::endl;
+    _os << "Polygon:" << std::endl;
     
-    // Cast strongly typed enum LineType to streamable base type
-    auto nLineType = static_cast<std::underlying_type<LineType>::type>(m_LineType);
-    _os << nLineType << std::endl;
+    // Cast strongly typed enum PolygonType to streamable base type
+    auto nPolygonType = static_cast<std::underlying_type<PolygonType>::type>(m_PolygonType);
+    _os << nPolygonType << std::endl;
     
     _os << m_VertList.size() << std::endl;
     for (const auto ci : m_VertList)
@@ -164,20 +225,20 @@ std::ostream& CPolyLine::myStreamOut(std::ostream& _os)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Copies information of a given polyline
+/// \brief Copies information of a given polygon
 ///
-/// This method does not create a new polyline, use clone in that case!
+/// This method does not create a new polygon, use clone in that case!
 ///
 /// \param _pShape Shape to be copied
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CPolyLine::myCopy(const IShape* const _pShape)
+void CPolygon::myCopy(const IShape* const _pShape)
 {
-    METHOD_ENTRY("CPolyLine::myCopy");
+    METHOD_ENTRY("CPolygon::myCopy");
     
-    const CPolyLine* const pPolyLine = static_cast<const CPolyLine* const>(_pShape);
+    const CPolygon* const pPolygon = static_cast<const CPolygon* const>(_pShape);
         
-    m_LineType     = pPolyLine->m_LineType;
-    m_VertList     = pPolyLine->m_VertList;
-    m_VertList0    = pPolyLine->m_VertList0;
+    m_PolygonType     = pPolygon->m_PolygonType;
+    m_VertList     = pPolygon->m_VertList;
+    m_VertList0    = pPolygon->m_VertList0;
 }

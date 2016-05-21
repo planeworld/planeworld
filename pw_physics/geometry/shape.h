@@ -50,7 +50,7 @@ enum class ShapeType
     SHAPE_NONE,
     SHAPE_CIRCLE,
     SHAPE_PLANET,
-    SHAPE_POLYLINE,
+    SHAPE_POLYGON,
     SHAPE_TERRAIN
 };
 
@@ -70,16 +70,21 @@ class IShape : public IUniqueIDUser
         
         //--- Constant Methods -----------------------------------------------//
         virtual IShape*             clone() const = 0;
-
         virtual const ShapeType     getShapeType() const;
+
+        double                      getArea() const;
+        const Vector2d&             getCentroid() const;
         int                         getDepths() const;
+        double                      getMass() const;
+        bool                        isValid() const;
                 
         //--- Methods --------------------------------------------------------//
         virtual void transform(const double&, const Vector2d&) = 0;  ///< Transforms the shape
 
         CBoundingBox&   getBoundingBox();
+        bool&           isValid();
         
-        void            associateMass(const double&);
+        void            setMass(const double&);
         void            copy(const IShape* const);
         void            setDepths(const int&);
         void            unsetDepths(const int&);
@@ -98,12 +103,45 @@ class IShape : public IUniqueIDUser
         //--- Protected Variables --------------------------------------------//
         CBoundingBox    m_AABB;                     ///< Bounding box of shape
         bool            m_bIsValid = false;         ///< Indicates if shape data is valid
-        double          m_fAssociatedMass = 1.0;    ///< Mass of object, associated to this shape
+        double          m_fMass = 1.0;              ///< Mass of object part, associated to this shape
+        double          m_fArea = 0.0;              ///< Area this shape covers
         int             m_nDepthlayers;             ///< Depths in which shape exists
         Vector2d        m_vecCentroid;              ///< Centroid of this shape
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns area covered by this shape
+///
+/// The area is need e.g. when automatically calculating the centroid of a
+/// polygon.
+///
+/// \return Area covered by this shape
+///
+////////////////////////////////////////////////////////////////////////////////
+inline double IShape::getArea() const
+{
+    METHOD_ENTRY("IShape::getArea")
+    return m_fArea;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns centroid, which is the geometric center of the shape
+///
+/// The geometric center (centroid) equals the center of mass for a constant
+/// density i.e. a homogeneous mass distribution.
+///
+/// \return Centroid of the shape
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2d& IShape::getCentroid() const
+{
+    METHOD_ENTRY("IShape::getCentroid")
+    return m_vecCentroid;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -120,6 +158,35 @@ inline int IShape::getDepths() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns mass
+///
+/// \return Mass
+///
+////////////////////////////////////////////////////////////////////////////////
+inline double IShape::getMass() const
+{
+    METHOD_ENTRY("IShape::getMass")
+    return m_fMass;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Indicates if shape is still valid.
+///
+/// Validity might be changed by changing geometry or center of shape, since
+/// recalculation of center of mass is neccessary.
+///
+/// \return Valid?
+///
+////////////////////////////////////////////////////////////////////////////////
+inline bool IShape::isValid() const
+{
+    METHOD_ENTRY("IShape::isValid")
+    return m_bIsValid;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Get the shape type
 ///
 /// \return Type of shape
@@ -129,6 +196,23 @@ inline const ShapeType IShape::getShapeType() const
 {
     METHOD_ENTRY("IShape::getShapeType")
     return ShapeType::SHAPE_NONE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief (In)Validate state from outside
+///
+/// Validity might be changed by changing geometry or center of shape, since
+/// recalculation of center of mass is neccessary. If done, states can be
+/// reset to valid
+///
+/// \return Valid?
+///
+////////////////////////////////////////////////////////////////////////////////
+inline bool& IShape::isValid()
+{
+    METHOD_ENTRY("IShape::isValid")
+    return m_bIsValid;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,10 +235,10 @@ inline CBoundingBox& IShape::getBoundingBox()
 /// \param _fM Mass associated to this shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IShape::associateMass(const double& _fM)
+inline void IShape::setMass(const double& _fM)
 {
-    METHOD_ENTRY("IShape::associateMass")
-    m_fAssociatedMass = _fM;
+    METHOD_ENTRY("IShape::setMass")
+    m_fMass = _fM;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -32,7 +32,7 @@
 
 #include "circle.h"
 #include "planet.h"
-#include "polyline.h"
+#include "polygon.h"
 #include "terrain.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -168,9 +168,9 @@ std::istream& operator>>(std::istream& _is, CDoubleBufferedShape& _DBS)
             MEM_ALLOC("IShape")
             MEM_ALLOC("IShape")
             break;
-        case ShapeType::SHAPE_POLYLINE:
-            _DBS.m_pShapeBuf = new CPolyLine;
-            _DBS.m_pShapeCur = new CPolyLine;
+        case ShapeType::SHAPE_POLYGON:
+            _DBS.m_pShapeBuf = new CPolygon;
+            _DBS.m_pShapeCur = new CPolygon;
             MEM_ALLOC("IShape")
             MEM_ALLOC("IShape")
             break;

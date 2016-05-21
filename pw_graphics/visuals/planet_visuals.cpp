@@ -71,7 +71,7 @@ IVisuals* CPlanetVisuals::clone(CDoubleBufferedShape* const _pShape) const
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CPlanetVisuals::draw(CCamera* const _pCamera,
-                          const IObject* const _pObject) const
+                          IObject* const _pObject) const
 {
     METHOD_ENTRY("CPlanetVisuals::draw")
 
@@ -93,7 +93,7 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         Vector2d    vecEx(1.0, 0.0);
         double      fAng;    
         double      fAngEnd;
-        LineType    LineT;
+        PolygonType    LineT;
         
         std::vector<std::vector<Vector2d> > WaterlineList;
         std::vector<Vector2d> WaterlineTmp;
@@ -104,7 +104,7 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         {
             fAng = 0.0;
             fAngEnd = 2.0*M_PI;
-            LineT = LineType::GRAPHICS_LINETYPE_LOOP;
+            LineT = PolygonType::LINE_LOOP;
         }
         else
         {
@@ -114,7 +114,7 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
             
             fAng = fAng0-fAlpha;
             fAngEnd = fAng0+fAlpha;
-            LineT = LineType::GRAPHICS_LINETYPE_STRIP;
+            LineT = PolygonType::LINE_STRIP;
         }
         double fInc  = pPlanet->getGroundResolution() / fRad;
         
@@ -228,9 +228,9 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         m_Graphics.endLine();
         m_Graphics.setWidth(1.0);
         
-        // Determine LineType
-        if ((LineT == LineType::GRAPHICS_LINETYPE_LOOP) && (WaterlineList.size() != 0))
-          LineT = LineType::GRAPHICS_LINETYPE_STRIP;
+        // Determine PolygonType
+        if ((LineT == PolygonType::LINE_LOOP) && (WaterlineList.size() != 0))
+          LineT = PolygonType::LINE_STRIP;
         
         // Push back potential last line segment
         if (WaterlineTmp.size() != 0)
@@ -268,7 +268,7 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
 //                     double fAngGrass02 = fAng-noise::ValueNoise2D(fAng*100000,fAng,1);
 //                     double fHghtGrass01 = fabs(0.5-fTerrainType);
 //                     double fHghtGrass02 = 0.5*fabs(0.5-fTerrainType);
-//                     m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_STRIP,SHAPE_DEFAULT_DEPTH);
+//                     m_Graphics.beginLine(PolygonType::LINE_STRIP,SHAPE_DEFAULT_DEPTH);
 //                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
 //                                                   vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
 //                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),

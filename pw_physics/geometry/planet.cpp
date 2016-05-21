@@ -111,6 +111,49 @@ void CPlanet::initTerrain()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Defines the center of the planet
+///
+/// \param _vecC Center of the planet
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanet::setCenter(const Vector2d& _vecC)
+{
+    METHOD_ENTRY("CPlanet::setCenter")
+
+    m_vecCenter0 = _vecC;
+    m_vecCenter = _vecC;
+    
+    // Calculate COM, shape no longer valid
+    m_vecCentroid = m_vecCenter0;
+    m_fArea = M_PI * m_fRadius * m_fRadius;
+    m_bIsValid = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines the center of the planet
+///
+/// \param _fX Center-x of the planet
+/// \param _fY Center-y of the planet
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanet::setCenter(const double& _fX, const double& _fY)
+{
+    METHOD_ENTRY("CPlanet::setCenter")
+
+    m_vecCenter0[0] = _fX;
+    m_vecCenter0[1] = _fY;
+    m_vecCenter[0]  = _fX;
+    m_vecCenter[1]  = _fY;
+    
+    // Calculate COM, shape no longer valid
+    m_vecCentroid = m_vecCenter0;
+    m_fArea = M_PI * m_fRadius * m_fRadius;
+    m_bIsValid = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Sets sampling of planet surface by given zoom factor
 ///
 /// The frequency is also calibrated for meter as unit. Thus, the initial maximum

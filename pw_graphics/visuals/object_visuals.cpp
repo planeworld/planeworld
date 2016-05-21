@@ -32,7 +32,7 @@
 
 #include "circle_visuals.h"
 #include "planet_visuals.h"
-#include "polyline_visuals.h"
+#include "polygon_visuals.h"
 #include "terrain_visuals.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -119,6 +119,15 @@ void IObjectVisuals::draw(CCamera* const _pCamera) const
                 }
             }
         }
+//         m_Graphics.circle(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM()) - _pCamera->getCenter(), 0.6);
+//         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+//         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(-0.6, 0.0)) -_pCamera->getCenter());
+//         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(+0.6, 0.0)) -_pCamera->getCenter());
+//         m_Graphics.endLine();
+//         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+//         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, -0.6)) -_pCamera->getCenter());
+//         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, +0.6)) -_pCamera->getCenter());
+//         m_Graphics.endLine();
     }
 }
 
@@ -180,10 +189,10 @@ std::istream& operator>>(std::istream& _is, IObjectVisuals* const _pObjVis)
                 _pObjVis->addVisuals(pShpVis);
                 break;
             }
-            case ShapeVisualsType::POLYLINE:
+            case ShapeVisualsType::POLYGON:
             {
-                CPolylineVisuals* pShpVis = new CPolylineVisuals;
-                MEM_ALLOC("CPolylineVisuals")
+                CPolygonVisuals* pShpVis = new CPolygonVisuals;
+                MEM_ALLOC("CPolygonVisuals")
                 _is >> pShpVis;
                 _pObjVis->addVisuals(pShpVis);
                 break;

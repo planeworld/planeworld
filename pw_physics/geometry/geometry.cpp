@@ -42,6 +42,8 @@ CGeometry::CGeometry()
     
     m_pShapes = new std::list<CDoubleBufferedShape*>();
     MEM_ALLOC("ShapeList")
+    
+    m_vecCOM.setZero();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,6 +69,8 @@ CGeometry::CGeometry(const CGeometry& _Geom)
         m_pShapes->push_back((*ci)->clone());
         ++ci;
     }
+    
+    m_vecCOM = _Geom.m_vecCOM;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,6 +136,8 @@ CGeometry& CGeometry::operator=(const CGeometry& _Geom)
         ++ci;
     }
     
+    m_vecCOM = _Geom.m_vecCOM;
+    
     return *this;
 }
 
@@ -157,6 +163,7 @@ CGeometry* CGeometry::clone() const
     }
     
     pClone->m_AABB = m_AABB;
+    pClone->m_vecCOM = m_vecCOM;
     
     return pClone;
 }
@@ -198,10 +205,29 @@ void CGeometry::update()
 {
     METHOD_ENTRY("CGeometry::update")
     
-    for (std::list<CDoubleBufferedShape*>::iterator it  = m_pShapes->begin();
-                                                    it != m_pShapes->end(); ++it)
+    bool m_bShapesValid = true;
+    for (const auto ci : *m_pShapes)
     {
-        (*it)->swapBuffer();
+        m_bShapesValid &= ci->getShapeCur()->isValid();
+    }
+    if (!m_bShapesValid)
+    {
+        m_vecCOM.setZero();
+        
+        for (const auto ci : *m_pShapes)
+        {
+            m_vecCOM += ci->getShapeCur()->getMass() *
+                        ci->getShapeCur()->getCentroid();
+            ci->getShapeCur()->isValid() = true;
+        }
+        if (m_pShapes->size() != 0)
+        {
+            m_vecCOM /= m_pShapes->size();
+        }
+    }
+    for (auto it : *m_pShapes)
+    {
+        it->swapBuffer();
     }
 }
 
@@ -222,6 +248,7 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
     std::string strTmp;
     _is >> strTmp;
     _is >> _Geo.m_AABB;
+    _is >> _Geo.m_vecCOM[0] >> _Geo.m_vecCOM[1];
     
     for (auto it : (*_Geo.m_pShapes))
     {
@@ -243,7 +270,7 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
         _is >> (*pDBShape);
         _Geo.m_pShapes->push_back(pDBShape);
     }
-
+    
     return _is;
 }
 
@@ -263,6 +290,7 @@ std::ostream& operator<<(std::ostream& _os, CGeometry& _Geo)
     
     _os << "Geometry:" << std::endl;
     _os << _Geo.m_AABB << std::endl;
+    _os << _Geo.m_vecCOM << " " << _Geo.m_vecCOM << std::endl;
     _os << _Geo.getShapes()->size() << std::endl;
     for (const auto ci : (*_Geo.m_pShapes))
     {

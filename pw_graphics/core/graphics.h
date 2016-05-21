@@ -79,11 +79,12 @@ const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn
 const double GRAPHICS_RAD2DEG = 180.0 / M_PI;           ///< Converts radiant to degree values
 
 /// specifies the type of line to be drawn
-enum class LineType
+enum class PolygonType
 {
-    GRAPHICS_LINETYPE_SINGLE,
-    GRAPHICS_LINETYPE_LOOP,
-    GRAPHICS_LINETYPE_STRIP
+    FILLED,
+    LINE_SINGLE,
+    LINE_LOOP,
+    LINE_STRIP
 };
 
 /// Type definition for vertex list
@@ -189,7 +190,7 @@ class CGraphics
         void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void dots(CCircularBuffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void filledRect(const Vector2d&, const Vector2d&) const;
-        void polyline(const VertexListType&, const LineType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
+        void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void rect(const Vector2d&, const Vector2d&) const;
         void showVec(const Vector2d&, const Vector2d&) const;
 
@@ -197,7 +198,7 @@ class CGraphics
         void addVertex(const Vector2d&);
         void addVertex(const double&, const double&);
         void setDepth(const double&);
-        void beginLine(const LineType&, const double&);
+        void beginLine(const PolygonType&, const double&);
         void endLine();
 
         

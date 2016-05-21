@@ -600,26 +600,29 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR) const
 /// \brief Draw a polygon line
 ///
 /// \param _Vertices List of vertices
-/// \param _LineType LineType
+/// \param _PolygonType PolygonType
 /// \param _vecOffset Offset for drawing, used e.g. when existing list should
 ///                   be shifted.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::polyline(const VertexListType& _Vertices,
-                         const LineType& _LineType,
+void CGraphics::polygon(const VertexListType& _Vertices,
+                         const PolygonType& _PolygonType,
                          const Vector2d& _vecOffset) const
 {
-    METHOD_ENTRY("CGraphics::polyline")
+    METHOD_ENTRY("CGraphics::polygon")
 
-    switch(_LineType)
+    switch(_PolygonType)
     {
-        case LineType::GRAPHICS_LINETYPE_SINGLE:
+        case PolygonType::FILLED:
+            glBegin(GL_LINE_LOOP);  
+            break;
+        case PolygonType::LINE_SINGLE:
             glBegin(GL_LINES);  
             break;
-        case LineType::GRAPHICS_LINETYPE_LOOP:
+        case PolygonType::LINE_LOOP:
             glBegin(GL_LINE_LOOP);
             break;
-        case LineType::GRAPHICS_LINETYPE_STRIP:
+        case PolygonType::LINE_STRIP:
             glBegin(GL_LINE_STRIP);
             break;
     }
@@ -705,25 +708,28 @@ void CGraphics::showVec(const Vector2d& _vecV, const Vector2d& _vecPos) const
 /// defines if it is a closed line loop, a single line etc. This concept is
 /// directly related to OpenGL-syntax.
 ///
-/// \param _LType Linetype
+/// \param _PType Linetype
 /// \param _fDepth Depth of line
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::beginLine(const LineType& _LType, const double& _fDepth)
+void CGraphics::beginLine(const PolygonType& _PType, const double& _fDepth)
 {
     METHOD_ENTRY("CGraphics::beginLine")
 
     m_fDepth = _fDepth;
 
-    switch(_LType)
+    switch(_PType)
     {
-        case LineType::GRAPHICS_LINETYPE_SINGLE:
-            glBegin(GL_LINES);  
-            break;
-        case LineType::GRAPHICS_LINETYPE_LOOP:
+        case PolygonType::FILLED:
             glBegin(GL_LINE_LOOP);
             break;
-        case LineType::GRAPHICS_LINETYPE_STRIP:
+        case PolygonType::LINE_SINGLE:
+            glBegin(GL_LINES);  
+            break;
+        case PolygonType::LINE_LOOP:
+            glBegin(GL_LINE_LOOP);
+            break;
+        case PolygonType::LINE_STRIP:
             glBegin(GL_LINE_STRIP);
             break;
     }

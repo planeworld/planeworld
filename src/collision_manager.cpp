@@ -158,8 +158,8 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
             case ShapeType::SHAPE_PLANET:
                 this->test(static_cast<CPlanet*>((*ci)->getShapeCur()), static_cast<CPlanet*>((*ci)->getShapeBuf()), _p1, _p2);
                 break;
-            case ShapeType::SHAPE_POLYLINE:
-                this->test(static_cast<CPolyLine*>((*ci)->getShapeCur()), static_cast<CPolyLine*>((*ci)->getShapeBuf()), _p1, _p2);
+            case ShapeType::SHAPE_POLYGON:
+                this->test(static_cast<CPolygon*>((*ci)->getShapeCur()), static_cast<CPolygon*>((*ci)->getShapeBuf()), _p1, _p2);
                 break;
             case ShapeType::SHAPE_NONE:
                 break;
@@ -287,15 +287,15 @@ void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CBody* _p1, CDebris* 
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Tests polyline shape against debris
+/// \brief Tests polygon shape against debris
 ///
-/// \param _pP1 Polyline shape, time t1
-/// \param _pP0 Polyline shape, time t0
+/// \param _pP1 Polygon shape, time t1
+/// \param _pP0 Polygon shape, time t0
 /// \param _p1 Object 1
 /// \param _p2 Debris
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CPolyLine* _pP1, CPolyLine* _pP0, CBody* _p1, CDebris* _p2)
+void CCollisionManager::test(CPolygon* _pP1, CPolygon* _pP0, CBody* _p1, CDebris* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -351,7 +351,7 @@ void CCollisionManager::test(CPolyLine* _pP1, CPolyLine* _pP0, CBody* _p1, CDebr
                     
                 ++ciP01; ++ciP00; ++ciP11; ++ciP10;
             }
-            if (_pP1->getLineType() == LineType::GRAPHICS_LINETYPE_LOOP)
+            if (_pP1->getPolygonType() == PolygonType::LINE_LOOP)
             {
                 ciP11 = _pP1->getVertices().begin();
                 ciP10 = _pP1->getVertices().begin();
@@ -562,15 +562,15 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                         case ShapeType::SHAPE_PLANET:
 //                             this->getSurfaceOfInterest();
                             break;
-                        case ShapeType::SHAPE_POLYLINE:
+                        case ShapeType::SHAPE_POLYGON:
                             CCircle* pCirc1;
                             CCircle* pCirc0;
-                            CPolyLine* pPoly1;
-                            CPolyLine* pPoly0;
+                            CPolygon* pPoly1;
+                            CPolygon* pPoly0;
                             pCirc1 = static_cast<CCircle*>((*ci)->getShapeCur());
                             pCirc0 = static_cast<CCircle*>((*ci)->getShapeBuf());
-                            pPoly1 = static_cast<CPolyLine*>((*cj)->getShapeCur());
-                            pPoly0 = static_cast<CPolyLine*>((*cj)->getShapeBuf());
+                            pPoly1 = static_cast<CPolygon*>((*cj)->getShapeCur());
+                            pPoly0 = static_cast<CPolygon*>((*cj)->getShapeBuf());
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
                         case ShapeType::SHAPE_TERRAIN:
@@ -585,26 +585,26 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                         case ShapeType::SHAPE_CIRCLE:
 //                             CCircle* pCirc1;
 //                             CCircle* pCirc0;
-//                             CPolyLine* pPoly1;
-//                             CPolyLine* pPoly0;
+//                             CPolygon* pPoly1;
+//                             CPolygon* pPoly0;
 //                             pCirc1 = static_cast<CCircle*>((*cj));
 //                             pCirc0 = static_cast<CCircle*>((*cj0));
-//                             pPoly1 = static_cast<CPolyLine*>((*ci));
-//                             pPoly0 = static_cast<CPolyLine*>((*ci0));
+//                             pPoly1 = static_cast<CPolygon*>((*ci));
+//                             pPoly0 = static_cast<CPolygon*>((*ci0));
 //                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
                         case ShapeType::SHAPE_PLANET:
 //                             this->getSurfaceOfInterest();
                             break;
-                        case ShapeType::SHAPE_POLYLINE:
-//                             CPolyLine* pPolyA1;
-//                             CPolyLine* pPolyB1;
-//                             CPolyLine* pPolyA0;
-//                             CPolyLine* pPolyB0;
-//                             pPolyA1 = static_cast<CPolyLine*>((*ci));
-//                             pPolyB1 = static_cast<CPolyLine*>((*cj));
-//                             pPolyA0 = static_cast<CPolyLine*>((*ci0));
-//                             pPolyB0 = static_cast<CPolyLine*>((*cj0));
+                        case ShapeType::SHAPE_POLYGON:
+//                             CPolygon* pPolyA1;
+//                             CPolygon* pPolyB1;
+//                             CPolygon* pPolyA0;
+//                             CPolygon* pPolyB0;
+//                             pPolyA1 = static_cast<CPolygon*>((*ci));
+//                             pPolyB1 = static_cast<CPolygon*>((*cj));
+//                             pPolyA0 = static_cast<CPolygon*>((*ci0));
+//                             pPolyB0 = static_cast<CPolygon*>((*cj0));
 //                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
 //                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
@@ -614,19 +614,19 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                             break;
                     }
                     break;
-                case ShapeType::SHAPE_POLYLINE:
+                case ShapeType::SHAPE_POLYGON:
                     switch((*cj)->getShapeCur()->getShapeType())
                     {
                         case ShapeType::SHAPE_CIRCLE:
                         {
                             CCircle* pCirc1;
                             CCircle* pCirc0;
-                            CPolyLine* pPoly1;
-                            CPolyLine* pPoly0;
+                            CPolygon* pPoly1;
+                            CPolygon* pPoly0;
                             pCirc1 = static_cast<CCircle*>((*cj)->getShapeCur());
                             pCirc0 = static_cast<CCircle*>((*cj)->getShapeBuf());
-                            pPoly1 = static_cast<CPolyLine*>((*ci)->getShapeCur());
-                            pPoly0 = static_cast<CPolyLine*>((*ci)->getShapeBuf());
+                            pPoly1 = static_cast<CPolygon*>((*ci)->getShapeCur());
+                            pPoly0 = static_cast<CPolygon*>((*ci)->getShapeBuf());
                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
                         }
@@ -634,25 +634,25 @@ void CCollisionManager::test(CBody* _p1, CBody* _p2)
                         {
 //                             CPlanet* pPlanet1;
 //                             CPlanet* pPlanet0;
-//                             CPolyLine* pPoly1;
-//                             CPolyLine* pPoly0;
+//                             CPolygon* pPoly1;
+//                             CPolygon* pPoly0;
 //                             pPlanet1 = static_cast<CPlanet*>((*cj));
 //                             pPlanet0 = static_cast<CPlanet*>((*cj0));
-//                             pPoly1 = static_cast<CPolyLine*>((*ci));
-//                             pPoly0 = static_cast<CPolyLine*>((*ci0));
+//                             pPoly1 = static_cast<CPolygon*>((*ci));
+//                             pPoly0 = static_cast<CPolygon*>((*ci0));
 //                             this->getSurfaceOfInterest();
                             break;
                         }
-                        case ShapeType::SHAPE_POLYLINE:
+                        case ShapeType::SHAPE_POLYGON:
                         {
-                            CPolyLine* pPolyA1;
-                            CPolyLine* pPolyB1;
-                            CPolyLine* pPolyA0;
-                            CPolyLine* pPolyB0;
-                            pPolyA1 = static_cast<CPolyLine*>((*ci)->getShapeCur());
-                            pPolyB1 = static_cast<CPolyLine*>((*cj)->getShapeCur());
-                            pPolyA0 = static_cast<CPolyLine*>((*ci)->getShapeBuf());
-                            pPolyB0 = static_cast<CPolyLine*>((*cj)->getShapeBuf());
+                            CPolygon* pPolyA1;
+                            CPolygon* pPolyB1;
+                            CPolygon* pPolyA0;
+                            CPolygon* pPolyB0;
+                            pPolyA1 = static_cast<CPolygon*>((*ci)->getShapeCur());
+                            pPolyB1 = static_cast<CPolygon*>((*cj)->getShapeCur());
+                            pPolyA0 = static_cast<CPolygon*>((*ci)->getShapeBuf());
+                            pPolyB0 = static_cast<CPolygon*>((*cj)->getShapeBuf());
                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
@@ -701,14 +701,14 @@ void CCollisionManager::getSurfaceOfInterest()
 //         Vector2d    vecEx(1.0, 0.0);
 //         double      fAng;    
 //         double      fAngEnd;
-//         LineType    LineT;
+//         PolygonType    LineT;
 // 
 //         double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecDist.norm()));
 //         if (isnan(fAlpha))
 //         {
 //             fAng = 0.0;
 //             fAngEnd = 2.0*M_PI;
-//             LineT = GRAPHICS_LINETYPE_LOOP;
+//             LineT = LINE_LOOP;
 //         }
 //         else
 //         {
@@ -718,7 +718,7 @@ void CCollisionManager::getSurfaceOfInterest()
 //             
 //             fAng = fAng0-fAlpha;
 //             fAngEnd = fAng0+fAlpha;
-//             LineT = GRAPHICS_LINETYPE_STRIP;
+//             LineT = LINE_STRIP;
 //         }
 //         
 //         if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
@@ -818,15 +818,15 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Tests two shapes (circles and polylines) for collision
+/// \brief Tests two shapes (circles and polygons) for collision
 ///
-/// The vertices of polylines must be tested separately to ensure collsion
-/// detection at polyline angles < 90 degree.
+/// The vertices of polygons must be tested separately to ensure collsion
+/// detection at polygon angles < 90 degree.
 ///
 /// \param _pA1 Circle, time t1
 /// \param _pA0 Circle, time t0
-/// \param _pB1 Polyline, time t1
-/// \param _pB0 Polyline, time t0
+/// \param _pB1 Polygon, time t1
+/// \param _pB0 Polygon, time t0
 /// \param _p1 Object 1
 /// \param _p2 Object 2
 ///
@@ -834,7 +834,7 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
-                             CPolyLine* _pB1, CPolyLine* _pB0,
+                             CPolygon* _pB1, CPolygon* _pB0,
                              CBody* _p1, CBody* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
@@ -890,7 +890,7 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
         ++ciB01;
         ++ciB11;
     }
-    if (_pB0->getLineType() == LineType::GRAPHICS_LINETYPE_LOOP)
+    if (_pB0->getPolygonType() == PolygonType::LINE_LOOP)
     {
         ciB11 = _pB1->getVertices().begin();
         ciB10 = _pB0->getVertices().begin();
@@ -939,24 +939,24 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Tests two shapes (polylines) for collision
+/// \brief Tests two shapes (polygons) for collision
 ///
-/// This method test all vertices of one polyline against the lines between
-/// vertices of the other polyline. Therefore, it has to be called twice with
+/// This method test all vertices of one polygon against the lines between
+/// vertices of the other polygon. Therefore, it has to be called twice with
 /// parameters being swapped to cover all collisions.
 ///
-/// \param _pA1 PolyLine 1, time t1
-/// \param _pA0 PolyLine 1, time t0
-/// \param _pB1 PolyLine 2, time t1
-/// \param _pB0 PolyLine 2, time t0
+/// \param _pA1 Polygon 1, time t1
+/// \param _pA0 Polygon 1, time t0
+/// \param _pB1 Polygon 2, time t1
+/// \param _pB0 Polygon 2, time t0
 /// \param _p1 Object 1
 /// \param _p2 Object 2
 ///
 /// \return collision?
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
-                             CPolyLine* _pB1, CPolyLine* _pB0,
+void CCollisionManager::test(CPolygon* _pA1, CPolygon* _pA0,
+                             CPolygon* _pB1, CPolygon* _pB0,
                              CBody* _p1, CBody* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
@@ -990,11 +990,11 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
             
             ++ciB1; ++ciB0;
             
-            /// \todo LineType Loop!
+            /// \todo PolygonType Loop!
         }
         ++ciA01; ++ciA00; ++ciA11; ++ciA10;
     }
-    if (_pA1->getLineType() == LineType::GRAPHICS_LINETYPE_LOOP)
+    if (_pA1->getPolygonType() == PolygonType::LINE_LOOP)
     {
         ciA11 = _pA1->getVertices().begin();
         ciA10 = _pA1->getVertices().begin();
@@ -1013,7 +1013,7 @@ void CCollisionManager::test(CPolyLine* _pA1, CPolyLine* _pA0,
             
             ++ciB1, ++ciB0;
             
-            /// \todo LineType Loop!
+            /// \todo PolygonType Loop!
         }
     }
     

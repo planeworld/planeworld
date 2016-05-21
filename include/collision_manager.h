@@ -38,7 +38,7 @@
 #include "circle.h"
 #include "debris.h"
 #include "planet.h"
-#include "polyline.h"
+#include "polygon.h"
 #include "terrain.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,11 +77,11 @@ class CCollisionManager
         void    test(CBody*, CDebris*);
         void    test(CCircle*, CCircle*, CBody*, CDebris*);
         void    test(CPlanet*, CPlanet*, CBody*, CDebris*);
-        void    test(CPolyLine*, CPolyLine*, CBody*, CDebris*);
+        void    test(CPolygon*, CPolygon*, CBody*, CDebris*);
         void    test(CTerrain*, CDebris*);
         void    test(CCircle*, CCircle*, CCircle*, CCircle*, CBody*, CBody*);
-        void    test(CCircle*, CCircle*, CPolyLine*, CPolyLine*, CBody*, CBody*);
-        void    test(CPolyLine*, CPolyLine*, CPolyLine*, CPolyLine*, CBody*, CBody*);
+        void    test(CCircle*, CCircle*, CPolygon*, CPolygon*, CBody*, CBody*);
+        void    test(CPolygon*, CPolygon*, CPolygon*, CPolygon*, CBody*, CBody*);
         double              testLineCircle(const Vector2d&, const Vector2d&,
                                            const Vector2d&, const Vector2d&,
                                            const CCircle* const,  const CCircle* const);
