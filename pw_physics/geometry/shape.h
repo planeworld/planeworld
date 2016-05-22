@@ -72,10 +72,11 @@ class IShape : public IUniqueIDUser
         virtual IShape*             clone() const = 0;
         virtual const ShapeType     getShapeType() const;
 
-        double                      getArea() const;
+        const double&               getArea() const;
         const Vector2d&             getCentroid() const;
         int                         getDepths() const;
-        double                      getMass() const;
+        const double&               getInertia() const;
+        const double&               getMass() const;
         bool                        isValid() const;
                 
         //--- Methods --------------------------------------------------------//
@@ -102,9 +103,10 @@ class IShape : public IUniqueIDUser
       
         //--- Protected Variables --------------------------------------------//
         CBoundingBox    m_AABB;                     ///< Bounding box of shape
-        bool            m_bIsValid = false;         ///< Indicates if shape data is valid
-        double          m_fMass = 1.0;              ///< Mass of object part, associated to this shape
-        double          m_fArea = 0.0;              ///< Area this shape covers
+        bool            m_bIsValid;                 ///< Indicates if shape data is valid
+        double          m_fArea;                    ///< Area this shape covers
+        double          m_fInertia;                 ///< Inertia of this shape
+        double          m_fMass;                    ///< Mass of object part, associated to this shape
         int             m_nDepthlayers;             ///< Depths in which shape exists
         Vector2d        m_vecCentroid;              ///< Centroid of this shape
 };
@@ -121,7 +123,7 @@ class IShape : public IUniqueIDUser
 /// \return Area covered by this shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline double IShape::getArea() const
+inline const double& IShape::getArea() const
 {
     METHOD_ENTRY("IShape::getArea")
     return m_fArea;
@@ -158,12 +160,25 @@ inline int IShape::getDepths() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns inertia
+///
+/// \return Inertia
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& IShape::getInertia() const
+{
+    METHOD_ENTRY("IShape::getInertia")
+    return m_fInertia;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns mass
 ///
 /// \return Mass
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline double IShape::getMass() const
+inline const double& IShape::getMass() const
 {
     METHOD_ENTRY("IShape::getMass")
     return m_fMass;

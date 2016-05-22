@@ -290,6 +290,8 @@ void CPlanetVisuals::draw(CCamera* const _pCamera,
         
         pPlanet->resetSampling();
     }
+    m_Graphics.circle(_pObject->getKinematicsState().getLocalPosition(
+                       pPlanet->getCentroid()) -_pCamera->getCenter(), 0.2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

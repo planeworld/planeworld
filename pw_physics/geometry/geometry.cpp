@@ -35,7 +35,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CGeometry::CGeometry()
+CGeometry::CGeometry() : m_fInertia(0.0),
+                         m_fMass(1.0)
 {
     METHOD_ENTRY("CGeometry::CGeometry")
     CTOR_CALL("CGeometry::CGeometry")
@@ -70,7 +71,9 @@ CGeometry::CGeometry(const CGeometry& _Geom)
         ++ci;
     }
     
-    m_vecCOM = _Geom.m_vecCOM;
+    m_vecCOM    = _Geom.m_vecCOM;
+    m_fInertia  = _Geom.m_fInertia;
+    m_fMass     = _Geom.m_fMass;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,7 +139,9 @@ CGeometry& CGeometry::operator=(const CGeometry& _Geom)
         ++ci;
     }
     
-    m_vecCOM = _Geom.m_vecCOM;
+    m_vecCOM    = _Geom.m_vecCOM;
+    m_fInertia  = _Geom.m_fInertia;
+    m_fMass     = _Geom.m_fMass;
     
     return *this;
 }
@@ -164,6 +169,8 @@ CGeometry* CGeometry::clone() const
     
     pClone->m_AABB = m_AABB;
     pClone->m_vecCOM = m_vecCOM;
+    pClone->m_fInertia = m_fInertia;
+    pClone->m_fMass = m_fMass;
     
     return pClone;
 }
@@ -205,25 +212,37 @@ void CGeometry::update()
 {
     METHOD_ENTRY("CGeometry::update")
     
-    bool m_bShapesValid = true;
+    // Should be global to catch additions or setting of whole shapes
+    bool bShapesValid = true;
     for (const auto ci : *m_pShapes)
     {
-        m_bShapesValid &= ci->getShapeCur()->isValid();
+        bShapesValid &= ci->getShapeCur()->isValid();
     }
-    if (!m_bShapesValid)
+    if (!bShapesValid)
     {
         m_vecCOM.setZero();
-        
+        m_fMass = 0.0;
         for (const auto ci : *m_pShapes)
         {
             m_vecCOM += ci->getShapeCur()->getMass() *
                         ci->getShapeCur()->getCentroid();
+            m_fMass  += ci->getShapeCur()->getMass();
             ci->getShapeCur()->isValid() = true;
         }
         if (m_pShapes->size() != 0)
         {
             m_vecCOM /= m_pShapes->size();
         }
+        
+        m_fInertia = 0.0;
+        for (const auto ci : *m_pShapes)
+        {
+            m_fInertia +=  ci->getShapeCur()->getInertia() + 
+                           ci->getShapeCur()->getMass() *
+                          (ci->getShapeCur()->getCentroid() -
+                           m_vecCOM).squaredNorm();
+        }
+        DOM_VAR(DEBUG_MSG("Geometry", "Inertia: " << m_fInertia))
     }
     for (auto it : *m_pShapes)
     {
@@ -249,6 +268,8 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
     _is >> strTmp;
     _is >> _Geo.m_AABB;
     _is >> _Geo.m_vecCOM[0] >> _Geo.m_vecCOM[1];
+    _is >> _Geo.m_fInertia;
+    _is >> _Geo.m_fMass;
     
     for (auto it : (*_Geo.m_pShapes))
     {
@@ -291,6 +312,8 @@ std::ostream& operator<<(std::ostream& _os, CGeometry& _Geo)
     _os << "Geometry:" << std::endl;
     _os << _Geo.m_AABB << std::endl;
     _os << _Geo.m_vecCOM << " " << _Geo.m_vecCOM << std::endl;
+    _os << _Geo.m_fInertia << std::endl;
+    _os << _Geo.m_fMass << std::endl;
     _os << _Geo.getShapes()->size() << std::endl;
     for (const auto ci : (*_Geo.m_pShapes))
     {

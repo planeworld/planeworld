@@ -67,7 +67,6 @@ class CPolygon : public IShape
         
         void setPolygonType(const PolygonType&);
 
-
     protected:
       
         //--- Protected methods ----------------------------------------------//

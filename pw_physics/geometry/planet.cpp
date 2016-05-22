@@ -105,7 +105,6 @@ CPlanet* CPlanet::clone() const
 void CPlanet::initTerrain()
 {
     METHOD_ENTRY("CPlanet::initTerrain")
-
     this->myInitTerrain();
 }
 
@@ -126,6 +125,7 @@ void CPlanet::setCenter(const Vector2d& _vecC)
     // Calculate COM, shape no longer valid
     m_vecCentroid = m_vecCenter0;
     m_fArea = M_PI * m_fRadius * m_fRadius;
+    m_fInertia = 0.5 * m_fMass * m_fRadius * m_fRadius;
     m_bIsValid = false;
 }
 
@@ -149,6 +149,7 @@ void CPlanet::setCenter(const double& _fX, const double& _fY)
     // Calculate COM, shape no longer valid
     m_vecCentroid = m_vecCenter0;
     m_fArea = M_PI * m_fRadius * m_fRadius;
+    m_fInertia = 0.5 * m_fMass * m_fRadius * m_fRadius;
     m_bIsValid = false;
 }
 

@@ -58,6 +58,8 @@ class CGeometry
         //--- Constant methods -----------------------------------------------//
         CGeometry*                clone() const;
         const Vector2d&           getCOM() const;
+        const double&             getInertia() const;
+        const double&             getMass() const;
         const DBShapesType* const getShapes() const;
         
         //--- Methods --------------------------------------------------------//
@@ -83,6 +85,8 @@ class CGeometry
         CBoundingBox    m_AABB;       ///< Bounding box
         DBShapesType*   m_pShapes;    ///< Double buffered shapes
         Vector2d        m_vecCOM;     ///< Center of mass
+        double          m_fInertia;   ///< Inertia of whole geometry
+        double          m_fMass;      ///< Mass of whole geometry
         
 };
 
@@ -99,6 +103,32 @@ inline const Vector2d& CGeometry::getCOM() const
 {
     METHOD_ENTRY("CGeometry::getCOM")
     return m_vecCOM;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return inertia of the geometry
+///
+/// \return Inertia of the geometry
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CGeometry::getInertia() const
+{
+    METHOD_ENTRY("CGeometry::getInertia")
+    return m_fInertia;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return mass of the geometry
+///
+/// \return Mass of the geometry
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CGeometry::getMass() const
+{
+    METHOD_ENTRY("CGeometry::getMass")
+    return m_fMass;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

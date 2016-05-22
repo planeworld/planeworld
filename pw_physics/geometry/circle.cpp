@@ -114,6 +114,7 @@ void CCircle::setCenter(const Vector2d& _vecC)
     // Calculate COM, shape no longer valid
     m_vecCentroid = m_vecCenter0;
     m_fArea = M_PI * m_fRadius * m_fRadius;
+    m_fInertia = m_fMass * m_fRadius * m_fRadius; // *0.5 for solid disc
     m_bIsValid = false;
 }
 
@@ -138,7 +139,8 @@ void CCircle::setCenter(const double& _fX, const double& _fY)
     
     // Calculate COM, shape no longer valid
     m_vecCentroid = m_vecCenter0;
-    m_fArea = M_PI * m_fRadius * m_fRadius;  
+    m_fArea = M_PI * m_fRadius * m_fRadius;
+    m_fInertia = m_fMass * m_fRadius * m_fRadius; // *0.5 for solid disc
     m_bIsValid = false;
 }
 
@@ -155,8 +157,10 @@ void CCircle::setRadius(const double& _fRadius)
 
     m_fRadius = _fRadius;
     
-    // Changed COM, shape no longer valid
+    // Calculate COM, shape no longer valid
     m_vecCentroid = m_vecCenter0;
+    m_fArea = M_PI * m_fRadius * m_fRadius;
+    m_fInertia = m_fMass * m_fRadius * m_fRadius; // *0.5 for solid disc
     m_bIsValid = false;
 }
 
