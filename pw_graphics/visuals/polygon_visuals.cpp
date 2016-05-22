@@ -96,15 +96,15 @@ void CPolygonVisuals::draw(CCamera* const _pCamera,
     m_Graphics.polygon(pPolygon->getVertices(), pPolygon->getPolygonType(),
                         -_pCamera->getCenter() + 
                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2);
-    m_Graphics.circle(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid()) -_pCamera->getCenter(), 0.2);
-    m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-    m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(-0.2, 0.0)) -_pCamera->getCenter());
-    m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(+0.2, 0.0)) -_pCamera->getCenter());
-    m_Graphics.endLine();
-    m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-    m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(0.0, -0.2)) -_pCamera->getCenter());
-    m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(0.0, +0.2)) -_pCamera->getCenter());
-    m_Graphics.endLine();
+//     m_Graphics.circle(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid()) -_pCamera->getCenter(), 0.2);
+//     m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+//     m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(-0.2, 0.0)) -_pCamera->getCenter());
+//     m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(+0.2, 0.0)) -_pCamera->getCenter());
+//     m_Graphics.endLine();
+//     m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+//     m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(0.0, -0.2)) -_pCamera->getCenter());
+//     m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(0.0, +0.2)) -_pCamera->getCenter());
+//     m_Graphics.endLine();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

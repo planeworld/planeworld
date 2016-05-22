@@ -138,8 +138,8 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
             }
         m_Graphics.endLine();
     }
-    m_Graphics.circle(_pObject->getKinematicsState().getLocalPosition(
-                      static_cast<CCircle*>(m_pRef->getShapeCur())->getCentroid()) -_pCamera->getCenter(), 0.2);
+//     m_Graphics.circle(_pObject->getKinematicsState().getLocalPosition(
+//                       static_cast<CCircle*>(m_pRef->getShapeCur())->getCentroid()) -_pCamera->getCenter(), 0.2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

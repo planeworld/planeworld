@@ -119,15 +119,15 @@ void IObjectVisuals::draw(CCamera* const _pCamera) const
                 }
             }
         }
-        m_Graphics.circle(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM()) - _pCamera->getCenter(), 0.6);
-        m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-        m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(-0.6, 0.0)) -_pCamera->getCenter());
-        m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(+0.6, 0.0)) -_pCamera->getCenter());
-        m_Graphics.endLine();
-        m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-        m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, -0.6)) -_pCamera->getCenter());
-        m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, +0.6)) -_pCamera->getCenter());
-        m_Graphics.endLine();
+//         m_Graphics.circle(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM()) - _pCamera->getCenter(), 0.6);
+//         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+//         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(-0.6, 0.0)) -_pCamera->getCenter());
+//         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(+0.6, 0.0)) -_pCamera->getCenter());
+//         m_Graphics.endLine();
+//         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+//         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, -0.6)) -_pCamera->getCenter());
+//         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, +0.6)) -_pCamera->getCenter());
+//         m_Graphics.endLine();
     }
 }
 
