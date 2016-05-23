@@ -3,7 +3,6 @@
 <object type="rigidbody">
     <core
         name="Jupiter"
-        mass="1.899e27"
         origin_x="778.36e9"
         origin_y="0.0"
         dynamics="true"
@@ -12,6 +11,7 @@
     />
     <shape
         type="shape_planet"
+        mass="1.899e27"
         radius="71492e3"
         height_max="16000.0"
         sea_level="-0.2"

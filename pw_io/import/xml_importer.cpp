@@ -1001,6 +1001,7 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody,
         pCircle->setRadius(_Node.attribute("radius").as_double());
         pCircle->setCenter(_Node.attribute("center_x").as_double(),
                           _Node.attribute("center_y").as_double());
+        pCircle->setMass(checkAttributeDouble(_Node, "mass", pCircle->getMass()));
         
         CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
         MEM_ALLOC("CDoubleBufferedShape")
@@ -1046,6 +1047,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
         CPlanet* pPlanet = new CPlanet;
         MEM_ALLOC("CPlanet")
         
+        pPlanet->setMass(checkAttributeDouble(_Node, "mass", pPlanet->getMass()));
         pPlanet->setRadius(_Node.attribute("radius").as_double());
         pPlanet->setCenter(_Node.attribute("center_x").as_double(),
                           _Node.attribute("center_y").as_double());
@@ -1089,8 +1091,8 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CXMLImporter::createShapePolygon(CBody* const _pBody,
-                                       IObjectVisuals* const _pObjectVisuals,
-                                       const pugi::xml_node& _Node)
+                                      IObjectVisuals* const _pObjectVisuals,
+                                      const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapePolygon")
     
@@ -1099,12 +1101,16 @@ void CXMLImporter::createShapePolygon(CBody* const _pBody,
         CPolygon* pPolygon = new CPolygon;
         MEM_ALLOC("CPolygon")
         
-        if (std::string(_Node.attribute("line_type").as_string()) == "loop")
+        if (std::string(_Node.attribute("polygon_type").as_string()) == "filled")
+            pPolygon->setPolygonType(PolygonType::FILLED);
+        else if (std::string(_Node.attribute("polygon_type").as_string()) == "line_loop")
             pPolygon->setPolygonType(PolygonType::LINE_LOOP);
-        else if (std::string(_Node.attribute("line_type").as_string()) == "strip")
+        else if (std::string(_Node.attribute("polygon_type").as_string()) == "line_strip")
             pPolygon->setPolygonType(PolygonType::LINE_STRIP);
-        else if (std::string(_Node.attribute("line_type").as_string()) == "single")
+        else if (std::string(_Node.attribute("polygon_type").as_string()) == "line_single")
             pPolygon->setPolygonType(PolygonType::LINE_SINGLE);
+        
+        pPolygon->setMass(checkAttributeDouble(_Node, "mass", pPolygon->getMass()));
         
         std::string strPoints = _Node.attribute("points").as_string();
         size_t Pos;
@@ -1176,6 +1182,7 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody,
         CTerrain* pTerrain = new CTerrain;
         MEM_ALLOC("CTerrain")
         
+        pTerrain->setMass(checkAttributeDouble(_Node, "mass", pTerrain->getMass()));
         pTerrain->setWidth (_Node.attribute("width").as_double());
         pTerrain->setCenter(_Node.attribute("center_x").as_double(),
                             _Node.attribute("center_y").as_double());
@@ -1396,7 +1403,6 @@ void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _
             std::pair<IKinematicsStateUser*, std::string>(_pO, strRef));
         
         _pO->setName(checkAttributeString(_Node, "name", _pO->getName()));
-        _pO->setMass(checkAttributeDouble(_Node, "mass", _pO->getMass()));
         
         // Origin might be given with no respect to grid, since user shouldn't have
         // to care unless he really need to place objects with high precision far

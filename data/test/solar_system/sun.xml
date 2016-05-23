@@ -3,7 +3,6 @@
 <object type="rigidbody">
     <core
         name="Sun"
-        mass="1.989e30"
         origin_x="0.0"
         origin_y="0.0"
         dynamics="true"
@@ -11,6 +10,7 @@
     />
     <shape
         type="shape_circle"
+        mass="1.989e30"
         radius="0.6957e9"
         center_x="0.0"
         center_y="0.0">

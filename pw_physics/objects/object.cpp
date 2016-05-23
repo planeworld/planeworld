@@ -38,7 +38,6 @@
 IObject::IObject(): m_bGravitation(true),
                 m_bDynamics(true),
                 m_fTimeFac(1.0),
-                m_fMass(1.0),
                 m_nDepthlayers(SHAPE_DEPTH_ALL)
 {
     METHOD_ENTRY("IObject::IObject")
@@ -318,7 +317,6 @@ std::istream& operator>>(std::istream& _is, IObject* const _pObj)
     _is >> _pObj->m_vecCOM[1];
     _is >> _pObj->m_vecForce[0];
     _is >> _pObj->m_vecForce[1];
-    _is >> _pObj->m_fMass;
     _is >> _pObj->m_nDepthlayers;
     _is >> _pObj->m_pIntPos;
     _is >> _pObj->m_pIntVel;
@@ -367,7 +365,6 @@ std::ostream& operator<<(std::ostream& _os, IObject* const _pObj)
            _pObj->m_vecCOM[1] << std::endl;
     _os << _pObj->m_vecForce[0] << " " <<
            _pObj->m_vecForce[1] << std::endl;
-    _os << _pObj->m_fMass << std::endl;
     _os << _pObj->m_nDepthlayers << std::endl;
     _os << _pObj->m_pIntPos << std::endl;
     _os << _pObj->m_pIntVel << std::endl;

@@ -229,9 +229,9 @@ void CGeometry::update()
             m_fMass  += ci->getShapeCur()->getMass();
             ci->getShapeCur()->isValid() = true;
         }
-        if (m_pShapes->size() != 0)
+        if (m_fMass > 0.0)
         {
-            m_vecCOM /= m_pShapes->size();
+            m_vecCOM /= m_fMass;
         }
         
         m_fInertia = 0.0;

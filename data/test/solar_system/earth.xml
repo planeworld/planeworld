@@ -3,7 +3,6 @@
 <object type="rigidbody">
     <core
         name="Earth"
-        mass="5.974e24"
         origin_x="0.0"
         origin_y="149606378.27e3"
         dynamics="true"
@@ -17,6 +16,7 @@
     />
     <shape
         type="shape_planet"
+        mass="5.974e24"
         radius="6378.16e3"
         height_max="8000.0"
         sea_level="-0.2"

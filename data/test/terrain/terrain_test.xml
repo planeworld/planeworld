@@ -19,13 +19,13 @@
   <object type="rigidbody">
     <core
       name="Terrain"
-      mass="1.0"
       origin_x="0.0"
       origin_y="50.0"
       dynamics="false"
       gravity="false"
     />
     <shape type="shape_terrain"
+      mass="1.0"
       width="3.0e4"
       height_max="100.0"
       ground_resolution="0.8"

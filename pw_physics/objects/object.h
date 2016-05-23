@@ -106,7 +106,6 @@ class IObject : public IUniqueIDUser,
         void                setOrigin(const Vector2d&);
         void                setOrigin(const double&, const double&);
         void                setDepths(const int&);
-        void                setMass(const double&);
         void                setName(const std::string&);
         void                setTimeFac(const double&);
         void                setVelocity(const Vector2d&);
@@ -148,7 +147,6 @@ class IObject : public IUniqueIDUser,
         Vector2d                m_vecCOM;                           ///< Center of mass
         Vector2d                m_vecForce;                         ///< Resulting force applied
         
-        double                  m_fMass;                            ///< Mass of object in kg
         int                     m_nDepthlayers;                     ///< Depths in which shape exists
         
         IIntegrator<Vector2d>*  m_pIntPos;                          ///< Position integrator
@@ -189,7 +187,7 @@ inline void IObject::addAcceleration(const Vector2d& _vecA)
 {
     METHOD_ENTRY("IObject::addAcceleration")
 
-    this->addForce(_vecA*m_fMass, m_pIntPos->getValue()+m_vecCOM);
+    this->addForce(_vecA*m_Geometry.getMass(), m_pIntPos->getValue()+m_vecCOM);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +258,7 @@ inline const bool IObject::getGravitationState() const
 inline const double IObject::getMass() const
 {
     METHOD_ENTRY("IObject::getMass")
-    return (m_fMass);
+    return (m_Geometry.getMass());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -440,20 +438,6 @@ inline void IObject::unsetDepths(const int& _nD)
     METHOD_ENTRY("IObject::unsetDepths")
 
     m_nDepthlayers &= (!_nD);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Set the mass
-///
-/// \param _fMass Mass 
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setMass(const double& _fMass)
-{
-    METHOD_ENTRY("IObject::setMass")
-
-    m_fMass = _fMass;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

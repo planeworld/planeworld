@@ -3,7 +3,6 @@
 <object type="rigidbody">
     <core
         name="Earth"
-        mass="5.974e24"
         origin_x="0.0"
         origin_y="0.0"
         dynamics="true"
@@ -16,6 +15,7 @@
     />
     <shape
         type="shape_planet"
+        mass="5.974e24"
         radius="6378.16e3"
         height_max="8000.0"
         sea_level="-0.2"
@@ -27,14 +27,16 @@
     <!-- Create Launch Pad on Earth -->
     <shape
         type="shape_polygon"
-        line_type="strip"
+        polygon_type="line_strip"
+        mass="100.0"
         points="-1000.0,  6378.16e3;
                  1000.0,  6378.16e3">
         <visuals type="shape_visuals_polygon"/>
     </shape>
     <shape
         type="shape_polygon"
-        line_type="strip"
+        polygon_type="line_strip"
+        mass="1000.0"
         points="-500.0,  6378.16e3;
                 -100.0,  6378.18e3;
                  -10.0,  6378.165e3;

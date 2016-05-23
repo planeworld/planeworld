@@ -81,7 +81,6 @@ IObject* CRigidBody::clone() const
     pClone->m_Geometry     = m_Geometry;
     pClone->m_vecCOM       = m_vecCOM;
     // m_vecForce: No Forces on newly created Rigidbody;
-    pClone->m_fMass        = m_fMass;       
     pClone->m_nDepthlayers = m_nDepthlayers;
     
     if (pClone->m_pIntPos != nullptr)
@@ -201,7 +200,7 @@ void CRigidBody::myDynamics(const double& _fStep)
 
     Vector2d vecAccel = m_vecForce;
     
-    if (m_fMass > 0.0) vecAccel /= m_fMass;
+    if (m_Geometry.getMass() > 0.0) vecAccel /= m_Geometry.getMass();
     
     m_pIntVel->integrate(vecAccel, _fStep*m_fTimeFac);
     m_pIntPos->integrate(m_pIntVel->getValue(),_fStep*m_fTimeFac);

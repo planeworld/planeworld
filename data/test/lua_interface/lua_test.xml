@@ -17,7 +17,6 @@
   <object type="rigidbody">
     <core
         name="Mass"
-        mass="1.0"
         origin_x="0.0"
         origin_y="0.0"
         dynamics="true"
@@ -31,6 +30,7 @@
     />
     <shape
         type="shape_circle"
+        mass="1.0"
         radius="1.0"
         center_x="0.0"
         center_y="0.0">
@@ -40,7 +40,6 @@
   <object type="rigidbody">
     <core
         name="ReferenceMass"
-        mass="1.0"
         origin_x="10.0"
         origin_y="0.0"
         dynamics="true"
@@ -54,6 +53,7 @@
     />
     <shape
         type="shape_circle"
+        mass="1.0"
         radius="1.0"
         center_x="0.0"
         center_y="0.0">

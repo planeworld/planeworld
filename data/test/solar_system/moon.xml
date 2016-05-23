@@ -3,7 +3,6 @@
 <object type="rigidbody">
     <core
         name="Moon"
-        mass="7.349e22"
         origin_x="0.0"
         origin_y="1.4999078e11"
         dynamics="true"
@@ -17,6 +16,7 @@
     />
     <shape
         type="shape_planet"
+        mass="7.349e22"
         radius="1738.0e3"
         height_max="1000.0"
         sea_level="-1.0"
