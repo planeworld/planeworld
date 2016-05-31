@@ -189,6 +189,8 @@ void IObject::init()
     // Center of mass (position vector) is always inside AABB
     m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue());
     m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue());
+    
+    this->transform();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
