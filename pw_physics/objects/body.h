@@ -69,7 +69,6 @@ class CBody : public IObject
         //--- Methods --------------------------------------------------------//
         void setAngle(const double&);
         void setAngleVelocity(const double&);
-        void setInertia(const double&);
 
     protected:
 
@@ -82,8 +81,7 @@ class CBody : public IObject
         std::ostream& myStreamOut(std::ostream&);
 
         //--- Variables [protected] ------------------------------------------//
-        double              m_fInertia;                 ///< The body's inertia
-        double              m_fTorque;                  ///< Resulting torque on body
+        double                  m_fTorque;              ///< Resulting torque on body
         
         IIntegrator<double>*    m_pIntAng;              ///< Angle integrator
         IIntegrator<double>*    m_pIntAngVel;           ///< Angle velocity integrator
@@ -141,7 +139,7 @@ inline const double CBody::getAngleVelocity() const
 inline const double CBody::getInertia() const
 {
     METHOD_ENTRY("CBody::getInertia")
-    return m_fInertia;
+    return m_Geometry.getInertia();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,19 +181,6 @@ inline void CBody::setAngleVelocity(const double& _fV)
     METHOD_ENTRY("CBody::setAngleVelocity")
     m_pIntAngVel->init(_fV);
     m_KinematicsState.setAngleVelocity(_fV);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Set the torque
-///
-/// \param _fInertia Inertia
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CBody::setInertia(const double& _fInertia)
-{
-    METHOD_ENTRY("CBody::setInertia(const double&)");
-    m_fInertia = _fInertia;
 }
 
 #endif

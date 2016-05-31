@@ -50,7 +50,7 @@ class CPolygon : public IShape
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        CPolygon() : m_PolygonType(PolygonType::LINE_STRIP){}
+        CPolygon() : m_PolygonType(PolygonType::FILLED){}
         virtual ~CPolygon(){};
         
         //--- Constant Methods -----------------------------------------------//
@@ -63,7 +63,7 @@ class CPolygon : public IShape
         //--- Methods --------------------------------------------------------//
         void addVertex(const Vector2d&);
         void addVertex(const double&, const double&);
-        void transform(const double&, const Vector2d&);
+        void transform(const double&, const Vector2d&, const Vector2d&);
         
         void setPolygonType(const PolygonType&);
 
@@ -74,6 +74,7 @@ class CPolygon : public IShape
         std::ostream&           myStreamOut(std::ostream&);
         
         void myCopy(const IShape* const);
+        void myUpdateGeometry();
 
         //--- Protected variables --------------------------------------------//
         PolygonType             m_PolygonType;  ///< Type of polygon
@@ -121,16 +122,16 @@ inline const ShapeType CPolygon::getShapeType() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set the linetype
+/// \brief Set the polygon type
 ///
-/// \param _LT PolygonType
+/// \param _PolygonType PolygonType
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CPolygon::setPolygonType(const PolygonType& _LT)
+inline void CPolygon::setPolygonType(const PolygonType& _PolygonType)
 {
     METHOD_ENTRY("CPolygon::setPolygonType(const PolygonType&)");
 
-    m_PolygonType = _LT;
+    m_PolygonType = _PolygonType;
 }
 
 #endif

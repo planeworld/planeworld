@@ -69,6 +69,7 @@ class CGeometry
         void updateBoundingBox(const CBoundingBox&);
         void updateBoundingBox(const Vector2d&);
         void setShapes(std::list<CDoubleBufferedShape*>* const);
+        void transform();
         void update();
         
         CGeometry& operator=(const CGeometry&);

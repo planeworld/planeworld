@@ -62,7 +62,10 @@ void CPolygon::addVertex(const Vector2d& _vecV)
 {
     METHOD_ENTRY("CPolygon::addVertex");
 
-    this->addVertex(_vecV[0], _vecV[1]);
+    m_VertList0.push_back(_vecV);
+    m_VertList.push_back(_vecV);
+    
+    this->updateGeometry();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,141 +80,10 @@ void CPolygon::addVertex(const double& _fX, const double& _fY)
 {
     METHOD_ENTRY("CPolygon::addVertex");
 
-//     m_PolygonType = PolygonType::FILLED;
-    
     m_VertList0.push_back(Vector2d(_fX, _fY));
     m_VertList.push_back(Vector2d(_fX, _fY));
     
-    // Shape is no longer valid
-    // Recalculate accordant parameters
-    m_vecCentroid.setZero();
-    m_fArea = 0.0;
-    m_fInertia = 0.0;
-    
-    auto nSize = m_VertList0.size();
-    std::vector<double> vecLength; vecLength.reserve(nSize);
-    double fLength = 0.0;
-
-    switch (m_PolygonType)
-    {
-        case PolygonType::LINE_LOOP:
-            for (auto i=0u; i<nSize-1; ++i)
-            {
-                vecLength.push_back((m_VertList0[i+1]-m_VertList0[i]).norm());
-                m_vecCentroid += (m_VertList0[i+1]+m_VertList0[i])*0.5*vecLength[i];
-                fLength += vecLength[i];
-            }
-            vecLength.push_back((m_VertList0[0]-m_VertList0[nSize-1]).norm());
-            m_vecCentroid += (m_VertList0[nSize-1]+m_VertList0[0])*0.5*vecLength[nSize-1];
-            fLength       += vecLength[nSize-1];
-            m_vecCentroid /= fLength;
-            
-            // Calculate inertia
-            for (auto i=0u; i<nSize-1; ++i)
-            {
-                // Calculate for each segment: (m*L^2)/12
-                // Additionally, add Steiner's part (Steiner's theorem)
-                m_fInertia += m_fMass * vecLength[i] * fLength * fLength / 12.0 + 
-                              m_fMass * vecLength[i] * m_vecCentroid.squaredNorm();
-            }
-            m_fInertia /= fLength;
-            break;
-        case PolygonType::LINE_SINGLE:
-            for (auto i=0u; i<nSize-1; ++i)
-            {
-                vecLength.push_back((m_VertList0[2*i+1]-m_VertList0[2*i]).norm());
-                m_vecCentroid += (m_VertList0[2*i+1]+m_VertList0[2*i])*0.5*vecLength[i];
-                fLength       += vecLength[i];
-            }
-            m_vecCentroid /= fLength;
-            
-            // Calculate inertia
-            for (auto i=0u; i<(nSize-1)/2; ++i)
-            {
-                // Calculate for each segment: (m*L^2)/12
-                // Additionally, add Steiner's part (Steiner's theorem)
-                m_fInertia += m_fMass * vecLength[i] * fLength * fLength / 12.0 + 
-                              m_fMass * vecLength[i] * m_vecCentroid.squaredNorm();
-            }
-            m_fInertia /= fLength;
-            
-            break;
-        case PolygonType::LINE_STRIP:
-            for (auto i=0u; i<nSize-1; ++i)
-            {
-                vecLength.push_back((m_VertList0[i+1]-m_VertList0[i]).norm());
-                m_vecCentroid += (m_VertList0[i+1]+m_VertList0[i])*0.5*vecLength[i];
-                fLength       += vecLength[i];
-            }
-            m_vecCentroid /= fLength;
-            
-            // Calculate inertia
-            for (auto i=0u; i<nSize-1; ++i)
-            {
-                // Calculate for each segment: (m*L^2)/12
-                // Additionally, add Steiner's part (Steiner's theorem)
-                m_fInertia += m_fMass * vecLength[i] * fLength * fLength / 12.0 + 
-                              m_fMass * vecLength[i] * m_vecCentroid.squaredNorm();
-            }
-            m_fInertia /= fLength;
-            break;
-        case PolygonType::FILLED:
-            std::vector<double> vecArea; vecArea.reserve(nSize);
-            for (auto i=0u; i<nSize-1; ++i)
-            {
-                vecArea.push_back((m_VertList0[i][0]*m_VertList0[i+1][1]) -
-                                  (m_VertList0[i][1]*m_VertList0[i+1][0]));
-                m_fArea += vecArea[i];
-            }
-            vecArea.push_back((m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
-                              (m_VertList0[nSize-1][1]*m_VertList0[0][0]));
-            m_fArea += vecArea[nSize-1];
-            m_fArea *= 0.5; // Note: factor 0.5 not stored in vecArea
-            
-            if (m_fArea != 0)
-            {
-                for (auto i=0u; i<nSize-1; ++i)
-                {
-                    m_vecCentroid[0] += (m_VertList0[i][0] + m_VertList0[i+1][0]) *
-                                        ((m_VertList0[i][0]*m_VertList0[i+1][1]) -
-                                        (m_VertList0[i][1]*m_VertList0[i+1][0]));
-                    m_vecCentroid[1] += (m_VertList0[i][1] + m_VertList0[i+1][1]) *
-                                        ((m_VertList0[i][0]*m_VertList0[i+1][1]) -
-                                        (m_VertList0[i][1]*m_VertList0[i+1][0]));
-                }
-                m_vecCentroid[0] += (m_VertList0[nSize-1][0] + m_VertList0[0][0]) *
-                                    ((m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
-                                    (m_VertList0[nSize-1][1]*m_VertList0[0][0]));
-                m_vecCentroid[1] += (m_VertList0[nSize-1][1] + m_VertList0[0][1]) *
-                                    ((m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
-                                    (m_VertList0[nSize-1][1]*m_VertList0[0][0]));
-                m_vecCentroid = 1.0/(6.0*m_fArea) * m_vecCentroid;
-                
-                // Calculate inertia
-                for (auto i=0u; i<nSize-1; ++i)
-                {
-                    m_fInertia +=   vecArea[i] * (
-                                    m_VertList0[i].squaredNorm()+
-                                    m_VertList0[i].dot(m_VertList0[i+1])+
-                                    m_VertList0[i+1].squaredNorm() +
-                                    m_fMass * m_vecCentroid.squaredNorm());
-                }
-                m_fInertia +=   vecArea[nSize-1] * (
-                                m_VertList0[nSize-1].squaredNorm()+
-                                m_VertList0[nSize-1].dot(m_VertList0[0])+
-                                m_VertList0[0].squaredNorm() +
-                                m_fMass * m_vecCentroid.squaredNorm());
-                m_fInertia /= 2.0*m_fArea; // Note: factor 2.0 because above,
-                                           //       factor 0.5 is not stored in vecArea
-            }
-            else
-            {
-                NOTICE_MSG("Polygon", "Not a valid polygon, area=0. => inertia=0.")
-            }
-            break;
-    }
-    
-    m_bIsValid = false;
+    this->updateGeometry();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -219,28 +91,30 @@ void CPolygon::addVertex(const double& _fX, const double& _fY)
 /// \brief Transforms the shape
 ///
 /// \param _fAngle Rotation angle
-/// \param _vecV Translation vector
+/// \param _vecCOM Center of mass in local (object) coordinates
+/// \param _vecV Translation vector for global translation
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPolygon::transform(const double& _fAngle, const Vector2d& _vecV)
+void CPolygon::transform(const double& _fAngle,
+                         const Vector2d& _vecCOM,
+                         const Vector2d& _vecV)
 {
-    METHOD_ENTRY("CPolygon::transform(const double&, const Vector2d&)");
+    METHOD_ENTRY("CPolygon::transform");
 
     Rotation2Dd Rotation(_fAngle);
 
     VertexListType::const_iterator ci = m_VertList0.begin();
     VertexListType::iterator it = m_VertList.begin();
     
-    m_AABB.setLowerLeft( Rotation * (*ci) + _vecV);
-    m_AABB.setUpperRight(Rotation * (*ci) + _vecV);
+    (*it) = Rotation * ((*ci)-_vecCOM) + _vecCOM + _vecV;
     
-    (*it) = Rotation * (*ci) + _vecV;
-    ++it;
-    ++ci;
-    
+    m_AABB.setLowerLeft( (*it));
+    m_AABB.setUpperRight((*it));
+
+    ++it; ++ci;
     while (ci != m_VertList0.end())
     {
-        (*it) = Rotation * (*ci) + _vecV;
+        (*it) = Rotation * ((*ci)-_vecCOM) + _vecCOM + _vecV;
 
         // Update bounding box
         m_AABB.update((*it));
@@ -269,8 +143,8 @@ std::istream& CPolygon::myStreamIn(std::istream& _is)
     m_VertList0.clear();
     
     // Cast streamable basetype to strongly typed enum PolygonType
-    std::underlying_type<PolygonType>::type nLinetype;
-    _is >> nLinetype; m_PolygonType = static_cast<PolygonType>(nLinetype);
+    std::underlying_type<PolygonType>::type nPolygonType;
+    _is >> nPolygonType; m_PolygonType = static_cast<PolygonType>(nPolygonType);
     
     VertexListType::size_type nSize;
     _is >> nSize;
@@ -340,7 +214,146 @@ void CPolygon::myCopy(const IShape* const _pShape)
     
     const CPolygon* const pPolygon = static_cast<const CPolygon* const>(_pShape);
         
-    m_PolygonType     = pPolygon->m_PolygonType;
+    m_PolygonType  = pPolygon->m_PolygonType;
     m_VertList     = pPolygon->m_VertList;
     m_VertList0    = pPolygon->m_VertList0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Update geometry relevant data, e.g. inertia, area, center of mass
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPolygon::myUpdateGeometry()
+{
+    METHOD_ENTRY("CPolygon::myUpdateGeometry")
+    
+    // Shape is no longer valid
+    // Recalculate accordant parameters
+    m_vecCentroid.setZero();
+    m_fArea = 0.0;
+    m_fInertia = 0.0;
+    
+    auto nSize = m_VertList0.size();
+    std::vector<double> vecLength; vecLength.reserve(nSize);
+    double fLength = 0.0;
+
+    switch (m_PolygonType)
+    {
+        case PolygonType::LINE_LOOP:
+            for (auto i=0u; i<nSize-1; ++i)
+            {
+                vecLength.push_back((m_VertList0[i+1]-m_VertList0[i]).norm());
+                m_vecCentroid += (m_VertList0[i+1]+m_VertList0[i])*0.5*vecLength[i];
+                fLength += vecLength[i];
+            }
+            vecLength.push_back((m_VertList0[0]-m_VertList0[nSize-1]).norm());
+            m_vecCentroid += (m_VertList0[nSize-1]+m_VertList0[0])*0.5*vecLength[nSize-1];
+            fLength       += vecLength[nSize-1];
+            if (fLength > 0.0) m_vecCentroid /= fLength;
+            
+            // Calculate inertia
+            for (auto i=0u; i<nSize-1; ++i)
+            {
+                // Calculate for each segment: (m*L^2)/12
+                // Additionally, add Steiner's part (Steiner's theorem)
+                m_fInertia += m_fMass * vecLength[i] * fLength * fLength / 12.0 + 
+                              m_fMass * vecLength[i] * m_vecCentroid.squaredNorm();
+            }
+            if (fLength > 0.0) m_fInertia /= fLength;
+            break;
+        case PolygonType::LINE_SINGLE:
+            for (auto i=0u; i<nSize-1; ++i)
+            {
+                vecLength.push_back((m_VertList0[2*i+1]-m_VertList0[2*i]).norm());
+                m_vecCentroid += (m_VertList0[2*i+1]+m_VertList0[2*i])*0.5*vecLength[i];
+                fLength       += vecLength[i];
+            }
+            if (fLength > 0.0) m_vecCentroid /= fLength;
+            
+            // Calculate inertia
+            for (auto i=0u; i<vecLength.size(); ++i)
+            {
+                // Calculate for each segment: (m*L^2)/12
+                // Additionally, add Steiner's part (Steiner's theorem)
+                m_fInertia += m_fMass * vecLength[i] * fLength * fLength / 12.0 + 
+                              m_fMass * vecLength[i] * m_vecCentroid.squaredNorm();
+            }
+            if (fLength > 0.0) m_fInertia /= fLength;
+            break;
+        case PolygonType::LINE_STRIP:
+            for (auto i=0u; i<nSize-1; ++i)
+            {
+                vecLength.push_back((m_VertList0[i+1]-m_VertList0[i]).norm());
+                m_vecCentroid += (m_VertList0[i+1]+m_VertList0[i])*0.5*vecLength[i];
+                fLength       += vecLength[i];
+            }
+            if (fLength > 0.0) m_vecCentroid /= fLength;
+            
+            // Calculate inertia
+            for (auto i=0u; i<nSize-1; ++i)
+            {
+                // Calculate for each segment: (m*L^2)/12
+                // Additionally, add Steiner's part (Steiner's theorem)
+                m_fInertia += m_fMass * vecLength[i] * fLength * fLength / 12.0 + 
+                              m_fMass * vecLength[i] * m_vecCentroid.squaredNorm();
+            }
+            if (fLength > 0.0) m_fInertia /= fLength;
+            break;
+        case PolygonType::FILLED:
+            std::vector<double> vecArea; vecArea.reserve(nSize);
+            for (auto i=0u; i<nSize-1; ++i)
+            {
+                vecArea.push_back((m_VertList0[i][0]*m_VertList0[i+1][1]) -
+                                  (m_VertList0[i][1]*m_VertList0[i+1][0]));
+                m_fArea += vecArea[i];
+            }
+            vecArea.push_back((m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
+                              (m_VertList0[nSize-1][1]*m_VertList0[0][0]));
+            m_fArea += vecArea[nSize-1];
+            m_fArea *= 0.5; // Note: factor 0.5 not stored in vecArea
+            
+            if (m_fArea != 0)
+            {
+                for (auto i=0u; i<nSize-1; ++i)
+                {
+                    m_vecCentroid[0] += (m_VertList0[i][0] + m_VertList0[i+1][0]) *
+                                        ((m_VertList0[i][0]*m_VertList0[i+1][1]) -
+                                        (m_VertList0[i][1]*m_VertList0[i+1][0]));
+                    m_vecCentroid[1] += (m_VertList0[i][1] + m_VertList0[i+1][1]) *
+                                        ((m_VertList0[i][0]*m_VertList0[i+1][1]) -
+                                        (m_VertList0[i][1]*m_VertList0[i+1][0]));
+                }
+                m_vecCentroid[0] += (m_VertList0[nSize-1][0] + m_VertList0[0][0]) *
+                                    ((m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
+                                    (m_VertList0[nSize-1][1]*m_VertList0[0][0]));
+                m_vecCentroid[1] += (m_VertList0[nSize-1][1] + m_VertList0[0][1]) *
+                                    ((m_VertList0[nSize-1][0]*m_VertList0[0][1]) -
+                                    (m_VertList0[nSize-1][1]*m_VertList0[0][0]));
+                m_vecCentroid = 1.0/(6.0*m_fArea) * m_vecCentroid;
+                
+                // Calculate inertia
+                for (auto i=0u; i<nSize-1; ++i)
+                {
+                    m_fInertia +=   vecArea[i] * (
+                                    m_VertList0[i].squaredNorm()+
+                                    m_VertList0[i].dot(m_VertList0[i+1])+
+                                    m_VertList0[i+1].squaredNorm() +
+                                    m_fMass * m_vecCentroid.squaredNorm());
+                }
+                m_fInertia +=   vecArea[nSize-1] * (
+                                m_VertList0[nSize-1].squaredNorm()+
+                                m_VertList0[nSize-1].dot(m_VertList0[0])+
+                                m_VertList0[0].squaredNorm() +
+                                m_fMass * m_vecCentroid.squaredNorm());
+                m_fInertia /= 2.0*m_fArea; // Note: factor 2.0 because above,
+                                           //       factor 0.5 is not stored in vecArea
+            }
+            else
+            {
+                NOTICE_MSG("Polygon", "Not a valid polygon, area=0. => inertia=0.")
+            }
+            break;
+    }
+    DOM_VAR(DEBUG_MSG("Polygon", "Inertia calculated: " << m_fInertia))
 }

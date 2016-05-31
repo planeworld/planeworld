@@ -185,13 +185,16 @@ void CTerrain::init()
 /// \brief Transforms the shape
 ///
 /// \param _fAngle Rotation angle
+/// \param _vecCOM Center of mass in local (object) coordinates
 /// \param _vecV Translation vector
 ///
 /// \todo Maybe implement virtual init method for all shapes to call after
 ///       transform
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CTerrain::transform( const double& _fAngle, const Vector2d& _vecV )
+void CTerrain::transform( const double& _fAngle,
+                          const Vector2d& _vecCOM,
+                          const Vector2d& _vecV )
 {
     METHOD_ENTRY("CTerrain::transform")
 
@@ -262,7 +265,7 @@ std::ostream& CTerrain::myStreamOut(std::ostream& _os)
 ////////////////////////////////////////////////////////////////////////////////
 void CTerrain::myCopy(const IShape* const _pShape)
 {
-    METHOD_ENTRY("CTerrain::myCopy");
+    METHOD_ENTRY("CTerrain::myCopy")
     
     const CTerrain* const pTerrain = static_cast<const CTerrain* const>(_pShape);
         
@@ -277,3 +280,15 @@ void CTerrain::myCopy(const IShape* const _pShape)
     m_vecCenter         = pTerrain->m_vecCenter;
     m_vecCenter0        = pTerrain->m_vecCenter0;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Update geometry relevant data, e.g. inertia, area, center of mass
+///
+////////////////////////////////////////////////////////////////////////////////
+void CTerrain::myUpdateGeometry()
+{
+    METHOD_ENTRY("CTerrain::myUpdateGeometry")
+    DOM_VAR(DEBUG_MSG("Terrain", "Inertia calculated: " << m_fInertia))
+}
+

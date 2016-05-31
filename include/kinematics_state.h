@@ -104,6 +104,7 @@ class CKinematicsState  : public IUniqueIDUser,
         void setAngleVelocity(const double&);
         
         void referTo(const CKinematicsState&);
+        void transform(const Vector2d&, const Vector2d&);
         
         //--- friends --------------------------------------------------------//
         friend std::istream&    operator>>(std::istream&, CKinematicsState&);

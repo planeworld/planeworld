@@ -144,7 +144,6 @@ class IObject : public IUniqueIDUser,
 
         CGeometry               m_Geometry;                         ///< Geometry of object
 
-        Vector2d                m_vecCOM;                           ///< Center of mass
         Vector2d                m_vecForce;                         ///< Resulting force applied
         
         int                     m_nDepthlayers;                     ///< Depths in which shape exists
@@ -187,7 +186,7 @@ inline void IObject::addAcceleration(const Vector2d& _vecA)
 {
     METHOD_ENTRY("IObject::addAcceleration")
 
-    this->addForce(_vecA*m_Geometry.getMass(), m_pIntPos->getValue()+m_vecCOM);
+    this->addForce(_vecA*m_Geometry.getMass(), m_pIntPos->getValue()+m_Geometry.getCOM());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +200,8 @@ inline const Vector2d IObject::getCOM() const
 {
     METHOD_ENTRY("IObject::getCOM")
 //     return (m_vecCOM+m_pIntPos->getValue());
-    return m_KinematicsState.getLocalOrigin() + m_vecCOM;
+//     std::cout << m_KinematicsState.getLocalPosition(m_Geometry.getCOM()) << std::endl;
+    return m_KinematicsState.getLocalPosition(m_Geometry.getCOM());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -393,7 +393,7 @@ inline void IObject::setOrigin(const Vector2d& _vecOrigin)
     METHOD_ENTRY("IObject::setOrigin")
 
     m_KinematicsState.setOrigin(_vecOrigin);
-    m_pIntPos->init(m_KinematicsState.getOrigin());
+//     m_pIntPos->init(m_KinematicsState.getOrigin());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -409,7 +409,7 @@ inline void IObject::setOrigin(const double& _fX, const double& _fY)
     METHOD_ENTRY("IObject::setOrigin")
 
     m_KinematicsState.setOrigin(Vector2d(_fX, _fY));
-    m_pIntPos->init(m_KinematicsState.getOrigin());
+//     m_pIntPos->init(m_KinematicsState.getOrigin());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -35,7 +35,7 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CBody::CBody() : m_fInertia(1.0), m_fTorque(0.0)
+CBody::CBody() : m_fTorque(0.0)
 {
     METHOD_ENTRY("CBody::CBody");
     CTOR_CALL("CBody::CBody");
@@ -106,22 +106,8 @@ void CBody::myInit()
 {
     METHOD_ENTRY("CBody::myInit")
     
-    m_pIntAng->init(m_KinematicsState.getLocalAngle());
-    m_pIntAngVel->init(m_KinematicsState.getLocalAngleVelocity());
-
-    for (std::list< CDoubleBufferedShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
-        ci != m_Geometry.getShapes()->end(); ++ci)
-    {
-        (*ci)->getShapeCur()->transform(m_KinematicsState.getAngle(), m_KinematicsState.getOrigin());
-        (*ci)->getShapeBuf()->transform(m_KinematicsState.getAngle(), m_KinematicsState.getOrigin());
-
-        // Update depthlayers
-        m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
-
-        // Update bounding box
-        m_Geometry.updateBoundingBox((*ci)->getShapeCur()->getBoundingBox());
-        m_Geometry.updateBoundingBox((*ci)->getShapeBuf()->getBoundingBox());
-    }
+    m_pIntAng->init(m_KinematicsState.getAngle());
+    m_pIntAngVel->init(m_KinematicsState.getAngleVelocity());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,8 +166,9 @@ void CBody::myTransform()
 {
     METHOD_ENTRY("CBody::myTransform")
 
-    for (std::list< CDoubleBufferedShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
-        ci != m_Geometry.getShapes()->end(); ++ci)
+    std::list< CDoubleBufferedShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
+    m_Geometry.getBoundingBox() = (*ci)->getShapeCur()->getBoundingBox();
+    while ((++ci) != m_Geometry.getShapes()->end())
     {
         // Update bounding box of previous time step for continuous collision dection
         m_Geometry.updateBoundingBox((*ci)->getShapeCur()->getBoundingBox());
@@ -190,7 +177,9 @@ void CBody::myTransform()
     for (std::list< CDoubleBufferedShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
         ci != m_Geometry.getShapes()->end(); ++ci)
     {
-        (*ci)->getShapeCur()->transform(m_KinematicsState.getAngle(), m_KinematicsState.getOrigin());
+        (*ci)->getShapeCur()->transform(m_KinematicsState.getAngle(),
+                                        m_Geometry.getCOM(),
+                                        m_KinematicsState.getOrigin());
 
         // Update depthlayers
         m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
@@ -198,6 +187,7 @@ void CBody::myTransform()
         // Update bounding box of current time step
         m_Geometry.updateBoundingBox((*ci)->getShapeCur()->getBoundingBox());
     }
+    m_KinematicsState.transform(m_pIntPos->getValue(), m_Geometry.getCOM());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -215,7 +205,6 @@ std::istream& CBody::myStreamIn(std::istream& _is)
     
     std::string strTmp;
     _is >> strTmp;
-    _is >> m_fInertia;
     _is >> m_fTorque;
     _is >> m_pIntAng;
     _is >> m_pIntAngVel;
@@ -237,7 +226,6 @@ std::ostream& CBody::myStreamOut(std::ostream& _os)
     METHOD_ENTRY("CBody::myStreamOut")
     
     _os << "Body:" << std::endl;
-    _os << m_fInertia << std::endl;
     _os << m_fTorque << std::endl;
     _os << m_pIntAng << std::endl;
     _os << m_pIntAngVel << std::endl;

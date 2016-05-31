@@ -122,11 +122,7 @@ void CPlanet::setCenter(const Vector2d& _vecC)
     m_vecCenter0 = _vecC;
     m_vecCenter = _vecC;
     
-    // Calculate COM, shape no longer valid
-    m_vecCentroid = m_vecCenter0;
-    m_fArea = M_PI * m_fRadius * m_fRadius;
-    m_fInertia = 0.5 * m_fMass * m_fRadius * m_fRadius;
-    m_bIsValid = false;
+    this->updateGeometry();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,11 +142,7 @@ void CPlanet::setCenter(const double& _fX, const double& _fY)
     m_vecCenter[0]  = _fX;
     m_vecCenter[1]  = _fY;
     
-    // Calculate COM, shape no longer valid
-    m_vecCentroid = m_vecCenter0;
-    m_fArea = M_PI * m_fRadius * m_fRadius;
-    m_fInertia = 0.5 * m_fMass * m_fRadius * m_fRadius;
-    m_bIsValid = false;
+    this->updateGeometry();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -217,16 +209,19 @@ void CPlanet::resetSampling()
 /// \brief Transforms the shape
 ///
 /// \param _fAngle Rotation angle
+/// \param _vecCOM Center of mass in local (object) coordinates
 /// \param _vecV Translation vector
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPlanet::transform( const double& _fAngle, const Vector2d& _vecV )
+void CPlanet::transform( const double& _fAngle,
+                         const Vector2d& _vecCOM,
+                         const Vector2d& _vecV )
 {
     METHOD_ENTRY("CPlanet::transform")
 
     Rotation2Dd Rotation(_fAngle);
 
-    m_vecCenter = Rotation * m_vecCenter0 + _vecV;
+    m_vecCenter = Rotation * (m_vecCenter0-_vecCOM) + _vecCOM + _vecV;
 
     m_fAngle = _fAngle;
 
@@ -531,3 +526,20 @@ void CPlanet::myInitTerrain()
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Update geometry relevant data, e.g. inertia, area, center of mass
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPlanet::myUpdateGeometry()
+{
+    METHOD_ENTRY("CPlanet::myUpdateGeometry")
+    
+    // Calculate COM, shape no longer valid
+    m_vecCentroid = m_vecCenter0;
+    m_fArea = M_PI * m_fRadius * m_fRadius;
+    m_fInertia = 0.5 * m_fMass * m_fRadius * m_fRadius;
+    DOM_VAR(DEBUG_MSG("Planet", "Inertia calculated: " << m_fInertia))
+}
+

@@ -80,7 +80,9 @@ class IShape : public IUniqueIDUser
         bool                        isValid() const;
                 
         //--- Methods --------------------------------------------------------//
-        virtual void transform(const double&, const Vector2d&) = 0;  ///< Transforms the shape
+        virtual void transform(const double&,
+                               const Vector2d&,
+                               const Vector2d&) = 0;  ///< Transforms the shape
 
         CBoundingBox&   getBoundingBox();
         bool&           isValid();
@@ -100,7 +102,10 @@ class IShape : public IUniqueIDUser
         virtual std::ostream& myStreamOut(std::ostream&) = 0;
         
         virtual void myCopy(const IShape* const) = 0; ///< Copies shape attributes
+        virtual void myUpdateGeometry() = 0;
       
+        void         updateGeometry();
+        
         //--- Protected Variables --------------------------------------------//
         CBoundingBox    m_AABB;                     ///< Bounding box of shape
         bool            m_bIsValid;                 ///< Indicates if shape data is valid
@@ -254,6 +259,7 @@ inline void IShape::setMass(const double& _fM)
 {
     METHOD_ENTRY("IShape::setMass")
     m_fMass = _fM;
+    m_bIsValid = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -280,6 +286,18 @@ inline void IShape::unsetDepths(const int& _nD)
 {
     METHOD_ENTRY("IShape::unsetDepths")
     m_nDepthlayers &= (!_nD);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Update geometry relevant data, e.g. inertia, center of mass, area.
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IShape::updateGeometry()
+{
+    METHOD_ENTRY("IShape::updateGeometry")
+    m_bIsValid = false;
+    this->myUpdateGeometry();
 }
 
 #endif

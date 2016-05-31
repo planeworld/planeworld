@@ -61,7 +61,8 @@ class CCircle : public IShape
         const ShapeType     getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
-        void transform(const double&, const Vector2d&);
+        void transform(const double&, const Vector2d&, const Vector2d&);
+        void setCircleType(const CircleType&);
         void setCenter(const Vector2d&);
         void setCenter(const double&, const double&);
         void setRadius(const double&);
@@ -73,8 +74,10 @@ class CCircle : public IShape
         std::ostream&       myStreamOut(std::ostream&);
         
         void myCopy(const IShape* const);
+        void myUpdateGeometry();
 
         //--- Protected variables --------------------------------------------//
+        CircleType          m_CircleType;                   ///< Type of circle
         Vector2d            m_vecCenter;                    ///< Center of circle
         Vector2d            m_vecCenter0;                   ///< Initial center of circle
         double              m_fAngle;                       ///< Angle, just for optical reasons

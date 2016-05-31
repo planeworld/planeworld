@@ -79,7 +79,6 @@ IObject* CRigidBody::clone() const
     // m_Lifetime: New individual object
     pClone->m_fTimeFac     = m_fTimeFac;
     pClone->m_Geometry     = m_Geometry;
-    pClone->m_vecCOM       = m_vecCOM;
     // m_vecForce: No Forces on newly created Rigidbody;
     pClone->m_nDepthlayers = m_nDepthlayers;
     
@@ -103,7 +102,6 @@ IObject* CRigidBody::clone() const
     pClone->m_Anchors      = m_Anchors;
     
     //--- Variables of CBody -------------------------------------------------//
-    pClone->m_fInertia = m_fInertia;
     pClone->m_fTorque = m_fTorque;
     
     if (pClone->m_pIntAng != nullptr)
@@ -142,8 +140,8 @@ void CRigidBody::addForce(const Vector2d& _vecF, const Vector2d& _vecPOC)
 
     /// \todo Check if COM is handeled correctly when object is rotated
     m_vecForce  +=  _vecF;
-    m_fTorque   +=  (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[0] * _vecF[1] -
-                    (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[1] * _vecF[0];
+    m_fTorque   +=  (_vecPOC - (m_pIntPos->getValue()+m_Geometry.getCOM()))[0] * _vecF[1] -
+                    (_vecPOC - (m_pIntPos->getValue()+m_Geometry.getCOM()))[1] * _vecF[0];
 //     m_fTorque   +=  _vecPOC[0] * _vecF[1] - _vecPOC[1] * _vecF[0];
 }
 
@@ -159,18 +157,12 @@ void CRigidBody::addForceLC(const Vector2d& _vecF, const Vector2d& _vecPOC)
 {
     METHOD_ENTRY("CRigidBody::addForceLC")
 
-    /// \todo Check if COM is handeled correctly when object is rotated
-    
-//     m_fTorque   +=  (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[0] * _vecF[1] -
-//                     (_vecPOC - (m_pIntPos->getValue()+m_vecCOM))[1] * _vecF[0];
-    
-    Rotation2Dd Rotation(m_KinematicsState.getLocalAngle());
+    Rotation2Dd Rotation(m_KinematicsState.getAngle());
     
     m_vecForce  +=  Rotation * _vecF;
     
-    Vector2d vecTmp = Rotation * _vecPOC;
-    Vector2d vecTmp2 = Rotation * _vecF;
-    m_fTorque   +=  vecTmp[0] * vecTmp2[1] - vecTmp[1] * vecTmp2[0];
+    Vector2d vecTmp = Rotation * (_vecPOC-m_Geometry.getCOM());
+    m_fTorque   +=  vecTmp[0] * m_vecForce[1] - vecTmp[1] * m_vecForce[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -207,7 +199,7 @@ void CRigidBody::myDynamics(const double& _fStep)
     
     double fAngleAccel = m_fTorque;
     
-    if (m_fInertia > 0.0) fAngleAccel /= m_fInertia;
+    if (m_Geometry.getInertia() > 0.0) fAngleAccel /= m_Geometry.getInertia();
     
     double fAngleVel = m_pIntAngVel->integrate(fAngleAccel, _fStep*m_fTimeFac);
     m_KinematicsState.setAngleVelocity(fAngleVel);

@@ -108,15 +108,16 @@ class CPlanet : public IShape
         
         void resetSampling();
         
-        void transform(const double&, const Vector2d&);
+        void transform(const double&, const Vector2d&, const Vector2d&);
                         
     protected:
         
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
         
-        void                myInitTerrain();
         void                myCopy(const IShape* const);
+        void                myInitTerrain();
+        void                myUpdateGeometry();
         
         PlanetType          m_PlanetType;               ///< Identifies type of planet
 

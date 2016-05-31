@@ -82,7 +82,7 @@ class CTerrain : public IShape
         void setSmoothness(const double&);
         void setWidth(const double&);
                 
-        void transform(const double&, const Vector2d&);
+        void transform(const double&, const Vector2d&, const Vector2d&);
                         
     protected:
           
@@ -91,6 +91,7 @@ class CTerrain : public IShape
         std::ostream&       myStreamOut(std::ostream&);
         
         void myCopy(const IShape* const);
+        void myUpdateGeometry();
 
         //--- Protected variables --------------------------------------------//
         std::vector<double> m_Cache;                    ///< Cached surface of terrain

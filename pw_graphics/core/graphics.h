@@ -78,13 +78,20 @@ const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn
 
 const double GRAPHICS_RAD2DEG = 180.0 / M_PI;           ///< Converts radiant to degree values
 
-/// specifies the type of line to be drawn
+/// Specifies the type of polygon to be drawn
 enum class PolygonType
 {
     FILLED,
     LINE_SINGLE,
     LINE_LOOP,
     LINE_STRIP
+};
+
+/// Specifies the type of circle to be drawn
+enum class CircleType
+{
+    FILLED,
+    OUTLINE
 };
 
 /// Type definition for vertex list

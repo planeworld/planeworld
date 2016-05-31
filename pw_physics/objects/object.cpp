@@ -48,7 +48,6 @@ IObject::IObject(): m_bGravitation(true),
     m_pIntVel = new CEulerIntegrator<Vector2d>;
     MEM_ALLOC("CEulerIntegrator")
 
-    m_vecCOM.setZero();
     m_vecForce.setZero();
     m_vecCell.setZero();
     
@@ -155,7 +154,8 @@ void IObject::dynamics(const double& _fTimeStep)
         m_Trajectory.update(m_pIntPos->getValue(), m_vecCell);
     }
     
-    m_KinematicsState.setOrigin(m_pIntPos->getValue());
+    // Update kinematics state from integrator
+    m_KinematicsState.setOrigin(m_pIntPos->getValue()-m_Geometry.getCOM());
     m_KinematicsState.setVelocity(m_pIntVel->getValue());
 }
 
@@ -172,17 +172,23 @@ void IObject::init()
 {
     METHOD_ENTRY("IObject::init")
 
-    // Initialise bounding box
-    // Center of mass (position vector) is always inside AABB
-    m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue()+m_vecCOM);
-    m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue()+m_vecCOM);
+    // First, calculate geometry, i.e. center of mass, inertia, etc.
+    m_Geometry.update();
+    
+    // Initialise object position and velocity (global coordinates)
+    m_pIntPos->init(m_KinematicsState.getLocalPosition(m_Geometry.getCOM()));
+    m_pIntVel->init(m_KinematicsState.getVelocity());
+    
     this->setCell(m_vecCell);
     
-    m_Geometry.update();
-
-    m_pIntPos->init(m_KinematicsState.getLocalOrigin());
-    m_pIntVel->init(m_KinematicsState.getLocalVelocity());
     this->myInit();
+    
+    this->transform();
+
+    // Initialise bounding box
+    // Center of mass (position vector) is always inside AABB
+    m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue());
+    m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -277,8 +283,8 @@ void IObject::transform()
     {
         // Initialise bounding box
         // Center of mass (position vector) is always inside AABB
-        m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue() + m_vecCOM);
-        m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue() + m_vecCOM);
+        m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue());
+        m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue());
 
         // Call object specific transformation
         this->myTransform();
@@ -313,8 +319,6 @@ std::istream& operator>>(std::istream& _is, IObject* const _pObj)
     _is >> _pObj->m_Lifetime;
     _is >> _pObj->m_fTimeFac;
     _is >> _pObj->m_Geometry;
-    _is >> _pObj->m_vecCOM[0];
-    _is >> _pObj->m_vecCOM[1];
     _is >> _pObj->m_vecForce[0];
     _is >> _pObj->m_vecForce[1];
     _is >> _pObj->m_nDepthlayers;
@@ -361,8 +365,6 @@ std::ostream& operator<<(std::ostream& _os, IObject* const _pObj)
     _os << _pObj->m_Lifetime << std::endl;
     _os << _pObj->m_fTimeFac << std::endl;
     _os << _pObj->m_Geometry << std::endl;
-    _os << _pObj->m_vecCOM[0] << " " <<
-           _pObj->m_vecCOM[1] << std::endl;
     _os << _pObj->m_vecForce[0] << " " <<
            _pObj->m_vecForce[1] << std::endl;
     _os << _pObj->m_nDepthlayers << std::endl;
