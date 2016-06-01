@@ -138,11 +138,9 @@ void CRigidBody::addForce(const Vector2d& _vecF, const Vector2d& _vecPOC)
 {
     METHOD_ENTRY("CRigidBody::addForce")
 
-    /// \todo Check if COM is handeled correctly when object is rotated
     m_vecForce  +=  _vecF;
-    m_fTorque   +=  (_vecPOC - (m_pIntPos->getValue()+m_Geometry.getCOM()))[0] * _vecF[1] -
-                    (_vecPOC - (m_pIntPos->getValue()+m_Geometry.getCOM()))[1] * _vecF[0];
-//     m_fTorque   +=  _vecPOC[0] * _vecF[1] - _vecPOC[1] * _vecF[0];
+    m_fTorque   +=  (_vecPOC - m_pIntPos->getValue())[0] * _vecF[1] -
+                    (_vecPOC - m_pIntPos->getValue())[1] * _vecF[0];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
