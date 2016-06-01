@@ -43,7 +43,7 @@ enum class ShapeVisualsType
     NONE,
     CIRCLE,
     PLANET,
-    POLYLINE,
+    POLYGON,
     TERRAIN
 };
 
@@ -66,7 +66,7 @@ class IVisuals : virtual public CGraphicsBase,
         //--- Constant Methods -----------------------------------------------//
         virtual IVisuals* clone(CDoubleBufferedShape* const) const = 0;
         virtual void      draw(CCamera* const,
-                               const IObject* const) const = 0;
+                               IObject* const) const = 0;
                                
         virtual const ShapeVisualsType  getShapeVisualsType() const;
                         

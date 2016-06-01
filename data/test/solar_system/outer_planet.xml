@@ -3,7 +3,6 @@
 <object type="rigidbody">
     <core
         name="OuterPlanet"
-        mass="1.0e20"
         origin_x="-9.9e11"
         origin_y="9.99999999999999999e11"
         cell_x = "-50"
@@ -13,6 +12,7 @@
     />
     <shape
         type="shape_planet"
+        mass="1.0e20"
         radius="1000.0e3"
         height_max="100.0"
         sea_level="-0.9"

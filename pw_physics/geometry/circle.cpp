@@ -35,12 +35,17 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CCircle::CCircle() : m_fAngle(0.0),m_fRadius(1.0)
+CCircle::CCircle() : m_CircleType(CircleType::FILLED),
+                     m_fAngle(0.0),
+                     m_fRadius(1.0)
+                     
+                     
 {
     METHOD_ENTRY("CCircle::CCircle");
     CTOR_CALL ("CCircle::CCircle");
     
     m_vecCenter0.setZero();
+    m_vecCenter.setZero();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,37 +73,9 @@ CCircle* CCircle::clone() const
     CCircle* pClone = new CCircle();
     MEM_ALLOC("CCircle")
         
-    pClone->m_vecCenter    = m_vecCenter;
-    pClone->m_vecCenter0   = m_vecCenter0;
-    pClone->m_fAngle       = m_fAngle;
-    pClone->m_fRadius      = m_fRadius;
-    pClone->m_AABB         = m_AABB;
-    pClone->m_nDepthlayers = m_nDepthlayers;
+    pClone->copy(this);
     
     return pClone;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Copies information of a given circle
-///
-/// This method does not create a new circle, use clone in that case!
-///
-/// \param _pShape Shape to be copied
-///
-////////////////////////////////////////////////////////////////////////////////
-void CCircle::copy(const IShape* const _pShape)
-{
-    METHOD_ENTRY("CCircle::copy");
-    
-    const CCircle* const pCircle = static_cast<const CCircle* const>(_pShape);
-        
-    m_vecCenter    = pCircle->m_vecCenter;
-    m_vecCenter0   = pCircle->m_vecCenter0;
-    m_fAngle       = pCircle->m_fAngle;
-    m_fRadius      = pCircle->m_fRadius;
-    m_AABB         = pCircle->m_AABB;
-    m_nDepthlayers = pCircle->m_nDepthlayers;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,22 +83,96 @@ void CCircle::copy(const IShape* const _pShape)
 /// \brief Transforms the shape
 ///
 /// \param _fAngle Rotation angle
+/// \param _vecCOM Center of mass in local (object) coordinates
 /// \param _vecV Translation vector
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCircle::transform( const double& _fAngle, const Vector2d& _vecV )
+void CCircle::transform( const double& _fAngle,
+                         const Vector2d& _vecCOM,
+                         const Vector2d& _vecV )
 {
     METHOD_ENTRY("CCircle::transform");
 
     Rotation2Dd Rotation(_fAngle);
 
-    m_vecCenter = Rotation * m_vecCenter0 + _vecV;
+    m_vecCenter = Rotation * (m_vecCenter0-_vecCOM) + _vecCOM + _vecV;
 
     m_fAngle = _fAngle;
 
     // Update bounding box
     m_AABB.setLowerLeft( m_vecCenter - Vector2d(m_fRadius,m_fRadius));
     m_AABB.setUpperRight(m_vecCenter + Vector2d(m_fRadius,m_fRadius));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the circle type
+///
+/// \param _CircleType Circle type
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::setCircleType(const CircleType& _CircleType)
+{
+    METHOD_ENTRY("CCircle::setCircleType")
+
+    m_CircleType = _CircleType;
+    
+    this->updateGeometry();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines the center of the circle
+///
+/// \param _vecC Center of the circle
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::setCenter(const Vector2d& _vecC)
+{
+    METHOD_ENTRY("CCircle::setCenter")
+
+    m_vecCenter0 = _vecC;
+    m_vecCenter = _vecC;
+    
+    this->updateGeometry();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines the center of the circle
+///
+/// \param _fX Center-x of the circle
+/// \param _fY Center-y of the circle
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::setCenter(const double& _fX, const double& _fY)
+{
+    METHOD_ENTRY("CCircle::setCenter")
+
+    m_vecCenter0[0] = _fX;
+    m_vecCenter0[1] = _fY;
+
+    m_vecCenter[0] = _fX;
+    m_vecCenter[1] = _fY;
+    
+    this->updateGeometry();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Defines the center of the circle
+///
+/// \param _fRadius Radius of the circle
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::setRadius(const double& _fRadius)
+{
+    METHOD_ENTRY("CCircle::setRadius")
+
+    m_fRadius = _fRadius;
+    
+    this->updateGeometry();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,6 +191,9 @@ std::istream& CCircle::myStreamIn(std::istream& _is)
     std::string strTmp;
     _is >> strTmp;
     
+    // Cast streamable basetype to strongly typed enum CircleType
+    std::underlying_type<CircleType>::type nCircleType;
+    _is >> nCircleType; m_CircleType = static_cast<CircleType>(nCircleType);
     _is >> m_vecCenter[0];
     _is >> m_vecCenter[1];
     _is >> m_vecCenter0[0];
@@ -165,6 +219,9 @@ std::ostream& CCircle::myStreamOut(std::ostream& _os)
     
     _os << "Circle" << std::endl;
     
+    // Cast strongly typed enum CircleType to streamable base type
+    auto nCircleType = static_cast<std::underlying_type<CircleType>::type>(m_CircleType);
+    _os << nCircleType << std::endl;
     _os << m_vecCenter[0] << " " <<
            m_vecCenter[1] << std::endl;
     _os << m_vecCenter0[0] << " " <<
@@ -174,3 +231,49 @@ std::ostream& CCircle::myStreamOut(std::ostream& _os)
     
     return _os;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies information of a given circle
+///
+/// This method does not create a new circle, use clone in that case!
+///
+/// \param _pShape Shape to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::myCopy(const IShape* const _pShape)
+{
+    METHOD_ENTRY("CCircle::myCopy");
+    
+    const CCircle* const pCircle = static_cast<const CCircle* const>(_pShape);
+    m_CircleType   = pCircle->m_CircleType;
+    m_vecCenter    = pCircle->m_vecCenter;
+    m_vecCenter0   = pCircle->m_vecCenter0;
+    m_fAngle       = pCircle->m_fAngle;
+    m_fRadius      = pCircle->m_fRadius;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Update geometry relevant data, e.g. inertia, area, center of mass
+///
+////////////////////////////////////////////////////////////////////////////////
+void CCircle::myUpdateGeometry()
+{
+    METHOD_ENTRY("CCircle::myUpdateGeometry")
+    
+    // Calculate COM, shape no longer valid
+    m_vecCentroid = m_vecCenter0;
+    m_fArea = M_PI * m_fRadius * m_fRadius;
+    switch (m_CircleType)
+    {
+        case CircleType::FILLED:
+            m_fInertia = m_fMass * m_fRadius * m_fRadius * 0.5;
+            break;
+        case CircleType::OUTLINE:
+            m_fInertia = m_fMass * m_fRadius * m_fRadius;
+            break;
+    }
+    DOM_VAR(DEBUG_MSG("Circle", "Inertia calculated: " << m_fInertia))
+}
+

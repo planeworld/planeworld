@@ -61,8 +61,8 @@ class CCircle : public IShape
         const ShapeType     getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
-        void copy(const IShape* const);
-        void transform(const double&, const Vector2d&);
+        void transform(const double&, const Vector2d&, const Vector2d&);
+        void setCircleType(const CircleType&);
         void setCenter(const Vector2d&);
         void setCenter(const double&, const double&);
         void setRadius(const double&);
@@ -72,8 +72,12 @@ class CCircle : public IShape
         //--- Protected methods ----------------------------------------------//
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
+        
+        void myCopy(const IShape* const);
+        void myUpdateGeometry();
 
         //--- Protected variables --------------------------------------------//
+        CircleType          m_CircleType;                   ///< Type of circle
         Vector2d            m_vecCenter;                    ///< Center of circle
         Vector2d            m_vecCenter0;                   ///< Initial center of circle
         double              m_fAngle;                       ///< Angle, just for optical reasons
@@ -137,54 +141,6 @@ inline const ShapeType CCircle::getShapeType() const
 {
     METHOD_ENTRY("CCircle::getShapeType")
     return ShapeType::SHAPE_CIRCLE;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Defines the center of the circle
-///
-/// \param _vecC Center of the circle
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCircle::setCenter(const Vector2d& _vecC)
-{
-    METHOD_ENTRY("CCircle::setCenter")
-
-    m_vecCenter0 = _vecC;
-    m_vecCenter = _vecC;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Defines the center of the circle
-///
-/// \param _fX Center-x of the circle
-/// \param _fY Center-y of the circle
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCircle::setCenter(const double& _fX, const double& _fY)
-{
-    METHOD_ENTRY("CCircle::setCenter")
-
-    m_vecCenter0[0] = _fX;
-    m_vecCenter0[1] = _fY;
-
-    m_vecCenter[0] = _fX;
-    m_vecCenter[1] = _fY;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Defines the center of the circle
-///
-/// \param _fRadius Radius of the circle
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCircle::setRadius(const double& _fRadius)
-{
-    METHOD_ENTRY("CCircle::setRadius")
-
-    m_fRadius = _fRadius;
 }
 
 #endif

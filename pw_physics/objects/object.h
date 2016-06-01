@@ -106,7 +106,6 @@ class IObject : public IUniqueIDUser,
         void                setOrigin(const Vector2d&);
         void                setOrigin(const double&, const double&);
         void                setDepths(const int&);
-        void                setMass(const double&);
         void                setName(const std::string&);
         void                setTimeFac(const double&);
         void                setVelocity(const Vector2d&);
@@ -131,7 +130,6 @@ class IObject : public IUniqueIDUser,
         virtual void myDynamics(const double&) = 0;                 ///< Calculate dynamics from forces
         virtual void myInit() = 0;                                  ///< Initialise object -> total reset
         virtual void mySetNewIntegrator(const IntegratorType&) = 0; ///< Change type of integrator 
-        virtual void myTransform() = 0;                             ///< Move and/or rotate a mass
         
         virtual std::istream& myStreamIn (std::istream&) = 0;       ///< Stream in from inherited class
         virtual std::ostream& myStreamOut(std::ostream&) = 0;       ///< Stream out from inherited class
@@ -145,10 +143,8 @@ class IObject : public IUniqueIDUser,
 
         CGeometry               m_Geometry;                         ///< Geometry of object
 
-        Vector2d                m_vecCOM;                           ///< Center of mass
         Vector2d                m_vecForce;                         ///< Resulting force applied
         
-        double                  m_fMass;                            ///< Mass of object in kg
         int                     m_nDepthlayers;                     ///< Depths in which shape exists
         
         IIntegrator<Vector2d>*  m_pIntPos;                          ///< Position integrator
@@ -189,7 +185,7 @@ inline void IObject::addAcceleration(const Vector2d& _vecA)
 {
     METHOD_ENTRY("IObject::addAcceleration")
 
-    this->addForce(_vecA*m_fMass, m_pIntPos->getValue()+m_vecCOM);
+    this->addForce(_vecA*m_Geometry.getMass(), m_pIntPos->getValue()+m_Geometry.getCOM());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +199,8 @@ inline const Vector2d IObject::getCOM() const
 {
     METHOD_ENTRY("IObject::getCOM")
 //     return (m_vecCOM+m_pIntPos->getValue());
-    return m_KinematicsState.getLocalOrigin() + m_vecCOM;
+//     std::cout << m_KinematicsState.getLocalPosition(m_Geometry.getCOM()) << std::endl;
+    return m_KinematicsState.getLocalPosition(m_Geometry.getCOM());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +257,7 @@ inline const bool IObject::getGravitationState() const
 inline const double IObject::getMass() const
 {
     METHOD_ENTRY("IObject::getMass")
-    return (m_fMass);
+    return (m_Geometry.getMass());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -395,7 +392,7 @@ inline void IObject::setOrigin(const Vector2d& _vecOrigin)
     METHOD_ENTRY("IObject::setOrigin")
 
     m_KinematicsState.setOrigin(_vecOrigin);
-    m_pIntPos->init(m_KinematicsState.getOrigin());
+//     m_pIntPos->init(m_KinematicsState.getOrigin());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -411,7 +408,7 @@ inline void IObject::setOrigin(const double& _fX, const double& _fY)
     METHOD_ENTRY("IObject::setOrigin")
 
     m_KinematicsState.setOrigin(Vector2d(_fX, _fY));
-    m_pIntPos->init(m_KinematicsState.getOrigin());
+//     m_pIntPos->init(m_KinematicsState.getOrigin());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -440,20 +437,6 @@ inline void IObject::unsetDepths(const int& _nD)
     METHOD_ENTRY("IObject::unsetDepths")
 
     m_nDepthlayers &= (!_nD);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Set the mass
-///
-/// \param _fMass Mass 
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setMass(const double& _fMass)
-{
-    METHOD_ENTRY("IObject::setMass")
-
-    m_fMass = _fMass;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -309,6 +309,24 @@ void CKinematicsState::referTo(const CKinematicsState& _Reference)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Transform local coordinate system, including translation and rotation
+///
+/// \param _vecAxisGlobal   Axis in global coordinates to rotate around
+/// \param _vecAxisLocal    Axis in local coordinates to rotate around
+///
+////////////////////////////////////////////////////////////////////////////////
+void CKinematicsState::transform(const Vector2d& _vecAxisGlobal,
+                                 const Vector2d& _vecAxisLocal)
+{
+    METHOD_ENTRY("CKinematicsState::transform")
+    
+    Rotation2Dd Rotation(m_fAngle);
+    
+    m_vecOrigin = _vecAxisGlobal - Rotation * _vecAxisLocal;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Input stream for game state information
 ///
 /// \param _is  Source stream

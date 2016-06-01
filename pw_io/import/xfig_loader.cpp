@@ -31,7 +31,7 @@
 #include "xfig_loader.h"
 
 #include "circle.h"
-#include "polyline.h"
+#include "polygon.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -57,8 +57,8 @@ void CXFigLoader::load(const std::string& _strFilename)
     CDoubleBufferedShape* pShape;
     CCircle*            pCircle;
     CCircleVisuals*     pCircleVisuals;
-    CPolyLine*          pPolyLine;
-    CPolylineVisuals*   pPolylineVisuals;
+    CPolygon*          pPolygon;
+    CPolygonVisuals*   pPolygonVisuals;
     CParzival           File;
     std::string         strTmp;
 
@@ -181,56 +181,56 @@ void CXFigLoader::load(const std::string& _strFilename)
                     double fTmp;
                     int nTmp;
                     int nDepth;
-                    DEBUG_MSG("XFig Loader", "Polyline")
+                    DEBUG_MSG("XFig Loader", "Polygon")
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring subtype: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring subtype: " << nTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring linestyle: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring linestyle: " << nTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring thickness: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring thickness: " << nTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring pencolor: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring pencolor: " << nTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring fillcolor: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring fillcolor: " << nTmp)
                     nDepth = File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, depth: " << nDepth)
+                    DEBUG_MSG("XFig Loader", "Polygon, depth: " << nDepth)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring penstyle: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring penstyle: " << nTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring area_fill: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring area_fill: " << nTmp)
                     fTmp=File.readDouble();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring style_val: " << fTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring style_val: " << fTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring join_style: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring join_style: " << nTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring cap_style: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring cap_style: " << nTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring radius: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring radius: " << nTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring forward_arrow: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring forward_arrow: " << nTmp)
                     nTmp=File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, ignoring backward_arrow: " << nTmp)
+                    DEBUG_MSG("XFig Loader", "Polygon, ignoring backward_arrow: " << nTmp)
                     nNPoints = File.readInt();
-                    DEBUG_MSG("XFig Loader", "Polyline, number of points: " << nNPoints)
+                    DEBUG_MSG("XFig Loader", "Polygon, number of points: " << nNPoints)
                 ))
-                pPolyLine = new CPolyLine;
-                MEM_ALLOC("pPolyline")
+                pPolygon = new CPolygon;
+                MEM_ALLOC("pPolygon")
                 pShape = new CDoubleBufferedShape;
                 MEM_ALLOC("pShape")
-                pPolylineVisuals = new CPolylineVisuals(pShape);
-                MEM_ALLOC("pPolylineVisuals")
-                pPolyLine->setLineType(LineType::GRAPHICS_LINETYPE_LOOP);
-                pPolyLine->setDepths(SHAPE_DEPTH_ALL);
+                pPolygonVisuals = new CPolygonVisuals(pShape);
+                MEM_ALLOC("pPolygonVisuals")
+                pPolygon->setPolygonType(PolygonType::LINE_LOOP);
+                pPolygon->setDepths(SHAPE_DEPTH_ALL);
                 for (int i=0; i<nNPoints; ++i)
                 {
                     nX = File.readInt();
                     nY = File.readInt();
-                    DOM_VAR(DEBUG_MSG("XFig Loader", "Polyline, point " << i+1 << ": " << nX << "," << nY))
-                    pPolyLine->addVertex(Vector2d(double(nX)/100.0,double(-nY)/100.0));
+                    DOM_VAR(DEBUG_MSG("XFig Loader", "Polygon, point " << i+1 << ": " << nX << "," << nY))
+                    pPolygon->addVertex(Vector2d(double(nX)/100.0,double(-nY)/100.0));
                 }
-                pShape->buffer(pPolyLine);
-                m_ShapeList.push_back(pPolyLine);
-                m_VisualsList.push_back(pPolylineVisuals);
+                pShape->buffer(pPolygon);
+                m_ShapeList.push_back(pPolygon);
+                m_VisualsList.push_back(pPolygonVisuals);
                 break;
             default:
                 DEBUG_MSG("XFig Loader", "Ignoring unknown shape. ")

@@ -114,11 +114,11 @@ class CXMLImporter : public IWorldDataStorageUser
         void createShapeCircle(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
         void createShapePlanet(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
         void createShapeTerrain(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createShapePolyline(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createShapePolygon(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
         void createVisualsCircle(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
         void createVisualsPlanet(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
         void createVisualsTerrain(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createVisualsPolyline(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createVisualsPolygon(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
         void createRigidBody(const pugi::xml_node&);
         void createUniverse(const pugi::xml_node&);
         void readBodyCore(CRigidBody* const, const pugi::xml_node&);

@@ -86,7 +86,7 @@ IVisuals* CCircleVisuals::clone(CDoubleBufferedShape* const _pShape) const
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CCircleVisuals::draw(CCamera* const _pCamera,
-                          const IObject* const _pObject) const
+                          IObject* const _pObject) const
 {
     METHOD_ENTRY("CCircleVisuals::draw()");
     
@@ -94,21 +94,21 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
     Vector2d vecCenter = static_cast<CCircle*>(m_pRef->getShapeCur())->getCenter() - _pCamera->getCenter()/* +
                          IUniverseScaled::cellToDouble(_pObject->getCell() - _pCamera->getCell())*/;
 
-                         if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&
+    if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&
         (vecCenter.norm() >  fRad-_pCamera->getBoundingCircleRadius())
        )
     {
         Vector2d    vecEx(1.0, 0.0);
         double      fAng;    
         double      fAngEnd;
-        LineType    LineT;
+        PolygonType    LineT;
         
         double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
         if (std::isnan(fAlpha))
         {
             fAng = 0.0;
             fAngEnd = 2.0*M_PI;
-            LineT = LineType::GRAPHICS_LINETYPE_LOOP;
+            LineT = PolygonType::LINE_LOOP;
         }
         else
         {
@@ -118,7 +118,7 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
             
             fAng = fAng0-fAlpha;
             fAngEnd = fAng0+fAlpha;
-            LineT = LineType::GRAPHICS_LINETYPE_STRIP;
+            LineT = PolygonType::LINE_STRIP;
         }
 
         double fInc = CIRCLE_DEFAULT_RESOLUTION * m_Graphics.getResMPX() / fRad; 
@@ -138,6 +138,8 @@ void CCircleVisuals::draw(CCamera* const _pCamera,
             }
         m_Graphics.endLine();
     }
+//     m_Graphics.circle(_pObject->getKinematicsState().getLocalPosition(
+//                       static_cast<CCircle*>(m_pRef->getShapeCur())->getCentroid()) -_pCamera->getCenter(), 0.2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

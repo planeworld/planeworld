@@ -21,15 +21,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \file       circle_visuals.h
-/// \brief      Prototype of class "CPolylineVisuals"
+/// \brief      Prototype of class "CPolygonVisuals"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2010-04-08
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef POLYLINE_VISUALS_H
-#define POLYLINE_VISUALS_H
+#ifndef POLYGON_VISUALS_H
+#define POLYGON_VISUALS_H
 
 //--- Standard header --------------------------------------------------------//
 
@@ -38,22 +38,22 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for managing the visualisation of a polyline
+/// \brief Class for managing the visualisation of a polygon
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CPolylineVisuals : public IVisuals
+class CPolygonVisuals : public IVisuals
 {
     
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
-        CPolylineVisuals(){}
-        CPolylineVisuals(CDoubleBufferedShape* const);
-        ~CPolylineVisuals();
+        CPolygonVisuals(){}
+        CPolygonVisuals(CDoubleBufferedShape* const);
+        ~CPolygonVisuals();
         
         //--- Constant Methods -----------------------------------------------//
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
-        virtual void        draw(CCamera* const, const IObject* const) const;
+        virtual void        draw(CCamera* const, IObject* const) const;
         
         const ShapeVisualsType getShapeVisualsType() const;
                 
@@ -73,11 +73,11 @@ class CPolylineVisuals : public IVisuals
 /// \return Type of shape visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeVisualsType CPolylineVisuals::getShapeVisualsType() const
+inline const ShapeVisualsType CPolygonVisuals::getShapeVisualsType() const
 {
-    METHOD_ENTRY("CPolylineVisuals::getShapeVisualsType")
-    return ShapeVisualsType::POLYLINE;
+    METHOD_ENTRY("CPolygonVisuals::getShapeVisualsType")
+    return ShapeVisualsType::POLYGON;
 }
 
 
-#endif // POLYLINE_VISUALS_H
+#endif // POLYGON_VISUALS_H

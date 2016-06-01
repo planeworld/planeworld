@@ -21,30 +21,30 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \file       circle_visuals.cpp
-/// \brief      Implementation of class "CPolylineVisuals"
+/// \brief      Implementation of class "CPolygonVisuals"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2010-04-08
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "polyline_visuals.h"
+#include "polygon_visuals.h"
 
-#include "polyline.h"
+#include "polygon.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Copy Constructor
 ///
-/// \param _pPolyline Polyline to attach when initialising 
+/// \param _pPolygon Polygon to attach when initialising 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CPolylineVisuals::CPolylineVisuals(CDoubleBufferedShape* const _pPolyline)
+CPolygonVisuals::CPolygonVisuals(CDoubleBufferedShape* const _pPolygon)
 {
-    METHOD_ENTRY("CPolylineVisuals::CPolylineVisuals")
-    CTOR_CALL("CPolylineVisuals::CPolylineVisuals")
+    METHOD_ENTRY("CPolygonVisuals::CPolygonVisuals")
+    CTOR_CALL("CPolygonVisuals::CPolygonVisuals")
     
-    this->attachTo(_pPolyline);
+    this->attachTo(_pPolygon);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,49 +52,59 @@ CPolylineVisuals::CPolylineVisuals(CDoubleBufferedShape* const _pPolyline)
 /// \brief Destructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CPolylineVisuals::~CPolylineVisuals()
+CPolygonVisuals::~CPolygonVisuals()
 {
-    METHOD_ENTRY("CPolylineVisuals::~CPolylineVisuals")
-    DTOR_CALL("CPolylineVisuals::~CPolylineVisuals")
+    METHOD_ENTRY("CPolygonVisuals::~CPolygonVisuals")
+    DTOR_CALL("CPolygonVisuals::~CPolygonVisuals")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Clone a polyline shape visual
+/// \brief Clone a polygon shape visual
 ///
 /// \param _pShape Shape the visuals are attached to
 ///
-/// \return Clone of polyline shape visuals
+/// \return Clone of polygon shape visuals
 ///
 ///////////////////////////////////////////////////////////////////////////////
-IVisuals* CPolylineVisuals::clone(CDoubleBufferedShape* const _pShape) const
+IVisuals* CPolygonVisuals::clone(CDoubleBufferedShape* const _pShape) const
 {
-    METHOD_ENTRY("CPolylineVisuals::clone");
+    METHOD_ENTRY("CPolygonVisuals::clone");
     
-    CPolylineVisuals* pClone = new CPolylineVisuals(_pShape);
-    MEM_ALLOC("CPolylineVisuals")
+    CPolygonVisuals* pClone = new CPolygonVisuals(_pShape);
+    MEM_ALLOC("CPolygonVisuals")
     
     return pClone;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Draw the polyline
+/// \brief Draw the polygon
 ///
 /// \param _pCamera Active camera for drawing visuals
 /// \param _pObject Corresponding object
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPolylineVisuals::draw(CCamera* const _pCamera,
-                            const IObject* const _pObject) const
+void CPolygonVisuals::draw(CCamera* const _pCamera,
+                           IObject* const _pObject) const
 {
-    METHOD_ENTRY("CPolylineVisuals::draw")
+    METHOD_ENTRY("CPolygonVisuals::draw")
 
-    CPolyLine* pPolyline = static_cast<CPolyLine*>(m_pRef->getShapeCur());
+    CPolygon* pPolygon = static_cast<CPolygon*>(m_pRef->getShapeCur());
     
-    m_Graphics.polyline(pPolyline->getVertices(), pPolyline->getLineType(),
+    
+    m_Graphics.polygon(pPolygon->getVertices(), pPolygon->getPolygonType(),
                         -_pCamera->getCenter() + 
                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2);
+//     m_Graphics.circle(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid()) -_pCamera->getCenter(), 0.2);
+//     m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+//     m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(-0.2, 0.0)) -_pCamera->getCenter());
+//     m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(+0.2, 0.0)) -_pCamera->getCenter());
+//     m_Graphics.endLine();
+//     m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+//     m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(0.0, -0.2)) -_pCamera->getCenter());
+//     m_Graphics.addVertex(_pObject->getKinematicsState().getLocalPosition(pPolygon->getCentroid() - Vector2d(0.0, +0.2)) -_pCamera->getCenter());
+//     m_Graphics.endLine();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,9 +116,9 @@ void CPolylineVisuals::draw(CCamera* const _pCamera,
 /// \return Remaining stream with game state information
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::istream& CPolylineVisuals::myStreamIn(std::istream& _is)
+std::istream& CPolygonVisuals::myStreamIn(std::istream& _is)
 {
-    METHOD_ENTRY("CPolylineVisuals::myStreamIn")
+    METHOD_ENTRY("CPolygonVisuals::myStreamIn")
     return _is;
 }
 
@@ -118,12 +128,12 @@ std::istream& CPolylineVisuals::myStreamIn(std::istream& _is)
 ///
 /// \param _os  Source stream
 ///
-/// \return Stream with game state information of CPolylineVisuals instance
+/// \return Stream with game state information of CPolygonVisuals instance
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream& CPolylineVisuals::myStreamOut(std::ostream& _os)
+std::ostream& CPolygonVisuals::myStreamOut(std::ostream& _os)
 {
-    METHOD_ENTRY("CPolylineVisuals::myStreamOut")
+    METHOD_ENTRY("CPolygonVisuals::myStreamOut")
     return _os;
 }
 

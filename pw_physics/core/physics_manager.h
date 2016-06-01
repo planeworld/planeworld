@@ -153,8 +153,11 @@ class CPhysicsManager : public IWorldDataStorageUser
         std::string                m_strLuaPhysicsInterface;    ///< Lua physics interface file
         
         static CPhysicsManager*    m_pLuaThis;                  ///< Store this-pointer for Lua access
+        static int                 luaAccelerateTime(lua_State*);
+        static int                 luaDecelerateTime(lua_State*);
         static int                 luaActivateThruster(lua_State*);
         static int                 luaDeactivateThruster(lua_State*);
+        
         static int                 luaApplyForce(lua_State*);
         static int                 luaGetAngle(lua_State*);
         static int                 luaGetAngleRef(lua_State*);

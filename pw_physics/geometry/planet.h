@@ -92,8 +92,6 @@ class CPlanet : public IShape
         const ShapeType                     getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
-        void copy(const IShape* const);
-        
         void initTerrain();
         
         void setPlanetType(const PlanetType&);
@@ -110,13 +108,16 @@ class CPlanet : public IShape
         
         void resetSampling();
         
-        void transform(const double&, const Vector2d&);
+        void transform(const double&, const Vector2d&, const Vector2d&);
                         
     protected:
         
-        void                myInitTerrain();
         std::istream&       myStreamIn(std::istream&);
         std::ostream&       myStreamOut(std::ostream&);
+        
+        void                myCopy(const IShape* const);
+        void                myInitTerrain();
+        void                myUpdateGeometry();
         
         PlanetType          m_PlanetType;               ///< Identifies type of planet
 
@@ -318,39 +319,6 @@ inline void CPlanet::setPlanetType(const PlanetType& _PlanetType)
     METHOD_ENTRY("CPlanet::setPlanetType")
 
     m_PlanetType = _PlanetType;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Defines the center of the planet
-///
-/// \param _vecC Center of the planet
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPlanet::setCenter(const Vector2d& _vecC)
-{
-    METHOD_ENTRY("CPlanet::setCenter")
-
-    m_vecCenter0 = _vecC;
-    m_vecCenter = _vecC;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Defines the center of the planet
-///
-/// \param _fX Center-x of the planet
-/// \param _fY Center-y of the planet
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPlanet::setCenter(const double& _fX, const double& _fY)
-{
-    METHOD_ENTRY("CPlanet::setCenter")
-
-    m_vecCenter0[0] = _fX;
-    m_vecCenter0[1] = _fY;
-    m_vecCenter[0]  = _fX;
-    m_vecCenter[1]  = _fY;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

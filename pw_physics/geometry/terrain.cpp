@@ -77,18 +77,7 @@ CTerrain* CTerrain::clone() const
     CTerrain* pClone = new CTerrain();
     MEM_ALLOC("pClone")
     
-    pClone->m_Cache             = m_Cache;
-    pClone->m_fAngle            = m_fAngle;
-    pClone->m_fDiversity        = m_fDiversity;
-    pClone->m_fGroundResolution = m_fGroundResolution;
-    pClone->m_fHeightMax        = m_fHeightMax;
-    pClone->m_fSmoothness       = m_fSmoothness;
-    pClone->m_fWidth            = m_fWidth;
-    pClone->m_nSeed             = m_nSeed;
-    pClone->m_vecCenter         = m_vecCenter;
-    pClone->m_vecCenter0        = m_vecCenter0;
-    pClone->m_AABB              = m_AABB;
-    pClone->m_nDepthlayers      = m_nDepthlayers;
+    pClone->copy(this);
         
     return pClone;
 }
@@ -117,35 +106,6 @@ const double CTerrain::getSurface(const double& _fX) const
         nX = 0u;
     }
     return m_Cache[nX];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Copies information of a given terrain
-///
-/// This method does not create a new terrain, use clone in that case!
-///
-/// \param _pShape Shape to be copied
-///
-////////////////////////////////////////////////////////////////////////////////
-void CTerrain::copy(const IShape* const _pShape)
-{
-    METHOD_ENTRY("CTerrain::copy");
-    
-    const CTerrain* const pTerrain = static_cast<const CTerrain* const>(_pShape);
-        
-    m_Cache             = pTerrain->m_Cache;
-    m_fAngle            = pTerrain->m_fAngle;
-    m_fDiversity        = pTerrain->m_fDiversity;
-    m_fGroundResolution = pTerrain->m_fGroundResolution;
-    m_fHeightMax        = pTerrain->m_fHeightMax;
-    m_fSmoothness       = pTerrain->m_fSmoothness;
-    m_fWidth            = pTerrain->m_fWidth;
-    m_nSeed             = pTerrain->m_nSeed;
-    m_vecCenter         = pTerrain->m_vecCenter;
-    m_vecCenter0        = pTerrain->m_vecCenter0;
-    m_AABB              = pTerrain->m_AABB;
-    m_nDepthlayers      = pTerrain->m_nDepthlayers;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -225,13 +185,16 @@ void CTerrain::init()
 /// \brief Transforms the shape
 ///
 /// \param _fAngle Rotation angle
+/// \param _vecCOM Center of mass in local (object) coordinates
 /// \param _vecV Translation vector
 ///
 /// \todo Maybe implement virtual init method for all shapes to call after
 ///       transform
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CTerrain::transform( const double& _fAngle, const Vector2d& _vecV )
+void CTerrain::transform( const double& _fAngle,
+                          const Vector2d& _vecCOM,
+                          const Vector2d& _vecV )
 {
     METHOD_ENTRY("CTerrain::transform")
 
@@ -289,5 +252,43 @@ std::ostream& CTerrain::myStreamOut(std::ostream& _os)
     /// \todo Implement streaming
     
     return _os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies information of a given terrain
+///
+/// This method does not create a new terrain, use clone in that case!
+///
+/// \param _pShape Shape to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void CTerrain::myCopy(const IShape* const _pShape)
+{
+    METHOD_ENTRY("CTerrain::myCopy")
+    
+    const CTerrain* const pTerrain = static_cast<const CTerrain* const>(_pShape);
+        
+    m_Cache             = pTerrain->m_Cache;
+    m_fAngle            = pTerrain->m_fAngle;
+    m_fDiversity        = pTerrain->m_fDiversity;
+    m_fGroundResolution = pTerrain->m_fGroundResolution;
+    m_fHeightMax        = pTerrain->m_fHeightMax;
+    m_fSmoothness       = pTerrain->m_fSmoothness;
+    m_fWidth            = pTerrain->m_fWidth;
+    m_nSeed             = pTerrain->m_nSeed;
+    m_vecCenter         = pTerrain->m_vecCenter;
+    m_vecCenter0        = pTerrain->m_vecCenter0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Update geometry relevant data, e.g. inertia, area, center of mass
+///
+////////////////////////////////////////////////////////////////////////////////
+void CTerrain::myUpdateGeometry()
+{
+    METHOD_ENTRY("CTerrain::myUpdateGeometry")
+    DOM_VAR(DEBUG_MSG("Terrain", "Inertia calculated: " << m_fInertia))
 }
 

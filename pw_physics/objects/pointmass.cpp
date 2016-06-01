@@ -88,7 +88,7 @@ void CPointMass::calcMovement(const double& _fStep)
 {
     METHOD_ENTRY("CPointMass::calcMovement()");
 
-    Vector2d vecAccel = m_vecForce / m_fMass;
+    Vector2d vecAccel = m_vecForce / m_Geometry.getMass();
     m_pIntVel->integrate(vecAccel, _fStep*m_fTimeFac);
     m_pIntPos->integrate(m_pIntVel->getValue(), _fStep*m_fTimeFac);
 

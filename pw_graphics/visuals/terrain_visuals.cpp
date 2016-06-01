@@ -89,7 +89,7 @@ IVisuals* CTerrainVisuals::clone(CDoubleBufferedShape* const _pShape) const
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CTerrainVisuals::draw(CCamera* const _pCamera,
-                           const IObject* const _pObject) const
+                           IObject* const _pObject) const
 {
     METHOD_ENTRY("CTerrainVisuals::draw")
     
@@ -120,7 +120,7 @@ void CTerrainVisuals::draw(CCamera* const _pCamera,
     fLeft = pTerrain->snapToTerrainGrid(fLeft);
     fRight = pTerrain->snapToTerrainGrid(fRight);
     
-    m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_STRIP, SHAPE_DEFAULT_DEPTH);
+    m_Graphics.beginLine(PolygonType::LINE_STRIP, SHAPE_DEFAULT_DEPTH);
     
     while ( fLeft <= fRight)
     {

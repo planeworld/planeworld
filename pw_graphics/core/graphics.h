@@ -85,12 +85,20 @@ const double GRAPHICS_DEPTH_DEFAULT = -15.0;            ///< Default drawing dep
 
 const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn-objects
 
-/// specifies the type of line to be drawn
-enum class LineType
+/// Specifies the type of polygon to be drawn
+enum class PolygonType
 {
-    GRAPHICS_LINETYPE_SINGLE,
-    GRAPHICS_LINETYPE_LOOP,
-    GRAPHICS_LINETYPE_STRIP
+    FILLED,
+    LINE_SINGLE,
+    LINE_LOOP,
+    LINE_STRIP
+};
+
+/// Specifies the type of circle to be drawn
+enum class CircleType
+{
+    FILLED,
+    OUTLINE
 };
 
 /// Type definition for vertex list
@@ -194,7 +202,7 @@ class CGraphics
         void circle(const Vector2d&, const double&) const;
         void dot(const Vector2d&) const;
         void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
-        void polyline(const VertexListType&, const LineType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
+        void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void rect(const Vector2d&, const Vector2d&) const;
         void showVec(const Vector2d&, const Vector2d&) const;
 
@@ -204,7 +212,7 @@ class CGraphics
         void dots(CCircularBuffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0));
         void filledRect(const Vector2d&, const Vector2d&);
         void setDepth(const double&);
-        void beginLine(const LineType&, const double&);
+        void beginLine(const PolygonType&, const double&);
         void endLine();
         
         void bufferGL(const GLenum, const std::vector<GLfloat>* const,

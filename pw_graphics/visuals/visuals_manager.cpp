@@ -180,7 +180,7 @@ void CVisualsManager::drawGrid() const
         // Vertical sub grid lines
         while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
         {
-            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_SINGLE,-15.3);
+            m_Graphics.beginLine(PolygonType::LINE_SINGLE,-15.3);
                 m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                m_pCamera->getBoundingBox().getLowerLeft()[1]-
                                                m_pCamera->getCenter()[1]);
@@ -193,7 +193,7 @@ void CVisualsManager::drawGrid() const
         // Horizontal sub grid lines
         while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
         {
-            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_SINGLE,-15.3);
+            m_Graphics.beginLine(PolygonType::LINE_SINGLE,-15.3);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
                                     m_pCamera->getCenter()[0],
                                     fGridTop-m_pCamera->getCenter()[1]);
@@ -224,7 +224,7 @@ void CVisualsManager::drawGrid() const
         // Vertical grid lines
         while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
         {
-            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_SINGLE,-15.2);
+            m_Graphics.beginLine(PolygonType::LINE_SINGLE,-15.2);
                 m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                 m_pCamera->getBoundingBox().getLowerLeft()[1]-
                                                 m_pCamera->getCenter()[1]);
@@ -237,7 +237,7 @@ void CVisualsManager::drawGrid() const
         // Horizontal grid lines
         while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
         {
-            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_SINGLE,-15.2);
+            m_Graphics.beginLine(PolygonType::LINE_SINGLE,-15.2);
                 m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
                                     m_pCamera->getCenter()[0],
                                     fGridTop-m_pCamera->getCenter()[1]);
@@ -279,13 +279,13 @@ void CVisualsManager::drawGridHUD() const
             fGrid*=0.1;
 //         
 //         // Draw zoom scale
-//         m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+//         m_Graphics.beginLine(LINE_SINGLE,-15.2);
 //             m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2- 26,10));
 //             m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+101,10));
 //         m_Graphics.endLine();
 //         for (int i=-1; i<=4; ++i)
 //         {
-//             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+//             m_Graphics.beginLine(LINE_SINGLE,-15.2);
 //                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,11));
 //                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,15));
 //             m_Graphics.endLine();
@@ -293,14 +293,14 @@ void CVisualsManager::drawGridHUD() const
 //         // Draw zoom level
 //         for (int i=static_cast<int>(std::log10(fGrid)); i<0; ++i)
 //         {
-//             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+//             m_Graphics.beginLine(LINE_SINGLE,-15.2);
 //                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
 //                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
 //             m_Graphics.endLine();
 //         }
 //         for (int i=1; i<=static_cast<int>(std::log10(fGrid)); ++i)
 //         {
-//             m_Graphics.beginLine(GRAPHICS_LINETYPE_SINGLE,-15.2);
+//             m_Graphics.beginLine(LINE_SINGLE,-15.2);
 //                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
 //                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
 //             m_Graphics.endLine();
@@ -512,7 +512,7 @@ void CVisualsManager::drawTrajectories() const
             
             // Draw objects trajectories
             double fColourFade = 0.1;
-            m_Graphics.beginLine(LineType::GRAPHICS_LINETYPE_STRIP, -15.0);
+            m_Graphics.beginLine(PolygonType::LINE_STRIP, -15.0);
             
             for (auto i=0u; i<ci->second->getTrajectory().getPositions().size(); ++i)
             {

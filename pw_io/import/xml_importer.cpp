@@ -42,8 +42,8 @@
 #include "physics_manager.h"
 #include "planet.h"
 #include "planet_visuals.h"
-#include "polyline.h"
-#include "polyline_visuals.h"
+#include "polygon.h"
+#include "polygon_visuals.h"
 #include "terrain.h"
 #include "terrain_visuals.h"
 #include "visuals_manager.h"
@@ -229,9 +229,9 @@ bool CXMLImporter::import(const std::string& _strFilename,
                 {
                     this->createShapeTerrain(m_pCurrentBody, m_pCurrentObjectVisuals, N);
                 }
-                else if (strType == "shape_polyline")
+                else if (strType == "shape_polygon")
                 {
-                    this->createShapePolyline(m_pCurrentBody, m_pCurrentObjectVisuals, N);
+                    this->createShapePolygon(m_pCurrentBody, m_pCurrentObjectVisuals, N);
                 }
                 else if (strType == "no_type")
                 {
@@ -251,9 +251,9 @@ bool CXMLImporter::import(const std::string& _strFilename,
         {
             this->createVisualsTerrain(m_pCurrentDoubleBufferedShape, m_pCurrentObjectVisuals, N);
         }
-        else if (std::string(N.name()) == "shape_visuals_polyline")
+        else if (std::string(N.name()) == "shape_visuals_polygon")
         {
-            this->createVisualsPolyline(m_pCurrentDoubleBufferedShape, m_pCurrentObjectVisuals, N);
+            this->createVisualsPolygon(m_pCurrentDoubleBufferedShape, m_pCurrentObjectVisuals, N);
         }
         
         N = N.next_sibling();
@@ -959,9 +959,9 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
                     {
                         this->createShapeCircle(pRigidBody, pObjectVisuals, N);
                     }
-                    else if (strType == "shape_polyline")
+                    else if (strType == "shape_polygon")
                     {
-                        this->createShapePolyline(pRigidBody, pObjectVisuals, N);
+                        this->createShapePolygon(pRigidBody, pObjectVisuals, N);
                     }
                     else if (strType == "shape_terrain")
                     {
@@ -1001,6 +1001,7 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody,
         pCircle->setRadius(_Node.attribute("radius").as_double());
         pCircle->setCenter(_Node.attribute("center_x").as_double(),
                           _Node.attribute("center_y").as_double());
+        pCircle->setMass(checkAttributeDouble(_Node, "mass", pCircle->getMass()));
         
         CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
         MEM_ALLOC("CDoubleBufferedShape")
@@ -1046,6 +1047,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
         CPlanet* pPlanet = new CPlanet;
         MEM_ALLOC("CPlanet")
         
+        pPlanet->setMass(checkAttributeDouble(_Node, "mass", pPlanet->getMass()));
         pPlanet->setRadius(_Node.attribute("radius").as_double());
         pPlanet->setCenter(_Node.attribute("center_x").as_double(),
                           _Node.attribute("center_y").as_double());
@@ -1081,30 +1083,34 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Create a polyline shape
+/// \brief Create a polygon shape
 ///
 /// \param _pBody Body to create the shape for
 /// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapePolyline(CBody* const _pBody,
-                                       IObjectVisuals* const _pObjectVisuals,
-                                       const pugi::xml_node& _Node)
+void CXMLImporter::createShapePolygon(CBody* const _pBody,
+                                      IObjectVisuals* const _pObjectVisuals,
+                                      const pugi::xml_node& _Node)
 {
-    METHOD_ENTRY("CXMLImporter::createShapePolyline")
+    METHOD_ENTRY("CXMLImporter::createShapePolygon")
     
     if (!checkFile(_Node))
     {
-        CPolyLine* pPolyline = new CPolyLine;
-        MEM_ALLOC("CPolyLine")
+        CPolygon* pPolygon = new CPolygon;
+        MEM_ALLOC("CPolygon")
         
-        if (std::string(_Node.attribute("line_type").as_string()) == "loop")
-            pPolyline->setLineType(LineType::GRAPHICS_LINETYPE_LOOP);
-        else if (std::string(_Node.attribute("line_type").as_string()) == "strip")
-            pPolyline->setLineType(LineType::GRAPHICS_LINETYPE_STRIP);
-        else if (std::string(_Node.attribute("line_type").as_string()) == "single")
-            pPolyline->setLineType(LineType::GRAPHICS_LINETYPE_SINGLE);
+        if (std::string(_Node.attribute("polygon_type").as_string()) == "filled")
+            pPolygon->setPolygonType(PolygonType::FILLED);
+        else if (std::string(_Node.attribute("polygon_type").as_string()) == "line_loop")
+            pPolygon->setPolygonType(PolygonType::LINE_LOOP);
+        else if (std::string(_Node.attribute("polygon_type").as_string()) == "line_strip")
+            pPolygon->setPolygonType(PolygonType::LINE_STRIP);
+        else if (std::string(_Node.attribute("polygon_type").as_string()) == "line_single")
+            pPolygon->setPolygonType(PolygonType::LINE_SINGLE);
+        
+        pPolygon->setMass(checkAttributeDouble(_Node, "mass", pPolygon->getMass()));
         
         std::string strPoints = _Node.attribute("points").as_string();
         size_t Pos;
@@ -1129,14 +1135,14 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody,
                 iss >> fY;
                 Pos=strPoints.find_first_of(",");
             }
-            pPolyline->addVertex(fX,fY);
+            pPolygon->addVertex(fX,fY);
         }
         
         CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
         MEM_ALLOC("CDoubleBufferedShape")
         m_pCurrentDoubleBufferedShape = pShape;
         
-        pShape->buffer(pPolyline);
+        pShape->buffer(pPolygon);
         
         // The shape might have visuals
         if (!_Node.empty())
@@ -1146,7 +1152,7 @@ void CXMLImporter::createShapePolyline(CBody* const _pBody,
             {
                 if (std::string(N.name()) == "visuals")
                 {
-                    this->createVisualsPolyline(pShape, _pObjectVisuals, N);
+                    this->createVisualsPolygon(pShape, _pObjectVisuals, N);
                 }
                 N = N.next_sibling();
             }
@@ -1176,6 +1182,7 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody,
         CTerrain* pTerrain = new CTerrain;
         MEM_ALLOC("CTerrain")
         
+        pTerrain->setMass(checkAttributeDouble(_Node, "mass", pTerrain->getMass()));
         pTerrain->setWidth (_Node.attribute("width").as_double());
         pTerrain->setCenter(_Node.attribute("center_x").as_double(),
                             _Node.attribute("center_y").as_double());
@@ -1269,29 +1276,29 @@ void CXMLImporter::createVisualsPlanet(CDoubleBufferedShape* const _pPlanet,
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Create visuals to a polyline shape
+/// \brief Create visuals to a polygon shape
 ///
-/// \param _pPolyline Polyline to create visuals for
+/// \param _pPolygon Polygon to create visuals for
 /// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsPolyline(CDoubleBufferedShape* const _pPolyline,
+void CXMLImporter::createVisualsPolygon(CDoubleBufferedShape* const _pPolygon,
                                          IObjectVisuals* const _pObjectVisuals,
                                          const pugi::xml_node& _Node)
 {
-    METHOD_ENTRY("CXMLImporter::createVisualsPolyline")
+    METHOD_ENTRY("CXMLImporter::createVisualsPolygon")
 
     if (!checkFile(_Node))
     {
         if (!_Node.empty())
         {
-            if (std::string(_Node.attribute("type").as_string()) == "shape_visuals_polyline")
+            if (std::string(_Node.attribute("type").as_string()) == "shape_visuals_polygon")
             {
-                CPolylineVisuals* pPolylineVisuals = new CPolylineVisuals(_pPolyline);
-                MEM_ALLOC("CPolylineVisuals")
+                CPolygonVisuals* pPolygonVisuals = new CPolygonVisuals(_pPolygon);
+                MEM_ALLOC("CPolygonVisuals")
                 
-                _pObjectVisuals->addVisuals(pPolylineVisuals);
+                _pObjectVisuals->addVisuals(pPolygonVisuals);
             }
         }
     } // if (!checkFile(_Node))
@@ -1372,7 +1379,10 @@ void CXMLImporter::readBodyCore(CRigidBody* const _pO, const pugi::xml_node& _No
     {
         _pO->setAngle(checkAttributeDouble(_Node, "angle", _pO->getAngle()));
         _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity()));
-        _pO->setInertia(checkAttributeDouble(_Node, "inertia", _pO->getInertia()));
+        
+        double fInertia = checkAttributeDouble(_Node, "inertia", _pO->getInertia());
+        DOM_VAR(NOTICE_MSG("XML Importer", "Inertia is be calculated automatically now, " <<
+                                           "value " << fInertia << " ignored."))
     }
 }
 
@@ -1396,7 +1406,6 @@ void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _
             std::pair<IKinematicsStateUser*, std::string>(_pO, strRef));
         
         _pO->setName(checkAttributeString(_Node, "name", _pO->getName()));
-        _pO->setMass(checkAttributeDouble(_Node, "mass", _pO->getMass()));
         
         // Origin might be given with no respect to grid, since user shouldn't have
         // to care unless he really need to place objects with high precision far

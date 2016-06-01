@@ -38,7 +38,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals_thruster.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/object_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/planet_visuals.cpp    
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/polyline_visuals.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/polygon_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/spring_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/terrain_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals.cpp
@@ -55,7 +55,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/double_buffered_shape.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/geometry.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/planet.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/polyline.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/polygon.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/shape.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/terrain.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp

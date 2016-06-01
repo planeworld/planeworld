@@ -57,6 +57,9 @@ class CGeometry
 
         //--- Constant methods -----------------------------------------------//
         CGeometry*                clone() const;
+        const Vector2d&           getCOM() const;
+        const double&             getInertia() const;
+        const double&             getMass() const;
         const DBShapesType* const getShapes() const;
         
         //--- Methods --------------------------------------------------------//
@@ -66,6 +69,7 @@ class CGeometry
         void updateBoundingBox(const CBoundingBox&);
         void updateBoundingBox(const Vector2d&);
         void setShapes(std::list<CDoubleBufferedShape*>* const);
+        void transform(const double&, const Vector2d&);
         void update();
         
         CGeometry& operator=(const CGeometry&);
@@ -81,10 +85,52 @@ class CGeometry
         //-- Variables [protected] -------------------------------------------//
         CBoundingBox    m_AABB;       ///< Bounding box
         DBShapesType*   m_pShapes;    ///< Double buffered shapes
+        Vector2d        m_vecCOM;     ///< Center of mass
+        double          m_fInertia;   ///< Inertia of whole geometry
+        double          m_fMass;      ///< Mass of whole geometry
         
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return center of mass of the geometry
+///
+/// \return Center of mass
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const Vector2d& CGeometry::getCOM() const
+{
+    METHOD_ENTRY("CGeometry::getCOM")
+    return m_vecCOM;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return inertia of the geometry
+///
+/// \return Inertia of the geometry
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CGeometry::getInertia() const
+{
+    METHOD_ENTRY("CGeometry::getInertia")
+    return m_fInertia;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return mass of the geometry
+///
+/// \return Mass of the geometry
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CGeometry::getMass() const
+{
+    METHOD_ENTRY("CGeometry::getMass")
+    return m_fMass;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
