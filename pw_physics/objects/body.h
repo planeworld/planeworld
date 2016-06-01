@@ -75,7 +75,6 @@ class CBody : public IObject
         //--- Methods [protected] --------------------------------------------//
         void myInit();
         void mySetNewIntegrator(const IntegratorType&);
-        void myTransform();
         
         std::istream& myStreamIn (std::istream&);
         std::ostream& myStreamOut(std::ostream&);

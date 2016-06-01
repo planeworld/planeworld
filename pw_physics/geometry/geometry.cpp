@@ -205,6 +205,40 @@ void CGeometry::setShapes(std::list<CDoubleBufferedShape*>* _pShapeList)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Transform geometry with given parameters from local to global
+///        coordinates
+///
+/// \param _fAngle Angle of local coordinate system
+/// \param _vecOrigin Origin of local coordinate system
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGeometry::transform(const double& _fAngle, const Vector2d& _vecOrigin)
+{
+    METHOD_ENTRY("CGeometry::transform")
+    
+    std::list< CDoubleBufferedShape* >::const_iterator ci = m_pShapes->begin();
+    m_AABB = (*ci)->getShapeCur()->getBoundingBox();
+    while ((++ci) != m_pShapes->end())
+    {
+        // Update bounding box of previous time step for continuous collision dection
+        m_AABB.update((*ci)->getShapeCur()->getBoundingBox());
+    }
+    this->update();
+    for (std::list< CDoubleBufferedShape* >::const_iterator ci = m_pShapes->begin();
+         ci != m_pShapes->end(); ++ci)
+    {
+        (*ci)->getShapeCur()->transform(_fAngle, m_vecCOM, _vecOrigin);
+
+        // Update depthlayers
+//         m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
+
+        // Update bounding box of current time step
+        m_AABB.update((*ci)->getShapeCur()->getBoundingBox());
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Swap current shapelist with shapes of previous time step
 ///
 ///////////////////////////////////////////////////////////////////////////////

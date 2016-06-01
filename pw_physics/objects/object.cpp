@@ -183,13 +183,8 @@ void IObject::init()
     
     this->myInit();
     
+    // Call transform twice to correctly set bounding boxes via front and backbuffer
     this->transform();
-
-    // Initialise bounding box
-    // Center of mass (position vector) is always inside AABB
-    m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue());
-    m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue());
-    
     this->transform();
 }
 
@@ -283,13 +278,8 @@ void IObject::transform()
     // Otherwise:
     if (m_bDynamics)
     {
-        // Initialise bounding box
-        // Center of mass (position vector) is always inside AABB
-        m_Geometry.getBoundingBox().setLowerLeft( m_pIntPos->getValue());
-        m_Geometry.getBoundingBox().setUpperRight(m_pIntPos->getValue());
-
-        // Call object specific transformation
-        this->myTransform();
+        m_Geometry.transform(m_KinematicsState.getAngle(), m_KinematicsState.getOrigin());
+        m_KinematicsState.transform(m_pIntPos->getValue(), m_Geometry.getCOM());
     }
 }
 

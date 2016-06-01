@@ -157,39 +157,6 @@ void CBody::mySetNewIntegrator(const IntegratorType& _IntType)
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Move and rotate the body
-///
-///////////////////////////////////////////////////////////////////////////////
-void CBody::myTransform()
-{
-    METHOD_ENTRY("CBody::myTransform")
-
-    std::list< CDoubleBufferedShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
-    m_Geometry.getBoundingBox() = (*ci)->getShapeCur()->getBoundingBox();
-    while ((++ci) != m_Geometry.getShapes()->end())
-    {
-        // Update bounding box of previous time step for continuous collision dection
-        m_Geometry.updateBoundingBox((*ci)->getShapeCur()->getBoundingBox());
-    }
-    m_Geometry.update();
-    for (std::list< CDoubleBufferedShape* >::const_iterator ci = m_Geometry.getShapes()->begin();
-        ci != m_Geometry.getShapes()->end(); ++ci)
-    {
-        (*ci)->getShapeCur()->transform(m_KinematicsState.getAngle(),
-                                        m_Geometry.getCOM(),
-                                        m_KinematicsState.getOrigin());
-
-        // Update depthlayers
-        m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
-
-        // Update bounding box of current time step
-        m_Geometry.updateBoundingBox((*ci)->getShapeCur()->getBoundingBox());
-    }
-    m_KinematicsState.transform(m_pIntPos->getValue(), m_Geometry.getCOM());
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Input stream for game state information

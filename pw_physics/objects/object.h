@@ -130,7 +130,6 @@ class IObject : public IUniqueIDUser,
         virtual void myDynamics(const double&) = 0;                 ///< Calculate dynamics from forces
         virtual void myInit() = 0;                                  ///< Initialise object -> total reset
         virtual void mySetNewIntegrator(const IntegratorType&) = 0; ///< Change type of integrator 
-        virtual void myTransform() = 0;                             ///< Move and/or rotate a mass
         
         virtual std::istream& myStreamIn (std::istream&) = 0;       ///< Stream in from inherited class
         virtual std::ostream& myStreamOut(std::ostream&) = 0;       ///< Stream out from inherited class
