@@ -86,7 +86,7 @@ IVisuals* CCircleVisuals::clone(CDoubleBufferedShape* const _pShape) const
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CCircleVisuals::draw(CCamera* const _pCamera,
-                          IObject* const _pObject) const
+                          CObject* const _pObject) const
 {
     METHOD_ENTRY("CCircleVisuals::draw()");
     

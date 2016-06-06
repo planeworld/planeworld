@@ -38,7 +38,6 @@
 #include "circle.h"
 #include "circle_visuals.h"
 #include "object_visuals.h"
-#include "rigidbody.h"
 #include "star_system.h"
 #include "world_data_storage_user.h"
 
@@ -65,7 +64,7 @@ class CUniverse : public IWorldDataStorageUser
 {
     
     public:
-        CRigidBody*                 m_pStar;
+        CObject*                    m_pStar;
         CCircle*                    m_pStarShape;
         CCircleVisuals*             m_pStarVisuals;
         IObjectVisuals*             m_pStarObjectVisuals;
@@ -75,7 +74,7 @@ class CUniverse : public IWorldDataStorageUser
         virtual ~CUniverse();
         
         //--- Constant Methods -----------------------------------------------//
-        const std::vector<IObject*>&          getObjects() const;
+        const std::vector<CObject*>&          getObjects() const;
         const std::vector<CStarSystem*>&      getStarSystems() const;
         const std::vector<IObjectVisuals*>&   getVisuals() const;
 
@@ -91,7 +90,7 @@ class CUniverse : public IWorldDataStorageUser
         //--- Constant Methods [private] -------------------------------------//
         const std::string starClassToString(const int&) const;
         
-        std::vector<IObject*>           m_Objects;          ///< Objects of the universe
+        std::vector<CObject*>           m_Objects;          ///< Objects of the universe
         std::vector<CStarSystem*>       m_StarSystems;      ///< Star system in this universe
         std::vector<IObjectVisuals*>    m_Visuals;          ///< Object visuals of the universe
         int                             m_nNrOfPlanetsMax;  ///< Maximum number of planets
@@ -107,7 +106,7 @@ class CUniverse : public IWorldDataStorageUser
 /// \return List of generated objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::vector<IObject*>& CUniverse::getObjects() const
+inline const std::vector<CObject*>& CUniverse::getObjects() const
 {
     METHOD_ENTRY("CUniverse::getObjects")
     return m_Objects;

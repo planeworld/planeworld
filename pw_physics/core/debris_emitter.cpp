@@ -150,7 +150,7 @@ void CDebrisEmitter::emit(const double& _fF)
 //                     {
 //                         m_pDebris->generate(m_KinematicsState.getOrigin(),
 //                                             fVelocity*(Rotation*Vector2d(0.0, 1.0)) +
-//                                             0.75*static_cast<IObject*>(m_pHookable)->getVelocity());
+//                                             0.75*static_cast<CObject*>(m_pHookable)->getVelocity());
 //                     }
 //                     else
                     {

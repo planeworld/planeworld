@@ -21,7 +21,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \file       object.h
-/// \brief      Prototype of interface "IObject"
+/// \brief      Prototype of interface "CObject"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2009-10-18
@@ -44,28 +44,14 @@
 /// Type definition for the AnchorIDs
 typedef uint AnchorIDType;
 
-/// Specifies the type of the object
-enum class ObjectType
-{
-    OBJECT_NONE,
-    OBJECT_BODY,
-    OBJECT_POINTMASS,
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Base class for general objects
-///
-/// This abstract class provides all basic methods and variables all object have
-/// in common. For example, this is the position of the object and its mass.
-/// Things like inertia are not included, since point masses and particals don't
-/// need them. They are declared for a body, shape definition is declared there
-/// too.
+/// \brief Class representing a phyiscal object
 ///
 /// \todo Move depth information to shapes only. Then map information to object
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class IObject : public IUniqueIDUser,
+class CObject : public IUniqueIDUser,
                 public IKinematicsStateUser,
                 public IUniverseScaled
 {
@@ -73,35 +59,39 @@ class IObject : public IUniqueIDUser,
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        IObject();
-        IObject(const IObject* const);
-        virtual ~IObject();
+        CObject();
+        CObject(const CObject* const);
+        virtual ~CObject();
 
         //--- Constant methods -----------------------------------------------//
-        virtual IObject*            clone() const = 0;                  ///< Clone object
-        virtual const Vector2d      getAnchor(const int&) const = 0;    ///< Return anchor
-        virtual const ObjectType    getObjectType() const;
-        const Vector2d              getCOM() const;
-        const int                   getDepths() const;
-        const bool                  getDynamicsState() const;
-        const bool                  getGravitationState() const;
-        const double                getMass() const;
-        const std::string           getName() const;
-        const Vector2d              getForce() const {return m_vecForce;}
-        const Vector2d              getOrigin() const;
-        const Vector2d              getVelocity() const;
-        const CTrajectory&          getTrajectory() const;
+        CObject*            clone() const;
+        const Vector2d     getAnchor(const int&) const;
+        const double&       getAngle() const;
+        const double&       getAngleVelocity() const;
+        const Vector2d      getCOM() const;
+        const int           getDepths() const;
+        const bool          getDynamicsState() const;
+        const bool          getGravitationState() const;
+        const double&       getInertia() const;
+        const double&       getMass() const;
+        const std::string&  getName() const;
+        const Vector2d&     getForce() const {return m_vecForce;}
+        const Vector2d&     getOrigin() const;
+        const Vector2d&     getVelocity() const;
+        const CTrajectory&  getTrajectory() const;
 
         //--- Methods --------------------------------------------------------//
-        virtual void        addForce(const Vector2d&,  const Vector2d&) = 0;   ///< Add a force
-        virtual void        addForceLC(const Vector2d&,  const Vector2d&) = 0; ///< Add a force (local coordinates)
-        virtual void        clearForces() = 0;                                 ///< Clear forces acting on object
+        void                addForce(const Vector2d&,  const Vector2d&);
+        void                addForceLC(const Vector2d&,  const Vector2d&);
+        void                clearForces();
         
         void                addAcceleration(const Vector2d&);
         AnchorIDType        addAnchor(const Vector2d&);
         void                disableGravitation();
         void                enableGravitation();
         CGeometry* const    getGeometry();
+        void                setAngle(const double&);
+        void                setAngleVelocity(const double&);
         void                setCell(const Vector2i&);
         void                setOrigin(const Vector2d&);
         void                setOrigin(const double&, const double&);
@@ -120,19 +110,14 @@ class IObject : public IUniqueIDUser,
         void                setNewIntegrator(const IntegratorType&);
         void                transform();
         
+        //--- Static Methods -------------------------------------------------//
+        static uint32_t     getCount();
+        
         //--- friends --------------------------------------------------------//
-        friend std::istream&    operator>>(std::istream&, IObject* const);
-        friend std::ostream&    operator<<(std::ostream&, IObject* const);
+        friend std::istream&    operator>>(std::istream&, CObject* const);
+        friend std::ostream&    operator<<(std::ostream&, CObject* const);
         
     protected:
-
-        //--- Abstract methods [protected] -----------------------------------//
-        virtual void myDynamics(const double&) = 0;                 ///< Calculate dynamics from forces
-        virtual void myInit() = 0;                                  ///< Initialise object -> total reset
-        virtual void mySetNewIntegrator(const IntegratorType&) = 0; ///< Change type of integrator 
-        
-        virtual std::istream& myStreamIn (std::istream&) = 0;       ///< Stream in from inherited class
-        virtual std::ostream& myStreamOut(std::ostream&) = 0;       ///< Stream out from inherited class
 
         //-- Variables [protected] -------------------------------------------//
         bool                    m_bGravitation;                     ///< Does this object influence others by gravitation?
@@ -144,9 +129,12 @@ class IObject : public IUniqueIDUser,
         CGeometry               m_Geometry;                         ///< Geometry of object
 
         Vector2d                m_vecForce;                         ///< Resulting force applied
+        double                  m_fTorque;                          ///< Resulting torque on object
         
         int                     m_nDepthlayers;                     ///< Depths in which shape exists
         
+        IIntegrator<double>*    m_pIntAng;                          ///< Angle integrator
+        IIntegrator<double>*    m_pIntAngVel;                       ///< Angle velocity integrator
         IIntegrator<Vector2d>*  m_pIntPos;                          ///< Position integrator
         IIntegrator<Vector2d>*  m_pIntVel;                          ///< Velocity integrator
 
@@ -155,37 +143,52 @@ class IObject : public IUniqueIDUser,
         std::vector<Vector2d>   m_Anchors;                          ///< Anchors to joints
         
         CTrajectory             m_Trajectory;                       ///< Trajectory of object
+        
+        static uint32_t         m_unNrOfObjects;                    ///< Static counter for name initialisation and tracking
 };
 
-typedef std::unordered_map<std::string, IObject*>  ObjectsType;    ///< Specifies a list of objects
+typedef std::unordered_map<std::string, CObject*>  ObjectsType;    ///< Specifies a list of objects
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Get the objects type - RTTI
-///
-/// \return Type of object
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const ObjectType IObject::getObjectType() const
-{
-    METHOD_ENTRY("IObject::getObjectType")
-    return ObjectType::OBJECT_NONE;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Adds a specific acceleration to the body, for example gravitation
+/// \brief Adds a specific acceleration to the object, for example gravitation
 ///
 /// \param _vecA Acceleration vector
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::addAcceleration(const Vector2d& _vecA)
+inline void CObject::addAcceleration(const Vector2d& _vecA)
 {
-    METHOD_ENTRY("IObject::addAcceleration")
+    METHOD_ENTRY("CObject::addAcceleration")
 
     this->addForce(_vecA*m_Geometry.getMass(), m_pIntPos->getValue()+m_Geometry.getCOM());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the angle of object
+///
+/// \return Angle
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CObject::getAngle() const
+{
+    METHOD_ENTRY("CObject::getAngle")
+    return m_KinematicsState.getLocalAngle();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the angle velocity
+///
+/// \return Angle velocity
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CObject::getAngleVelocity() const
+{
+    METHOD_ENTRY("CObject::getAngleVelocity")
+    return m_KinematicsState.getLocalAngleVelocity();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,11 +198,9 @@ inline void IObject::addAcceleration(const Vector2d& _vecA)
 /// \return Center of mass (COM)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d IObject::getCOM() const
+inline const Vector2d CObject::getCOM() const
 {
-    METHOD_ENTRY("IObject::getCOM")
-//     return (m_vecCOM+m_pIntPos->getValue());
-//     std::cout << m_KinematicsState.getLocalPosition(m_Geometry.getCOM()) << std::endl;
+    METHOD_ENTRY("CObject::getCOM")
     return m_KinematicsState.getLocalPosition(m_Geometry.getCOM());
 }
 
@@ -210,9 +211,9 @@ inline const Vector2d IObject::getCOM() const
 /// \return Depthlayers as bit pattern
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const int IObject::getDepths() const
+inline const int CObject::getDepths() const
 {
-    METHOD_ENTRY("IObject::getDepths")
+    METHOD_ENTRY("CObject::getDepths")
     return (m_nDepthlayers);
 }
 
@@ -223,9 +224,9 @@ inline const int IObject::getDepths() const
 /// \return Dynamics state, true=dynamic, false=static
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const bool IObject::getDynamicsState() const
+inline const bool CObject::getDynamicsState() const
 {
-    METHOD_ENTRY("IObject::getDynamicsState")
+    METHOD_ENTRY("CObject::getDynamicsState")
     return (m_bDynamics);
 }
 
@@ -241,10 +242,23 @@ inline const bool IObject::getDynamicsState() const
 /// \return The gravitational state
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const bool IObject::getGravitationState() const
+inline const bool CObject::getGravitationState() const
 {
-    METHOD_ENTRY("IObject::getGravitationState")
+    METHOD_ENTRY("CObject::getGravitationState")
     return (m_bGravitation);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the inertia
+///
+/// \return Inertia
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& CObject::getInertia() const
+{
+    METHOD_ENTRY("CObject::getInertia")
+    return m_Geometry.getInertia();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -254,9 +268,9 @@ inline const bool IObject::getGravitationState() const
 /// \return Mass
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double IObject::getMass() const
+inline const double& CObject::getMass() const
 {
-    METHOD_ENTRY("IObject::getMass")
+    METHOD_ENTRY("CObject::getMass")
     return (m_Geometry.getMass());
 }
 
@@ -267,9 +281,9 @@ inline const double IObject::getMass() const
 /// \return Name of the object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::string IObject::getName() const
+inline const std::string& CObject::getName() const
 {
-    METHOD_ENTRY("IObject::getName")
+    METHOD_ENTRY("CObject::getName")
     return (m_strName);
 }
 
@@ -280,9 +294,9 @@ inline const std::string IObject::getName() const
 /// \return Origin of the object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d IObject::getOrigin() const
+inline const Vector2d& CObject::getOrigin() const
 {
-    METHOD_ENTRY("IObject::getOrigin")
+    METHOD_ENTRY("CObject::getOrigin")
     return m_KinematicsState.getLocalOrigin();
 }
 
@@ -293,9 +307,9 @@ inline const Vector2d IObject::getOrigin() const
 /// \return Velocity of the object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d IObject::getVelocity() const
+inline const Vector2d& CObject::getVelocity() const
 {
-    METHOD_ENTRY("IObject::getVelocity")
+    METHOD_ENTRY("CObject::getVelocity")
 //     return (m_pIntVel->getValue());
     return m_KinematicsState.getLocalVelocity();
 }
@@ -307,9 +321,9 @@ inline const Vector2d IObject::getVelocity() const
 /// \return Trajectory of the object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const CTrajectory& IObject::getTrajectory() const
+inline const CTrajectory& CObject::getTrajectory() const
 {
-    METHOD_ENTRY("IObject::getTrajectory")
+    METHOD_ENTRY("CObject::getTrajectory")
     return m_Trajectory;
 }
 
@@ -322,9 +336,9 @@ inline const CTrajectory& IObject::getTrajectory() const
 /// \return ID of anchor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline AnchorIDType IObject::addAnchor(const Vector2d& _vecV)
+inline AnchorIDType CObject::addAnchor(const Vector2d& _vecV)
 {
-    METHOD_ENTRY("IObject::addAnchor")
+    METHOD_ENTRY("CObject::addAnchor")
 
     m_Anchors.push_back(_vecV);
     
@@ -342,9 +356,9 @@ inline AnchorIDType IObject::addAnchor(const Vector2d& _vecV)
 /// certain objects, e.g. particals.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::disableGravitation()
+inline void CObject::disableGravitation()
 {
-    METHOD_ENTRY("IObject::disableGravitation")
+    METHOD_ENTRY("CObject::disableGravitation")
 
     m_bGravitation = false;
 }
@@ -360,9 +374,9 @@ inline void IObject::disableGravitation()
 /// certain objects, e.g. particals.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::enableGravitation()
+inline void CObject::enableGravitation()
 {
-    METHOD_ENTRY("IObject::enableGravitation")
+    METHOD_ENTRY("CObject::enableGravitation")
 
     m_bGravitation = true;
 }
@@ -374,10 +388,38 @@ inline void IObject::enableGravitation()
 /// \return Geometry
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CGeometry* const IObject::getGeometry()
+inline CGeometry* const CObject::getGeometry()
 {
-    METHOD_ENTRY("IObject::getGeometry")
+    METHOD_ENTRY("CObject::getGeometry")
     return &m_Geometry;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set the angle of the object
+///
+/// \param _fAng Angle of object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CObject::setAngle(const double& _fAng)
+{
+    METHOD_ENTRY("CObject::setAngle")
+    m_pIntAng->init(_fAng);
+    m_KinematicsState.setAngle(_fAng);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set the angle velocity of the object
+///
+/// \param _fV Angle velocity of object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CObject::setAngleVelocity(const double& _fV)
+{
+    METHOD_ENTRY("CObject::setAngleVelocity")
+    m_pIntAngVel->init(_fV);
+    m_KinematicsState.setAngleVelocity(_fV);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -387,9 +429,9 @@ inline CGeometry* const IObject::getGeometry()
 /// \param _vecOrigin Origin of mass 
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setOrigin(const Vector2d& _vecOrigin)
+inline void CObject::setOrigin(const Vector2d& _vecOrigin)
 {
-    METHOD_ENTRY("IObject::setOrigin")
+    METHOD_ENTRY("CObject::setOrigin")
 
     m_KinematicsState.setOrigin(_vecOrigin);
 //     m_pIntPos->init(m_KinematicsState.getOrigin());
@@ -403,9 +445,9 @@ inline void IObject::setOrigin(const Vector2d& _vecOrigin)
 /// \param _fY Y-position of origin of mass 
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setOrigin(const double& _fX, const double& _fY)
+inline void CObject::setOrigin(const double& _fX, const double& _fY)
 {
-    METHOD_ENTRY("IObject::setOrigin")
+    METHOD_ENTRY("CObject::setOrigin")
 
     m_KinematicsState.setOrigin(Vector2d(_fX, _fY));
 //     m_pIntPos->init(m_KinematicsState.getOrigin());
@@ -418,9 +460,9 @@ inline void IObject::setOrigin(const double& _fX, const double& _fY)
 /// \param _nD Depthlayers as bit pattern
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setDepths(const int& _nD)
+inline void CObject::setDepths(const int& _nD)
 {
-    METHOD_ENTRY("IObject::setDepths")
+    METHOD_ENTRY("CObject::setDepths")
 
     m_nDepthlayers |= _nD;
 }
@@ -432,9 +474,9 @@ inline void IObject::setDepths(const int& _nD)
 /// \param _nD Depthlayers as bit pattern
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::unsetDepths(const int& _nD)
+inline void CObject::unsetDepths(const int& _nD)
 {
-    METHOD_ENTRY("IObject::unsetDepths")
+    METHOD_ENTRY("CObject::unsetDepths")
 
     m_nDepthlayers &= (!_nD);
 }
@@ -446,9 +488,9 @@ inline void IObject::unsetDepths(const int& _nD)
 /// \param _strName Name of mass
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setName(const std::string& _strName)
+inline void CObject::setName(const std::string& _strName)
 {
-    METHOD_ENTRY("IObject::setName")
+    METHOD_ENTRY("CObject::setName")
 
     m_strName = _strName;
 }
@@ -464,9 +506,9 @@ inline void IObject::setName(const std::string& _strName)
 /// \param _fTF Time factor to be set
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setTimeFac(const double& _fTF)
+inline void CObject::setTimeFac(const double& _fTF)
 {
-    METHOD_ENTRY("IObject::setTimeFac")
+    METHOD_ENTRY("CObject::setTimeFac")
 
     m_fTimeFac = _fTF;
 }
@@ -478,9 +520,9 @@ inline void IObject::setTimeFac(const double& _fTF)
 /// \param _vecVel Velocity of center of mass 
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::setVelocity(const Vector2d& _vecVel)
+inline void CObject::setVelocity(const Vector2d& _vecVel)
 {
-    METHOD_ENTRY("IObject::setVelocity")
+    METHOD_ENTRY("CObject::setVelocity")
 
     m_KinematicsState.setVelocity(_vecVel);
     m_pIntVel->init(_vecVel);
@@ -493,9 +535,9 @@ inline void IObject::setVelocity(const Vector2d& _vecVel)
 /// This is the default state for each object. Dynamics calculations are done.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::enableDynamics()
+inline void CObject::enableDynamics()
 {
-    METHOD_ENTRY("IObject::enableDynamics")
+    METHOD_ENTRY("CObject::enableDynamics")
 
     m_bDynamics = true;
 }
@@ -509,11 +551,24 @@ inline void IObject::enableDynamics()
 /// is fixed.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IObject::disableDynamics()
+inline void CObject::disableDynamics()
 {
-    METHOD_ENTRY("IObject::disableDynamics")
+    METHOD_ENTRY("CObject::disableDynamics")
 
     m_bDynamics = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the absolute count of object instances
+///
+/// \return Count of object instances
+///
+////////////////////////////////////////////////////////////////////////////////
+inline uint32_t CObject::getCount()
+{
+    METHOD_ENTRY("CObject::getCount")
+    return m_unNrOfObjects;
 }
 
 #endif

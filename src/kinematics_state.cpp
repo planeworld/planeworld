@@ -368,7 +368,7 @@ std::istream& operator>>(std::istream& _is, CKinematicsState& _KS)
 /// \param _os  Source stream
 /// \param _KS CKinematicsState instance to stream
 ///
-/// \return Stream with game state information of IObject instance
+/// \return Stream with game state information of CObject instance
 ///
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream& operator<<(std::ostream& _os, CKinematicsState& _KS)

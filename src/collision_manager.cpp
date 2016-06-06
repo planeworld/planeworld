@@ -58,16 +58,8 @@ void CCollisionManager::detectCollisions()
                 // Test for overlapping bounding boxes
                 if (ci->second->getGeometry()->getBoundingBox().overlaps(cj->second->getGeometry()->getBoundingBox(),1))
                 {
-                    switch(ci->second->getObjectType())
-                    {
-                        case ObjectType::OBJECT_BODY:
-                            this->test(static_cast<CBody*>(ci->second),static_cast<CBody*>(cj->second));
-                            break;
-                        case ObjectType::OBJECT_POINTMASS:
-                            break;
-                        case ObjectType::OBJECT_NONE:
-                            break;
-                    }
+                    this->test(ci->second, cj->second);
+                    
 //                     CContact Contact;
 //                     Contact = (*ci)->collidesWith((*cj));
 //                     m_ContactList.push_back(Contact);
@@ -83,7 +75,7 @@ void CCollisionManager::detectCollisions()
 //             switch((*ci)->getObjectType())
 //             {
 //                 case ObjectType::OBJECT_BODY:
-//                     this->test(static_cast<CBody*>((*ci)), (*cj));
+//                     this->test(static_cast<CObject*>((*ci)), (*cj));
 //             }
 //         }
 //         m_Graphics.setColor(0.0, 0.8, 0.0);
@@ -103,7 +95,7 @@ void CCollisionManager::detectCollisions()
 //             switch(ci->second->getObjectType())
 //             {
 //                 case ObjectType::OBJECT_BODY:
-//                     this->test(static_cast<CBody*>(ci->second), (*cj));
+//                     this->test(static_cast<CObject*>(ci->second), (*cj));
 //                     break;
 //             }
 //         }
@@ -121,7 +113,7 @@ void CCollisionManager::detectCollisions()
 //             switch(ci->second->getObjectType())
 //             {
 //                 case ObjectType::OBJECT_BODY:
-//                     this->test(static_cast<CBody*>(ci->second), (*cj));
+//                     this->test(static_cast<CObject*>(ci->second), (*cj));
 //                     break;
 //             }
 //         }
@@ -139,7 +131,7 @@ void CCollisionManager::detectCollisions()
 /// \param _p2 Debris
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CBody* _p1, CDebris* _p2)
+void CCollisionManager::test(CObject* _p1, CDebris* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -178,7 +170,7 @@ void CCollisionManager::test(CBody* _p1, CDebris* _p2)
 /// \param _p2 Debris
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* _p2)
+void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CObject* _p1, CDebris* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -274,7 +266,7 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CBody* _p1, CDebris* 
 /// \param _p2 Debris
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CBody* _p1, CDebris* _p2)
+void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CObject* _p1, CDebris* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -295,7 +287,7 @@ void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CBody* _p1, CDebris* 
 /// \param _p2 Debris
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CPolygon* _pP1, CPolygon* _pP0, CBody* _p1, CDebris* _p2)
+void CCollisionManager::test(CPolygon* _pP1, CPolygon* _pP0, CObject* _p1, CDebris* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -531,7 +523,7 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
 /// \param _p2 Object 2
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CBody* _p1, CBody* _p2)
+void CCollisionManager::test(CObject* _p1, CObject* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
 
@@ -763,7 +755,7 @@ void CCollisionManager::getSurfaceOfInterest()
 ///////////////////////////////////////////////////////////////////////////////
 void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
                              CCircle* _pCB1, CCircle* _pCB0,
-                             CBody* _p1, CBody* _p2)
+                             CObject* _p1, CObject* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -835,7 +827,7 @@ void CCollisionManager::test(CCircle* _pCA1, CCircle* _pCA0,
 ///////////////////////////////////////////////////////////////////////////////
 void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
                              CPolygon* _pB1, CPolygon* _pB0,
-                             CBody* _p1, CBody* _p2)
+                             CObject* _p1, CObject* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -957,7 +949,7 @@ void CCollisionManager::test(CCircle* _pA1, CCircle* _pA0,
 ///////////////////////////////////////////////////////////////////////////////
 void CCollisionManager::test(CPolygon* _pA1, CPolygon* _pA0,
                              CPolygon* _pB1, CPolygon* _pB0,
-                             CBody* _p1, CBody* _p2)
+                             CObject* _p1, CObject* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     

@@ -36,6 +36,6 @@
 #include "unique_id_referrer.h"
 
 /// Type definition for specialised interface referring to objects
-typedef IUniqueIDReferrer<IObject> IObjectReferrer;
+typedef IUniqueIDReferrer<CObject> IObjectReferrer;
 
 #endif // OBJECT_REFERRER_H

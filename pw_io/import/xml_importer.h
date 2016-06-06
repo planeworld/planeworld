@@ -35,7 +35,6 @@
 #include <map>
 
 //--- Program header ---------------------------------------------------------//
-#include "body.h"
 #include "debris_emitter.h"
 #include "objects_emitter.h"
 #include "thruster.h"
@@ -111,21 +110,21 @@ class CXMLImporter : public IWorldDataStorageUser
         void createComponent(const pugi::xml_node&);
         void createEmitter(const pugi::xml_node&);
         void createGravity(const pugi::xml_node&);
-        void createShapeCircle(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createShapePlanet(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createShapeTerrain(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createShapePolygon(CBody* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createShapeCircle(CObject* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createShapePlanet(CObject* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createShapeTerrain(CObject* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createShapePolygon(CObject* const, IObjectVisuals* const, const pugi::xml_node&);
         void createVisualsCircle(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
         void createVisualsPlanet(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
         void createVisualsTerrain(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
         void createVisualsPolygon(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
         void createRigidBody(const pugi::xml_node&);
         void createUniverse(const pugi::xml_node&);
-        void readBodyCore(CRigidBody* const, const pugi::xml_node&);
-        void readObjectCore(CRigidBody* const, const pugi::xml_node&);
+        void readBodyCore(CObject* const, const pugi::xml_node&);
+        void readObjectCore(CObject* const, const pugi::xml_node&);
         
         IEmitter*               m_pCurrentEmitter;              ///< Temporary variable for state machine
-        CBody*                  m_pCurrentBody;                 ///< Temporary variable for state machine
+        CObject*                m_pCurrentObject;               ///< Temporary variable for state machine
         IObjectVisuals*         m_pCurrentObjectVisuals;        ///< Temporary variable for state machine
         CDoubleBufferedShape*   m_pCurrentDoubleBufferedShape;  ///< Temporary variable for state machine
         

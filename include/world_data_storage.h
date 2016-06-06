@@ -80,7 +80,7 @@ class CWorldDataStorage
         void addDebrisVisuals(CDebrisVisuals*);
         void addDebrisVisualsThruster(CDebrisVisualsThruster*);
         void addJoint(IJoint*);
-        void addObject(IObject*);
+        void addObject(CObject*);
         void addObjects(ObjectsType);
         void addObjectVisuals(IObjectVisuals*);
         

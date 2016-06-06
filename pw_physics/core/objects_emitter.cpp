@@ -33,7 +33,6 @@
 #include "circle.h"
 #include "circle_visuals.h"
 #include "object_visuals.h"
-#include "rigidbody.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -60,7 +59,7 @@ CObjectEmitter::~CObjectEmitter()
     if (m_pTemplate != nullptr)
     {
         delete m_pTemplate;
-        MEM_FREED("CRigidBody")
+        MEM_FREED("CObject")
         m_pTemplate = nullptr;
     }
     if (m_pTemplateVisuals != nullptr)
@@ -115,7 +114,7 @@ void CObjectEmitter::emit(const double& _fF)
                     double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
                     double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
                     
-                    IObject* pObject = m_pTemplate->clone();
+                    CObject* pObject = m_pTemplate->clone();
                     IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
                     
                     pObject->setOrigin(Vector2d(fX, fY) + m_KinematicsState.getOrigin());
@@ -131,7 +130,7 @@ void CObjectEmitter::emit(const double& _fF)
                     double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_KinematicsState.getAngle();;
                     double fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
                                     
-                    IObject* pObject = m_pTemplate->clone();
+                    CObject* pObject = m_pTemplate->clone();
                     IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
                     
                     pObject->setOrigin(m_KinematicsState.getOrigin());
@@ -157,9 +156,9 @@ void CObjectEmitter::init()
     // Create default object if needed (circlular mass)
     if (m_pTemplate == nullptr)
     {
-        m_pTemplate = new CRigidBody;
+        m_pTemplate = new CObject;
         CCircle*    pCircle = new CCircle;
-        MEM_ALLOC("CRigidBody")
+        MEM_ALLOC("CObject")
         MEM_ALLOC("IShape")
         
         pCircle->setMass(1.0e12);
@@ -190,14 +189,14 @@ void CObjectEmitter::init()
 /// \param _pObjV Object visuals to be cloned and emitted
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CObjectEmitter::setTemplate(IObject* const _pObj, IObjectVisuals* const _pObjV)
+void CObjectEmitter::setTemplate(CObject* const _pObj, IObjectVisuals* const _pObjV)
 {
     METHOD_ENTRY("CObjectEmitter::setTemplate")
     
     if (m_pTemplate != nullptr)
     {
         delete m_pTemplate;
-        MEM_FREED("IObject")
+        MEM_FREED("CObject")
         m_pTemplate = nullptr;
         NOTICE_MSG("Objects Emitter", "Template object already existing, replacing.");
     }

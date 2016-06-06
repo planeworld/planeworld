@@ -37,7 +37,7 @@
 //--- Standard header --------------------------------------------------------//
 
 // Forward declarations
-class IObject;
+class CObject;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -58,17 +58,17 @@ class IJoint
         
         AnchorIDType    getAnchorIDA() const;
         AnchorIDType    getAnchorIDB() const;
-        IObject*        getObjectA() const;
-        IObject*        getObjectB() const;
+        CObject*        getObjectA() const;
+        CObject*        getObjectB() const;
 
         //--- Methods --------------------------------------------------------//
-        void attachObjectA(IObject*, const AnchorIDType&);
-        void attachObjectB(IObject*, const AnchorIDType&);
+        void attachObjectA(CObject*, const AnchorIDType&);
+        void attachObjectB(CObject*, const AnchorIDType&);
 
     protected:
         
-        IObject* m_pObjectA;        ///< Pointer to attached object
-        IObject* m_pObjectB;        ///< Pointer to attached object
+        CObject* m_pObjectA;        ///< Pointer to attached object
+        CObject* m_pObjectB;        ///< Pointer to attached object
         
         AnchorIDType    m_AnchorIDA;  ///< Anchor ID of first attached object
         AnchorIDType    m_AnchorIDB;  ///< Anchor ID of second attached object
@@ -109,7 +109,7 @@ inline AnchorIDType IJoint::getAnchorIDB() const
 /// \return Pointer to object
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline IObject* IJoint::getObjectA() const
+inline CObject* IJoint::getObjectA() const
 {
     METHOD_ENTRY("IJoint::getObjectA()");
     return (m_pObjectA);
@@ -122,7 +122,7 @@ inline IObject* IJoint::getObjectA() const
 /// \return Pointer to object
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline IObject* IJoint::getObjectB() const
+inline CObject* IJoint::getObjectB() const
 {
     METHOD_ENTRY("IJoint::getObjectB()");
     return (m_pObjectB);
@@ -136,7 +136,7 @@ inline IObject* IJoint::getObjectB() const
 /// \param _AnchorID Anchor ID
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void IJoint::attachObjectA(IObject* _pA, const AnchorIDType& _AnchorID)
+inline void IJoint::attachObjectA(CObject* _pA, const AnchorIDType& _AnchorID)
 {
     METHOD_ENTRY("IJoint::attachObjectA")
 
@@ -152,7 +152,7 @@ inline void IJoint::attachObjectA(IObject* _pA, const AnchorIDType& _AnchorID)
 /// \param _AnchorID Anchor ID
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void IJoint::attachObjectB(IObject* _pB, const AnchorIDType& _AnchorID)
+inline void IJoint::attachObjectB(CObject* _pB, const AnchorIDType& _AnchorID)
 {
     METHOD_ENTRY("IJoint::attachObjectA")
 

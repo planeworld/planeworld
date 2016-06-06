@@ -241,33 +241,43 @@ void CPolygon::myUpdateGeometry()
     switch (m_PolygonType)
     {
         case PolygonType::LINE_LOOP:
+        {
+            // Calculate centroid
+            std::vector<Vector2d> vecCenter; vecCenter.reserve(nSize);
             for (auto i=0u; i<nSize-1; ++i)
             {
                 vecLength.push_back((m_VertList0[i+1]-m_VertList0[i]).norm());
-                m_vecCentroid += (m_VertList0[i+1]+m_VertList0[i])*0.5*vecLength[i];
+                vecCenter.push_back((m_VertList0[i+1]+m_VertList0[i])*0.5);
+                m_vecCentroid += vecCenter[i]*vecLength[i];
                 fLength += vecLength[i];
             }
             vecLength.push_back((m_VertList0[0]-m_VertList0[nSize-1]).norm());
-            m_vecCentroid += (m_VertList0[nSize-1]+m_VertList0[0])*0.5*vecLength[nSize-1];
+            vecCenter.push_back((m_VertList0[nSize-1]+m_VertList0[0])*0.5);
+            m_vecCentroid += vecCenter[nSize-1]*vecLength[nSize-1];
             fLength       += vecLength[nSize-1];
             if (fLength > 0.0) m_vecCentroid /= fLength;
             
             // Calculate inertia
-            for (auto i=0u; i<nSize-1; ++i)
+            for (auto i=0u; i<nSize; ++i)
             {
                 // Calculate for each segment: (m*L^2)/12
                 // Additionally, add Steiner's part (Steiner's theorem)
-                m_fInertia += m_fMass * vecLength[i] * fLength * fLength / 12.0 + 
-                              m_fMass * vecLength[i] * m_vecCentroid.squaredNorm();
+                m_fInertia += m_fMass * vecLength[i] * vecLength[i] * vecLength[i] / 12.0 + 
+                              m_fMass * vecLength[i] * (vecCenter[i]-m_vecCentroid).squaredNorm();
             }
             if (fLength > 0.0) m_fInertia /= fLength;
             break;
+        }
         case PolygonType::LINE_SINGLE:
-            for (auto i=0u; i<nSize-1; ++i)
+        {
+            // Calculate centroid
+            std::vector<Vector2d> vecCenter; vecCenter.reserve(nSize);
+            for (auto i=0u; i<(nSize>>1); ++i)
             {
                 vecLength.push_back((m_VertList0[2*i+1]-m_VertList0[2*i]).norm());
-                m_vecCentroid += (m_VertList0[2*i+1]+m_VertList0[2*i])*0.5*vecLength[i];
-                fLength       += vecLength[i];
+                vecCenter.push_back((m_VertList0[2*i+1]+m_VertList0[2*i])*0.5);
+                m_vecCentroid += vecCenter[i]*vecLength[i];
+                fLength += vecLength[i];
             }
             if (fLength > 0.0) m_vecCentroid /= fLength;
             
@@ -276,17 +286,22 @@ void CPolygon::myUpdateGeometry()
             {
                 // Calculate for each segment: (m*L^2)/12
                 // Additionally, add Steiner's part (Steiner's theorem)
-                m_fInertia += m_fMass * vecLength[i] * fLength * fLength / 12.0 + 
-                              m_fMass * vecLength[i] * m_vecCentroid.squaredNorm();
+                m_fInertia += m_fMass * vecLength[i] * vecLength[i] * vecLength[i] / 12.0 + 
+                              m_fMass * vecLength[i] * (vecCenter[i]-m_vecCentroid).squaredNorm();
             }
             if (fLength > 0.0) m_fInertia /= fLength;
             break;
+        }
         case PolygonType::LINE_STRIP:
+        {
+            // Calculate centroid
+            std::vector<Vector2d> vecCenter; vecCenter.reserve(nSize);
             for (auto i=0u; i<nSize-1; ++i)
             {
                 vecLength.push_back((m_VertList0[i+1]-m_VertList0[i]).norm());
-                m_vecCentroid += (m_VertList0[i+1]+m_VertList0[i])*0.5*vecLength[i];
-                fLength       += vecLength[i];
+                vecCenter.push_back((m_VertList0[i+1]+m_VertList0[i])*0.5);
+                m_vecCentroid += vecCenter[i]*vecLength[i];
+                fLength += vecLength[i];
             }
             if (fLength > 0.0) m_vecCentroid /= fLength;
             
@@ -295,12 +310,14 @@ void CPolygon::myUpdateGeometry()
             {
                 // Calculate for each segment: (m*L^2)/12
                 // Additionally, add Steiner's part (Steiner's theorem)
-                m_fInertia += m_fMass * vecLength[i] * fLength * fLength / 12.0 + 
-                              m_fMass * vecLength[i] * m_vecCentroid.squaredNorm();
+                m_fInertia += m_fMass * vecLength[i] * vecLength[i] * vecLength[i] / 12.0 + 
+                              m_fMass * vecLength[i] * (vecCenter[i]-m_vecCentroid).squaredNorm();
             }
             if (fLength > 0.0) m_fInertia /= fLength;
             break;
+        }
         case PolygonType::FILLED:
+        {
             std::vector<double> vecArea; vecArea.reserve(nSize);
             for (auto i=0u; i<nSize-1; ++i)
             {
@@ -336,24 +353,28 @@ void CPolygon::myUpdateGeometry()
                 for (auto i=0u; i<nSize-1; ++i)
                 {
                     m_fInertia +=   vecArea[i] * (
-                                    m_VertList0[i].squaredNorm()+
-                                    m_VertList0[i].dot(m_VertList0[i+1])+
-                                    m_VertList0[i+1].squaredNorm() +
-                                    m_fMass * m_vecCentroid.squaredNorm());
+                                    (m_VertList0[i]-m_vecCentroid).squaredNorm()+
+                                    (m_VertList0[i]-m_vecCentroid).dot(
+                                        (m_VertList0[i+1]-m_vecCentroid)) +
+                                    (m_VertList0[i+1]-m_vecCentroid).squaredNorm());
                 }
                 m_fInertia +=   vecArea[nSize-1] * (
-                                m_VertList0[nSize-1].squaredNorm()+
-                                m_VertList0[nSize-1].dot(m_VertList0[0])+
-                                m_VertList0[0].squaredNorm() +
-                                m_fMass * m_vecCentroid.squaredNorm());
-                m_fInertia /= 2.0*m_fArea; // Note: factor 2.0 because above,
-                                           //       factor 0.5 is not stored in vecArea
+                                (m_VertList0[nSize-1]-m_vecCentroid).squaredNorm()+
+                                (m_VertList0[nSize-1]-m_vecCentroid).dot(
+                                    (m_VertList0[0]-m_vecCentroid)) +
+                                (m_VertList0[0]-m_vecCentroid).squaredNorm());
+                m_fInertia *= m_fMass;
+                m_fInertia /= 12.0*m_fArea; // Note: factor 2.0 because above,
+                                            //       factor 0.5 is not stored in vecArea
             }
             else
             {
-                NOTICE_MSG("Polygon", "Not a valid polygon, area=0. => inertia=0.")
+                DEBUG(
+                    NOTICE_MSG("Polygon", "Not a valid polygon, area=0. => inertia=0.")
+                )
             }
             break;
+        }
     }
     DOM_VAR(DEBUG_MSG("Polygon", "Inertia calculated: " << m_fInertia))
 }
