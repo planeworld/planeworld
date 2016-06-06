@@ -34,9 +34,9 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "body.h"
 #include "circle.h"
 #include "debris.h"
+#include "object.h"
 #include "planet.h"
 #include "polygon.h"
 #include "terrain.h"
@@ -73,15 +73,15 @@ class CCollisionManager
         
         void getSurfaceOfInterest();
         
-        void    test(CBody*, CBody*);
-        void    test(CBody*, CDebris*);
-        void    test(CCircle*, CCircle*, CBody*, CDebris*);
-        void    test(CPlanet*, CPlanet*, CBody*, CDebris*);
-        void    test(CPolygon*, CPolygon*, CBody*, CDebris*);
+        void    test(CObject*, CObject*);
+        void    test(CObject*, CDebris*);
+        void    test(CCircle*, CCircle*, CObject*, CDebris*);
+        void    test(CPlanet*, CPlanet*, CObject*, CDebris*);
+        void    test(CPolygon*, CPolygon*, CObject*, CDebris*);
         void    test(CTerrain*, CDebris*);
-        void    test(CCircle*, CCircle*, CCircle*, CCircle*, CBody*, CBody*);
-        void    test(CCircle*, CCircle*, CPolygon*, CPolygon*, CBody*, CBody*);
-        void    test(CPolygon*, CPolygon*, CPolygon*, CPolygon*, CBody*, CBody*);
+        void    test(CCircle*, CCircle*, CCircle*, CCircle*, CObject*, CObject*);
+        void    test(CCircle*, CCircle*, CPolygon*, CPolygon*, CObject*, CObject*);
+        void    test(CPolygon*, CPolygon*, CPolygon*, CPolygon*, CObject*, CObject*);
         double              testLineCircle(const Vector2d&, const Vector2d&,
                                            const Vector2d&, const Vector2d&,
                                            const CCircle* const,  const CCircle* const);

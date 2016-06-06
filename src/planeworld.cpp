@@ -48,7 +48,6 @@
 #include "physics_manager.h"
 #include "planet_visuals.h"
 #include "objects_emitter.h"
-#include "pointmass.h"
 #include "spring_visuals.h"
 #include "thruster.h"
 #include "xfig_loader.h"

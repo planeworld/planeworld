@@ -57,11 +57,8 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/shape.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/terrain.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/body.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/debris.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/object.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/pointmass.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/rigidbody.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
         

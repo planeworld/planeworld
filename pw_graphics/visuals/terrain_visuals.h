@@ -55,7 +55,7 @@ class CTerrainVisuals : public IVisuals
         
         //--- Constant Methods -----------------------------------------------//
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
-        virtual void        draw(CCamera* const, IObject* const) const;
+        virtual void        draw(CCamera* const, CObject* const) const;
         
         const ShapeVisualsType getShapeVisualsType() const;
                 

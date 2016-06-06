@@ -30,8 +30,6 @@
 
 #include "world_data_storage.h"
 
-#include "rigidbody.h"
-
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
@@ -75,11 +73,11 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             delete it->second;
             it->second = nullptr;
-            MEM_FREED("IObject")
+            MEM_FREED("CObject")
         }
         else
         {
-            DOM_MEMF(DEBUG_MSG("IObject", "Memory already freed."))
+            DOM_MEMF(DEBUG_MSG("CObject", "Memory already freed."))
         }
     }
     
@@ -92,11 +90,11 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             delete it->second;
             it->second = nullptr;
-            MEM_FREED("IObject")
+            MEM_FREED("CObject")
         }
         else
         {
-            DOM_MEMF(DEBUG_MSG("IObject", "Memory already freed."))
+            DOM_MEMF(DEBUG_MSG("CObject", "Memory already freed."))
         }
     }
     
@@ -241,7 +239,7 @@ void CWorldDataStorage::addJoint(IJoint* _pJoint)
 /// \param _pObject Mass that should be added to list
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CWorldDataStorage::addObject(IObject* _pObject)
+void CWorldDataStorage::addObject(CObject* _pObject)
 {
     METHOD_ENTRY("CWorldDataStorage::addObject")
 
@@ -257,13 +255,13 @@ void CWorldDataStorage::addObject(IObject* _pObject)
     {
         while (!m_DynamicObjects.insert({_pObject->getName(), _pObject}).second)
         {
-            _pObject->setName(_pObject->getName() + "_" + std::to_string(CRigidBody::getCount()));
+            _pObject->setName(_pObject->getName() + "_" + std::to_string(CObject::getCount()));
         }
     }
     else
         while (!m_StaticObjects.insert({_pObject->getName(), _pObject}).second)
         {
-            _pObject->setName(_pObject->getName() + "_" + std::to_string(CRigidBody::getCount()));
+            _pObject->setName(_pObject->getName() + "_" + std::to_string(CObject::getCount()));
         }
         
     m_ObjectMutex.unlock();    
@@ -284,7 +282,7 @@ void CWorldDataStorage::addObject(IObject* _pObject)
 // /// \param _pObject Object that should be added to list
 // ///
 // ///////////////////////////////////////////////////////////////////////////////
-// void CWorldDataStorage::addObject(IObject* _pObject)
+// void CWorldDataStorage::addObject(CObject* _pObject)
 // {
 //     METHOD_ENTRY("CWorldDataStorage::addObject")
 // 
@@ -391,7 +389,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
         {
             delete it.second;
             it.second = nullptr;
-            MEM_FREED("IObject")
+            MEM_FREED("CObject")
         }
     }
     _WDS.m_DynamicObjects.clear();
@@ -401,7 +399,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
         {
             delete it.second;
             it.second = nullptr;
-            MEM_FREED("IObject")
+            MEM_FREED("CObject")
         }
     }
     _WDS.m_StaticObjects.clear();
@@ -450,32 +448,17 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
             std::string strName;
             _is >> strName;
             
-            // Cast streamable basetype to strongly typed enum ObjectType
-            std::underlying_type<ObjectType>::type nObjectType;
-            _is >> nObjectType;
+            CObject* pObj = new CObject;
+            MEM_ALLOC("CObject")
+            _is >> pObj;
             
-            switch (static_cast<ObjectType>(nObjectType))
+            pObj->setName(strName);
+            
+            _WDS.addObject(pObj);
+            
+            for (const auto ci : *(pObj->getGeometry()->getShapes()))
             {
-                case ObjectType::OBJECT_BODY:
-                {
-                    CRigidBody* pObj = new CRigidBody;
-                    MEM_ALLOC("CRigidBody")
-                    _is >> pObj;
-                    
-                    pObj->setName(strName);
-                    
-                    _WDS.addObject(pObj);
-                    
-                    for (const auto ci : *(pObj->getGeometry()->getShapes()))
-                    {
-                        UIDShapeRef.insert({ci->getUID(),ci});
-                    }
-                    break;
-                }
-                case ObjectType::OBJECT_POINTMASS:
-                    break;
-                case ObjectType::OBJECT_NONE:
-                    break;
+                UIDShapeRef.insert({ci->getUID(),ci});
             }
             Log.progressBar("Loading objects", i, nSize);
         }
@@ -496,7 +479,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
             
             UIDType UID = pObjVis->getUIDRef();
             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
-            pObjVis->attachTo(static_cast<IObject*>(pUIDUser));
+            pObjVis->attachTo(static_cast<CObject*>(pUIDUser));
             _WDS.addObjectVisuals(pObjVis);
             
             for (const auto ci : pObjVis->getShapeVisuals())
@@ -527,7 +510,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
         {
             UIDType UID = _WDS.m_pCamera->getKinematicsState().getUIDRef();
             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
-            _WDS.m_pCamera->hook(static_cast<IKinematicsStateUser*>(static_cast<IObject*>(pUIDUser)));
+            _WDS.m_pCamera->hook(static_cast<IKinematicsStateUser*>(static_cast<CObject*>(pUIDUser)));
         }
     }
     

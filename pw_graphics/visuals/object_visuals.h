@@ -43,18 +43,18 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class IObjectVisuals : virtual public CGraphicsBase,
-                               public IUniqueIDReferrer<IObject>
+                               public IUniqueIDReferrer<CObject>
 {
     
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
         IObjectVisuals();
-        IObjectVisuals(IObject* const);
+        IObjectVisuals(CObject* const);
         virtual ~IObjectVisuals();
         
         //--- Constant Methods -----------------------------------------------//
-        IObjectVisuals* clone(IObject* const) const;
+        IObjectVisuals* clone(CObject* const) const;
         
         virtual void draw(CCamera* const) const;
 
@@ -93,7 +93,7 @@ inline IObjectVisuals::IObjectVisuals()
 /// \param _pObject Pointer to object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IObjectVisuals::IObjectVisuals(IObject* const _pObject)
+inline IObjectVisuals::IObjectVisuals(CObject* const _pObject)
 {
     METHOD_ENTRY("IObjectVisuals")
     CTOR_CALL("IObjectVisuals")

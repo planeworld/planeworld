@@ -66,7 +66,7 @@ class IVisuals : virtual public CGraphicsBase,
         //--- Constant Methods -----------------------------------------------//
         virtual IVisuals* clone(CDoubleBufferedShape* const) const = 0;
         virtual void      draw(CCamera* const,
-                               IObject* const) const = 0;
+                               CObject* const) const = 0;
                                
         virtual const ShapeVisualsType  getShapeVisualsType() const;
                         

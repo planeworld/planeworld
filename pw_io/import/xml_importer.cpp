@@ -35,7 +35,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
-#include "rigidbody.h"
 
 #include "circle.h"
 #include "circle_visuals.h"
@@ -60,7 +59,7 @@ const bool XML_IMPORTER_DO_NOT_NOTICE = false;
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CXMLImporter::CXMLImporter() : m_pCurrentEmitter(nullptr),
-                               m_pCurrentBody(nullptr),
+                               m_pCurrentObject(nullptr),
                                m_pCurrentObjectVisuals(nullptr),
                                m_pCurrentDoubleBufferedShape(nullptr),
                                m_pCamera(nullptr),
@@ -219,19 +218,19 @@ bool CXMLImporter::import(const std::string& _strFilename,
                 std::string strType = checkAttributeString(N, "type", "no_type");
                 if (strType == "shape_circle")
                 {
-                    this->createShapeCircle(m_pCurrentBody, m_pCurrentObjectVisuals, N);
+                    this->createShapeCircle(m_pCurrentObject, m_pCurrentObjectVisuals, N);
                 }
                 else if (strType == "shape_planet")
                 {
-                    this->createShapePlanet(m_pCurrentBody, m_pCurrentObjectVisuals, N);
+                    this->createShapePlanet(m_pCurrentObject, m_pCurrentObjectVisuals, N);
                 }
                 else if (strType == "shape_terrain")
                 {
-                    this->createShapeTerrain(m_pCurrentBody, m_pCurrentObjectVisuals, N);
+                    this->createShapeTerrain(m_pCurrentObject, m_pCurrentObjectVisuals, N);
                 }
                 else if (strType == "shape_polygon")
                 {
-                    this->createShapePolygon(m_pCurrentBody, m_pCurrentObjectVisuals, N);
+                    this->createShapePolygon(m_pCurrentObject, m_pCurrentObjectVisuals, N);
                 }
                 else if (strType == "no_type")
                 {
@@ -924,13 +923,13 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
         
     if (!checkFile(_Node))
     {
-        INFO_MSG("XML Importer", "Creating rigid body.");
+        INFO_MSG("XML Importer", "Creating object.");
         
-        CRigidBody* pRigidBody = new CRigidBody;
-        MEM_ALLOC("CRigidBody")
-        m_pCurrentBody = pRigidBody;
+        CObject* pObject = new CObject;
+        MEM_ALLOC("CObject")
+        m_pCurrentObject = pObject;
         
-        IObjectVisuals* pObjectVisuals = new IObjectVisuals(pRigidBody);
+        IObjectVisuals* pObjectVisuals = new IObjectVisuals(pObject);
         MEM_ALLOC("IObjectVisuals");
         m_pCurrentObjectVisuals = pObjectVisuals;
         
@@ -940,11 +939,11 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
         {
             if (std::string(N.name()) == "core")
             {
-                this->readObjectCore(pRigidBody, N);
+                this->readObjectCore(pObject, N);
             }
             else if (std::string(N.name()) == "body_core")
             {
-                this->readBodyCore(pRigidBody, N);
+                this->readBodyCore(pObject, N);
             }
             else if (std::string(N.name()) == "shape")
             {
@@ -953,19 +952,19 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
                     std::string strType(N.attribute("type").as_string());
                     if (strType == "shape_planet")
                     {
-                        this->createShapePlanet(pRigidBody, pObjectVisuals, N);
+                        this->createShapePlanet(pObject, pObjectVisuals, N);
                     }
                     else if (strType == "shape_circle")
                     {
-                        this->createShapeCircle(pRigidBody, pObjectVisuals, N);
+                        this->createShapeCircle(pObject, pObjectVisuals, N);
                     }
                     else if (strType == "shape_polygon")
                     {
-                        this->createShapePolygon(pRigidBody, pObjectVisuals, N);
+                        this->createShapePolygon(pObject, pObjectVisuals, N);
                     }
                     else if (strType == "shape_terrain")
                     {
-                        this->createShapeTerrain(pRigidBody, pObjectVisuals, N);
+                        this->createShapeTerrain(pObject, pObjectVisuals, N);
                     }
                 }
             }        
@@ -973,7 +972,7 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
             N = N.next_sibling();
         }
         
-        m_pDataStorage->addObject(pRigidBody);
+        m_pDataStorage->addObject(pObject);
         m_pDataStorage->addObjectVisuals(pObjectVisuals);
     } // if (!checkFile(_Node))
 }
@@ -982,12 +981,12 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
 ///
 /// \brief Create a circle shape
 ///
-/// \param _pBody Body to create the shape for
+/// \param _pObject Object to create the shape for
 /// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapeCircle(CBody* const _pBody,
+void CXMLImporter::createShapeCircle(CObject* const _pObject,
                                      IObjectVisuals* const _pObjectVisuals,
                                      const pugi::xml_node& _Node)
 {
@@ -1023,7 +1022,7 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody,
             }
         }
         
-        _pBody->getGeometry()->addShape(pShape);
+        _pObject->getGeometry()->addShape(pShape);
     } // if (!checkFile(_Node))
 }
 
@@ -1031,12 +1030,12 @@ void CXMLImporter::createShapeCircle(CBody* const _pBody,
 ///
 /// \brief Create a planet shape
 ///
-/// \param _pBody Body to create the shape for
+/// \param _pObject Objectto create the shape for
 /// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapePlanet(CBody* const _pBody,
+void CXMLImporter::createShapePlanet(CObject* const _pObject,
                                      IObjectVisuals* const _pObjectVisuals,
                                      const pugi::xml_node& _Node)
 {
@@ -1077,7 +1076,7 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
             }
         }
         
-        _pBody->getGeometry()->addShape(pShape);
+        _pObject->getGeometry()->addShape(pShape);
     } // if (!checkFile(_Node))
 }
 
@@ -1085,12 +1084,12 @@ void CXMLImporter::createShapePlanet(CBody* const _pBody,
 ///
 /// \brief Create a polygon shape
 ///
-/// \param _pBody Body to create the shape for
+/// \param _pObject Object to create the shape for
 /// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapePolygon(CBody* const _pBody,
+void CXMLImporter::createShapePolygon(CObject* const _pObject,
                                       IObjectVisuals* const _pObjectVisuals,
                                       const pugi::xml_node& _Node)
 {
@@ -1158,7 +1157,7 @@ void CXMLImporter::createShapePolygon(CBody* const _pBody,
             }
         }
         
-        _pBody->getGeometry()->addShape(pShape);
+        _pObject->getGeometry()->addShape(pShape);
     } // if (!checkFile(_Node))
 }
 
@@ -1166,12 +1165,12 @@ void CXMLImporter::createShapePolygon(CBody* const _pBody,
 ///
 /// \brief Create a terrain shape
 ///
-/// \param _pBody Body to create the shape for
+/// \param _pObject Object to create the shape for
 /// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createShapeTerrain(CBody* const _pBody,
+void CXMLImporter::createShapeTerrain(CObject* const _pObject,
                                       IObjectVisuals* const _pObjectVisuals,
                                       const pugi::xml_node& _Node)
 {
@@ -1210,7 +1209,7 @@ void CXMLImporter::createShapeTerrain(CBody* const _pBody,
             }
         }
         
-        _pBody->getGeometry()->addShape(pShape);
+        _pObject->getGeometry()->addShape(pShape);
     } // if (!checkFile(_Node))
 }
 
@@ -1362,7 +1361,7 @@ void CXMLImporter::createUniverse(const pugi::xml_node& _Node)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Read information for object bodies.
+/// \brief Read information for objects.
 ///
 /// While object core holds information of a point mass, body core adds
 /// information depending on volume (here area) like inertia.
@@ -1371,7 +1370,7 @@ void CXMLImporter::createUniverse(const pugi::xml_node& _Node)
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::readBodyCore(CRigidBody* const _pO, const pugi::xml_node& _Node)
+void CXMLImporter::readBodyCore(CObject* const _pO, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::readBodyCore")
     
@@ -1394,7 +1393,7 @@ void CXMLImporter::readBodyCore(CRigidBody* const _pO, const pugi::xml_node& _No
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _Node)
+void CXMLImporter::readObjectCore(CObject* const _pO, const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::readObjectCore")
     
@@ -1416,7 +1415,7 @@ void CXMLImporter::readObjectCore(CRigidBody* const _pO, const pugi::xml_node& _
         Vector2i vecCell;
         vecGivenOrigin[0] = checkAttributeDouble(_Node, "origin_x", _pO->getOrigin()[0]);
         vecGivenOrigin[1] = checkAttributeDouble(_Node, "origin_y", _pO->getOrigin()[1]);
-        IObject::separateCenterCell(vecGivenOrigin, vecOrigin, vecCell);
+        CObject::separateCenterCell(vecGivenOrigin, vecOrigin, vecCell);
         
         DOM_VAR(DEBUG_MSG("XML Importer", "Separating origin (" <<
                            vecGivenOrigin[0] << ", " << vecGivenOrigin[1] <<

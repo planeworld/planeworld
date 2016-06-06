@@ -71,7 +71,7 @@ IVisuals* CPlanetVisuals::clone(CDoubleBufferedShape* const _pShape) const
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CPlanetVisuals::draw(CCamera* const _pCamera,
-                          IObject* const _pObject) const
+                          CObject* const _pObject) const
 {
     METHOD_ENTRY("CPlanetVisuals::draw")
 

@@ -1141,15 +1141,8 @@ int CPhysicsManager::luaGetInertia(lua_State* _pLuaState)
         if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
             m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
         {
-            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getObjectType() == ObjectType::OBJECT_BODY)
-            {
-                double fInertia = static_cast<CBody*>(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject))->getInertia();
-                lua_pushnumber(_pLuaState, fInertia);
-            }
-            else
-            {
-                WARNING_MSG("Physics Manager", "Object " << strObject << " not of type OBJECT_BODY, no inertia available.")
-            }
+            double fInertia = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getInertia();
+            lua_pushnumber(_pLuaState, fInertia);
         }
         else
         {

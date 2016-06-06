@@ -67,7 +67,7 @@ IObjectVisuals::~IObjectVisuals()
 /// \return Pointer to cloned object visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-IObjectVisuals* IObjectVisuals::clone(IObject* const _pObj) const
+IObjectVisuals* IObjectVisuals::clone(CObject* const _pObj) const
 {
     METHOD_ENTRY("IObjectVisuals::clone")
     
@@ -119,7 +119,7 @@ void IObjectVisuals::draw(CCamera* const _pCamera) const
                 }
             }
         }
-//         m_Graphics.circle(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM()) - _pCamera->getCenter(), 0.6);
+//         m_Graphics.circle(m_pRef->getCOM() - _pCamera->getCenter(), 0.6);
 //         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
 //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(-0.6, 0.0)) -_pCamera->getCenter());
 //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(+0.6, 0.0)) -_pCamera->getCenter());

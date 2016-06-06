@@ -86,7 +86,7 @@ IVisuals* CPolygonVisuals::clone(CDoubleBufferedShape* const _pShape) const
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CPolygonVisuals::draw(CCamera* const _pCamera,
-                           IObject* const _pObject) const
+                           CObject* const _pObject) const
 {
     METHOD_ENTRY("CPolygonVisuals::draw")
 
