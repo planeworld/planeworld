@@ -61,6 +61,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/debris.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/object.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
         
@@ -72,7 +73,6 @@ SET(SRCS
     parzival.cpp
     planeworld.cpp
     star_system.cpp
-    unique_id.cpp
     universe.cpp
     world_data_storage.cpp
     

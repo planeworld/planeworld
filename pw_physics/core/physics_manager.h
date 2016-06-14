@@ -72,9 +72,9 @@ class CPhysicsManager : public IWorldDataStorageUser
         ~CPhysicsManager();
         
         //--- Constant Methods -----------------------------------------------//
-        const double                      getFrequency() const;
-        const double                      getProcessingTime() const;
-        CUniverse* const                  getUniverse() const;
+        double      getFrequency() const;
+        double      getProcessingTime() const;
+        CUniverse*  getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
         CSimTimer&                        getSimTimerGlobal();
@@ -189,7 +189,7 @@ class CPhysicsManager : public IWorldDataStorageUser
 /// \return Frequency in Hertz
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CPhysicsManager::getFrequency() const
+inline double CPhysicsManager::getFrequency() const
 {
     METHOD_ENTRY("CPhysicsManager::getFrequency()")
     return (m_fFrequency);
@@ -202,7 +202,7 @@ inline const double CPhysicsManager::getFrequency() const
 /// \return Processing time in seconds
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CPhysicsManager::getProcessingTime() const
+inline double CPhysicsManager::getProcessingTime() const
 {
     METHOD_ENTRY("CPhysicsManager::getProcessingTime()")
     return (m_fProcessingTime);
@@ -215,7 +215,7 @@ inline const double CPhysicsManager::getProcessingTime() const
 /// \return Procedurally generated universe
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CUniverse* const CPhysicsManager::getUniverse() const
+inline CUniverse* CPhysicsManager::getUniverse() const
 {
     METHOD_ENTRY("CPhysicsManager::getUniverse()")
     return m_pUniverse;

@@ -60,7 +60,7 @@ class CGeometry
         const Vector2d&           getCOM() const;
         const double&             getInertia() const;
         const double&             getMass() const;
-        const DBShapesType* const getShapes() const;
+        const DBShapesType*       getShapes() const;
         
         //--- Methods --------------------------------------------------------//
         CBoundingBox& getBoundingBox();
@@ -139,7 +139,7 @@ inline const double& CGeometry::getMass() const
 /// \return Shapelist
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::list<CDoubleBufferedShape*>* const CGeometry::getShapes() const
+inline const std::list<CDoubleBufferedShape*>* CGeometry::getShapes() const
 {
     METHOD_ENTRY("CGeometry::getShapes")
     return m_pShapes;

@@ -56,8 +56,8 @@ class CCircularBuffer
         const T& operator[](const std::size_t&) const;
         const T& at        (const std::size_t&) const;
         
-        const std::size_t capacity() const;
-        const std::size_t size() const;
+        std::size_t capacity() const;
+        std::size_t size() const;
         
         //--- Methods --------------------------------------------------------//
         T&   operator[](const std::size_t&);
@@ -91,7 +91,7 @@ class CCircularBuffer
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template<class T>
-inline const std::size_t CCircularBuffer<T>::capacity() const
+inline std::size_t CCircularBuffer<T>::capacity() const
 {
     METHOD_ENTRY("CCircularBuffer::capacity")
     return m_nCapacity;
@@ -105,7 +105,7 @@ inline const std::size_t CCircularBuffer<T>::capacity() const
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template<class T>
-inline const std::size_t CCircularBuffer<T>::size() const
+inline std::size_t CCircularBuffer<T>::size() const
 {
     METHOD_ENTRY("CCircularBuffer::size")
     return m_nSize;

@@ -62,7 +62,7 @@ class CDebrisEmitter : public IEmitter
         void emit(const double&);
         
         const DebrisTypeType& getDebrisType()  const;
-        const EmitterType getEmitterType() const;
+              EmitterType getEmitterType() const;
         
         //--- Methods --------------------------------------------------------//
         void        init();
@@ -111,7 +111,7 @@ inline const DebrisTypeType& CDebrisEmitter::getDebrisType() const
 /// \return Type: debris emitter
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const EmitterType CDebrisEmitter::getEmitterType() const
+inline EmitterType CDebrisEmitter::getEmitterType() const
 {
     METHOD_ENTRY("CDebrisEmitter::getEmitterType")
     return EMITTER_DEBRIS;

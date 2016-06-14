@@ -58,7 +58,7 @@ class CCircle : public IShape
         const double&       getAngle() const;
         const Vector2d&     getCenter() const;
         const double&       getRadius() const;
-        const ShapeType     getShapeType() const;
+              ShapeType     getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
         void transform(const double&, const Vector2d&, const Vector2d&);
@@ -137,7 +137,7 @@ inline const double& CCircle::getRadius() const
 /// \return Type of shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeType CCircle::getShapeType() const
+inline ShapeType CCircle::getShapeType() const
 {
     METHOD_ENTRY("CCircle::getShapeType")
     return ShapeType::SHAPE_CIRCLE;

@@ -57,7 +57,7 @@ class CTerrainVisuals : public IVisuals
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, CObject* const) const;
         
-        const ShapeVisualsType getShapeVisualsType() const;
+        ShapeVisualsType getShapeVisualsType() const;
                 
         //--- Methods --------------------------------------------------------//
                 
@@ -77,7 +77,7 @@ class CTerrainVisuals : public IVisuals
 /// \return Type of shape visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeVisualsType CTerrainVisuals::getShapeVisualsType() const
+inline ShapeVisualsType CTerrainVisuals::getShapeVisualsType() const
 {
     METHOD_ENTRY("CTerrainVisuals::getShapeVisualsType")
     return ShapeVisualsType::TERRAIN;

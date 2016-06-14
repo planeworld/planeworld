@@ -99,9 +99,9 @@ class IEmitter : public IKinematicsStateUser,
         virtual ~IEmitter();
         
         //--- Constant Methods -----------------------------------------------//
-        virtual const EmitterType   getEmitterType() const;
+        virtual EmitterType         getEmitterType() const;
         
-        const EmitterModeType       getMode() const;
+              EmitterModeType       getMode() const;
         const double&               getVelocity() const;
         const double&               getVelocityStd() const;
         const bool&                 isActive() const;
@@ -225,7 +225,7 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
 /// \return Type of emitter
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const EmitterType IEmitter::getEmitterType() const
+inline EmitterType IEmitter::getEmitterType() const
 {
     METHOD_ENTRY("IEmitter::getEmitterType")
     return EMITTER_NONE;
@@ -249,7 +249,7 @@ inline IEmitter::~IEmitter()
 /// \return Emitter mode
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline const EmitterModeType IEmitter::getMode() const
+inline EmitterModeType IEmitter::getMode() const
 {
     METHOD_ENTRY("IEmitter::getMode")
     return m_EmitterMode;

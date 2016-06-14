@@ -57,7 +57,7 @@ class CPolygon : public IShape
         CPolygon*              clone() const;
         
         const PolygonType&      getPolygonType() const;
-        const ShapeType         getShapeType() const;
+              ShapeType         getShapeType() const;
         const VertexListType&   getVertices() const;
 
         //--- Methods --------------------------------------------------------//
@@ -114,7 +114,7 @@ inline const VertexListType& CPolygon::getVertices() const
 /// \return Type of shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeType CPolygon::getShapeType() const
+inline ShapeType CPolygon::getShapeType() const
 {
     METHOD_ENTRY("CPolygon::getShapeType")
     return ShapeType::SHAPE_POLYGON;

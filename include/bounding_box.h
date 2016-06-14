@@ -57,8 +57,8 @@ class CBoundingBox : public IUniverseScaled
         //--- Constant Methods -----------------------------------------------//
         const Vector2d& getLowerLeft() const;
         const Vector2d& getUpperRight() const;
-        const double    getHeight() const;
-        const double    getWidth() const;
+        double          getHeight() const;
+        double          getWidth() const;
         
         bool isInside(const Vector2d&) const;
         bool overlaps(const CBoundingBox&, const int& = -1) const;
@@ -117,7 +117,7 @@ inline const Vector2d& CBoundingBox::getUpperRight() const
 /// \return Returns height of bounding box
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CBoundingBox::getHeight() const
+inline double CBoundingBox::getHeight() const
 {
     METHOD_ENTRY("CBoundingBox::getHeight")
     return m_vecUpperRight[1] - m_vecLowerLeft[1];
@@ -130,7 +130,7 @@ inline const double CBoundingBox::getHeight() const
 /// \return Returns width of bounding box
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CBoundingBox::getWidth() const
+inline double CBoundingBox::getWidth() const
 {
     METHOD_ENTRY("CBoundingBox::getWidth")
     return m_vecUpperRight[0] - m_vecLowerLeft[0];

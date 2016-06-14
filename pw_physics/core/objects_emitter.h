@@ -51,7 +51,7 @@ class CObjectEmitter : public IEmitter
         ~CObjectEmitter();
    
         //--- Constant Methods -----------------------------------------------//
-        const EmitterType getEmitterType() const;
+        EmitterType getEmitterType() const;
         
         //--- Methods --------------------------------------------------------//
         void emit(const double&);
@@ -74,7 +74,7 @@ class CObjectEmitter : public IEmitter
 /// \return Type: object emitter
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const EmitterType CObjectEmitter::getEmitterType() const
+inline EmitterType CObjectEmitter::getEmitterType() const
 {
     METHOD_ENTRY("CObjectEmitter::getEmitterType")
     return EMITTER_OBJECT;

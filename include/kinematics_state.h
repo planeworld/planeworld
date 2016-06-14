@@ -69,26 +69,26 @@ class CKinematicsState  : public IUniqueIDUser,
         CKinematicsState(const CKinematicsState&);
 
         //--- Constant methods -----------------------------------------------//
-        const Vector2d  getOrigin() const;
-        const Vector2d  getVelocity() const;
-        const double    getAngle() const;
-        const double    getAngleVelocity() const;
+        Vector2d  getOrigin() const;
+        Vector2d  getVelocity() const;
+        double    getAngle() const;
+        double    getAngleVelocity() const;
         
-        const Vector2d& getLocalOrigin() const;
-        const Vector2d& getLocalVelocity() const;
-        const double&   getLocalAngle() const;
-        const double&   getLocalAngleVelocity() const;
+        const Vector2d&     getLocalOrigin() const;
+        const Vector2d&     getLocalVelocity() const;
+        const double&       getLocalAngle() const;
+        const double&       getLocalAngleVelocity() const;
         
-        const double           getAngleReferredTo(const CKinematicsState&) const;
-        const double           getAngleVelocityReferredTo(const CKinematicsState&) const;
-        const Vector2d         getOriginReferredTo(const CKinematicsState&) const;
-        const Vector2d         getPositionReferredTo(const Vector2d&, const CKinematicsState&) const;
-        const Vector2d         getVelocityReferredTo(const CKinematicsState&) const;
+        double              getAngleReferredTo(const CKinematicsState&) const;
+        double              getAngleVelocityReferredTo(const CKinematicsState&) const;
+        Vector2d            getOriginReferredTo(const CKinematicsState&) const;
+        Vector2d            getPositionReferredTo(const Vector2d&, const CKinematicsState&) const;
+        Vector2d            getVelocityReferredTo(const CKinematicsState&) const;
         
-        const CKinematicsState referredTo(const CKinematicsState&) const;
+        CKinematicsState    referredTo(const CKinematicsState&) const;
         
-        const Vector2d         getLocalPosition(const Vector2d&) const;
-        const Vector2d         getPosition(const Vector2d&) const;
+        Vector2d            getLocalPosition(const Vector2d&) const;
+        Vector2d            getPosition(const Vector2d&) const;
         
         const bool&            gotReference() const;
         

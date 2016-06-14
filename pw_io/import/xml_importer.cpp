@@ -366,10 +366,10 @@ bool CXMLImporter::import(const std::string& _strFilename,
 /// \return Attribute
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const bool CXMLImporter::checkAttributeBool(const pugi::xml_node& _Node, 
-                                          const std::string& _strAttr,
-                                          const bool& _bDef,
-                                          const bool _bNotice) const
+bool CXMLImporter::checkAttributeBool(const pugi::xml_node& _Node, 
+                                      const std::string& _strAttr,
+                                      const bool& _bDef,
+                                      const bool _bNotice) const
 {
     METHOD_ENTRY("CXMLImporter::checkAttributeBool")
     if (_Node.attribute(_strAttr.c_str()).empty())
@@ -409,7 +409,7 @@ const bool CXMLImporter::checkAttributeBool(const pugi::xml_node& _Node,
 /// \return Attribute
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node, 
+double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node, 
                                           const std::string& _strAttr,
                                           const double& _fDef,
                                           const bool _bNotice) const
@@ -467,10 +467,10 @@ const double CXMLImporter::checkAttributeDouble(const pugi::xml_node& _Node,
 /// \return Attribute
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const int CXMLImporter::checkAttributeInt(const pugi::xml_node& _Node, 
-                                          const std::string& _strAttr,
-                                          const int& _nDef,
-                                          const bool _bNotice) const
+int CXMLImporter::checkAttributeInt(const pugi::xml_node& _Node, 
+                                    const std::string& _strAttr,
+                                    const int& _nDef,
+                                    const bool _bNotice) const
 {
     METHOD_ENTRY("CXMLImporter::checkAttributeInt")
     if (_Node.attribute(_strAttr.c_str()).empty())
@@ -510,10 +510,10 @@ const int CXMLImporter::checkAttributeInt(const pugi::xml_node& _Node,
 /// \return Attribute
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const std::string CXMLImporter::checkAttributeString(const pugi::xml_node& _Node, 
-                                          const std::string& _strAttr,
-                                          const std::string& _strDef,
-                                          const bool _bNotice) const
+std::string CXMLImporter::checkAttributeString(const pugi::xml_node& _Node, 
+                                               const std::string& _strAttr,
+                                               const std::string& _strDef,
+                                               const bool _bNotice) const
 {
     METHOD_ENTRY("CXMLImporter::checkAttributeString")
     if (_Node.attribute(_strAttr.c_str()).empty())

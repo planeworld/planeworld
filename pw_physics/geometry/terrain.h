@@ -55,20 +55,20 @@ class CTerrain : public IShape
         virtual ~CTerrain();
         
         //--- Constant Methods -----------------------------------------------//
-        CTerrain*                       clone() const;
-        const double&                   getAngle() const;
-        const Vector2d&                 getCenter() const;
-        const double&                   getDiversity() const;
-        const double&                   getGroundResolution() const;
-        const double&                   getHeight() const;
-        const int&                      getSeed() const;
-        const double&                   getSmoothness() const;
-        const double                    getSurface(const double&) const;
-        const double&                   getWidth() const;
+        CTerrain*       clone() const;
+        const double&   getAngle() const;
+        const Vector2d& getCenter() const;
+        const double&   getDiversity() const;
+        const double&   getGroundResolution() const;
+        const double&   getHeight() const;
+        const int&      getSeed() const;
+        const double&   getSmoothness() const;
+        const double&   getSurface(const double&) const;
+        const double&   getWidth() const;
                 
-        const ShapeType                 getShapeType() const;
+        ShapeType       getShapeType() const;
         
-        const double                    snapToTerrainGrid(const double&) const;
+              double    snapToTerrainGrid(const double&) const;
 
         //--- Methods --------------------------------------------------------//
         void init();
@@ -226,7 +226,7 @@ inline const double& CTerrain::getWidth() const
 /// \return Type of shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeType CTerrain::getShapeType() const
+inline ShapeType CTerrain::getShapeType() const
 {
     METHOD_ENTRY("CTerrain::getShapeType")
     return ShapeType::SHAPE_TERRAIN;
@@ -244,7 +244,7 @@ inline const ShapeType CTerrain::getShapeType() const
 /// \return Snapped position
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CTerrain::snapToTerrainGrid(const double& _fX) const
+inline double CTerrain::snapToTerrainGrid(const double& _fX) const
 {
     METHOD_ENTRY("CTerrain::snapToTerrainGrid")
     return floor((_fX+m_vecCenter[0])/m_fGroundResolution)*m_fGroundResolution-m_vecCenter[0];

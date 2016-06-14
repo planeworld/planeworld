@@ -44,7 +44,7 @@ CThruster::CThruster() : m_bActive(true),
     METHOD_ENTRY("CThruster::CThruster")
     CTOR_CALL("CThruster::CThruster")
     
-//     IHooker::m_strName += ": Thruster";
+    m_UID.setName("Thruster_"+m_UID.getName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ CThruster::CThruster() : m_bActive(true),
 /// \return Current thrust
 ///
 ///////////////////////////////////////////////////////////////////////////////
-const double CThruster::activate(const double& _fThrust)
+const double& CThruster::activate(const double& _fThrust)
 {
     METHOD_ENTRY("CThruster::activate")
     

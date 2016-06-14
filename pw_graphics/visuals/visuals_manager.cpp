@@ -452,6 +452,9 @@ void CVisualsManager::drawTimers() const
                 << m_pPhysicsManager->getSimTimerLocal()[i].getMinutesPart() << "m "
                 << m_pPhysicsManager->getSimTimerLocal()[i].getSecondsPart() << "s" << std::endl;
         }
+        
+        /// \todo Check: Somehow showing text increases framerate when activating the first time
+        
         m_Graphics.getWindow()->pushGLStates();
         sf::Text Text;
         if (m_pDataStorage->getTimeScale() > 1.0)
@@ -477,7 +480,7 @@ void CVisualsManager::drawTimers() const
 /// \return True or false
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const bool CVisualsManager::getVisualisation(const int& _nVis) const
+bool CVisualsManager::getVisualisation(const int& _nVis) const
 {
     METHOD_ENTRY("CVisualsManager::getVisualisation")
 

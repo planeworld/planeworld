@@ -55,10 +55,10 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         ~CVisualsManager();
         
         //--- Constant Methods -----------------------------------------------//
-        const double    getFrequency() const;
-        const bool      getVisualisation(const int&) const;
-        const int       getVisualisations() const;
-        WindowHandleType* const
+        const double&   getFrequency() const;
+        bool            getVisualisation(const int&) const;
+        int             getVisualisations() const;
+        WindowHandleType*
                         getWindowHandle() const;
         bool            initGraphics() const;
                 
@@ -118,7 +118,7 @@ inline void CVisualsManager::finishFrame() const
 /// \return Frequency in Hertz
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CVisualsManager::getFrequency() const
+inline const double& CVisualsManager::getFrequency() const
 {
     METHOD_ENTRY("CVisualsManager::getFrequency")
     return (m_fFrequency);
@@ -131,7 +131,7 @@ inline const double CVisualsManager::getFrequency() const
 /// \return Visualisations as bit pattern
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const int CVisualsManager::getVisualisations() const
+inline int CVisualsManager::getVisualisations() const
 {
     METHOD_ENTRY("CVisualsManager::getVisualisations")
     return (m_nVisualisations);
@@ -144,7 +144,7 @@ inline const int CVisualsManager::getVisualisations() const
 /// \return Window handle
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline WindowHandleType* const CVisualsManager::getWindowHandle() const
+inline WindowHandleType* CVisualsManager::getWindowHandle() const
 {
     METHOD_ENTRY("CVisualsManager::getWindowHandle")
     return (m_Graphics.getWindow());

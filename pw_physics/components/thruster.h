@@ -45,7 +45,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 class CThruster : public IKinematicsStateUser,
                   public IEmitterReferrer,
-                  public IObjectReferrer
+                  public IObjectReferrer,
+                  public IUniqueIDUser
 {
     
     public:
@@ -55,14 +56,14 @@ class CThruster : public IKinematicsStateUser,
         virtual ~CThruster(){}
         
         //--- Constant methods -----------------------------------------------//
-        const double    getAngle() const;
-        const Vector2d  getOrigin() const;
-        const double    getThrust() const;
+        double    getAngle() const;
+        Vector2d  getOrigin() const;
+        double    getThrust() const;
         
         
         //--- Methods --------------------------------------------------------//
-        const double activate(const double&);
-        void         deactivate();
+        const double& activate(const double&);
+        void          deactivate();
         
         void execute();
         
@@ -187,7 +188,7 @@ inline void CThruster::setEmitterVelocityStd(const double& _fEmitterVelocityStd)
 /// \return Angle of thrust vector
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CThruster::getAngle() const
+inline double CThruster::getAngle() const
 {
     METHOD_ENTRY("CThruster::getAngle")
     return m_KinematicsState.getAngle();    
@@ -200,7 +201,7 @@ inline const double CThruster::getAngle() const
 /// \return Origin of thruster
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d CThruster::getOrigin() const
+inline Vector2d CThruster::getOrigin() const
 {
     METHOD_ENTRY("CThruster::getOrigin")
     return m_KinematicsState.getOrigin();    
@@ -213,7 +214,7 @@ inline const Vector2d CThruster::getOrigin() const
 /// \return Current thrust
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CThruster::getThrust() const
+inline double CThruster::getThrust() const
 {
     METHOD_ENTRY("CThruster::getThrust")
     return m_fThrust;    

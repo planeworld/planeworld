@@ -162,7 +162,7 @@ class CGraphics
         void setPointSize(const double&) const;
         void setWidth(const double&) const;
         
-        WindowHandleType* const getWindow() const;
+        WindowHandleType* getWindow() const;
 
         //--- Methods --------------------------------------------------------//
         bool init();
@@ -470,7 +470,7 @@ inline void CGraphics::setWidth(const double& _fW) const
 /// \return Main window
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline WindowHandleType* const CGraphics::getWindow() const
+inline WindowHandleType* CGraphics::getWindow() const
 {
     METHOD_ENTRY("CGraphics::getWindow")
     if (m_pWindow == nullptr)

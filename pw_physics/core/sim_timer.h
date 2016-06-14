@@ -51,15 +51,15 @@ class CSimTimer
         //--- Constructor/Destructor -----------------------------------------//
         
         //--- Constant Methods -----------------------------------------------//
-        const uint16_t   getSecondsPart() const;
-        const uint16_t   getMinutesPart() const;
-        const uint16_t   getHoursPart() const;
-        const uint16_t   getDaysPart() const;
-        const uint32_t   getYears() const;
+        uint16_t   getSecondsPart() const;
+        uint16_t   getMinutesPart() const;
+        uint16_t   getHoursPart() const;
+        uint16_t   getDaysPart() const;
+        uint32_t   getYears() const;
         
         const double&   getSecondsRaw() const;
         
-        const bool isActive() const;
+        bool isActive() const;
         
         //--- Methods --------------------------------------------------------//
         void inc(const double&);
@@ -88,7 +88,7 @@ class CSimTimer
 /// \return Seconds part (residual) of the time passed
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const uint16_t CSimTimer::getSecondsPart() const
+inline uint16_t CSimTimer::getSecondsPart() const
 {
     METHOD_ENTRY("CSimTimer::getSecondsPart")
     
@@ -103,7 +103,7 @@ inline const uint16_t CSimTimer::getSecondsPart() const
 /// \return Minutes part (residual) of the time passed
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const uint16_t CSimTimer::getMinutesPart() const
+inline uint16_t CSimTimer::getMinutesPart() const
 {
     METHOD_ENTRY("CSimTimer::getMinutesPart")
     
@@ -119,7 +119,7 @@ inline const uint16_t CSimTimer::getMinutesPart() const
 /// \return Hours part (residual) of the time passed
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const uint16_t CSimTimer::getHoursPart() const
+inline uint16_t CSimTimer::getHoursPart() const
 {
     METHOD_ENTRY("CSimTimer::getHoursPart")
     
@@ -135,7 +135,7 @@ inline const uint16_t CSimTimer::getHoursPart() const
 /// \return Days part (residual) of the time passed
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const uint16_t CSimTimer::getDaysPart() const
+inline uint16_t CSimTimer::getDaysPart() const
 {
     METHOD_ENTRY("CSimTimer::getDaysPart")
     
@@ -151,7 +151,7 @@ inline const uint16_t CSimTimer::getDaysPart() const
 /// \return Number of years that passed since starting of timer
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const uint32_t CSimTimer::getYears() const
+inline uint32_t CSimTimer::getYears() const
 {
     METHOD_ENTRY("CSimTimer::getYears")
     return m_unYears;
@@ -181,7 +181,7 @@ inline const double& CSimTimer::getSecondsRaw() const
 /// \return Is timer active?
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const bool CSimTimer::isActive() const
+inline bool CSimTimer::isActive() const
 {
     METHOD_ENTRY("CSimTimer::isActive")
     return m_bActive;

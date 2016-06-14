@@ -80,7 +80,7 @@ void CTimer::stop()
 /// \return Sleep time in seconds, might be negative if no time left
 ///
 ///////////////////////////////////////////////////////////////////////////////
-const double CTimer::sleepRemaining(const double& _fFreq)
+double CTimer::sleepRemaining(const double& _fFreq)
 {
     this->stop();
     double fFrametime = 1.0e6*(1.0/_fFreq-m_fDiffTime);

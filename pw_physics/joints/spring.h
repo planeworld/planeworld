@@ -51,8 +51,8 @@ class CSpring : public IJoint
         virtual ~CSpring();
 
         //--- Constant methods -----------------------------------------------//
-        const double getC() const;
-        const double getLength() const;
+        const double& getC() const;
+        const double& getLength() const;
 
         void react() const;
 
@@ -76,7 +76,7 @@ class CSpring : public IJoint
 /// \return Spring constant
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CSpring::getC() const
+inline const double& CSpring::getC() const
 {
     METHOD_ENTRY("CSpring::getC")
     return m_fC;
@@ -89,7 +89,7 @@ inline const double CSpring::getC() const
 /// \return Spring length in neutral position
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CSpring::getLength() const
+inline const double& CSpring::getLength() const
 {
     METHOD_ENTRY("CSpring::getLength")
     return m_fLength;

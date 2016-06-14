@@ -84,26 +84,26 @@ class CXMLImporter : public IWorldDataStorageUser
         
     private:
         
-        const bool          checkAttributeBool(const pugi::xml_node&,
-                                    const std::string&,
-                                    const bool&,
-                                    const bool = true
-                                   ) const;
-        const double        checkAttributeDouble(const pugi::xml_node&,
-                                    const std::string&,
-                                    const double&,
-                                    const bool = true
-                                   ) const;
-        const int           checkAttributeInt(const pugi::xml_node&,
-                                    const std::string&,
-                                    const int&,
-                                    const bool = true
-                                   ) const;
-        const std::string   checkAttributeString(const pugi::xml_node&,
-                                    const std::string&,
-                                    const std::string&,
-                                    const bool = true
-                                   ) const;
+        bool          checkAttributeBool(const pugi::xml_node&,
+                              const std::string&,
+                              const bool&,
+                              const bool = true
+                             ) const;
+        double        checkAttributeDouble(const pugi::xml_node&,
+                              const std::string&,
+                              const double&,
+                              const bool = true
+                             ) const;
+        int           checkAttributeInt(const pugi::xml_node&,
+                              const std::string&,
+                              const int&,
+                              const bool = true
+                             ) const;
+        std::string   checkAttributeString(const pugi::xml_node&,
+                              const std::string&,
+                              const std::string&,
+                              const bool = true
+                             ) const;
 
         bool checkFile(const pugi::xml_node&);
         void createCamera(const pugi::xml_node&);

@@ -70,7 +70,7 @@ class IShape : public IUniqueIDUser
         
         //--- Constant Methods -----------------------------------------------//
         virtual IShape*             clone() const = 0;
-        virtual const ShapeType     getShapeType() const;
+        virtual ShapeType           getShapeType() const;
 
         const double&               getArea() const;
         const Vector2d&             getCentroid() const;
@@ -212,7 +212,7 @@ inline bool IShape::isValid() const
 /// \return Type of shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeType IShape::getShapeType() const
+inline ShapeType IShape::getShapeType() const
 {
     METHOD_ENTRY("IShape::getShapeType")
     return ShapeType::SHAPE_NONE;
