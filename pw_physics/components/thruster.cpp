@@ -44,7 +44,7 @@ CThruster::CThruster() : m_bActive(true),
     METHOD_ENTRY("CThruster::CThruster")
     CTOR_CALL("CThruster::CThruster")
     
-//     IHooker::m_strName += ": Thruster";
+    m_UID.setName("Thruster_"+m_UID.getName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

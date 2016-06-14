@@ -45,7 +45,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 class CThruster : public IKinematicsStateUser,
                   public IEmitterReferrer,
-                  public IObjectReferrer
+                  public IObjectReferrer,
+                  public IUniqueIDUser
 {
     
     public:

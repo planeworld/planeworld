@@ -55,17 +55,13 @@ class IKinematicsStateUser
 
         //--- Constant methods -----------------------------------------------//
         CKinematicsState&   getKinematicsState();
-        const std::string&  getName() {return m_strName;}
         
         //--- Methods --------------------------------------------------------//
         bool hook(IKinematicsStateUser* const);
-        void setName(const std::string& _strName){m_strName=_strName;}
                 
     protected:
         
         CKinematicsState    m_KinematicsState;  ///< Kinematics state data
-        
-        std::string m_strName = {"TESTNAME"};
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

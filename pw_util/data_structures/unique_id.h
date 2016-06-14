@@ -55,7 +55,11 @@ class CUniqueID
         ~CUniqueID();
         
         //--- Constant Methods -----------------------------------------------//
-        const UIDType& value() const;
+        const std::string&  getName() const;
+        const UIDType&      getValue() const;
+        
+        //--- Methods --------------------------------------------------------//
+        void setName(const std::string&);
                 
         //--- friends --------------------------------------------------------//
         friend std::istream&    operator>>(std::istream&, CUniqueID&);
@@ -67,6 +71,7 @@ class CUniqueID
       
         //--- Variables [private] --------------------------------------------//
                UIDType             m_nUID;              ///< Unique ID for this instance
+               std::string         m_strName;           ///< Name for this instance
                
         static UIDType             s_nUID;              ///< Unique ID counter
         static std::deque<UIDType> s_UnusedUIDs;        ///< Storage for unused / released IDs
@@ -77,15 +82,41 @@ class CUniqueID
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns the name as identifier
+///
+/// \return Name as identifier
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::string& CUniqueID::getName() const
+{
+    METHOD_ENTRY("CUniqueID::getName")
+    return m_strName;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns the unique ID value
 ///
 /// \return Unique ID value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const UIDType& CUniqueID::value() const
+inline const UIDType& CUniqueID::getValue() const
 {
-    METHOD_ENTRY("CUniqueID::value")
+    METHOD_ENTRY("CUniqueID::getValue")
     return m_nUID;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets a name as identifier
+///
+/// \param _strName Name to be set as identifier
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CUniqueID::setName(const std::string& _strName)
+{
+    METHOD_ENTRY("CUniqueID::setName")
+    m_strName = _strName;
 }
 
 #endif // CUniqueID

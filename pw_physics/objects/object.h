@@ -284,7 +284,7 @@ inline const double& CObject::getMass() const
 inline const std::string& CObject::getName() const
 {
     METHOD_ENTRY("CObject::getName")
-    return (m_strName);
+    return (m_UID.getName());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -492,7 +492,7 @@ inline void CObject::setName(const std::string& _strName)
 {
     METHOD_ENTRY("CObject::setName")
 
-    m_strName = _strName;
+    m_UID.setName(_strName);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

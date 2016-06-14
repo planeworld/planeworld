@@ -50,7 +50,11 @@ class IUniqueIDUser
     public:
    
         //--- Constant Methods -----------------------------------------------//
-        UIDType   getUID() const;
+        const std::string&  getName() const;
+              UIDType       getUID() const;
+        
+        //--- Methods --------------------------------------------------------//
+        void setName(const std::string&);
         
     protected:
         
@@ -64,6 +68,19 @@ typedef std::unordered_map<UIDType, IUniqueIDUser*> UIDUserType; ///< Stores ent
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns the entity's name
+///
+/// \return Name of entity
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::string& IUniqueIDUser::getName() const
+{
+    METHOD_ENTRY("IUniqueIDUser::getName")
+    return m_UID.getName();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns the objects unique id
 ///
 /// \return Unique id of object
@@ -72,7 +89,20 @@ typedef std::unordered_map<UIDType, IUniqueIDUser*> UIDUserType; ///< Stores ent
 inline UIDType IUniqueIDUser::getUID() const
 {
     METHOD_ENTRY("IUniqueIDUser::getUID")
-    return m_UID.value();
+    return m_UID.getValue();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the entities name
+///
+/// \param _strName Name to be set for entity
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IUniqueIDUser::setName(const std::string& _strName)
+{
+    METHOD_ENTRY("IUniqueIDUser::setName")
+    m_UID.setName(_strName);
 }
 
 #endif // UNIQUE_ID_USER_H

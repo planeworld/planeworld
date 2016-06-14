@@ -46,7 +46,7 @@ CCamera::CCamera() : m_fViewportWidth(m_Graphics.getViewPort().right-m_Graphics.
     
     m_vecCell.setZero();
     
-//     IHooker::m_strName += ": Camera";
+    m_UID.setName("Camera_"+m_UID.getName());
     
     this->reset();
 }

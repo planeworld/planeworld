@@ -53,6 +53,7 @@
 class CCamera : public CGraphicsBase,
                 public IKinematicsStateUser,
                 public IObjectReferrer,
+                public IUniqueIDUser,
                 public IUniverseScaled
 {
 

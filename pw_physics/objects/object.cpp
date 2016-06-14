@@ -46,7 +46,7 @@ CObject::CObject(): m_bGravitation(true),
     CTOR_CALL("CObject::CObject")
 
     // Default name for any object:
-    m_strName = "Object_" + std::to_string(m_unNrOfObjects++);
+    m_UID.setName("Object_" + m_UID.getName());
     
     m_pIntAng = new CEulerIntegrator<double>;
     MEM_ALLOC("CEulerIntegrator");
@@ -102,7 +102,7 @@ CObject::~CObject()
 
     m_Lifetime.stop();
     DOM_STATS(
-        DEBUG_MSG("Object", "Lifetime (" << m_strName << "): "
+        DEBUG_MSG("Object", "Lifetime (" << m_UID.getName() << "): "
                 << m_Lifetime.getTime())
     )
 }
@@ -294,7 +294,7 @@ void CObject::updateCell()
     DEBUG(
         if (std::abs(vecUpdateCell[0]) > 0 || std::abs(vecUpdateCell[1] > 0))
         {
-            DOM_VAR(DEBUG_MSG("Object Interface","Cell update for " << m_strName << " is " <<
+            DOM_VAR(DEBUG_MSG("Object Interface","Cell update for " << m_UID.getName() << " is " <<
                             vecUpdateCell[0] << ", " << vecUpdateCell[1]))
         }
     )
