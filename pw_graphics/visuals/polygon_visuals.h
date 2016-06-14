@@ -55,7 +55,7 @@ class CPolygonVisuals : public IVisuals
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, CObject* const) const;
         
-        const ShapeVisualsType getShapeVisualsType() const;
+        ShapeVisualsType getShapeVisualsType() const;
                 
     private:
       
@@ -73,7 +73,7 @@ class CPolygonVisuals : public IVisuals
 /// \return Type of shape visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeVisualsType CPolygonVisuals::getShapeVisualsType() const
+inline ShapeVisualsType CPolygonVisuals::getShapeVisualsType() const
 {
     METHOD_ENTRY("CPolygonVisuals::getShapeVisualsType")
     return ShapeVisualsType::POLYGON;

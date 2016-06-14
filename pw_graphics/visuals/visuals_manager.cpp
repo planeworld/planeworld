@@ -477,7 +477,7 @@ void CVisualsManager::drawTimers() const
 /// \return True or false
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const bool CVisualsManager::getVisualisation(const int& _nVis) const
+bool CVisualsManager::getVisualisation(const int& _nVis) const
 {
     METHOD_ENTRY("CVisualsManager::getVisualisation")
 

@@ -76,20 +76,20 @@ class CPlanet : public IShape
         virtual ~CPlanet();
         
         //--- Constant Methods -----------------------------------------------//
-        CPlanet*                            clone() const;
+        CPlanet*                     clone() const;
         
-        const double&                       getAngle() const;
-        const Vector2d&                     getCenter() const;
-        const double&                       getGroundResolution() const;
-        const double&                       getHeight() const;
-        const double&                       getRadius() const;
-        const double&                       getSeaLevel() const;
-        const int&                          getSeed() const;
-        const double&                       getSmoothness() const;
-        const noise::module::Module* const  getSurface() const;
-        const noise::module::Module* const  getTerrainType() const;
+        const double&                getAngle() const;
+        const Vector2d&              getCenter() const;
+        const double&                getGroundResolution() const;
+        const double&                getHeight() const;
+        const double&                getRadius() const;
+        const double&                getSeaLevel() const;
+        const int&                   getSeed() const;
+        const double&                getSmoothness() const;
+        const noise::module::Module* getSurface() const;
+        const noise::module::Module* getTerrainType() const;
         
-        const ShapeType                     getShapeType() const;
+              ShapeType              getShapeType() const;
 
         //--- Methods --------------------------------------------------------//
         void initTerrain();
@@ -275,7 +275,7 @@ inline const double& CPlanet::getSmoothness() const
 /// \return Surface noise module
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const noise::module::Module* const CPlanet::getSurface() const
+inline const noise::module::Module* CPlanet::getSurface() const
 {
     METHOD_ENTRY("CPlanet::getSurface")
     return m_pSurface;
@@ -288,7 +288,7 @@ inline const noise::module::Module* const CPlanet::getSurface() const
 /// \return terrain type noise module
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const noise::module::Module* const CPlanet::getTerrainType() const
+inline const noise::module::Module* CPlanet::getTerrainType() const
 {
     METHOD_ENTRY("CPlanet::getTerrainType")
     return m_pTerrainType;
@@ -301,7 +301,7 @@ inline const noise::module::Module* const CPlanet::getTerrainType() const
 /// \return Type of shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeType CPlanet::getShapeType() const
+inline ShapeType CPlanet::getShapeType() const
 {
     METHOD_ENTRY("CPlanet::getShapeType")
     return ShapeType::SHAPE_PLANET;

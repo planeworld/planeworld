@@ -60,7 +60,7 @@ class CPlanetVisuals : public IVisuals
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, CObject* const) const;
         
-        const ShapeVisualsType getShapeVisualsType() const;
+        ShapeVisualsType getShapeVisualsType() const;
                 
     private:
         
@@ -94,7 +94,7 @@ inline CPlanetVisuals::CPlanetVisuals(CDoubleBufferedShape* const _pPlanet)
 /// \return Type of shape visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeVisualsType CPlanetVisuals::getShapeVisualsType() const
+inline ShapeVisualsType CPlanetVisuals::getShapeVisualsType() const
 {
     METHOD_ENTRY("CPlanetVisuals::getShapeVisualsType")
     return ShapeVisualsType::PLANET;

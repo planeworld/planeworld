@@ -64,7 +64,7 @@ class CCamera : public CGraphicsBase,
 
         //--- Constant Methods -----------------------------------------------//
         const Vector2d      getCenter() const;
-        const double        getAngle() const;
+        double              getAngle() const;
         const double&       getZoom() const;
         
         //--- Methods --------------------------------------------------------//
@@ -125,7 +125,7 @@ inline const Vector2d CCamera::getCenter() const
 /// \return The camera angle
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double CCamera::getAngle() const
+inline double CCamera::getAngle() const
 {
     METHOD_ENTRY("CCamera::getAngle")
     return (m_KinematicsState.getAngle());

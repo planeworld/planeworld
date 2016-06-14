@@ -78,7 +78,7 @@ CParzival::~CParzival()
 /// \return Double value read from file
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const double CParzival::readDouble()
+double CParzival::readDouble()
 {
     METHOD_ENTRY("CParzival::readDouble")
 
@@ -99,7 +99,7 @@ const double CParzival::readDouble()
 /// \return Integer value read from file
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const int CParzival::readInt()
+int CParzival::readInt()
 {
     METHOD_ENTRY("CParzival::readInt")
 
@@ -119,7 +119,7 @@ const int CParzival::readInt()
 /// \return String read from file
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const std::string CParzival::readString()
+std::string CParzival::readString()
 {
     METHOD_ENTRY("CParzival::readString")
 
@@ -139,7 +139,7 @@ const std::string CParzival::readString()
 /// \return Line, stored in std::string
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const std::string CParzival::readLine()
+std::string CParzival::readLine()
 {
     METHOD_ENTRY("CParzival::readLine()")
 

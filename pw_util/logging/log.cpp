@@ -107,7 +107,7 @@ CLog& CLog::getInstance()
 /// \return Colour scheme
 ///
 ///////////////////////////////////////////////////////////////////////////////
-const LogColourSchemeType CLog::stringToColourScheme(const std::string& _strScheme) const
+LogColourSchemeType CLog::stringToColourScheme(const std::string& _strScheme) const
 {
     METHOD_ENTRY("CLog::stringToColourScheme");
     
@@ -494,7 +494,9 @@ void CLog::unsetDomain(const LogDomainType& _Domain)
     if (m_bDynSetting)
     {
         if (_Domain != LOG_DOMAIN_METHOD_ENTRY)
+        {
             METHOD_ENTRY("CLog::unsetDomain(const LogDomainType&)");
+        }
     
         m_abDomain[_Domain] = false;
         DEBUG_MSG("Logging", "Unset domain "+convLogDom2Str(_Domain))

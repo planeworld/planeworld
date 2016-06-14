@@ -94,16 +94,16 @@ CTerrain* CTerrain::clone() const
 /// \return Height
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const double CTerrain::getSurface(const double& _fX) const
+const double& CTerrain::getSurface(const double& _fX) const
 {
     METHOD_ENTRY("CTerrain::getSurface")
     
-    std::uint32_t nX = static_cast<std::uint32_t>(
-                       (_fX+m_fWidth*0.5-m_vecCenter[0])/m_fGroundResolution
+    std::int32_t nX = static_cast<std::int32_t>(
+                      (_fX+m_fWidth*0.5-m_vecCenter[0])/m_fGroundResolution
                  );
-    if ((nX < 0u) || (nX >= m_Cache.size()))
+    if ((nX < 0) || (nX >= static_cast<std::int32_t>(m_Cache.size())))
     {
-        nX = 0u;
+        nX = 0;
     }
     return m_Cache[nX];
 }

@@ -62,7 +62,7 @@ class CWorldDataStorage
         ~CWorldDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
-        CCamera* const                      getCamera() const;
+        CCamera*                            getCamera() const;
         const DebrisType&                   getDebris() const;
         const DebrisVisualsType&            getDebrisVisuals() const;
         const DebrisVisualsThrusterType&    getDebrisVisualsThruster() const;
@@ -128,7 +128,7 @@ class CWorldDataStorage
 /// \return Active camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CCamera* const CWorldDataStorage::getCamera() const
+inline CCamera* CWorldDataStorage::getCamera() const
 {
     METHOD_ENTRY("CWorldDataStorage::getCamera")
     return m_pCamera;

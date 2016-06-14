@@ -68,10 +68,10 @@ class CParzival
         //--- Methods --------------------------------------------------------//
         bool                create(const std::string&);
         bool                open(const std::string&);
-        const double        readDouble();
-        const int           readInt();
-        const std::string   readString();
-        const std::string   readLine();
+        double              readDouble();
+        int                 readInt();
+        std::string         readString();
+        std::string         readLine();
         void                close();
         void                goHead();
         void                goNext();

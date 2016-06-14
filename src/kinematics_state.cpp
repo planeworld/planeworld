@@ -41,7 +41,7 @@
 /// \return Resulting kinematics when referring to _Reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const CKinematicsState CKinematicsState::referredTo(const CKinematicsState& _Reference) const
+CKinematicsState CKinematicsState::referredTo(const CKinematicsState& _Reference) const
 {
     METHOD_ENTRY("CKinematicsState::referredTo")
     
@@ -67,7 +67,7 @@ const CKinematicsState CKinematicsState::referredTo(const CKinematicsState& _Ref
 /// \return Resulting origin in global coordinates based on reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const Vector2d CKinematicsState::getOrigin() const
+Vector2d CKinematicsState::getOrigin() const
 {
     METHOD_ENTRY("CKinematicsState::getOrigin")
     
@@ -89,7 +89,7 @@ const Vector2d CKinematicsState::getOrigin() const
 /// \return Resulting velocity in global coordinates based on reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const Vector2d CKinematicsState::getVelocity() const
+Vector2d CKinematicsState::getVelocity() const
 {
     METHOD_ENTRY("CKinematicsState::getVelocity")
     
@@ -113,7 +113,7 @@ const Vector2d CKinematicsState::getVelocity() const
 /// \return Resulting angle in global coordinates based on reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const double CKinematicsState::getAngle() const
+double CKinematicsState::getAngle() const
 {
     METHOD_ENTRY("CKinematicsState::getAngle")
     if (m_bGotReference)
@@ -129,7 +129,7 @@ const double CKinematicsState::getAngle() const
 /// \return Resulting angle velocity in global coordinates based on reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const double CKinematicsState::getAngleVelocity() const
+double CKinematicsState::getAngleVelocity() const
 {
     METHOD_ENTRY("CKinematicsState::getAngleVelocity")
     if (m_bGotReference)
@@ -148,7 +148,7 @@ const double CKinematicsState::getAngleVelocity() const
 /// \return Resulting angle when referring to _Reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const double CKinematicsState::getAngleReferredTo(const CKinematicsState& _Reference) const
+double CKinematicsState::getAngleReferredTo(const CKinematicsState& _Reference) const
 {
     METHOD_ENTRY("CKinematicsState::getAngleReferredTo")
     return m_fAngle - _Reference.m_fAngle;
@@ -164,7 +164,7 @@ const double CKinematicsState::getAngleReferredTo(const CKinematicsState& _Refer
 /// \return Resulting angle velocity when referring to _Reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const double CKinematicsState::getAngleVelocityReferredTo(const CKinematicsState& _Reference) const
+double CKinematicsState::getAngleVelocityReferredTo(const CKinematicsState& _Reference) const
 {
     METHOD_ENTRY("CKinematicsState::getAngleVelocityReferredTo")
     return m_fAngleVelocity - _Reference.m_fAngleVelocity;
@@ -180,7 +180,7 @@ const double CKinematicsState::getAngleVelocityReferredTo(const CKinematicsState
 /// \return Resulting position when referring to _Reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const Vector2d CKinematicsState::getOriginReferredTo(const CKinematicsState& _Reference) const
+Vector2d CKinematicsState::getOriginReferredTo(const CKinematicsState& _Reference) const
 {
     METHOD_ENTRY("CKinematicsState::getOriginReferredTo")
     
@@ -201,7 +201,7 @@ const Vector2d CKinematicsState::getOriginReferredTo(const CKinematicsState& _Re
 /// \return Resulting position when referring to _Reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const Vector2d CKinematicsState::getPositionReferredTo(const Vector2d& _vecLocal,
+Vector2d CKinematicsState::getPositionReferredTo(const Vector2d& _vecLocal,
                                                const CKinematicsState& _Reference) const
 {
     METHOD_ENTRY("CKinematicsState::getPositionReferredTo")
@@ -223,7 +223,7 @@ const Vector2d CKinematicsState::getPositionReferredTo(const Vector2d& _vecLocal
 /// \return Resulting velocity when referring to _Reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const Vector2d CKinematicsState::getVelocityReferredTo(const CKinematicsState& _Reference) const
+Vector2d CKinematicsState::getVelocityReferredTo(const CKinematicsState& _Reference) const
 {
     METHOD_ENTRY("CKinematicsState::getVelocityReferredTo")
     
@@ -248,7 +248,7 @@ const Vector2d CKinematicsState::getVelocityReferredTo(const CKinematicsState& _
 /// \return Resulting coordinates referring to local coordinate system
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const Vector2d CKinematicsState::getLocalPosition(const Vector2d& _vecLocal) const
+Vector2d CKinematicsState::getLocalPosition(const Vector2d& _vecLocal) const
 {
     METHOD_ENTRY("CKinematicsState::getPosition")
     
@@ -266,7 +266,7 @@ const Vector2d CKinematicsState::getLocalPosition(const Vector2d& _vecLocal) con
 /// \return Resulting global coordinates when referring to reference
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const Vector2d CKinematicsState::getPosition(const Vector2d& _vecLocal) const
+Vector2d CKinematicsState::getPosition(const Vector2d& _vecLocal) const
 {
     METHOD_ENTRY("CKinematicsState::getPosition")
     

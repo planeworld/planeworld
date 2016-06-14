@@ -119,7 +119,7 @@ class CLog
         static CLog& getInstance();
         
         //--- Constant methods -----------------------------------------------//
-        const LogColourSchemeType stringToColourScheme(const std::string&) const;
+        LogColourSchemeType stringToColourScheme(const std::string&) const;
 
         //--- Methods --------------------------------------------------------//
         void indent();

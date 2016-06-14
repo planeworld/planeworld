@@ -59,9 +59,9 @@ class CDoubleBufferedShape : public IUniqueIDUser
         //--- Constant Methods -----------------------------------------------//
         CDoubleBufferedShape* clone() const;
         
-        IShape* const getShapeBuf() const;
-        IShape* const getShapeCur() const;
-        void          updateBuffer() const;
+        IShape* getShapeBuf() const;
+        IShape* getShapeCur() const;
+        void    updateBuffer() const;
                         
         //--- Methods --------------------------------------------------------//
         void buffer(IShape* const);
@@ -87,7 +87,7 @@ class CDoubleBufferedShape : public IUniqueIDUser
 /// \return Buffered shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IShape* const CDoubleBufferedShape::getShapeBuf() const
+inline IShape* CDoubleBufferedShape::getShapeBuf() const
 {
     METHOD_ENTRY("CDoubleBufferedShape::getShapeBuf")
     return m_pShapeBuf;
@@ -100,7 +100,7 @@ inline IShape* const CDoubleBufferedShape::getShapeBuf() const
 /// \return Currently active shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IShape* const CDoubleBufferedShape::getShapeCur() const
+inline IShape* CDoubleBufferedShape::getShapeCur() const
 {
     METHOD_ENTRY("CDoubleBufferedShape::getShapeCur")
     return m_pShapeCur;

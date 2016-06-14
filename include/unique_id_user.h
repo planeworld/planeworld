@@ -50,7 +50,7 @@ class IUniqueIDUser
     public:
    
         //--- Constant Methods -----------------------------------------------//
-        const UIDType   getUID() const;
+        UIDType   getUID() const;
         
     protected:
         
@@ -69,7 +69,7 @@ typedef std::unordered_map<UIDType, IUniqueIDUser*> UIDUserType; ///< Stores ent
 /// \return Unique id of object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const UIDType IUniqueIDUser::getUID() const
+inline UIDType IUniqueIDUser::getUID() const
 {
     METHOD_ENTRY("IUniqueIDUser::getUID")
     return m_UID.value();

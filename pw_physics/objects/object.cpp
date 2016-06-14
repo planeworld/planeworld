@@ -185,7 +185,7 @@ CObject* CObject::clone() const
 /// \return Demanded anchor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-const Vector2d CObject::getAnchor(const int& _nID) const
+Vector2d CObject::getAnchor(const int& _nID) const
 {
     METHOD_ENTRY("CObject::getAnchor")
 

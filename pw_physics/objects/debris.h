@@ -69,7 +69,7 @@ class CDebris : public IUniverseScaled,
         CDebris();
 
         //--- Constant methods -----------------------------------------------//
-        const int getDepths() const;
+        int getDepths() const;
 
         //--- Methods --------------------------------------------------------//
         CCircularBuffer<Vector2d>* getPositions();
@@ -172,7 +172,7 @@ inline CCircularBuffer<std::uint8_t>* CDebris::getStates()
 /// \return Depthlayers as bit pattern
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const int CDebris::getDepths() const
+inline int CDebris::getDepths() const
 {
     METHOD_ENTRY("CDebris::getDepths")
     return (m_nDepthlayers);

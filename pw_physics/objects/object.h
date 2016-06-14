@@ -64,14 +64,14 @@ class CObject : public IUniqueIDUser,
         virtual ~CObject();
 
         //--- Constant methods -----------------------------------------------//
-        CObject*            clone() const;
-        const Vector2d     getAnchor(const int&) const;
+              CObject*      clone() const;
+              Vector2d      getAnchor(const int&) const;
         const double&       getAngle() const;
         const double&       getAngleVelocity() const;
-        const Vector2d      getCOM() const;
-        const int           getDepths() const;
-        const bool          getDynamicsState() const;
-        const bool          getGravitationState() const;
+              Vector2d      getCOM() const;
+              int           getDepths() const;
+              bool          getDynamicsState() const;
+              bool          getGravitationState() const;
         const double&       getInertia() const;
         const double&       getMass() const;
         const std::string&  getName() const;
@@ -89,7 +89,7 @@ class CObject : public IUniqueIDUser,
         AnchorIDType        addAnchor(const Vector2d&);
         void                disableGravitation();
         void                enableGravitation();
-        CGeometry* const    getGeometry();
+        CGeometry*          getGeometry();
         void                setAngle(const double&);
         void                setAngleVelocity(const double&);
         void                setCell(const Vector2i&);
@@ -198,7 +198,7 @@ inline const double& CObject::getAngleVelocity() const
 /// \return Center of mass (COM)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d CObject::getCOM() const
+inline Vector2d CObject::getCOM() const
 {
     METHOD_ENTRY("CObject::getCOM")
     return m_KinematicsState.getLocalPosition(m_Geometry.getCOM());
@@ -211,7 +211,7 @@ inline const Vector2d CObject::getCOM() const
 /// \return Depthlayers as bit pattern
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const int CObject::getDepths() const
+inline int CObject::getDepths() const
 {
     METHOD_ENTRY("CObject::getDepths")
     return (m_nDepthlayers);
@@ -224,7 +224,7 @@ inline const int CObject::getDepths() const
 /// \return Dynamics state, true=dynamic, false=static
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const bool CObject::getDynamicsState() const
+inline bool CObject::getDynamicsState() const
 {
     METHOD_ENTRY("CObject::getDynamicsState")
     return (m_bDynamics);
@@ -242,7 +242,7 @@ inline const bool CObject::getDynamicsState() const
 /// \return The gravitational state
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const bool CObject::getGravitationState() const
+inline bool CObject::getGravitationState() const
 {
     METHOD_ENTRY("CObject::getGravitationState")
     return (m_bGravitation);
@@ -388,7 +388,7 @@ inline void CObject::enableGravitation()
 /// \return Geometry
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CGeometry* const CObject::getGeometry()
+inline CGeometry* CObject::getGeometry()
 {
     METHOD_ENTRY("CObject::getGeometry")
     return &m_Geometry;

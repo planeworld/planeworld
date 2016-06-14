@@ -68,7 +68,7 @@ class IVisuals : virtual public CGraphicsBase,
         virtual void      draw(CCamera* const,
                                CObject* const) const = 0;
                                
-        virtual const ShapeVisualsType  getShapeVisualsType() const;
+        virtual ShapeVisualsType  getShapeVisualsType() const;
                         
         //--- Methods --------------------------------------------------------//
         virtual const CBoundingBox& getBoundingBox();
@@ -92,7 +92,7 @@ class IVisuals : virtual public CGraphicsBase,
 /// \return Type of shape visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeVisualsType IVisuals::getShapeVisualsType() const
+inline ShapeVisualsType IVisuals::getShapeVisualsType() const
 {
     METHOD_ENTRY("IVisuals::getShapeVisualsType")
     return ShapeVisualsType::NONE;

@@ -59,7 +59,7 @@ CThruster::CThruster() : m_bActive(true),
 /// \return Current thrust
 ///
 ///////////////////////////////////////////////////////////////////////////////
-const double CThruster::activate(const double& _fThrust)
+const double& CThruster::activate(const double& _fThrust)
 {
     METHOD_ENTRY("CThruster::activate")
     

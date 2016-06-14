@@ -58,7 +58,7 @@ class CCircleVisuals : public IVisuals
         virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
         virtual void        draw(CCamera* const, CObject* const) const;
         
-        const ShapeVisualsType getShapeVisualsType() const;
+        ShapeVisualsType getShapeVisualsType() const;
         
     private:
         
@@ -77,7 +77,7 @@ class CCircleVisuals : public IVisuals
 /// \return Type of shape visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const ShapeVisualsType CCircleVisuals::getShapeVisualsType() const
+inline ShapeVisualsType CCircleVisuals::getShapeVisualsType() const
 {
     METHOD_ENTRY("CCircleVisuals::getShapeVisualsType")
     return ShapeVisualsType::CIRCLE;

@@ -1,4 +1,4 @@
-SET(CMAKE_CXX_FLAGS "-std=c++14 -mtune=native -Wall -pedantic" CACHE STRING "")
+SET(CMAKE_CXX_FLAGS "-std=c++14 -mtune=native -Wall -Wextra -pedantic" CACHE STRING "")
 
 PROJECT (planeworld)
 cmake_minimum_required(VERSION 3.1)

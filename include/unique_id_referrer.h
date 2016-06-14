@@ -51,8 +51,8 @@ class IUniqueIDReferrer
     public:
    
         //--- Constant Methods -----------------------------------------------//
-        T* const        getRef() const;
-        const UIDType   getUIDRef() const;
+        T*              getRef() const;
+        UIDType         getUIDRef() const;
         
         //--- Methods --------------------------------------------------------//
         void attachTo(T* const);
@@ -94,7 +94,7 @@ inline void IUniqueIDReferrer<T>::attachTo(T* const _pRef)
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-inline T* const IUniqueIDReferrer<T>::getRef() const
+inline T* IUniqueIDReferrer<T>::getRef() const
 {
     METHOD_ENTRY("IUniqueIDReferrer::getRef")
     return m_pRef;
@@ -108,7 +108,7 @@ inline T* const IUniqueIDReferrer<T>::getRef() const
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-inline const UIDType IUniqueIDReferrer<T>::getUIDRef() const
+inline UIDType IUniqueIDReferrer<T>::getUIDRef() const
 {
     METHOD_ENTRY("IUniqueIDReferrer::getUIDRef")
     return m_UIDRef;
