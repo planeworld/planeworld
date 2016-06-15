@@ -59,17 +59,17 @@ int main(int argc, char *argv[])
 {
     Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
     
-    INFO_MSG("Unit test", "Starting unit test for unique id's...")
+    INFO_MSG("Unique ID [unit test]", "Starting unit test...")
        
     CUniqueID UID0;
     if (UID0.getValue() != 0u)
     {
-        ERROR_MSG("Unit test", "Initial uid value not 0.")
+        ERROR_MSG("Unique ID [unit test]", "Initial uid value not 0.")
         return EXIT_FAILURE;
     }
     if (UID0.getName() != "UID_0")
     {
-        ERROR_MSG("Unit test", "Incorrect default string (uid0=" << UID0.getName() << ")")
+        ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid0=" << UID0.getName() << ")")
         return EXIT_FAILURE;
     }
     // UID 1,2 in local scope
@@ -78,12 +78,12 @@ int main(int argc, char *argv[])
         CUniqueID UID2;
         if (UID2.getValue() != 2u)
         {
-            ERROR_MSG("Unit test", "Incorrect uid value (uid2=" << UID2.getValue() << ")")
+            ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid2=" << UID2.getValue() << ")")
             return EXIT_FAILURE;
         }
         if (UID2.getName() != "UID_2")
         {
-            ERROR_MSG("Unit test", "Incorrect default string (uid2=" << UID2.getName() << ")")
+            ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid2=" << UID2.getName() << ")")
             return EXIT_FAILURE;
         }
     }
@@ -94,17 +94,17 @@ int main(int argc, char *argv[])
     {
         if (UID3.getName() != "UID_1")
         {
-            ERROR_MSG("Unit test", "Incorrect default string (uid3=" << UID3.getName() << ")")
+            ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid3=" << UID3.getName() << ")")
             return EXIT_FAILURE;
         }
         if (UID4.getValue() != 2u)
         {
-            ERROR_MSG("Unit test", "Incorrect uid value (uid4=" << UID4.getValue() << ")")
+            ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid4=" << UID4.getValue() << ")")
             return EXIT_FAILURE;
         }
         if (UID4.getName() != "UID_2")
         {
-            ERROR_MSG("Unit test", "Incorrect default string (uid4=" << UID4.getName() << ")")
+            ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid4=" << UID4.getName() << ")")
             return EXIT_FAILURE;
         }
     }
@@ -112,23 +112,23 @@ int main(int argc, char *argv[])
     {
         if (UID3.getName() != "UID_2")
         {
-            ERROR_MSG("Unit test", "Incorrect default string (uid3=" << UID3.getName() << ")")
+            ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid3=" << UID3.getName() << ")")
             return EXIT_FAILURE;
         }
         if (UID4.getValue() != 1u)
         {
-            ERROR_MSG("Unit test", "Incorrect uid value (uid4=" << UID4.getValue() << ")")
+            ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid4=" << UID4.getValue() << ")")
             return EXIT_FAILURE;
         }
         if (UID4.getName() != "UID_1")
         {
-            ERROR_MSG("Unit test", "Incorrect default string (uid4=" << UID4.getName() << ")")
+            ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid4=" << UID4.getName() << ")")
             return EXIT_FAILURE;
         }
     }
     else
     {
-        ERROR_MSG("Unit test", "Incorrect uid value (uid3=" << UID3.getValue() << ")")
+        ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid3=" << UID3.getValue() << ")")
         return EXIT_FAILURE;
     }
     
@@ -136,15 +136,27 @@ int main(int argc, char *argv[])
     CUniqueID UID5;
     if (UID5.getValue() != 3u)
     {
-        ERROR_MSG("Unit test", "Incorrect uid value (uid5=" << UID5.getValue() << ")")
+        ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid5=" << UID5.getValue() << ")")
         return EXIT_FAILURE;
     }
     if (UID5.getName() != "UID_3")
     {
-        ERROR_MSG("Unit test", "Incorrect default string (uid5=" << UID5.getName() << ")")
+        ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid5=" << UID5.getName() << ")")
+        return EXIT_FAILURE;
+    }
+    // Copy constructor should create a new uid, ignoring the given one
+    CUniqueID UID6(UID5);
+    if (UID6.getValue() != 4u)
+    {
+        ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid6=" << UID6.getValue() << ")")
+        return EXIT_FAILURE;
+    }
+    if (UID6.getName() != "UID_4")
+    {
+        ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid6=" << UID6.getName() << ")")
         return EXIT_FAILURE;
     }
   
-    INFO_MSG("Unit test", "...done. Unique id test successful.")
+    INFO_MSG("Unique ID [unit test]", "...done. Test successful.")
     return EXIT_SUCCESS;
 }

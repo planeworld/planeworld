@@ -59,6 +59,30 @@ CUniqueID::CUniqueID()
     m_strName = "UID_"+std::to_string(m_nUID);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy Constructor
+///
+/// Copy constructor will exactly do the same as standard constructor, since
+/// id has to be unique and thus, may not be copied 1:1.
+///
+/// \param _UID UID (won't be copied to ensure unique ids)
+///
+///////////////////////////////////////////////////////////////////////////////
+CUniqueID::CUniqueID(const CUniqueID& _UID)
+{
+    METHOD_ENTRY("CUniqueID::CUniqueID")
+    DTOR_CALL("CUniqueID::CUniqueID")
+    
+    if (s_UnusedUIDs.empty())
+        m_nUID = s_nUID++;
+    else
+    {
+        m_nUID = s_UnusedUIDs.front();
+        s_UnusedUIDs.pop_front();
+    }
+    m_strName = "UID_"+std::to_string(m_nUID);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///

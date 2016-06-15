@@ -52,6 +52,7 @@ class CUniqueID
         
         //--- Constructor/Destructor -----------------------------------------//
         CUniqueID();
+        CUniqueID(const CUniqueID&);
         ~CUniqueID();
         
         //--- Constant Methods -----------------------------------------------//
@@ -67,8 +68,6 @@ class CUniqueID
                 
     private:
         
-        CUniqueID(const CUniqueID&){};                  ///< Copying not allowed
-      
         //--- Variables [private] --------------------------------------------//
                UIDType             m_nUID;              ///< Unique ID for this instance
                std::string         m_strName;           ///< Name for this instance
