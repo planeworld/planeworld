@@ -49,6 +49,7 @@ typedef uint AnchorIDType;
 /// \brief Class representing a phyiscal object
 ///
 /// \todo Move depth information to shapes only. Then map information to object
+/// \todo Implement copy constructor and operator=
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CObject : public IUniqueIDUser,

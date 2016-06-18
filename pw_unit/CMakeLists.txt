@@ -29,6 +29,13 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/include
 )
 
+SET(SRCS_TRIPLE_BUFFER
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
+    pw_unit_triple_buffer.cpp
+)
+
 SET(SRCS_UID
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
@@ -36,15 +43,11 @@ SET(SRCS_UID
     pw_unit_uid.cpp
 )
 
+ADD_EXECUTABLE (pw_unit_triple_buffer ${SRCS_TRIPLE_BUFFER})
 ADD_EXECUTABLE (pw_unit_uid ${SRCS_UID})
 
-TARGET_LINK_LIBRARIES (pw_unit_uid
-    sfml-system
-    sfml-window
-    sfml-graphics
-    Threads::Threads
-)
-
-INSTALL (TARGETS pw_unit_uid
+INSTALL (TARGETS
+    pw_unit_triple_buffer
+    pw_unit_uid
     RUNTIME DESTINATION bin
 )

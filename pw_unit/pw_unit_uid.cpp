@@ -55,7 +55,7 @@
 /// \return Exit code
 ///
 ///////////////////////////////////////////////////////////////////////////////
-int main(int argc, char *argv[])
+int main()
 {
     Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
     
