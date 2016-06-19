@@ -32,6 +32,7 @@
 #define TRIPLE_BUFFER_H
 
 //--- Standard header --------------------------------------------------------//
+#include <mutex>
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
@@ -86,6 +87,8 @@ class CTripleBuffer<TContainer, TVal>
         TContainer    m_Buffer0;      ///< Buffer 1/3
         TContainer    m_Buffer1;      ///< Buffer 2/3
         TContainer    m_Buffer2;      ///< Buffer 3/3
+        
+        std::mutex    m_Mutex;        ///< Mutex for thread safety
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -128,6 +131,8 @@ class CTripleBuffer<TContainer, TKey, TVal>
         TContainer    m_Buffer0;      ///< Buffer 1/3
         TContainer    m_Buffer1;      ///< Buffer 2/3
         TContainer    m_Buffer2;      ///< Buffer 3/3
+        
+        std::mutex    m_Mutex;        ///< Mutex for thread safety
 };
 
 

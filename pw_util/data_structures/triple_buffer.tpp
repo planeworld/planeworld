@@ -172,7 +172,9 @@ template<class TContainer, class TVal>
 void CTripleBuffer<TContainer, TVal>::swapBack()
 {
     METHOD_ENTRY("CTripleBuffer::swapBack")
+    m_Mutex.lock();
     std::swap(m_pBackFront, m_pBackBack);
+    m_Mutex.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +186,9 @@ template<class TContainer, class TKey, class TVal>
 void CTripleBuffer<TContainer, TKey, TVal>::swapBack()
 {
     METHOD_ENTRY("CTripleBuffer::swapBack")
+    m_Mutex.lock();
     std::swap(m_pBackFront, m_pBackBack);
+    m_Mutex.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -196,7 +200,9 @@ template<class TContainer, class TVal>
 void CTripleBuffer<TContainer, TVal>::swapFront()
 {
     METHOD_ENTRY("CTripleBuffer::swapFront")
+    m_Mutex.lock();
     std::swap(m_pFront, m_pBackFront);
+    m_Mutex.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -208,5 +214,7 @@ template<class TContainer, class TKey, class TVal>
 void CTripleBuffer<TContainer, TKey, TVal>::swapFront()
 {
     METHOD_ENTRY("CTripleBuffer::swapFront")
+    m_Mutex.lock();
     std::swap(m_pFront, m_pBackFront);
+    m_Mutex.unlock();
 }
