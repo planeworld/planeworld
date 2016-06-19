@@ -65,6 +65,7 @@ class CTripleBuffer<TContainer, TVal>
         CTripleBuffer();
         
         //--- Methods --------------------------------------------------------//
+        TContainer* getBack();
         TContainer* getFront();
         
         void add(const TVal&);
@@ -109,6 +110,7 @@ class CTripleBuffer<TContainer, TKey, TVal>
         CTripleBuffer();
         
         //--- Methods --------------------------------------------------------//
+        TContainer* getBack();
         TContainer* getFront();
         
         void add(const TKey&, const TVal&);

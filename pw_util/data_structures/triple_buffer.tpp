@@ -102,6 +102,34 @@ void CTripleBuffer<TContainer, TKey, TVal>::buffer(const TContainer& _Container)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns back buffer
+///
+/// \return Back buffer
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class TContainer, class TVal>
+TContainer* CTripleBuffer<TContainer, TVal>::getBack()
+{
+    METHOD_ENTRY("CTripleBuffer::getBack")
+    return m_pBackBack;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns back buffer
+///
+/// \return Back buffer
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class TContainer, class TKey, class TVal>
+TContainer* CTripleBuffer<TContainer, TKey, TVal>::getBack()
+{
+    METHOD_ENTRY("CTripleBuffer::getBack")
+    return m_pBackBack;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns front buffer
 ///
 /// \return Front buffer
