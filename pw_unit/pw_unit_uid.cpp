@@ -46,6 +46,33 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Outputs data of UID internal structures
+///
+/// \param  _strAction String, explaining which operation was done with UID
+///
+///////////////////////////////////////////////////////////////////////////////
+void outputInternalUIDData(const std::string& _strAction)
+{
+    METHOD_ENTRY("outputInternalUIDData")
+    INFO(
+        std::cout << _strAction << std::endl;
+        std::cout << "  Unused UIDs: ";
+        for (auto UnusedUIDs : CUniqueID::getUnusedUIDs())
+            std::cout << UnusedUIDs << " ";
+        std::cout << std::endl;
+        std::cout << "  Referenced UIDs [val]:  ";
+        for (auto ReferencedUIDs : CUniqueID::getReferencedUIDs())
+            std::cout <<  ReferencedUIDs.first << " ";
+        std::cout << std::endl;
+        std::cout << "  Referenced UIDs [refs]: ";
+        for (auto ReferencedUIDs : CUniqueID::getReferencedUIDs())
+            std::cout <<  ReferencedUIDs.second << " ";
+        std::cout << std::endl;
+    )
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Main function
 ///
 /// This is the entrance point for program startup.
@@ -62,6 +89,7 @@ int main()
     INFO_MSG("Unique ID [unit test]", "Starting unit test...")
        
     CUniqueID UID0;
+    outputInternalUIDData("1x Constructor");
     if (UID0.getValue() != 0u)
     {
         ERROR_MSG("Unique ID [unit test]", "Initial uid value not 0.")
@@ -76,6 +104,7 @@ int main()
     {
         CUniqueID UID1;
         CUniqueID UID2;
+        outputInternalUIDData("2x Constructor");
         if (UID2.getValue() != 2u)
         {
             ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid2=" << UID2.getValue() << ")")
@@ -87,9 +116,12 @@ int main()
             return EXIT_FAILURE;
         }
     }
+    outputInternalUIDData("2x Destructor");
+    
     // UID 1,2 should be used, since they were destroyed when exiting scope
     CUniqueID UID3;
     CUniqueID UID4;
+    outputInternalUIDData("2x Constructor");
     if (UID3.getValue() == 1u)
     {
         if (UID3.getName() != "UID_1")
@@ -131,32 +163,115 @@ int main()
         ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid3=" << UID3.getValue() << ")")
         return EXIT_FAILURE;
     }
-    
-    // Counting should go on, UID 5 should be set to 3
-    CUniqueID UID5;
-    if (UID5.getValue() != 3u)
     {
-        ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid5=" << UID5.getValue() << ")")
+        // Counting should go on, UID 5 should be set to 3
+        CUniqueID UID5;
+        outputInternalUIDData("1x Constructor");
+        if (UID5.getValue() != 3u)
+        {
+            ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid5=" << UID5.getValue() << ")")
+            return EXIT_FAILURE;
+        }
+        if (UID5.getName() != "UID_3")
+        {
+            ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid5=" << UID5.getName() << ")")
+            return EXIT_FAILURE;
+        }
+        // Copy constructor should copy the UID, but start reference counting
+        {
+            CUniqueID UID6(UID5);
+            outputInternalUIDData("1x Copy constructor");
+            if (UID6.getValue() != 3u)
+            {
+                ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid6=" << UID6.getValue() << ")")
+                return EXIT_FAILURE;
+            }
+            if (UID6.getName() != "UID_3")
+            {
+                ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid6=" << UID6.getName() << ")")
+                return EXIT_FAILURE;
+            }
+            CUniqueID UID7(UID6);
+            outputInternalUIDData("1x Copy constructor");
+            if (UID7.getValue() != 3u)
+            {
+                ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid7=" << UID7.getValue() << ")")
+                return EXIT_FAILURE;
+            }
+            if (UID7.getName() != "UID_3")
+            {
+                ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid7=" << UID7.getName() << ")")
+                return EXIT_FAILURE;
+            }
+        }
+        outputInternalUIDData("2x Destructor");
+        
+        CUniqueID UID8;
+        outputInternalUIDData("1x Constructor");
+        if (UID8.getValue() != 4u)
+        {
+            ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid8=" << UID8.getValue() << ")")
+            return EXIT_FAILURE;
+        }
+        if (UID8.getName() != "UID_4")
+        {
+            ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid8=" << UID8.getName() << ")")
+            return EXIT_FAILURE;
+        }
+        CUniqueID UID9; 
+        outputInternalUIDData("1x Constructor");
+        UID9 = UID8;
+        outputInternalUIDData("1x Copy assignment operator");
+        if (UID9.getValue() != 4u)
+        {
+            ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid9=" << UID9.getValue() << ")")
+            return EXIT_FAILURE;
+        }
+        if (UID8.getName() != "UID_4")
+        {
+            ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid9=" << UID9.getName() << ")")
+            return EXIT_FAILURE;
+        }
+    }
+    outputInternalUIDData("2x Destructor");
+    // UIDs 3, 4, and 5 should be free by now
+    CUniqueID UID10;
+    outputInternalUIDData("1x Constructor");
+    if (UID10.getValue() != 5u)
+    {
+        ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid10=" << UID10.getValue() << ")")
         return EXIT_FAILURE;
     }
-    if (UID5.getName() != "UID_3")
+    if (UID10.getName() != "UID_5")
     {
-        ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid5=" << UID5.getName() << ")")
+        ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid10=" << UID10.getName() << ")")
         return EXIT_FAILURE;
     }
-    // Copy constructor should create a new uid, ignoring the given one
-    CUniqueID UID6(UID5);
-    if (UID6.getValue() != 4u)
+    CUniqueID UID11;
+    outputInternalUIDData("1x Constructor");
+    if (UID11.getValue() != 4u)
     {
-        ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid6=" << UID6.getValue() << ")")
+        ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid11=" << UID11.getValue() << ")")
         return EXIT_FAILURE;
     }
-    if (UID6.getName() != "UID_4")
+    if (UID11.getName() != "UID_4")
     {
-        ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid6=" << UID6.getName() << ")")
+        ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid11=" << UID11.getName() << ")")
         return EXIT_FAILURE;
     }
-  
+    CUniqueID UID12;
+    outputInternalUIDData("1x Constructor");
+    if (UID12.getValue() != 3u)
+    {
+        ERROR_MSG("Unique ID [unit test]", "Incorrect uid value (uid12=" << UID12.getValue() << ")")
+        return EXIT_FAILURE;
+    }
+    if (UID12.getName() != "UID_3")
+    {
+        ERROR_MSG("Unique ID [unit test]", "Incorrect default string (uid12=" << UID12.getName() << ")")
+        return EXIT_FAILURE;
+    }
+ 
     INFO_MSG("Unique ID [unit test]", "...done. Test successful.")
     return EXIT_SUCCESS;
 }
