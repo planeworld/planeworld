@@ -123,11 +123,14 @@ CUniqueID& CUniqueID::operator=(const CUniqueID& _UID)
 {
     METHOD_ENTRY("CUniqueID::operator=")
     
-    s_UnusedUIDs.push_back(m_nUID);
-    s_ReferencedUIDs[m_nUID] -= 1u;
-    if (s_ReferencedUIDs[m_nUID] == 0u) s_ReferencedUIDs.erase(m_nUID);
-        
-    this->copy(_UID);
+    if (this != &_UID)
+    {
+        s_UnusedUIDs.push_back(m_nUID);
+        s_ReferencedUIDs[m_nUID] -= 1u;
+        if (s_ReferencedUIDs[m_nUID] == 0u) s_ReferencedUIDs.erase(m_nUID);
+            
+        this->copy(_UID);
+    }
     return *this;
 }
 
