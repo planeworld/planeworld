@@ -35,7 +35,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "unique_id.h"
-#include "unique_id_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -51,8 +50,10 @@ class IUniqueIDReferrer
     public:
    
         //--- Constant Methods -----------------------------------------------//
-        T*              getRef() const;
-        UIDType         getUIDRef() const;
+        const std::string&  getNameRef() const;
+        T*                  getRef() const;
+        UIDType             getUIDRef() const;
+        bool                gotRef() const;
         
         //--- Methods --------------------------------------------------------//
         void attachTo(T* const);
@@ -60,8 +61,9 @@ class IUniqueIDReferrer
     protected:
         
         //--- Variables [protected] ------------------------------------------//
-        UIDType         m_UIDRef = 0u;      ///< Reference to unique identifier 
-        T*              m_pRef = nullptr;   ///< Pointer reference to UID user
+        std::string     m_strUIDName = "UID_0";  ///< Reference to named uid
+        UIDType         m_UIDRef = 0u;           ///< Reference to unique identifier 
+        T*              m_pRef = nullptr;        ///< Pointer reference to UID user
         
         //--- Methods [protected] --------------------------------------------//
         virtual void myAttachTo();
@@ -80,10 +82,25 @@ template <class T>
 inline void IUniqueIDReferrer<T>::attachTo(T* const _pRef)
 {
     METHOD_ENTRY("IUniqueIDReferrer::attachTo")
+    m_strUIDName = _pRef->getName();
     m_pRef   = _pRef;
     m_UIDRef = _pRef->getUID();
     
     this->myAttachTo();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the reference to named uid of UID user
+///
+/// \return Reference to named of UID user
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+inline const std::string& IUniqueIDReferrer<T>::getNameRef() const
+{
+    METHOD_ENTRY("IUniqueIDReferrer::getNameRef")
+    return m_strUIDName;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +129,21 @@ inline UIDType IUniqueIDReferrer<T>::getUIDRef() const
 {
     METHOD_ENTRY("IUniqueIDReferrer::getUIDRef")
     return m_UIDRef;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Indicates if reference is given
+///
+/// \return Got reference?
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+inline bool IUniqueIDReferrer<T>::gotRef() const
+{
+    METHOD_ENTRY("IUniqueIDReferrer::gotRef")
+    if (m_UIDRef == 0u) return false;
+    else return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

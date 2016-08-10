@@ -56,15 +56,16 @@ class CUniqueID
         CUniqueID(const CUniqueID&);
         ~CUniqueID();
         
+        CUniqueID& operator=(const CUniqueID&);
+        
         //--- Constant Methods -----------------------------------------------//
         const std::string&  getName() const;
         const UIDType&      getValue() const;
         
         //--- Methods --------------------------------------------------------//
         void setName(const std::string&);
+        void setNewID();
         
-        CUniqueID& operator=(const CUniqueID&);
-                
         //--- Static methods -------------------------------------------------//
         static const std::deque<UIDType>& getUnusedUIDs();
         static const std::unordered_map<UIDType, std::uint32_t>& getReferencedUIDs();

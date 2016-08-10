@@ -30,8 +30,8 @@
 
 #include "unique_id.h"
 
-/// Global counter for unique IDs.
-UIDType CUniqueID::s_nUID = 0;
+/// Global counter for unique IDs. Reserve 0 for no reference
+UIDType CUniqueID::s_nUID = 1;
 
 /// Global list for unused unique IDs
 std::deque<UIDType> CUniqueID::s_UnusedUIDs;
@@ -61,14 +61,7 @@ CUniqueID::CUniqueID()
         m_nUID = s_UnusedUIDs.front();
         s_UnusedUIDs.pop_front();
     }
-    if (s_ReferencedUIDs.find(m_nUID) != s_ReferencedUIDs.end())
-    {
-        s_ReferencedUIDs[m_nUID] += 1u;
-    }
-    else
-    {
-        s_ReferencedUIDs[m_nUID] = 1u;
-    }
+    s_ReferencedUIDs[m_nUID] = 1u;
     m_strName = "UID_"+std::to_string(m_nUID);
 }
 
@@ -125,13 +118,45 @@ CUniqueID& CUniqueID::operator=(const CUniqueID& _UID)
     
     if (this != &_UID)
     {
-        s_UnusedUIDs.push_back(m_nUID);
         s_ReferencedUIDs[m_nUID] -= 1u;
-        if (s_ReferencedUIDs[m_nUID] == 0u) s_ReferencedUIDs.erase(m_nUID);
+        if (s_ReferencedUIDs[m_nUID] == 0u)
+        {
+            s_UnusedUIDs.push_back(m_nUID);
+            s_ReferencedUIDs.erase(m_nUID);
+        }
             
         this->copy(_UID);
     }
     return *this;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets a new value for this ID
+///
+////////////////////////////////////////////////////////////////////////////////
+void CUniqueID::setNewID()
+{
+    METHOD_ENTRY("CUniqueID::setNewID")
+    UIDType nTmp;
+    if (s_UnusedUIDs.empty())
+    {
+        nTmp = s_nUID++;
+    }
+    else
+    {
+        nTmp = s_UnusedUIDs.front();
+        s_UnusedUIDs.pop_front();
+    }
+    s_ReferencedUIDs[m_nUID] -= 1u;
+    if (s_ReferencedUIDs[m_nUID] == 0u)
+    {
+        s_UnusedUIDs.push_back(m_nUID);
+        s_ReferencedUIDs.erase(m_nUID);
+    }
+    s_ReferencedUIDs[nTmp] = 1u;
+    m_nUID = nTmp;
+    m_strName = "UID_"+std::to_string(m_nUID);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
