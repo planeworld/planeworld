@@ -98,6 +98,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         
         void pause();
         void processFrame();
+        void processOneFrame();
         void togglePause();
         
         void accelerateTime(const bool = false);
@@ -141,6 +142,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         double                      m_fCellUpdateResidual;      ///< Residual for calculation of cell update
         bool                        m_bCellUpdateFirst;         ///< Indicates the first cell update (to initialise access)
         bool                        m_bPaused;                  ///< Indicates if physics caluculations are paused
+        bool                        m_bProcessOneFrame;         ///< Indicates if physics should be run stepwise
         #ifdef PW_MULTITHREADING
           bool                      m_bRunning = false;         ///< Indicates if physics thread is running
         #endif
@@ -339,6 +341,17 @@ inline void CPhysicsManager::pause()
     METHOD_ENTRY("CPhysicsManager::pause")
     m_bPaused = true;
     INFO_MSG("Physics Manager", "Physics processing paused.")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Stepwise processing when paused
+/// 
+////////////////////////////////////////////////////////////////////////////////
+inline void CPhysicsManager::processOneFrame()
+{
+    METHOD_ENTRY("CPhysicsManager::processOneFrame")
+    m_bProcessOneFrame = true;
 }
 
 #ifdef PW_MULTITHREADING

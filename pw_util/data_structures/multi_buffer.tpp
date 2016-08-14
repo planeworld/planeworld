@@ -79,63 +79,6 @@ CMultiBuffer<N, TContainer, TKey, TVal>::CMultiBuffer()
     m_Mutex.unlock();
 }
 
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Buffer given class object to back buffers
-// ///
-// /// \param _CObj Class object to be buffered
-// ///
-// /// \note At the moment, this does not involve deep copying. This might later
-// ///       be implemented by using std::transform
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// template<std::uint8_t N, class T>
-// void CMultiBuffer<N,T>::buffer(const T& _CObj)
-// {
-//     METHOD_ENTRY("CMultiBuffer::buffer")
-//     m_Buffer0 = _CObj;
-//     m_Buffer1 = _CObj;
-//     m_Buffer2 = _CObj;
-// }
-// 
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Buffer given container to back buffers
-// ///
-// /// \param _Container Container to be buffered
-// ///
-// /// \note At the moment, this does not involve deep copying. This might later
-// ///       be implemented by using std::transform
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// template<std::uint8_t N, class TContainer, class TVal>
-// void CMultiBuffer<N, TContainer, TVal>::buffer(const TContainer& _Container)
-// {
-//     METHOD_ENTRY("CMultiBuffer::buffer")
-//     m_Buffer0 = _Container;
-//     m_Buffer1 = _Container;
-//     m_Buffer2 = _Container;
-// }
-// 
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Buffer given container to back buffers
-// ///
-// /// \param _Container Container to be buffered
-// ///
-// /// \note At the moment, this does not involve deep copying. This might later
-// ///       be implemented by using std::transform
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// template<std::uint8_t N, class TContainer, class TKey, class TVal>
-// void CMultiBuffer<N, TContainer, TKey, TVal>::buffer(const TContainer& _Container)
-// {
-//     METHOD_ENTRY("CMultiBuffer::buffer")
-//     m_Buffer0 = _Container;
-//     m_Buffer1 = _Container;
-//     m_Buffer2 = _Container;
-// }
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Returns buffer
@@ -226,22 +169,23 @@ std::array<TVal, N> CMultiBuffer<N, TContainer, TKey, TVal>::getElementAll(const
     return aElems;
 }
 
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Sets class object to be buffered.
-// ///
-// /// \param _CObj Class object to be buffered
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// template<std::uint8_t N, class T>
-// void CMultiBuffer<N,T>::set(const T& _CObj)
-// {
-//     METHOD_ENTRY("CMultiBuffer::add")
-//     
-//     m_Buffer0.push_back(_CObj);
-//     m_Buffer1.push_back(_CObj);
-//     m_Buffer2.push_back(_CObj);
-// }
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets class object to be buffered.
+///
+/// \param _Val Class object to be buffered
+///
+////////////////////////////////////////////////////////////////////////////////
+template<std::uint8_t N, class T>
+void CMultiBuffer<N,T>::add(const T& _Val)
+{
+    METHOD_ENTRY("CMultiBuffer::add")
+    
+    m_Mutex.lock();
+    for (auto i=0u; i<N; ++i)
+        m_Buffer[i] = _Val;
+    m_Mutex.unlock();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -354,7 +298,7 @@ void CMultiBuffer<N, TContainer, TKey, TVal>::copyDeep(const std::uint8_t _unBuf
     METHOD_ENTRY("CMultiBuffer::copyDeep")
     m_Mutex.lock();
     auto it = m_BufferRef[_unBuf1]->begin();
-    for (auto ci  = m_BufferRef[_unBuf0]->cbegin(); ci != m_BufferRef[_unBuf0]->end(); ++ci)
+    for (auto ci  = m_BufferRef[_unBuf0]->cbegin(); ci != m_BufferRef[_unBuf0]->cend(); ++ci)
     {
         *(it->second) = *(ci->second);
         ++it;

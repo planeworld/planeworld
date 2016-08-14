@@ -304,7 +304,7 @@ inline const noise::module::Module* CPlanet::getTerrainType() const
 inline ShapeType CPlanet::getShapeType() const
 {
     METHOD_ENTRY("CPlanet::getShapeType")
-    return ShapeType::SHAPE_PLANET;
+    return ShapeType::PLANET;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

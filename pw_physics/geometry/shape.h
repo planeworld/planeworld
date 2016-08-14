@@ -38,7 +38,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "graphics.h"
-#include "unique_id_user.h"
+// #include "unique_id_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -47,11 +47,11 @@ using namespace Eigen;
 /// specifies the type of shape
 enum class ShapeType
 {
-    SHAPE_NONE,
-    SHAPE_CIRCLE,
-    SHAPE_PLANET,
-    SHAPE_POLYGON,
-    SHAPE_TERRAIN
+    NONE,
+    CIRCLE,
+    PLANET,
+    POLYGON,
+    TERRAIN
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ enum class ShapeType
 /// \brief Abstract class representing a simple shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IShape : public IUniqueIDUser
+class IShape
 {
     
     public:
@@ -215,7 +215,7 @@ inline bool IShape::isValid() const
 inline ShapeType IShape::getShapeType() const
 {
     METHOD_ENTRY("IShape::getShapeType")
-    return ShapeType::SHAPE_NONE;
+    return ShapeType::NONE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

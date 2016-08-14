@@ -232,10 +232,10 @@ Vector2d CKinematicsState::getVelocityReferredTo(const CKinematicsState& _Refere
 //                                                               _Reference.m_vecOrigin[0]);
                                                     
     Rotation2Dd Rotation(-_Reference.m_fAngle);
-    Vector2d vecResult = Rotation * m_vecVelocity -
-                                    _Reference.m_vecVelocity +
-                                    _Reference.m_fAngleVelocity * Rotation * Vector2d(- m_vecOrigin[1],
-                                                                                        m_vecOrigin[0]);
+    Vector2d vecResult = Rotation * m_vecVelocity - _Reference.m_vecVelocity;
+    Vector2d vecTmp = Rotation * Vector2d(- m_vecOrigin[1],
+                                            m_vecOrigin[0]);
+             vecResult += _Reference.m_fAngleVelocity * vecTmp;
     return vecResult;
 }
 

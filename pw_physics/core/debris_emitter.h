@@ -49,7 +49,8 @@ typedef enum
 /// \brief Class for a source that emits debris.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CDebrisEmitter : public IEmitter
+class CDebrisEmitter : public IEmitter,
+                       public IUniqueIDReferrer<CDebris>
 {
     
     public:
@@ -72,9 +73,7 @@ class CDebrisEmitter : public IEmitter
     private:
         
         //--- Variables [private] --------------------------------------------//
-        CDebris*            m_pDebris;          ///< The debris instance
         DebrisTypeType      m_DebrisType;       ///< Type of debris
-        
         static uint32_t     m_unNrOfEmitters;   ///< Static counter for name initialisation and tracking
 };
 
@@ -141,7 +140,7 @@ inline void CDebrisEmitter::setNumber(const u_int32_t& _nNrMax)
 {
     METHOD_ENTRY("CDebrisEmitter::setMode")
     m_nNr = _nNrMax;
-    m_pDebris->setNumber(_nNrMax);
+    m_pRef->setNumber(_nNrMax);
 }
 
 #endif

@@ -140,7 +140,7 @@ inline const double& CCircle::getRadius() const
 inline ShapeType CCircle::getShapeType() const
 {
     METHOD_ENTRY("CCircle::getShapeType")
-    return ShapeType::SHAPE_CIRCLE;
+    return ShapeType::CIRCLE;
 }
 
 #endif

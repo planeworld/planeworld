@@ -38,7 +38,11 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CCamera::CCamera() : m_fViewportWidth(m_Graphics.getViewPort().right-m_Graphics.getViewPort().left),
+CCamera::CCamera() : IKinematicsStateUser(),
+                     IObjectReferrer(),
+                     IUniqueIDUser(),
+                     IUniverseScaled(),
+                     m_fViewportWidth(m_Graphics.getViewPort().right-m_Graphics.getViewPort().left),
                      m_fViewportHeight(m_Graphics.getViewPort().top-m_Graphics.getViewPort().bottom)
 {
     METHOD_ENTRY("CCamera::CCamera");
@@ -53,6 +57,25 @@ CCamera::CCamera() : m_fViewportWidth(m_Graphics.getViewPort().right-m_Graphics.
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Copy constructor
+///
+/// \param _Camera Camera to be constructed from
+///
+///////////////////////////////////////////////////////////////////////////////
+CCamera::CCamera(const CCamera& _Camera) : CGraphicsBase(_Camera),
+                                           IKinematicsStateUser(_Camera),
+                                           IObjectReferrer(_Camera),
+                                           IUniqueIDUser(_Camera),
+                                           IUniverseScaled(_Camera)
+{
+    METHOD_ENTRY("CCamera::CCamera");
+    CTOR_CALL("CCamera::CCamera");
+    
+    this->copy(_Camera);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Destructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,6 +83,45 @@ CCamera::~CCamera()
 {
     METHOD_ENTRY("CCamera::~CCamera")
     DTOR_CALL("CCamera::~CCamera")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy assignment operator
+///
+/// \param _Camera Camera to be copied and assigned data from
+///
+///////////////////////////////////////////////////////////////////////////////
+CCamera& CCamera::operator=(const CCamera& _Camera)
+{
+    METHOD_ENTRY("CCamera::operator=")
+    
+    if (this != &_Camera)
+    {
+        IKinematicsStateUser::operator=(_Camera);
+        IObjectReferrer::operator=(_Camera);
+        IUniqueIDUser::operator=(_Camera);
+        IUniverseScaled::operator=(_Camera);
+        this->copy(_Camera);
+    }
+    return *this;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones camera
+///
+/// \return Pointer to cloned camera
+///
+////////////////////////////////////////////////////////////////////////////////
+CCamera* CCamera::clone() const
+{
+    METHOD_ENTRY("CCamera::clone")
+    
+    CCamera* pClone = new CCamera(*this);
+    MEM_ALLOC("CCamera")
+    
+    return pClone;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -302,76 +364,6 @@ void CCamera::zoomTo(const double& _fZoom)
     m_fZoom = _fZoom;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Helper method. Update of the bounding box, frame and position.
-///
-/// Update of bounding box etc is called from updateFromHooked as well as
-/// from internal update method to synchronise camera and object graphics.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CCamera::updateWithHook()
-{
-    METHOD_ENTRY("CCamera::updateWithHook")
-    
-    std::array<Vector2d,4> vecFrame;
-    
-    m_vecCenter = m_KinematicsState.getOrigin();// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
-
-    // m_vecCenter is in absolute coordinates while m_vecCell is zero. Thus, they
-    // have to be separated:
-    IUniverseScaled::separateCenterCell(m_vecCenter,m_vecCenter,m_vecCell);
-
-    // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
-    // Hence, accuracy is low, so it can stay with the double value.
-    vecFrame[0] = m_KinematicsState.getPosition(m_vecFrame0[0]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
-    vecFrame[1] = m_KinematicsState.getPosition(m_vecFrame0[1]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
-    vecFrame[2] = m_KinematicsState.getPosition(m_vecFrame0[2]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
-    vecFrame[3] = m_KinematicsState.getPosition(m_vecFrame0[3]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
-    
-    m_BoundingBox.setLowerLeft(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.setUpperRight(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[1]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[2]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[3]-IUniverseScaled::cellToDouble(m_vecCell));
-    
-    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
-                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Helper method. Update of the bounding box, frame and position.
-///
-/// Update of bounding box etc is called from from internal update method if
-/// no hook is given.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CCamera::updateWithoutHook()
-{
-    METHOD_ENTRY("CCamera::updateWithoutHook")
-    
-    std::array<Vector2d,4>  vecFrame;
-    Vector2i                vecCell;
-    
-    IUniverseScaled::separateCenterCell(m_KinematicsState.getLocalOrigin(), m_KinematicsState.Origin(), vecCell);
-    m_vecCenter = m_KinematicsState.getLocalOrigin();
-    m_vecCell  += vecCell;
-    
-    // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
-    // Hence, accuracy is low, so it can stay with the double value.
-    vecFrame[0] = m_KinematicsState.getPosition(m_vecFrame0[0]/m_fZoom);
-    vecFrame[1] = m_KinematicsState.getPosition(m_vecFrame0[1]/m_fZoom);
-    vecFrame[2] = m_KinematicsState.getPosition(m_vecFrame0[2]/m_fZoom);
-    vecFrame[3] = m_KinematicsState.getPosition(m_vecFrame0[3]/m_fZoom);
-    
-    m_BoundingBox.setLowerLeft(vecFrame[0]);
-    m_BoundingBox.setUpperRight(vecFrame[0]);
-    m_BoundingBox.update(vecFrame[1]);
-    m_BoundingBox.update(vecFrame[2]);
-    m_BoundingBox.update(vecFrame[3]);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Input stream for game state information
@@ -443,4 +435,95 @@ std::ostream& operator<<(std::ostream& _os, CCamera* const _pCam)
     /// \todo Stream IUniverseScaled information
     
     return _os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy data from given Camera
+///
+/// \param _Camera Camera to copy data from
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCamera::copy(const CCamera& _Camera)
+{
+    METHOD_ENTRY("CCamera::copy")
+    
+    // Copy CCamera data
+    m_vecFrame0             = _Camera.m_vecFrame0;
+    m_BoundingBox           = _Camera.m_BoundingBox;
+    m_vecCenter             = _Camera.m_vecCenter;
+    m_fBoundingCircleRadius = _Camera.m_fBoundingCircleRadius;
+    m_fViewportWidth        = _Camera.m_fViewportWidth;
+    m_fViewportHeight       = _Camera.m_fViewportHeight;
+    m_fZoom                 = _Camera.m_fZoom;    
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Helper method. Update of the bounding box, frame and position.
+///
+/// Update of bounding box etc is called from updateFromHooked as well as
+/// from internal update method to synchronise camera and object graphics.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCamera::updateWithHook()
+{
+    METHOD_ENTRY("CCamera::updateWithHook")
+    
+    std::array<Vector2d,4> vecFrame;
+    
+    m_vecCenter = m_KinematicsState.getOrigin();// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
+
+    // m_vecCenter is in absolute coordinates while m_vecCell is zero. Thus, they
+    // have to be separated:
+    IUniverseScaled::separateCenterCell(m_vecCenter,m_vecCenter,m_vecCell);
+
+    // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
+    // Hence, accuracy is low, so it can stay with the double value.
+    vecFrame[0] = m_KinematicsState.getPosition(m_vecFrame0[0]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
+    vecFrame[1] = m_KinematicsState.getPosition(m_vecFrame0[1]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
+    vecFrame[2] = m_KinematicsState.getPosition(m_vecFrame0[2]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
+    vecFrame[3] = m_KinematicsState.getPosition(m_vecFrame0[3]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
+    
+    m_BoundingBox.setLowerLeft(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
+    m_BoundingBox.setUpperRight(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
+    m_BoundingBox.update(vecFrame[1]-IUniverseScaled::cellToDouble(m_vecCell));
+    m_BoundingBox.update(vecFrame[2]-IUniverseScaled::cellToDouble(m_vecCell));
+    m_BoundingBox.update(vecFrame[3]-IUniverseScaled::cellToDouble(m_vecCell));
+    
+    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
+                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Helper method. Update of the bounding box, frame and position.
+///
+/// Update of bounding box etc is called from from internal update method if
+/// no hook is given.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCamera::updateWithoutHook()
+{
+    METHOD_ENTRY("CCamera::updateWithoutHook")
+    
+    std::array<Vector2d,4>  vecFrame;
+    Vector2i                vecCell;
+    
+    IUniverseScaled::separateCenterCell(m_KinematicsState.getLocalOrigin(), m_KinematicsState.Origin(), vecCell);
+    m_vecCenter = m_KinematicsState.getLocalOrigin();
+    m_vecCell  += vecCell;
+    
+    // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
+    // Hence, accuracy is low, so it can stay with the double value.
+    vecFrame[0] = m_KinematicsState.getPosition(m_vecFrame0[0]/m_fZoom);
+    vecFrame[1] = m_KinematicsState.getPosition(m_vecFrame0[1]/m_fZoom);
+    vecFrame[2] = m_KinematicsState.getPosition(m_vecFrame0[2]/m_fZoom);
+    vecFrame[3] = m_KinematicsState.getPosition(m_vecFrame0[3]/m_fZoom);
+    
+    m_BoundingBox.setLowerLeft(vecFrame[0]);
+    m_BoundingBox.setUpperRight(vecFrame[0]);
+    m_BoundingBox.update(vecFrame[1]);
+    m_BoundingBox.update(vecFrame[2]);
+    m_BoundingBox.update(vecFrame[3]);
 }

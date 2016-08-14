@@ -37,14 +37,16 @@
 #include "camera.h"
 #include "debris.h"
 #include "unique_id_referrer.h"
+#include "world_data_storage_user.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the visualisation of a debris
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CDebrisVisuals : public CGraphicsBase,
-                       public IUniqueIDReferrer<CDebris>
+class CDebrisVisuals : virtual public CGraphicsBase,
+                               public IUniqueIDReferrer<CDebris>,
+                               public IWorldDataStorageUser
 {
     
     public:

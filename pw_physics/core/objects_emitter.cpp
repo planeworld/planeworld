@@ -31,16 +31,13 @@
 #include "objects_emitter.h"
 
 #include "circle.h"
-#include "circle_visuals.h"
-#include "object_visuals.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CObjectEmitter::CObjectEmitter() : m_pTemplate(nullptr),
-                                   m_pTemplateVisuals(nullptr) 
+CObjectEmitter::CObjectEmitter() : m_pTemplate(nullptr)
 {
     METHOD_ENTRY("CObjectEmitter::CObjectEmitter")
     CTOR_CALL("CObjectEmitter::CObjectEmitter")
@@ -61,12 +58,6 @@ CObjectEmitter::~CObjectEmitter()
         delete m_pTemplate;
         MEM_FREED("CObject")
         m_pTemplate = nullptr;
-    }
-    if (m_pTemplateVisuals != nullptr)
-    {
-        delete m_pTemplateVisuals;
-        MEM_FREED("IObjectVisuals")
-        m_pTemplateVisuals = nullptr;
     }
 }
 
@@ -115,13 +106,10 @@ void CObjectEmitter::emit(const double& _fF)
                     double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
                     
                     CObject* pObject = m_pTemplate->clone();
-                    IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
+                    pObject->setNewID();
                     
                     pObject->setOrigin(Vector2d(fX, fY) + m_KinematicsState.getOrigin());
                     m_pDataStorage->addObject(pObject);
-                    m_pDataStorage->addObjectVisuals(pObjectVisuals);
-                    
-                    pObject->init();
                 }
                 break;
             case EMITTER_DISTRIBUTION_POINT_SOURCE:
@@ -131,14 +119,11 @@ void CObjectEmitter::emit(const double& _fF)
                     double fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
                                     
                     CObject* pObject = m_pTemplate->clone();
-                    IObjectVisuals* pObjectVisuals = m_pTemplateVisuals->clone(pObject);
+                    pObject->setNewID();
                     
                     pObject->setOrigin(m_KinematicsState.getOrigin());
                     pObject->setVelocity(fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
                     m_pDataStorage->addObject(pObject);
-                    m_pDataStorage->addObjectVisuals(pObjectVisuals);
-                    
-                    pObject->init();
                 }
         }
     }
@@ -166,18 +151,7 @@ void CObjectEmitter::init()
         pCircle->setCenter(0.0, 0.0);
         pCircle->setRadius(1.0);
 
-        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-        MEM_ALLOC("CDoubleBufferedShape")
-        pShape->buffer(pCircle);
-        m_pTemplate->getGeometry()->addShape(pShape);
-    
-        CCircleVisuals* pCircleVisuals = new CCircleVisuals(pShape);
-        MEM_ALLOC("CCircleVisuals")
-        
-        m_pTemplateVisuals = new IObjectVisuals(m_pTemplate);
-        MEM_ALLOC("IObjectVisuals")
-        
-        m_pTemplateVisuals->addVisuals(pCircleVisuals);
+        m_pTemplate->getGeometry()->addShape(pCircle);
     }
 }
 
@@ -186,10 +160,9 @@ void CObjectEmitter::init()
 /// \brief Set the template for object emitation
 ///
 /// \param _pObj  Object to be cloned and emitted
-/// \param _pObjV Object visuals to be cloned and emitted
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CObjectEmitter::setTemplate(CObject* const _pObj, IObjectVisuals* const _pObjV)
+void CObjectEmitter::setTemplate(CObject* const _pObj)
 {
     METHOD_ENTRY("CObjectEmitter::setTemplate")
     
@@ -200,15 +173,6 @@ void CObjectEmitter::setTemplate(CObject* const _pObj, IObjectVisuals* const _pO
         m_pTemplate = nullptr;
         NOTICE_MSG("Objects Emitter", "Template object already existing, replacing.");
     }
-    if (m_pTemplateVisuals != nullptr)
-    {
-        delete m_pTemplateVisuals;
-        MEM_FREED("IObjectVisuals")
-        m_pTemplateVisuals = nullptr;
-        NOTICE_MSG("Objects Emitter", "Template object visuals already existing, replacing.");
-    }
-    
+        
     m_pTemplate = _pObj;
-    m_pTemplateVisuals = _pObjV;
-    
 }

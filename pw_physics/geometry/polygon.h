@@ -117,7 +117,7 @@ inline const VertexListType& CPolygon::getVertices() const
 inline ShapeType CPolygon::getShapeType() const
 {
     METHOD_ENTRY("CPolygon::getShapeType")
-    return ShapeType::SHAPE_POLYGON;
+    return ShapeType::POLYGON;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

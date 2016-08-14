@@ -43,9 +43,10 @@ CDebrisEmitter::CDebrisEmitter() : m_DebrisType(DEBRIS_TYPE_DOT)
     METHOD_ENTRY("CDebrisEmitter::CDebrisEmitter")
     CTOR_CALL("CDebrisEmitter::CDebrisEmitter")
     
-    m_pDebris = new CDebris;
+    m_pRef = new CDebris;
     MEM_ALLOC("CDebris")
-    m_pDebris->setNumber(1);
+    m_pRef->setNumber(1);
+    this->attachTo(m_pRef);
     
     m_Generator.seed(m_unNrOfEmitters);
 //     IHooker::m_strName += ": Debris_"+ std::to_string(m_unNrOfEmitters++);
@@ -72,24 +73,26 @@ void CDebrisEmitter::init()
     METHOD_ENTRY("CDebrisEmitter::init")
     
     // Add debris
-    m_pDataStorage->addDebris(m_pDebris);
+    m_pDataStorage->addDebris(m_pRef);
     
     // Create visuals
     if (m_DebrisType == DEBRIS_TYPE_DOT)
     {
-        CDebrisVisuals* pDebrisVisuals = new CDebrisVisuals(m_pDebris);
+        CDebrisVisuals* pDebrisVisuals = new CDebrisVisuals(m_pRef);
         MEM_ALLOC("CDebrisVisuals")
         
         // Add visuals
-        m_pDataStorage->addDebrisVisuals(pDebrisVisuals);
+        m_pVisualsDataStorage->addDebrisVisuals(pDebrisVisuals);
+        pDebrisVisuals->setWorldDataStorage(m_pDataStorage);
     }
     else
     {
-        CDebrisVisualsThruster* pDebrisVisuals = new CDebrisVisualsThruster(m_pDebris);
+        CDebrisVisualsThruster* pDebrisVisuals = new CDebrisVisualsThruster(m_pRef);
         MEM_ALLOC("CDebrisVisualsThruster")
         
         // Add visuals
-        m_pDataStorage->addDebrisVisualsThruster(pDebrisVisuals);
+        m_pVisualsDataStorage->addDebrisVisualsThruster(pDebrisVisuals);
+        pDebrisVisuals->setWorldDataStorage(m_pDataStorage);
     }
 }
 
@@ -136,7 +139,7 @@ void CDebrisEmitter::emit(const double& _fF)
                 {
                     double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
                     double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
-                    m_pDebris->generate(Vector2d(fX, fY)+ m_KinematicsState.getOrigin(), Vector2d(0.0, 0.0));
+                    m_pRef->generate(Vector2d(fX, fY)+ m_KinematicsState.getOrigin(), Vector2d(0.0, 0.0));
                 }
                 break;
             case EMITTER_DISTRIBUTION_POINT_SOURCE:
@@ -154,8 +157,10 @@ void CDebrisEmitter::emit(const double& _fF)
 //                     }
 //                     else
                     {
-                        m_pDebris->generate(m_KinematicsState.getOrigin(),
+                        static_cast<CDebris*>(m_pDataStorage->getUIDUsersByValueBack()->operator[](m_UIDRef))->generate(m_KinematicsState.getOrigin(),
                                             fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());
+//                         m_pDebris->generate(m_KinematicsState.getOrigin(),
+//                                             fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());
                     }
                 }
         }

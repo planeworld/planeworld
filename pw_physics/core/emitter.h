@@ -39,6 +39,9 @@
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state_user.h"
 #include "universe_scaled.h"
+#include "unique_id_user.h"
+#include "unique_id_referrer.h"
+#include "visuals_data_storage_user.h"
 #include "world_data_storage_user.h"
 
 //--- Enumerations -----------------------------------------------------------//
@@ -89,6 +92,7 @@ const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter ty
 class IEmitter : public IKinematicsStateUser,
                  public IUniqueIDUser,
                  public IUniverseScaled,
+                 public IVisualsDataStorageUser,
                  public IWorldDataStorageUser
 {
     
@@ -125,7 +129,7 @@ class IEmitter : public IKinematicsStateUser,
         void setVelocityStd(const double&);
         
     protected:
-        
+
         EmitterModeType         m_EmitterMode;              ///< Emit mode
         EmitterDistributionType m_EmitterDistribution;      ///< Distribution of emitter
         
@@ -133,7 +137,7 @@ class IEmitter : public IKinematicsStateUser,
         std::normal_distribution<double>        m_NormalDist;   ///< Normal distribution;
         std::uniform_real_distribution<double>  m_UniformDist;  ///< Uniform distribution;
         
-        u_int32_t               m_nNr;                      ///< Maximum number of emitted entities
+        std::uint32_t           m_nNr;                      ///< Maximum number of emitted entities
         
         bool                    m_bActive;                  ///< Flags if emitter is activated
         

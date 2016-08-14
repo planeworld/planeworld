@@ -36,13 +36,17 @@
 //--- Program header ---------------------------------------------------------//
 #include "camera.h"
 #include "debris.h"
+#include "unique_id_referrer.h"
+#include "world_data_storage_user.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the visualisation of thruster output
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CDebrisVisualsThruster : public CGraphicsBase
+class CDebrisVisualsThruster : virtual public CGraphicsBase,
+                                       public IUniqueIDReferrer<CDebris>,
+                                       public IWorldDataStorageUser
 {
     
     public:
@@ -55,29 +59,11 @@ class CDebrisVisualsThruster : public CGraphicsBase
         void draw(const CCamera* const) const;
                 
         //--- Methods --------------------------------------------------------//
-        void attach(CDebris*);
         
     private:
         
-        CDebrisVisualsThruster();       ///< Constructor is private
-        
-        CDebris* m_pDebris;
-
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches a debris to debris visuals
-///
-/// \param _pDebris Debris to attach
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CDebrisVisualsThruster::attach(CDebris* _pDebris)
-{
-    METHOD_ENTRY("CDebrisVisualsThruster::attach")
-    m_pDebris = _pDebris;
-}
-
-#endif
+#endif // DEBRIS_VISUALS_THRUSTER_H

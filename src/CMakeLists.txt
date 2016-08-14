@@ -31,15 +31,9 @@ INCLUDE_DIRECTORIES (
 
 SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/circle_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals_thruster.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/object_visuals.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/planet_visuals.cpp    
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/polygon_visuals.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/spring_visuals.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/terrain_visuals.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/game_state_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
@@ -50,7 +44,6 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/sim_timer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/components/thruster.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/circle.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/double_buffered_shape.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/geometry.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/planet.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/polygon.cpp

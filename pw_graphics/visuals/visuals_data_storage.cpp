@@ -52,39 +52,16 @@ CVisualsDataStorage::~CVisualsDataStorage()
     METHOD_ENTRY("CVisualsDataStorage::~CVisualsDataStorage")
     DTOR_CALL("CVisualsDataStorage::~CVisualsDataStorage")
     
-//     // Free memory if pointer is still existent
-//     if (m_pCamera != nullptr)
-//     {
-//         delete m_pCamera;
-//         m_pCamera = nullptr;
-//         MEM_FREED("CCamera");
-//     }
-    
-    for (auto Cam : m_CamerasByName)
+    for (auto pCam : m_CamerasByName)
     {
-        if (Cam.second != nullptr)
+        if (pCam.second != nullptr)
         {
-            delete Cam.second;
-            Cam.second = nullptr;
+            delete pCam.second;
+            pCam.second = nullptr;
             MEM_FREED("CCamera")
         }
     }
     
-    for (auto pObjVis : m_ObjectVisuals)
-    {
-        if (pObjVis != nullptr)
-        {
-            delete pObjVis;
-            pObjVis = nullptr;
-            MEM_FREED("IObjectVisuals")
-        }
-    }
-    
-    // for (auto it : m_UIDUserRef)
-    // Do not delete objects here.
-    // Object pointers are stored in two maps, referring to their name and
-    // referring to their UID. Thus, they only need to be destroyed once.
-
     for (DebrisVisualsType::iterator it = m_DebrisVisuals.begin();
         it != m_DebrisVisuals.end(); ++it)
     {
@@ -185,17 +162,6 @@ std::istream& operator>>(std::istream& _is, CVisualsDataStorage& _WDS)
 //     // after sequentually loading shapes and then visuals.
 //     std::unordered_map<UIDType, IShape*> UIDShapeRef;
     
-    for (auto it : _WDS.m_ObjectVisuals)
-    {
-        if (it != nullptr)
-        {
-            delete it;
-            it = nullptr;
-            MEM_FREED("IObjectVisuals")
-        }
-    }
-    _WDS.m_ObjectVisuals.clear();
-
 //     for (auto it : _WDS.m_DebrisVisuals)
 //     {
 //         if (it != nullptr)
@@ -210,33 +176,6 @@ std::istream& operator>>(std::istream& _is, CVisualsDataStorage& _WDS)
     // Thruster Visuals!!!
     
 //     _WDS.m_UIDUserRef.clear();
-    
-//     //-------------------------------------------------------------------------
-//     // Stream in object visuals
-//     //-------------------------------------------------------------------------
-//     {
-//         ObjectVisualsType::size_type nSize;
-//         _is >> nSize;    
-//         DOM_VAR(INFO_MSG("Visuals data storage", "Number of visuals to load: " << nSize))
-//         for (auto i=0u; i<nSize; ++i)
-//         {
-//             IObjectVisuals* pObjVis = new IObjectVisuals;
-//             MEM_ALLOC("CObjectVisuals")
-//             _is >> pObjVis;
-//             
-//             UIDType UID = pObjVis->getUIDRef();
-//             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
-//             pObjVis->attachTo(static_cast<CObject*>(pUIDUser));
-//             _WDS.addObjectVisuals(pObjVis);
-//             
-// //             for (const auto ci : pObjVis->getShapeVisuals())
-// //             {
-// //                 ci->attachTo(UIDShapeRef[ci->getUIDRef()]);
-// //             }
-//             
-//             Log.progressBar("Loading object visuals", i, nSize);
-//         }
-//     }
     
 //     //-------------------------------------------------------------------------
 //     // Stream in camera
@@ -302,14 +241,6 @@ std::ostream& operator<<(std::ostream& _os, CVisualsDataStorage& _WDS)
 {
     METHOD_ENTRY("CVisualsDataStorage::operator<<")
 
-    _os << _WDS.m_ObjectVisuals.size() << std::endl;
-    for (const auto ci : _WDS.m_ObjectVisuals)
-    {
-        _os << ci << std::endl;
-    }
-
-//     _os << _WDS.m_pCamera << std::endl;
-    
     /// \todo Implement DebrisEmitter serialisation to make debris work
     return _os;
 }

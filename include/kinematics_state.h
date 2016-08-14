@@ -90,7 +90,7 @@ class CKinematicsState  : public IUniqueIDUser,
         Vector2d            getLocalPosition(const Vector2d&) const;
         Vector2d            getPosition(const Vector2d&) const;
         
-        const bool&            gotReference() const;
+        const bool&         gotReference() const;
         
         //--- Methods --------------------------------------------------------//
         Vector2d& Origin();
@@ -131,7 +131,9 @@ class CKinematicsState  : public IUniqueIDUser,
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CKinematicsState::CKinematicsState() : m_bGotReference(false),
+inline CKinematicsState::CKinematicsState() : IUniqueIDUser(),
+                                              IUniqueIDReferrer< CKinematicsState >(),
+                                              m_bGotReference(false),
                                               m_fAngle(0.0),
                                               m_fAngleVelocity(0.0)
 {
@@ -149,11 +151,17 @@ inline CKinematicsState::CKinematicsState() : m_bGotReference(false),
 /// \param _Reference Kinematics to refer to
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CKinematicsState::CKinematicsState(const CKinematicsState& _Reference)
+inline CKinematicsState::CKinematicsState(const CKinematicsState& _Reference) :
+                                          IUniqueIDUser(_Reference),
+                                          IUniqueIDReferrer< CKinematicsState >(_Reference),
+                                          m_bGotReference(false),
+                                          m_fAngle(0.0),
+                                          m_fAngleVelocity(0.0)
 {
     METHOD_ENTRY("CKinematicsState::CKinematicsState")
     CTOR_CALL("CKinematicsState::CKinematicsState")
-    
+    m_vecOrigin.setZero();
+    m_vecVelocity.setZero();
     this->referTo(_Reference);
 }
 

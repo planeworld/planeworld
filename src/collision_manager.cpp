@@ -39,12 +39,12 @@ void CCollisionManager::detectCollisions()
 {
     METHOD_ENTRY("CCollisionManager::detectCollisions")
 
-    ObjectsType::const_iterator cj;
+    ObjectsByNameType::const_iterator cj;
     
     //--------------------------------------------------------------------------
     // Test dynamic objects
     //--------------------------------------------------------------------------
-    for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
+    for (ObjectsByNameType::const_iterator ci = m_DynamicObjects.begin();
         ci != m_DynamicObjects.end(); ++ci)
     {
         cj = ci;
@@ -86,7 +86,7 @@ void CCollisionManager::detectCollisions()
 //     //--------------------------------------------------------------------------
 //     // Test static objects against debris
 //     //--------------------------------------------------------------------------
-//     for (ObjectsType::const_iterator ci = m_StaticObjects.begin();
+//     for (ObjectsByNameType::const_iterator ci = m_StaticObjects.begin();
 //         ci != m_StaticObjects.end(); ++ci)
 //     {
 //         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
@@ -104,7 +104,7 @@ void CCollisionManager::detectCollisions()
 //     //--------------------------------------------------------------------------
 //     // Test dynamic objects against debris
 //     //--------------------------------------------------------------------------
-//     for (ObjectsType::const_iterator ci = m_DynamicObjects.begin();
+//     for (ObjectsByNameType::const_iterator ci = m_DynamicObjects.begin();
 //         ci != m_DynamicObjects.end(); ++ci)
 //     {
 //         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
@@ -135,29 +135,29 @@ void CCollisionManager::test(CObject* _p1, CDebris* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
-    std::list<CDoubleBufferedShape*>::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
-    
-    while (ci != _p1->getGeometry()->getShapes()->end())
-    {
-        switch((*ci)->getShapeCur()->getShapeType())
-        {
-            case ShapeType::SHAPE_TERRAIN:
-                this->test(static_cast<CTerrain*>((*ci)->getShapeCur()),_p2);
-                break;
-            case ShapeType::SHAPE_CIRCLE:
-                this->test(static_cast<CCircle*>((*ci)->getShapeCur()), static_cast<CCircle*>((*ci)->getShapeBuf()), _p1, _p2);
-                break;
-            case ShapeType::SHAPE_PLANET:
-                this->test(static_cast<CPlanet*>((*ci)->getShapeCur()), static_cast<CPlanet*>((*ci)->getShapeBuf()), _p1, _p2);
-                break;
-            case ShapeType::SHAPE_POLYGON:
-                this->test(static_cast<CPolygon*>((*ci)->getShapeCur()), static_cast<CPolygon*>((*ci)->getShapeBuf()), _p1, _p2);
-                break;
-            case ShapeType::SHAPE_NONE:
-                break;
-        }
-        ++ci;
-    }
+//     ShapesType::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
+//     
+//     while (ci != _p1->getGeometry()->getShapes()->end())
+//     {
+//         switch((*ci)->getShapeType())
+//         {
+//             case ShapeType::SHAPE_TERRAIN:
+//                 this->test(static_cast<CTerrain*>((*ci,_p2));
+//                 break;
+//             case ShapeType::SHAPE_CIRCLE:
+//                 this->test(static_cast<CCircle*>((*ci)), static_cast<CCircle*>((*ci)->getShapeBuf()), _p1, _p2);
+//                 break;
+//             case ShapeType::SHAPE_PLANET:
+//                 this->test(static_cast<CPlanet*>((*ci)), static_cast<CPlanet*>((*ci)->getShapeBuf()), _p1, _p2);
+//                 break;
+//             case ShapeType::SHAPE_POLYGON:
+//                 this->test(static_cast<CPolygon*>((*ci)->getShapeCur()), static_cast<CPolygon*>((*ci)->getShapeBuf()), _p1, _p2);
+//                 break;
+//             case ShapeType::SHAPE_NONE:
+//                 break;
+//         }
+//         ++ci;
+//     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -527,54 +527,54 @@ void CCollisionManager::test(CObject* _p1, CObject* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
 
-    std::list<CDoubleBufferedShape*>::const_iterator ci  = _p1->getGeometry()->getShapes()->begin();
-    std::list<CDoubleBufferedShape*>::const_iterator cj;
+    ShapesType::const_iterator ci  = _p1->getGeometry()->getShapes().cbegin();
+    ShapesType::const_iterator cj;
     
-    while (ci != _p1->getGeometry()->getShapes()->end())
+    while (ci != _p1->getGeometry()->getShapes().cend())
     {
-        cj  = _p2->getGeometry()->getShapes()->begin();
-        while (cj != _p2->getGeometry()->getShapes()->end())
+        cj  = _p2->getGeometry()->getShapes().cbegin();
+        while (cj != _p2->getGeometry()->getShapes().cend())
         {
-            switch((*ci)->getShapeCur()->getShapeType())
+            switch((*ci)->getShapeType())
             {
-                case ShapeType::SHAPE_CIRCLE:
-                    switch((*cj)->getShapeCur()->getShapeType())
+                case ShapeType::CIRCLE:
+                    switch((*cj)->getShapeType())
                     {
-                        case ShapeType::SHAPE_CIRCLE:
+                        case ShapeType::CIRCLE:
                             CCircle* pCircA1;
                             CCircle* pCircB1;
                             CCircle* pCircA0;
                             CCircle* pCircB0;
-                            pCircA1 = static_cast<CCircle*>((*ci)->getShapeCur());
-                            pCircB1 = static_cast<CCircle*>((*cj)->getShapeCur());
-                            pCircA0 = static_cast<CCircle*>((*ci)->getShapeBuf());
-                            pCircB0 = static_cast<CCircle*>((*cj)->getShapeBuf());
+//                             pCircA1 = static_cast<CCircle*>((*ci)->getShapeCur());
+//                             pCircB1 = static_cast<CCircle*>((*cj)->getShapeCur());
+//                             pCircA0 = static_cast<CCircle*>((*ci)->getShapeBuf());
+//                             pCircB0 = static_cast<CCircle*>((*cj)->getShapeBuf());
                             this->test(pCircA1, pCircA0, pCircB1, pCircB0, _p1, _p2);
                             break;
-                        case ShapeType::SHAPE_PLANET:
+                        case ShapeType::PLANET:
 //                             this->getSurfaceOfInterest();
                             break;
-                        case ShapeType::SHAPE_POLYGON:
+                        case ShapeType::POLYGON:
                             CCircle* pCirc1;
                             CCircle* pCirc0;
                             CPolygon* pPoly1;
                             CPolygon* pPoly0;
-                            pCirc1 = static_cast<CCircle*>((*ci)->getShapeCur());
-                            pCirc0 = static_cast<CCircle*>((*ci)->getShapeBuf());
-                            pPoly1 = static_cast<CPolygon*>((*cj)->getShapeCur());
-                            pPoly0 = static_cast<CPolygon*>((*cj)->getShapeBuf());
-                            this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
+//                             pCirc1 = static_cast<CCircle*>((*ci)->getShapeCur());
+//                             pCirc0 = static_cast<CCircle*>((*ci)->getShapeBuf());
+//                             pPoly1 = static_cast<CPolygon*>((*cj)->getShapeCur());
+//                             pPoly0 = static_cast<CPolygon*>((*cj)->getShapeBuf());
+//                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
-                        case ShapeType::SHAPE_TERRAIN:
+                        case ShapeType::TERRAIN:
                             break;
-                        case ShapeType::SHAPE_NONE:
+                        case ShapeType::NONE:
                             break;
                     }
                     break;
-                case ShapeType::SHAPE_PLANET:
-                    switch((*cj)->getShapeCur()->getShapeType())
+                case ShapeType::PLANET:
+                    switch((*cj)->getShapeType())
                     {
-                        case ShapeType::SHAPE_CIRCLE:
+                        case ShapeType::CIRCLE:
 //                             CCircle* pCirc1;
 //                             CCircle* pCirc0;
 //                             CPolygon* pPoly1;
@@ -585,10 +585,10 @@ void CCollisionManager::test(CObject* _p1, CObject* _p2)
 //                             pPoly0 = static_cast<CPolygon*>((*ci0));
 //                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
-                        case ShapeType::SHAPE_PLANET:
+                        case ShapeType::PLANET:
 //                             this->getSurfaceOfInterest();
                             break;
-                        case ShapeType::SHAPE_POLYGON:
+                        case ShapeType::POLYGON:
 //                             CPolygon* pPolyA1;
 //                             CPolygon* pPolyB1;
 //                             CPolygon* pPolyA0;
@@ -600,29 +600,29 @@ void CCollisionManager::test(CObject* _p1, CObject* _p2)
 //                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
 //                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
-                        case ShapeType::SHAPE_TERRAIN:
+                        case ShapeType::TERRAIN:
                             break;
-                        case ShapeType::SHAPE_NONE:
+                        case ShapeType::NONE:
                             break;
                     }
                     break;
-                case ShapeType::SHAPE_POLYGON:
-                    switch((*cj)->getShapeCur()->getShapeType())
+                case ShapeType::POLYGON:
+                    switch((*cj)->getShapeType())
                     {
-                        case ShapeType::SHAPE_CIRCLE:
+                        case ShapeType::CIRCLE:
                         {
                             CCircle* pCirc1;
                             CCircle* pCirc0;
                             CPolygon* pPoly1;
                             CPolygon* pPoly0;
-                            pCirc1 = static_cast<CCircle*>((*cj)->getShapeCur());
-                            pCirc0 = static_cast<CCircle*>((*cj)->getShapeBuf());
-                            pPoly1 = static_cast<CPolygon*>((*ci)->getShapeCur());
-                            pPoly0 = static_cast<CPolygon*>((*ci)->getShapeBuf());
-                            this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
+//                             pCirc1 = static_cast<CCircle*>((*cj)->getShapeCur());
+//                             pCirc0 = static_cast<CCircle*>((*cj)->getShapeBuf());
+//                             pPoly1 = static_cast<CPolygon*>((*ci)->getShapeCur());
+//                             pPoly0 = static_cast<CPolygon*>((*ci)->getShapeBuf());
+//                             this->test(pCirc1, pCirc0, pPoly1, pPoly0, _p1, _p2);
                             break;
                         }
-                        case ShapeType::SHAPE_PLANET:
+                        case ShapeType::PLANET:
                         {
 //                             CPlanet* pPlanet1;
 //                             CPlanet* pPlanet0;
@@ -635,29 +635,29 @@ void CCollisionManager::test(CObject* _p1, CObject* _p2)
 //                             this->getSurfaceOfInterest();
                             break;
                         }
-                        case ShapeType::SHAPE_POLYGON:
+                        case ShapeType::POLYGON:
                         {
                             CPolygon* pPolyA1;
                             CPolygon* pPolyB1;
                             CPolygon* pPolyA0;
                             CPolygon* pPolyB0;
-                            pPolyA1 = static_cast<CPolygon*>((*ci)->getShapeCur());
-                            pPolyB1 = static_cast<CPolygon*>((*cj)->getShapeCur());
-                            pPolyA0 = static_cast<CPolygon*>((*ci)->getShapeBuf());
-                            pPolyB0 = static_cast<CPolygon*>((*cj)->getShapeBuf());
-                            this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
-                            this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
+//                             pPolyA1 = static_cast<CPolygon*>((*ci)->getShapeCur());
+//                             pPolyB1 = static_cast<CPolygon*>((*cj)->getShapeCur());
+//                             pPolyA0 = static_cast<CPolygon*>((*ci)->getShapeBuf());
+//                             pPolyB0 = static_cast<CPolygon*>((*cj)->getShapeBuf());
+//                             this->test(pPolyA1, pPolyA0, pPolyB1, pPolyB0, _p1, _p2);
+//                             this->test(pPolyB1, pPolyB0, pPolyA1, pPolyA0, _p2, _p1);
                             break;
                         }
-                        case ShapeType::SHAPE_TERRAIN:
+                        case ShapeType::TERRAIN:
                             break;
-                        case ShapeType::SHAPE_NONE:
+                        case ShapeType::NONE:
                             break;
                     }
                     break;
-                case ShapeType::SHAPE_TERRAIN:
+                case ShapeType::TERRAIN:
                     break;
-                case ShapeType::SHAPE_NONE:
+                case ShapeType::NONE:
                     break;
                           
             }

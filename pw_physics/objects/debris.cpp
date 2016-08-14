@@ -35,7 +35,9 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebris::CDebris() : m_fTimeFac(1.0)
+CDebris::CDebris() : IUniqueIDUser(),
+                     IUniverseScaled(),
+                     m_fTimeFac(1.0)
 {
     METHOD_ENTRY("CDebris::CDebris")
     CTOR_CALL("CDebris::CDebris")
@@ -46,6 +48,58 @@ CDebris::CDebris() : m_fTimeFac(1.0)
     m_StateList.reserve(DEBRIS_DEFAULT_NUMBER);
     
     m_vecForce.setZero();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy constructor
+///
+/// \param _Debris Debris to be copied
+///
+///////////////////////////////////////////////////////////////////////////////
+CDebris::CDebris(const CDebris& _Debris) : IUniqueIDUser(_Debris),
+                                           IUniverseScaled(_Debris)
+{
+    METHOD_ENTRY("CDebris::CDebris")
+    CTOR_CALL("CDebris::CDebris")
+    
+    this->copy(_Debris);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clones debris
+///
+/// \return Pointer to cloned debris
+///
+////////////////////////////////////////////////////////////////////////////////
+CDebris* CDebris::clone() const
+{
+    METHOD_ENTRY("CDebris::clone")
+    
+    CDebris* pClone = new CDebris(*this);
+    MEM_ALLOC("CDebris")
+
+    return pClone;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy assignment operator
+///
+/// \param _Debris Debris to be copied and assigned
+///
+/// \return Copied debris to be assigned
+///
+////////////////////////////////////////////////////////////////////////////////
+CDebris& CDebris::operator=(const CDebris& _Debris)
+{
+    METHOD_ENTRY("CDebris::operator=")
+    IUniqueIDUser::operator=(_Debris);
+    IUniverseScaled::operator=(_Debris);
+    this->copy(_Debris);
+    
+    return *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -190,3 +244,25 @@ std::ostream& operator<<(std::ostream& _os, CDebris* const _pDebris)
     return _os;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies debris
+///
+/// \param _Debris Debris to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+void CDebris::copy(const CDebris& _Debris) 
+{
+    METHOD_ENTRY("CDebris::copy")
+    
+    //--- Variables of CDebris -----------------------------------------------//
+    m_PosList = _Debris.m_PosList;
+    m_PosListPrev = _Debris.m_PosListPrev;
+    m_VelList = _Debris.m_VelList;
+    m_StateList = _Debris.m_StateList;
+    // m_Lifetime: New individual object
+    m_fTimeFac = _Debris.m_fTimeFac;
+    m_fDamping = _Debris.m_fDamping;
+    m_nDepthlayers = _Debris.m_nDepthlayers;
+    m_vecForce = _Debris.m_vecForce;
+}

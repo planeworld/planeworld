@@ -86,6 +86,9 @@ class CMultiBuffer<N,T>
         
         //--- Methods --------------------------------------------------------//
         T* getBuffer(const std::uint8_t);
+        
+        void add(const T&);
+        void add(const std::array<T, N>&);
                 
         void buffer(const T&);
         void swap(const std::uint8_t, const std::uint8_t);
@@ -132,8 +135,8 @@ class CMultiBuffer<N, TContainer, TVal>
                 
         void add(const TVal&);
         void add(const std::array<TVal, N>&);
-        void copyDeep(const std::uint8_t, const std::uint8_t);
 //         void buffer(const TContainer&);
+        void copyDeep(const std::uint8_t, const std::uint8_t);
         void setAt(const std::uint32_t, const TVal&);
         void setAt(const std::uint32_t, const std::array<TVal, N>&);
         void swap(const std::uint8_t, const std::uint8_t);

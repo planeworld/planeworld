@@ -37,14 +37,10 @@
 #include "log.h"
 
 #include "circle.h"
-#include "circle_visuals.h"
 #include "physics_manager.h"
 #include "planet.h"
-#include "planet_visuals.h"
 #include "polygon.h"
-#include "polygon_visuals.h"
 #include "terrain.h"
-#include "terrain_visuals.h"
 #include "visuals_manager.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -60,8 +56,7 @@ const bool XML_IMPORTER_DO_NOT_NOTICE = false;
 ///////////////////////////////////////////////////////////////////////////////
 CXMLImporter::CXMLImporter() : m_pCurrentEmitter(nullptr),
                                m_pCurrentObject(nullptr),
-                               m_pCurrentObjectVisuals(nullptr),
-                               m_pCurrentDoubleBufferedShape(nullptr),
+                               m_pCurrentShape(nullptr),
                                m_pCamera(nullptr),
                                m_strPath(""),
                                m_strFont(""),
@@ -218,41 +213,25 @@ bool CXMLImporter::import(const std::string& _strFilename,
                 std::string strType = checkAttributeString(N, "type", "no_type");
                 if (strType == "shape_circle")
                 {
-                    this->createShapeCircle(m_pCurrentObject, m_pCurrentObjectVisuals, N);
+                    this->createShapeCircle(m_pCurrentObject, N);
                 }
                 else if (strType == "shape_planet")
                 {
-                    this->createShapePlanet(m_pCurrentObject, m_pCurrentObjectVisuals, N);
+                    this->createShapePlanet(m_pCurrentObject, N);
                 }
                 else if (strType == "shape_terrain")
                 {
-                    this->createShapeTerrain(m_pCurrentObject, m_pCurrentObjectVisuals, N);
+                    this->createShapeTerrain(m_pCurrentObject, N);
                 }
                 else if (strType == "shape_polygon")
                 {
-                    this->createShapePolygon(m_pCurrentObject, m_pCurrentObjectVisuals, N);
+                    this->createShapePolygon(m_pCurrentObject, N);
                 }
                 else if (strType == "no_type")
                 {
                     WARNING_MSG("XML Importer", "No type given for shape.")
                 }
             }
-        }
-        else if (std::string(N.name()) == "shape_visuals_circle")
-        {
-            this->createVisualsCircle(m_pCurrentDoubleBufferedShape, m_pCurrentObjectVisuals, N);
-        }
-        else if (std::string(N.name()) == "shape_visuals_planet")
-        {
-            this->createVisualsPlanet(m_pCurrentDoubleBufferedShape, m_pCurrentObjectVisuals, N);
-        }
-        else if (std::string(N.name()) == "shape_visuals_terrain")
-        {
-            this->createVisualsTerrain(m_pCurrentDoubleBufferedShape, m_pCurrentObjectVisuals, N);
-        }
-        else if (std::string(N.name()) == "shape_visuals_polygon")
-        {
-            this->createVisualsPolygon(m_pCurrentDoubleBufferedShape, m_pCurrentObjectVisuals, N);
         }
         
         N = N.next_sibling();
@@ -267,6 +246,7 @@ bool CXMLImporter::import(const std::string& _strFilename,
             m_pCamera = new CCamera;
             MEM_ALLOC("CCamera")
             m_pCamera->setViewport(600.0,400.0);
+            m_pVisualsDataStorage->addCamera(m_pCamera);
             
             INFO_MSG("XML Importer", "Default Camera created.")
         }
@@ -276,46 +256,31 @@ bool CXMLImporter::import(const std::string& _strFilename,
             std::string strHookable = (*ci).first;
             if (strHookable != "no_hook")
             {
-                auto it = m_pDataStorage->getDynamicObjects().find(strHookable);
-                if (it != m_pDataStorage->getDynamicObjects().end())
+                auto it = m_ObjectsByName.find(strHookable);
+                if (it != m_ObjectsByName.end())
                 {
                     (*ci).second->hook((*it).second);
                 }
                 else
                 {
-                    it = m_pDataStorage->getStaticObjects().find(strHookable);
-                    if (it != m_pDataStorage->getStaticObjects().end())
-                    {
-                        (*ci).second->hook((*it).second);
-                    }
-                    else
-                    {
-                        WARNING_MSG("XML Importer", "Hook to unknown hookable: " << strHookable)
-                    }
+                    WARNING_MSG("XML Importer", "Hook to unknown hookable: " << strHookable)
                 }
             }
         }
-        for (auto ci = m_ThrusterHooks.cbegin(); ci != m_ThrusterHooks.cend(); ++ci)
+        // Handle all object referrers
+        for (const auto ObjRefs : m_ObjectReferrers)
         {
-            std::string strHookable = (*ci).second;
-            if (strHookable != "no_hook")
+            std::string strReferredObject = ObjRefs.second;
+            if (strReferredObject != "no_hook")
             {
-                auto it = m_pDataStorage->getDynamicObjects().find(strHookable);
-                if (it != m_pDataStorage->getDynamicObjects().end())
+                auto it = m_ObjectsByName.find(strReferredObject);
+                if (it != m_ObjectsByName.end())
                 {
-                    (*ci).first->IObjectReferrer::attachTo((*it).second);
+                    ObjRefs.first->attachTo((*it).second);
                 }
                 else
                 {
-                    it = m_pDataStorage->getStaticObjects().find(strHookable);
-                    if (it != m_pDataStorage->getStaticObjects().end())
-                    {
-                        (*ci).first->IObjectReferrer::attachTo((*it).second);
-                    }
-                    else
-                    {
-                        WARNING_MSG("XML Importer", "Hook to unknown hookable: " << strHookable)
-                    }
+                    WARNING_MSG("XML Importer", "Referred object unknown: " << strReferredObject)
                 }
             }
         }
@@ -324,25 +289,24 @@ bool CXMLImporter::import(const std::string& _strFilename,
             std::string strRef = (*ci).second;
             if (strRef != "no_ref")
             {
-                auto it = m_pDataStorage->getDynamicObjects().find(strRef);
-                if (it != m_pDataStorage->getDynamicObjects().end())
+                auto it = m_ObjectsByName.find(strRef);
+                if (it != m_ObjectsByName.end())
                 {
                     (*ci).first->getKinematicsState().referTo((*it).second->getKinematicsState());
                 }
                 else
                 {
-                    it = m_pDataStorage->getStaticObjects().find(strRef);
-                    if (it != m_pDataStorage->getStaticObjects().end())
-                    {
-                        (*ci).first->getKinematicsState().referTo((*it).second->getKinematicsState());
-                    }
-                    else
-                    {
-                        WARNING_MSG("XML Importer", "Reference to unknown kinematics state user: " << strRef)
-                    }
+                    WARNING_MSG("XML Importer", "Reference to unknown kinematics state user: " << strRef)
                 }
             }
         }
+        // Transfer objects to WorldDataStorage after everything has been attached
+        for (auto pObj : m_ObjectsByName)
+        {
+            m_pDataStorage->addObject(pObj.second);
+            m_pDataStorage->addUIDUser(&pObj.second->getKinematicsState());
+        }
+        m_ObjectsByName.clear();
     }
     
     // Restore path -- kind of stack pop, when recursively calling import
@@ -588,6 +552,7 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
         MEM_ALLOC("CCamera")
         
         m_strCameraHook = _Node.attribute("hook").as_string();
+        
         m_pCamera->setPosition(_Node.attribute("position_x").as_double(),
                               _Node.attribute("position_y").as_double());
         m_pCamera->getKinematicsState().setAngle(checkAttributeDouble(_Node,"angle", 0.0, false));
@@ -596,11 +561,14 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
         m_pCamera->zoomTo(GRAPHICS_PX_PER_METER/checkAttributeDouble(_Node, "m_per_px", 0.5, false));
 //         if (checkAttributeBool(_Node, "enable_angle_hook", true)) m_pCamera->enableAngleHook();
 //         else m_pCamera->disableAngleHook();
+        std::string strReferredObject = checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE);
         
         m_Hooks.insert(std::pair<std::string,IKinematicsStateUser*>(
-            checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE),
+            strReferredObject,
             m_pCamera
         ));
+        m_pVisualsDataStorage->addCamera(m_pCamera);
+        m_ObjectReferrers.insert({m_pCamera, strReferredObject});
     } // if (!checkFile(_Node))
 }
 
@@ -628,6 +596,8 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 MEM_ALLOC("CObjectEmitter")
                 
                 pObjEmitter->setName(checkAttributeString(_Node, "name", pObjEmitter->getName()));
+                pObjEmitter->setVisualsDataStorage(m_pVisualsDataStorage);
+                pObjEmitter->setWorldDataStorage(m_pDataStorage);
                 
                 std::string strMode = checkAttributeString(_Node, "mode", mapEmitterModeToString.at(EMITTER_DEFAULT_MODE));
                 if (strMode == "emit_once")
@@ -709,6 +679,8 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 MEM_ALLOC("CDebrisEmitter")
                 
                 pDebrisEmitter->setName(checkAttributeString(_Node, "name", pDebrisEmitter->getName()));
+                pDebrisEmitter->setVisualsDataStorage(m_pVisualsDataStorage);
+                pDebrisEmitter->setWorldDataStorage(m_pDataStorage);
                 
                 std::string strDebrisType = checkAttributeString(_Node, "debris_type", mapDebrisTypeToString.at(pDebrisEmitter->getDebrisType()));
                 pDebrisEmitter->setDebrisType(mapStringToDebrisType.at(strDebrisType));
@@ -829,15 +801,13 @@ void CXMLImporter::createComponent(const pugi::xml_node& _Node)
             pThruster->setOrigin(Vector2d(checkAttributeDouble(_Node, "origin_x", pThruster->getOrigin()[0]),
                                           checkAttributeDouble(_Node, "origin_y", pThruster->getOrigin()[1])));
             pThruster->setThrustMax(checkAttributeDouble(_Node, "thrust_max", 1.0));
+            pThruster->setWorldDataStorage(m_pDataStorage);            
             
             m_Hooks.insert(std::pair<std::string,IKinematicsStateUser*>(
                 strThrusterHook,
                 pThruster
             ));
-            m_ThrusterHooks.insert(std::pair<CThruster*, std::string>(
-                pThruster,
-                strThrusterHook
-            ));
+            m_ObjectReferrers.insert({pThruster, strThrusterHook});
             
             // Read emitter and body information
             pugi::xml_node N = _Node.first_child();
@@ -929,10 +899,6 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
         MEM_ALLOC("CObject")
         m_pCurrentObject = pObject;
         
-        IObjectVisuals* pObjectVisuals = new IObjectVisuals(pObject);
-        MEM_ALLOC("IObjectVisuals");
-        m_pCurrentObjectVisuals = pObjectVisuals;
-        
         pugi::xml_node N = _Node;
         
         while (!N.empty())
@@ -952,19 +918,19 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
                     std::string strType(N.attribute("type").as_string());
                     if (strType == "shape_planet")
                     {
-                        this->createShapePlanet(pObject, pObjectVisuals, N);
+                        this->createShapePlanet(pObject, N);
                     }
                     else if (strType == "shape_circle")
                     {
-                        this->createShapeCircle(pObject, pObjectVisuals, N);
+                        this->createShapeCircle(pObject, N);
                     }
                     else if (strType == "shape_polygon")
                     {
-                        this->createShapePolygon(pObject, pObjectVisuals, N);
+                        this->createShapePolygon(pObject, N);
                     }
                     else if (strType == "shape_terrain")
                     {
-                        this->createShapeTerrain(pObject, pObjectVisuals, N);
+                        this->createShapeTerrain(pObject, N);
                     }
                 }
             }        
@@ -972,8 +938,7 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
             N = N.next_sibling();
         }
         
-        m_pDataStorage->addObject(pObject);
-        m_pDataStorage->addObjectVisuals(pObjectVisuals);
+        m_ObjectsByName.insert({pObject->getName(), pObject});
     } // if (!checkFile(_Node))
 }
 
@@ -982,12 +947,10 @@ void CXMLImporter::createRigidBody(const pugi::xml_node& _Node)
 /// \brief Create a circle shape
 ///
 /// \param _pObject Object to create the shape for
-/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CXMLImporter::createShapeCircle(CObject* const _pObject,
-                                     IObjectVisuals* const _pObjectVisuals,
                                      const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapeCircle")
@@ -1002,27 +965,9 @@ void CXMLImporter::createShapeCircle(CObject* const _pObject,
                           _Node.attribute("center_y").as_double());
         pCircle->setMass(checkAttributeDouble(_Node, "mass", pCircle->getMass()));
         
-        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-        MEM_ALLOC("CDoubleBufferedShape")
-        m_pCurrentDoubleBufferedShape = pShape;
-        
-        pShape->buffer(pCircle);
-            
-        // The shape might have visuals
-        if (_Node.first_child())
-        {
-            pugi::xml_node N = _Node.first_child();
-            while (!N.empty())
-            {
-                if (std::string(N.name()) == "visuals")
-                {
-                    this->createVisualsCircle(pShape, _pObjectVisuals, N);
-                }
-                N = N.next_sibling();
-            }
-        }
-        
-        _pObject->getGeometry()->addShape(pShape);
+        m_pCurrentShape = pCircle;
+
+        _pObject->getGeometry()->addShape(pCircle);
     } // if (!checkFile(_Node))
 }
 
@@ -1031,12 +976,10 @@ void CXMLImporter::createShapeCircle(CObject* const _pObject,
 /// \brief Create a planet shape
 ///
 /// \param _pObject Objectto create the shape for
-/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CXMLImporter::createShapePlanet(CObject* const _pObject,
-                                     IObjectVisuals* const _pObjectVisuals,
                                      const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapePlanet")
@@ -1055,28 +998,9 @@ void CXMLImporter::createShapePlanet(CObject* const _pObject,
         pPlanet->setSeaLevel(_Node.attribute("sea_level").as_double());
         pPlanet->initTerrain();
         
-        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-        MEM_ALLOC("IShape")
-        m_pCurrentDoubleBufferedShape = pShape;
+        m_pCurrentShape = pPlanet;
         
-        pShape->buffer(pPlanet);
-        static_cast<CPlanet*>(pShape->getShapeBuf())->initTerrain();
-            
-        // The shape might have visuals
-        if (_Node.first_child())
-        {
-            pugi::xml_node N = _Node.first_child();
-            while (!N.empty())
-            {
-                if (std::string(N.name()) == "visuals")
-                {
-                    this->createVisualsPlanet(pShape, _pObjectVisuals, N);
-                }
-                N = N.next_sibling();
-            }
-        }
-        
-        _pObject->getGeometry()->addShape(pShape);
+        _pObject->getGeometry()->addShape(pPlanet);
     } // if (!checkFile(_Node))
 }
 
@@ -1085,12 +1009,10 @@ void CXMLImporter::createShapePlanet(CObject* const _pObject,
 /// \brief Create a polygon shape
 ///
 /// \param _pObject Object to create the shape for
-/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CXMLImporter::createShapePolygon(CObject* const _pObject,
-                                      IObjectVisuals* const _pObjectVisuals,
                                       const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapePolygon")
@@ -1137,27 +1059,9 @@ void CXMLImporter::createShapePolygon(CObject* const _pObject,
             pPolygon->addVertex(fX,fY);
         }
         
-        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-        MEM_ALLOC("CDoubleBufferedShape")
-        m_pCurrentDoubleBufferedShape = pShape;
+        m_pCurrentShape = pPolygon;
         
-        pShape->buffer(pPolygon);
-        
-        // The shape might have visuals
-        if (!_Node.empty())
-        {
-            pugi::xml_node N = _Node.first_child();
-            while (!N.empty())
-            {
-                if (std::string(N.name()) == "visuals")
-                {
-                    this->createVisualsPolygon(pShape, _pObjectVisuals, N);
-                }
-                N = N.next_sibling();
-            }
-        }
-        
-        _pObject->getGeometry()->addShape(pShape);
+        _pObject->getGeometry()->addShape(pPolygon);
     } // if (!checkFile(_Node))
 }
 
@@ -1166,12 +1070,10 @@ void CXMLImporter::createShapePolygon(CObject* const _pObject,
 /// \brief Create a terrain shape
 ///
 /// \param _pObject Object to create the shape for
-/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
 /// \param _Node Current node in xml tree
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CXMLImporter::createShapeTerrain(CObject* const _pObject,
-                                      IObjectVisuals* const _pObjectVisuals,
                                       const pugi::xml_node& _Node)
 {
     METHOD_ENTRY("CXMLImporter::createShapeTerrain")
@@ -1189,148 +1091,9 @@ void CXMLImporter::createShapeTerrain(CObject* const _pObject,
         pTerrain->setDiversity(_Node.attribute("diversity").as_double());
         pTerrain->setGroundResolution(_Node.attribute("ground_resolution").as_double());
 
-        CDoubleBufferedShape* pShape = new CDoubleBufferedShape;
-        MEM_ALLOC("CDoubleBufferedShape")
-        m_pCurrentDoubleBufferedShape = pShape;
+        m_pCurrentShape = pTerrain;
         
-        pShape->buffer(pTerrain);
-        
-        // The shape might have visuals
-        if (_Node.first_child())
-        {
-            pugi::xml_node N = _Node.first_child();
-            while (!N.empty())
-            {
-                if (std::string(N.name()) == "visuals")
-                {
-                    this->createVisualsTerrain(pShape, _pObjectVisuals, N);
-                }
-                N = N.next_sibling();
-            }
-        }
-        
-        _pObject->getGeometry()->addShape(pShape);
-    } // if (!checkFile(_Node))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Create visuals to a circle shape
-///
-/// \param _pCircle Circle to create visuals for
-/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
-/// \param _Node Current node in xml tree
-///
-////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsCircle(CDoubleBufferedShape* const _pCircle,
-                                       IObjectVisuals* const _pObjectVisuals,
-                                       const pugi::xml_node& _Node)
-{
-    METHOD_ENTRY("CXMLImporter::createVisualsCircle")
-    
-    if (!checkFile(_Node))
-    {
-        if (!_Node.empty())
-        {
-            if (std::string(_Node.attribute("type").as_string()) == "shape_visuals_circle")
-            {
-                CCircleVisuals* pCircleVisuals = new CCircleVisuals(_pCircle);
-                MEM_ALLOC("CCircleVisuals")
-                
-                _pObjectVisuals->addVisuals(pCircleVisuals);
-            }
-        }
-    } // if (!checkFile(_Node))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Create visuals to a planet shape
-///
-/// \param _pPlanet Planet to create visuals for
-/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
-/// \param _Node Current node in xml tree
-///
-////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsPlanet(CDoubleBufferedShape* const _pPlanet,
-                                       IObjectVisuals* const _pObjectVisuals,
-                                       const pugi::xml_node& _Node)
-{
-    METHOD_ENTRY("CXMLImporter::createVisualsPlanet")
-    
-    if (!checkFile(_Node))
-    {
-        if (!_Node.empty())
-        {
-            if (std::string(_Node.attribute("type").as_string()) == "shape_visuals_planet")
-            {
-                CPlanetVisuals* pPlanetVisuals = new CPlanetVisuals(_pPlanet);
-                MEM_ALLOC("CPlanetVisuals")
-                
-                _pObjectVisuals->addVisuals(pPlanetVisuals);
-            }
-        }
-    } // if (!checkFile(_Node))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Create visuals to a polygon shape
-///
-/// \param _pPolygon Polygon to create visuals for
-/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
-/// \param _Node Current node in xml tree
-///
-////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsPolygon(CDoubleBufferedShape* const _pPolygon,
-                                         IObjectVisuals* const _pObjectVisuals,
-                                         const pugi::xml_node& _Node)
-{
-    METHOD_ENTRY("CXMLImporter::createVisualsPolygon")
-
-    if (!checkFile(_Node))
-    {
-        if (!_Node.empty())
-        {
-            if (std::string(_Node.attribute("type").as_string()) == "shape_visuals_polygon")
-            {
-                CPolygonVisuals* pPolygonVisuals = new CPolygonVisuals(_pPolygon);
-                MEM_ALLOC("CPolygonVisuals")
-                
-                _pObjectVisuals->addVisuals(pPolygonVisuals);
-            }
-        }
-    } // if (!checkFile(_Node))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Create visuals to a terrain shape
-///
-/// \param _pTerrain Terrain to create visuals for
-/// \param _pObjectVisuals Pointer to object visuals to refer shape visuals to
-/// \param _Node Current node in xml tree
-///
-////////////////////////////////////////////////////////////////////////////////
-void CXMLImporter::createVisualsTerrain(CDoubleBufferedShape* const _pTerrain,
-                                        IObjectVisuals* const _pObjectVisuals,
-                                        const pugi::xml_node& _Node)
-{
-    METHOD_ENTRY("CXMLImporter::createVisualsTerrain")
- 
-    if (!checkFile(_Node))
-    {
-        if (!_Node.empty())
-        {
-            if (std::string(_Node.attribute("type").as_string()) == "shape_visuals_terrain")
-            {
-                CTerrainVisuals* pTerrainVisuals = new CTerrainVisuals(_pTerrain);
-                MEM_ALLOC("CTerrainVisuals")
-                
-                _pObjectVisuals->addVisuals(pTerrainVisuals);
-            }
-                
-        }
+        _pObject->getGeometry()->addShape(pTerrain);
     } // if (!checkFile(_Node))
 }
 

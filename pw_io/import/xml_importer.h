@@ -39,6 +39,7 @@
 #include "objects_emitter.h"
 #include "thruster.h"
 #include "universe.h"
+#include "visuals_data_storage_user.h"
 #include "world_data_storage_user.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -56,7 +57,8 @@ typedef enum
 /// \brief Class for importing world data from xml files
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CXMLImporter : public IWorldDataStorageUser
+class CXMLImporter : public IVisualsDataStorageUser,
+                     public IWorldDataStorageUser
 {
 
     public:
@@ -110,14 +112,10 @@ class CXMLImporter : public IWorldDataStorageUser
         void createComponent(const pugi::xml_node&);
         void createEmitter(const pugi::xml_node&);
         void createGravity(const pugi::xml_node&);
-        void createShapeCircle(CObject* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createShapePlanet(CObject* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createShapeTerrain(CObject* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createShapePolygon(CObject* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createVisualsCircle(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createVisualsPlanet(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createVisualsTerrain(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
-        void createVisualsPolygon(CDoubleBufferedShape* const, IObjectVisuals* const, const pugi::xml_node&);
+        void createShapeCircle(CObject* const, const pugi::xml_node&);
+        void createShapePlanet(CObject* const, const pugi::xml_node&);
+        void createShapeTerrain(CObject* const, const pugi::xml_node&);
+        void createShapePolygon(CObject* const, const pugi::xml_node&);
         void createRigidBody(const pugi::xml_node&);
         void createUniverse(const pugi::xml_node&);
         void readBodyCore(CObject* const, const pugi::xml_node&);
@@ -125,8 +123,7 @@ class CXMLImporter : public IWorldDataStorageUser
         
         IEmitter*               m_pCurrentEmitter;              ///< Temporary variable for state machine
         CObject*                m_pCurrentObject;               ///< Temporary variable for state machine
-        IObjectVisuals*         m_pCurrentObjectVisuals;        ///< Temporary variable for state machine
-        CDoubleBufferedShape*   m_pCurrentDoubleBufferedShape;  ///< Temporary variable for state machine
+        IShape*                 m_pCurrentShape;                ///< Temporary variable for state machine
         
         CUniverse                       m_Universe;             ///< The procedurally generated universe
         CCamera*                        m_pCamera;              ///< Main camera
@@ -143,8 +140,9 @@ class CXMLImporter : public IWorldDataStorageUser
         double                          m_fVisualsFrequency;    ///< Frequency for visual update
         
         std::unordered_multimap<std::string, IKinematicsStateUser*> m_Hooks;                     ///< List of hooks and related object names
-        std::unordered_multimap<CThruster*, std::string>    m_ThrusterHooks;                     ///< List of thrusters and related object names
         std::unordered_multimap<IKinematicsStateUser*, std::string> m_KinematicsStateReferences; ///< List of states to be referred to others
+        std::unordered_map<IObjectReferrer*, std::string> m_ObjectReferrers;                     ///< List of object referrers
+        ObjectsByNameType   m_ObjectsByName; ///< List of objects, accessed by name
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -40,10 +40,11 @@
 /// \param _pDebris Debris to attach when initialising 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebrisVisualsThruster::CDebrisVisualsThruster(CDebris* _pDebris): m_pDebris(_pDebris)
+CDebrisVisualsThruster::CDebrisVisualsThruster(CDebris* _pDebris)
 {
     METHOD_ENTRY("CDebrisVisualsThruster::CDebrisVisualsThruster")
     CTOR_CALL("CDebrisVisualsThruster::CDebrisVisualsThruster")
+    this->attachTo(_pDebris);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,14 +72,15 @@ CDebrisVisualsThruster::~CDebrisVisualsThruster()
 void CDebrisVisualsThruster::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CDebrisVisualsThruster::draw()");
-    double fSizeR = 1.0 / m_pDebris->getPositions()->size();
+    CDebris* pDebris = static_cast<CDebris*>(m_pDataStorage->getUIDUsersByValueFront()->at(m_UIDRef));
+    double fSizeR = 1.0 / pDebris->getPositions()->size();
     
-    for (auto i=0u; i<m_pDebris->getPositions()->size(); ++i)
+    for (auto i=0u; i<pDebris->getPositions()->size(); ++i)
     {
-        m_Graphics.setPointSize((double(m_pDebris->getPositions()->size()-i) * 0.05 + 3.0) * _pCamera->getZoom());
+        m_Graphics.setPointSize((double(pDebris->getPositions()->size()-i) * 0.05 + 3.0) * _pCamera->getZoom());
         m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
-        m_Graphics.dot(m_pDebris->getPositions()->at(i) - _pCamera->getCenter() +
-                        IUniverseScaled::cellToDouble(m_pDebris->getCell() - _pCamera->getCell()));
+        m_Graphics.dot(pDebris->getPositions()->at(i) - _pCamera->getCenter() +
+                        IUniverseScaled::cellToDouble(pDebris->getCell() - _pCamera->getCell()));
     }
     m_Graphics.setPointSize(1.0);
 }

@@ -87,7 +87,7 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
     _is >> strTmp;
     
     // From IUniqueIDUser
-    _is >> _pShape->m_UID;
+//     _is >> _pShape->m_UID;
     
     _is >> _pShape->m_AABB;
     _is >> _pShape->m_bIsValid;
@@ -124,7 +124,7 @@ std::ostream& operator<<(std::ostream& _os, IShape* const _pShape)
     _os << "Shape:" << std::endl;
     
     // From IUniqueIDUser
-    _os << _pShape->m_UID << std::endl;
+//     _os << _pShape->m_UID << std::endl;
     
     _os << _pShape->m_AABB << std::endl;
     _os << _pShape->m_bIsValid << std::endl;

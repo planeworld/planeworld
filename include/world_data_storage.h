@@ -32,24 +32,55 @@
 #define WORLD_DATA_STORAGE_H
 
 //--- Standard header --------------------------------------------------------//
-#include <mutex>
+#include <list>
 #include <unordered_map>
+#include <vector>
 
 //--- Program header ---------------------------------------------------------//
-#include "debris_visuals.h"
-#include "debris_visuals_thruster.h"
-#include "joint.h"
-#include "object_visuals.h"
+#include "multi_buffer.h"
+#include "unique_id_user.h"
+
+class CDebris;
+class IEmitter;
+class CObject;
+class IJoint;
+class IShape;
 
 typedef std::list<IJoint*>                      JointsType;                 ///< Specifies a list of joints
-typedef std::vector<CDebris*>                   DebrisType;                 ///< Specifies a list of debris
-typedef std::vector<CDebrisVisuals*>            DebrisVisualsType;          ///< Specifies a list of debris visuals
-typedef std::list<CDebrisVisualsThruster*>      DebrisVisualsThrusterType;  ///< Specifies a list of debris visuals
-typedef std::vector<IObjectVisuals*>            ObjectVisualsType;          ///< Specifies a list of object visuals
+
+/// Map of debris, accessed by name
+typedef std::unordered_map<std::string, CDebris*> DebrisByNameType;
+/// Buffered debris, accessed by name
+typedef CMultiBuffer<BUFFER_QUADRUPLE, DebrisByNameType, std::string, CDebris*> BufferedDebrisByNameType;
+/// Map of debris, accessed by UID value
+typedef std::unordered_map<UIDType, CDebris*> DebrisByValueType;
+/// Map of buffered debris, accessed by UID value
+typedef CMultiBuffer<BUFFER_QUADRUPLE, DebrisByValueType, UIDType, CDebris*> BufferedDebrisByValueType;
+
+/// Map of debris, accessed by UID value
+typedef std::unordered_map<UIDType, IEmitter*> EmittersByValueType;
+/// Map of buffered debris, accessed by UID value
+typedef CMultiBuffer<BUFFER_TRIPLE, EmittersByValueType, UIDType, IEmitter*> BufferedEmittersByValueType;
+
+/// Map of objects, accessed by name
+typedef std::unordered_map<std::string, CObject*> ObjectsByNameType;
+/// Map of buffered objects, accessed by name
+typedef CMultiBuffer<BUFFER_QUADRUPLE, ObjectsByNameType, std::string, CObject*> BufferedObjectsByNameType;
+/// Map of objects, accessed by UID value
+typedef std::unordered_map<UIDType, CObject*> ObjectsByValueType;
+/// Map of buffered objects, accessed by UID value
+typedef CMultiBuffer<BUFFER_QUADRUPLE, ObjectsByValueType, UIDType, CObject*> BufferedObjectsByValueType;
+
+/// Vector of UID users, accessed by UID value
+typedef std::vector<IUniqueIDUser*> UIDUsersByValueType;
+/// Vector of buffered UID users, accessed by UID value
+typedef CMultiBuffer<BUFFER_QUADRUPLE, UIDUsersByValueType, IUniqueIDUser*> BufferedUIDUsersByValueType;
+
+const std::uint16_t WDS_DEFAULT_UID_BUFFER_SIZE = 32768; ///< Default size of value buffer
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class that stores all data, e.g. physics objects, visuals, etc.
+/// \brief Class that stores all physics data
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CWorldDataStorage
@@ -62,35 +93,36 @@ class CWorldDataStorage
         ~CWorldDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
-        CCamera*                            getCamera() const;
-        const DebrisType&                   getDebris() const;
-        const DebrisVisualsType&            getDebrisVisuals() const;
-        const DebrisVisualsThrusterType&    getDebrisVisualsThruster() const;
+//         const DebrisType&                   getDebris() const;
         const JointsType&                   getJoints() const;
-        const ObjectsType&                  getDynamicObjects();
-        const ObjectsType&                  getStaticObjects();
-        const ObjectVisualsType&            getObjectVisuals();
         const double&                       getTimeScale() const;
         
-        const ObjectsType::const_iterator recallDynamicObject(const std::string&);
+        const ObjectsByNameType::const_iterator recallDynamicObject(const std::string&);
         
         
         //--- Methods --------------------------------------------------------//
-        void addDebris(CDebris*);
-        void addDebrisVisuals(CDebrisVisuals*);
-        void addDebrisVisualsThruster(CDebrisVisualsThruster*);
+        bool addDebris(CDebris*);
         void addJoint(IJoint*);
-        void addObject(CObject*);
-        void addObjects(ObjectsType);
-        void addObjectVisuals(IObjectVisuals*);
+        bool addObject(CObject*);
+        bool addUIDUser(IUniqueIDUser*);
+        
+        BufferedObjectsByNameType&  getObjectsBuffer();
+        DebrisByNameType*           getDebrisByNameBack();
+        DebrisByNameType*           getDebrisByNameFront();
+        DebrisByValueType*          getDebrisByValueFront();
+        DebrisByValueType*          getDebrisByValueBack();
+        ObjectsByNameType*          getObjectsByNameBack();
+        ObjectsByValueType*         getObjectsByValueBack();
+        ObjectsByValueType*         getObjectsByValueFront();
+        UIDUsersByValueType*        getUIDUsersByValueFront();
+        UIDUsersByValueType*        getUIDUsersByValueBack();
+        
+        void                        swapBack();
+        void                        swapFront();
         
         void memorizeDynamicObject(const std::string&,
-                                   const ObjectsType::const_iterator);
+                                   const ObjectsByNameType::const_iterator);
         
-        void lockObjects(){m_ObjectMutex.lock();}
-        void unlockObjects(){m_ObjectMutex.unlock();}
-        
-        void setCamera(CCamera* const);
         void setTimeScale(const double&);
         
         //--- friends --------------------------------------------------------//
@@ -98,80 +130,28 @@ class CWorldDataStorage
         friend std::ostream& operator<<(std::ostream&, CWorldDataStorage&);
         
     private:
+        
+        //--- Methods [private] ----------------------------------------------//
+        bool addUIDUser(const std::array<IUniqueIDUser*,BUFFER_QUADRUPLE>&);
       
-        CCamera*                    m_pCamera;                  ///< Active camera for visuals
-      
-        DebrisType                  m_Debris;                   ///< List of debris
-        DebrisVisualsType           m_DebrisVisuals;            ///< List of debris visuals
-        DebrisVisualsThrusterType   m_DebrisVisualsThruster;    ///< List of debris visuals
+        BufferedDebrisByNameType    m_DebrisByName;             ///< Buffered debris, accessed by name
+        BufferedDebrisByValueType   m_DebrisByValue;            ///< Buffered debris, accessed by value
+        BufferedEmittersByValueType m_EmittersByValue;          ///< Buffered emitters, accessed by value
+        BufferedObjectsByNameType   m_ObjectsByName;            ///< Buffered objects, accessed by name
+        BufferedObjectsByValueType  m_ObjectsByValue;           ///< Buffered objects, accessed by UID value
+        BufferedUIDUsersByValueType m_UIDUsersByValue;          ///< Buffered UID users, accessed by value
+        
         JointsType                  m_Joints;                   ///< List of joints
-//         KinematicsStatesType        m_KinematicsStates;         ///< List of kinematics states
         UIDUserType                 m_UIDUserRef;               ///< Store objects referred by their UID
-        ObjectsType                 m_DynamicObjects;           ///< List of dynamic objects
-        ObjectsType                 m_StaticObjects;            ///< List of static objects
-        ObjectVisualsType           m_ObjectVisuals;            ///< List of object visuals
         
-        std::unordered_map<std::string, ObjectsType::const_iterator> m_DynamicObjectsMemory; ///< Stores index to specific object
-        
-        std::mutex                  m_ObjectMutex;              ///< Mutex to lock object
-        std::mutex                  m_ObjectVisualsMutex;       ///< Mutex to lock object visuals
-        
+        std::unordered_map<std::string, ObjectsByNameType::const_iterator> m_DynamicObjectsMemory; ///< Stores index to specific object
+
+        std::mutex                  m_MutexFrontNew;            ///< Mutex for thread safety when swapping
+        bool                        m_bFrontNew;                ///< Indicates new information for front buffer
         double                      m_fTimeScale;               ///< Factor for global acceleration of time
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns active camera
-///
-/// \return Active camera
-///
-////////////////////////////////////////////////////////////////////////////////
-inline CCamera* CWorldDataStorage::getCamera() const
-{
-    METHOD_ENTRY("CWorldDataStorage::getCamera")
-    return m_pCamera;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns a list of debris.
-///
-/// \return List of debris
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const DebrisType& CWorldDataStorage::getDebris() const
-{
-    METHOD_ENTRY("CWorldDataStorage::getDebris")
-    return m_Debris;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns a list of debris visuals.
-///
-/// \return List of debris visuals
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const DebrisVisualsType& CWorldDataStorage::getDebrisVisuals() const
-{
-    METHOD_ENTRY("CWorldDataStorage::getDebrisVisuals")
-    return m_DebrisVisuals;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns a list of thruster debris visuals.
-///
-/// \return List of thruster debris visuals
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const DebrisVisualsThrusterType& CWorldDataStorage::getDebrisVisualsThruster() const
-{
-    METHOD_ENTRY("CWorldDataStorage::getDebrisVisualsThruster")
-    return m_DebrisVisualsThruster;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -184,47 +164,6 @@ inline const JointsType& CWorldDataStorage::getJoints() const
 {
     METHOD_ENTRY("CWorldDataStorage::getDebris")
     return m_Joints;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns a list of dynamic objects.
-///
-/// \return List of dynamic objects
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const ObjectsType& CWorldDataStorage::getDynamicObjects() 
-{
-    METHOD_ENTRY("CWorldDataStorage::getDynamicObjects")
-    std::lock_guard<std::mutex> lock(m_ObjectMutex);
-    return m_DynamicObjects;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns a list of static objects.
-///
-/// \return List of static objects
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const ObjectsType& CWorldDataStorage::getStaticObjects() 
-{
-    METHOD_ENTRY("CWorldDataStorage::getStaticObjects")
-    std::lock_guard<std::mutex> lock(m_ObjectMutex);
-    return m_StaticObjects;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns a list of object visuals.
-///
-/// \return List of object visuals
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const ObjectVisualsType& CWorldDataStorage::getObjectVisuals()
-{
-    METHOD_ENTRY("CWorldDataStorage::getObjectVisuals")
-    return m_ObjectVisuals;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -242,15 +181,133 @@ inline const double& CWorldDataStorage::getTimeScale() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the active camera
+/// \brief Returns front buffer of debris, accessed by name
 ///
-/// \param _pCam Active camera
+/// \return Debris front buffer, accessed by name
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CWorldDataStorage::setCamera(CCamera* const _pCam)
+inline DebrisByNameType* CWorldDataStorage::getDebrisByNameFront()
 {
-    METHOD_ENTRY("CWorldDataStorage::setCamera")
-    m_pCamera = _pCam;
+    METHOD_ENTRY("CWorldDataStorage::getDebrisByNameFront")
+    return m_DebrisByName.getBuffer(BUFFER_QUADRUPLE_FRONT);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns back buffer of debris, accessed by name
+///
+/// \return Debris back buffer, accessed by name
+///
+////////////////////////////////////////////////////////////////////////////////
+inline DebrisByNameType* CWorldDataStorage::getDebrisByNameBack()
+{
+    METHOD_ENTRY("CWorldDataStorage::getDebrisByNameBack")
+    return m_DebrisByName.getBuffer(BUFFER_QUADRUPLE_BACK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns back buffer of debris, accessed by value
+///
+/// \return Debris back buffer, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline DebrisByValueType* CWorldDataStorage::getDebrisByValueBack()
+{
+    METHOD_ENTRY("CWorldDataStorage::getDebrisByValueBack")
+    return m_DebrisByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns front buffer of debris, accessed by value
+///
+/// \return Debris front buffer, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline DebrisByValueType* CWorldDataStorage::getDebrisByValueFront()
+{
+    METHOD_ENTRY("CWorldDataStorage::getDebrisByValueFront")
+    return m_DebrisByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns buffer of objects, accessed by name
+///
+/// \return Objects buffer, accessed by name
+///
+////////////////////////////////////////////////////////////////////////////////
+inline BufferedObjectsByNameType& CWorldDataStorage::getObjectsBuffer()
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectsBuffer")
+    return m_ObjectsByName;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns back buffer of objects, accessed by name
+///
+/// \return Objects back buffer, accessed by name
+///
+////////////////////////////////////////////////////////////////////////////////
+inline ObjectsByNameType* CWorldDataStorage::getObjectsByNameBack()
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectsByNameBack")
+    return m_ObjectsByName.getBuffer(BUFFER_QUADRUPLE_BACK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns back buffer of objects, accessed by value
+///
+/// \return Objects back buffer, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline ObjectsByValueType* CWorldDataStorage::getObjectsByValueBack()
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectsByValueBack")
+    return m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns front buffer of objects, accessed by value
+///
+/// \return Object front buffer, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline ObjectsByValueType* CWorldDataStorage::getObjectsByValueFront()
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectsByValueFront")
+    return m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns back buffer of UID users, accessed by value
+///
+/// \return UID users back buffer, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline UIDUsersByValueType* CWorldDataStorage::getUIDUsersByValueBack()
+{
+    METHOD_ENTRY("CWorldDataStorage::getUIDUsersByValueBack")
+    return m_UIDUsersByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns front buffer of UID users, accessed by value
+///
+/// \return UID users front buffer, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline UIDUsersByValueType* CWorldDataStorage::getUIDUsersByValueFront()
+{
+    METHOD_ENTRY("CWorldDataStorage::getUIDUsersByValueFront")
+    return m_UIDUsersByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -265,6 +322,5 @@ inline void CWorldDataStorage::setTimeScale(const double& _fTimeScale)
     METHOD_ENTRY("CWorldDataStorage::setTimeScale")
     m_fTimeScale = _fTimeScale;
 }
-
 
 #endif // WORLD_DATA_STORAGE_H

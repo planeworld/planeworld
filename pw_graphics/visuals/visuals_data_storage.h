@@ -38,14 +38,12 @@
 #include "camera.h"
 #include "debris_visuals.h"
 #include "debris_visuals_thruster.h"
-#include "object_visuals.h"
 
 /// Map of cameras, accessed by name
 typedef std::unordered_map<std::string, CCamera*> CamerasByNameType;
 
 typedef std::vector<CDebrisVisuals*>            DebrisVisualsType;          ///< Specifies a list of debris visuals
 typedef std::list<CDebrisVisualsThruster*>      DebrisVisualsThrusterType;  ///< Specifies a list of debris visuals
-typedef std::vector<IObjectVisuals*>            ObjectVisualsType;          ///< Specifies a list of object visuals
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -62,18 +60,14 @@ class CVisualsDataStorage
         ~CVisualsDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
-//         CCamera*                            getCamera() const;
         const CamerasByNameType&            getCamerasByName() const;
         const DebrisVisualsType&            getDebrisVisuals() const;
         const DebrisVisualsThrusterType&    getDebrisVisualsThruster() const;
-        const ObjectVisualsType&            getObjectVisuals() const;
         
         //--- Methods --------------------------------------------------------//
         void addCamera(CCamera*);
         void addDebrisVisuals(CDebrisVisuals*);
         void addDebrisVisualsThruster(CDebrisVisualsThruster*);
-        
-        void            addObjectVisuals(IObjectVisuals*);
         
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CVisualsDataStorage&);
@@ -81,27 +75,12 @@ class CVisualsDataStorage
         
     private:
       
-//         CCamera*                    m_pCamera;                  ///< Active camera for visuals
         CamerasByNameType           m_CamerasByName;            ///< Cameras, accessed by name
         DebrisVisualsType           m_DebrisVisuals;            ///< List of debris visuals
         DebrisVisualsThrusterType   m_DebrisVisualsThruster;    ///< List of debris visuals
-        ObjectVisualsType           m_ObjectVisuals;            ///< List of object visuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Returns active camera
-// ///
-// /// \return Active camera
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// inline CCamera* CVisualsDataStorage::getCamera() const
-// {
-//     METHOD_ENTRY("CVisualsDataStorage::getCamera")
-//     return m_pCamera;
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -141,44 +120,5 @@ inline const DebrisVisualsThrusterType& CVisualsDataStorage::getDebrisVisualsThr
     METHOD_ENTRY("CVisualsDataStorage::getDebrisVisualsThruster")
     return m_DebrisVisualsThruster;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add a object visuals to internal list
-///
-/// \param _pObjectVisuals Objects visuals that should be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CVisualsDataStorage::addObjectVisuals(IObjectVisuals* _pObjectVisuals)
-{
-    METHOD_ENTRY("CVisualsDataStorage::addObjectVisuals")
-    m_ObjectVisuals.push_back(_pObjectVisuals);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns a list of object visuals.
-///
-/// \return List of object visuals
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const ObjectVisualsType& CVisualsDataStorage::getObjectVisuals() const
-{
-    METHOD_ENTRY("CVisualsDataStorage::getObjectVisuals")
-    return m_ObjectVisuals;
-}
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Sets the active camera
-// ///
-// /// \param _pCam Active camera
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// inline void CVisualsDataStorage::setCamera(CCamera* const _pCam)
-// {
-//     METHOD_ENTRY("CVisualsDataStorage::setCamera")
-//     m_pCamera = _pCam;
-// }
 
 #endif // VISUALS_DATA_STORAGE_H

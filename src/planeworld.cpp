@@ -46,9 +46,7 @@
 #include "debris_emitter.h"
 #include "game_state_manager.h"
 #include "physics_manager.h"
-#include "planet_visuals.h"
 #include "objects_emitter.h"
-#include "spring_visuals.h"
 #include "thruster.h"
 #include "xfig_loader.h"
 #include "xml_importer.h"
@@ -158,6 +156,7 @@ int main(int argc, char *argv[])
     CVisualsManager*    pVisualsManager = nullptr;
     CXFigLoader         XFigLoader;
     CUniverse           Universe;
+    CVisualsDataStorage VisualsDataStorage;
     CWorldDataStorage   WorldDataStorage;
     CThruster           Thruster;
     
@@ -173,7 +172,11 @@ int main(int argc, char *argv[])
     //--- Initialize storage access for engine managers ----------------------//
     GameStateManager.setWorldDataStorage(&WorldDataStorage);
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
-    if (bGraphics) pVisualsManager->setWorldDataStorage(&WorldDataStorage);
+    if (bGraphics)
+    {
+        pVisualsManager->setWorldDataStorage(&WorldDataStorage);
+        pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
+    }
     
     //--- Import from xml file ----------------------------------------------//
     {
@@ -183,8 +186,9 @@ int main(int argc, char *argv[])
         CXMLImporter        XMLImporter;
         
         XMLImporter.setWorldDataStorage(&WorldDataStorage);
+        XMLImporter.setVisualsDataStorage(&VisualsDataStorage);
         if (!XMLImporter.import(strArgData)) CLEAN_UP_AND_EXIT_FAILURE;
-        WorldDataStorage.setCamera(XMLImporter.getCamera());
+//         WorldDataStorage.setCamera(XMLImporter.getCamera());
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
         pPhysicsManager->addComponents(XMLImporter.getComponents());
         pPhysicsManager->addEmitters(XMLImporter.getEmitters());
@@ -343,7 +347,7 @@ int main(int argc, char *argv[])
                                     /// \todo Really check if physics thread is paused before saving the simulation
                                     pPhysicsManager->pause();
                                     GameStateManager.load();
-                                    pCamera=WorldDataStorage.getCamera();
+                                    pCamera=(*VisualsDataStorage.getCamerasByName().cbegin()).second;
                                     pPhysicsManager->togglePause();
                                     break;
                                 }
@@ -363,6 +367,11 @@ int main(int argc, char *argv[])
                                     pPhysicsManager->pause();
                                     GameStateManager.save();
                                     pPhysicsManager->togglePause();
+                                    break;
+                                }
+                                case sf::Keyboard::Space:
+                                {
+                                    pPhysicsManager->processOneFrame();
                                     break;
                                 }
                                 case sf::Keyboard::T:

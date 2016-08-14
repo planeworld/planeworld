@@ -83,8 +83,9 @@ CDebrisVisuals::~CDebrisVisuals()
 void CDebrisVisuals::draw(const CCamera* const _pCamera) const
 {
     METHOD_ENTRY("CDebrisVisuals::draw()");
-    m_Graphics.dots((*m_pRef->getPositions()),-_pCamera->getCenter()+
-                      IUniverseScaled::cellToDouble(m_pRef->getCell() - _pCamera->getCell()));
+    CDebris* pDebris = static_cast<CDebris*>(m_pDataStorage->getUIDUsersByValueFront()->at(m_UIDRef));
+    m_Graphics.dots((*pDebris->getPositions()),-_pCamera->getCenter()+
+                      IUniverseScaled::cellToDouble(pDebris->getCell() - _pCamera->getCell()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

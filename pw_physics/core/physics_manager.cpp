@@ -31,6 +31,7 @@
 #include "physics_manager.h"
 
 #include "debris_emitter.h"
+#include "joint.h"
 #include "physics_manager.h"
 
 CPhysicsManager* CPhysicsManager::m_pLuaThis;
@@ -51,6 +52,7 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_bPaused(false),
+                                     m_bProcessOneFrame(false),
                                      m_strLuaPhysicsInterface("")
                                    
 {
@@ -343,16 +345,13 @@ void CPhysicsManager::initObjects()
     //--- Init objects -------------------------------------------------------//
     INFO_MSG("Physics Manager", "Initialising objects.")
 
-    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
-        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
-    {
-        ci->second->init();
-    }
-    for (ObjectsType::const_iterator ci = m_pDataStorage->getStaticObjects().begin();
-        ci != m_pDataStorage->getStaticObjects().end(); ++ci)
-    {
-        ci->second->init();
-    }
+//     for (auto i=0u; i<m_pDataStorage->getObjectsBuffer().getBufferSize(); ++i)
+//     {
+//         for (auto Obj : *m_pDataStorage->getObjectsBuffer().getBuffer(i))
+//         {
+//             Obj.second->init();
+//         }
+//     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -450,7 +449,7 @@ void CPhysicsManager::processFrame()
 {
     METHOD_ENTRY("CPhysicsManager::processFrame")
  
-    if (!m_bPaused)
+    if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {
         m_SimTimerGlobal.inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
         m_SimTimerLocal[0].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
@@ -475,6 +474,8 @@ void CPhysicsManager::processFrame()
             NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << m_fProcessingTime << 
                                           "s of " << 1.0/m_fFrequency << "s max.")
         }
+        m_pDataStorage->swapBack();
+        m_bProcessOneFrame = false;
     }
 }
 
@@ -486,6 +487,27 @@ void CPhysicsManager::processFrame()
 void CPhysicsManager::moveMasses(int nTest) const
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
+    
+    for (const auto pComp : m_Components)
+    {
+        pComp.second->IObjectReferrer::attachTo(
+            static_cast<CObject*>(
+                m_pDataStorage->getUIDUsersByValueBack()->operator[](
+                    pComp.second->IObjectReferrer::getUIDRef()
+                )
+            )
+        );
+    }
+    for (const auto pEmit : m_Emitters)
+    {
+        pEmit.second->getKinematicsState().attachTo(
+            static_cast<CKinematicsState*>(
+                m_pDataStorage->getUIDUsersByValueBack()->operator[](
+                    pEmit.second->getKinematicsState().getUIDRef()
+                )
+            )
+        );
+    }
     
     if ((nTest % static_cast<int>(m_fFrequency/m_fFrequencyLua) == 0) &&
         (m_strLuaPhysicsInterface != ""))
@@ -518,21 +540,21 @@ void CPhysicsManager::moveMasses(int nTest) const
     {
         (*ci).second->execute();
     }
-    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
-        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
+    for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
     {
-        ci->second->dynamics(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        ci->second->transform();
+        Obj.second->dynamics(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        Obj.second->transform();
     }
     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
     {
         CTimer FrameTimeDebris;
         FrameTimeDebris.start();
         
-        for (auto ci = m_pDataStorage->getDebris().cbegin();
-            ci != m_pDataStorage->getDebris().cend(); ++ci)
+        for (const auto Debris : *m_pDataStorage->getDebrisByValueBack())
+//         for (const auto ci  = m_pDataStorage->getDebrisByNameBack()->cbegin();
+//                         ci != m_pDataStorage->getDebrisByNameBack()->cend(); ++ci)
         {
-            (*ci)->dynamics(1.0/m_fFrequencyDebris*m_pDataStorage->getTimeScale());
+            Debris.second->dynamics(1.0/m_fFrequencyDebris*m_pDataStorage->getTimeScale());
         }
         
         FrameTimeDebris.stop();
@@ -555,7 +577,7 @@ void CPhysicsManager::addGlobalForces()
 {
     METHOD_ENTRY("CPhysicsManager::addGlobalForces")
     
-    ObjectsType::const_iterator cj;
+    ObjectsByValueType::const_iterator cj;
     double fCCSqr;
     Vector2d vecCC;
     Vector2d vecG;
@@ -566,45 +588,45 @@ void CPhysicsManager::addGlobalForces()
         (*ci)->react();
     }
 
-    for (const auto ci : m_pDataStorage->getDynamicObjects())
-        ci.second->clearForces();
+    for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
+        Obj.second->clearForces();
 
-    for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
-        ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
+    for (auto ci  = m_pDataStorage->getObjectsByValueBack()->cbegin();
+              ci != m_pDataStorage->getObjectsByValueBack()->cend(); ++ci)
     {
         cj = ci;
         ++cj;
         
-        if (ci->second->getGravitationState() == true)
+        if ((*ci).second->getGravitationState() == true)
         {
-            while (cj != m_pDataStorage->getDynamicObjects().end())
+            while (cj != m_pDataStorage->getObjectsByValueBack()->cend())
             {
-                vecCC = ci->second->getCOM() - cj->second->getCOM() +
-                        IUniverseScaled::cellToDouble(ci->second->getCell()-cj->second->getCell());
+                vecCC = (*ci).second->getCOM() - (*cj).second->getCOM() +
+                        IUniverseScaled::cellToDouble((*ci).second->getCell()-(*cj).second->getCell());
 
                 fCCSqr = vecCC.squaredNorm();
                 
                 if (fCCSqr > 400.0)
                 {
-                    vecG = vecCC.normalized() * (ci->second->getMass() * cj->second->getMass()) / fCCSqr
+                    vecG = vecCC.normalized() * ((*ci).second->getMass() * (*cj).second->getMass()) / fCCSqr
 //                             * 6.6742e+0;
                         * m_fG;
-                    if (cj->second->getGravitationState() == true)
-                        ci->second->addForce(-vecG, ci->second->getCOM());
-                    cj->second->addForce(vecG, cj->second->getCOM());
+                    if ((*cj).second->getGravitationState() == true)
+                        (*ci).second->addForce(-vecG, (*ci).second->getCOM());
+                    (*cj).second->addForce(vecG, (*cj).second->getCOM());
                 }
                 ++cj;
             }
         }
 
-        ci->second->addAcceleration(m_vecConstantGravitation);
+        (*ci).second->addAcceleration(m_vecConstantGravitation);
     };
     
-    for (auto ci = m_pDataStorage->getDebris().cbegin();
-        ci != m_pDataStorage->getDebris().cend(); ++ci)
-    {
-//         (*ci)->setForce(Vector2d(0.0, -1.81));
-    }
+//     for (auto ci = m_pDataStorage->getDebris().cbegin();
+//         ci != m_pDataStorage->getDebris().cend(); ++ci)
+//     {
+// //         (*ci)->setForce(Vector2d(0.0, -1.81));
+//     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -617,10 +639,10 @@ void CPhysicsManager::collisionDetection()
     METHOD_ENTRY("CPhysicsManager::collisionDetection")
 
 //     m_ContactList.clear();
-    m_CollisionManager.setDebris(m_pDataStorage->getDebris());
-    m_CollisionManager.setDynamicObjects(m_pDataStorage->getDynamicObjects());
-    m_CollisionManager.setStaticObjects(m_pDataStorage->getStaticObjects());
-    m_CollisionManager.detectCollisions();
+//     m_CollisionManager.setDebris(m_pDataStorage->getDebris());
+//     m_CollisionManager.setDynamicObjects(m_pDataStorage->getObjectsByValueBack());
+//     m_CollisionManager.setStaticObjects(m_pDataStorage->getObjectsByValueBack());
+//     m_CollisionManager.detectCollisions();
     
 //  for (ContactList::const_iterator ci = m_ContactList.begin();
 //      ci != m_ContactList.end(); ++ci)
@@ -646,32 +668,32 @@ void CPhysicsManager::updateCells()
 {
     METHOD_ENTRY("CPhysicsManager::updateCells")
     
-    // Use double frequency just to avoid any surprises
-    double fFreq = 6.0e9*m_pDataStorage->getTimeScale()*m_pDataStorage->getDynamicObjects().size()/DEFAULT_CELL_SIZE_2;
-
-    double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
-    uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
-
-    if (nNrOfObj > m_pDataStorage->getDynamicObjects().size()) nNrOfObj = m_pDataStorage->getDynamicObjects().size();
-    
-    m_fCellUpdateResidual = fNrOfObj - nNrOfObj;
-    
-    for (uint32_t i=0; i<nNrOfObj; ++i)
-    {
-        // Initialise the iterator for dynamic cell update.
-        /// \todo Somehow, this doesn't work if initialised outside of loop. Evaluate.
-        if (m_bCellUpdateFirst)
-        {
-            m_pDataStorage->memorizeDynamicObject("CellUpdater", m_pDataStorage->getDynamicObjects().begin());
-            m_bCellUpdateFirst = false;
-        }
-        
-        ObjectsType::const_iterator ci = m_pDataStorage->recallDynamicObject("CellUpdater");
-        ci->second->updateCell();
-        if (++ci == m_pDataStorage->getDynamicObjects().end())
-            ci = m_pDataStorage->getDynamicObjects().begin();
-        m_pDataStorage->memorizeDynamicObject("CellUpdater", ci);
-    }
+//     // Use double frequency just to avoid any surprises
+//     double fFreq = 6.0e9*m_pDataStorage->getTimeScale()*m_pDataStorage->getObjectsByValueBack()->size()/DEFAULT_CELL_SIZE_2;
+// 
+//     double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
+//     uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
+// 
+//     if (nNrOfObj > m_pDataStorage->getObjectsByValueBack()->size()) nNrOfObj = m_pDataStorage->getObjectsByValueBack()->size();
+//     
+//     m_fCellUpdateResidual = fNrOfObj - nNrOfObj;
+//     
+//     for (uint32_t i=0; i<nNrOfObj; ++i)
+//     {
+//         // Initialise the iterator for dynamic cell update.
+//         /// \todo Somehow, this doesn't work if initialised outside of loop. Evaluate.
+//         if (m_bCellUpdateFirst)
+//         {
+//             m_pDataStorage->memorizeDynamicObject("CellUpdater", m_pDataStorage->getObjectsByValueBack()->begin());
+//             m_bCellUpdateFirst = false;
+//         }
+//         
+//         ObjectsType::const_iterator ci = m_pDataStorage->recallDynamicObject("CellUpdater");
+//         ci->second->updateCell();
+//         if (++ci == m_pDataStorage->getObjectsByValueBack()->end())
+//             ci = m_pDataStorage->getObjectsByValueBack()->begin();
+//         m_pDataStorage->memorizeDynamicObject("CellUpdater", ci);
+//     }
     
 }
 
@@ -861,10 +883,10 @@ int CPhysicsManager::luaApplyForce(lua_State* _pLuaState)
         
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->addForceLC(
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->addForceLC(
                 vecForce * m_pLuaThis->m_fFrequency/m_pLuaThis->m_fFrequencyLua, vecPOA);
         }
         else
@@ -899,10 +921,10 @@ int CPhysicsManager::luaGetAngle(lua_State* _pLuaState)
     {
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            double fAng = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState().getAngle();
+            double fAng = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState().getAngle();
             lua_pushnumber(_pLuaState, fAng);
         }
         else
@@ -938,14 +960,14 @@ int CPhysicsManager::luaGetAngleRef(lua_State* _pLuaState)
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
         std::string strReference = lua_tolstring(_pLuaState,2,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strReference) != 
-                m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+            if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strReference) != 
+                m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
             {
-                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState();
-                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strReference)->getKinematicsState();
+                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState();
+                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strReference)->getKinematicsState();
                 double fAng = KinObj.getAngleReferredTo(KinRef);
                 lua_pushnumber(_pLuaState, fAng);
             }
@@ -986,10 +1008,10 @@ int CPhysicsManager::luaGetAngleVelocity(lua_State* _pLuaState)
     {
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            double fAngVel = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState().getAngleVelocity();
+            double fAngVel = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState().getAngleVelocity();
             lua_pushnumber(_pLuaState, fAngVel);
         }
         else
@@ -1025,14 +1047,14 @@ int CPhysicsManager::luaGetAngleVelocityRef(lua_State* _pLuaState)
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
         std::string strReference = lua_tolstring(_pLuaState,2,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strReference) != 
-                m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+            if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strReference) != 
+                m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
             {
-                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState();
-                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strReference)->getKinematicsState();
+                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState();
+                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strReference)->getKinematicsState();
                 double fAngVel = KinObj.getAngleVelocityReferredTo(KinRef);
                 lua_pushnumber(_pLuaState, fAngVel);
             }
@@ -1100,10 +1122,10 @@ int CPhysicsManager::luaGetMass(lua_State* _pLuaState)
     {
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            double fMass = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getMass();
+            double fMass = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getMass();
             lua_pushnumber(_pLuaState, fMass);
         }
         else
@@ -1138,10 +1160,10 @@ int CPhysicsManager::luaGetInertia(lua_State* _pLuaState)
     {
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            double fInertia = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getInertia();
+            double fInertia = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getInertia();
             lua_pushnumber(_pLuaState, fInertia);
         }
         else
@@ -1176,10 +1198,10 @@ int CPhysicsManager::luaGetPosition(lua_State* _pLuaState)
     {
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            Vector2d vecPos(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getOrigin());
+            Vector2d vecPos(m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getOrigin());
             lua_pushnumber(_pLuaState, vecPos[0]);
             lua_pushnumber(_pLuaState, vecPos[1]);
         }
@@ -1216,14 +1238,14 @@ int CPhysicsManager::luaGetPositionRef(lua_State* _pLuaState)
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
         std::string strReference = lua_tolstring(_pLuaState,2,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strReference) != 
-                m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+            if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strReference) != 
+                m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
             {
-                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState();
-                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strReference)->getKinematicsState();
+                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState();
+                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strReference)->getKinematicsState();
                 Vector2d vecPos(KinObj.getOriginReferredTo(KinRef));
                 lua_pushnumber(_pLuaState, vecPos[0]);
                 lua_pushnumber(_pLuaState, vecPos[1]);
@@ -1319,10 +1341,10 @@ int CPhysicsManager::luaGetVelocity(lua_State* _pLuaState)
     {
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            Vector2d vecVel(m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getVelocity());
+            Vector2d vecVel(m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getVelocity());
             lua_pushnumber(_pLuaState, vecVel[0]);
             lua_pushnumber(_pLuaState, vecVel[1]);
         }
@@ -1359,15 +1381,15 @@ int CPhysicsManager::luaGetVelocityRef(lua_State* _pLuaState)
         size_t l;
         std::string strObject = lua_tolstring(_pLuaState,1,&l);
         std::string strReference = lua_tolstring(_pLuaState,2,&l);
-        if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
+            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
         {
-            if (m_pLuaThis->m_pDataStorage->getDynamicObjects().find(strReference) != 
-                m_pLuaThis->m_pDataStorage->getDynamicObjects().end())
+            if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strReference) != 
+                m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
             {
-                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strObject)->getKinematicsState();
-                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getDynamicObjects().at(strReference)->getKinematicsState();
-                Vector2d vecVel(KinObj.getVelocityReferredTo(KinRef));
+//                 CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState();
+//                 CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strReference)->getKinematicsState();
+                Vector2d vecVel;//(KinObj.getVelocityReferredTo(KinRef));
                 lua_pushnumber(_pLuaState, vecVel[0]);
                 lua_pushnumber(_pLuaState, vecVel[1]);
             }

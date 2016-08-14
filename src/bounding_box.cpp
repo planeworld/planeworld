@@ -35,7 +35,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CBoundingBox::CBoundingBox()
+CBoundingBox::CBoundingBox() : IUniverseScaled()
 {
     METHOD_ENTRY("CBoundingBox::CBoundingBox")
     CTOR_CALL("CBoundingBox::CBoundingBox")

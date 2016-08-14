@@ -59,17 +59,21 @@ using namespace Eigen;
 ///       std::vector is a little restricted when accessing elements.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CDebris : public IUniverseScaled,
-                public IUniqueIDUser
+class CDebris : public IUniqueIDUser,
+                public IUniverseScaled
 {
     
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
         CDebris();
+        CDebris(const CDebris&);
+        CDebris& operator=(const CDebris&);
+        CDebris* clone() const;
 
         //--- Constant methods -----------------------------------------------//
-        int getDepths() const;
+        
+        int         getDepths() const;
 
         //--- Methods --------------------------------------------------------//
         CCircularBuffer<Vector2d>* getPositions();
@@ -91,16 +95,18 @@ class CDebris : public IUniverseScaled,
         friend std::ostream&    operator<<(std::ostream&, CDebris* const);
         
     protected:
+        
+        //--- Methods [protected] --------------------------------------------//
+        void                   copy(const CDebris&);
 
-        //-- Variables [protected] -------------------------------------------//
-        CTimer                  m_Lifetime;                  ///< Lifetime counter
-        double                  m_fTimeFac;                  ///< Factor of realtime
-
+        //--- Variables [protected] ------------------------------------------//
         CCircularBuffer<Vector2d> m_PosList;                 ///< Position of debris
         CCircularBuffer<Vector2d> m_PosListPrev;             ///< Position of debris in previous time step
         CCircularBuffer<Vector2d> m_VelList;                 ///< Velocity of derbis
         CCircularBuffer<std::uint8_t>  m_StateList;          ///< Is the debris active or inactive
         
+        CTimer                  m_Lifetime;                  ///< Lifetime counter
+        double                  m_fTimeFac;                  ///< Factor of realtime
         double                  m_fDamping;                  ///< Damping of debris
         int                     m_nDepthlayers;              ///< Depths in which debris exists
         

@@ -351,6 +351,8 @@ void CPlanet::myCopy(const IShape* const _pShape)
     m_nOctHlTr          = pPlanet->m_nOctHlTr;
     m_nOctMtTr          = pPlanet->m_nOctMtTr;
     m_nOctTrTp          = pPlanet->m_nOctTrTp;
+    
+    this->myInitTerrain();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
