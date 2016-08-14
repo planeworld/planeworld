@@ -706,7 +706,7 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsSta
         text.setString(oss.str());
         text.setFont(m_Font);
         text.setCharacterSize(12.0);
-        text.setColor(color);
+        text.setFillColor(color);
         text.setPosition(m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[0],
                         m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[1]);
 
@@ -788,7 +788,7 @@ void CVisualsManager::drawTimers() const
         sf::Text Text;
         if (m_pDataStorage->getTimeScale() > 1.0)
         {
-            Text.setColor(sf::Color(255.0, 0.0, 0.0, 255.0));
+            Text.setFillColor(sf::Color(255.0, 0.0, 0.0, 255.0));
             oss << "\nWarning: Decreasing accuracy." << std::endl;
         }
         Text.setString(oss.str());
@@ -992,7 +992,7 @@ void CVisualsManager::drawWorld() const
                 text.setString(pObj.second->getName());
                 text.setFont(m_Font);
                 text.setCharacterSize(nTextSize);
-                text.setColor(color);
+                text.setFillColor(color);
                 text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
 
                 m_Graphics.getWindow()->draw(text);
@@ -1020,7 +1020,7 @@ void CVisualsManager::drawWorld() const
                     text.setString(m_pUniverse->getStarSystems()[i]->getName());
                     text.setFont(m_Font);
                     text.setCharacterSize(nTextSize);
-                    text.setColor(color);
+                    text.setFillColor(color);
                     text.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
 
                     m_Graphics.getWindow()->draw(text);
