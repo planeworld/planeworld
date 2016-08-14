@@ -41,6 +41,8 @@
 
 /// Map of cameras, accessed by name
 typedef std::unordered_map<std::string, CCamera*> CamerasByNameType;
+/// Vector of cameras, accessed by index to cycle through cameras
+typedef std::vector<CCamera*> CamerasByIndexType;
 
 typedef std::vector<CDebrisVisuals*>            DebrisVisualsType;          ///< Specifies a list of debris visuals
 typedef std::list<CDebrisVisualsThruster*>      DebrisVisualsThrusterType;  ///< Specifies a list of debris visuals
@@ -60,6 +62,7 @@ class CVisualsDataStorage
         ~CVisualsDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
+        const CamerasByIndexType&           getCamerasByIndex() const;
         const CamerasByNameType&            getCamerasByName() const;
         const DebrisVisualsType&            getDebrisVisuals() const;
         const DebrisVisualsThrusterType&    getDebrisVisualsThruster() const;
@@ -75,12 +78,26 @@ class CVisualsDataStorage
         
     private:
       
+        CamerasByIndexType          m_CamerasByIndex;           ///< Cameras, accessed by index
         CamerasByNameType           m_CamerasByName;            ///< Cameras, accessed by name
         DebrisVisualsType           m_DebrisVisuals;            ///< List of debris visuals
         DebrisVisualsThrusterType   m_DebrisVisualsThruster;    ///< List of debris visuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns cameras.
+///
+/// \return Cameras
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CamerasByIndexType& CVisualsDataStorage::getCamerasByIndex() const
+{
+    METHOD_ENTRY("CVisualsDataStorage::getCamerasByIndex")
+    return m_CamerasByIndex;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

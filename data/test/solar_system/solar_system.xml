@@ -15,6 +15,17 @@
     viewport_height="400.0"
     m_per_px="1.0e5"
   />
+  
+  <camera
+    hook="Moon"
+    enable_angle_hook="true"
+    angle__deg="-20.0"
+    position_x="10.0"
+    position_y="-1.0"
+    viewport_width="600.0"
+    viewport_height="400.0"
+    m_per_px="2.0e4"
+  />
     
   <config file="config.xml"/>
   

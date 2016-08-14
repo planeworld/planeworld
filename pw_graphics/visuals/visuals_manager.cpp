@@ -39,7 +39,9 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_pPhysicsManager(nullptr),
                                      m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
                                      m_nVisualisations(0),
-                                     m_nStarIndex(-1)
+                                     m_nStarIndex(-1),
+                                     m_unCameraIndex(0u),
+                                     m_pCamera(nullptr)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -1068,6 +1070,19 @@ void CVisualsManager::drawWorld() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Cycle through cameras, using index
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::cycleCamera()
+{
+    METHOD_ENTRY("CVisualsManager::cycleCamera")
+    ++m_unCameraIndex;
+    if (m_unCameraIndex == m_pVisualsDataStorage->getCamerasByIndex().size())
+        m_unCameraIndex = 0u;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Drawing finished, now swap buffers
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -1091,7 +1106,7 @@ void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
 
-    m_pCamera = (*m_pVisualsDataStorage->getCamerasByName().cbegin()).second;
+    m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
     
     this->drawGrid();
     this->drawTrajectories();

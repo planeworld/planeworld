@@ -327,6 +327,12 @@ int main(int argc, char *argv[])
                                     pPhysicsManager->resetTime();
                                     break;
                                 }
+                                case sf::Keyboard::C:
+                                {
+                                    pVisualsManager->cycleCamera();
+                                    pCamera=pVisualsManager->getCurrentCamera();
+                                    break;
+                                }
                                 case sf::Keyboard::B:
                                 {
                                     pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);

@@ -540,14 +540,6 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
     {
         INFO_MSG("XML Importer", "Creating camera.")
     
-        // Free memory if pointer is already existent
-        if (m_pCamera != nullptr)
-        {
-            delete m_pCamera;
-            m_pCamera = 0;
-            MEM_FREED("CCamera");
-            NOTICE_MSG("XML Importer", "More than one camera, creating new one, deleting old one.")
-        }
         m_pCamera = new CCamera;
         MEM_ALLOC("CCamera")
         
