@@ -51,10 +51,14 @@ class CCircularBuffer
         //--- Constructor/Destructor -----------------------------------------//
         CCircularBuffer();
         CCircularBuffer(const std::size_t&);
+        CCircularBuffer(const CCircularBuffer<T>&);
+        CCircularBuffer<T>& operator=(const CCircularBuffer<T>&);
         
         //--- Constant Methods -----------------------------------------------//
         const T& operator[](const std::size_t&) const;
         const T& at        (const std::size_t&) const;
+        
+        CCircularBuffer<T>* clone() const;
         
         std::size_t capacity() const;
         std::size_t size() const;
@@ -72,6 +76,9 @@ class CCircularBuffer
         friend std::ostream&    operator<<(std::ostream&, const CCircularBuffer<U>&);
                 
     private:
+        
+        //--- Methods [private] ----------------------------------------------//
+        void copy(const CCircularBuffer<T>&);
         
         //--- Variables [private] --------------------------------------------//
         size_t              m_nCapacity = 1;    ///< Capacity of the buffer

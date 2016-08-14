@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2016 Torsten Büschenfeld
+// Copyright (C) 2016-2016 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,67 +20,64 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       circle_visuals.h
-/// \brief      Prototype of class "CCircleVisuals"
+/// \file       visuals_data_storage_user.h
+/// \brief      Prototype of interface "IVisualsDataStorageUser"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2010-04-08
+/// \date       2016-06-28
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef CIRCLE_VISUALS_H
-#define CIRCLE_VISUALS_H
+#ifndef VISUALS_DATA_STORAGE_USER_H
+#define VISUALS_DATA_STORAGE_USER_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "visuals.h"
+#include "visuals_data_storage.h"
 
-const double CIRCLE_DEFAULT_RESOLUTION = 5.0; ///< Default resolution for visual sampling, px/vertex.
-const double CIRCLE_MINIMUM_SEGMENTS  = 10.0; ///< Minimum number of circle segments
+//--- Misc header ------------------------------------------------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for managing the visualisation of a circle
+/// \brief Interface for classes that use the visuals data storage
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CCircleVisuals : public IVisuals
+class IVisualsDataStorageUser
 {
-    
+
     public:
-
+   
         //--- Constructor/Destructor -----------------------------------------//
-        CCircleVisuals(){}
-        CCircleVisuals(CDoubleBufferedShape* const);
-        ~CCircleVisuals();
-        
-        //--- Constant Methods -----------------------------------------------//
-        virtual IVisuals*   clone(CDoubleBufferedShape* const) const;
-        virtual void        draw(CCamera* const, CObject* const) const;
-        
-        ShapeVisualsType getShapeVisualsType() const;
-        
-    private:
-        
-        //--- Methods [private] ----------------------------------------------//
-        std::istream&       myStreamIn(std::istream&);
-        std::ostream&       myStreamOut(std::ostream&);
+        IVisualsDataStorageUser() : m_pVisualsDataStorage(nullptr){}
 
+        //--- Methods --------------------------------------------------------//
+        void setVisualsDataStorage(CVisualsDataStorage*);
+        
+    protected:
+        
+        CVisualsDataStorage*  m_pVisualsDataStorage;     ///< Pointer to storage for visuals data
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Get the shape visuals type
+/// \brief Sets the instance of the visuals data storage.
 ///
-/// \return Type of shape visuals
+/// \param _pDataStorage Instance of visuals data storage.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline ShapeVisualsType CCircleVisuals::getShapeVisualsType() const
+inline void IVisualsDataStorageUser::setVisualsDataStorage(CVisualsDataStorage* _pDataStorage)
 {
-    METHOD_ENTRY("CCircleVisuals::getShapeVisualsType")
-    return ShapeVisualsType::CIRCLE;
+    METHOD_ENTRY("IVisualsDataStorageUser::setVisualsDataStorage")
+    
+    if (m_pVisualsDataStorage != nullptr)
+    {
+        NOTICE_MSG("Visuals Data Storage User", "Data storage instance already given, overwriting.")
+    }
+    
+    m_pVisualsDataStorage = _pDataStorage;
 }
 
-#endif // CIRCLE_VISUALS_H
+#endif // VISUALS_DATA_STORAGE_USER_H

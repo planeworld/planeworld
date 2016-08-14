@@ -229,7 +229,7 @@ inline const double& CTerrain::getWidth() const
 inline ShapeType CTerrain::getShapeType() const
 {
     METHOD_ENTRY("CTerrain::getShapeType")
-    return ShapeType::SHAPE_TERRAIN;
+    return ShapeType::TERRAIN;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

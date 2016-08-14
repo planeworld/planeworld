@@ -34,6 +34,7 @@
 //--- Standard header --------------------------------------------------------//
 #include <cstdint>
 #include <deque>
+#include <unordered_map>
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
@@ -52,7 +53,10 @@ class CUniqueID
         
         //--- Constructor/Destructor -----------------------------------------//
         CUniqueID();
+        CUniqueID(const CUniqueID&);
         ~CUniqueID();
+        
+        CUniqueID& operator=(const CUniqueID&);
         
         //--- Constant Methods -----------------------------------------------//
         const std::string&  getName() const;
@@ -60,21 +64,28 @@ class CUniqueID
         
         //--- Methods --------------------------------------------------------//
         void setName(const std::string&);
-                
+        void setNewID();
+        
+        //--- Static methods -------------------------------------------------//
+        static const std::deque<UIDType>& getUnusedUIDs();
+        static const std::unordered_map<UIDType, std::uint32_t>& getReferencedUIDs();
+        
         //--- friends --------------------------------------------------------//
         friend std::istream&    operator>>(std::istream&, CUniqueID&);
         friend std::ostream&    operator<<(std::ostream&, CUniqueID&);
                 
     private:
         
-        CUniqueID(const CUniqueID&){};                  ///< Copying not allowed
-      
+        //--- Methods [private] ----------------------------------------------//
+        void copy(const CUniqueID&);
+        
         //--- Variables [private] --------------------------------------------//
                UIDType             m_nUID;              ///< Unique ID for this instance
                std::string         m_strName;           ///< Name for this instance
                
         static UIDType             s_nUID;              ///< Unique ID counter
         static std::deque<UIDType> s_UnusedUIDs;        ///< Storage for unused / released IDs
+        static std::unordered_map<UIDType, std::uint32_t> s_ReferencedUIDs; ///< Storage for reference counting of uids
         
 };
 
@@ -117,6 +128,35 @@ inline void CUniqueID::setName(const std::string& _strName)
 {
     METHOD_ENTRY("CUniqueID::setName")
     m_strName = _strName;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns all unused UIDs
+///
+/// \return Unused UIDs
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::deque<UIDType>& CUniqueID::getUnusedUIDs()
+{
+    METHOD_ENTRY("CUniqueID::getUnusedUIDs")
+    return s_UnusedUIDs;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns all referenced UIDs
+///
+/// UIDs are reference counted due to copy constructor and copy assignment
+/// operator duplication of UIDs.
+///
+/// \return Referenced UIDs
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::unordered_map<UIDType, std::uint32_t>& CUniqueID::getReferencedUIDs()
+{
+    METHOD_ENTRY("CUniqueID::getReferencedUIDs")
+    return s_ReferencedUIDs;
 }
 
 #endif // CUniqueID

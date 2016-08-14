@@ -54,11 +54,8 @@ void CXFigLoader::load(const std::string& _strFilename)
 {
     METHOD_ENTRY("CXFigLoader::load")
 
-    CDoubleBufferedShape* pShape;
     CCircle*            pCircle;
-    CCircleVisuals*     pCircleVisuals;
     CPolygon*          pPolygon;
-    CPolygonVisuals*   pPolygonVisuals;
     CParzival           File;
     std::string         strTmp;
 
@@ -164,16 +161,10 @@ void CXFigLoader::load(const std::string& _strFilename)
                 // Add object to shapelist
                 pCircle = new CCircle;
                 MEM_ALLOC("pCircle")
-                pShape = new CDoubleBufferedShape;
-                MEM_ALLOC("pShape")
-                pCircleVisuals = new CCircleVisuals(pShape);
-                MEM_ALLOC("pCircleVisuals")
                 pCircle->setRadius(double(nRadiusX)/100.0);
                 pCircle->setCenter(double(nCenterX)/100.0, double(-nCenterY)/100.0);
                 pCircle->setDepths(SHAPE_DEPTH_ALL);
-                pShape->buffer(pCircle);
                 m_ShapeList.push_back(pCircle);
-                m_VisualsList.push_back(pCircleVisuals);
                 
                 break;
             case 2:
@@ -215,10 +206,6 @@ void CXFigLoader::load(const std::string& _strFilename)
                 ))
                 pPolygon = new CPolygon;
                 MEM_ALLOC("pPolygon")
-                pShape = new CDoubleBufferedShape;
-                MEM_ALLOC("pShape")
-                pPolygonVisuals = new CPolygonVisuals(pShape);
-                MEM_ALLOC("pPolygonVisuals")
                 pPolygon->setPolygonType(PolygonType::LINE_LOOP);
                 pPolygon->setDepths(SHAPE_DEPTH_ALL);
                 for (int i=0; i<nNPoints; ++i)
@@ -228,9 +215,7 @@ void CXFigLoader::load(const std::string& _strFilename)
                     DOM_VAR(DEBUG_MSG("XFig Loader", "Polygon, point " << i+1 << ": " << nX << "," << nY))
                     pPolygon->addVertex(Vector2d(double(nX)/100.0,double(-nY)/100.0));
                 }
-                pShape->buffer(pPolygon);
                 m_ShapeList.push_back(pPolygon);
-                m_VisualsList.push_back(pPolygonVisuals);
                 break;
             default:
                 DEBUG_MSG("XFig Loader", "Ignoring unknown shape. ")

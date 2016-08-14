@@ -55,6 +55,7 @@ class IUniqueIDUser
         
         //--- Methods --------------------------------------------------------//
         void setName(const std::string&);
+        void setNewID();
         
     protected:
         
@@ -103,6 +104,17 @@ inline void IUniqueIDUser::setName(const std::string& _strName)
 {
     METHOD_ENTRY("IUniqueIDUser::setName")
     m_UID.setName(_strName);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets a new ID
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IUniqueIDUser::setNewID()
+{
+    METHOD_ENTRY("IUniqueIDUser::setNewID")
+    m_UID.setNewID();
 }
 
 #endif // UNIQUE_ID_USER_H

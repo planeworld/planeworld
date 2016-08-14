@@ -30,11 +30,14 @@
 
 #include "unique_id.h"
 
-/// Global counter for unique IDs.
-UIDType CUniqueID::s_nUID = 0;
+/// Global counter for unique IDs. Reserve 0 for no reference
+UIDType CUniqueID::s_nUID = 1;
 
 /// Global list for unused unique IDs
 std::deque<UIDType> CUniqueID::s_UnusedUIDs;
+
+/// Global list for reference counting of uids
+std::unordered_map<UIDType, std::uint32_t> CUniqueID::s_ReferencedUIDs;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -50,15 +53,35 @@ CUniqueID::CUniqueID()
     DTOR_CALL("CUniqueID::CUniqueID")
     
     if (s_UnusedUIDs.empty())
+    {
         m_nUID = s_nUID++;
+    }
     else
     {
         m_nUID = s_UnusedUIDs.front();
         s_UnusedUIDs.pop_front();
     }
+    s_ReferencedUIDs[m_nUID] = 1u;
     m_strName = "UID_"+std::to_string(m_nUID);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy Constructor
+///
+/// Copy constructor will exactly do the same as standard constructor, since
+/// id has to be unique and thus, may not be copied 1:1.
+///
+/// \param _UID UID (won't be copied to ensure unique ids)
+///
+///////////////////////////////////////////////////////////////////////////////
+CUniqueID::CUniqueID(const CUniqueID& _UID)
+{
+    METHOD_ENTRY("CUniqueID::CUniqueID")
+    DTOR_CALL("CUniqueID::CUniqueID")
+    
+    this->copy(_UID);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -74,7 +97,66 @@ CUniqueID::~CUniqueID()
     METHOD_ENTRY("CUniqueID::~CUniqueID")
     DTOR_CALL("CUniqueID::~CUniqueID")
     
-    s_UnusedUIDs.push_back(m_nUID);
+    s_ReferencedUIDs[m_nUID] -= 1u;
+    if (s_ReferencedUIDs[m_nUID] == 0u)
+    {
+        s_UnusedUIDs.push_back(m_nUID);
+        s_ReferencedUIDs.erase(m_nUID);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy assignment operator
+///
+/// \param _UID UID to be copied and assigned data from
+///
+///////////////////////////////////////////////////////////////////////////////
+CUniqueID& CUniqueID::operator=(const CUniqueID& _UID)
+{
+    METHOD_ENTRY("CUniqueID::operator=")
+    
+    if (this != &_UID)
+    {
+        s_ReferencedUIDs[m_nUID] -= 1u;
+        if (s_ReferencedUIDs[m_nUID] == 0u)
+        {
+            s_UnusedUIDs.push_back(m_nUID);
+            s_ReferencedUIDs.erase(m_nUID);
+        }
+            
+        this->copy(_UID);
+    }
+    return *this;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets a new value for this ID
+///
+////////////////////////////////////////////////////////////////////////////////
+void CUniqueID::setNewID()
+{
+    METHOD_ENTRY("CUniqueID::setNewID")
+    UIDType nTmp;
+    if (s_UnusedUIDs.empty())
+    {
+        nTmp = s_nUID++;
+    }
+    else
+    {
+        nTmp = s_UnusedUIDs.front();
+        s_UnusedUIDs.pop_front();
+    }
+    s_ReferencedUIDs[m_nUID] -= 1u;
+    if (s_ReferencedUIDs[m_nUID] == 0u)
+    {
+        s_UnusedUIDs.push_back(m_nUID);
+        s_ReferencedUIDs.erase(m_nUID);
+    }
+    s_ReferencedUIDs[nTmp] = 1u;
+    m_nUID = nTmp;
+    m_strName = "UID_"+std::to_string(m_nUID);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -125,3 +207,20 @@ std::ostream& operator<<(std::ostream& _os, CUniqueID& _UID)
     
     return _os;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy data from given UID
+///
+/// \param _UID UID to copy data from
+///
+///////////////////////////////////////////////////////////////////////////////
+void CUniqueID::copy(const CUniqueID& _UID)
+{
+    METHOD_ENTRY("CUniqueID::copy")
+    
+    m_nUID = _UID.m_nUID;
+    m_strName = _UID.m_strName;
+    s_ReferencedUIDs[_UID.m_nUID] += 1u;
+}
+

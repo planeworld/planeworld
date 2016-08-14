@@ -36,14 +36,13 @@
 // standard-header
 // #include <fstream>
 // #include <iostream>
-// #include <list>
+#include <list>
 // #include <string>
 
 // program-header
-#include "circle_visuals.h"
 // #include "log.h"
 #include "parzival.h"
-#include "polygon_visuals.h"
+#include "shape.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -67,7 +66,6 @@ class CXFigLoader
         
         //--- Constant Methods -----------------------------------------------//
         const std::list<IShape*>&   getShapes() const;
-        const std::list<IVisuals*>& getVisuals() const;
         
 
         //--- Methods --------------------------------------------------------//
@@ -79,7 +77,6 @@ class CXFigLoader
 
         //--- Private Variables ----------------------------------------------//
         std::list<IShape*>      m_ShapeList;            ///< Stores the shapes
-        std::list<IVisuals*>    m_VisualsList;          ///< Stores the visuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -97,21 +94,6 @@ inline const std::list<IShape*>& CXFigLoader::getShapes() const
 
     METHOD_EXIT("CXFigLoader::getShapes")
     return m_ShapeList;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the visuals
-///
-/// \return Visuals list
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const std::list<IVisuals*>& CXFigLoader::getVisuals() const
-{
-    METHOD_ENTRY("CXFigLoader::getVisuals")
-
-    METHOD_EXIT("CXFigLoader::getVisuals")
-    return m_VisualsList;
 }
 
 #endif

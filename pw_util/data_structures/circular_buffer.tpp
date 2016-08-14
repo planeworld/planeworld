@@ -62,6 +62,39 @@ CCircularBuffer<T>::CCircularBuffer(const std::size_t& _nCapa)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Copy constructor, initialising from given buffer
+///
+/// \param _Buf Buffer to be copied
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+CCircularBuffer<T>::CCircularBuffer(const CCircularBuffer<T>& _Buf)
+{
+    METHOD_ENTRY("CCircularBuffer::CCircularBuffer")
+    CTOR_CALL("CCircularBuffer")
+    this->copy(_Buf);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy assignment operator
+///
+/// \param _Buf Buffer to be copied
+///
+/// \return Copied buffer
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+CCircularBuffer<T>& CCircularBuffer<T>::operator=(const CCircularBuffer<T>& _Buf)
+{
+    METHOD_ENTRY("CCircularBuffer::operator=")
+  
+    this->copy(_Buf);
+    return *this;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Returns the elment at given index
 ///
 /// \param _nI Index
@@ -112,6 +145,25 @@ const T& CCircularBuffer<T>::at(const std::size_t& _nI) const
     std::size_t nI = _nI + m_nBegin;
     if (nI >= m_nCapacity) nI-=m_nCapacity;
     return m_Buffer[nI];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clone this buffer
+///
+/// \return New buffer
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+CCircularBuffer<T>* CCircularBuffer<T>::clone() const
+{
+    METHOD_ENTRY("CCircularBuffer::clone")
+  
+    CCircularBuffer<T>* pBuf = new CCircularBuffer;
+    MEM_ALLOC("CCircularBuffer")
+    pBuf->copy(*this);
+    
+    return pBuf;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -368,3 +420,22 @@ inline std::ostream& operator<<(std::ostream& _os, const CCircularBuffer<Vector2
     return _os;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copies contents of given buffer to this buffer
+///
+/// \param _Buf Buffer to copy contents from
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+void CCircularBuffer<T>::copy(const CCircularBuffer<T>& _Buf)
+{
+    METHOD_ENTRY("CCircularBuffer::copy")
+    
+    m_nCapacity = _Buf.m_nCapacity;
+    m_nBegin = _Buf.m_nBegin;
+    m_nEnd = _Buf.m_nEnd;
+    m_nSize = _Buf.m_nSize;
+    m_Buffer = _Buf.m_Buffer;
+    m_Buffer.resize(m_nCapacity);
+}

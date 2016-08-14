@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2012-2016 Torsten Büschenfeld
+// Copyright (C) 2016-2016 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,111 +20,105 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       object_visuals.h
-/// \brief      Prototype of class "IObjectVisuals"
+/// \file       visuals_data_storage.h
+/// \brief      Prototype of class "CVisualsDataStorage"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2012-12-03
+/// \date       2016-06-28
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef OBJECT_VISUALS_H
-#define OBJECT_VISUALS_H
+#ifndef VISUALS_DATA_STORAGE_H
+#define VISUALS_DATA_STORAGE_H
 
 //--- Standard header --------------------------------------------------------//
+#include <unordered_map>
 
 //--- Program header ---------------------------------------------------------//
-#include "unique_id_referrer.h"
-#include "visuals.h"
+#include "camera.h"
+#include "debris_visuals.h"
+#include "debris_visuals_thruster.h"
+
+/// Map of cameras, accessed by name
+typedef std::unordered_map<std::string, CCamera*> CamerasByNameType;
+
+typedef std::vector<CDebrisVisuals*>            DebrisVisualsType;          ///< Specifies a list of debris visuals
+typedef std::list<CDebrisVisualsThruster*>      DebrisVisualsThrusterType;  ///< Specifies a list of debris visuals
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for visualisation of world objects
+/// \brief Class that stores all visuals data
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IObjectVisuals : virtual public CGraphicsBase,
-                               public IUniqueIDReferrer<CObject>
+class CVisualsDataStorage
 {
     
     public:
-
+        
         //--- Constructor/Destructor -----------------------------------------//
-        IObjectVisuals();
-        IObjectVisuals(CObject* const);
-        virtual ~IObjectVisuals();
+        CVisualsDataStorage();
+        ~CVisualsDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
-        IObjectVisuals* clone(CObject* const) const;
-        
-        virtual void draw(CCamera* const) const;
-
-        virtual const std::vector<IVisuals*>& getShapeVisuals() const;
+        const CamerasByNameType&            getCamerasByName() const;
+        const DebrisVisualsType&            getDebrisVisuals() const;
+        const DebrisVisualsThrusterType&    getDebrisVisualsThruster() const;
         
         //--- Methods --------------------------------------------------------//
-        void addVisuals(IVisuals* const);
+        void addCamera(CCamera*);
+        void addDebrisVisuals(CDebrisVisuals*);
+        void addDebrisVisualsThruster(CDebrisVisualsThruster*);
         
         //--- friends --------------------------------------------------------//
-        friend std::istream&    operator>>(std::istream&, IObjectVisuals* const);
-        friend std::ostream&    operator<<(std::ostream&, IObjectVisuals* const);
+        friend std::istream& operator>>(std::istream&, CVisualsDataStorage&);
+        friend std::ostream& operator<<(std::ostream&, CVisualsDataStorage&);
         
-    protected:
+    private:
       
-        std::vector<IVisuals*> m_Visuals;   ///< List of visuals
-
+        CamerasByNameType           m_CamerasByName;            ///< Cameras, accessed by name
+        DebrisVisualsType           m_DebrisVisuals;            ///< List of debris visuals
+        DebrisVisualsThrusterType   m_DebrisVisualsThruster;    ///< List of debris visuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Constructor
+/// \brief Returns cameras.
+///
+/// \return Cameras
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IObjectVisuals::IObjectVisuals()
+inline const CamerasByNameType& CVisualsDataStorage::getCamerasByName() const
 {
-    METHOD_ENTRY("IObjectVisuals")
-    CTOR_CALL("IObjectVisuals")
+    METHOD_ENTRY("CVisualsDataStorage::getCamerasByName")
+    return m_CamerasByName;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Constructor, initialises object pointer
+/// \brief Returns a list of debris visuals.
 ///
-/// \param _pObject Pointer to object
+/// \return List of debris visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IObjectVisuals::IObjectVisuals(CObject* const _pObject)
+inline const DebrisVisualsType& CVisualsDataStorage::getDebrisVisuals() const
 {
-    METHOD_ENTRY("IObjectVisuals")
-    CTOR_CALL("IObjectVisuals")
-    
-    IUniqueIDReferrer::attachTo(_pObject);
+    METHOD_ENTRY("CVisualsDataStorage::getDebrisVisuals")
+    return m_DebrisVisuals;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return a list of all shape visuals of this object
+/// \brief Returns a list of thruster debris visuals.
 ///
-/// \return List of shape visuals for this object
+/// \return List of thruster debris visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::vector<IVisuals*>& IObjectVisuals::getShapeVisuals() const
+inline const DebrisVisualsThrusterType& CVisualsDataStorage::getDebrisVisualsThruster() const
 {
-    METHOD_ENTRY("IObjectVisuals::getShapeVisuals")
-    return m_Visuals;
+    METHOD_ENTRY("CVisualsDataStorage::getDebrisVisualsThruster")
+    return m_DebrisVisualsThruster;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add shape visuals to this object
-///
-/// \param _pVisuals Shape visuals to add to this object
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IObjectVisuals::addVisuals(IVisuals* const _pVisuals)
-{
-    METHOD_ENTRY("addVisuals")
-    m_Visuals.push_back(_pVisuals);
-}
-
-#endif // OBJECT_VISUALS_H
+#endif // VISUALS_DATA_STORAGE_H

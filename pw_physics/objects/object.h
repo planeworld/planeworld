@@ -49,6 +49,7 @@ typedef uint AnchorIDType;
 /// \brief Class representing a phyiscal object
 ///
 /// \todo Move depth information to shapes only. Then map information to object
+/// \todo Implement copy constructor and operator=
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CObject : public IUniqueIDUser,
@@ -60,8 +61,10 @@ class CObject : public IUniqueIDUser,
     
         //--- Constructor/Destructor -----------------------------------------//
         CObject();
-        CObject(const CObject* const);
+        CObject(const CObject&);
         virtual ~CObject();
+        
+        CObject& operator=(const CObject&);
 
         //--- Constant methods -----------------------------------------------//
               CObject*      clone() const;
@@ -118,6 +121,9 @@ class CObject : public IUniqueIDUser,
         friend std::ostream&    operator<<(std::ostream&, CObject* const);
         
     protected:
+        
+        //--- Methods [protected] --------------------------------------------//
+        void copy(const CObject&);
 
         //-- Variables [protected] -------------------------------------------//
         bool                    m_bGravitation;                     ///< Does this object influence others by gravitation?
@@ -138,16 +144,12 @@ class CObject : public IUniqueIDUser,
         IIntegrator<Vector2d>*  m_pIntPos;                          ///< Position integrator
         IIntegrator<Vector2d>*  m_pIntVel;                          ///< Velocity integrator
 
-//         std::string             m_strName;                          ///< Object's name
-
         std::vector<Vector2d>   m_Anchors;                          ///< Anchors to joints
         
         CTrajectory             m_Trajectory;                       ///< Trajectory of object
         
         static uint32_t         m_unNrOfObjects;                    ///< Static counter for name initialisation and tracking
 };
-
-typedef std::unordered_map<std::string, CObject*>  ObjectsType;    ///< Specifies a list of objects
 
 //--- Implementation is done here for inline optimisation --------------------//
 

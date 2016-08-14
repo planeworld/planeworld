@@ -54,6 +54,7 @@ Usage
 | - / d                    | Decelarate time                 |
 | RETURN/ENTER             | Reset time                      |     
 | p                        | Pause physics                   |
+| SPACE                    | Stepwise physics (when paused)  |
 | Mouse-Wheel              | Zoom                            |
 | Right-Mouse + Move Up    | Zoom in                         |
 | Right-Mouse + Move Down  | Zoom out                        |

@@ -35,6 +35,7 @@
 #include "emitter_referrer.h"
 #include "kinematics_state_user.h"
 #include "object_referrer.h"
+#include "world_data_storage_user.h"
 
 //--- Standard header --------------------------------------------------------//
 
@@ -46,7 +47,8 @@
 class CThruster : public IKinematicsStateUser,
                   public IEmitterReferrer,
                   public IObjectReferrer,
-                  public IUniqueIDUser
+                  public IUniqueIDUser,
+                  public IWorldDataStorageUser
 {
     
     public:
@@ -75,6 +77,11 @@ class CThruster : public IKinematicsStateUser,
         void setEmitterVelocityStd(const double&);
          
     protected:
+        
+                
+        //--- Methods [protected ---------------------------------------------//
+        virtual void myAttachTo();
+        
         
         //--- Variables ------------------------------------------------------//
         bool        m_bActive;              ///< Flags if thruster is activated
@@ -218,6 +225,17 @@ inline double CThruster::getThrust() const
 {
     METHOD_ENTRY("CThruster::getThrust")
     return m_fThrust;    
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Attaches thruster to UID user
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CThruster::myAttachTo()
+{
+    METHOD_ENTRY("CThruster::myAttachTo")
+//     m_KinematicsState.attachTo(&(IObjectReferrer::m_pRef->getKinematicsState()));
 }
 
 #endif // THRUSTER_H

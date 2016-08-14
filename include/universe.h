@@ -36,8 +36,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "circle.h"
-#include "circle_visuals.h"
-#include "object_visuals.h"
 #include "star_system.h"
 #include "world_data_storage_user.h"
 
@@ -66,8 +64,6 @@ class CUniverse : public IWorldDataStorageUser
     public:
         CObject*                    m_pStar;
         CCircle*                    m_pStarShape;
-        CCircleVisuals*             m_pStarVisuals;
-        IObjectVisuals*             m_pStarObjectVisuals;
     
         //--- Constructor/Destructor -----------------------------------------//
         CUniverse();
@@ -76,7 +72,6 @@ class CUniverse : public IWorldDataStorageUser
         //--- Constant Methods -----------------------------------------------//
         const std::vector<CObject*>&          getObjects() const;
         const std::vector<CStarSystem*>&      getStarSystems() const;
-        const std::vector<IObjectVisuals*>&   getVisuals() const;
 
         //--- Methods --------------------------------------------------------//
         void generate(const int&, const int&);
@@ -92,7 +87,6 @@ class CUniverse : public IWorldDataStorageUser
         
         std::vector<CObject*>           m_Objects;          ///< Objects of the universe
         std::vector<CStarSystem*>       m_StarSystems;      ///< Star system in this universe
-        std::vector<IObjectVisuals*>    m_Visuals;          ///< Object visuals of the universe
         int                             m_nNrOfPlanetsMax;  ///< Maximum number of planets
 
 };
@@ -125,17 +119,4 @@ inline const std::vector< CStarSystem* >& CUniverse::getStarSystems() const
     return m_StarSystems;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return generated object visuals
-///
-/// \return List of generated object visuals
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const std::vector<IObjectVisuals*>& CUniverse::getVisuals() const
-{
-    METHOD_ENTRY("CUniverse::getVisuals")
-    return m_Visuals;
-}
-
-#endif
+#endif // UNIVERSE_H

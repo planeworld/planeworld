@@ -41,9 +41,6 @@ CGeometry::CGeometry() : m_fInertia(0.0),
     METHOD_ENTRY("CGeometry::CGeometry")
     CTOR_CALL("CGeometry::CGeometry")
     
-    m_pShapes = new std::list<CDoubleBufferedShape*>();
-    MEM_ALLOC("ShapeList")
-    
     m_vecCOM.setZero();
 }
 
@@ -59,21 +56,7 @@ CGeometry::CGeometry(const CGeometry& _Geom)
     METHOD_ENTRY("CGeometry::CGeometry")
     CTOR_CALL("CGeometry::CGeometry")
     
-    m_AABB = _Geom.m_AABB;
-
-    m_pShapes = new std::list<CDoubleBufferedShape*>();
-    MEM_ALLOC("ShapeList")
-    
-    DBShapesType::const_iterator ci=_Geom.m_pShapes->begin();
-    while (ci != _Geom.m_pShapes->end())
-    {
-        m_pShapes->push_back((*ci)->clone());
-        ++ci;
-    }
-    
-    m_vecCOM    = _Geom.m_vecCOM;
-    m_fInertia  = _Geom.m_fInertia;
-    m_fMass     = _Geom.m_fMass;
+    this->copy(_Geom);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,62 +69,35 @@ CGeometry::~CGeometry()
     METHOD_ENTRY("CGeometry::~CGeometry")
     DTOR_CALL("CGeometry::~CGeometry")
 
-    for (std::list< CDoubleBufferedShape* >::iterator it = m_pShapes->begin();
-        it != m_pShapes->end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it) != nullptr)
-        {
-            delete (*it);
-            (*it) = nullptr;
-            MEM_FREED("CDoubleBufferedShape")
-        }
-    }
-    
     // Free memory if pointer is still existent
-    if (m_pShapes != nullptr)
+    for (auto pShp : m_Shapes)
     {
-        delete m_pShapes;
-        m_pShapes = nullptr;
-        MEM_FREED("ShapeList")
+        if (pShp != nullptr)
+        {
+            delete pShp;
+            pShp = nullptr;
+            MEM_FREED("IShape")
+        }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Clones geometry
+/// \brief Copy assignment operator
 ///
-/// \param _Geom Geometry that should be copied
+/// \param _Geom Geometry that should be copied and assigned
 ///
-/// \return Pointer to cloned geometry
+/// \return Pointer to copied and assigned geometry
 ///
 ////////////////////////////////////////////////////////////////////////////////
 CGeometry& CGeometry::operator=(const CGeometry& _Geom)
 {
     METHOD_ENTRY("CGeometry::operator=")
     
-    m_AABB = _Geom.m_AABB;
-
-    // Free memory if pointer is still existent
-    if (m_pShapes != nullptr)
+    if (this != &_Geom)
     {
-        delete m_pShapes;
-        m_pShapes = nullptr;
-        MEM_FREED("ShapeList")
+        this->copy(_Geom);
     }
-    m_pShapes = new std::list<CDoubleBufferedShape*>();
-    MEM_ALLOC("ShapeList")
-    
-    DBShapesType::const_iterator ci=_Geom.m_pShapes->begin();
-    while (ci != _Geom.m_pShapes->end())
-    {
-        m_pShapes->push_back((*ci)->clone());
-        ++ci;
-    }
-    
-    m_vecCOM    = _Geom.m_vecCOM;
-    m_fInertia  = _Geom.m_fInertia;
-    m_fMass     = _Geom.m_fMass;
     
     return *this;
 }
@@ -157,20 +113,8 @@ CGeometry* CGeometry::clone() const
 {
     METHOD_ENTRY("CGeometry::clone")
     
-    CGeometry* pClone = new CGeometry;
+    CGeometry* pClone = new CGeometry(*this);
     MEM_ALLOC("CGeometry")
-    
-    DBShapesType::const_iterator ci=m_pShapes->begin();
-    while (ci != m_pShapes->end())
-    {
-        pClone->m_pShapes->push_back((*ci)->clone());
-        ++ci;
-    }
-    
-    pClone->m_AABB = m_AABB;
-    pClone->m_vecCOM = m_vecCOM;
-    pClone->m_fInertia = m_fInertia;
-    pClone->m_fMass = m_fMass;
     
     return pClone;
 }
@@ -182,25 +126,35 @@ CGeometry* CGeometry::clone() const
 /// \param _pShape Shape, that should be added to list
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGeometry::addShape(CDoubleBufferedShape* const _pShape)
+void CGeometry::addShape(IShape* const _pShape)
 {
     METHOD_ENTRY("CGeometry::addShape")
-    m_pShapes->push_back(_pShape);
+    m_Shapes.push_back(_pShape);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Copy the given shapelist
 ///
-/// \param _pShapeList Shapelist to be set
+/// \param _ShapeList Shapelist to be set
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGeometry::setShapes(std::list<CDoubleBufferedShape*>* _pShapeList)
+void CGeometry::setShapes(const ShapesType& _ShapeList)
 {
     METHOD_ENTRY("CGeometry::setShapes")
 
-    m_pShapes->clear();
-    m_pShapes = _pShapeList;
+    // Free memory if pointer is still existent
+    for (auto pShp : m_Shapes)
+    {
+        if (pShp != nullptr)
+        {
+            delete pShp;
+            pShp = nullptr;
+            MEM_FREED("IShape")
+        }
+    }
+    m_Shapes.clear();
+    m_Shapes = _ShapeList;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -216,24 +170,24 @@ void CGeometry::transform(const double& _fAngle, const Vector2d& _vecOrigin)
 {
     METHOD_ENTRY("CGeometry::transform")
     
-    std::list< CDoubleBufferedShape* >::const_iterator ci = m_pShapes->begin();
-    m_AABB = (*ci)->getShapeCur()->getBoundingBox();
-    while ((++ci) != m_pShapes->end())
+    ShapesType::const_iterator ci = m_Shapes.cbegin();
+    m_AABB = (*ci)->getBoundingBox();
+    while ((++ci) != m_Shapes.cend())
     {
         // Update bounding box of previous time step for continuous collision dection
-        m_AABB.update((*ci)->getShapeCur()->getBoundingBox());
+        m_AABB.update((*ci)->getBoundingBox());
     }
     this->update();
-    for (std::list< CDoubleBufferedShape* >::const_iterator ci = m_pShapes->begin();
-         ci != m_pShapes->end(); ++ci)
+    for (ShapesType::const_iterator ci = m_Shapes.cbegin();
+         ci != m_Shapes.cend(); ++ci)
     {
-        (*ci)->getShapeCur()->transform(_fAngle, m_vecCOM, _vecOrigin);
+        (*ci)->transform(_fAngle, m_vecCOM, _vecOrigin);
 
         // Update depthlayers
 //         m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
 
         // Update bounding box of current time step
-        m_AABB.update((*ci)->getShapeCur()->getBoundingBox());
+        m_AABB.update((*ci)->getBoundingBox());
     }
 }
 
@@ -248,20 +202,20 @@ void CGeometry::update()
     
     // Should be global to catch additions or setting of whole shapes
     bool bShapesValid = true;
-    for (const auto ci : *m_pShapes)
+    for (const auto ci : m_Shapes)
     {
-        bShapesValid &= ci->getShapeCur()->isValid();
+        bShapesValid &= ci->isValid();
     }
     if (!bShapesValid)
     {
         m_vecCOM.setZero();
         m_fMass = 0.0;
-        for (const auto ci : *m_pShapes)
+        for (const auto ci : m_Shapes)
         {
-            m_vecCOM += ci->getShapeCur()->getMass() *
-                        ci->getShapeCur()->getCentroid();
-            m_fMass  += ci->getShapeCur()->getMass();
-            ci->getShapeCur()->isValid() = true;
+            m_vecCOM += ci->getMass() *
+                        ci->getCentroid();
+            m_fMass  += ci->getMass();
+            ci->isValid() = true;
         }
         if (m_fMass > 0.0)
         {
@@ -269,20 +223,20 @@ void CGeometry::update()
         }
         
         m_fInertia = 0.0;
-        for (const auto ci : *m_pShapes)
+        for (const auto ci : m_Shapes)
         {
-            m_fInertia +=  ci->getShapeCur()->getInertia() + 
-                           ci->getShapeCur()->getMass() *
-                          (ci->getShapeCur()->getCentroid() -
+            m_fInertia +=  ci->getInertia() + 
+                           ci->getMass() *
+                          (ci->getCentroid() -
                            m_vecCOM).squaredNorm();
         }
         DOM_VAR(DEBUG_MSG("Geometry", "Center of mass calculated: " << m_vecCOM[0] << ", " << m_vecCOM[1]))
         DOM_VAR(DEBUG_MSG("Geometry", "Inertia calculated: " << m_fInertia))
     }
-    for (auto it : *m_pShapes)
-    {
-        it->swapBuffer();
-    }
+//     for (auto it : *m_pShapes)
+//     {
+//         it->swapBuffer();
+//     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -306,7 +260,7 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
     _is >> _Geo.m_fInertia;
     _is >> _Geo.m_fMass;
     
-    for (auto it : (*_Geo.m_pShapes))
+    for (auto it : _Geo.m_Shapes)
     {
         if (it != nullptr)
         {
@@ -316,16 +270,16 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
         }
     }
     
-    DBShapesType::size_type nSize;
-    _is >> nSize;
-    
-    for (auto i=0u; i<nSize; ++i)
-    {
-        CDoubleBufferedShape* pDBShape = new CDoubleBufferedShape;
-        MEM_ALLOC("CDoubleBufferedShape")
-        _is >> (*pDBShape);
-        _Geo.m_pShapes->push_back(pDBShape);
-    }
+//     ShapesType::size_type nSize;
+//     _is >> nSize;
+//     
+//     for (auto i=0u; i<nSize; ++i)
+//     {
+//         IShape* pShape = new CDoubleBufferedShape;
+//         MEM_ALLOC("CDoubleBufferedShape")
+//         _is >> (*pDBShape);
+//         _Geo.m_pShapes->push_back(pDBShape);
+//     }
     
     return _is;
 }
@@ -349,11 +303,46 @@ std::ostream& operator<<(std::ostream& _os, CGeometry& _Geo)
     _os << _Geo.m_vecCOM << " " << _Geo.m_vecCOM << std::endl;
     _os << _Geo.m_fInertia << std::endl;
     _os << _Geo.m_fMass << std::endl;
-    _os << _Geo.getShapes()->size() << std::endl;
-    for (const auto ci : (*_Geo.m_pShapes))
-    {
-        _os << (*ci) << std::endl;
-    }
+    _os << _Geo.getShapes().size() << std::endl;
+//     for (const auto ci : (*_Geo.m_pShapes))
+//     {
+//         _os << (*ci) << std::endl;
+//     }
     
     return _os;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy data from given geometry
+///
+/// \param _Geom Geometry to copy data from
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGeometry::copy(const CGeometry& _Geom)
+{
+    METHOD_ENTRY("CGeometry::copy")
+    
+    m_AABB = _Geom.m_AABB;
+
+    // Free memory if pointer is still existent
+    for (auto pShp : m_Shapes)
+    {
+        if (pShp != nullptr)
+        {
+            delete pShp;
+            pShp = nullptr;
+            MEM_FREED("IShape")
+        }
+    }
+    m_Shapes.clear();
+    
+    for (auto pShp : _Geom.m_Shapes)
+    {
+        m_Shapes.push_back(pShp->clone());
+    }
+    
+    m_vecCOM    = _Geom.m_vecCOM;
+    m_fInertia  = _Geom.m_fInertia;
+    m_fMass     = _Geom.m_fMass;
 }

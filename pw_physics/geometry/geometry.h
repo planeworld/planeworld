@@ -32,11 +32,12 @@
 #define GEOMETRY_H
 
 //--- Program header ---------------------------------------------------------//
-#include "double_buffered_shape.h"
+#include "shape.h"
 
 //--- Standard header --------------------------------------------------------//
+#include <list>
 
-typedef std::list<CDoubleBufferedShape*> DBShapesType; ///< Specifies a list of double buffered shapes
+typedef std::list<IShape*> ShapesType; ///< Specifies a list of  shapes
 
 // Forward declarations
 
@@ -54,25 +55,25 @@ class CGeometry
         CGeometry();
         CGeometry(const CGeometry&);
         virtual ~CGeometry();
+        
+        CGeometry& operator=(const CGeometry&);
 
         //--- Constant methods -----------------------------------------------//
         CGeometry*                clone() const;
         const Vector2d&           getCOM() const;
         const double&             getInertia() const;
         const double&             getMass() const;
-        const DBShapesType*       getShapes() const;
+        const ShapesType&         getShapes() const;
         
         //--- Methods --------------------------------------------------------//
         CBoundingBox& getBoundingBox();
         
-        void addShape(CDoubleBufferedShape* const);
+        void addShape(IShape* const);
         void updateBoundingBox(const CBoundingBox&);
         void updateBoundingBox(const Vector2d&);
-        void setShapes(std::list<CDoubleBufferedShape*>* const);
+        void setShapes(const ShapesType&);
         void transform(const double&, const Vector2d&);
         void update();
-        
-        CGeometry& operator=(const CGeometry&);
         
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CGeometry&);
@@ -80,15 +81,15 @@ class CGeometry
         
     protected:
 
-        //--- Abstract methods [protected] -----------------------------------//
+        //--- Methods [protected] --------------------------------------------//
+        void copy(const CGeometry&);
 
         //-- Variables [protected] -------------------------------------------//
         CBoundingBox    m_AABB;       ///< Bounding box
-        DBShapesType*   m_pShapes;    ///< Double buffered shapes
+        ShapesType      m_Shapes;     ///< Shapes
         Vector2d        m_vecCOM;     ///< Center of mass
         double          m_fInertia;   ///< Inertia of whole geometry
         double          m_fMass;      ///< Mass of whole geometry
-        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -139,10 +140,10 @@ inline const double& CGeometry::getMass() const
 /// \return Shapelist
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::list<CDoubleBufferedShape*>* CGeometry::getShapes() const
+inline const ShapesType& CGeometry::getShapes() const
 {
     METHOD_ENTRY("CGeometry::getShapes")
-    return m_pShapes;
+    return m_Shapes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

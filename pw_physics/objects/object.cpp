@@ -37,7 +37,8 @@ uint32_t CObject::m_unNrOfObjects = 0;
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CObject::CObject(): m_bGravitation(true),
+CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IUniverseScaled(),
+                m_bGravitation(true),
                 m_bDynamics(true),
                 m_fTimeFac(1.0),
                 m_nDepthlayers(SHAPE_DEPTH_ALL)
@@ -61,6 +62,33 @@ CObject::CObject(): m_bGravitation(true),
     m_vecCell.setZero();
     
     m_Lifetime.start();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy constructor
+///
+/// \param _Obj Object to be constructed from
+///
+////////////////////////////////////////////////////////////////////////////////
+CObject::CObject(const CObject& _Obj) : 
+                IUniqueIDUser(_Obj),
+                IKinematicsStateUser(_Obj),
+                IUniverseScaled(_Obj)
+{
+    METHOD_ENTRY("CObject::CObject")
+    CTOR_CALL("CObject::CObject")
+    
+    m_pIntAng = new CEulerIntegrator<double>;
+    MEM_ALLOC("CEulerIntegrator");
+    m_pIntAngVel = new CEulerIntegrator<double>;
+    MEM_ALLOC("CEulerIntegrator");
+    m_pIntPos = new CEulerIntegrator<Vector2d>;
+    MEM_ALLOC("CEulerIntegrator")
+    m_pIntVel = new CEulerIntegrator<Vector2d>;
+    MEM_ALLOC("CEulerIntegrator")
+    
+    this->copy(_Obj);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,9 +135,30 @@ CObject::~CObject()
     )
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy assignment operator
+///
+/// \param _Obj Object to be copied and assigned data from
+///
+///////////////////////////////////////////////////////////////////////////////
+CObject& CObject::operator=(const CObject& _Obj)
+{
+    METHOD_ENTRY("CObject::operator=")
+    
+    if (this != &_Obj)
+    {
+        IUniqueIDUser::operator=(_Obj);
+        IKinematicsStateUser::operator=(_Obj);
+        IUniverseScaled::operator=(_Obj);
+        this->copy(_Obj);
+    }
+    return *this;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Clones an object
+/// \brief Clone object
 ///
 /// \return Pointer to cloned object
 ///
@@ -118,61 +167,9 @@ CObject* CObject::clone() const
 {
     METHOD_ENTRY("CObject::clone")
     
-    CObject* pClone = new CObject;
+    CObject* pClone = new CObject(*this);
     MEM_ALLOC("CObject")
 
-    //--- Variables of CObject -----------------------------------------------//
-
-    pClone->m_KinematicsState = m_KinematicsState;
-    pClone->m_bGravitation = m_bGravitation;
-    pClone->m_bDynamics    = m_bDynamics;
-    // m_Lifetime: New individual object
-    pClone->m_fTimeFac     = m_fTimeFac;
-    pClone->m_Geometry     = (*m_Geometry.clone());
-    // m_vecForce: No Forces on newly created object;
-    pClone->m_nDepthlayers = m_nDepthlayers;
-    
-    if (pClone->m_pIntPos != nullptr)
-    {
-        delete pClone->m_pIntPos;
-        MEM_FREED("IIntegrator")
-        pClone->m_pIntPos = nullptr;
-    }
-    pClone->m_pIntPos      = m_pIntPos->clone();
-    
-    if (pClone->m_pIntVel != nullptr)
-    {
-        delete pClone->m_pIntVel;
-        MEM_FREED("IIntegrator")
-        pClone->m_pIntVel = nullptr;
-    }
-    pClone->m_pIntVel      = m_pIntVel->clone();     
-    
-    // m_strName: Don't clone the name, this is an individual object
-    pClone->m_Anchors      = m_Anchors;
-    
-    //--- Variables of CBody -------------------------------------------------//
-    pClone->m_fTorque = m_fTorque;
-    
-    if (pClone->m_pIntAng != nullptr)
-    {
-        delete pClone->m_pIntAng;
-        MEM_FREED("IIntegrator")
-        pClone->m_pIntAng = nullptr;
-    }
-    pClone->m_pIntAng      = m_pIntAng->clone();
-    
-    if (pClone->m_pIntAngVel != nullptr)
-    {
-        delete pClone->m_pIntAngVel;
-        MEM_FREED("IIntegrator")
-        pClone->m_pIntAngVel = nullptr;
-    }
-    pClone->m_pIntAngVel      = m_pIntAngVel->clone();
-    
-    //--- Variables of IUniverseScaled ---------------------------------------//
-    pClone->m_vecCell = m_vecCell;
-    
     return pClone;
 }
 
@@ -379,16 +376,16 @@ void CObject::setCell(const Vector2i& _vecCell)
 
     m_vecCell = _vecCell;
     m_Geometry.getBoundingBox().setCell(_vecCell);
-    std::list<CDoubleBufferedShape*>::const_iterator ci = m_Geometry.getShapes()->begin();
-    while (ci != m_Geometry.getShapes()->end())
+    ShapesType::const_iterator ci = m_Geometry.getShapes().cbegin();
+    while (ci != m_Geometry.getShapes().cend())
     {
-        (*ci)->getShapeCur()->getBoundingBox().setCell(m_vecCell);
+        (*ci)->getBoundingBox().setCell(m_vecCell);
         ++ci;
     }
-    ci = m_Geometry.getShapes()->begin();
-    while (ci != m_Geometry.getShapes()->end())
+    ci = m_Geometry.getShapes().cbegin();
+    while (ci != m_Geometry.getShapes().cend())
     {
-        (*ci)->getShapeBuf()->getBoundingBox().setCell(m_vecCell);
+        (*ci)->getBoundingBox().setCell(m_vecCell);
         ++ci;
     }    
 }
@@ -568,4 +565,34 @@ std::ostream& operator<<(std::ostream& _os, CObject* const _pObj)
 //     _os << _pObj->m_Trajectory;
     
     return _os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Copy data from given object
+///
+/// \param _Obj Object to copy data from
+///
+////////////////////////////////////////////////////////////////////////////////
+void CObject::copy(const CObject& _Obj)
+{
+    METHOD_ENTRY("CObject::copy")
+    
+    //--- Variables of CObject -----------------------------------------------//
+
+    m_bGravitation      = _Obj.m_bGravitation;
+    m_bDynamics         = _Obj.m_bDynamics;
+    m_Lifetime          = _Obj.m_Lifetime;
+    m_fTimeFac          = _Obj.m_fTimeFac;
+    m_Geometry          = _Obj.m_Geometry;
+    m_vecForce          = _Obj.m_vecForce;
+    m_fTorque           = _Obj.m_fTorque;
+    m_nDepthlayers      = _Obj.m_nDepthlayers;
+    
+    *m_pIntAng          = *(_Obj.m_pIntAng);
+    *m_pIntAngVel       = *(_Obj.m_pIntAngVel);
+    *m_pIntPos          = *(_Obj.m_pIntPos);
+    *m_pIntVel          = *(_Obj.m_pIntVel);
+    
+    m_Anchors           = _Obj.m_Anchors;
 }

@@ -56,12 +56,11 @@ class CObjectEmitter : public IEmitter
         //--- Methods --------------------------------------------------------//
         void emit(const double&);
         void init();
-        void setTemplate(CObject* const, IObjectVisuals* const);
+        void setTemplate(CObject* const);
 
     private:
         
         CObject*        m_pTemplate;        ///< Template for objects to emit
-        IObjectVisuals* m_pTemplateVisuals; ///< Template visuals for objects to emit
         
 };
 

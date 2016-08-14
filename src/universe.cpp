@@ -41,8 +41,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 CUniverse::CUniverse() : m_pStar(0),
                          m_pStarShape(0),
-                         m_pStarVisuals(0),
-                         m_pStarObjectVisuals(0),
                          m_nNrOfPlanetsMax(0)
 {
     METHOD_ENTRY("CUniverse::CUniverse");
@@ -229,10 +227,7 @@ void CUniverse::clone(const CUniverse& _Universe)
         // allocated objects!
         m_pStar = _Universe.m_pStar;
         m_pStarShape = _Universe.m_pStarShape;
-        m_pStarVisuals = _Universe.m_pStarVisuals;
-        m_pStarObjectVisuals = _Universe.m_pStarObjectVisuals;
         m_Objects.push_back(_Universe.m_pStar);
-        m_Visuals.push_back(_Universe.m_pStarObjectVisuals);
     }
 }
 

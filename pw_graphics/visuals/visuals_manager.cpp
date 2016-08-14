@@ -57,6 +57,372 @@ CVisualsManager::~CVisualsManager()
     METHOD_ENTRY("CVisualsManager::~CVisualsManager")
     DTOR_CALL("CVisualsManager::~CVisualsManager")
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws a circle using graphics base
+///
+/// \param _pObject Object, the polygon belongs to
+/// \param _pCircle The circle to be drawn
+/// \param _pCamera The camera to draw the polygon with
+///
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* _pCamera) const
+{
+    METHOD_ENTRY("CVisualsManager::drawCircle")
+    double   fRad      = _pCircle->getRadius();
+    Vector2d vecCenter = _pCircle->getCenter() - _pCamera->getCenter()/* +
+                         IUniverseScaled::cellToDouble(_pObject->getCell() - _pCamera->getCell())*/;
+
+    if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&
+        (vecCenter.norm() >  fRad-_pCamera->getBoundingCircleRadius())
+       )
+    {
+        Vector2d    vecEx(1.0, 0.0);
+        double      fAng;    
+        double      fAngEnd;
+        PolygonType    LineT;
+        
+        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
+        if (std::isnan(fAlpha))
+        {
+            fAng = 0.0;
+            fAngEnd = 2.0*M_PI;
+            LineT = PolygonType::LINE_LOOP;
+        }
+        else
+        {
+            double fAng0 = std::acos((- vecCenter.dot(vecEx)) / vecCenter.norm());
+            
+            if (vecCenter[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
+            
+            fAng = fAng0-fAlpha;
+            fAngEnd = fAng0+fAlpha;
+            LineT = PolygonType::LINE_STRIP;
+        }
+
+        double fInc = CIRCLE_DEFAULT_RESOLUTION * m_Graphics.getResMPX() / fRad; 
+        
+        if (fInc > 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS) fInc = 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS;
+        fAngEnd += fInc;
+        
+        if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+        
+        m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
+
+            while ( fAng < fAngEnd)
+            {
+                m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*fRad,
+                                              vecCenter[1]+std::sin(fAng)*fRad));
+                fAng += fInc;
+            }
+        m_Graphics.endLine();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw the Planet
+///
+/// \param _pObject Object, the planet belongs to
+/// \param _pPlanet The planet to be drawn
+/// \param _pCamera The camera to draw the planet with
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* _pCamera) const
+{
+    METHOD_ENTRY("CVisualsManager::draw")
+
+    double   fRad      = _pPlanet->getRadius();
+    double   fHeight   = _pPlanet->getHeight();
+    double   fPAng     = _pPlanet->getAngle();
+    double   fSeaLevel = _pPlanet->getSeaLevel();
+    //int      nSeed     = _pPlanet->getSeed();
+    //double   fSmooth   = _pPlanet->getSmoothness();
+    Vector2d vecCenter = _pPlanet->getCenter()-_pCamera->getCenter() +
+                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;
+    
+    if ((vecCenter.norm() <= fRad+fHeight+_pCamera->getBoundingCircleRadius()) &&
+        (vecCenter.norm() >  fRad-fHeight-_pCamera->getBoundingCircleRadius())
+       )
+    {
+        Vector2d    vecEx(1.0, 0.0);
+        double      fAng;    
+        double      fAngEnd;
+        PolygonType    LineT;
+        
+        std::vector<std::vector<Vector2d> > WaterlineList;
+        std::vector<Vector2d> WaterlineTmp;
+        bool bInWater = false;
+
+        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
+        if (std::isnan(fAlpha))
+        {
+            fAng = 0.0;
+            fAngEnd = 2.0*M_PI;
+            LineT = PolygonType::LINE_LOOP;
+        }
+        else
+        {
+            double fAng0 = std::acos((- vecCenter.dot(vecEx)) / vecCenter.norm());
+            
+            if (vecCenter[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
+            
+            fAng = fAng0-fAlpha;
+            fAngEnd = fAng0+fAlpha;
+            LineT = PolygonType::LINE_STRIP;
+        }
+        double fInc  = _pPlanet->getGroundResolution() / fRad;
+        
+        // Subsample planet surface when zooming out.
+        if (_pCamera->getZoom()*_pPlanet->getGroundResolution() <= PLANET_VISUALS_DEFAULT_RESOLUTION)
+        {
+            // 1. Normalise according to planet's ground resolution
+            // 2. Adjust to given visual quality (length of lines)
+            // 3. Adjust to given visual quality (maximum planet amplitude, planet is nearly circular)
+            //   3a. General adjustment by zoom
+            //   3b. Ensure enough segments for circular object, but also incorporate resolution
+            // 4. Adjust octaves
+            fInc /= _pPlanet->getGroundResolution(); 
+            fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION * m_Graphics.getResMPX(); 
+            if (fHeight*_pCamera->getZoom() < PLANET_VISUALS_DEFAULT_RESOLUTION)
+            {
+                fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION / (fHeight*_pCamera->getZoom());
+                if (fInc > PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE)
+                {
+                    fInc = PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE;
+                    if (fInc * fRad * m_Graphics.getResPMX() < PLANET_VISUALS_DEFAULT_RESOLUTION) 
+                        fInc = PLANET_VISUALS_DEFAULT_RESOLUTION * m_Graphics.getResMPX() / fRad;
+                }
+            }
+            _pPlanet->setSampling(m_Graphics.getResPMX()); 
+        }
+        
+        fAngEnd += fInc;
+        
+        // Snap angle to ground resolution grid to avoid flickering.
+        // If angle is started at arbitrary position, aliasing causes flickering when zooming
+        // or moving, since height is always sampled at different positions.
+        double fAngleSampling = fAng-fPAng;
+        double fAngleSnap = fAngleSampling-floor(fAngleSampling/fInc)*fInc;
+        fAng    -= fAngleSnap;
+        fAngEnd += fAngleSnap;
+        
+        if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+        
+//         double fAngBak = fAng;
+        
+//         double fZoom = _pCamera->getZoom() * fHeight;
+//         if (fZoom > 1.0) fZoom = 1.0;
+        
+        double fHght;
+        double fTerrainType;
+        double fWeightMountains;
+        double fWeightFlat;
+        
+        const double TERRAIN_CROSSOVER = 1.0e-10;
+        const double TERRAIN_CROSSOVER_INV = 0.5/(TERRAIN_CROSSOVER);
+        m_Graphics.setWidth(3.0);
+        m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
+
+            while (fAng < fAngEnd)
+            {
+                fHght = _pPlanet->getSurface()->GetValue(std::cos(fAng-fPAng)*fRad,
+                                                        std::sin(fAng-fPAng)*fRad);
+                if (fHght < fSeaLevel)
+                {
+                  m_Graphics.setColor(0.0,0.0,0.7*(fHght+1.0)/(fSeaLevel+1.0));
+                }
+                else
+                {
+                  fTerrainType = 0.1;// pPlanet->getTerrainType()->GetValue(std::cos(fAng-fPAng)*fRad,
+                                     //                               std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
+                  if (fTerrainType < 0.5)
+                  {
+                      fWeightMountains = 0.0 + (fTerrainType - (0.5-TERRAIN_CROSSOVER))*TERRAIN_CROSSOVER_INV;
+                      if (fWeightMountains < 0.0) fWeightMountains = 0.0;
+                      fWeightFlat      = 1.0 - (fTerrainType - (0.5-TERRAIN_CROSSOVER))*TERRAIN_CROSSOVER_INV;
+                      if (fWeightFlat  > 1.0) fWeightFlat = 1.0;
+                  }
+                  else
+                  {
+                      fWeightFlat      = 0.0 + ((0.5+TERRAIN_CROSSOVER) - fTerrainType)*TERRAIN_CROSSOVER_INV;
+                      if (fWeightFlat  < 0.0) fWeightFlat = 0.0;
+                      fWeightMountains = 1.0 - ((0.5+TERRAIN_CROSSOVER) - fTerrainType)*TERRAIN_CROSSOVER_INV;
+                      if (fWeightMountains > 1.0) fWeightMountains = 1.0;
+                  }
+                  m_Graphics.setColor((fHght+2.0)*0.3*fWeightMountains*0.4 + 0.1*(fHght+2.0)*0.8*fWeightFlat,
+                                      (fHght+2.0)*0.3*fWeightMountains*0.4 + 0.2*(fHght+2.0)*0.8*fWeightFlat,
+                                      (fHght+2.0)*0.3*fWeightMountains*0.4 + 0.1*(fHght+2.0)*0.8*fWeightFlat
+                                    );
+                }
+//                 m_Graphics.setColor(0.2,(0.5+fTerrainType), 0.2);
+                
+                m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+                                              vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+//                 m_Graphics.setColor(0.5+0.2*fHght,0.3+0.1*fHght,0.1);
+//                 m_Graphics.dot(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+//                                         vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+
+                if (fHght < fSeaLevel)
+                {
+                  WaterlineTmp.push_back(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fSeaLevel*fHeight),vecCenter[1]+std::sin(fAng)*(fRad+fSeaLevel*fHeight)));
+                  bInWater = true;
+                }
+                else
+                {
+                  if (bInWater)
+                  {
+                    WaterlineList.push_back(WaterlineTmp);
+                    WaterlineTmp.clear();
+                    bInWater = false;
+                  }
+                }
+                
+                fAng += fInc;
+            }
+        m_Graphics.endLine();
+        m_Graphics.setWidth(1.0);
+        
+        // Determine PolygonType
+        if ((LineT == PolygonType::LINE_LOOP) && (WaterlineList.size() != 0))
+          LineT = PolygonType::LINE_STRIP;
+        
+        // Push back potential last line segment
+        if (WaterlineTmp.size() != 0)
+        {
+          WaterlineList.push_back(WaterlineTmp);
+        }
+        
+        // Draw sea level
+        m_Graphics.setWidth(2.0);
+        m_Graphics.setColor(0.0,0.0,0.7);
+        for (auto i=0u; i<WaterlineList.size(); ++i)
+        {
+          m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
+          for (auto j=0u; j<WaterlineList[i].size(); ++j)
+            m_Graphics.addVertex(WaterlineList[i][j]);
+          m_Graphics.endLine();
+        }
+        m_Graphics.setWidth(1.0);
+        
+//         // Draw grass
+//         m_Graphics.setColor(0.1,0.2,0.1);
+//         if (_pCamera->getZoom() >= 1.0)
+//         {
+//             fAng = fAngBak;
+//             while ( fAng <= fAngEnd)
+//             {
+//                 fHght = pPlanet->getSurface()->GetValue(std::cos(fAng-fPAng)*fRad,
+//                                                          std::sin(fAng-fPAng)*fRad);
+//                 fTerrainType = pPlanet->getTerrainType()->GetValue(std::cos(fAng-fPAng)*fRad,
+//                                                                     std::sin(fAng-fPAng)*fRad) * 0.5 + 0.5;
+// //                 if (fTerrainType < 0.5)
+//                 {
+//                     
+//                     double fAngGrass01 = fAng-0.5*noise::ValueNoise2D(fAng*100000,fAng,1);
+//                     double fAngGrass02 = fAng-noise::ValueNoise2D(fAng*100000,fAng,1);
+//                     double fHghtGrass01 = fabs(0.5-fTerrainType);
+//                     double fHghtGrass02 = 0.5*fabs(0.5-fTerrainType);
+//                     m_Graphics.beginLine(PolygonType::LINE_STRIP,SHAPE_DEFAULT_DEPTH);
+//                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+//                                                   vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight)));
+//                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+//                                                   vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight))+
+//                                          Vector2d(std::cos(fAngGrass01)*(fHghtGrass01),
+//                                                   std::sin(fAngGrass01)*(fHghtGrass01)));
+//                     m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*(fRad+fHght*fHeight),
+//                                                   vecCenter[1]+std::sin(fAng)*(fRad+fHght*fHeight))+
+//                                          Vector2d(std::cos(fAngGrass01)*(fHghtGrass01),
+//                                                   std::sin(fAngGrass01)*(fHghtGrass01))+
+//                                          Vector2d(std::cos(fAngGrass02)*(fHghtGrass02),
+//                                                   std::sin(fAngGrass02)*(fHghtGrass02)));
+//                     m_Graphics.endLine();
+//                 }
+//                 fAng += fInc;
+//             }
+//         }
+        m_Graphics.setColor(1.0,1.0,1.0,1.0);
+        
+        _pPlanet->resetSampling();
+    }
+//     m_Graphics.circle(_pObject->getKinematicsState().getLocalPosition(
+//                        pPlanet->getCentroid()) -_pCamera->getCenter(), 0.2);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws a polygon using graphics base
+///
+/// \param _pObject Object, the polygon belongs to
+/// \param _pPolygon The polygon to be drawn
+/// \param _pCamera The camera to draw the polygon with
+///
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, CCamera* _pCamera) const
+{
+    METHOD_ENTRY("CVisualsManager::drawPolygon")
+    m_Graphics.polygon(_pPolygon->getVertices(), _pPolygon->getPolygonType(),
+                -_pCamera->getCenter() + 
+                (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw all shape visuals of this object
+///
+/// \todo At the moment, an object is only drawn if in the same cell as the
+///       camera, otherwise, when zoomed out, a dot is drawn. Bounding Boxes are
+///       not fully adjusted to cells yet.
+///
+/// \param _pCamera Draw visuals with respect to this camera
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawObjects(CCamera* const _pCamera) const
+{
+    METHOD_ENTRY("CVisualsManager::drawObjects")
+
+    for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
+    {
+        
+        if (Obj.second->getGeometry()->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+        {
+            for (const auto pShape : Obj.second->getGeometry()->getShapes())
+            {
+                switch (pShape->getShapeType())
+                {
+                    case ShapeType::CIRCLE:
+                        this->drawCircle(Obj.second, static_cast<CCircle*>(pShape), _pCamera);
+                        break;
+                    case ShapeType::PLANET:
+                        this->drawPlanet(Obj.second, static_cast<CPlanet*>(pShape), _pCamera);
+                        break;
+                    case ShapeType::POLYGON:
+                        this->drawPolygon(Obj.second, static_cast<CPolygon*>(pShape), _pCamera);
+                        break;
+                    case ShapeType::TERRAIN:
+                        break;
+                    case ShapeType::NONE:
+                        WARNING_MSG("Object Visuals", "Shapetype unknown, not drawing. This shouldn't happen!")
+                        break;
+                }
+            }
+            
+    //         m_Graphics.circle(m_pRef->getCOM() - _pCamera->getCenter(), 0.6);
+    //         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(-0.6, 0.0)) -_pCamera->getCenter());
+    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(+0.6, 0.0)) -_pCamera->getCenter());
+    //         m_Graphics.endLine();
+    //         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, -0.6)) -_pCamera->getCenter());
+    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, +0.6)) -_pCamera->getCenter());
+    //         m_Graphics.endLine();
+        }
+    }
+}
     
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -85,35 +451,32 @@ void CVisualsManager::drawBoundingBoxes() const
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
         
-        for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
-            ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
+        for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
             // Object bounding boxes
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-            m_Graphics.rect((*ci)->getRef()->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                            IUniverseScaled::cellToDouble((*ci)->getRef()->getCell()-m_pCamera->getCell()),
-                            (*ci)->getRef()->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                            IUniverseScaled::cellToDouble((*ci)->getRef()->getCell()-m_pCamera->getCell()));
+            m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                            pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-            m_Graphics.filledRect((*ci)->getRef()->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                  IUniverseScaled::cellToDouble((*ci)->getRef()->getCell()-m_pCamera->getCell()),
-                                  (*ci)->getRef()->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                  IUniverseScaled::cellToDouble((*ci)->getRef()->getCell()-m_pCamera->getCell()));
-            
-            // Shape bounding boxes
-            for (std::vector<IVisuals*>::const_iterator cj = (*ci)->getShapeVisuals().begin();
-                 cj != (*ci)->getShapeVisuals().end(); ++cj)
+            m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                  pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+             // Shape bounding boxes
+            for (const auto pShp : pObj.second->getGeometry()->getShapes())
             {
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
-                m_Graphics.rect((*cj)->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                IUniverseScaled::cellToDouble((*cj)->getBoundingBox().getCell()-m_pCamera->getCell()),
-                                (*cj)->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                IUniverseScaled::cellToDouble((*cj)->getBoundingBox().getCell()-m_pCamera->getCell()));
+                m_Graphics.rect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                                IUniverseScaled::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
+                                pShp->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                IUniverseScaled::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
-                m_Graphics.filledRect((*cj)->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() +
-                                    IUniverseScaled::cellToDouble((*cj)->getBoundingBox().getCell()-m_pCamera->getCell()),
-                                    (*cj)->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
-                                    IUniverseScaled::cellToDouble((*cj)->getBoundingBox().getCell()-m_pCamera->getCell()));
+                m_Graphics.filledRect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() +
+                                    IUniverseScaled::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
+                                    pShp->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
+                                    IUniverseScaled::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
             }
         }
     }
@@ -277,36 +640,6 @@ void CVisualsManager::drawGridHUD() const
             fGrid*=10.0;
         while ((m_pCamera->getBoundingCircleRadius() / fGrid) < 10.0)
             fGrid*=0.1;
-//         
-//         // Draw zoom scale
-//         m_Graphics.beginLine(LINE_SINGLE,-15.2);
-//             m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2- 26,10));
-//             m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+101,10));
-//         m_Graphics.endLine();
-//         for (int i=-1; i<=4; ++i)
-//         {
-//             m_Graphics.beginLine(LINE_SINGLE,-15.2);
-//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,11));
-//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+25*i,15));
-//             m_Graphics.endLine();
-//         }
-//         // Draw zoom level
-//         for (int i=static_cast<int>(std::log10(fGrid)); i<0; ++i)
-//         {
-//             m_Graphics.beginLine(LINE_SINGLE,-15.2);
-//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
-//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
-//             m_Graphics.endLine();
-//         }
-//         for (int i=1; i<=static_cast<int>(std::log10(fGrid)); ++i)
-//         {
-//             m_Graphics.beginLine(LINE_SINGLE,-15.2);
-//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,20));
-//                 m_Graphics.addVertex(m_Graphics.screen2World(m_Graphics.getWidthScr()/2+5*i,40));
-//             m_Graphics.endLine();
-//         }
-//         
-//         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         
         // Now draw the text
         std::stringstream oss;
@@ -373,7 +706,7 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsSta
         text.setString(oss.str());
         text.setFont(m_Font);
         text.setCharacterSize(12.0);
-        text.setColor(color);
+        text.setFillColor(color);
         text.setPosition(m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[0],
                         m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[1]);
 
@@ -407,19 +740,15 @@ void CVisualsManager::drawKinematicsStates() const
     
     if (m_nVisualisations & VISUALS_KINEMATICS_STATES)
     {
-        for (auto ci =  m_pDataStorage->getObjectVisuals().cbegin();
-                  ci != m_pDataStorage->getObjectVisuals().cend(); ++ci)
+        for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
-            this->drawKinematicsState((*ci)->getRef()->getKinematicsState(),
-                                      ((*ci)->getRef()->getGeometry()->getBoundingBox().getHeight() + 
-                                       (*ci)->getRef()->getGeometry()->getBoundingBox().getWidth()) * 0.5 * 0.33
-                                     );
-//             m_Graphics.showVec((*ci)->getRef()->getForce(), (*ci)->getRef()->getKinematicsState().getOrigin() - m_pCamera->getKinematicsState().getOrigin());
+            this->drawKinematicsState(
+                pObj.second->getKinematicsState(),
+                pObj.second->getGeometry()->getBoundingBox().getHeight() +
+                pObj.second->getGeometry()->getBoundingBox().getWidth() * 0.5 * 0.33
+            );
         }
-        
         this->drawKinematicsState(m_pCamera->getKinematicsState(),m_pCamera->getBoundingCircleRadius() * 0.1);
-
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
 }
 
@@ -459,7 +788,7 @@ void CVisualsManager::drawTimers() const
         sf::Text Text;
         if (m_pDataStorage->getTimeScale() > 1.0)
         {
-            Text.setColor(sf::Color(255.0, 0.0, 0.0, 255.0));
+            Text.setFillColor(sf::Color(255.0, 0.0, 0.0, 255.0));
             oss << "\nWarning: Decreasing accuracy." << std::endl;
         }
         Text.setString(oss.str());
@@ -508,26 +837,23 @@ void CVisualsManager::drawTrajectories() const
     if (m_nVisualisations & VISUALS_OBJECT_TRAJECTORIES)
     {
         
-        for (ObjectsType::const_iterator ci = m_pDataStorage->getDynamicObjects().begin();
-            ci != m_pDataStorage->getDynamicObjects().end(); ++ci)
+        for (auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
-            ci->second->getTrajectory().lock();
-            
             // Draw objects trajectories
             double fColourFade = 0.1;
             m_Graphics.beginLine(PolygonType::LINE_STRIP, -15.0);
             
-            for (auto i=0u; i<ci->second->getTrajectory().getPositions().size(); ++i)
+            for (auto i=0u; i<pObj.second->getTrajectory().getPositions().size(); ++i)
             {
                 m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
-                m_Graphics.addVertex(ci->second->getTrajectory().getPositions().at(i) - m_pCamera->getCenter() +
-                    IUniverseScaled::cellToDouble(ci->second->getTrajectory().getCells().at(i)-m_pCamera->getCell())
+                m_Graphics.addVertex(pObj.second->getTrajectory().getPositions().at(i) - m_pCamera->getCenter() +
+                    IUniverseScaled::cellToDouble(pObj.second->getTrajectory().getCells().at(i)-m_pCamera->getCell())
                 );
                 fColourFade += 0.9/TRAJECTORY_CAPACITY;
             }
             m_Graphics.endLine();
             
-            ci->second->getTrajectory().unlock();
+            pObj.second->getTrajectory().unlock();
         }
         
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
@@ -647,27 +973,26 @@ void CVisualsManager::drawWorld() const
     {
         int nTextSize = 16;
         m_Graphics.getWindow()->pushGLStates();    
-        for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
-            ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
+        for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
-            if (m_pCamera->getZoom() * (*ci)->getRef()->getGeometry()->getBoundingBox().getWidth() > 1.0)
+            if (m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() > 1.0)
             {
-                Vector2d vecPosRel = (*ci)->getRef()->getCOM()-
+                Vector2d vecPosRel = pObj.second->getCOM()-
                                     m_pCamera->getCenter()+
                                     IUniverseScaled::cellToDouble
-                                    ((*ci)->getRef()->getCell()-
+                                    (pObj.second->getCell()-
                                     m_pCamera->getCell());
                 
                 // Now draw the text
                 sf::Text text;
-                double fColor = (m_pCamera->getZoom() * (*ci)->getRef()->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
+                double fColor = (m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
                 if (fColor > 255.0) fColor = 255.0;
                 sf::Color color(255.0,255.0,255.0, fColor);
                 
-                text.setString((*ci)->getRef()->getName());
+                text.setString(pObj.second->getName());
                 text.setFont(m_Font);
                 text.setCharacterSize(nTextSize);
-                text.setColor(color);
+                text.setFillColor(color);
                 text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
 
                 m_Graphics.getWindow()->draw(text);
@@ -695,7 +1020,7 @@ void CVisualsManager::drawWorld() const
                     text.setString(m_pUniverse->getStarSystems()[i]->getName());
                     text.setFont(m_Font);
                     text.setCharacterSize(nTextSize);
-                    text.setColor(color);
+                    text.setFillColor(color);
                     text.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
 
                     m_Graphics.getWindow()->draw(text);
@@ -706,18 +1031,14 @@ void CVisualsManager::drawWorld() const
         m_Graphics.getWindow()->popGLStates();
     }
     
-    for (std::vector<IObjectVisuals*>::const_iterator ci = m_pDataStorage->getObjectVisuals().begin();
-         ci != m_pDataStorage->getObjectVisuals().end(); ++ci)
+    this->drawObjects(m_pCamera);
+    for (auto ci = m_pVisualsDataStorage->getDebrisVisuals().begin();
+         ci != m_pVisualsDataStorage->getDebrisVisuals().end(); ++ci)
     {
         (*ci)->draw(m_pCamera);
     }
-    for (auto ci = m_pDataStorage->getDebrisVisuals().begin();
-         ci != m_pDataStorage->getDebrisVisuals().end(); ++ci)
-    {
-        (*ci)->draw(m_pCamera);
-    }
-    for (std::list<CDebrisVisualsThruster*>::const_iterator ci = m_pDataStorage->getDebrisVisualsThruster().begin();
-         ci != m_pDataStorage->getDebrisVisualsThruster().end(); ++ci)
+    for (std::list<CDebrisVisualsThruster*>::const_iterator ci = m_pVisualsDataStorage->getDebrisVisualsThruster().begin();
+         ci != m_pVisualsDataStorage->getDebrisVisualsThruster().end(); ++ci)
     {
         (*ci)->draw(m_pCamera);
     }
@@ -747,15 +1068,31 @@ void CVisualsManager::drawWorld() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Drawing finished, now swap buffers
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::finishFrame()
+{
+    METHOD_ENTRY("CVisualsManager::finishFrame")
+    m_Graphics.swapBuffers();
+    m_pDataStorage->swapFront();
+
+    // Attach camera to current front buffer (at the moment, this is need for the kinematics state)
+    if (m_pCamera->gotRef())
+        m_pCamera->attachTo(m_pDataStorage->getObjectsByValueFront()->at(m_pCamera->getUIDRef()));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Processes one visual frame
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
+
+    m_pCamera = (*m_pVisualsDataStorage->getCamerasByName().cbegin()).second;
     
-    // Set active camera from WorldDataStorage
-    m_pCamera = m_pDataStorage->getCamera(); 
     this->drawGrid();
     this->drawTrajectories();
     this->drawWorld();
@@ -763,5 +1100,6 @@ void CVisualsManager::processFrame()
     this->drawBoundingBoxes();
     this->drawGridHUD();
     this->drawTimers();
+    
     this->finishFrame();
 }

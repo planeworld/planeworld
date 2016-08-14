@@ -36,16 +36,23 @@
 //--- Program header ---------------------------------------------------------//
 #include "physics_manager.h"
 #include "universe.h"
+#include "visuals_data_storage_user.h"
 #include "world_data_storage_user.h"
 
-const double VISUALS_DEFAULT_FREQUENCY = 60.0;
+const double CIRCLE_DEFAULT_RESOLUTION =  5.0;               ///< Default resolution for visual sampling, px/vertex.
+const double CIRCLE_MINIMUM_SEGMENTS = 10.0;                 ///< Minimum number of circle segments
+const double PLANET_VISUALS_DEFAULT_RESOLUTION=3.0;          ///< Default resolution for visual sampling px/vertex
+const double PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE=M_PI*0.01; ///< Default minium of 200 segments if above resolution limit
+const double VISUALS_DEFAULT_FREQUENCY = 60.0;               ///< Default frequency for graphics update
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the visualisation
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUser
+class CVisualsManager : virtual public CGraphicsBase,
+                                public IVisualsDataStorageUser,
+                                public IWorldDataStorageUser
 {
     
     public:
@@ -63,6 +70,7 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         bool            initGraphics() const;
                 
         //--- Methods --------------------------------------------------------//
+        void            finishFrame();
         void            processFrame();
         
         void            setFont(const std::string&);
@@ -77,6 +85,11 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
     private:
 
         //--- Constant methods [private] -------------------------------------//
+        void drawCircle(CObject*, CCircle*, CCamera*) const;
+        void drawPlanet(CObject*, CPlanet*, CCamera*) const;
+        void drawPolygon(CObject*, CPolygon*, CCamera*) const;
+        void drawObjects(CCamera* const) const;
+        
         void            drawBoundingBoxes() const;
         void            drawGrid() const;
         void            drawGridHUD() const;
@@ -85,7 +98,6 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
         void            drawTimers() const;
         void            drawTrajectories() const;
         void            drawWorld() const;
-        void            finishFrame() const;
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         CPhysicsManager*                m_pPhysicsManager;  ///< Reference to physics
@@ -99,17 +111,6 @@ class CVisualsManager : virtual public CGraphicsBase, public IWorldDataStorageUs
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Drawing finished, now swap buffers
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::finishFrame() const
-{
-    METHOD_ENTRY("CVisualsManager::finishFrame")
-    m_Graphics.swapBuffers();
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

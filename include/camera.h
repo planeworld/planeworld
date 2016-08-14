@@ -39,6 +39,7 @@
 #include "graphics.h"
 #include "kinematics_state_user.h"
 #include "object_referrer.h"
+#include "unique_id_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -61,7 +62,10 @@ class CCamera : public CGraphicsBase,
 
         //--- Constructor/Destructor -----------------------------------------//
         CCamera();
-        virtual ~CCamera();
+        CCamera(const CCamera&);
+        ~CCamera();
+        CCamera& operator=(const CCamera&);
+        CCamera* clone() const;
 
         //--- Constant Methods -----------------------------------------------//
         const Vector2d      getCenter() const;
@@ -91,6 +95,9 @@ class CCamera : public CGraphicsBase,
     protected:
         
         //--- Methods --------------------------------------------------------//
+        virtual void myAttachTo();
+        
+        void copy(const CCamera&);
         void updateWithHook();
         void updateWithoutHook();
 
@@ -143,6 +150,17 @@ inline const double& CCamera::getZoom() const
 {
     METHOD_ENTRY("CCamera::getZoom")
     return m_fZoom;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Attaches camera to UID user
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CCamera::myAttachTo()
+{
+    METHOD_ENTRY("CCamera::myAttachTo")
+    m_KinematicsState.attachTo(&(m_pRef->getKinematicsState()));
 }
 
 #endif

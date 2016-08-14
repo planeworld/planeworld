@@ -40,13 +40,14 @@
 #include "planet.h"
 #include "polygon.h"
 #include "terrain.h"
+#include "world_data_storage_user.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing collisions
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CCollisionManager
+class CCollisionManager : public IWorldDataStorageUser
 {
     
     public:
@@ -60,8 +61,8 @@ class CCollisionManager
         //--- Methods --------------------------------------------------------//
         void detectCollisions();
         void setDebris(const DebrisType&);
-        void setDynamicObjects(const ObjectsType&);
-        void setStaticObjects(const ObjectsType&);
+        void setDynamicObjects(const ObjectsByNameType&);
+        void setStaticObjects(const ObjectsByNameType&);
         
     private:
         
@@ -91,8 +92,8 @@ class CCollisionManager
                                           const Vector2d&, const Vector2d&, const Vector2d&);
         
         DebrisType              m_Debris;           ///< List of debris
-        ObjectsType             m_DynamicObjects;   ///< List of dynamic objects
-        ObjectsType             m_StaticObjects;    ///< List of static objects
+        ObjectsByNameType       m_DynamicObjects;   ///< List of dynamic objects
+        ObjectsByNameType       m_StaticObjects;    ///< List of static objects
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -118,7 +119,7 @@ inline void CCollisionManager::setDebris(const DebrisType& _DebrisList)
 /// \param _ObjList List of dynamic objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setDynamicObjects(const ObjectsType& _ObjList)
+inline void CCollisionManager::setDynamicObjects(const ObjectsByNameType& _ObjList)
 {
     METHOD_ENTRY("CCollisionManager::setDynamicObjects")
 
@@ -132,7 +133,7 @@ inline void CCollisionManager::setDynamicObjects(const ObjectsType& _ObjList)
 /// \param _ObjList List of static objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setStaticObjects(const ObjectsType& _ObjList)
+inline void CCollisionManager::setStaticObjects(const ObjectsByNameType& _ObjList)
 {
     METHOD_ENTRY("CCollisionManager::setStaticObjects")
 
