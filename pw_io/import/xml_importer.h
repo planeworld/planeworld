@@ -68,7 +68,6 @@ class CXMLImporter : public IVisualsDataStorageUser,
         ~CXMLImporter();
 
         //--- Constant Methods -----------------------------------------------//
-        CCamera*                        getCamera() const;
         Vector2d                        getGravity() const;
         const ComponentsType&           getComponents() const;
         const EmittersType&             getEmitters() const;
@@ -146,19 +145,6 @@ class CXMLImporter : public IVisualsDataStorageUser,
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return camera
-///
-/// \return Camera
-///
-////////////////////////////////////////////////////////////////////////////////
-inline CCamera* CXMLImporter::getCamera() const
-{
-    METHOD_ENTRY("CXMLImporter::getCamera")
-    return m_pCamera;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

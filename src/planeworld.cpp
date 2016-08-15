@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
         {
             pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
             pVisualsManager->setFont(XMLImporter.getFont());
-            pCamera=XMLImporter.getCamera();
+            pCamera=pVisualsManager->getCurrentCamera();
         }
         Universe.clone(XMLImporter.getUniverse());
     }
