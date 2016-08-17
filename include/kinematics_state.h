@@ -66,7 +66,6 @@ class CKinematicsState  : public IUniqueIDUser,
     
         //--- Constructor/Destructor -----------------------------------------//
         CKinematicsState();
-        CKinematicsState(const CKinematicsState&);
 
         //--- Constant methods -----------------------------------------------//
         Vector2d  getOrigin() const;
@@ -141,28 +140,6 @@ inline CKinematicsState::CKinematicsState() : IUniqueIDUser(),
     CTOR_CALL("CKinematicsState::CKinematicsState")
     m_vecOrigin.setZero();
     m_vecVelocity.setZero();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Copy constructor, creating kinematics with reference to given
-///        kinematics.
-///
-/// \param _Reference Kinematics to refer to
-///
-////////////////////////////////////////////////////////////////////////////////
-inline CKinematicsState::CKinematicsState(const CKinematicsState& _Reference) :
-                                          IUniqueIDUser(_Reference),
-                                          IUniqueIDReferrer< CKinematicsState >(_Reference),
-                                          m_bGotReference(false),
-                                          m_fAngle(0.0),
-                                          m_fAngleVelocity(0.0)
-{
-    METHOD_ENTRY("CKinematicsState::CKinematicsState")
-    CTOR_CALL("CKinematicsState::CKinematicsState")
-    m_vecOrigin.setZero();
-    m_vecVelocity.setZero();
-    this->referTo(_Reference);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

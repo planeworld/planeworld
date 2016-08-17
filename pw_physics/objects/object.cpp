@@ -318,6 +318,8 @@ void CObject::dynamics(const double& _fTimeStep)
         m_pIntVel->integrate(vecAccel, _fTimeStep*m_fTimeFac);
         m_pIntPos->integrate(m_pIntVel->getValue(),_fTimeStep*m_fTimeFac);
         
+        Vector2d vecTest = m_pIntPos->getValue();
+        
         double fAngleAccel = m_fTorque;
         
         if (m_Geometry.getInertia() > 0.0) fAngleAccel /= m_Geometry.getInertia();
@@ -358,7 +360,7 @@ void CObject::init()
     
     this->setCell(m_vecCell);
     
-    // Call transform twice to correctly set bounding boxes via front and backbuffer
+    // Call transform twice to correctly set bounding boxes
     this->transform();
     this->transform();
 }

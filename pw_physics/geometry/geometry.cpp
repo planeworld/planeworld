@@ -233,10 +233,6 @@ void CGeometry::update()
         DOM_VAR(DEBUG_MSG("Geometry", "Center of mass calculated: " << m_vecCOM[0] << ", " << m_vecCOM[1]))
         DOM_VAR(DEBUG_MSG("Geometry", "Inertia calculated: " << m_fInertia))
     }
-//     for (auto it : *m_pShapes)
-//     {
-//         it->swapBuffer();
-//     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
