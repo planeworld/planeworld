@@ -39,7 +39,12 @@
 
 typedef std::list<IShape*> ShapesType; ///< Specifies a list of  shapes
 
-// Forward declarations
+/// Specifies the type of bounding box
+enum class AABBType
+{
+    SINGLEFRAME,
+    MULTIFRAME
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -66,7 +71,7 @@ class CGeometry
         const ShapesType&         getShapes() const;
         
         //--- Methods --------------------------------------------------------//
-        CBoundingBox& getBoundingBox();
+        CBoundingBox& getBoundingBox(AABBType = AABBType::MULTIFRAME);
         
         void addShape(IShape* const);
         void updateBoundingBox(const CBoundingBox&);
@@ -85,7 +90,8 @@ class CGeometry
         void copy(const CGeometry&);
 
         //-- Variables [protected] -------------------------------------------//
-        CBoundingBox    m_AABB;       ///< Bounding box
+        CBoundingBox    m_AABB;       ///< Bounding box, multiframe, covering movement
+        CBoundingBox    m_AABBS;      ///< Bounding box, single frame
         ShapesType      m_Shapes;     ///< Shapes
         Vector2d        m_vecCOM;     ///< Center of mass
         double          m_fInertia;   ///< Inertia of whole geometry
@@ -150,13 +156,18 @@ inline const ShapesType& CGeometry::getShapes() const
 ///
 /// \brief Returns the bounding box
 ///
+/// \param _AABBType Type of bounding box, either single or multi frame
+///
 /// \return Bounding box
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CBoundingBox& CGeometry::getBoundingBox()
+inline CBoundingBox& CGeometry::getBoundingBox(AABBType _AABBType)
 {
     METHOD_ENTRY("CGeometry::getBoundingBox")
-    return (m_AABB);
+    if (_AABBType == AABBType::MULTIFRAME)
+        return m_AABB;
+    else
+        return m_AABBS;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

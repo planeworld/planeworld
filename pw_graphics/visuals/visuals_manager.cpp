@@ -390,26 +390,33 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
     for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
     {
         
-        if (Obj.second->getGeometry()->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+        if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(_pCamera->getBoundingBox()))
         {
-            for (const auto pShape : Obj.second->getGeometry()->getShapes())
+            if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth() * m_Graphics.getResPMX() < 2.0)
             {
-                switch (pShape->getShapeType())
+                m_Graphics.dot(Obj.second->getCOM()-_pCamera->getCenter());
+            }
+            else
+            {
+                for (const auto pShape : Obj.second->getGeometry()->getShapes())
                 {
-                    case ShapeType::CIRCLE:
-                        this->drawCircle(Obj.second, static_cast<CCircle*>(pShape), _pCamera);
-                        break;
-                    case ShapeType::PLANET:
-                        this->drawPlanet(Obj.second, static_cast<CPlanet*>(pShape), _pCamera);
-                        break;
-                    case ShapeType::POLYGON:
-                        this->drawPolygon(Obj.second, static_cast<CPolygon*>(pShape), _pCamera);
-                        break;
-                    case ShapeType::TERRAIN:
-                        break;
-                    case ShapeType::NONE:
-                        WARNING_MSG("Object Visuals", "Shapetype unknown, not drawing. This shouldn't happen!")
-                        break;
+                    switch (pShape->getShapeType())
+                    {
+                        case ShapeType::CIRCLE:
+                            this->drawCircle(Obj.second, static_cast<CCircle*>(pShape), _pCamera);
+                            break;
+                        case ShapeType::PLANET:
+                            this->drawPlanet(Obj.second, static_cast<CPlanet*>(pShape), _pCamera);
+                            break;
+                        case ShapeType::POLYGON:
+                            this->drawPolygon(Obj.second, static_cast<CPolygon*>(pShape), _pCamera);
+                            break;
+                        case ShapeType::TERRAIN:
+                            break;
+                        case ShapeType::NONE:
+                            WARNING_MSG("Object Visuals", "Shapetype unknown, not drawing. This shouldn't happen!")
+                            break;
+                    }
                 }
             }
             
@@ -456,6 +463,7 @@ void CVisualsManager::drawBoundingBoxes() const
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
             // Object bounding boxes
+            // Multiframe
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
             m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
                             IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
@@ -465,6 +473,17 @@ void CVisualsManager::drawBoundingBoxes() const
             m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
                                   IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
                                   pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+            // Singleframe
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+            m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
+                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                            pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
+                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+            m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
+                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                  pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
                                   IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
              // Shape bounding boxes
             for (const auto pShp : pObj.second->getGeometry()->getShapes())
