@@ -196,8 +196,7 @@ bool CXMLImporter::import(const std::string& _strFilename,
                     NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fVisualsFrequency << "Hz.")
                 }
             }
-            
-        }        
+        }
         else if (std::string(N.name()) == "emitter")
         {
             this->createEmitter(N);
@@ -1134,7 +1133,7 @@ void CXMLImporter::readBodyCore(CObject* const _pO, const pugi::xml_node& _Node)
         _pO->setAngle(checkAttributeDouble(_Node, "angle", _pO->getAngle()));
         _pO->setAngleVelocity(checkAttributeDouble(_Node, "angle_velocity", _pO->getAngleVelocity()));
         
-        double fInertia = checkAttributeDouble(_Node, "inertia", _pO->getInertia());
+        double fInertia = checkAttributeDouble(_Node, "inertia", _pO->getInertia(), XML_IMPORTER_DO_NOT_NOTICE);
         DOM_VAR(NOTICE_MSG("XML Importer", "Inertia is be calculated automatically now, " <<
                                            "value " << fInertia << " ignored."))
     }
