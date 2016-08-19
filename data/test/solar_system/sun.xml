@@ -14,6 +14,5 @@
         radius="0.6957e9"
         center_x="0.0"
         center_y="0.0">
-        <visuals type="shape_visuals_circle"/>
     </shape>
 </object>

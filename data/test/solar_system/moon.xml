@@ -12,7 +12,6 @@
     />
     <body_core
         angle_velocity="2.661666501955582e-6"
-        inertia="8.7389674e34"
     />
     <shape
         type="shape_planet"
@@ -23,6 +22,5 @@
         ground_resolution="0.01"
         center_x="0.0"
         center_y="0.0">
-        <visuals type="shape_visuals_planet"/>
     </shape>
 </object>

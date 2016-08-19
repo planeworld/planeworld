@@ -9,7 +9,6 @@
     />
     <body_core
         angle_velocity__deg="36.0"
-        inertia="10.0"
     />
     <shape file="ball_shape_circle.xml"/>
 </object>

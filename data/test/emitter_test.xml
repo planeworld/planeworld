@@ -4,11 +4,11 @@
     vec_x="0.0"
     vec_y="0.0"
   />
-  <config file="config.xml"/>
-  <object file="rigidbody.xml"/>
+  <config file="emitter/config.xml"/>
+  <object file="emitter/rigidbody.xml"/>
   <component
     hook="Ball">
-    <emitter file="emitter.xml" />
+    <emitter file="emitter/emitter.xml" />
   </component>
   <emitter
     type="object_emitter"
