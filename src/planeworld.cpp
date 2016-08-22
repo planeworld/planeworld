@@ -43,6 +43,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "conf_pw.h"
 #include "circular_buffer.h"
+#include "com_interface.h"
 #include "debris_emitter.h"
 #include "game_state_manager.h"
 #include "physics_manager.h"
@@ -86,13 +87,17 @@
     return EXIT_SUCCESS; \
 }
 
+//--- Global variables -------------------------------------------------------//
+bool g_bDone = false;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Usage to call program
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void usage()
 {
+    METHOD_ENTRY("usage")
     std::cout << "Usage: planeworld <OPTIONS> <UNIVERSE_DATA_FILE>" << std::endl;
     std::cout << "\nOptions: " << std::endl;
     std::cout << "--no graphics: Start simulation without graphical output." << std::endl;
@@ -100,6 +105,28 @@ void usage()
     std::cout << "planeworld path/to/scene.xml" << std::endl;
     std::cout << "planeworld --no-graphics path/to/scene.xml" << std::endl;
     
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Quit program
+///
+////////////////////////////////////////////////////////////////////////////////
+void quit()
+{
+    METHOD_ENTRY("quit")
+    g_bDone = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Test
+///
+////////////////////////////////////////////////////////////////////////////////
+void test(int nTest)
+{
+    METHOD_ENTRY("test")
+    std::cout << "Test: " << nTest << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,6 +147,10 @@ int main(int argc, char *argv[])
     bool bGraphics = true;
     std::string strArgOptions("");
     std::string strArgData("");
+    
+    CComInterface ComInterface;
+    ComInterface.registerFunction("quit", quit);
+//     ComInterface.registerFunction("test", test);
   
     if (argc < 2 || argc > 3)
     {
@@ -145,7 +176,6 @@ int main(int argc, char *argv[])
         strArgData = argv[1];
     }
 
-    bool                bDone = false;
     CTimer              Timer;
 
     //--- Major instances ----------------------------------------------------//
@@ -230,6 +260,8 @@ int main(int argc, char *argv[])
         pVisualsManager->initGraphics();
         pWindow=pVisualsManager->getWindowHandle();
         
+        ComInterface.registerFunction("cycle_camera",[&](){pVisualsManager->cycleCamera();});
+        
         bool bGraphicsOn = true;
         bool bMouseCursorVisible = false;
         
@@ -243,7 +275,7 @@ int main(int argc, char *argv[])
             auto nFrame = 0u;
         #endif
         Timer.start();
-        while (!bDone)
+        while (!g_bDone)
         {
             #ifndef PW_MULTITHREADING
             if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()/
@@ -264,7 +296,7 @@ int main(int argc, char *argv[])
                         case sf::Event::Closed:
                         {
                             // End the program
-                            bDone = true;
+                            ComInterface.call("quit");
                             break;
                         }
                         case sf::Event::Resized:
@@ -282,7 +314,7 @@ int main(int argc, char *argv[])
                             {
                                 case sf::Keyboard::Escape:
                                 {
-                                    bDone = true;
+                                    ComInterface.call("quit");
                                     break;
                                 }
                                 case sf::Keyboard::Num0:
@@ -329,7 +361,8 @@ int main(int argc, char *argv[])
                                 }
                                 case sf::Keyboard::C:
                                 {
-                                    pVisualsManager->cycleCamera();
+//                                     pVisualsManager->cycleCamera();
+                                    ComInterface.call("cycle_camera");
                                     pCamera=pVisualsManager->getCurrentCamera();
                                     break;
                                 }
@@ -466,7 +499,7 @@ int main(int argc, char *argv[])
     else // if (!bGraphics)
     {
         #ifndef PW_MULTITHREADING
-        while (!bDone)
+        while (!g_bDone)
         {
             //--- Run Physics ---//
             pPhysicsManager->processFrame();
@@ -477,7 +510,7 @@ int main(int argc, char *argv[])
         }
         #else
         Timer.start();
-        while (!bDone)
+        while (!g_bDone)
         {
             Timer.sleepRemaining(0.1);
         }
@@ -490,5 +523,7 @@ int main(int argc, char *argv[])
         PhysicsThread.join();
     #endif
 
+    ComInterface.help();
+        
     CLEAN_UP_AND_EXIT_SUCCESS;
 }
