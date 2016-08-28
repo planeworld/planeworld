@@ -924,8 +924,7 @@ void CVisualsManager::drawWorld() const
                 
                 double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
                 m_Graphics.setColor(0.8,fColor,0.3);
-                m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getStarType());
-                m_Graphics.dot(vecPosRel);
+                m_Graphics.filledCircle(vecPosRel, (m_pUniverse->getStarSystems()[i]->getStarType()*0.3+1) * m_Graphics.getResMPX(), 7.0);
             }
 //             // Draw stars in reduced scale for background
 //             if (m_pCamera->getBoundingBox().isInside(1.0/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)) + m_pCamera->getCenter()+IUniverseScaled::cellToDouble(m_pCamera->getCell())))
