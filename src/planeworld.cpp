@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     std::string strArgData("");
     
     CComInterface ComInterface;
-    ComInterface.registerFunction("quit", quit);
+    ComInterface.registerFunction("quit", new CComCallback<void>(quit));
 //     ComInterface.registerFunction("test", test);
   
     if (argc < 2 || argc > 3)
@@ -260,7 +260,8 @@ int main(int argc, char *argv[])
         pVisualsManager->initGraphics();
         pWindow=pVisualsManager->getWindowHandle();
         
-        ComInterface.registerFunction("cycle_camera",[&](){pVisualsManager->cycleCamera();});
+        ComInterface.registerFunction("cycle_camera",new CComCallback<void>([&](){pVisualsManager->cycleCamera();}));
+        ComInterface.registerFunction("get_current_camera", new CComCallback<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}));
         
         bool bGraphicsOn = true;
         bool bMouseCursorVisible = false;
@@ -296,7 +297,7 @@ int main(int argc, char *argv[])
                         case sf::Event::Closed:
                         {
                             // End the program
-                            ComInterface.call("quit");
+                            ComInterface.call<void>("quit");
                             break;
                         }
                         case sf::Event::Resized:
@@ -314,7 +315,7 @@ int main(int argc, char *argv[])
                             {
                                 case sf::Keyboard::Escape:
                                 {
-                                    ComInterface.call("quit");
+                                    ComInterface.call<void>("quit");
                                     break;
                                 }
                                 case sf::Keyboard::Num0:
@@ -362,8 +363,9 @@ int main(int argc, char *argv[])
                                 case sf::Keyboard::C:
                                 {
 //                                     pVisualsManager->cycleCamera();
-                                    ComInterface.call("cycle_camera");
-                                    pCamera=pVisualsManager->getCurrentCamera();
+                                    ComInterface.call<void>("cycle_camera");
+                                    pCamera=ComInterface.call<CCamera*>("get_current_camera");
+//                                     pCamera=pVisualsManager->getCurrentCamera();
                                     break;
                                 }
                                 case sf::Keyboard::B:

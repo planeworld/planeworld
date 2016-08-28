@@ -36,11 +36,45 @@
 #include <unordered_map>
 
 //--- Program header ---------------------------------------------------------//
+#include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Base class for callback functions registered at com interface
+///
+////////////////////////////////////////////////////////////////////////////////
+class IBaseComCallback
+{
+    public:
+        //--- Constructor/Destructor -----------------------------------------//
+        virtual ~IBaseComCallback(){}
+};
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Specialised callback functions registered at com interface
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class TRet, class... TArgs>
+class CComCallback : public IBaseComCallback
+{
+    public:
+        
+        //--- Constructor/Destructor -----------------------------------------//
+        CComCallback(const std::function<TRet(TArgs...)>&);
+        
+        //--- Methods --------------------------------------------------------//
+        TRet call(TArgs...);
+        
+    private:
+        
+        std::function<TRet(TArgs...)> m_Function; ///< Function to be registered at com interface
+};
+
 /// Map of functions, accessed by name
-typedef std::unordered_map<std::string, std::function<void(void)>> RegisteredFunctionsType;
+typedef std::unordered_map<std::string, IBaseComCallback*> RegisteredFunctionsType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -53,31 +87,16 @@ class CComInterface
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
+        ~CComInterface();
         
         //--- Constant Methods -----------------------------------------------//
-        void help() const
-        {
-            METHOD_ENTRY("CComInterface::help")
-            for (auto Com : m_RegisteredFunctions) std::cout << "Command: " << Com.first << std::endl;
-        }
+        void help() const;
         
         //--- Methods --------------------------------------------------------//
-        void call(const std::string& _strName)
-        {
-            METHOD_ENTRY("CComInterface::call")
-            if (m_RegisteredFunctions.count(_strName) != 0)
-                m_RegisteredFunctions[_strName]();
-            else
-            {
-                WARNING_MSG("Com Interface", "Unknown function <" << _strName << ">. ")
-            }
-        }
-        bool registerFunction(const std::string& _strName, const std::function<void(void)>& _Function)
-        {
-            METHOD_ENTRY("CComInterface::registerFunction")
-            m_RegisteredFunctions[_strName] = _Function;
-            return true;
-        }
+        template<class TRet, class... Args>
+        TRet call(const std::string& _strName, Args...);
+        
+        bool registerFunction(const std::string&, IBaseComCallback* const);
         
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CComInterface&);
@@ -90,5 +109,7 @@ class CComInterface
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+#include "com_interface.tpp"
 
 #endif // COM_INTERFACE_H
