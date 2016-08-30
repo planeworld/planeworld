@@ -120,17 +120,6 @@ void quit()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Test
-///
-////////////////////////////////////////////////////////////////////////////////
-void test(int nTest)
-{
-    METHOD_ENTRY("test")
-    std::cout << "Test: " << nTest << std::endl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief main function
 ///
 /// This is the entrance point for program startup.
@@ -262,6 +251,7 @@ int main(int argc, char *argv[])
         
         ComInterface.registerFunction("cycle_camera",new CComCallback<void>([&](){pVisualsManager->cycleCamera();}));
         ComInterface.registerFunction("get_current_camera", new CComCallback<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}));
+        ComInterface.registerFunction("rotate_camera_by", new CComCallback<void, double>([&](const double& _fAngle){pCamera->rotateBy(_fAngle);}));
         
         bool bGraphicsOn = true;
         bool bMouseCursorVisible = false;
@@ -453,7 +443,8 @@ int main(int argc, char *argv[])
                                 }
                                 if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                                 {
-                                    pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
+                                    ComInterface.call<void, double>("rotate_camera_by", -double(vecMouse.x)*0.001);
+//                                     pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
                                     pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
                                     if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
                                     else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
