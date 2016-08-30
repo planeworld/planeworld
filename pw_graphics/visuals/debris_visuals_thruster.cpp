@@ -49,17 +49,6 @@ CDebrisVisualsThruster::CDebrisVisualsThruster(CDebris* _pDebris)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Destructor
-///
-///////////////////////////////////////////////////////////////////////////////
-CDebrisVisualsThruster::~CDebrisVisualsThruster()
-{
-    METHOD_ENTRY("CDebrisVisualsThruster::~CDebrisVisualsThruster()");
-    DTOR_CALL("CDebrisVisualsThruster::~CDebrisVisualsThruster()");
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Draw the Debris
 ///
 /// \param _pCamera Active camera for drawing visuals
