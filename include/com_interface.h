@@ -87,7 +87,7 @@ class CComInterface
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
-        ~CComInterface();
+        virtual ~CComInterface();
         
         //--- Constant Methods -----------------------------------------------//
         void help() const;

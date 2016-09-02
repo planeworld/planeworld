@@ -35,6 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "collision_manager.h"
+#include "com_interface_user.h"
 #include "conf_pw.h"
 #include "emitter.h"
 #include "sim_timer.h"
@@ -56,13 +57,9 @@ const double      PHYSICS_LUA_DEFAULT_FREQUENCY = 10.0;     ///< Default frequen
 ///
 /// This class computes everything that is physics related.
 ///
-/// \todo Create own list for gravity enabled object. This makes computation
-///       faster, especially for debris.
-/// \todo Implement methods to move dynamic/static objects between lists to
-///       allow online state change.
-/// 
 ////////////////////////////////////////////////////////////////////////////////
-class CPhysicsManager : public IWorldDataStorageUser
+class CPhysicsManager : public IComInterfaceUser,
+                        public IWorldDataStorageUser
 {
     
     public:
@@ -91,6 +88,7 @@ class CPhysicsManager : public IWorldDataStorageUser
         void addComponents(const ComponentsType&);
         void addEmitter(IEmitter* const);
         void addEmitters(const EmittersType&);
+        void initComInterface();
         void initComponents();
         void initEmitters();
         bool initLua();

@@ -36,7 +36,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template <class TRet, class... TArgs>
-CComCallback<TRet, TArgs...>::CComCallback(const std::function<TRet(TArgs...)>& _Function)
+inline CComCallback<TRet, TArgs...>::CComCallback(const std::function<TRet(TArgs...)>& _Function)
 {
     METHOD_ENTRY("CComCallback::CComCallback")
     m_Function = _Function;
@@ -51,7 +51,7 @@ CComCallback<TRet, TArgs...>::CComCallback(const std::function<TRet(TArgs...)>& 
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template <class TRet, class... TArgs>
-TRet CComCallback<TRet, TArgs...>::call(TArgs... _Args)
+inline TRet CComCallback<TRet, TArgs...>::call(TArgs... _Args)
 {
     METHOD_ENTRY("CComCallback::call")
     return m_Function(_Args...);
@@ -62,7 +62,7 @@ TRet CComCallback<TRet, TArgs...>::call(TArgs... _Args)
 /// \brief Destructor, deletes callback functions
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CComInterface::~CComInterface()
+inline CComInterface::~CComInterface()
 {
     METHOD_ENTRY("CComInterface::~CComInterface")
     DTOR_CALL("CComInterface::~CComInterface")
@@ -82,7 +82,7 @@ CComInterface::~CComInterface()
 /// \brief List all known functions
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CComInterface::help() const
+inline void CComInterface::help() const
 {
     METHOD_ENTRY("CComInterface::help")
     for (auto Com : m_RegisteredFunctions) std::cout << "Command: " << Com.first << std::endl;
@@ -98,7 +98,7 @@ void CComInterface::help() const
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template<class TRet, class... Args>
-TRet CComInterface::call(const std::string& _strName, Args... _Args)
+inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
 {
     METHOD_ENTRY("CComInterface::call")
     #ifdef LOGLEVEL_DEBUG
@@ -137,7 +137,7 @@ TRet CComInterface::call(const std::string& _strName, Args... _Args)
 /// \param _pFunction Function to be registered
 ///
 ///////////////////////////////////////////////////////////////////////////////
-bool CComInterface::registerFunction(const std::string& _strName, IBaseComCallback* const _pFunction)
+inline bool CComInterface::registerFunction(const std::string& _strName, IBaseComCallback* const _pFunction)
 {
     METHOD_ENTRY("CComInterface::registerFunction")
     m_RegisteredFunctions[_strName] = _pFunction;

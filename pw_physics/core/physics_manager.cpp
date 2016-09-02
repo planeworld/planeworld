@@ -177,6 +177,39 @@ void CPhysicsManager::addEmitters(const EmittersType& _Emitters)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Initialise the command interface
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::initComInterface()
+{
+    METHOD_ENTRY("CPhysicsManager::initComInterface")
+
+    INFO_MSG("Physics Manager", "Initialising com interace.")
+    if (m_pComInterface != nullptr)
+    {
+        m_pComInterface->registerFunction("set_angle",
+                                          new CComCallback<void, std::string, double>(
+                                                [&](const std::string& _strName, const double& _fMass)
+                                                {
+                                                  m_pDataStorage->getObjectsByNameBack()->operator[](_strName)->setAngle(_fMass);
+                                                }
+                                            ));
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Com interface not set, can register functions")
+    }
+    
+//     auto ci = m_Components.cbegin();
+//     while (ci != m_Components.cend())
+//     {
+//         (*ci)->init();
+//         ++ci;
+//     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Initialise all components
 ///
 ///////////////////////////////////////////////////////////////////////////////
