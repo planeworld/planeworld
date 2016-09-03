@@ -64,6 +64,12 @@ class CKinematicsState  : public IUniqueIDUser,
     
     public:
     
+        //--- Static Methods -------------------------------------------------//
+        static const double&  getWorldLimitX();
+        static const double&  getWorldLimitY();
+        static const Vector2d clipToWorldLimit(const Vector2d&);
+        static void           setWorldLimit(const double&, const double&);
+            
         //--- Constructor/Destructor -----------------------------------------//
         CKinematicsState();
 
@@ -110,6 +116,10 @@ class CKinematicsState  : public IUniqueIDUser,
         friend std::ostream&    operator<<(std::ostream&, CKinematicsState&);
 
     private:
+        
+        //--- Static variables -----------------------------------------------//
+        static double s_fWorldLimitX;   ///< Maximum world coordinate abs(x) before repetition
+        static double s_fWorldLimitY;   ///< Maximum world coordinate abs(x) before repetition
 
         //--- Variables ------------------------------------------------------//
         bool        m_bGotReference;    ///< Flags if reference is given
@@ -224,7 +234,7 @@ inline Vector2d& CKinematicsState::Origin()
 ///
 /// \brief Increases the angle by given value
 ///
-/// \param _fInc Value to increase the angel by
+/// \param _fAngle Value to increase the angel by
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline void CKinematicsState::increaseAngle(const double& _fAngle)
@@ -243,7 +253,7 @@ inline void CKinematicsState::increaseAngle(const double& _fAngle)
 inline void CKinematicsState::setOrigin(const Vector2d& _vecOrigin)
 {
     METHOD_ENTRY("CKinematicsState::setOrigin")
-    m_vecOrigin = _vecOrigin;
+    m_vecOrigin = CKinematicsState::clipToWorldLimit(_vecOrigin);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

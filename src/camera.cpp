@@ -346,8 +346,14 @@ void CCamera::translateTo(const Vector2d& _vecV)
 void CCamera::zoomBy(const double& _fZoom)
 {
     METHOD_ENTRY("CCamera::zoomBy")
-
     m_fZoom *= _fZoom;
+    
+    // Limit zoom to universe limits, worst viewport case (=> sqrt(2))
+    double fLimit = CKinematicsState::getWorldLimitX();
+    if (fLimit > CKinematicsState::getWorldLimitY()) fLimit = CKinematicsState::getWorldLimitY();
+    if (M_SQRT2*m_fViewportWidth/m_fZoom  > fLimit) m_fZoom = M_SQRT2*m_fViewportWidth/fLimit;
+    if (M_SQRT2*m_fViewportHeight/m_fZoom > fLimit) m_fZoom = M_SQRT2*m_fViewportHeight/fLimit;
+        
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -360,8 +366,13 @@ void CCamera::zoomBy(const double& _fZoom)
 void CCamera::zoomTo(const double& _fZoom)
 {
     METHOD_ENTRY("CCamera::zoomTo")
-
     m_fZoom = _fZoom;
+    
+    // Limit zoom to universe limits, worst viewport case (=> sqrt(2))
+    double fLimit = CKinematicsState::getWorldLimitX();
+    if (fLimit > CKinematicsState::getWorldLimitY()) fLimit = CKinematicsState::getWorldLimitY();
+    if (M_SQRT2*m_fViewportWidth/m_fZoom  > fLimit) m_fZoom = M_SQRT2*m_fViewportWidth/fLimit;
+    if (M_SQRT2*m_fViewportHeight/m_fZoom > fLimit) m_fZoom = M_SQRT2*m_fViewportHeight/fLimit;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -405,7 +416,7 @@ std::istream& operator>>(std::istream& _is, CCamera* const _pCam)
 /// \brief Output stream for game state information
 ///
 /// \param _os  Source stream
-/// \param _UID CCamera instance to stream
+/// \param _pCam CCamera instance to stream
 ///
 /// \return Stream with game state information of CCamera instance
 ///

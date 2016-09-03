@@ -456,7 +456,7 @@ void CVisualsManager::drawBoundingBoxes() const
                               m_pCamera->getCenter());
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
         m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
-                          m_pCamera->getBoundingCircleRadius());
+                          m_pCamera->getBoundingCircleRadius(),100.0);
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
         
@@ -910,12 +910,16 @@ void CVisualsManager::drawWorld() const
     {
         for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
         {
-            Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
-                              IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
-            Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter() - m_pCamera->getCenter() +
+            Vector2d vecPos = CKinematicsState::clipToWorldLimit(
+                                m_pUniverse->getStarSystems()[i]->getCenter() +
+                                IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell())
+                              );
+            Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(
+                                    m_pUniverse->getStarSystems()[i]->getCenter() - m_pCamera->getCenter() +
                                      IUniverseScaled::cellToDouble
                                      (m_pUniverse->getStarSystems()[i]->getCell() -
-                                      m_pCamera->getCell());
+                                      m_pCamera->getCell())
+                                );
             
 
             // Draw stars in original scale
@@ -997,11 +1001,12 @@ void CVisualsManager::drawWorld() const
         {
             if (m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() > 1.0)
             {
-                Vector2d vecPosRel = pObj.second->getCOM()-
+                Vector2d vecPosRel = CKinematicsState::clipToWorldLimit( 
+                                    pObj.second->getCOM()-
                                     m_pCamera->getCenter()+
                                     IUniverseScaled::cellToDouble
                                     (pObj.second->getCell()-
-                                    m_pCamera->getCell());
+                                    m_pCamera->getCell()));
                 
                 // Now draw the text
                 sf::Text text;
@@ -1022,15 +1027,15 @@ void CVisualsManager::drawWorld() const
         {
             for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
             {
-                Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
-                                  IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
+                Vector2d vecPos = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->getCenter() +
+                                  IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()));
                 if (m_pCamera->getBoundingBox().isInside(vecPos))
                 {
-                    Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
+                    Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->getCenter()-
                                         m_pCamera->getCenter()+
                                         IUniverseScaled::cellToDouble
                                         (m_pUniverse->getStarSystems()[i]->getCell()-
-                                          m_pCamera->getCell());
+                                          m_pCamera->getCell()));
                     
                     // Now draw the text
                     sf::Text text;

@@ -28,6 +28,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
 #include <random>
 
 #include "engine_common.h"
@@ -87,12 +88,13 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     
     Generator.seed(_nSeed);
     
-    // Density = m_nNrOfStars/(3.0*fSigma * 2.0*M_PI) = 0.4/30.857e15;
-    double fSigma = _nNumberOfStars * 30.857e15;
-//     double fSigma = _nNumberOfStars * 30.857e8 / (0.4*3.0*2.0*M_PI);
+    double fDistanceAvg = 33.e15; // Average distance of stars (~3.5 ly)
+    double fLimit = std::sqrt(double(_nNumberOfStars)) * fDistanceAvg;
+    
+    CKinematicsState::setWorldLimit(fLimit, fLimit);
     
     std::exponential_distribution<double>   ExponentialDistribution(3.5);
-    std::uniform_real_distribution<double>  UniformDistribution(-fSigma,fSigma);
+    std::uniform_real_distribution<double>  UniformDistribution(-fLimit,fLimit);
     std::poisson_distribution<int>          PoissionDistribution(4);
     std::vector<int> vecNrOfPlanets;
     std::vector<int> vecNrOfStars(nNrOfStarTypes,0);

@@ -31,6 +31,86 @@
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state.h"
 
+double CKinematicsState::s_fWorldLimitX = 3.0e20;
+double CKinematicsState::s_fWorldLimitY = 3.0e20;
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return x coordinate limit for the simulated world
+///
+/// The world is two dimensional with finite extension. It will be infinitely
+/// repeated behind world borders. The limit sets the postion of these borders.
+///
+/// \return World limit x coordinate (abs)
+///
+////////////////////////////////////////////////////////////////////////////////
+const double& CKinematicsState::getWorldLimitX()
+{
+    METHOD_ENTRY("CKinematicsState::getWorldLimitX")
+    return s_fWorldLimitX;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return y coordinate limit for the simulated world
+///
+/// The world is two dimensional with finite extension. It will be infinitely
+/// repeated behind world borders. The limit sets the postion of these borders.
+///
+/// \return World limit y coordinate (abs)
+///
+////////////////////////////////////////////////////////////////////////////////
+const double& CKinematicsState::getWorldLimitY()
+{
+    METHOD_ENTRY("CKinematicsState::getWorldLimitY")
+    return s_fWorldLimitY;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Clip given coordinates to limits for the simulated world
+///
+/// The world is two dimensional with finite extension. It will be infinitely
+/// repeated behind world borders. The limit sets the postion of these borders.
+///
+/// \param _vecPos Position to be clipped to world limits
+/// 
+/// \return Clipped coordinates
+///
+////////////////////////////////////////////////////////////////////////////////
+const Vector2d CKinematicsState::clipToWorldLimit(const Vector2d& _vecPos)
+{
+    METHOD_ENTRY("CKinematicsState::clipToWorldLimit")
+    
+    Vector2d vecReturn(_vecPos);
+    
+    if      (_vecPos[0] >  s_fWorldLimitX) vecReturn[0] -= 2.0*s_fWorldLimitX;
+    else if (_vecPos[0] < -s_fWorldLimitX) vecReturn[0] += 2.0*s_fWorldLimitX;
+    if      (_vecPos[1] >  s_fWorldLimitY) vecReturn[1] -= 2.0*s_fWorldLimitY;
+    else if (_vecPos[1] < -s_fWorldLimitY) vecReturn[1] += 2.0*s_fWorldLimitY;
+    
+    return vecReturn;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set coordinate limits for the simulated world
+///
+/// The world is two dimensional with finite extension. It will be infinitely
+/// repeated behind world borders. The limit sets the postion of these borders.
+///
+/// \param _fLimitX World limit x coordinate (abs)
+/// \param _fLimitY World limit x coordinate (abs)
+///
+////////////////////////////////////////////////////////////////////////////////
+void CKinematicsState::setWorldLimit(const double& _fLimitX, const double& _fLimitY)
+{
+    METHOD_ENTRY("CKinematicsState::setWorldLimit")
+    s_fWorldLimitX = _fLimitX;
+    s_fWorldLimitY = _fLimitY;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Create kinematics referred to given ones without changing the
@@ -350,6 +430,9 @@ std::istream& operator>>(std::istream& _is, CKinematicsState& _KS)
     // From IUniqueIDReferrer
     _is >> _KS.m_UIDRef;
     
+    _is >> _KS.s_fWorldLimitX;
+    _is >> _KS.s_fWorldLimitY;
+    
     _is >> _KS.m_bGotReference;
     _is >> _KS.m_vecOrigin[0];
     _is >> _KS.m_vecOrigin[1];
@@ -385,6 +468,9 @@ std::ostream& operator<<(std::ostream& _os, CKinematicsState& _KS)
     // From IUniqueIDReferrer
     _os << _KS.m_UIDRef << std::endl;
     
+    
+    _os << _KS.s_fWorldLimitX << std::endl;
+    _os << _KS.s_fWorldLimitY << std::endl;
     _os << _KS.m_bGotReference << std::endl;
     _os << _KS.m_vecOrigin[0] << " " <<
            _KS.m_vecOrigin[1] << std::endl;
