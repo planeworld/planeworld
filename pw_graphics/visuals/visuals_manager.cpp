@@ -911,11 +911,11 @@ void CVisualsManager::drawWorld() const
         for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
         {
             Vector2d vecPos = CKinematicsState::clipToWorldLimit(
-                                m_pUniverse->getStarSystems()[i]->getCenter() +
+                                m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
                                 IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell())
                               );
             Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(
-                                    m_pUniverse->getStarSystems()[i]->getCenter() - m_pCamera->getCenter() +
+                                    m_pUniverse->getStarSystems()[i]->Star().getOrigin() - m_pCamera->getCenter() +
                                      IUniverseScaled::cellToDouble
                                      (m_pUniverse->getStarSystems()[i]->getCell() -
                                       m_pCamera->getCell())
@@ -926,9 +926,15 @@ void CVisualsManager::drawWorld() const
             if (m_pCamera->getBoundingBox().isInside(vecPos))
             {
                 
-                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->Star().getStarType()+0.3;
                 m_Graphics.setColor(0.8,fColor,0.3);
-                m_Graphics.filledCircle(vecPosRel, (m_pUniverse->getStarSystems()[i]->getStarType()*0.3+1) * m_Graphics.getResMPX(), 7.0);
+                
+                double fDrawSize = (m_pUniverse->getStarSystems()[i]->Star().getStarType()*0.3+1) * m_Graphics.getResMPX();
+                double fRadius   = m_pUniverse->getStarSystems()[i]->Star().getRadius();
+                if (fDrawSize > fRadius)
+                    m_Graphics.filledCircle(vecPosRel, fDrawSize, 7.0);
+                else
+                    m_Graphics.filledCircle(vecPosRel, (m_pUniverse->getStarSystems()[i]->Star().getRadius()), 100.0);
             }
 //             // Draw stars in reduced scale for background
 //             if (m_pCamera->getBoundingBox().isInside(1.0/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)) + m_pCamera->getCenter()+IUniverseScaled::cellToDouble(m_pCamera->getCell())))
@@ -996,6 +1002,7 @@ void CVisualsManager::drawWorld() const
     if (m_nVisualisations & VISUALS_NAMES)
     {
         int nTextSize = 16;
+                
         m_Graphics.getWindow()->pushGLStates();    
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
@@ -1023,15 +1030,15 @@ void CVisualsManager::drawWorld() const
                 m_Graphics.getWindow()->draw(text);
             }
         }
-        if (1.0e9 * m_Graphics.getResPMX() < 1.0)
+//         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
             for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
             {
-                Vector2d vecPos = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->getCenter() +
+                Vector2d vecPos = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
                                   IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()));
                 if (m_pCamera->getBoundingBox().isInside(vecPos))
                 {
-                    Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->getCenter()-
+                    Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-
                                         m_pCamera->getCenter()+
                                         IUniverseScaled::cellToDouble
                                         (m_pUniverse->getStarSystems()[i]->getCell()-
@@ -1039,10 +1046,11 @@ void CVisualsManager::drawWorld() const
                     
                     // Now draw the text
                     sf::Text text;
-                    double fColor=0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                    double fColor=0.1*m_pUniverse->getStarSystems()[i]->Star().getStarType()+0.3;
                     sf::Color color(0.8*255, fColor*255, 0.3*255);
                     
-                    text.setString(m_pUniverse->getStarSystems()[i]->getName());
+                    text.setString(m_pUniverse->getStarSystems()[i]->Star().getName() + "\n" +
+                                   std::to_string(m_pUniverse->getStarSystems()[i]->Star().getRadius()));
                     text.setFont(m_Font);
                     text.setCharacterSize(nTextSize);
                     text.setFillColor(color);
@@ -1079,7 +1087,7 @@ void CVisualsManager::drawWorld() const
             for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
             {
                 m_Graphics.setColor(0.2,0.2,0.5);
-                m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
+                m_Graphics.circle(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-m_pCamera->getCenter()+
                                     IUniverseScaled::cellToDouble(
                                         m_pUniverse->getStarSystems()[i]->getCell()-
                                         m_pCamera->getCell()),

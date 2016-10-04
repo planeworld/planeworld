@@ -41,6 +41,8 @@
 #include <thread>
 
 //--- Program header ---------------------------------------------------------//
+#include "log.h"
+
 #include "conf_pw.h"
 #include "circular_buffer.h"
 #include "debris_emitter.h"

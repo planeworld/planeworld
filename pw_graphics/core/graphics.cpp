@@ -229,7 +229,7 @@ bool CGraphics::init()
     // Enable anti-aliasing
     glEnable(GL_LINE_SMOOTH);
     glShadeModel(GL_SMOOTH);
-    glEnable(GL_POLYGON_SMOOTH);
+//     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
 
 //     // Test for depthbuffer and enable if possible
@@ -282,8 +282,8 @@ bool CGraphics::init()
 ///
 /// This method reinitialises the OpenGL-matrices for the new resolution.
 ///
-/// \param _unX New x-resolution
-/// \param _unY New y-resolution
+/// \param _unWidthScr New x-resolution
+/// \param _unHeightScr New y-resolution
 ///
 /// \return Success
 ///
