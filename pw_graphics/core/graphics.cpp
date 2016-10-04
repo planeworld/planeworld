@@ -617,10 +617,6 @@ void CGraphics::dots(const std::vector<Vector2d>& _Dots,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Draw a circle
 ///
 /// \param _vecC    Center of circle
@@ -648,6 +644,10 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR, const dou
                     _vecC[1]+std::cos(fAng)*_fR,
                     -10.0);
     glEnd();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw a polygon line
 ///
 /// \param _Vertices List of vertices
