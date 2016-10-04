@@ -35,13 +35,10 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CStarSystem::CStarSystem() : m_strName("Star system"),
-                             m_nNumberOfPlanets(0),
-                             m_StarType(STAR_CLASS_M)
+CStarSystem::CStarSystem() : m_nNumberOfPlanets(0)
 {
     METHOD_ENTRY("CStarSystem::CStarSystem()");
     CTOR_CALL("CStarSystem::CStarSystem()");
     
     m_vecCell.setZero();
-    m_vecCenter.setZero();
 }

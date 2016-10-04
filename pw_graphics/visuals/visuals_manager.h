@@ -62,7 +62,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         ~CVisualsManager();
         
         //--- Constant Methods -----------------------------------------------//
-        CCamera* const  getCurrentCamera() const;
+        CCamera*        getCurrentCamera() const;
         const double&   getFrequency() const;
         bool            getVisualisation(const int&) const;
         int             getVisualisations() const;
@@ -123,7 +123,7 @@ class CVisualsManager : virtual public CGraphicsBase,
 /// \return Camera currently used
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CCamera* const CVisualsManager::getCurrentCamera() const
+inline CCamera* CVisualsManager::getCurrentCamera() const
 {
     METHOD_ENTRY("CVisualsManager::getCurrentCamera")
     return (m_pVisualsDataStorage->getCamerasByIndex())[m_unCameraIndex];

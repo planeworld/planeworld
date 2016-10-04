@@ -98,14 +98,13 @@ CWorldDataStorage::~CWorldDataStorage()
         }
     }
     
-    for (JointsType::iterator it = m_Joints.begin();
-        it != m_Joints.end(); ++it)
+    for (auto pJoint : m_Joints)
     {
         // Free memory if pointer is still existent
-        if ((*it) != nullptr)
+        if (pJoint != nullptr)
         {
-            delete (*it);
-            (*it) = nullptr;
+            delete pJoint;
+            pJoint = nullptr;
             MEM_FREED("IJoint")
         }
         else

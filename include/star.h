@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2012-2016 Torsten Büschenfeld
+// Copyright (C) 2016 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,161 +20,196 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       star_system.h
-/// \brief      Prototype of class "CStarSystem"
+/// \file       star.h
+/// \brief      Prototype of class "CStar"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2012-11-18
+/// \date       2016-09-06
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef STAR_SYSTEM_H
-#define STAR_SYSTEM_H
+#ifndef STAR_H
+#define STAR_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "star.h"
+#include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
+#include <eigen3/Eigen/Geometry>
+
+using namespace Eigen;
+
+typedef enum
+{
+    STAR_CLASS_M = 0,
+    STAR_CLASS_K = 1,
+    STAR_CLASS_G = 2,
+    STAR_CLASS_F = 3,
+    STAR_CLASS_A = 4,
+    STAR_CLASS_B = 5,
+    STAR_CLASS_O = 6
+} StarType;
+
+constexpr const double SOLAR_RADIUS = 695000000.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class representing a star system.
+/// \brief Class representing a star.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CStarSystem
+class CStar
 {
     
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        CStarSystem();
+        CStar();
         
         //--- Constant Methods -----------------------------------------------//
-        const Vector2i&     getCell() const;
-//         const Vector2d&     getCenter() const;
-//         const std::string&  getName() const;
-        const int&          getNumberOfPlanets() const;
-//         const int&          getStarType() const;
-        const int&          getSeed() const;
+        const std::string&  getName() const;
+        const Vector2d&     getOrigin() const;
+        const double&       getRadius() const;
+        const int&          getStarType() const;
 
         //--- Methods --------------------------------------------------------//
-        void setCell(const Vector2i&);
-//         void setCenter(const Vector2d&);
-//         void setName(const std::string&);
-        void setNumberOfPlanets(const int&);
-        void setSeed(const int&);
-//         void setStarType(const int&);
-        
-        CStar& Star();
+        void setOrigin(const Vector2d&);
+        void setName(const std::string&);
+        void setRadius(const double&);
+        void setStarType(const int&);
         
     private:
         
         //--- Constant Methods [private] -------------------------------------//
         
         //--- Variables [private] --------------------------------------------//
-        CStar       m_Star;                ///< The central star
-        Vector2i    m_vecCell;             ///< Cell in that the star system is located
-        int         m_nNumberOfPlanets;    ///< Number of planets in this star system
-        int         m_nSeed;               ///< Local seed of this star system
+        std::string m_strName;              ///< Name of the star
+        Vector2d    m_vecOrigin;            ///< Origin of star system in cell
+        double      m_fRadius;              ///< Size of star
+        int         m_nStarType;            ///< Type of star
 
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns the cell the star system is located at.
+/// \brief Constructor, initialising members
 ///
-/// \return Cell the star system is located at
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const Vector2i& CStarSystem::getCell() const
+///////////////////////////////////////////////////////////////////////////////
+inline CStar::CStar() : m_strName("Star"),
+                        m_fRadius(SOLAR_RADIUS),
+                        m_nStarType(STAR_CLASS_M)
 {
-    METHOD_ENTRY("CStarSystem::getCell")
-    return m_vecCell;
+    METHOD_ENTRY("CStar::CStar")
+    CTOR_CALL("CStar::CStar")
+    m_vecOrigin.setZero();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns the number of planets for this star system
+/// \brief Returns the name of this star
 ///
-/// \return Number of planets for this star system
+/// \return Name of this star
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const int& CStarSystem::getNumberOfPlanets() const
+inline const std::string& CStar::getName() const
 {
-    METHOD_ENTRY("CStarSystem::getNumberOfPlanets")
-    return m_nNumberOfPlanets;
+    METHOD_ENTRY("CStar::getName")
+    return m_strName;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns the local seed of this star system
+/// \brief Returns the origin of the star
 ///
-/// \return Local seed of star system
+/// \return Origin of the star
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const int& CStarSystem::getSeed() const
+inline const Vector2d& CStar::getOrigin() const
 {
-    METHOD_ENTRY("CStarSystem::getSeed")
-    return m_nSeed;
+    METHOD_ENTRY("CStar::getOrigin")
+    return m_vecOrigin;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the cell the star system is located at
+/// \brief Returns the size of the star (radius)
 ///
-/// \param _vecCell Cell of star system
+/// \return Size of the star (radius)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CStarSystem::setCell(const Vector2i& _vecCell)
+inline const double& CStar::getRadius() const
 {
-    METHOD_ENTRY("CStarSystem::setCell")
-
-    m_vecCell = _vecCell;
+    METHOD_ENTRY("CStar::getRadius")
+    return m_fRadius;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the number of planets in this star system
+/// \brief Returns the type of star (spectral class)
 ///
-/// \param _nNumberOfPlanets Number of planets to set for this star system
+/// \return Type of star
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CStarSystem::setNumberOfPlanets(const int& _nNumberOfPlanets)
+inline const int& CStar::getStarType() const
 {
-    METHOD_ENTRY("CStarSystem::setNumberOfPlanets")
-
-    m_nNumberOfPlanets = _nNumberOfPlanets;
+    METHOD_ENTRY("CStar::getStarType")
+    return m_nStarType;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the local seed for this star system
+/// \brief Sets the origin of the star
 ///
-/// \param _nSeed Local seed for this star system
+/// \param _vecOrigin Origin of star
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CStarSystem::setSeed(const int& _nSeed)
+inline void CStar::setOrigin(const Vector2d& _vecOrigin)
 {
-    METHOD_ENTRY("CStarSystem::setSeed")
-
-    m_nSeed = _nSeed;
+    METHOD_ENTRY("CStar::setOrigin")
+    m_vecOrigin = _vecOrigin;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Delegate, return star reference
+/// \brief Sets the name this star
 ///
-/// \return Star
+/// \param _strName Name of the star
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CStar& CStarSystem::Star()
+inline void CStar::setName(const std::string& _strName)
 {
-    METHOD_ENTRY("CStarSystem::Star")
-    return m_Star;
+    METHOD_ENTRY("CStar::setName")
+    m_strName = _strName;
 }
 
-#endif
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the radius ot the star
+///
+/// \param _fRadius Radius of the star
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CStar::setRadius(const double& _fRadius)
+{
+    METHOD_ENTRY("CStar::setRadius")
+    m_fRadius = _fRadius;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the type of the star
+///
+/// \param _StarType Type of star
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CStar::setStarType(const int& _StarType)
+{
+    METHOD_ENTRY("CStar::setStarType")
+
+    m_nStarType = _StarType;
+}
+
+#endif // STAR_H
