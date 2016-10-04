@@ -358,7 +358,7 @@ void CObject::init()
     
     this->setCell(m_vecCell);
     
-    // Call transform twice to correctly set bounding boxes via front and backbuffer
+    // Call transform twice to correctly set bounding boxes
     this->transform();
     this->transform();
 }

@@ -295,7 +295,7 @@ bool CGraphics::init()
     // Enable anti-aliasing
     glEnable(GL_LINE_SMOOTH);
     glShadeModel(GL_SMOOTH);
-    glEnable(GL_POLYGON_SMOOTH);
+//     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
 
     // Test for depthbuffer and enable if possible
@@ -358,8 +358,8 @@ bool CGraphics::init()
 ///
 /// This method reinitialises the OpenGL-matrices for the new resolution.
 ///
-/// \param _unX New x-resolution
-/// \param _unY New y-resolution
+/// \param _unWidthScr New x-resolution
+/// \param _unHeightScr New y-resolution
 ///
 /// \return Success
 ///
@@ -540,13 +540,15 @@ void CGraphics::zoomCamTo(const double& _fFac)
 ///
 /// \param _vecC    Center of circle
 /// \param _fR      Radius of circle
+/// \param _fNrOfSeg Number of segments
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::circle(const Vector2d& _vecC, const double& _fR) const
+void CGraphics::circle(const Vector2d& _vecC, const double& _fR, const double& _fNrOfSeg) const
 {
     METHOD_ENTRY("CGraphics::circle")
 
     double fAng = 0.0;
+    double fFac = 2.0/_fNrOfSeg;
 
     glBegin(GL_LINE_LOOP);
         while (fAng < 2.0*M_PI)
@@ -554,7 +556,7 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR) const
             glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
                         _vecC[1]+std::cos(fAng)*_fR,
                         -10.0);
-            fAng += M_PI / 50;
+            fAng += M_PI * fFac;
         }
     glEnd();
 }
@@ -615,6 +617,37 @@ void CGraphics::dots(const std::vector<Vector2d>& _Dots,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw a circle
+///
+/// \param _vecC    Center of circle
+/// \param _fR      Radius of circle
+/// \param _fNrOfSeg Number of segments
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR, const double& _fNrOfSeg) const
+{
+    METHOD_ENTRY("CGraphics::filledCircle")
+
+    double fAng = 0.0;
+    double fFac = 2.0/_fNrOfSeg;
+
+    glBegin(GL_TRIANGLE_FAN);
+        glVertex3d( _vecC[0], _vecC[1],-10.0);
+        while (fAng < 2.0*M_PI)
+        {
+            glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
+                        _vecC[1]+std::cos(fAng)*_fR,
+                        -10.0);
+            fAng += M_PI * fFac;
+        }
+        glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
+                    _vecC[1]+std::cos(fAng)*_fR,
+                    -10.0);
+    glEnd();
 /// \brief Draw a polygon line
 ///
 /// \param _Vertices List of vertices

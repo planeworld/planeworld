@@ -37,13 +37,13 @@
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
+#include "joint.h"
 #include "multi_buffer.h"
 #include "unique_id_user.h"
 
 class CDebris;
 class IEmitter;
 class CObject;
-class IJoint;
 class IShape;
 
 typedef std::list<IJoint*>                      JointsType;                 ///< Specifies a list of joints

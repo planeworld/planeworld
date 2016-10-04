@@ -41,6 +41,8 @@
 #include <thread>
 
 //--- Program header ---------------------------------------------------------//
+#include "log.h"
+
 #include "conf_pw.h"
 #include "circular_buffer.h"
 #include "debris_emitter.h"
@@ -200,7 +202,7 @@ int main(int argc, char *argv[])
         {
             pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
             pVisualsManager->setFont(XMLImporter.getFont());
-            pCamera=XMLImporter.getCamera();
+            pCamera=pVisualsManager->getCurrentCamera();
         }
         Universe.clone(XMLImporter.getUniverse());
     }
@@ -325,6 +327,12 @@ int main(int argc, char *argv[])
                                 case sf::Keyboard::Return:
                                 {
                                     pPhysicsManager->resetTime();
+                                    break;
+                                }
+                                case sf::Keyboard::C:
+                                {
+                                    pVisualsManager->cycleCamera();
+                                    pCamera=pVisualsManager->getCurrentCamera();
                                     break;
                                 }
                                 case sf::Keyboard::B:

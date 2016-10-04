@@ -39,7 +39,9 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_pPhysicsManager(nullptr),
                                      m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
                                      m_nVisualisations(0),
-                                     m_nStarIndex(-1)
+                                     m_nStarIndex(-1),
+                                     m_unCameraIndex(0u),
+                                     m_pCamera(nullptr)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -388,26 +390,33 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
     for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
     {
         
-        if (Obj.second->getGeometry()->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+        if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(_pCamera->getBoundingBox()))
         {
-            for (const auto pShape : Obj.second->getGeometry()->getShapes())
+            if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth() * m_Graphics.getResPMX() < 2.0)
             {
-                switch (pShape->getShapeType())
+                m_Graphics.dot(Obj.second->getCOM()-_pCamera->getCenter());
+            }
+            else
+            {
+                for (const auto pShape : Obj.second->getGeometry()->getShapes())
                 {
-                    case ShapeType::CIRCLE:
-                        this->drawCircle(Obj.second, static_cast<CCircle*>(pShape), _pCamera);
-                        break;
-                    case ShapeType::PLANET:
-                        this->drawPlanet(Obj.second, static_cast<CPlanet*>(pShape), _pCamera);
-                        break;
-                    case ShapeType::POLYGON:
-                        this->drawPolygon(Obj.second, static_cast<CPolygon*>(pShape), _pCamera);
-                        break;
-                    case ShapeType::TERRAIN:
-                        break;
-                    case ShapeType::NONE:
-                        WARNING_MSG("Object Visuals", "Shapetype unknown, not drawing. This shouldn't happen!")
-                        break;
+                    switch (pShape->getShapeType())
+                    {
+                        case ShapeType::CIRCLE:
+                            this->drawCircle(Obj.second, static_cast<CCircle*>(pShape), _pCamera);
+                            break;
+                        case ShapeType::PLANET:
+                            this->drawPlanet(Obj.second, static_cast<CPlanet*>(pShape), _pCamera);
+                            break;
+                        case ShapeType::POLYGON:
+                            this->drawPolygon(Obj.second, static_cast<CPolygon*>(pShape), _pCamera);
+                            break;
+                        case ShapeType::TERRAIN:
+                            break;
+                        case ShapeType::NONE:
+                            WARNING_MSG("Object Visuals", "Shapetype unknown, not drawing. This shouldn't happen!")
+                            break;
+                    }
                 }
             }
             
@@ -447,13 +456,14 @@ void CVisualsManager::drawBoundingBoxes() const
 //                               m_pCamera->getCenter());
         m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
         m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
-                          m_pCamera->getBoundingCircleRadius());
+                          m_pCamera->getBoundingCircleRadius(),100.0);
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
         
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
             // Object bounding boxes
+            // Multiframe
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
             m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
                             IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
@@ -463,6 +473,17 @@ void CVisualsManager::drawBoundingBoxes() const
             m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
                                   IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
                                   pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+            // Singleframe
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+            m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
+                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                            pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
+                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+            m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
+                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                  pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
                                   IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
              // Shape bounding boxes
             for (const auto pShp : pObj.second->getGeometry()->getShapes())
@@ -889,22 +910,31 @@ void CVisualsManager::drawWorld() const
     {
         for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
         {
-            Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
-                              IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
-            Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter() - m_pCamera->getCenter() +
+            Vector2d vecPos = CKinematicsState::clipToWorldLimit(
+                                m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
+                                IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell())
+                              );
+            Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(
+                                    m_pUniverse->getStarSystems()[i]->Star().getOrigin() - m_pCamera->getCenter() +
                                      IUniverseScaled::cellToDouble
                                      (m_pUniverse->getStarSystems()[i]->getCell() -
-                                      m_pCamera->getCell());
+                                      m_pCamera->getCell())
+                                );
             
 
             // Draw stars in original scale
             if (m_pCamera->getBoundingBox().isInside(vecPos))
             {
                 
-                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->Star().getStarType()+0.3;
                 m_Graphics.setColor(0.8,fColor,0.3);
-                m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getStarType());
-                m_Graphics.dot(vecPosRel);
+                
+                double fDrawSize = (m_pUniverse->getStarSystems()[i]->Star().getStarType()*0.3+1) * m_Graphics.getResMPX();
+                double fRadius   = m_pUniverse->getStarSystems()[i]->Star().getRadius();
+                if (fDrawSize > fRadius)
+                    m_Graphics.filledCircle(vecPosRel, fDrawSize, 7.0);
+                else
+                    m_Graphics.filledCircle(vecPosRel, (m_pUniverse->getStarSystems()[i]->Star().getRadius()), 100.0);
             }
 //             // Draw stars in reduced scale for background
 //             if (m_pCamera->getBoundingBox().isInside(1.0/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)) + m_pCamera->getCenter()+IUniverseScaled::cellToDouble(m_pCamera->getCell())))
@@ -972,16 +1002,18 @@ void CVisualsManager::drawWorld() const
     if (m_nVisualisations & VISUALS_NAMES)
     {
         int nTextSize = 16;
+                
         m_Graphics.getWindow()->pushGLStates();    
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
             if (m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() > 1.0)
             {
-                Vector2d vecPosRel = pObj.second->getCOM()-
+                Vector2d vecPosRel = CKinematicsState::clipToWorldLimit( 
+                                    pObj.second->getCOM()-
                                     m_pCamera->getCenter()+
                                     IUniverseScaled::cellToDouble
                                     (pObj.second->getCell()-
-                                    m_pCamera->getCell());
+                                    m_pCamera->getCell()));
                 
                 // Now draw the text
                 sf::Text text;
@@ -998,26 +1030,27 @@ void CVisualsManager::drawWorld() const
                 m_Graphics.getWindow()->draw(text);
             }
         }
-        if (1.0e9 * m_Graphics.getResPMX() < 1.0)
+//         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
             for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
             {
-                Vector2d vecPos = m_pUniverse->getStarSystems()[i]->getCenter() +
-                                  IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell());
+                Vector2d vecPos = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
+                                  IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()));
                 if (m_pCamera->getBoundingBox().isInside(vecPos))
                 {
-                    Vector2d vecPosRel = m_pUniverse->getStarSystems()[i]->getCenter()-
+                    Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-
                                         m_pCamera->getCenter()+
                                         IUniverseScaled::cellToDouble
                                         (m_pUniverse->getStarSystems()[i]->getCell()-
-                                          m_pCamera->getCell());
+                                          m_pCamera->getCell()));
                     
                     // Now draw the text
                     sf::Text text;
-                    double fColor=0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
+                    double fColor=0.1*m_pUniverse->getStarSystems()[i]->Star().getStarType()+0.3;
                     sf::Color color(0.8*255, fColor*255, 0.3*255);
                     
-                    text.setString(m_pUniverse->getStarSystems()[i]->getName());
+                    text.setString(m_pUniverse->getStarSystems()[i]->Star().getName() + "\n" +
+                                   std::to_string(m_pUniverse->getStarSystems()[i]->Star().getRadius()));
                     text.setFont(m_Font);
                     text.setCharacterSize(nTextSize);
                     text.setFillColor(color);
@@ -1054,7 +1087,7 @@ void CVisualsManager::drawWorld() const
             for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
             {
                 m_Graphics.setColor(0.2,0.2,0.5);
-                m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
+                m_Graphics.circle(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-m_pCamera->getCenter()+
                                     IUniverseScaled::cellToDouble(
                                         m_pUniverse->getStarSystems()[i]->getCell()-
                                         m_pCamera->getCell()),
@@ -1064,6 +1097,19 @@ void CVisualsManager::drawWorld() const
             }
         }
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Cycle through cameras, using index
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::cycleCamera()
+{
+    METHOD_ENTRY("CVisualsManager::cycleCamera")
+    ++m_unCameraIndex;
+    if (m_unCameraIndex == m_pVisualsDataStorage->getCamerasByIndex().size())
+        m_unCameraIndex = 0u;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1091,7 +1137,7 @@ void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
 
-    m_pCamera = (*m_pVisualsDataStorage->getCamerasByName().cbegin()).second;
+    m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
     
     this->drawGrid();
     this->drawTrajectories();

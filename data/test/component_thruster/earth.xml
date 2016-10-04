@@ -11,7 +11,6 @@
     />
     <body_core
         angle_velocity__deg="0.0041780742"
-        inertia="8.0e37"
     />
     <shape
         type="shape_planet"
@@ -22,7 +21,6 @@
         ground_resolution="0.001"
         center_x="0.0"
         center_y="0.0">
-        <visuals type="shape_visuals_planet"/>
     </shape>
     <!-- Create Launch Pad on Earth -->
     <shape
@@ -31,7 +29,6 @@
         mass="100.0"
         points="-1000.0,  6378.16e3;
                  1000.0,  6378.16e3">
-        <visuals type="shape_visuals_polygon"/>
     </shape>
     <shape
         type="shape_polygon"
@@ -43,6 +40,5 @@
                   10.0,  6378.165e3;
                  100.0,  6378.18e3;
                  500.0,  6378.16e3">
-        <visuals type="shape_visuals_polygon"/>
     </shape>
 </object>

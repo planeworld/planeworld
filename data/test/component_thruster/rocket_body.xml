@@ -14,7 +14,6 @@
     <body_core
         angle="-0.000062891233353584"
         angle_velocity="0.0"
-        inertia="10000000.0"
     />
     <shape
         type="shape_polygon"
@@ -25,7 +24,6 @@
                   2.7,  18.0;
                   0.0,  27.0;
                  -2.7,  18.0">
-        <visuals type="shape_visuals_polygon"/>
     </shape>
     <shape
         type="shape_polygon"
@@ -36,7 +34,6 @@
                  -5.7,   0.0;
                  -4.2,   4.0;
                  -2.7,   0.0;">
-        <visuals type="shape_visuals_polygon"/>
     </shape>
     <shape
         type="shape_polygon"
@@ -47,6 +44,5 @@
                   5.7,   0.0;
                   4.2,   4.0;
                   2.7,   0.0;">
-        <visuals type="shape_visuals_polygon"/>
     </shape>    
 </object>

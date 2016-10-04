@@ -1,0 +1,32 @@
+<!DOCTYPE PlaneworldML>
+<universe
+  procedural_generation="true"
+  seed="1072"
+  number_of_stars="10000"
+>
+  <gravity
+    vec_x="0.0"
+    vec_y="0.0"
+  />
+  <config file="component_thruster/config.xml"/>
+  
+  <!-- Create the active camera -->
+  <camera
+    hook="RocketBody"
+    enable_angle_hook="true"
+    position_x="0.0"
+    position_y="0.0"
+    viewport_width="600.0"
+    viewport_height="400.0"
+  />
+  
+  <!-- Create thruster components -->
+  <component file="component_thruster/booster_left.xml" />
+  <component file="component_thruster/booster_right.xml" />
+  <component file="component_thruster/main_thruster.xml" />
+  <component file="component_thruster/controller_thruster_left.xml" />
+  <component file="component_thruster/controller_thruster_right.xml" />
+
+  <object file="component_thruster/rocket_body.xml"/>
+  <object file="component_thruster/earth.xml" />
+</universe>

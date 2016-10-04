@@ -62,6 +62,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         ~CVisualsManager();
         
         //--- Constant Methods -----------------------------------------------//
+        CCamera*        getCurrentCamera() const;
         const double&   getFrequency() const;
         bool            getVisualisation(const int&) const;
         int             getVisualisations() const;
@@ -70,6 +71,8 @@ class CVisualsManager : virtual public CGraphicsBase,
         bool            initGraphics() const;
                 
         //--- Methods --------------------------------------------------------//
+        void            cycleCamera();
+        
         void            finishFrame();
         void            processFrame();
         
@@ -104,6 +107,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         double                          m_fFrequency;       ///< Frequency of visuals update
         int                             m_nVisualisations;  ///< Additional graphical output
         std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star
+        std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera
         CCamera*                        m_pCamera;          ///< Camera for player view
         
         std::string                     m_strFont;          ///< Font name and location
@@ -111,6 +115,19 @@ class CVisualsManager : virtual public CGraphicsBase,
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns currently used camera
+///
+/// \return Camera currently used
+///
+////////////////////////////////////////////////////////////////////////////////
+inline CCamera* CVisualsManager::getCurrentCamera() const
+{
+    METHOD_ENTRY("CVisualsManager::getCurrentCamera")
+    return (m_pVisualsDataStorage->getCamerasByIndex())[m_unCameraIndex];
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

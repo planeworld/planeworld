@@ -53,12 +53,12 @@ class CDebrisVisualsThruster : virtual public CGraphicsBase,
 
         //--- Constructor/Destructor -----------------------------------------//
         CDebrisVisualsThruster(CDebris*);
-        ~CDebrisVisualsThruster();
         
         //--- Constant Methods -----------------------------------------------//
-        void draw(const CCamera* const) const;
+        void draw(CCamera* const) const;
                 
         //--- Methods --------------------------------------------------------//
+        
         
     private:
         

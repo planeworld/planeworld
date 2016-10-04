@@ -170,14 +170,22 @@ void CGeometry::transform(const double& _fAngle, const Vector2d& _vecOrigin)
 {
     METHOD_ENTRY("CGeometry::transform")
     
+    // Initialise multi frame bounding box with previous time step
     ShapesType::const_iterator ci = m_Shapes.cbegin();
     m_AABB = (*ci)->getBoundingBox();
     while ((++ci) != m_Shapes.cend())
     {
-        // Update bounding box of previous time step for continuous collision dection
+        
         m_AABB.update((*ci)->getBoundingBox());
     }
+    
     this->update();
+    
+    // Initialise single frame bounding box
+    m_AABBS.setLowerLeft(m_vecCOM+_vecOrigin);
+    m_AABBS.setUpperRight(m_vecCOM+_vecOrigin);
+    
+    // Update Bounding boxes with current time step
     for (ShapesType::const_iterator ci = m_Shapes.cbegin();
          ci != m_Shapes.cend(); ++ci)
     {
@@ -186,8 +194,8 @@ void CGeometry::transform(const double& _fAngle, const Vector2d& _vecOrigin)
         // Update depthlayers
 //         m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
 
-        // Update bounding box of current time step
         m_AABB.update((*ci)->getBoundingBox());
+        m_AABBS.update((*ci)->getBoundingBox());
     }
 }
 
@@ -233,10 +241,6 @@ void CGeometry::update()
         DOM_VAR(DEBUG_MSG("Geometry", "Center of mass calculated: " << m_vecCOM[0] << ", " << m_vecCOM[1]))
         DOM_VAR(DEBUG_MSG("Geometry", "Inertia calculated: " << m_fInertia))
     }
-//     for (auto it : *m_pShapes)
-//     {
-//         it->swapBuffer();
-//     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -256,6 +260,7 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
     std::string strTmp;
     _is >> strTmp;
     _is >> _Geo.m_AABB;
+    _is >> _Geo.m_AABBS;
     _is >> _Geo.m_vecCOM[0] >> _Geo.m_vecCOM[1];
     _is >> _Geo.m_fInertia;
     _is >> _Geo.m_fMass;
@@ -300,6 +305,7 @@ std::ostream& operator<<(std::ostream& _os, CGeometry& _Geo)
     
     _os << "Geometry:" << std::endl;
     _os << _Geo.m_AABB << std::endl;
+    _os << _Geo.m_AABBS << std::endl;
     _os << _Geo.m_vecCOM << " " << _Geo.m_vecCOM << std::endl;
     _os << _Geo.m_fInertia << std::endl;
     _os << _Geo.m_fMass << std::endl;
@@ -324,6 +330,7 @@ void CGeometry::copy(const CGeometry& _Geom)
     METHOD_ENTRY("CGeometry::copy")
     
     m_AABB = _Geom.m_AABB;
+    m_AABBS = _Geom.m_AABBS;
 
     // Free memory if pointer is still existent
     for (auto pShp : m_Shapes)

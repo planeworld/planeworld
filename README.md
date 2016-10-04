@@ -43,6 +43,7 @@ Usage
 | g                        | Show grid                       |
 | b                        | Show bounding boxes             |
 | k                        | Show kinematics states          |
+| c                        | Cycle through cameras           |
 | l                        | Load game state                 |
 | n                        | Show names                      |
 | s                        | Save game state                 |

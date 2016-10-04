@@ -28,6 +28,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
 #include <random>
 
 #include "engine_common.h"
@@ -87,39 +88,54 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     
     Generator.seed(_nSeed);
     
-    // Density = m_nNrOfStars/(3.0*fSigma * 2.0*M_PI) = 0.4/30.857e15;
-    double fSigma = _nNumberOfStars * 30.857e15;
-//     double fSigma = _nNumberOfStars * 30.857e8 / (0.4*3.0*2.0*M_PI);
+    double fDistanceAvg = 33.e15; // Average distance of stars (~3.5 ly)
+    double fLimit = std::sqrt(double(_nNumberOfStars)) * fDistanceAvg;
+    
+    CKinematicsState::setWorldLimit(fLimit, fLimit);
     
     std::exponential_distribution<double>   ExponentialDistribution(3.5);
-    std::uniform_real_distribution<double>  UniformDistribution(-fSigma,fSigma);
+    std::uniform_real_distribution<double>  UniformDistribution(-fLimit,fLimit);
     std::poisson_distribution<int>          PoissionDistribution(4);
     std::vector<int> vecNrOfPlanets;
     std::vector<int> vecNrOfStars(nNrOfStarTypes,0);
 
     int nNrOfPlanets = 0;
     
-    // Create a globular cluster
+    double fMin = 10000.0;
+    double fMax = 10000.0;
+    
+    // Create a star field
     for (int i=0; i<_nNumberOfStars; ++i)
     {
         double fNumber = ExponentialDistribution(Generator);
-        if (fNumber<1.0)
-        {
-            ++vecNrOfStars[int(nNrOfStarTypes*fNumber)];
+        
+        // Calculate temperature of star
+        double fTemp = (fNumber * 50000.0) + 2000.0 -
+                        ExponentialDistribution(Generator)*500.0;
+        if (fTemp < 100.0) fTemp = 100.0;
+    
+        // Calculate stellar class of star
+        std::uint8_t nStellarClass = static_cast<int>(nNrOfStarTypes*fNumber);
+        if (nStellarClass >= nNrOfStarTypes) nStellarClass = nNrOfStarTypes - 1;
+        DOM_STATS(DEBUG(++vecNrOfStars[nStellarClass];))
+        
+        
+            
             
             CStarSystem* pStarSystem = new CStarSystem();
             MEM_ALLOC("CStarSystem");
 
             Vector2i vecCell;
-            Vector2d vecCenter;
+            Vector2d vecOrigin;
             Vector2d vecPosition(UniformDistribution(Generator), UniformDistribution(Generator));
             
-            IUniverseScaled::separateCenterCell(vecPosition,vecCenter,vecCell);
+            IUniverseScaled::separateCenterCell(vecPosition,vecOrigin,vecCell);
             
-            pStarSystem->setName(StarNameGenerator.getName());
-            pStarSystem->setStarType(int(nNrOfStarTypes*fNumber));
+            pStarSystem->Star().setName(StarNameGenerator.getName());
+            pStarSystem->Star().setStarType(int(nNrOfStarTypes*fNumber));
+            pStarSystem->Star().setOrigin(vecOrigin);
+            pStarSystem->Star().setRadius((0.5+7.0*fNumber)*SOLAR_RADIUS);
             pStarSystem->setSeed(i);
-            pStarSystem->setCenter(vecCenter);
             pStarSystem->setCell(vecCell);
             pStarSystem->setNumberOfPlanets(PoissionDistribution(Generator));
             nNrOfPlanets += pStarSystem->getNumberOfPlanets();
@@ -128,15 +144,14 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             if (pStarSystem->getNumberOfPlanets() > m_nNrOfPlanetsMax)
             {
                 m_nNrOfPlanetsMax = pStarSystem->getNumberOfPlanets();
-                vecNrOfPlanets.resize(m_nNrOfPlanetsMax,0);
+                vecNrOfPlanets.resize(m_nNrOfPlanetsMax+1,0);
             }
             
             m_StarSystems.push_back(pStarSystem);
             
-            ++vecNrOfPlanets[pStarSystem->getNumberOfPlanets()];
-        }
+            DOM_STATS(DEBUG(++vecNrOfPlanets[pStarSystem->getNumberOfPlanets()];))
     }
-
+    
     DOM_STATS(
     INFO_MSG("Universe generator", "Generated " << m_StarSystems.size() << " Stars.")
     DEBUG(

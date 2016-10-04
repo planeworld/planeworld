@@ -110,6 +110,7 @@ void CVisualsDataStorage::addCamera(CCamera* _pCamera)
     METHOD_ENTRY("CVisualsDataStorage::addCamera")
     
     m_CamerasByName.insert({_pCamera->getName(), _pCamera});
+    m_CamerasByIndex.push_back(_pCamera);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

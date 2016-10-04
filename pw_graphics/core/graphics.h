@@ -199,9 +199,10 @@ class CGraphics
         //
 
         //--- Constant methods -----------------------------------------------//
-        void circle(const Vector2d&, const double&) const;
+        void circle(const Vector2d&, const double&, const double& = 12.0) const;
         void dot(const Vector2d&) const;
         void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
+        void filledCircle(const Vector2d&, const double&, const double& = 12.0) const;
         void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void rect(const Vector2d&, const Vector2d&) const;
         void showVec(const Vector2d&, const Vector2d&) const;
