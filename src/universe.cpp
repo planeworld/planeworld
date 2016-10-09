@@ -93,7 +93,8 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     
     CKinematicsState::setWorldLimit(fLimit, fLimit);
     
-    std::exponential_distribution<double>   ExponentialDistribution(3.5);
+    std::exponential_distribution<double>   ExponentialDistribution(5.5);
+    std::normal_distribution<double>        NormalDistribution(0.0,1.0);
     std::uniform_real_distribution<double>  UniformDistribution(-fLimit,fLimit);
     std::poisson_distribution<int>          PoissionDistribution(4);
     std::vector<int> vecNrOfPlanets;
@@ -166,7 +167,8 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         for (int i=0; i<nNrOfStarTypes; ++i)
         {
             std::cout << "Class " << this->starClassToString(i) << ": ";
-            std::cout << std::string(double(vecNrOfStars[i])/double(nMax)*60.0,'#') << std::endl;
+            std::cout << std::string(double(vecNrOfStars[i])/double(nMax)*60.0,'#') << 
+                         " " << double(vecNrOfStars[i]) / _nNumberOfStars * 100.0 << "%" << std::endl;
         }
         Log.logSeparator();
     )
