@@ -630,6 +630,31 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR) const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draw a filled rectangle in screen space
+///
+/// \param _vecLL   Lower left corner
+/// \param _vecUR   Upper right corner
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::filledRectSS(const Vector2d& _vecLL, const Vector2d& _vecUR) const
+{
+    METHOD_ENTRY("CGraphics::filledRectSS")
+    
+    Vector2d vecLL = screen2World(_vecLL[0], _vecLL[1]);
+    Vector2d vecLR = screen2World(_vecUR[0], _vecLL[1]);
+    Vector2d vecUL = screen2World(_vecLL[0], _vecUR[1]);
+    Vector2d vecUR = screen2World(_vecUR[0], _vecUR[1]);
+    
+    glBegin(GL_QUADS);
+        glVertex3d(vecLL[0], vecLL[1], -15.0);
+        glVertex3d(vecLR[0], vecLR[1], -15.0);
+        glVertex3d(vecUR[0], vecUR[1], -15.0);
+        glVertex3d(vecUL[0], vecUL[1], -15.0);
+    glEnd();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw a polygon line
 ///
 /// \param _Vertices List of vertices
@@ -695,6 +720,31 @@ void CGraphics::rect(const Vector2d& _vecLL, const Vector2d& _vecUR) const
         glVertex3d(_vecUR[0], _vecLL[1], -15.0);
         glVertex3d(_vecUR[0], _vecUR[1], -15.0);
         glVertex3d(_vecLL[0], _vecUR[1], -15.0);
+    glEnd();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw a rectangle in screen space
+///
+/// \param _vecLL   Lower left corner
+/// \param _vecUR   Upper right corner
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::rectSS(const Vector2d& _vecLL, const Vector2d& _vecUR) const
+{
+    METHOD_ENTRY("CGraphics::rectSS")
+    
+    Vector2d vecLL = screen2World(_vecLL[0], _vecLL[1]);
+    Vector2d vecLR = screen2World(_vecUR[0], _vecLL[1]);
+    Vector2d vecUL = screen2World(_vecLL[0], _vecUR[1]);
+    Vector2d vecUR = screen2World(_vecUR[0], _vecUR[1]);
+    
+    glBegin(GL_LINE_LOOP);
+        glVertex3d(vecLL[0], vecLL[1], -15.0);
+        glVertex3d(vecLR[0], vecLR[1], -15.0);
+        glVertex3d(vecUR[0], vecUR[1], -15.0);
+        glVertex3d(vecUL[0], vecUL[1], -15.0);
     glEnd();
 }
 

@@ -33,12 +33,26 @@
 
 //--- Standard header --------------------------------------------------------//
 #include <functional>
+#include <map>
 #include <unordered_map>
+#include <vector>
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
+
+/// Specifies a parameter type
+enum class ParameterType
+{
+    VOID,
+    CUSTOM_OBJ,
+    BOOL,
+    DOUBLE,
+    INT,
+    STRING,
+    UID
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -74,7 +88,28 @@ class CComCallback : public IBaseComCallback
 };
 
 /// Map of functions, accessed by name
-typedef std::unordered_map<std::string, IBaseComCallback*> RegisteredFunctionsType;
+typedef std::map<std::string, IBaseComCallback*> RegisteredFunctionsType;
+/// Map of descriptions, accessed by name
+typedef std::unordered_map<std::string, std::string> RegisteredFunctionsDescriptionType;
+/// Parameter list for functions
+typedef std::vector<std::pair<ParameterType, std::string>> ParameterListType;
+/// Map of parameter lists, accessed by function name
+typedef std::unordered_map<std::string, ParameterListType> RegisteredParameterListsType;
+/// Domain of function being registered
+typedef std::string DomainType;
+/// Map of domains, accessed by function name
+typedef std::unordered_map<std::string, DomainType> RegisteredDomainsType;
+
+//--- Enum parser ------------------------------------------------------------//
+static std::map<ParameterType, std::string> mapParameterToString = {
+    {ParameterType::VOID, "<void>"},
+    {ParameterType::CUSTOM_OBJ, "<custom_object>"},
+    {ParameterType::BOOL, "<bool>"},
+    {ParameterType::DOUBLE, "<double>"},
+    {ParameterType::INT, "<int>"},
+    {ParameterType::STRING, "<string>"},
+    {ParameterType::UID, "<uid>"}
+}; ///< Map from ParameterType to string
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -90,13 +125,19 @@ class CComInterface
         virtual ~CComInterface();
         
         //--- Constant Methods -----------------------------------------------//
-        void help() const;
+        RegisteredFunctionsType* getFunctions() {return &m_RegisteredFunctions;} 
         
         //--- Methods --------------------------------------------------------//
         template<class TRet, class... Args>
-        TRet call(const std::string& _strName, Args...);
+        TRet                call(const std::string& _strName, Args...);
+        const std::string&  call(const std::string&);
+        void                help();
         
-        bool registerFunction(const std::string&, IBaseComCallback* const);
+        bool registerFunction(const std::string&, IBaseComCallback* const,
+                              const std::string&,
+                              const ParameterListType& = {},
+                              const DomainType& = ""
+        );
         
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CComInterface&);
@@ -104,8 +145,10 @@ class CComInterface
         
     private:
         
-        RegisteredFunctionsType m_RegisteredFunctions; ///< Registered functions provided by modules
-      
+        RegisteredFunctionsType             m_RegisteredFunctions;       ///< Registered functions provided by modules
+        RegisteredFunctionsDescriptionType  m_RegisteredFunctionsDescriptions; // Descriptions of registered functions
+        RegisteredParameterListsType        m_RegisteredFunctionsParams; ///< Parameter lists of registered functions      
+        RegisteredDomainsType               m_RegisteredFunctionsDomain; ///< Domain of registered functions
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -41,7 +41,8 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_nVisualisations(0),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
-                                     m_pCamera(nullptr)
+                                     m_pCamera(nullptr),
+                                     m_bConsoleMode(false)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -430,6 +431,42 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
     //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, +0.6)) -_pCamera->getCenter());
     //         m_Graphics.endLine();
         }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws console if console mode is active
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawConsole() const
+{
+    METHOD_ENTRY("CVisualsManager::drawConsole")
+
+    if (m_bConsoleMode)
+    {
+        m_Graphics.setColor(1.0, 0.0, 0.0, 0.8);
+        m_Graphics.rectSS(Vector2d(10.0, m_Graphics.getHeightScr()*0.3),
+                        Vector2d(m_Graphics.getWidthScr() *0.3, 10.0));
+        m_Graphics.setColor(0.5, 0.0, 0.0, 0.2);
+        m_Graphics.filledRectSS(Vector2d(10.0, m_Graphics.getHeightScr()*0.3),
+                                Vector2d(m_Graphics.getWidthScr() *0.3, 10.0));
+        m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
+        
+        std::stringstream oss;
+        
+        oss << "> " << m_strConsoleText;
+
+        m_Graphics.getWindow()->pushGLStates();
+        sf::Text Text;
+        Text.setString(oss.str());
+        Text.setFont(m_Font);
+        Text.setCharacterSize(12);
+        Text.setPosition(20.0, 20.0);
+        m_Graphics.getWindow()->draw(Text);
+        m_Graphics.getWindow()->popGLStates();        
+        
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
 }
     
@@ -1123,7 +1160,7 @@ void CVisualsManager::finishFrame()
     m_Graphics.swapBuffers();
     m_pDataStorage->swapFront();
 
-    // Attach camera to current front buffer (at the moment, this is need for the kinematics state)
+    // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
     if (m_pCamera->gotRef())
         m_pCamera->attachTo(m_pDataStorage->getObjectsByValueFront()->at(m_pCamera->getUIDRef()));
 }
@@ -1146,6 +1183,7 @@ void CVisualsManager::processFrame()
     this->drawBoundingBoxes();
     this->drawGridHUD();
     this->drawTimers();
+    this->drawConsole();
     
     this->finishFrame();
 }

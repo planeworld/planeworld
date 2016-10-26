@@ -28,6 +28,8 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
@@ -59,37 +61,6 @@ inline TRet CComCallback<TRet, TArgs...>::call(TArgs... _Args)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Destructor, deletes callback functions
-///
-///////////////////////////////////////////////////////////////////////////////
-inline CComInterface::~CComInterface()
-{
-    METHOD_ENTRY("CComInterface::~CComInterface")
-    DTOR_CALL("CComInterface::~CComInterface")
-    for (auto pFunction : m_RegisteredFunctions)
-    {
-        if (pFunction.second != nullptr)
-        {
-            delete pFunction.second;
-            pFunction.second = nullptr;
-            MEM_FREED("IBaseComCallback")
-        }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief List all known functions
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CComInterface::help() const
-{
-    METHOD_ENTRY("CComInterface::help")
-    for (auto Com : m_RegisteredFunctions) std::cout << "Command: " << Com.first << std::endl;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Calls the given function if registered
 ///
 /// \param _strName Registered name of the function that should be called
@@ -101,14 +72,11 @@ template<class TRet, class... Args>
 inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
 {
     METHOD_ENTRY("CComInterface::call")
-    #ifdef LOGLEVEL_DEBUG
-        auto pFunction = dynamic_cast<CComCallback<TRet, Args...>*>(m_RegisteredFunctions[_strName]);
-    #else
-        auto pFunction = static_cast<CComCallback<TRet, Args...>*>(m_RegisteredFunctions[_strName]);
-    #endif
-    if (m_RegisteredFunctions.count(_strName) != 0)
+    
+    try
     {
         #ifdef LOGLEVEL_DEBUG
+            auto pFunction = dynamic_cast<CComCallback<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
             if (pFunction != nullptr )
             {
                 return pFunction->call(_Args...);
@@ -119,28 +87,13 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
                 return TRet();
             }
         #else
+            auto pFunction = static_cast<CComCallback<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
             return pFunction->call(_Args...);
         #endif
     }
-    else
+    catch (const std::out_of_range& oor)
     {
         WARNING_MSG("Com Interface", "Unknown function <" << _strName << ">. ")
         return TRet();
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Register the given function with its arguments
-///
-/// \param _strName Name the function should be registered under
-/// \param _pFunction Function to be registered
-///
-///////////////////////////////////////////////////////////////////////////////
-inline bool CComInterface::registerFunction(const std::string& _strName, IBaseComCallback* const _pFunction)
-{
-    METHOD_ENTRY("CComInterface::registerFunction")
-    m_RegisteredFunctions[_strName] = _pFunction;
-    MEM_ALLOC("IBaseComCallback")
-    return true;
 }

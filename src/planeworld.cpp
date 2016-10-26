@@ -48,6 +48,7 @@
 #include "com_interface.h"
 #include "debris_emitter.h"
 #include "game_state_manager.h"
+// #include "lua_manager.h"
 #include "physics_manager.h"
 #include "objects_emitter.h"
 #include "thruster.h"
@@ -140,7 +141,12 @@ int main(int argc, char *argv[])
     std::string strArgData("");
     
     CComInterface ComInterface;
-    ComInterface.registerFunction("quit", new CComCallback<void>(quit));
+    ComInterface.registerFunction("quit",
+                                  new CComCallback<void>(quit),
+                                  "Quit processing, clean up and end simulation.",
+                                  {{ParameterType::VOID, "No return value"}},
+                                  "system"
+                                 );
 //     ComInterface.registerFunction("test", test);
   
     if (argc < 2 || argc > 3)
@@ -237,6 +243,8 @@ int main(int argc, char *argv[])
     pPhysicsManager->initObjects();
     pPhysicsManager->initEmitters();
     pPhysicsManager->initComponents();
+    pPhysicsManager->setComInterface(&ComInterface);
+    pPhysicsManager->initComInterface();
     if (!pPhysicsManager->initLua()) CLEAN_UP_AND_EXIT_FAILURE;
     
     #ifdef PW_MULTITHREADING    
@@ -251,12 +259,30 @@ int main(int argc, char *argv[])
         pVisualsManager->initGraphics();
         pWindow=pVisualsManager->getWindowHandle();
         
-        ComInterface.registerFunction("cycle_camera",new CComCallback<void>([&](){pVisualsManager->cycleCamera();}));
-        ComInterface.registerFunction("get_current_camera", new CComCallback<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}));
-        ComInterface.registerFunction("rotate_camera_by", new CComCallback<void, double>([&](const double& _fAngle){pCamera->rotateBy(_fAngle);}));
+        ComInterface.registerFunction("cycle_camera",
+                                      new CComCallback<void>([&](){pVisualsManager->cycleCamera();}),
+                                      "Cycle through registered cameras",
+                                      {{ParameterType::VOID,"No return value"}},
+                                      "system"
+        );
+        ComInterface.registerFunction("get_current_camera",
+                                      new CComCallback<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}),
+                                      "Returns pointer to active camera",
+                                      {{ParameterType::CUSTOM_OBJ, "CCamera*, Currently active camera"}},
+                                      "system"
+        );
+        ComInterface.registerFunction("rotate_camera_by",
+                                      new CComCallback<void, double>([&](const double& _fAngle){pCamera->rotateBy(_fAngle);}),
+                                      "Rotate camera by given angle.",
+                                      {{ParameterType::VOID, "No return value"},
+                                       {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
+                                      "system"  
+        );
         
         bool bGraphicsOn = true;
         bool bMouseCursorVisible = false;
+        bool bConsoleMode = false;
+        std::string strConsoleCommand("");
         
         //--- Prepare for querying relative mouse movement -----------------------//
         sf::Vector2i vecMouse;
@@ -303,6 +329,21 @@ int main(int argc, char *argv[])
                         }
                         case sf::Event::KeyPressed:
                         {
+                            if (Event.key.code == sf::Keyboard::Home)
+                            {
+                                strConsoleCommand = "";
+                                bConsoleMode ^= true;
+                                pVisualsManager->toggleConsoleMode();
+                                INFO_MSG("Main","Console mode toggled")
+                                break;
+                            }
+                            if (Event.key.code == sf::Keyboard::Return && bConsoleMode)
+                            {
+                                ComInterface.call(strConsoleCommand);
+                                strConsoleCommand = "";
+                                break;
+                            }
+                            if (!bConsoleMode)
                             switch (Event.key.code)
                             {
                                 case sf::Keyboard::Escape:
@@ -461,6 +502,18 @@ int main(int argc, char *argv[])
                                 if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
                                 else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
                             }
+                        case sf::Event::TextEntered:
+                        {
+                            if (bConsoleMode)
+                            {
+                                if (Event.text.unicode > 31 && Event.text.unicode < 127)
+                                {
+                                    strConsoleCommand += static_cast<char>(Event.text.unicode);
+                                    pVisualsManager->setConsoleText(strConsoleCommand);
+                                }
+                            }
+                            break;
+                        }
                         default:
                             break;
                     }

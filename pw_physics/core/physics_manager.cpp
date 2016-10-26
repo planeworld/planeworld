@@ -193,11 +193,17 @@ void CPhysicsManager::initComInterface()
                                                 {
                                                   m_pDataStorage->getObjectsByNameBack()->operator[](_strName)->setAngle(_fMass);
                                                 }
-                                            ));
+                                            ),
+                                          "Sets rotation angle of a given object.",
+                                          {{ParameterType::VOID, "No return value"},
+                                           {ParameterType::STRING, "Object name"},
+                                           {ParameterType::DOUBLE, "Angle"}},
+                                           "physics"
+                                         );
     }
     else
     {
-        WARNING_MSG("Physics Manager", "Com interface not set, can register functions")
+        WARNING_MSG("Physics Manager", "Com interface not set, cannot register functions.")
     }
     
 //     auto ci = m_Components.cbegin();
@@ -303,7 +309,7 @@ bool CPhysicsManager::initLua()
                 lua_setfield(m_pLuaState, -2, "decelerate_time");
                 lua_pushcfunction(m_pLuaState, luaGetFrequency);
                 lua_setfield(m_pLuaState, -2, "get_frequency");
-                lua_pushcfunction(m_pLuaState, luaPause);
+                lua_pushcfunction(m_pLuaState, [](lua_State* _pLuaState) -> int {m_pLuaThis->m_bPaused = true; return 0;});
                 lua_setfield(m_pLuaState, -2, "pause");
                 lua_pushcfunction(m_pLuaState, luaResume);
                 lua_setfield(m_pLuaState, -2, "resume");
