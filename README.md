@@ -49,6 +49,7 @@ Usage
 | s                        | Save game state                 |
 | t                        | Show object trajectories        |
 | v                        | Toggle graphics (on/off)        |
+| Home                     | Toggle command console          |
 | ESC                      | Quit                            |
 | + / a                    | Accelerate time (only key-pad +)|
 | + / a  and CTRL          | ... and allow timestep increment|

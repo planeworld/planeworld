@@ -45,6 +45,7 @@
 
 #include "conf_pw.h"
 #include "circular_buffer.h"
+#include "com_console.h"
 #include "com_interface.h"
 #include "debris_emitter.h"
 #include "game_state_manager.h"
@@ -140,6 +141,7 @@ int main(int argc, char *argv[])
     std::string strArgOptions("");
     std::string strArgData("");
     
+    CComConsole   ComConsole;
     CComInterface ComInterface;
     ComInterface.registerFunction("quit",
                                   new CComCallback<void>(quit),
@@ -201,6 +203,7 @@ int main(int argc, char *argv[])
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
     if (bGraphics)
     {
+        pVisualsManager->setComConsole(&ComConsole);
         pVisualsManager->setWorldDataStorage(&WorldDataStorage);
         pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
     }
@@ -265,6 +268,12 @@ int main(int argc, char *argv[])
                                       {{ParameterType::VOID,"No return value"}},
                                       "system"
         );
+        ComInterface.registerFunction("help",
+                                      new CComCallback<void>([&](){ComInterface.help();}),
+                                      "Show command interface help",
+                                      {{ParameterType::VOID,"No return value"}},
+                                      "system"
+        );
         ComInterface.registerFunction("get_current_camera",
                                       new CComCallback<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}),
                                       "Returns pointer to active camera",
@@ -277,6 +286,24 @@ int main(int argc, char *argv[])
                                       {{ParameterType::VOID, "No return value"},
                                        {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
                                       "system"  
+        );
+        ComInterface.registerFunction("toggle_bboxes",
+                                      new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
+                                      "Toggle bounding boxes on and off.",
+                                      {{ParameterType::VOID, "No return value"}},
+                                      "visuals"
+        );
+        ComInterface.registerFunction("toggle_grid",
+                                      new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
+                                      "Toggle universe grid on and off.",
+                                      {{ParameterType::VOID, "No return value"}},
+                                      "visuals"  
+        );
+        ComInterface.registerFunction("toggle_timers",
+                                      new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_TIMERS);}),
+                                      "Toggle timers on and off.",
+                                      {{ParameterType::VOID, "No return value"}},
+                                      "visuals"  
         );
         
         bool bGraphicsOn = true;
@@ -337,142 +364,182 @@ int main(int argc, char *argv[])
                                 INFO_MSG("Main","Console mode toggled")
                                 break;
                             }
-                            if (Event.key.code == sf::Keyboard::Return && bConsoleMode)
+                            if (bConsoleMode)
                             {
-                                ComInterface.call(strConsoleCommand);
-                                strConsoleCommand = "";
-                                break;
+                                switch (Event.key.code)
+                                {
+                                    case sf::Keyboard::BackSpace:
+                                    {
+                                        if (!strConsoleCommand.empty())
+                                        {
+                                            strConsoleCommand.pop_back();
+                                        }
+                                        ComConsole.setCurrentCommand(strConsoleCommand);
+                                        break;
+                                    }
+                                    case sf::Keyboard::Home:
+                                    {
+                                        strConsoleCommand = "";
+                                        bConsoleMode ^= true;
+                                        pVisualsManager->toggleConsoleMode();
+                                        INFO_MSG("Main","Console mode toggled")
+                                        break;
+                                    }
+                                    case sf::Keyboard::Up:
+                                    {
+                                        ComConsole.prevCommand();
+                                        strConsoleCommand = ComConsole.getCurrentCommand();
+                                        break;
+                                    }
+                                    case sf::Keyboard::Down:
+                                    {
+                                        ComConsole.nextCommand();
+                                        strConsoleCommand = ComConsole.getCurrentCommand();
+                                        break;
+                                    }
+                                    case sf::Keyboard::Return:
+                                    {
+                                        ComInterface.call(strConsoleCommand);
+                                        ComConsole.addCommand(strConsoleCommand);
+                                        strConsoleCommand = "";
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
                             }
-                            if (!bConsoleMode)
-                            switch (Event.key.code)
+                            else
                             {
-                                case sf::Keyboard::Escape:
+                                switch (Event.key.code)
                                 {
-                                    ComInterface.call<void>("quit");
-                                    break;
-                                }
-                                case sf::Keyboard::Num0:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_TIMERS);
-                                    break;
-                                }
-                                case sf::Keyboard::Num1:
-                                {
-                                    pPhysicsManager->getSimTimerLocal()[0].toggle();
-                                    break;
-                                }
-                                case sf::Keyboard::Num2:
-                                {
-                                    pPhysicsManager->getSimTimerLocal()[1].toggle();
-                                    break;
-                                }
-                                case sf::Keyboard::Num3:
-                                {
-                                    pPhysicsManager->getSimTimerLocal()[2].toggle();
-                                    break;
-                                }
-                                case sf::Keyboard::Add:
-                                case sf::Keyboard::A:
-                                {
-                                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
-                                        sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
-                                        pPhysicsManager->accelerateTime(PHYSICS_ALLOW_STEP_SIZE_INC);
-                                    else
-                                        pPhysicsManager->accelerateTime();
-                                    break;
-                                }
-                                case sf::Keyboard::Subtract:
-                                case sf::Keyboard::Dash:
-                                case sf::Keyboard::D:
-                                {
-                                    pPhysicsManager->decelerateTime();
-                                    break;
-                                }
-                                case sf::Keyboard::Return:
-                                {
-                                    pPhysicsManager->resetTime();
-                                    break;
-                                }
-                                case sf::Keyboard::C:
-                                {
-//                                     pVisualsManager->cycleCamera();
-                                    ComInterface.call<void>("cycle_camera");
-                                    pCamera=ComInterface.call<CCamera*>("get_current_camera");
-//                                     pCamera=pVisualsManager->getCurrentCamera();
-                                    break;
-                                }
-                                case sf::Keyboard::B:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
-                                    break;
-                                }
-                                case sf::Keyboard::G:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
-                                    break;
-                                }
-                                case sf::Keyboard::K:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_KINEMATICS_STATES);
-                                    break;
-                                }
-                                case sf::Keyboard::L:
-                                {
-                                    /// \todo Really check if physics thread is paused before saving the simulation
-                                    pPhysicsManager->pause();
-                                    GameStateManager.load();
-                                    pCamera=(*VisualsDataStorage.getCamerasByName().cbegin()).second;
-                                    pPhysicsManager->togglePause();
-                                    break;
-                                }
-                                case sf::Keyboard::N:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_NAMES);
-                                    break;
-                                }
-                                case sf::Keyboard::P:
-                                {
-                                    pPhysicsManager->togglePause();
-                                    break;
-                                }
-                                case sf::Keyboard::S:
-                                {
-                                    /// \todo Really check if physics thread is paused before saving the simulation
-                                    pPhysicsManager->pause();
-                                    GameStateManager.save();
-                                    pPhysicsManager->togglePause();
-                                    break;
-                                }
-                                case sf::Keyboard::Space:
-                                {
-                                    pPhysicsManager->processOneFrame();
-                                    break;
-                                }
-                                case sf::Keyboard::T:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
-                                    break;
-                                }
-                                case sf::Keyboard::V:
-                                {
-                                    bGraphicsOn ^= 1;
-                                    bMouseCursorVisible ^= 1;
-                                    pWindow->setMouseCursorVisible(bMouseCursorVisible);
-                                    vecMouse.x=0;
-                                    vecMouse.y=0;
-                                    
-                                    if (bGraphicsOn)
+                                    case sf::Keyboard::Escape:
                                     {
-                                        INFO_MSG("Main", "Graphics reactivated.")
+                                        ComInterface.call<void>("quit");
+                                        break;
                                     }
-                                    else
+                                    case sf::Keyboard::Num0:
                                     {
-                                        INFO_MSG("Main", "Graphics deactivated, simulation still running...")
+                                        pVisualsManager->toggleVisualisations(VISUALS_TIMERS);
+                                        break;
                                     }
-                                    break;
+                                    case sf::Keyboard::Num1:
+                                    {
+                                        pPhysicsManager->getSimTimerLocal()[0].toggle();
+                                        break;
+                                    }
+                                    case sf::Keyboard::Num2:
+                                    {
+                                        pPhysicsManager->getSimTimerLocal()[1].toggle();
+                                        break;
+                                    }
+                                    case sf::Keyboard::Num3:
+                                    {
+                                        pPhysicsManager->getSimTimerLocal()[2].toggle();
+                                        break;
+                                    }
+                                    case sf::Keyboard::Add:
+                                    case sf::Keyboard::A:
+                                    {
+                                        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+                                            sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                                            pPhysicsManager->accelerateTime(PHYSICS_ALLOW_STEP_SIZE_INC);
+                                        else
+                                            pPhysicsManager->accelerateTime();
+                                        break;
+                                    }
+                                    case sf::Keyboard::Subtract:
+                                    case sf::Keyboard::Dash:
+                                    case sf::Keyboard::D:
+                                    {
+                                        pPhysicsManager->decelerateTime();
+                                        break;
+                                    }
+                                    case sf::Keyboard::Return:
+                                    {
+                                        pPhysicsManager->resetTime();
+                                        break;
+                                    }
+                                    case sf::Keyboard::C:
+                                    {
+    //                                     pVisualsManager->cycleCamera();
+                                        ComInterface.call<void>("cycle_camera");
+                                        pCamera=ComInterface.call<CCamera*>("get_current_camera");
+    //                                     pCamera=pVisualsManager->getCurrentCamera();
+                                        break;
+                                    }
+                                    case sf::Keyboard::B:
+                                    {
+                                        pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
+                                        break;
+                                    }
+                                    case sf::Keyboard::G:
+                                    {
+                                        pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
+                                        break;
+                                    }
+                                    case sf::Keyboard::K:
+                                    {
+                                        pVisualsManager->toggleVisualisations(VISUALS_KINEMATICS_STATES);
+                                        break;
+                                    }
+                                    case sf::Keyboard::L:
+                                    {
+                                        /// \todo Really check if physics thread is paused before saving the simulation
+                                        pPhysicsManager->pause();
+                                        GameStateManager.load();
+                                        pCamera=(*VisualsDataStorage.getCamerasByName().cbegin()).second;
+                                        pPhysicsManager->togglePause();
+                                        break;
+                                    }
+                                    case sf::Keyboard::N:
+                                    {
+                                        pVisualsManager->toggleVisualisations(VISUALS_NAMES);
+                                        break;
+                                    }
+                                    case sf::Keyboard::P:
+                                    {
+                                        pPhysicsManager->togglePause();
+                                        break;
+                                    }
+                                    case sf::Keyboard::S:
+                                    {
+                                        /// \todo Really check if physics thread is paused before saving the simulation
+                                        pPhysicsManager->pause();
+                                        GameStateManager.save();
+                                        pPhysicsManager->togglePause();
+                                        break;
+                                    }
+                                    case sf::Keyboard::Space:
+                                    {
+                                        pPhysicsManager->processOneFrame();
+                                        break;
+                                    }
+                                    case sf::Keyboard::T:
+                                    {
+                                        pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
+                                        break;
+                                    }
+                                    case sf::Keyboard::V:
+                                    {
+                                        bGraphicsOn ^= 1;
+                                        bMouseCursorVisible ^= 1;
+                                        pWindow->setMouseCursorVisible(bMouseCursorVisible);
+                                        vecMouse.x=0;
+                                        vecMouse.y=0;
+                                        
+                                        if (bGraphicsOn)
+                                        {
+                                            INFO_MSG("Main", "Graphics reactivated.")
+                                        }
+                                        else
+                                        {
+                                            INFO_MSG("Main", "Graphics deactivated, simulation still running...")
+                                        }
+                                        break;
+                                    }
+                                    default:
+                                        break;
                                 }
-                                default:
-                                    break;
                             }
                             break;
                         }
@@ -509,7 +576,7 @@ int main(int argc, char *argv[])
                                 if (Event.text.unicode > 31 && Event.text.unicode < 127)
                                 {
                                     strConsoleCommand += static_cast<char>(Event.text.unicode);
-                                    pVisualsManager->setConsoleText(strConsoleCommand);
+                                    ComConsole.setCurrentCommand(strConsoleCommand);
                                 }
                             }
                             break;

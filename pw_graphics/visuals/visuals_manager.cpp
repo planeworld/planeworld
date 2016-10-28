@@ -42,6 +42,7 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
                                      m_pCamera(nullptr),
+                                     m_pComConsole(nullptr),
                                      m_bConsoleMode(false)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
@@ -448,25 +449,30 @@ void CVisualsManager::drawConsole() const
         m_Graphics.setColor(1.0, 0.0, 0.0, 0.8);
         m_Graphics.rectSS(Vector2d(10.0, m_Graphics.getHeightScr()*0.3),
                         Vector2d(m_Graphics.getWidthScr() *0.3, 10.0));
-        m_Graphics.setColor(0.5, 0.0, 0.0, 0.2);
+        m_Graphics.setColor(0.25, 0.0, 0.0, 0.8);
         m_Graphics.filledRectSS(Vector2d(10.0, m_Graphics.getHeightScr()*0.3),
                                 Vector2d(m_Graphics.getWidthScr() *0.3, 10.0));
         m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
         
-        std::stringstream oss;
-        
-        oss << "> " << m_strConsoleText;
 
+        std::stringstream oss;
+        for (auto i=0u; i < m_pComConsole->getCommands().size(); ++i)
+        {
+            oss << "> " << m_pComConsole->getCommands().at(i) << "\n";
+        }
+        oss << "> " << m_pComConsole->getCurrentCommand() << "_";
         m_Graphics.getWindow()->pushGLStates();
         sf::Text Text;
+
         Text.setString(oss.str());
         Text.setFont(m_Font);
         Text.setCharacterSize(12);
         Text.setPosition(20.0, 20.0);
         m_Graphics.getWindow()->draw(Text);
         m_Graphics.getWindow()->popGLStates();        
-        
+            
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        
     }
 }
     

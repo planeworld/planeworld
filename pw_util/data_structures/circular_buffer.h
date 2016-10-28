@@ -81,7 +81,7 @@ class CCircularBuffer
         void copy(const CCircularBuffer<T>&);
         
         //--- Variables [private] --------------------------------------------//
-        size_t              m_nCapacity = 1;    ///< Capacity of the buffer
+        size_t              m_nCapacity = 0;    ///< Capacity of the buffer
         size_t              m_nBegin = 0;       ///< Index for first buffer entry
         size_t              m_nEnd =  0;        ///< Index for last buffer entry
         size_t              m_nSize = 0;        ///< Size from begin to end of buffer

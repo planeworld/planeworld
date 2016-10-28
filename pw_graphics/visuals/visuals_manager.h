@@ -34,6 +34,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "com_console.h"
 #include "physics_manager.h"
 #include "universe.h"
 #include "visuals_data_storage_user.h"
@@ -76,6 +77,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            finishFrame();
         void            processFrame();
         
+        void            setComConsole(CComConsole* const);
         void            setConsoleText(const std::string&);
         void            setFont(const std::string&);
         void            setFrequency(const double&);
@@ -113,6 +115,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera
         CCamera*                        m_pCamera;          ///< Camera for player view
         
+        CComConsole*                    m_pComConsole;      ///< Active com console
         bool                            m_bConsoleMode;     ///< Indicates if console mode is active
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name and location
@@ -201,6 +204,19 @@ inline void CVisualsManager::setConsoleText(const std::string& _strText)
     {
         m_strConsoleText = _strText;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the active com console for visualisation
+///
+/// \param _pComConsole Active console to be set for visualisation
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CVisualsManager::setComConsole(CComConsole* const _pComConsole)
+{
+    METHOD_ENTRY("CVisualsManager::setComConsole")
+    m_pComConsole = _pComConsole;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
