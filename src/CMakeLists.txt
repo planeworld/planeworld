@@ -25,6 +25,7 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects
+    ${CMAKE_HOME_DIRECTORY}/pw_system
     ${CMAKE_HOME_DIRECTORY}/pw_unit
     ${CMAKE_HOME_DIRECTORY}/include
 )
@@ -52,6 +53,8 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/debris.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/object.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_system/com_console.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_system/com_interface.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
@@ -59,8 +62,6 @@ SET(SRCS
     bounding_box.cpp
     camera.cpp
     collision_manager.cpp
-    com_console.cpp
-    com_interface.cpp
     kinematics_state.cpp
     namegenerator.cpp
     parzival.cpp
