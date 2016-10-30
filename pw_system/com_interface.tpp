@@ -93,7 +93,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
     }
     catch (const std::out_of_range& oor)
     {
-        WARNING_MSG("Com Interface", "Unknown function <" << _strName << ">. ")
+        WARNING_MSG("Com Interface", "Unknown function <" << _strName << ">. " << oor.what())
         return TRet();
     }
 }

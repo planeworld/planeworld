@@ -143,13 +143,18 @@ int main(int argc, char *argv[])
     
     CComConsole   ComConsole;
     CComInterface ComInterface;
-    ComInterface.registerFunction("quit",
+    ComInterface.registerFunction("exit",
                                   new CComCallback<void>(quit),
-                                  "Quit processing, clean up and end simulation.",
+                                  "Exit processing, clean up and end simulation. Same as <quit>",
                                   {{ParameterType::VOID, "No return value"}},
                                   "system"
                                  );
-//     ComInterface.registerFunction("test", test);
+    ComInterface.registerFunction("quit",
+                                  new CComCallback<void>(quit),
+                                  "Quit processing, clean up and end simulation. Same as <exit>",
+                                  {{ParameterType::VOID, "No return value"}},
+                                  "system"
+                                 );
   
     if (argc < 2 || argc > 3)
     {
@@ -268,12 +273,6 @@ int main(int argc, char *argv[])
                                       {{ParameterType::VOID,"No return value"}},
                                       "system"
         );
-        ComInterface.registerFunction("help",
-                                      new CComCallback<void>([&](){ComInterface.help();}),
-                                      "Show command interface help",
-                                      {{ParameterType::VOID,"No return value"}},
-                                      "system"
-        );
         ComInterface.registerFunction("get_current_camera",
                                       new CComCallback<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}),
                                       "Returns pointer to active camera",
@@ -296,6 +295,12 @@ int main(int argc, char *argv[])
         ComInterface.registerFunction("toggle_grid",
                                       new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
                                       "Toggle universe grid on and off.",
+                                      {{ParameterType::VOID, "No return value"}},
+                                      "visuals"  
+        );
+        ComInterface.registerFunction("toggle_names",
+                                      new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_NAMES);}),
+                                      "Toggle objects names on and off.",
                                       {{ParameterType::VOID, "No return value"}},
                                       "visuals"  
         );

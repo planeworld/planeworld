@@ -30,6 +30,26 @@
 
 #include "com_interface.h"
 
+#include <sstream>
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Constructor, registeres its own functions
+///
+///////////////////////////////////////////////////////////////////////////////
+CComInterface::CComInterface()
+{
+    METHOD_ENTRY("CComInterface::CComInterface")
+    CTOR_CALL("CComInterface::CComInterface")
+    this->registerFunction("help",
+                                    new CComCallback<void, int>([&](int nVerboseLevel){this->help(nVerboseLevel);}),
+                                    "Show command interface help",
+                                    {{ParameterType::VOID,"No return value"},
+                                     {ParameterType::INT,"Verbosity (0-1)"}},
+                                    "system"
+    );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Destructor, deletes callback functions
@@ -59,28 +79,33 @@ CComInterface::~CComInterface()
 /// external calls. Internally, direct call should be preferred to avoid
 /// the parsing.
 ///
-/// \param _strName Registered name of the function that should be called
+/// \param _strCommand Command that should be called
 /// \return Return value of function as string
 ///
 ///////////////////////////////////////////////////////////////////////////////
-const std::string& CComInterface::call(const std::string& _strName)
+const std::string& CComInterface::call(const std::string& _strCommand)
 {
     METHOD_ENTRY("CComInterface::call")
     
-    if (m_RegisteredFunctions.find(_strName) != m_RegisteredFunctions.end())
+    std::istringstream iss(_strCommand);
+    std::string strName;
+    
+    iss >> strName;
+    
+    if (m_RegisteredFunctions.find(strName) != m_RegisteredFunctions.end())
     {
-        ParameterListType ParamList = m_RegisteredFunctionsParams[_strName];
+        ParameterListType ParamList = m_RegisteredFunctionsParams[strName];
         
         switch (ParamList.size())
         {
             case 1:
                 if (ParamList[0].first == ParameterType::VOID)
                 {
-                    this->call<void>(_strName);
+                    this->call<void>(strName);
                 }
                 else
                 {
-                    NOTICE_MSG("Com Interface", "Wrapper for " << _strName << "'s signature not implemented.")
+                    NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
                 }
                 break;
             case 2:
@@ -88,36 +113,88 @@ const std::string& CComInterface::call(const std::string& _strName)
                 {
                     if (ParamList[1].first == ParameterType::DOUBLE)
                     {
-                        this->call<void,double>(_strName, std::stod(_strName));
+                        double fParam = 0.0;
+                        iss >> fParam;
+                        this->call<void,double>(strName, fParam);
+                    }
+                    else if (ParamList[1].first == ParameterType::INT)
+                    {
+                        int nParam = 0;
+                        iss >> nParam;
+                        this->call<void,int>(strName, nParam);
+                    }
+                    else
+                    {
+                        NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
+                    }
+                }
+                break;
+            case 3:
+                if (ParamList[0].first == ParameterType::VOID)
+                {
+                    if (ParamList[1].first == ParameterType::STRING)
+                    {
+                        std::string strS;
+                        iss >> strS;
+                        if (ParamList[2].first == ParameterType::DOUBLE)
+                        {
+                            double fParam = 0.0;
+                            iss >> fParam;
+                            this->call<void,std::string, double>(strName, strS, fParam);
+                        }
+                        else
+                        {
+                            NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
+                        }
+                    }
+                    else
+                    {
+                        NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
                     }
                 }
                 break;
         }
-        
-//         for (auto Params : m_RegisteredFunctionsParams[_strName])
-//         {
-//             if (Params)
-//         }
-//         #ifdef LOGLEVEL_DEBUG
-//             auto pFunction = dynamic_cast<CComCallback<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-//             if (pFunction != nullptr )
-//             {
-//                 return pFunction->call(_Args...);
-//             }
-//             else
-//             {
-//                 WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
-//                 return TRet();
-//             }
-//         #else
-//             auto pFunction = static_cast<CComCallback<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-//             return pFunction->call(_Args...);
-//         #endif
     }
     else
     {
-        WARNING_MSG("Com Interface", "Unknown function <" << _strName << ">. ")
+        WARNING_MSG("Com Interface", "Unknown function <" << strName << ">. ")
         return std::string("");
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief List all known functions
+///
+/// \param nVerboseLevel Level of verbosity when listing registered functions
+///
+///////////////////////////////////////////////////////////////////////////////
+void CComInterface::help(int nVerboseLevel)
+{
+    METHOD_ENTRY("CComInterface::help")
+    switch (nVerboseLevel)
+    {
+        case 0:
+            for (auto Com : m_RegisteredFunctions)
+            {
+                std::cout << Com.first << std::endl;
+            }
+            break;
+        case 1:
+            for (auto Com : m_RegisteredFunctions)
+            {
+                std::cout << "Command: " << Com.first << " (" << m_RegisteredFunctionsDomain[Com.first] <<  ")" << std::endl;
+                std::cout << "- Description: " << m_RegisteredFunctionsDescriptions[Com.first] << std::endl;
+                std::cout << "- Params: " << std::endl;
+                for (auto Param : m_RegisteredFunctionsParams[Com.first])
+                {
+                    std::cout << mapParameterToString[Param.first] << " " << Param.second << std::endl;
+                }
+                std::cout << std::endl;
+            }
+            break;
+        default:
+            break;
     }
 }
 
@@ -129,17 +206,7 @@ const std::string& CComInterface::call(const std::string& _strName)
 void CComInterface::help()
 {
     METHOD_ENTRY("CComInterface::help")
-    for (auto Com : m_RegisteredFunctions)
-    {
-        std::cout << "Command: " << Com.first << " (" << m_RegisteredFunctionsDomain[Com.first] <<  ")" << std::endl;
-        std::cout << "- Description: " << m_RegisteredFunctionsDescriptions[Com.first] << std::endl;
-        std::cout << "- Params: " << std::endl;
-        for (auto Param : m_RegisteredFunctionsParams[Com.first])
-        {
-            std::cout << mapParameterToString[Param.first] << " " << Param.second << std::endl;
-        }
-        std::cout << std::endl;
-    }
+    this->help(0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -187,17 +187,57 @@ void CPhysicsManager::initComInterface()
     INFO_MSG("Physics Manager", "Initialising com interace.")
     if (m_pComInterface != nullptr)
     {
+        m_pComInterface->registerFunction("pause",
+                                          new CComCallback<void>(
+                                                [&]()
+                                                {
+                                                  this->m_bPaused = true;
+                                                }
+                                            ),
+                                          "Pauses physics simulation.",
+                                          {{ParameterType::VOID, "No return value"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("resume",
+                                          new CComCallback<void>(
+                                                [&]()
+                                                {
+                                                  this->m_bPaused = false;
+                                                }
+                                            ),
+                                          "Resumes physics simulation if paused.",
+                                          {{ParameterType::VOID, "No return value"}},
+                                           "physics"
+                                         );
         m_pComInterface->registerFunction("set_angle",
                                           new CComCallback<void, std::string, double>(
-                                                [&](const std::string& _strName, const double& _fMass)
+                                                [&](const std::string& _strName, const double& _fAngle)
                                                 {
-                                                  m_pDataStorage->getObjectsByNameBack()->operator[](_strName)->setAngle(_fMass);
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByNameBack()->at(_strName)->setAngle(_fAngle);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    }
                                                 }
                                             ),
                                           "Sets rotation angle of a given object.",
                                           {{ParameterType::VOID, "No return value"},
                                            {ParameterType::STRING, "Object name"},
                                            {ParameterType::DOUBLE, "Angle"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("toggle_pause",
+                                          new CComCallback<void>(
+                                                [&]()
+                                                {
+                                                  this->togglePause();
+                                                }
+                                            ),
+                                          "Pauses or unpauses physics simulation.",
+                                          {{ParameterType::VOID, "No return value"}},
                                            "physics"
                                          );
     }

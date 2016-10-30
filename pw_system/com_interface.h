@@ -122,6 +122,7 @@ class CComInterface
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
+        CComInterface();
         virtual ~CComInterface();
         
         //--- Constant Methods -----------------------------------------------//
@@ -132,6 +133,7 @@ class CComInterface
         TRet                call(const std::string& _strName, Args...);
         const std::string&  call(const std::string&);
         void                help();
+        void                help(int);
         
         bool registerFunction(const std::string&, IBaseComCallback* const,
                               const std::string&,
