@@ -443,22 +443,32 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
 void CVisualsManager::drawConsole() const
 {
     METHOD_ENTRY("CVisualsManager::drawConsole")
-
+    
+    int nTextSize = 12;
+    int nComHistory = 5;
+    int nWindowBorderLeft = 10;
+    int nWindowBorderTop = 10;
+    int nWindowHeight = (m_Font.getLineSpacing(nTextSize))*(nComHistory+1) + nWindowBorderLeft;
+    int nWindowWidth = 300;
+    
     if (m_bConsoleMode)
     {
         m_Graphics.setColor(1.0, 0.0, 0.0, 0.8);
-        m_Graphics.rectSS(Vector2d(10.0, m_Graphics.getHeightScr()*0.3),
-                        Vector2d(m_Graphics.getWidthScr() *0.3, 10.0));
+        m_Graphics.rectSS(Vector2d(nWindowBorderLeft, nWindowHeight),
+                          Vector2d(nWindowBorderLeft+nWindowWidth, nWindowBorderTop));
         m_Graphics.setColor(0.25, 0.0, 0.0, 0.8);
-        m_Graphics.filledRectSS(Vector2d(10.0, m_Graphics.getHeightScr()*0.3),
-                                Vector2d(m_Graphics.getWidthScr() *0.3, 10.0));
+        m_Graphics.filledRectSS(Vector2d(nWindowBorderLeft, nWindowHeight),
+                                Vector2d(nWindowBorderLeft+nWindowWidth, nWindowBorderTop));
         m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
         
 
         std::stringstream oss;
-        for (auto i=0u; i < m_pComConsole->getCommands().size(); ++i)
+        int i = m_pComConsole->getCommands().size() - nComHistory;
+        if (i<0) i=0;
+        while (i < m_pComConsole->getCommands().size())
         {
             oss << "> " << m_pComConsole->getCommands().at(i) << "\n";
+            ++i;
         }
         oss << "> " << m_pComConsole->getCurrentCommand() << "_";
         m_Graphics.getWindow()->pushGLStates();
@@ -466,8 +476,8 @@ void CVisualsManager::drawConsole() const
 
         Text.setString(oss.str());
         Text.setFont(m_Font);
-        Text.setCharacterSize(12);
-        Text.setPosition(20.0, 20.0);
+        Text.setCharacterSize(nTextSize);
+        Text.setPosition(nWindowBorderLeft, nWindowBorderTop);
         m_Graphics.getWindow()->draw(Text);
         m_Graphics.getWindow()->popGLStates();        
             
