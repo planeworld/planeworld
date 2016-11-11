@@ -42,8 +42,8 @@ CCamera::CCamera() : IKinematicsStateUser(),
                      IObjectReferrer(),
                      IUniqueIDUser(),
                      IUniverseScaled(),
-                     m_fViewportWidth(m_Graphics.getViewPort().right-m_Graphics.getViewPort().left),
-                     m_fViewportHeight(m_Graphics.getViewPort().top-m_Graphics.getViewPort().bottom)
+                     m_fViewportWidth(m_Graphics.getViewPort().rightplane-m_Graphics.getViewPort().leftplane),
+                     m_fViewportHeight(m_Graphics.getViewPort().topplane-m_Graphics.getViewPort().bottomplane)
 {
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
@@ -186,16 +186,16 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
 {
     METHOD_ENTRY("CCamera::setViewport")
 
-    if ((_fW <= m_Graphics.getViewPort().right - m_Graphics.getViewPort().left) &&
-        (_fH <= m_Graphics.getViewPort().top   - m_Graphics.getViewPort().bottom))
+    if ((_fW <= m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane) &&
+        (_fH <= m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane))
     {
       m_fViewportWidth  = _fW*0.5;
       m_fViewportHeight = _fH*0.5;
     }
     else
     {
-      m_fViewportWidth  = (m_Graphics.getViewPort().right - m_Graphics.getViewPort().left)*0.5;
-      m_fViewportHeight = (m_Graphics.getViewPort().top   - m_Graphics.getViewPort().bottom)*0.5;
+      m_fViewportWidth  = (m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane)*0.5;
+      m_fViewportHeight = (m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane)*0.5;
       NOTICE_MSG("Camera", "Given viewport is larger than actual screen, resizing to screen size.")
       NOTICE(
         std::cout << "  Viewport: " << _fW << "m x " << _fH << "m" << std::endl;
