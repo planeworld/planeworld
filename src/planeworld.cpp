@@ -274,8 +274,8 @@ int main(int argc, char *argv[])
                             // Adjust the viewport when the window is resized
                             vecMouseCenter = sf::Vector2i(pWindow->getSize().x >> 1, pWindow->getSize().y >> 1);
                             Graphics.resizeWindow(Event.size.width, Event.size.height);
-                            pCamera->setViewport(Graphics.getViewPort().right-Graphics.getViewPort().left - 20.0,
-                                                Graphics.getViewPort().top  -Graphics.getViewPort().bottom - 20.0);
+                            pCamera->setViewport(Graphics.getViewPort().rightplane-Graphics.getViewPort().leftplane - 20.0,
+                                                Graphics.getViewPort().topplane  -Graphics.getViewPort().bottomplane - 20.0);
                             break;
                         }
                         case sf::Event::KeyPressed:
