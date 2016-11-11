@@ -14,8 +14,12 @@ SET(SRCS
 
 ADD_LIBRARY (log SHARED ${SRCS})
 
-INSTALL (TARGETS log
-        LIBRARY DESTINATION lib/planeworld
-)
+IF(WIN32)
+    INSTALL (TARGETS log
+        RUNTIME DESTINATION lib/planeworld)
+ELSE()
+    INSTALL (TARGETS log
+        LIBRARY DESTINATION lib/planeworld)
+ENDIF()
 
 #INSTALL (FILES ${HDRS} DESTINATION include/planeworld)

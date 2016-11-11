@@ -30,7 +30,9 @@
 
 #include "log.h"
 
-#include <sys/ioctl.h>
+#ifdef __linux__
+	#include <sys/ioctl.h>
+#endif
 
 std::ostringstream  CLog::s_strStr; ///< Used for streaming functionality in macros
 LogDomainType       CLog::s_Dom = LOG_DOMAIN_NONE;    ///< Used for domain handling in macros
@@ -833,10 +835,14 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
 
 //  CTOR_CALL("CLog::CLog");
     
-    // Request the terminal width from the system
-    struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-    m_unColsMax = w.ws_col;
+	#ifdef __linux__
+		// Request the terminal width from the system
+		struct winsize w;
+		ioctl(0, TIOCGWINSZ, &w);
+		m_unColsMax = w.ws_col;
+	#else
+		m_unColsMax = 80u;
+	#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
