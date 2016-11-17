@@ -110,7 +110,13 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* 
         if (fInc > 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS) fInc = 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS;
         fAngEnd += fInc;
         
-        if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+		if (fAngEnd < fAng)
+		{
+			double fTmp = fAng;
+			fAng = fAngEnd;
+			fAngEnd = fTmp;
+			// std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
+		}
         
         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
 
@@ -212,7 +218,13 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         fAng    -= fAngleSnap;
         fAngEnd += fAngleSnap;
         
-        if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+		if (fAngEnd < fAng)
+		{
+			double fTmp = fAng;
+			fAng = fAngEnd;
+			fAngEnd = fTmp;
+			// std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
+		}
         
 //         double fAngBak = fAng;
         

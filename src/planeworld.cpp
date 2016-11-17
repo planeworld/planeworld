@@ -117,7 +117,11 @@ void usage()
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
-    Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
+	#ifdef WIN32
+		Log.setColourScheme(LOG_COLOUR_SCHEME_DEFAULT);
+	#else
+		Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
+	#endif
   
     bool bGraphics = true;
     std::string strArgOptions("");

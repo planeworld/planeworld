@@ -30,6 +30,8 @@
 
 #include "graphics.h"
 
+#include "math_constants.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief constructor, initialising members.
@@ -102,8 +104,8 @@ Vector2d CGraphics::screen2World(const Vector2d& _vecV) const
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (MATH_PI2-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (MATH_PI2-m_fCamAng))- m_vecCamPos[1];
 
     return vecResult;
 }
@@ -137,8 +139,8 @@ Vector2d CGraphics::screen2World(const double& _fX, const double& _fY) const
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (MATH_PI2-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (MATH_PI2-m_fCamAng))- m_vecCamPos[1];
 
     return vecResult;
 }

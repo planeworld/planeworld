@@ -31,6 +31,7 @@
 #include "camera.h"
 
 //--- Program header ---------------------------------------------------------//
+#include "math_constants.h"
 #include "object.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -351,8 +352,8 @@ void CCamera::zoomBy(const double& _fZoom)
     // Limit zoom to universe limits, worst viewport case (=> sqrt(2))
     double fLimit = CKinematicsState::getWorldLimitX();
     if (fLimit > CKinematicsState::getWorldLimitY()) fLimit = CKinematicsState::getWorldLimitY();
-    if (M_SQRT2*m_fViewportWidth/m_fZoom  > fLimit) m_fZoom = M_SQRT2*m_fViewportWidth/fLimit;
-    if (M_SQRT2*m_fViewportHeight/m_fZoom > fLimit) m_fZoom = M_SQRT2*m_fViewportHeight/fLimit;
+    if (MATH_SQRT2*m_fViewportWidth/m_fZoom  > fLimit) m_fZoom = MATH_SQRT2*m_fViewportWidth/fLimit;
+    if (MATH_SQRT2*m_fViewportHeight/m_fZoom > fLimit) m_fZoom = MATH_SQRT2*m_fViewportHeight/fLimit;
         
 }
 
@@ -371,8 +372,8 @@ void CCamera::zoomTo(const double& _fZoom)
     // Limit zoom to universe limits, worst viewport case (=> sqrt(2))
     double fLimit = CKinematicsState::getWorldLimitX();
     if (fLimit > CKinematicsState::getWorldLimitY()) fLimit = CKinematicsState::getWorldLimitY();
-    if (M_SQRT2*m_fViewportWidth/m_fZoom  > fLimit) m_fZoom = M_SQRT2*m_fViewportWidth/fLimit;
-    if (M_SQRT2*m_fViewportHeight/m_fZoom > fLimit) m_fZoom = M_SQRT2*m_fViewportHeight/fLimit;
+    if (MATH_SQRT2*m_fViewportWidth/m_fZoom  > fLimit) m_fZoom = MATH_SQRT2*m_fViewportWidth/fLimit;
+    if (MATH_SQRT2*m_fViewportHeight/m_fZoom > fLimit) m_fZoom = MATH_SQRT2*m_fViewportHeight/fLimit;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
