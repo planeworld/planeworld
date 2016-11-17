@@ -123,7 +123,7 @@ class IEmitter : public IKinematicsStateUser,
         void setFrequency(const double&);
         void setLimits(const double&, const double&, const double&, const double&);
         void setMode(const EmitterModeType&);
-        void setNumber(const u_int32_t&);
+        void setNumber(const std::uint32_t&);
         void setOrigin(const Vector2d&);
         void setVelocity(const double&);
         void setVelocityStd(const double&);
@@ -451,7 +451,7 @@ inline void IEmitter::setMode(const EmitterModeType& _EmM)
 /// \param _nNr Number of entities.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void IEmitter::setNumber(const u_int32_t& _nNr)
+inline void IEmitter::setNumber(const std::uint32_t& _nNr)
 {
     METHOD_ENTRY("IEmitter::setNumber")
     m_nNr = _nNr;

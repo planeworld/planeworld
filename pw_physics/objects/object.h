@@ -42,7 +42,7 @@
 //--- Standard header --------------------------------------------------------//
 
 /// Type definition for the AnchorIDs
-typedef uint AnchorIDType;
+typedef std::uint16_t AnchorIDType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

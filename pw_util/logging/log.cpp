@@ -30,7 +30,9 @@
 
 #include "log.h"
 
-#include <sys/ioctl.h>
+#ifdef __linux__
+	#include <sys/ioctl.h>
+#endif
 
 std::ostringstream  CLog::s_strStr; ///< Used for streaming functionality in macros
 LogDomainType       CLog::s_Dom = LOG_DOMAIN_NONE;    ///< Used for domain handling in macros
@@ -259,8 +261,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cerr << "  ";
                         #endif
                         std::cerr << m_strColSender << 
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_WARNING:
                         std::cout << m_strColWarning << std::left << std::setw(14) <<  "[warning]";
@@ -270,8 +271,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cout << "  ";
                         #endif
                         std::cout << m_strColSender << \
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_NOTICE:
                         std::cout << m_strColNotice << std::left << std::setw(14) <<  "[notice]";
@@ -281,8 +281,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cout << "  ";
                         #endif
                         std::cout << m_strColSender << \
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_INFO:
                         std::cout << m_strColInfo << std::left << std::setw(14) <<  "[info]";
@@ -292,8 +291,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cout << "  ";
                         #endif
                         std::cout << m_strColSender << \
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_DEBUG:
                         std::cout << m_strColDebug << std::left << std::setw(14) <<  "[debug]";
@@ -303,8 +301,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cout << m_strColDefault << "  ";
                         #endif
                         std::cout << m_strColSender << \
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                 }
             }
@@ -833,10 +830,14 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
 
 //  CTOR_CALL("CLog::CLog");
     
-    // Request the terminal width from the system
-    struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-    m_unColsMax = w.ws_col;
+	#ifdef __linux__
+		// Request the terminal width from the system
+		struct winsize w;
+		ioctl(0, TIOCGWINSZ, &w);
+		m_unColsMax = w.ws_col;
+	#else
+		m_unColsMax = 80u;
+	#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

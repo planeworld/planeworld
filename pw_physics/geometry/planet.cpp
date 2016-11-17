@@ -30,6 +30,8 @@
 
 #include "planet.h"
 
+#include "math_constants.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor, initialising members
@@ -170,7 +172,7 @@ void CPlanet::setSampling(const double& _fMaxF)
     int nOct;
 
     fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
-    fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+    fMinF = 1.0 / (m_fHeightMax*MATH_PI2);
     
     if (_fMaxF < fMaxF) fMaxF = _fMaxF;
     nOct = ceil(log2(fMaxF/fMinF)/log2(m_fLacMtTr));
@@ -388,7 +390,7 @@ void CPlanet::myInitTerrain()
             m_fLacMtTr = 2.137;
             m_fLacTrTp = 2.317;
             
-            double fMinF = 1.0 / (m_fHeightMax*M_PI_2);
+            double fMinF = 1.0 / (m_fHeightMax*MATH_PI2);
             double fMaxF = 1.0 / (m_fGroundResolution*PLANET_DEFAULT_VERTICES_PER_PERIOD);
             
             m_nOctHlTr = ceil(log2(fMaxF/fMinF)/log2(m_fLacHlTr));

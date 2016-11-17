@@ -30,6 +30,8 @@
 
 #include "graphics.h"
 
+#include "math_constants.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief constructor, initialising members.
@@ -94,16 +96,16 @@ Vector2d CGraphics::screen2World(const Vector2d& _vecV) const
     double fX;
     double fY;
         
-    fX = ((m_ViewPort.right-m_ViewPort.left) / m_unWidthScr * _vecV[0]+
-                    m_ViewPort.left) / m_fCamZoom;
-    fY = ((m_ViewPort.top-m_ViewPort.bottom) / m_unHeightScr * _vecV[1]+
-                    m_ViewPort.bottom) /  m_fCamZoom;
+    fX = ((m_ViewPort.rightplane-m_ViewPort.leftplane) / m_unWidthScr * _vecV[0]+
+                    m_ViewPort.leftplane) / m_fCamZoom;
+    fY = ((m_ViewPort.topplane-m_ViewPort.bottomplane) / m_unHeightScr * _vecV[1]+
+                    m_ViewPort.bottomplane) /  m_fCamZoom;
     
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (MATH_PI2-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (MATH_PI2-m_fCamAng))- m_vecCamPos[1];
 
     return vecResult;
 }
@@ -129,16 +131,16 @@ Vector2d CGraphics::screen2World(const double& _fX, const double& _fY) const
     double fX;
     double fY;
         
-    fX = ((m_ViewPort.right-m_ViewPort.left) / m_unWidthScr * _fX +
-           m_ViewPort.left) / m_fCamZoom;
-    fY = ((m_ViewPort.top-m_ViewPort.bottom) / m_unHeightScr * _fY +
-           m_ViewPort.bottom) /  m_fCamZoom;
+    fX = ((m_ViewPort.rightplane-m_ViewPort.leftplane) / m_unWidthScr * _fX +
+           m_ViewPort.leftplane) / m_fCamZoom;
+    fY = ((m_ViewPort.topplane-m_ViewPort.bottomplane) / m_unHeightScr * _fY +
+           m_ViewPort.bottomplane) /  m_fCamZoom;
     
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (MATH_PI2-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (MATH_PI2-m_fCamAng))- m_vecCamPos[1];
 
     return vecResult;
 }
@@ -158,8 +160,8 @@ Vector2d CGraphics::world2Screen(const Vector2d& _vecV) const
 
     Rotation2Dd Rot(m_fCamAng);
     
-    return (Rot*Vector2d(_vecV[0],-_vecV[1])*m_fCamZoom-Vector2d(m_ViewPort.left,-m_ViewPort.top))
-            *m_unWidthScr/(m_ViewPort.right-m_ViewPort.left);
+    return (Rot*Vector2d(_vecV[0],-_vecV[1])*m_fCamZoom-Vector2d(m_ViewPort.leftplane,-m_ViewPort.topplane))
+            *m_unWidthScr/(m_ViewPort.rightplane-m_ViewPort.leftplane);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -218,9 +220,9 @@ bool CGraphics::init()
     // Setup projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(m_ViewPort.left, m_ViewPort.right,
-            m_ViewPort.bottom, m_ViewPort.top,
-            m_ViewPort.near, m_ViewPort.far);
+    glOrtho(m_ViewPort.leftplane, m_ViewPort.rightplane,
+            m_ViewPort.bottomplane, m_ViewPort.topplane,
+            m_ViewPort.nearplane, m_ViewPort.farplane);
 
     // Enable blending
     glEnable(GL_BLEND);
@@ -295,10 +297,10 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     sf::FloatRect View(0,0,_unWidthScr,_unHeightScr);
     m_pWindow->setView(sf::View(View));
 
-    m_ViewPort.right = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
-    m_ViewPort.top   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
-    m_ViewPort.left   = -m_ViewPort.right;
-    m_ViewPort.bottom = -m_ViewPort.top;
+    m_ViewPort.rightplane = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.topplane   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.leftplane   = -m_ViewPort.rightplane;
+    m_ViewPort.bottomplane = -m_ViewPort.topplane;
     
     // Setup viewport
     glMatrixMode(GL_VIEWPORT);
@@ -308,9 +310,9 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     // Setup projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(m_ViewPort.left, m_ViewPort.right,
-            m_ViewPort.bottom, m_ViewPort.top,
-            m_ViewPort.near, m_ViewPort.far);
+    glOrtho(m_ViewPort.leftplane, m_ViewPort.rightplane,
+            m_ViewPort.bottomplane, m_ViewPort.topplane,
+            m_ViewPort.nearplane, m_ViewPort.farplane);
    
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -319,8 +321,8 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     m_unWidthScr = _unWidthScr;
     m_unHeightScr = _unHeightScr;
     
-    INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.right - m_ViewPort.left << "m x " <<
-                                                   m_ViewPort.top   - m_ViewPort.bottom << "m (" <<
+    INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.rightplane - m_ViewPort.leftplane << "m x " <<
+                                                   m_ViewPort.topplane   - m_ViewPort.bottomplane << "m (" <<
                                                    _unWidthScr << "x" << _unHeightScr << ").")
     
     return (true);

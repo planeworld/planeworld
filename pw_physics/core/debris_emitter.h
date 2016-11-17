@@ -68,7 +68,7 @@ class CDebrisEmitter : public IEmitter,
         //--- Methods --------------------------------------------------------//
         void        init();
         void        setDebrisType(const DebrisTypeType&);
-        void        setNumber(const u_int32_t&);
+        void        setNumber(const std::uint32_t&);
 
     private:
         
@@ -136,7 +136,7 @@ inline void CDebrisEmitter::setDebrisType(const DebrisTypeType& _DebrisType)
 /// \param _nNrMax Maximum number of debris.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void CDebrisEmitter::setNumber(const u_int32_t& _nNrMax)
+inline void CDebrisEmitter::setNumber(const std::uint32_t& _nNrMax)
 {
     METHOD_ENTRY("CDebrisEmitter::setMode")
     m_nNr = _nNrMax;

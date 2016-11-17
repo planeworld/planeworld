@@ -100,12 +100,12 @@ typedef std::vector<Vector2d> VertexListType;
 // Structure containing viewport information
 struct ViewPort
 {
-    double left = GRAPHICS_LEFT_DEFAULT;        ///< Left plane of viewport
-    double right = GRAPHICS_RIGHT_DEFAULT;      ///< Right plane of viewport
-    double top = GRAPHICS_TOP_DEFAULT;          ///< Top plane of viewport
-    double bottom = GRAPHICS_BOTTOM_DEFAULT;    ///< Bottom plane of viewport
-    double near = GRAPHICS_NEAR_DEFAULT;        ///< Near plane of viewport
-    double far = GRAPHICS_FAR_DEFAULT;          ///< Far plane of viewport
+    double leftplane = GRAPHICS_LEFT_DEFAULT;        ///< Left plane of viewport
+    double rightplane = GRAPHICS_RIGHT_DEFAULT;      ///< Right plane of viewport
+    double topplane = GRAPHICS_TOP_DEFAULT;          ///< Top plane of viewport
+    double bottomplane = GRAPHICS_BOTTOM_DEFAULT;    ///< Bottom plane of viewport
+    double nearplane = GRAPHICS_NEAR_DEFAULT;        ///< Near plane of viewport
+    double farplane = GRAPHICS_FAR_DEFAULT;          ///< Far plane of viewport
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +298,7 @@ inline double CGraphics::getDynPelSize() const
 inline double CGraphics::getResMPX() const
 {
     METHOD_ENTRY("CGraphics::getResMPX()");
-    return ((m_ViewPort.right-m_ViewPort.left) /
+    return ((m_ViewPort.rightplane-m_ViewPort.leftplane) /
             (m_fCamZoom * m_unWidthScr));
 }
 
@@ -312,7 +312,7 @@ inline double CGraphics::getResMPX() const
 inline double CGraphics::getResMPY() const
 {
     METHOD_ENTRY("CGraphics::getResMPY()");
-    return ((m_ViewPort.top-m_ViewPort.bottom) /
+    return ((m_ViewPort.topplane-m_ViewPort.bottomplane) /
             (m_fCamZoom * m_unHeightScr));
 }
 
@@ -327,7 +327,7 @@ inline double CGraphics::getResPMX() const
 {
     METHOD_ENTRY("CGraphics::getResPMX()");
     return ((m_fCamZoom * m_unWidthScr) / 
-            (m_ViewPort.right-m_ViewPort.left));
+            (m_ViewPort.rightplane-m_ViewPort.leftplane));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -341,7 +341,7 @@ inline double CGraphics::getResPMY() const
 {
     METHOD_ENTRY("CGraphics::getResPMY()");
     return ((m_fCamZoom * m_unHeightScr) / 
-            (m_ViewPort.top-m_ViewPort.bottom));
+            (m_ViewPort.topplane-m_ViewPort.bottomplane));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

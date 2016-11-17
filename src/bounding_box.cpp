@@ -183,26 +183,26 @@ void CBoundingBox::update(const Vector2d& _vecPoint)
 /// \brief Input stream for game state information
 ///
 /// \param _is  Source stream
-/// \param _BB CBoundingBox instance to stream
+/// \param _BBox CBoundingBox instance to stream
 ///
 /// \return Remaining stream with game state information
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::istream& operator>>(std::istream& _is, CBoundingBox& _BB)
+std::istream& operator>>(std::istream& _is, CBoundingBox& _BBox)
 {
     METHOD_ENTRY("CBoundingBox::operator>>")
     
     std::string strTmp;
     _is >> strTmp;
     
-    _is >> _BB.m_vecLowerLeft[0];
-    _is >> _BB.m_vecLowerLeft[1];
-    _is >> _BB.m_vecUpperRight[0];
-    _is >> _BB.m_vecUpperRight[1];
+    _is >> _BBox.m_vecLowerLeft[0];
+    _is >> _BBox.m_vecLowerLeft[1];
+    _is >> _BBox.m_vecUpperRight[0];
+    _is >> _BBox.m_vecUpperRight[1];
     
     // From IUniverseScaled:
-    _is >> _BB.m_vecCell[0];
-    _is >> _BB.m_vecCell[1];
+    _is >> _BBox.m_vecCell[0];
+    _is >> _BBox.m_vecCell[1];
 
     return _is;
 }
@@ -212,25 +212,25 @@ std::istream& operator>>(std::istream& _is, CBoundingBox& _BB)
 /// \brief Output stream for game state information
 ///
 /// \param _os  Source stream
-/// \param _BB CBoundingBox instance to stream
+/// \param _BBox CBoundingBox instance to stream
 ///
 /// \return Stream with game state information of CBoundingBox instance
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream& _os, CBoundingBox& _BB)
+std::ostream& operator<<(std::ostream& _os, CBoundingBox& _BBox)
 {
     METHOD_ENTRY("CBoundingBox::operator<<")
     
     _os << "BoundingBox:" << std::endl;
     
-    _os << _BB.m_vecLowerLeft[0] << " " <<
-           _BB.m_vecLowerLeft[1] << std::endl;
-    _os << _BB.m_vecUpperRight[0] << " " <<
-           _BB.m_vecUpperRight[1] << std::endl;
+    _os << _BBox.m_vecLowerLeft[0] << " " <<
+           _BBox.m_vecLowerLeft[1] << std::endl;
+    _os << _BBox.m_vecUpperRight[0] << " " <<
+           _BBox.m_vecUpperRight[1] << std::endl;
     
     // From IUniverseScaled:
-    _os << _BB.m_vecCell[0] << " " <<
-           _BB.m_vecCell[1] << std::endl;
+    _os << _BBox.m_vecCell[0] << " " <<
+           _BBox.m_vecCell[1] << std::endl;
         
     return _os;
 }
