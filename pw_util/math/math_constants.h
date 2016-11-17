@@ -37,7 +37,7 @@
 #include <cmath>
 
 //--- Misc header ------------------------------------------------------------//
-const double MATH_PI = std::asin(1.0);
+const double MATH_PI = 2.0 * std::asin(1.0);
 const double MATH_2PI = 2.0 * MATH_PI;
 const double MATH_PI2 = MATH_PI * 0.5;
 const double MATH_SQRT2 = std::sqrt(2.0);
