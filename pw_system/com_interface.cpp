@@ -44,7 +44,7 @@ CComInterface::CComInterface()
     this->registerFunction("help",
                                     new CComCallback<void, int>([&](int nVerboseLevel){this->help(nVerboseLevel);}),
                                     "Show command interface help",
-                                    {{ParameterType::VOID,"No return value"},
+                                    {{ParameterType::NONE,"No return value"},
                                      {ParameterType::INT,"Verbosity (0-1)"}},
                                     "system"
     );
@@ -99,7 +99,7 @@ const std::string& CComInterface::call(const std::string& _strCommand)
         switch (ParamList.size())
         {
             case 1:
-                if (ParamList[0].first == ParameterType::VOID)
+                if (ParamList[0].first == ParameterType::NONE)
                 {
                     this->call<void>(strName);
                 }
@@ -109,7 +109,7 @@ const std::string& CComInterface::call(const std::string& _strCommand)
                 }
                 break;
             case 2:
-                if (ParamList[0].first == ParameterType::VOID)
+                if (ParamList[0].first == ParameterType::NONE)
                 {
                     if (ParamList[1].first == ParameterType::DOUBLE)
                     {
@@ -130,7 +130,7 @@ const std::string& CComInterface::call(const std::string& _strCommand)
                 }
                 break;
             case 3:
-                if (ParamList[0].first == ParameterType::VOID)
+                if (ParamList[0].first == ParameterType::NONE)
                 {
                     if (ParamList[1].first == ParameterType::STRING)
                     {

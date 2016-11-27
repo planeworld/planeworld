@@ -45,7 +45,7 @@
 /// Specifies a parameter type
 enum class ParameterType
 {
-    VOID,
+    NONE,
     CUSTOM_OBJ,
     BOOL,
     DOUBLE,
@@ -102,7 +102,7 @@ typedef std::unordered_map<std::string, DomainType> RegisteredDomainsType;
 
 //--- Enum parser ------------------------------------------------------------//
 static std::map<ParameterType, std::string> mapParameterToString = {
-    {ParameterType::VOID, "<void>"},
+    {ParameterType::NONE, "<none>"},
     {ParameterType::CUSTOM_OBJ, "<custom_object>"},
     {ParameterType::BOOL, "<bool>"},
     {ParameterType::DOUBLE, "<double>"},

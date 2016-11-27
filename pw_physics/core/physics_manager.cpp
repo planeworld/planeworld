@@ -195,7 +195,7 @@ void CPhysicsManager::initComInterface()
                                                 }
                                             ),
                                           "Pauses physics simulation.",
-                                          {{ParameterType::VOID, "No return value"}},
+                                          {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("resume",
@@ -206,7 +206,7 @@ void CPhysicsManager::initComInterface()
                                                 }
                                             ),
                                           "Resumes physics simulation if paused.",
-                                          {{ParameterType::VOID, "No return value"}},
+                                          {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("set_angle",
@@ -224,7 +224,7 @@ void CPhysicsManager::initComInterface()
                                                 }
                                             ),
                                           "Sets rotation angle of a given object.",
-                                          {{ParameterType::VOID, "No return value"},
+                                          {{ParameterType::NONE, "No return value"},
                                            {ParameterType::STRING, "Object name"},
                                            {ParameterType::DOUBLE, "Angle"}},
                                            "physics"
@@ -237,7 +237,7 @@ void CPhysicsManager::initComInterface()
                                                 }
                                             ),
                                           "Pauses or unpauses physics simulation.",
-                                          {{ParameterType::VOID, "No return value"}},
+                                          {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );
     }

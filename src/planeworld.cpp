@@ -150,13 +150,13 @@ int main(int argc, char *argv[])
     ComInterface.registerFunction("exit",
                                   new CComCallback<void>(quit),
                                   "Exit processing, clean up and end simulation. Same as <quit>",
-                                  {{ParameterType::VOID, "No return value"}},
+                                  {{ParameterType::NONE, "No return value"}},
                                   "system"
                                  );
     ComInterface.registerFunction("quit",
                                   new CComCallback<void>(quit),
                                   "Quit processing, clean up and end simulation. Same as <exit>",
-                                  {{ParameterType::VOID, "No return value"}},
+                                  {{ParameterType::NONE, "No return value"}},
                                   "system"
                                  );
   
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
         ComInterface.registerFunction("cycle_camera",
                                       new CComCallback<void>([&](){pVisualsManager->cycleCamera();}),
                                       "Cycle through registered cameras",
-                                      {{ParameterType::VOID,"No return value"}},
+                                      {{ParameterType::NONE,"No return value"}},
                                       "system"
         );
         ComInterface.registerFunction("get_current_camera",
@@ -286,32 +286,32 @@ int main(int argc, char *argv[])
         ComInterface.registerFunction("rotate_camera_by",
                                       new CComCallback<void, double>([&](const double& _fAngle){pCamera->rotateBy(_fAngle);}),
                                       "Rotate camera by given angle.",
-                                      {{ParameterType::VOID, "No return value"},
+                                      {{ParameterType::NONE, "No return value"},
                                        {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
                                       "system"  
         );
         ComInterface.registerFunction("toggle_bboxes",
                                       new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
                                       "Toggle bounding boxes on and off.",
-                                      {{ParameterType::VOID, "No return value"}},
+                                      {{ParameterType::NONE, "No return value"}},
                                       "visuals"
         );
         ComInterface.registerFunction("toggle_grid",
                                       new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
                                       "Toggle universe grid on and off.",
-                                      {{ParameterType::VOID, "No return value"}},
+                                      {{ParameterType::NONE, "No return value"}},
                                       "visuals"  
         );
         ComInterface.registerFunction("toggle_names",
                                       new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_NAMES);}),
                                       "Toggle objects names on and off.",
-                                      {{ParameterType::VOID, "No return value"}},
+                                      {{ParameterType::NONE, "No return value"}},
                                       "visuals"  
         );
         ComInterface.registerFunction("toggle_timers",
                                       new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_TIMERS);}),
                                       "Toggle timers on and off.",
-                                      {{ParameterType::VOID, "No return value"}},
+                                      {{ParameterType::NONE, "No return value"}},
                                       "visuals"  
         );
         
