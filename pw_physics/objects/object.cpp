@@ -582,7 +582,7 @@ void CObject::copy(const CObject& _Obj)
 
     m_bGravitation      = _Obj.m_bGravitation;
     m_bDynamics         = _Obj.m_bDynamics;
-    m_Lifetime          = _Obj.m_Lifetime;
+//     m_Lifetime          = _Obj.m_Lifetime;
     m_fTimeFac          = _Obj.m_fTimeFac;
     m_Geometry          = _Obj.m_Geometry;
     m_vecForce          = _Obj.m_vecForce;

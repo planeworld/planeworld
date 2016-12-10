@@ -38,11 +38,12 @@
 /// \brief CTimer
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CTimer::CTimer()
+CTimer::CTimer() : m_fCountAbsolute(0.0), m_fFrequency(-1.0)
 {
     // Initialise m_Start to be sure to have a valid time if stop() is called
     // without calling start() first
     m_Start = std::chrono::high_resolution_clock::now();
+    m_StartAbsolute = std::chrono::high_resolution_clock::now();
 
 }
 
@@ -54,6 +55,7 @@ CTimer::CTimer()
 void CTimer::start()
 {
     m_Start = std::chrono::high_resolution_clock::now();
+    m_fCountAbsolute += 1.0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,14 +85,28 @@ void CTimer::stop()
 ///////////////////////////////////////////////////////////////////////////////
 double CTimer::sleepRemaining(const double& _fFreq)
 {
+    using namespace std::chrono_literals;
+    
+    if (m_fFrequency == -1.0)
+    {
+        m_fFrequency = _fFreq;
+    }
+    else if (m_fFrequency != _fFreq)
+    {
+        m_fFrequency = _fFreq;
+        m_fCountAbsolute = 1.0;
+        m_StartAbsolute = std::chrono::high_resolution_clock::now();
+    }
+    
     this->stop();
     double fFrametime = 1.0e6*(1.0/_fFreq-m_fDiffTime);
-    if (fFrametime > 0.0)
-    {
-        unsigned int unFrametime = static_cast<unsigned int>(fFrametime);
-        std::this_thread::sleep_for(std::chrono::microseconds(unFrametime));
-    }
+    
+    std::unique_lock<std::mutex> lk(m_MutexCV);
+    if (m_CV.wait_until(lk, m_StartAbsolute + std::chrono::duration<double>(m_fCountAbsolute/_fFreq), [](){return false;}))
+    m_MutexCV.lock();
+    
     this->start();
+    
     return fFrametime;
 }
 

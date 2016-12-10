@@ -214,9 +214,9 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                 unsigned short unLengthMax = m_unColsMax;
                 
                 #ifdef DOMAIN_METHOD_HIERARCHY 
-                    unsigned short unIndent = _strSrc.size() + 30 + m_nHierLevel*2;
+                    unsigned short unIndent = _strSrc.size() + 26 + m_nHierLevel*2;
                 #else
-                    unsigned short unIndent = _strSrc.size() + 30;
+                    unsigned short unIndent = _strSrc.size() + 26;
                 #endif
                 std::string strIndent(unIndent, ' ');
     
