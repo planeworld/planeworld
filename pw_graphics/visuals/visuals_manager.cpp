@@ -479,10 +479,17 @@ void CVisualsManager::drawConsole() const
         if (i<0) i=0;
         while (i < m_pComConsole->getCommands().size())
         {
-            oss << "> " << m_pComConsole->getCommands().at(i) << "\n";
+            oss << "> " << m_pComConsole->getCommands().at(i);
+            if (m_pComConsole->getReturnValues().at(i) != "")
+            {
+                oss << " => " << m_pComConsole->getReturnValues().at(i);
+            }
+            oss << "\n";
+            
             ++i;
         }
         oss << "> " << m_pComConsole->getCurrentCommand() << "_";
+        
         m_Graphics.getWindow()->pushGLStates();
         sf::Text Text;
 

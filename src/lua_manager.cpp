@@ -52,8 +52,17 @@ bool CLuaManager::init()
         
         switch ((*m_pComInterface->getSignatures())[Function.first])
         {
+            case SignatureType::INT:
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::DOUBLE:
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double>*>(Function.second)->getFunction();
+                break;
             case SignatureType::NONE:
                 m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_BOOL:
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,bool>*>(Function.second)->getFunction();
                 break;
             case SignatureType::NONE_DOUBLE:
                 m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double>*>(Function.second)->getFunction();

@@ -187,25 +187,30 @@ void CPhysicsManager::initComInterface()
     INFO_MSG("Physics Manager", "Initialising com interace.")
     if (m_pComInterface != nullptr)
     {
+        m_pComInterface->registerFunction("accelerate_time",
+                                          CCommand<void,bool>([&](bool _bAllowTimeScaling){this->accelerateTime(_bAllowTimeScaling);}),
+                                          "Accelerates time using more cpu power unless scaling is allowed, which will increase the time step.",
+                                          SignatureType::NONE_BOOL,
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::BOOL, "Flag if time scaling by increasing time step is allowed (reduces accuracy)"}},
+                                          "sim"
+                                         );
+        m_pComInterface->registerFunction("decelerate_time",
+                                          CCommand<void>([&](){this->decelerateTime();}),
+                                          "Decelerates time.",
+                                          SignatureType::NONE,
+                                          {{ParameterType::NONE, "No return value"}},
+                                          "sim"
+                                         );
         m_pComInterface->registerFunction("pause",
-                                          CCommand<void>(
-                                                [&]()
-                                                {
-                                                  this->m_bPaused = true;
-                                                }
-                                            ),
+                                          CCommand<void>([&](){this->m_bPaused = true;}),
                                           "Pauses physics simulation.",
                                           SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("resume",
-                                          CCommand<void>(
-                                                [&]()
-                                                {
-                                                  this->m_bPaused = false;
-                                                }
-                                            ),
+                                          CCommand<void>([&](){this->m_bPaused = false;}),
                                           "Resumes physics simulation if paused.",
                                           SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
@@ -233,15 +238,24 @@ void CPhysicsManager::initComInterface()
                                            "physics"
                                          );
         m_pComInterface->registerFunction("toggle_pause",
-                                          CCommand<void>(
-                                                [&]()
-                                                {
-                                                  this->togglePause();
-                                                }
-                                            ),
+                                          CCommand<void>([&](){this->togglePause();}),
                                           "Pauses or unpauses physics simulation.",
                                           SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time",
+                                          CCommand<double>([&](){return this->m_SimTimerGlobal.getSecondsRaw();}),
+                                          "Provides simulation time (raw seconds, years excluded).",
+                                          SignatureType::DOUBLE,
+                                          {{ParameterType::DOUBLE, "Seconds of simulation time"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_years",
+                                          CCommand<int>([&](){return this->m_SimTimerGlobal.getYears();}),
+                                          "Provides full years of simulation time.",
+                                          SignatureType::INT,
+                                          {{ParameterType::INT, "Full years of simulation time"}},
                                            "physics"
                                          );
     }

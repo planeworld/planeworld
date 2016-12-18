@@ -35,13 +35,15 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CComConsole::CComConsole() : m_strCurrent(""),
+CComConsole::CComConsole() : m_strRet(""),
+                             m_strCurrent(""),
                              m_nICurrent(0)
 {
     METHOD_ENTRY("CComConsole::CComConsole")
     DTOR_CALL("CComConsole::CComConsole")
 
     m_CommandBuffer.reserve(100);
+    m_RetValBuffer.reserve(100);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,8 +58,22 @@ void CComConsole::addCommand(const std::string& _strCom)
     METHOD_ENTRY("CComConsole::addCommand")
     
     m_CommandBuffer.push_back(_strCom);
+    m_RetValBuffer.push_back(m_strRet);
     m_strCurrent = "";
     m_nICurrent = m_CommandBuffer.size()-1;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Executes the current command, using the com interface
+///
+////////////////////////////////////////////////////////////////////////////////
+void CComConsole::execute()
+{
+    METHOD_ENTRY("CComConsole::execute")
+    
+    m_strRet = m_pComInterface->call(m_strCurrent);
+    this->addCommand(m_strCurrent);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

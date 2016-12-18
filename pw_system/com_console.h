@@ -36,6 +36,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
 #include "circular_buffer.h"
+#include "com_interface_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -48,7 +49,7 @@ typedef CCircularBuffer<std::string> CommandBufferType;
 /// \brief Class providing an command console
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CComConsole
+class CComConsole : public IComInterfaceUser
 {
     
     public:
@@ -59,9 +60,11 @@ class CComConsole
         //--- Constant Methods -----------------------------------------------//
         const CommandBufferType&    getCommands() const;
         const std::string&          getCurrentCommand() const;
+        const CommandBufferType&    getReturnValues() const;
         
         //--- Methods --------------------------------------------------------//
         void addCommand(const std::string& _strCom);
+        void execute();
         void nextCommand();
         void prevCommand();
         void setCurrentCommand(const std::string&);
@@ -73,6 +76,8 @@ class CComConsole
     private:
         
         CommandBufferType   m_CommandBuffer; ///< Command buffer
+        CommandBufferType   m_RetValBuffer;  ///< Return value buffer
+        std::string         m_strRet;        ///< Return value of last command
         std::string         m_strCurrent;    ///< Currently selected/entered command
         int                 m_nICurrent;     ///< Index of currently selected command
 };
@@ -106,6 +111,19 @@ inline const std::string& CComConsole::getCurrentCommand() const
 {
     METHOD_ENTRY("CComConsole::getCurrentCommand")
     return m_strCurrent;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns return value buffer of functions that were executed
+///
+/// \return Return value buffer of functions that were executed
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CommandBufferType& CComConsole::getReturnValues() const
+{
+    METHOD_ENTRY("CComConsole::getReturnValue")
+    return m_RetValBuffer;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

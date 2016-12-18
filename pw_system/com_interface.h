@@ -59,6 +59,8 @@ enum class SignatureType
 {
     NONE,
     CUSTOM_OBJ,
+    DOUBLE,
+    INT,
     NONE_BOOL,
     NONE_DOUBLE,
     NONE_INT,
@@ -151,7 +153,7 @@ class CComInterface
         //--- Methods --------------------------------------------------------//
         template<class TRet, class... Args>
         TRet                call(const std::string& _strName, Args...);
-        const std::string&  call(const std::string&);
+        const std::string   call(const std::string&);
         void                help();
         void                help(int);
         

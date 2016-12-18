@@ -147,6 +147,9 @@ int main(int argc, char *argv[])
     
     CComConsole   ComConsole;
     CComInterface ComInterface;
+    
+    ComConsole.setComInterface(&ComInterface);
+    
     ComInterface.registerFunction("exit",
                                   CCommand<void>(quit),
                                   "Exit processing, clean up and end simulation. Same as <quit>",
@@ -420,9 +423,8 @@ int main(int argc, char *argv[])
                                     }
                                     case sf::Keyboard::Return:
                                     {
-                                        ComInterface.call(strConsoleCommand);
-                                        ComConsole.addCommand(strConsoleCommand);
                                         strConsoleCommand = "";
+                                        ComConsole.execute();
                                         break;
                                     }
                                     default:

@@ -83,11 +83,12 @@ CComInterface::~CComInterface()
 /// \return Return value of function as string
 ///
 ///////////////////////////////////////////////////////////////////////////////
-const std::string& CComInterface::call(const std::string& _strCommand)
+const std::string CComInterface::call(const std::string& _strCommand)
 {
     METHOD_ENTRY("CComInterface::call")
     
     std::istringstream iss(_strCommand);
+    std::ostringstream oss("");
     std::string strName;
     
     iss >> strName;
@@ -96,9 +97,26 @@ const std::string& CComInterface::call(const std::string& _strCommand)
     {
         switch (m_RegisteredSignatures[strName])
         {
+            case SignatureType::DOUBLE:
+            {
+                oss << this->call<double>(strName);
+                break;
+            }
+            case SignatureType::INT:
+            {
+                oss << this->call<int>(strName);
+                break;
+            }
             case SignatureType::NONE:
             {
                 this->call<void>(strName);
+                break;
+            }
+            case SignatureType::NONE_BOOL:
+            {
+                bool bParam = 0;
+                iss >> bParam;
+                this->call<void,bool>(strName, bParam);
                 break;
             }
             case SignatureType::NONE_DOUBLE:
@@ -127,13 +145,12 @@ const std::string& CComInterface::call(const std::string& _strCommand)
             default:
                 NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
         }
-    
     }
     else
     {
         WARNING_MSG("Com Interface", "Unknown function <" << strName << ">. ")
-        return std::string("");
     }
+    return oss.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

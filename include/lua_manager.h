@@ -74,7 +74,7 @@ class CLuaManager : public IComInterfaceUser
         
 
         //--- Private Variables ----------------------------------------------//
-        sel::State  m_LuaState;
+        sel::State  m_LuaState{true};
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
