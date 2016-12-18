@@ -41,7 +41,7 @@ CComInterface::CComInterface()
 {
     METHOD_ENTRY("CComInterface::CComInterface")
     CTOR_CALL("CComInterface::CComInterface")
-    this->registerFunction("help",  CComCallback<void, int>([&](int nVerboseLevel){this->help(nVerboseLevel);}),
+    this->registerFunction("help",  CCommand<void, int>([&](int nVerboseLevel){this->help(nVerboseLevel);}),
                                     "Show command interface help",
                                     SignatureType::NONE_INT,
                                     {{ParameterType::NONE,"No return value"},
@@ -65,7 +65,7 @@ CComInterface::~CComInterface()
         {
             delete pFunction.second;
             pFunction.second = nullptr;
-            MEM_FREED("IBaseComCallback")
+            MEM_FREED("IBaseCommand")
         }
     }
 }

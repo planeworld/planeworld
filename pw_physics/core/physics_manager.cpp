@@ -188,7 +188,7 @@ void CPhysicsManager::initComInterface()
     if (m_pComInterface != nullptr)
     {
         m_pComInterface->registerFunction("pause",
-                                          CComCallback<void>(
+                                          CCommand<void>(
                                                 [&]()
                                                 {
                                                   this->m_bPaused = true;
@@ -200,7 +200,7 @@ void CPhysicsManager::initComInterface()
                                            "physics"
                                          );
         m_pComInterface->registerFunction("resume",
-                                          CComCallback<void>(
+                                          CCommand<void>(
                                                 [&]()
                                                 {
                                                   this->m_bPaused = false;
@@ -212,7 +212,7 @@ void CPhysicsManager::initComInterface()
                                            "physics"
                                          );
         m_pComInterface->registerFunction("set_angle",
-                                          CComCallback<void, std::string, double>(
+                                          CCommand<void, std::string, double>(
                                                 [&](const std::string& _strName, const double& _fAngle)
                                                 {
                                                     try
@@ -233,7 +233,7 @@ void CPhysicsManager::initComInterface()
                                            "physics"
                                          );
         m_pComInterface->registerFunction("toggle_pause",
-                                          CComCallback<void>(
+                                          CCommand<void>(
                                                 [&]()
                                                 {
                                                   this->togglePause();

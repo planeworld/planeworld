@@ -53,16 +53,16 @@ bool CLuaManager::init()
         switch ((*m_pComInterface->getSignatures())[Function.first])
         {
             case SignatureType::NONE:
-                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CComCallback<void>*>(Function.second)->getFunction();
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void>*>(Function.second)->getFunction();
                 break;
             case SignatureType::NONE_DOUBLE:
-                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CComCallback<void,double>*>(Function.second)->getFunction();
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double>*>(Function.second)->getFunction();
                 break;
             case SignatureType::NONE_INT:
-                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CComCallback<void,int>*>(Function.second)->getFunction();
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int>*>(Function.second)->getFunction();
                 break;
             case SignatureType::NONE_STRING_DOUBLE:
-                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CComCallback<void,std::string,double>*>(Function.second)->getFunction();
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,double>*>(Function.second)->getFunction();
                 break;
         }
     }

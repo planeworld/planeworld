@@ -38,10 +38,10 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template <class TRet, class... TArgs>
-CComCallback<TRet, TArgs...>::CComCallback(const std::function<TRet(TArgs...)>& _Function) : m_Function(_Function)
+CCommand<TRet, TArgs...>::CCommand(const std::function<TRet(TArgs...)>& _Function) : m_Function(_Function)
 {
-    METHOD_ENTRY("CComCallback::CComCallback")
-    CTOR_CALL("CComCallback")
+    METHOD_ENTRY("CCommand::CCommand")
+    CTOR_CALL("CCommand")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,9 +53,9 @@ CComCallback<TRet, TArgs...>::CComCallback(const std::function<TRet(TArgs...)>& 
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template <class TRet, class... TArgs>
-inline TRet CComCallback<TRet, TArgs...>::call(TArgs... _Args)
+inline TRet CCommand<TRet, TArgs...>::call(TArgs... _Args)
 {
-    METHOD_ENTRY("CComCallback::call")
+    METHOD_ENTRY("CCommand::call")
     return m_Function(_Args...);
 }
 
@@ -76,7 +76,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
     try
     {
         #ifdef LOGLEVEL_DEBUG
-            auto pFunction = dynamic_cast<CComCallback<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
+            auto pFunction = dynamic_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
             if (pFunction != nullptr )
             {
                 return pFunction->call(_Args...);
@@ -87,7 +87,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
                 return TRet();
             }
         #else
-            auto pFunction = static_cast<CComCallback<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
+            auto pFunction = static_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
             return pFunction->call(_Args...);
         #endif
     }

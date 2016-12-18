@@ -72,11 +72,11 @@ enum class SignatureType
 /// \brief Base class for callback functions registered at com interface
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IBaseComCallback
+class IBaseCommand
 {
     public:
         //--- Constructor/Destructor -----------------------------------------//
-        virtual ~IBaseComCallback(){}
+        virtual ~IBaseCommand(){}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,12 +85,12 @@ class IBaseComCallback
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class TRet, class... TArgs>
-class CComCallback : public IBaseComCallback
+class CCommand : public IBaseCommand
 {
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
-        CComCallback(const std::function<TRet(TArgs...)>&);
+        CCommand(const std::function<TRet(TArgs...)>&);
         
         //--- Constant methods -----------------------------------------------//
         std::function<TRet(TArgs...)> getFunction() const {return m_Function;}
@@ -104,7 +104,7 @@ class CComCallback : public IBaseComCallback
 };
 
 /// Map of functions, accessed by name
-typedef std::map<std::string, IBaseComCallback*> RegisteredFunctionsType;
+typedef std::map<std::string, IBaseCommand*> RegisteredFunctionsType;
 /// Map of descriptions, accessed by name
 typedef std::unordered_map<std::string, std::string> RegisteredFunctionsDescriptionType;
 /// Parameter list for functions
