@@ -15,7 +15,7 @@ INCLUDE_DIRECTORIES (
     ${LUA_INCLUDE_DIR}
     ${NOISE2D_INCLUDE_DIR}
     ${SFML_INCLUDE_DIR}
-    ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src
+    ${CMAKE_HOME_DIRECTORY}/3rdparty/Selene/include
     ${CMAKE_HOME_DIRECTORY}/pw_io
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures
@@ -66,6 +66,7 @@ SET(SRCS
     camera.cpp
     collision_manager.cpp
     kinematics_state.cpp
+    lua_manager.cpp
     namegenerator.cpp
     parzival.cpp
     planeworld.cpp

@@ -35,7 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "collision_manager.h"
-#include "com_interface_user.h"
+#include "com_interface_provider.h"
 #include "conf_pw.h"
 #include "emitter.h"
 #include "sim_timer.h"
@@ -58,7 +58,7 @@ const double      PHYSICS_LUA_DEFAULT_FREQUENCY = 10.0;     ///< Default frequen
 /// This class computes everything that is physics related.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CPhysicsManager : public IComInterfaceUser,
+class CPhysicsManager : public IComInterfaceProvider,
                         public IWorldDataStorageUser
 {
     

@@ -20,16 +20,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       com_interface_user.h
-/// \brief      Prototype of interface "IComInterfaceUser"
+/// \file       com_interface_provider.h
+/// \brief      Prototype of interface "IComInterfaceProvider"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2016-08-31
+/// \date       2016-12-11
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COM_INTERFACE_USER_H
-#define COM_INTERFACE_USER_H
+#ifndef COM_INTERFACE_PROVIDER_H
+#define COM_INTERFACE_PROVIDER_H
 
 //--- Standard header --------------------------------------------------------//
 
@@ -40,19 +40,21 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Interface for classes that use the com interface
+/// \brief Interface for classes that provide functions for the com interface
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IComInterfaceUser
+class IComInterfaceProvider
 {
 
     public:
    
         //--- Constructor/Destructor -----------------------------------------//
-        IComInterfaceUser() : m_pComInterface(nullptr){}
-        virtual ~IComInterfaceUser() {}
+        IComInterfaceProvider() : m_pComInterface(nullptr){}
+        virtual ~IComInterfaceProvider() {}
 
         //--- Methods --------------------------------------------------------//
+        virtual void initComInterface() = 0;
+        
         void setComInterface(CComInterface*);
         
     protected:
@@ -69,16 +71,16 @@ class IComInterfaceUser
 /// \param _pComInterface Instance of com interface to be used
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IComInterfaceUser::setComInterface(CComInterface* _pComInterface)
+inline void IComInterfaceProvider::setComInterface(CComInterface* _pComInterface)
 {
-    METHOD_ENTRY("IComInterfaceUser::setComInterface")
+    METHOD_ENTRY("IComInterfaceProvider::setComInterface")
     
     if (m_pComInterface != nullptr)
     {
-        NOTICE_MSG("Com Interface User", "Com interface instance already given, overwriting.")
+        NOTICE_MSG("Com Interface Provider", "Com interface instance already given, overwriting.")
     }
     
     m_pComInterface = _pComInterface;
 }
 
-#endif // COM_INTERFACE_USER_H
+#endif // COM_INTERFACE_PROVIDER_H

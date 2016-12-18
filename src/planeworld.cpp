@@ -49,7 +49,7 @@
 #include "com_interface.h"
 #include "debris_emitter.h"
 #include "game_state_manager.h"
-// #include "lua_manager.h"
+#include "lua_manager.h"
 #include "physics_manager.h"
 #include "objects_emitter.h"
 #include "thruster.h"
@@ -148,14 +148,16 @@ int main(int argc, char *argv[])
     CComConsole   ComConsole;
     CComInterface ComInterface;
     ComInterface.registerFunction("exit",
-                                  new CComCallback<void>(quit),
+                                  CComCallback<void>(quit),
                                   "Exit processing, clean up and end simulation. Same as <quit>",
+                                  SignatureType::NONE,
                                   {{ParameterType::NONE, "No return value"}},
                                   "system"
                                  );
     ComInterface.registerFunction("quit",
-                                  new CComCallback<void>(quit),
+                                  CComCallback<void>(quit),
                                   "Quit processing, clean up and end simulation. Same as <exit>",
+                                  SignatureType::NONE,
                                   {{ParameterType::NONE, "No return value"}},
                                   "system"
                                  );
@@ -197,6 +199,7 @@ int main(int argc, char *argv[])
     CVisualsDataStorage VisualsDataStorage;
     CWorldDataStorage   WorldDataStorage;
     CThruster           Thruster;
+    CLuaManager         LuaManager;
     
     //--- Initialisation -----------------------------------------------------//
     pPhysicsManager = new CPhysicsManager;
@@ -272,48 +275,57 @@ int main(int argc, char *argv[])
         pWindow=pVisualsManager->getWindowHandle();
         
         ComInterface.registerFunction("cycle_camera",
-                                      new CComCallback<void>([&](){pVisualsManager->cycleCamera();}),
+                                      CComCallback<void>([&](){pVisualsManager->cycleCamera();}),
                                       "Cycle through registered cameras",
+                                      SignatureType::NONE,
                                       {{ParameterType::NONE,"No return value"}},
                                       "system"
         );
         ComInterface.registerFunction("get_current_camera",
-                                      new CComCallback<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}),
+                                      CComCallback<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}),
                                       "Returns pointer to active camera",
+                                      SignatureType::CUSTOM_OBJ,
                                       {{ParameterType::CUSTOM_OBJ, "CCamera*, Currently active camera"}},
                                       "system"
         );
         ComInterface.registerFunction("rotate_camera_by",
-                                      new CComCallback<void, double>([&](const double& _fAngle){pCamera->rotateBy(_fAngle);}),
+                                      CComCallback<void, double>([&](const double& _fAngle){pCamera->rotateBy(_fAngle);}),
                                       "Rotate camera by given angle.",
+                                      SignatureType::NONE_DOUBLE,
                                       {{ParameterType::NONE, "No return value"},
                                        {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
                                       "system"  
         );
         ComInterface.registerFunction("toggle_bboxes",
-                                      new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
+                                      CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
                                       "Toggle bounding boxes on and off.",
+                                      SignatureType::NONE,
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals"
         );
         ComInterface.registerFunction("toggle_grid",
-                                      new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
+                                      CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
                                       "Toggle universe grid on and off.",
+                                      SignatureType::NONE,
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals"  
         );
         ComInterface.registerFunction("toggle_names",
-                                      new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_NAMES);}),
+                                      CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_NAMES);}),
                                       "Toggle objects names on and off.",
+                                      SignatureType::NONE,
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals"  
         );
         ComInterface.registerFunction("toggle_timers",
-                                      new CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_TIMERS);}),
+                                      CComCallback<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_TIMERS);}),
                                       "Toggle timers on and off.",
+                                      SignatureType::NONE,
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals"  
         );
+        LuaManager.setComInterface(&ComInterface);
+        LuaManager.init();
         
         bool bGraphicsOn = true;
         bool bMouseCursorVisible = false;
@@ -503,6 +515,7 @@ int main(int argc, char *argv[])
                                     case sf::Keyboard::N:
                                     {
                                         pVisualsManager->toggleVisualisations(VISUALS_NAMES);
+                                        LuaManager.test();
                                         break;
                                     }
                                     case sf::Keyboard::P:

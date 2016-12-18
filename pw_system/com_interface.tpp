@@ -38,10 +38,10 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template <class TRet, class... TArgs>
-inline CComCallback<TRet, TArgs...>::CComCallback(const std::function<TRet(TArgs...)>& _Function)
+CComCallback<TRet, TArgs...>::CComCallback(const std::function<TRet(TArgs...)>& _Function) : m_Function(_Function)
 {
     METHOD_ENTRY("CComCallback::CComCallback")
-    m_Function = _Function;
+    CTOR_CALL("CComCallback")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,4 +96,37 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
         WARNING_MSG("Com Interface", "Unknown function <" << _strName << ">. " << oor.what())
         return TRet();
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Register the given function with its arguments
+///
+/// \param _strName Name the function should be registered under
+/// \param _Command Function to be registered
+/// \param _strDescription Description of the function to be registered
+/// \param _Signature Signature of the function, containing return value and parameters
+/// \param _ParamList List of parameters for given function
+/// \param _Domain Domain of function to be registered
+///
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+bool CComInterface::registerFunction(const std::string& _strName, const T& _Command,
+                                     const std::string& _strDescription,
+                                     const SignatureType& _Signature,
+                                     const ParameterListType& _ParamList,
+                                     const DomainType& _Domain
+                                    )
+{
+    METHOD_ENTRY("CComInterface::registerFunction")
+    
+    m_RegisteredFunctions[_strName] = new T(_Command);
+    MEM_ALLOC("IBaseComCallback")
+    
+    m_RegisteredFunctionsDescriptions[_strName] = _strDescription;
+    m_RegisteredFunctionsParams[_strName] = _ParamList;
+    m_RegisteredFunctionsDomain[_strName] = _Domain;
+    m_RegisteredSignatures[_strName] = _Signature;
+    
+    return true;
 }

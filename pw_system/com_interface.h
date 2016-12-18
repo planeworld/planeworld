@@ -54,6 +54,19 @@ enum class ParameterType
     UID
 };
 
+/// Specifies the signature of the function
+enum class SignatureType
+{
+    NONE,
+    CUSTOM_OBJ,
+    NONE_BOOL,
+    NONE_DOUBLE,
+    NONE_INT,
+    NONE_STRING,
+    NONE_STRING_DOUBLE,
+    NONE_UID
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Base class for callback functions registered at com interface
@@ -79,6 +92,9 @@ class CComCallback : public IBaseComCallback
         //--- Constructor/Destructor -----------------------------------------//
         CComCallback(const std::function<TRet(TArgs...)>&);
         
+        //--- Constant methods -----------------------------------------------//
+        std::function<TRet(TArgs...)> getFunction() const {return m_Function;}
+        
         //--- Methods --------------------------------------------------------//
         TRet call(TArgs...);
         
@@ -95,6 +111,8 @@ typedef std::unordered_map<std::string, std::string> RegisteredFunctionsDescript
 typedef std::vector<std::pair<ParameterType, std::string>> ParameterListType;
 /// Map of parameter lists, accessed by function name
 typedef std::unordered_map<std::string, ParameterListType> RegisteredParameterListsType;
+/// Map of signatures, accessed by function name
+typedef std::unordered_map<std::string, SignatureType> RegisteredSignaturesType;
 /// Domain of function being registered
 typedef std::string DomainType;
 /// Map of domains, accessed by function name
@@ -126,7 +144,8 @@ class CComInterface
         virtual ~CComInterface();
         
         //--- Constant Methods -----------------------------------------------//
-        RegisteredFunctionsType* getFunctions() {return &m_RegisteredFunctions;} 
+        RegisteredFunctionsType*      getFunctions()  {return &m_RegisteredFunctions;} 
+        RegisteredSignaturesType*     getSignatures() {return &m_RegisteredSignatures;}
         
         //--- Methods --------------------------------------------------------//
         template<class TRet, class... Args>
@@ -135,8 +154,10 @@ class CComInterface
         void                help();
         void                help(int);
         
-        bool registerFunction(const std::string&, IBaseComCallback* const,
+        template <class T>
+        bool registerFunction(const std::string&, const T&,
                               const std::string&,
+                              const SignatureType&,
                               const ParameterListType& = {},
                               const DomainType& = ""
         );
@@ -150,6 +171,7 @@ class CComInterface
         RegisteredFunctionsType             m_RegisteredFunctions;       ///< Registered functions provided by modules
         RegisteredFunctionsDescriptionType  m_RegisteredFunctionsDescriptions; // Descriptions of registered functions
         RegisteredParameterListsType        m_RegisteredFunctionsParams; ///< Parameter lists of registered functions      
+        RegisteredSignaturesType            m_RegisteredSignatures;      ///< Signatures of the registered functions
         RegisteredDomainsType               m_RegisteredFunctionsDomain; ///< Domain of registered functions
 };
 

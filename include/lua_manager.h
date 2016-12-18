@@ -20,65 +20,60 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       com_interface_user.h
-/// \brief      Prototype of interface "IComInterfaceUser"
+/// \file       lua_manager.h
+/// \brief      Prototype of class "CLuaManager"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2016-08-31
+/// \date       2016-03-18
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COM_INTERFACE_USER_H
-#define COM_INTERFACE_USER_H
-
-//--- Standard header --------------------------------------------------------//
+#ifndef LUA_MANAGER_H
+#define LUA_MANAGER_H
 
 //--- Program header ---------------------------------------------------------//
-#include "com_interface.h"
+#include "log.h"
 
-//--- Misc header ------------------------------------------------------------//
+//--- Standard header --------------------------------------------------------//
+#include <array>
+#include <sstream>
+
+//--- Misc. header -----------------------------------------------------------//
+#include "com_interface_user.h"
+#include "selene.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Interface for classes that use the com interface
+/// \brief Class to handling Lua scripting
+///
+/// This class manages initialisation and running of Lua scripts. It provides
+/// access to game entities and much more
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IComInterfaceUser
+class CLuaManager : public IComInterfaceUser
 {
-
+    
     public:
-   
+    
         //--- Constructor/Destructor -----------------------------------------//
-        IComInterfaceUser() : m_pComInterface(nullptr){}
-        virtual ~IComInterfaceUser() {}
 
+        //--- Constant methods -----------------------------------------------//
+        
         //--- Methods --------------------------------------------------------//
-        void setComInterface(CComInterface*);
+        bool init();
+        void test();
         
-    protected:
+        //--- friends --------------------------------------------------------//
+        friend std::istream&    operator>>(std::istream&, CLuaManager&);
+        friend std::ostream&    operator<<(std::ostream&, CLuaManager&);
+
+    private:
         
-        CComInterface*  m_pComInterface;     ///< Pointer to com interface
+
+        //--- Private Variables ----------------------------------------------//
+        sel::State  m_LuaState;
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the com interface to be used
-///
-/// \param _pComInterface Instance of com interface to be used
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IComInterfaceUser::setComInterface(CComInterface* _pComInterface)
-{
-    METHOD_ENTRY("IComInterfaceUser::setComInterface")
-    
-    if (m_pComInterface != nullptr)
-    {
-        NOTICE_MSG("Com Interface User", "Com interface instance already given, overwriting.")
-    }
-    
-    m_pComInterface = _pComInterface;
-}
-
-#endif // COM_INTERFACE_USER_H
+#endif // LUA_MANAGER_H

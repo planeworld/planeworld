@@ -188,29 +188,31 @@ void CPhysicsManager::initComInterface()
     if (m_pComInterface != nullptr)
     {
         m_pComInterface->registerFunction("pause",
-                                          new CComCallback<void>(
+                                          CComCallback<void>(
                                                 [&]()
                                                 {
                                                   this->m_bPaused = true;
                                                 }
                                             ),
                                           "Pauses physics simulation.",
+                                          SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("resume",
-                                          new CComCallback<void>(
+                                          CComCallback<void>(
                                                 [&]()
                                                 {
                                                   this->m_bPaused = false;
                                                 }
                                             ),
                                           "Resumes physics simulation if paused.",
+                                          SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("set_angle",
-                                          new CComCallback<void, std::string, double>(
+                                          CComCallback<void, std::string, double>(
                                                 [&](const std::string& _strName, const double& _fAngle)
                                                 {
                                                     try
@@ -224,19 +226,21 @@ void CPhysicsManager::initComInterface()
                                                 }
                                             ),
                                           "Sets rotation angle of a given object.",
+                                          SignatureType::NONE_STRING_DOUBLE,
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::STRING, "Object name"},
                                            {ParameterType::DOUBLE, "Angle"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("toggle_pause",
-                                          new CComCallback<void>(
+                                          CComCallback<void>(
                                                 [&]()
                                                 {
                                                   this->togglePause();
                                                 }
                                             ),
                                           "Pauses or unpauses physics simulation.",
+                                          SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );

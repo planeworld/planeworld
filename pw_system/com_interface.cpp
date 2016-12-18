@@ -41,9 +41,9 @@ CComInterface::CComInterface()
 {
     METHOD_ENTRY("CComInterface::CComInterface")
     CTOR_CALL("CComInterface::CComInterface")
-    this->registerFunction("help",
-                                    new CComCallback<void, int>([&](int nVerboseLevel){this->help(nVerboseLevel);}),
+    this->registerFunction("help",  CComCallback<void, int>([&](int nVerboseLevel){this->help(nVerboseLevel);}),
                                     "Show command interface help",
+                                    SignatureType::NONE_INT,
                                     {{ParameterType::NONE,"No return value"},
                                      {ParameterType::INT,"Verbosity (0-1)"}},
                                     "system"
@@ -94,66 +94,40 @@ const std::string& CComInterface::call(const std::string& _strCommand)
     
     if (m_RegisteredFunctions.find(strName) != m_RegisteredFunctions.end())
     {
-        ParameterListType ParamList = m_RegisteredFunctionsParams[strName];
-        
-        switch (ParamList.size())
+        switch (m_RegisteredSignatures[strName])
         {
-            case 1:
-                if (ParamList[0].first == ParameterType::NONE)
-                {
-                    this->call<void>(strName);
-                }
-                else
-                {
-                    NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
-                }
+            case SignatureType::NONE:
+            {
+                this->call<void>(strName);
                 break;
-            case 2:
-                if (ParamList[0].first == ParameterType::NONE)
-                {
-                    if (ParamList[1].first == ParameterType::DOUBLE)
-                    {
-                        double fParam = 0.0;
-                        iss >> fParam;
-                        this->call<void,double>(strName, fParam);
-                    }
-                    else if (ParamList[1].first == ParameterType::INT)
-                    {
-                        int nParam = 0;
-                        iss >> nParam;
-                        this->call<void,int>(strName, nParam);
-                    }
-                    else
-                    {
-                        NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
-                    }
-                }
+            }
+            case SignatureType::NONE_DOUBLE:
+            {
+                double fParam = 0.0;
+                iss >> fParam;
+                this->call<void,double>(strName, fParam);
                 break;
-            case 3:
-                if (ParamList[0].first == ParameterType::NONE)
-                {
-                    if (ParamList[1].first == ParameterType::STRING)
-                    {
-                        std::string strS;
-                        iss >> strS;
-                        if (ParamList[2].first == ParameterType::DOUBLE)
-                        {
-                            double fParam = 0.0;
-                            iss >> fParam;
-                            this->call<void,std::string, double>(strName, strS, fParam);
-                        }
-                        else
-                        {
-                            NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
-                        }
-                    }
-                    else
-                    {
-                        NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
-                    }
-                }
+            }
+            case SignatureType::NONE_INT:
+            {
+                int nParam = 0;
+                iss >> nParam;
+                this->call<void,int>(strName, nParam);
                 break;
+            }
+            case SignatureType::NONE_STRING_DOUBLE:
+            {
+                std::string strS;
+                iss >> strS;
+                double fParam = 0.0;
+                iss >> fParam;
+                this->call<void,std::string, double>(strName, strS, fParam);
+                break;
+            }
+            default:
+                NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
         }
+    
     }
     else
     {
@@ -208,33 +182,3 @@ void CComInterface::help()
     METHOD_ENTRY("CComInterface::help")
     this->help(0);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Register the given function with its arguments
-///
-/// \param _strName Name the function should be registered under
-/// \param _pFunction Function to be registered
-/// \param _strDescription Description of the function to be registered
-/// \param _ParamList List of parameters for given function
-/// \param _Domain Domain of function to be registered
-///
-///////////////////////////////////////////////////////////////////////////////
-bool CComInterface::registerFunction(const std::string& _strName, IBaseComCallback* const _pFunction,
-                                     const std::string& _strDescription,
-                                     const ParameterListType& _ParamList,
-                                     const DomainType& _Domain
-                                    )
-{
-    METHOD_ENTRY("CComInterface::registerFunction")
-    
-    m_RegisteredFunctions[_strName] = _pFunction;
-    MEM_ALLOC("IBaseComCallback")
-    
-    m_RegisteredFunctionsDescriptions[_strName] = _strDescription;
-    m_RegisteredFunctionsParams[_strName] = _ParamList;
-    m_RegisteredFunctionsDomain[_strName] = _Domain;
-    
-    return true;
-}
-
