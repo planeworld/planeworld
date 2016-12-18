@@ -42,6 +42,9 @@
 #include "com_interface_user.h"
 #include "selene.h"
 
+// Constants
+const char LUA_PACKAGE_PREFIX[2] = {'p','w'};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class to handling Lua scripting

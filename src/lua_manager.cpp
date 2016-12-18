@@ -30,6 +30,8 @@
 
 #include "lua_manager.h"
 
+#include <string>
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Initialise Lua scripting engine
@@ -46,19 +48,21 @@ bool CLuaManager::init()
     
     for (auto Function : *m_pComInterface->getFunctions())
     {
+        std::string strDomain((*m_pComInterface->getDomains())[Function.first]);
+        
         switch ((*m_pComInterface->getSignatures())[Function.first])
         {
             case SignatureType::NONE:
-                m_LuaState["pw"][Function.first.c_str()] = static_cast<CComCallback<void>*>(Function.second)->getFunction();
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CComCallback<void>*>(Function.second)->getFunction();
                 break;
             case SignatureType::NONE_DOUBLE:
-                m_LuaState[Function.first.c_str()] = static_cast<CComCallback<void,double>*>(Function.second)->getFunction();
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CComCallback<void,double>*>(Function.second)->getFunction();
                 break;
             case SignatureType::NONE_INT:
-                m_LuaState[Function.first.c_str()] = static_cast<CComCallback<void,int>*>(Function.second)->getFunction();
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CComCallback<void,int>*>(Function.second)->getFunction();
                 break;
             case SignatureType::NONE_STRING_DOUBLE:
-                m_LuaState[Function.first.c_str()] = static_cast<CComCallback<void,std::string,double>*>(Function.second)->getFunction();
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CComCallback<void,std::string,double>*>(Function.second)->getFunction();
                 break;
         }
     }

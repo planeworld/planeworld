@@ -144,6 +144,7 @@ class CComInterface
         virtual ~CComInterface();
         
         //--- Constant Methods -----------------------------------------------//
+        RegisteredDomainsType*        getDomains()    {return &m_RegisteredFunctionsDomain;} 
         RegisteredFunctionsType*      getFunctions()  {return &m_RegisteredFunctions;} 
         RegisteredSignaturesType*     getSignatures() {return &m_RegisteredSignatures;}
         
