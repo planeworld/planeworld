@@ -227,6 +227,7 @@ void CPhysicsManager::initComInterface()
                                                     catch (const std::out_of_range& oor)
                                                     {
                                                         WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::NR_PARAMS);
                                                     }
                                                 }
                                             ),

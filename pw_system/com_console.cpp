@@ -72,7 +72,15 @@ void CComConsole::execute()
 {
     METHOD_ENTRY("CComConsole::execute")
     
-    m_strRet = m_pComInterface->call(m_strCurrent);
+    try
+    {
+        m_strRet = m_pComInterface->call(m_strCurrent);
+    }
+    catch (CComInterfaceException ComIntEx)
+    {
+        m_strRet = ComIntEx.getMessage();
+        
+    }
     this->addCommand(m_strCurrent);
 }
 

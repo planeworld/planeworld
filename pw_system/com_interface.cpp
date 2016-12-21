@@ -32,6 +32,28 @@
 
 #include <sstream>
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return message according to exception type
+///
+/// \return Message according to exception type
+///
+////////////////////////////////////////////////////////////////////////////////
+const std::string CComInterfaceException::getMessage() const
+{
+    METHOD_ENTRY("CComInterfaceException::getMessage")
+    
+    switch (m_EType)
+    {
+        case ComIntExceptionType::UNKNOWN_COMMAND:
+            return "Unknown command";
+        case ComIntExceptionType::NR_PARAMS:
+            return "Wrong number of parameters";
+        default:
+            return "";
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor, registeres its own functions
@@ -93,6 +115,7 @@ const std::string CComInterface::call(const std::string& _strCommand)
     
     iss >> strName;
     
+//     try{
     if (m_RegisteredFunctions.find(strName) != m_RegisteredFunctions.end())
     {
         switch (m_RegisteredSignatures[strName])
@@ -148,7 +171,8 @@ const std::string CComInterface::call(const std::string& _strCommand)
     }
     else
     {
-        WARNING_MSG("Com Interface", "Unknown function <" << strName << ">. ")
+        WARNING_MSG("Com Interface", "Unknown function <" << strName << ">. ");
+        throw CComInterfaceException(ComIntExceptionType::UNKNOWN_COMMAND);
     }
     return oss.str();
 }

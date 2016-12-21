@@ -69,6 +69,35 @@ enum class SignatureType
     NONE_UID
 };
 
+/// Specifies type of possible exceptions in com interface
+enum class ComIntExceptionType
+{
+    UNKNOWN_COMMAND,
+    NR_PARAMS
+};
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Class defining exceptions for the com interface
+///
+////////////////////////////////////////////////////////////////////////////////
+class CComInterfaceException
+{
+    public:
+        //--- Constructor/Destructor -----------------------------------------//
+        CComInterfaceException(ComIntExceptionType _EType) : m_EType(_EType) {}
+        
+        //--- Constant methods -----------------------------------------------//
+        const std::string getMessage() const;
+            
+    private:
+        
+        CComInterfaceException();
+        
+        ComIntExceptionType m_EType; ///< Type of exception
+
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Base class for callback functions registered at com interface
