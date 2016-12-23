@@ -58,6 +58,12 @@ bool CLuaManager::init()
             case SignatureType::DOUBLE:
                 m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double>*>(Function.second)->getFunction();
                 break;
+            case SignatureType::DOUBLE_STRING:
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::DOUBLE_STRING_DOUBLE:
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string,double>*>(Function.second)->getFunction();
+                break;
             case SignatureType::NONE:
                 m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void>*>(Function.second)->getFunction();
                 break;
@@ -70,6 +76,12 @@ bool CLuaManager::init()
             case SignatureType::NONE_INT:
                 m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int>*>(Function.second)->getFunction();
                 break;
+            case SignatureType::NONE_STRING:
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_STRING_4DOUBLE:
+                m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] =
+                            static_cast<CCommand<void,std::string,double, double, double, double>*>(Function.second)->getFunction();
             case SignatureType::NONE_STRING_DOUBLE:
                 m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,double>*>(Function.second)->getFunction();
                 break;

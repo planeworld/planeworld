@@ -60,11 +60,14 @@ enum class SignatureType
     NONE,
     CUSTOM_OBJ,
     DOUBLE,
+    DOUBLE_STRING,
+    DOUBLE_STRING_DOUBLE,
     INT,
     NONE_BOOL,
     NONE_DOUBLE,
     NONE_INT,
     NONE_STRING,
+    NONE_STRING_4DOUBLE,
     NONE_STRING_DOUBLE,
     NONE_UID
 };
@@ -73,7 +76,7 @@ enum class SignatureType
 enum class ComIntExceptionType
 {
     UNKNOWN_COMMAND,
-    NR_PARAMS
+    PARAM_ERROR
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -227,10 +227,9 @@ void CPhysicsManager::initComInterface()
                                                     catch (const std::out_of_range& oor)
                                                     {
                                                         WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
-                                                        throw CComInterfaceException(ComIntExceptionType::NR_PARAMS);
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
                                                     }
-                                                }
-                                            ),
+                                                }),
                                           "Sets rotation angle of a given object.",
                                           SignatureType::NONE_STRING_DOUBLE,
                                           {{ParameterType::NONE, "No return value"},
@@ -246,18 +245,112 @@ void CPhysicsManager::initComInterface()
                                            "physics"
                                          );
         m_pComInterface->registerFunction("get_time",
-                                          CCommand<double>([&](){return this->m_SimTimerGlobal.getSecondsRaw();}),
+                                          CCommand<double>([&]() -> double {return this->m_SimTimerGlobal.getSecondsRaw();}),
                                           "Provides simulation time (raw seconds, years excluded).",
                                           SignatureType::DOUBLE,
                                           {{ParameterType::DOUBLE, "Seconds of simulation time"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("get_time_years",
-                                          CCommand<int>([&](){return this->m_SimTimerGlobal.getYears();}),
+                                          CCommand<int>([&]() -> int {return this->m_SimTimerGlobal.getYears();}),
                                           "Provides full years of simulation time.",
                                           SignatureType::INT,
                                           {{ParameterType::INT, "Full years of simulation time"}},
                                            "physics"
+                                         );
+        m_pComInterface->registerFunction("apply_force",
+                                          CCommand<void, std::string, double, double, double, double>(
+                                              [&](const std::string& _strName,
+                                                  const double _fForceX,
+                                                  const double _fForceY,
+                                                  const double _fPOAX,
+                                                  const double _fPOAY)
+                                              {
+                                                try
+                                                {
+                                                    m_pDataStorage->getObjectsByNameBack()->at(_strName)->addForceLC(
+                                                    Vector2d(_fForceX, _fForceY) /** m_pLuaThis->m_fFrequency/m_pLuaThis->m_fFrequencyLua*/, Vector2d(_fPOAX, _fPOAY));
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                              }),
+                                          "Applies a force on given object.",
+                                          SignatureType::NONE_STRING_4DOUBLE,
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "Object name"},
+                                           {ParameterType::DOUBLE, "Force X"},
+                                           {ParameterType::DOUBLE, "Force Y"},
+                                           {ParameterType::DOUBLE, "Point of attack X"},
+                                           {ParameterType::DOUBLE, "Point of attack Y"}},
+                                           "universe"
+                                         );
+        m_pComInterface->registerFunction("get_angle",
+                                          CCommand<double, std::string>(
+                                              [&](const std::string& _strName) -> const double
+                                              {
+                                                double fAngle = 0.0;
+                                                try
+                                                {
+                                                    fAngle = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getAngle();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return fAngle;
+                                              }),
+                                          "Returns angle of a given object.",
+                                          SignatureType::DOUBLE_STRING,
+                                          {{ParameterType::DOUBLE, "Angle"},
+                                           {ParameterType::STRING, "Object name"}},
+                                           "universe"
+                                         );
+        m_pComInterface->registerFunction("activate_thruster",
+                                          CCommand<double,std::string,double>(
+                                              [&](const std::string& _strName, const double& _fThrust) -> double 
+                                              {
+                                                    auto itThruster  = m_Components.find(_strName);
+                                                    if ( itThruster != m_Components.end())
+                                                    {
+                                                        return (*itThruster).second->activate(_fThrust);
+                                                    }
+                                                    else
+                                                    {
+                                                        WARNING_MSG("Physics Manager", "Unknown thruster " << _strName)
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                              }),
+                                          "Activates thruster with given thrust.",
+                                          SignatureType::DOUBLE_STRING_DOUBLE,
+                                          {{ParameterType::DOUBLE, "Actually applied thrust"},
+                                           {ParameterType::STRING, "Thruster name"},
+                                           {ParameterType::STRING, "Thrust to be applied when activated"}},
+                                          "sim"
+                                         );
+        m_pComInterface->registerFunction("deactivate_thruster",
+                                          CCommand<void, std::string>(
+                                              [&](const std::string& _strName)
+                                              {
+                                                    auto itThruster  = m_Components.find(_strName);
+                                                    if ( itThruster != m_Components.end())
+                                                    {
+                                                        return (*itThruster).second->deactivate();
+                                                    }
+                                                    else
+                                                    {
+                                                        WARNING_MSG("Physics Manager", "Unknown thruster " << _strName)
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                              }),
+                                          "Deactivates thruster.",
+                                          SignatureType::NONE_STRING,
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "Thrust to be applied when activated"}},
+                                          "sim"
                                          );
     }
     else

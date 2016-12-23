@@ -47,8 +47,8 @@ const std::string CComInterfaceException::getMessage() const
     {
         case ComIntExceptionType::UNKNOWN_COMMAND:
             return "Unknown command";
-        case ComIntExceptionType::NR_PARAMS:
-            return "Wrong number of parameters";
+        case ComIntExceptionType::PARAM_ERROR:
+            return "Parameter error. Wrong number or unknown value.";
         default:
             return "";
     }
@@ -115,7 +115,6 @@ const std::string CComInterface::call(const std::string& _strCommand)
     
     iss >> strName;
     
-//     try{
     if (m_RegisteredFunctions.find(strName) != m_RegisteredFunctions.end())
     {
         switch (m_RegisteredSignatures[strName])
@@ -123,6 +122,21 @@ const std::string CComInterface::call(const std::string& _strCommand)
             case SignatureType::DOUBLE:
             {
                 oss << this->call<double>(strName);
+                break;
+            }
+            case SignatureType::DOUBLE_STRING:
+            {
+                std::string strParam = "";
+                iss >> strParam;
+                oss << this->call<double,std::string>(strName, strParam);
+                break;
+            }
+            case SignatureType::DOUBLE_STRING_DOUBLE:
+            {
+                std::string strParam = "";
+                double fParam = 0.0;
+                iss >> strParam >> fParam;
+                oss << this->call<double,std::string,double>(strName, strParam, fParam);
                 break;
             }
             case SignatureType::INT:
@@ -154,6 +168,22 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 int nParam = 0;
                 iss >> nParam;
                 this->call<void,int>(strName, nParam);
+                break;
+            }
+            case SignatureType::NONE_STRING:
+            {
+                std::string strS;
+                iss >> strS;
+                this->call<void,std::string>(strName, strS);
+                break;
+            }
+            case SignatureType::NONE_STRING_4DOUBLE:
+            {
+                std::string strS;
+                iss >> strS;
+                double fParam[4] = {0.0, 0.0, 0.0, 0.0};
+                iss >> fParam[0] >> fParam[1] >> fParam[2] >> fParam[3];
+                this->call<void,std::string, double, double, double, double>(strName, strS, fParam[0], fParam[1], fParam[2], fParam[3]);
                 break;
             }
             case SignatureType::NONE_STRING_DOUBLE:
