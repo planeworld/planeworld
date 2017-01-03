@@ -200,7 +200,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 //     m_pStarObjectVisuals = new IObjectVisuals(m_pStar);
 // 
 //     MEM_ALLOC("CRigidBody");
-//     MEM_ALLOC("CCircle");
+//     MEM_ALLOC("IShape");
 //     MEM_ALLOC("CDoubleBufferedShape")
 //     MEM_ALLOC("CCircleVisuals");
 //     MEM_ALLOC("IObjectVisuals");

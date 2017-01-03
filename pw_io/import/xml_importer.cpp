@@ -978,7 +978,7 @@ void CXMLImporter::createShapePlanet(CObject* const _pObject,
     if (!checkFile(_Node))
     {
         CPlanet* pPlanet = new CPlanet;
-        MEM_ALLOC("CPlanet")
+        MEM_ALLOC("IShape")
         
         pPlanet->setMass(checkAttributeDouble(_Node, "mass", pPlanet->getMass()));
         pPlanet->setRadius(_Node.attribute("radius").as_double());

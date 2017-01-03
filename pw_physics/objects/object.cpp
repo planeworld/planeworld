@@ -50,13 +50,13 @@ CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IUniverseScaled(),
     m_UID.setName("Object_" + m_UID.getName());
     
     m_pIntAng = new CEulerIntegrator<double>;
-    MEM_ALLOC("CEulerIntegrator");
+    MEM_ALLOC("IIntegrator")
     m_pIntAngVel = new CEulerIntegrator<double>;
-    MEM_ALLOC("CEulerIntegrator");
+    MEM_ALLOC("IIntegrator")
     m_pIntPos = new CEulerIntegrator<Vector2d>;
-    MEM_ALLOC("CEulerIntegrator")
+    MEM_ALLOC("IIntegrator")
     m_pIntVel = new CEulerIntegrator<Vector2d>;
-    MEM_ALLOC("CEulerIntegrator")
+    MEM_ALLOC("IIntegrator")
 
     m_vecForce.setZero();
     m_vecCell.setZero();
@@ -80,13 +80,13 @@ CObject::CObject(const CObject& _Obj) :
     CTOR_CALL("CObject::CObject")
     
     m_pIntAng = new CEulerIntegrator<double>;
-    MEM_ALLOC("CEulerIntegrator");
+    MEM_ALLOC("IIntegrator")
     m_pIntAngVel = new CEulerIntegrator<double>;
-    MEM_ALLOC("CEulerIntegrator");
+    MEM_ALLOC("IIntegrator")
     m_pIntPos = new CEulerIntegrator<Vector2d>;
-    MEM_ALLOC("CEulerIntegrator")
+    MEM_ALLOC("IIntegrator")
     m_pIntVel = new CEulerIntegrator<Vector2d>;
-    MEM_ALLOC("CEulerIntegrator")
+    MEM_ALLOC("IIntegrator")
     
     this->copy(_Obj);
 }
@@ -433,10 +433,10 @@ void CObject::setNewIntegrator(const IntegratorType& _IntType)
             m_pIntAngVel = new CEulerIntegrator<double>;
             m_pIntPos = new CEulerIntegrator<Vector2d>;
             m_pIntVel = new CEulerIntegrator<Vector2d>;
-            MEM_ALLOC("CEulerIntegrator")
-            MEM_ALLOC("CEulerIntegrator")
-            MEM_ALLOC("CEulerIntegrator")
-            MEM_ALLOC("CEulerIntegrator")
+            MEM_ALLOC("IIntegrator")
+            MEM_ALLOC("IIntegrator")
+            MEM_ALLOC("IIntegrator")
+            MEM_ALLOC("IIntegrator")
             break;
         case INTEGRATOR_ADAMS_BASHFORTH:
             m_pIntAng = new CAdamsBashforthIntegrator<double>;

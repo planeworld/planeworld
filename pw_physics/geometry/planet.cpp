@@ -86,7 +86,7 @@ CPlanet* CPlanet::clone() const
     METHOD_ENTRY("CPlanet::clone")
     
     CPlanet* pClone = new CPlanet();
-    MEM_ALLOC("CPlanet")
+    MEM_ALLOC("IShape")
         
     pClone->copy(this);
     

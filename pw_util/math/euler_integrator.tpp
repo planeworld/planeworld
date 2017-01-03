@@ -80,7 +80,7 @@ IIntegrator<T>* CEulerIntegrator<T>::clone() const
     METHOD_ENTRY("CEulerIntegrator::clone")
     
     CEulerIntegrator<T>* pClone = new CEulerIntegrator;
-    MEM_ALLOC("CEulerIntegrator")
+    MEM_ALLOC("IIntegrator")
         
     (*pClone) = (*this);
     
