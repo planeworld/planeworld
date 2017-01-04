@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2016 Torsten Büschenfeld
+// Copyright (C) 2011-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -190,7 +190,6 @@ void CPhysicsManager::initComInterface()
         m_pComInterface->registerFunction("accelerate_time",
                                           CCommand<void,bool>([&](bool _bAllowTimeScaling){this->accelerateTime(_bAllowTimeScaling);}),
                                           "Accelerates time using more cpu power unless scaling is allowed, which will increase the time step.",
-                                          SignatureType::NONE_BOOL,
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::BOOL, "Flag if time scaling by increasing time step is allowed (reduces accuracy)"}},
                                           "sim"
@@ -198,21 +197,18 @@ void CPhysicsManager::initComInterface()
         m_pComInterface->registerFunction("decelerate_time",
                                           CCommand<void>([&](){this->decelerateTime();}),
                                           "Decelerates time.",
-                                          SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
                                           "sim"
                                          );
         m_pComInterface->registerFunction("pause",
                                           CCommand<void>([&](){this->m_bPaused = true;}),
                                           "Pauses physics simulation.",
-                                          SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("resume",
                                           CCommand<void>([&](){this->m_bPaused = false;}),
                                           "Resumes physics simulation if paused.",
-                                          SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );
@@ -231,7 +227,6 @@ void CPhysicsManager::initComInterface()
                                                     }
                                                 }),
                                           "Sets rotation angle of a given object.",
-                                          SignatureType::NONE_STRING_DOUBLE,
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::STRING, "Object name"},
                                            {ParameterType::DOUBLE, "Angle"}},
@@ -240,21 +235,18 @@ void CPhysicsManager::initComInterface()
         m_pComInterface->registerFunction("toggle_pause",
                                           CCommand<void>([&](){this->togglePause();}),
                                           "Pauses or unpauses physics simulation.",
-                                          SignatureType::NONE,
                                           {{ParameterType::NONE, "No return value"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("get_time",
                                           CCommand<double>([&]() -> double {return this->m_SimTimerGlobal.getSecondsRaw();}),
                                           "Provides simulation time (raw seconds, years excluded).",
-                                          SignatureType::DOUBLE,
                                           {{ParameterType::DOUBLE, "Seconds of simulation time"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("get_time_years",
                                           CCommand<int>([&]() -> int {return this->m_SimTimerGlobal.getYears();}),
                                           "Provides full years of simulation time.",
-                                          SignatureType::INT,
                                           {{ParameterType::INT, "Full years of simulation time"}},
                                            "physics"
                                          );
@@ -278,7 +270,6 @@ void CPhysicsManager::initComInterface()
                                                 }
                                               }),
                                           "Applies a force on given object.",
-                                          SignatureType::NONE_STRING_4DOUBLE,
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::STRING, "Object name"},
                                            {ParameterType::DOUBLE, "Force X"},
@@ -304,7 +295,6 @@ void CPhysicsManager::initComInterface()
                                                 return fAngle;
                                               }),
                                           "Returns angle of a given object.",
-                                          SignatureType::DOUBLE_STRING,
                                           {{ParameterType::DOUBLE, "Angle"},
                                            {ParameterType::STRING, "Object name"}},
                                            "universe"
@@ -326,7 +316,6 @@ void CPhysicsManager::initComInterface()
                                                 return vecVelocity;
                                               }),
                                           "Returns velocity of a given object.",
-                                          SignatureType::VEC2DDOUBLE_STRING,
                                           {{ParameterType::VEC2DDOUBLE, "Velocity (x, y)"},
                                            {ParameterType::STRING, "Object name"}},
                                            "universe"
@@ -347,7 +336,6 @@ void CPhysicsManager::initComInterface()
                                                     }
                                               }),
                                           "Activates thruster with given thrust.",
-                                          SignatureType::DOUBLE_STRING_DOUBLE,
                                           {{ParameterType::DOUBLE, "Actually applied thrust"},
                                            {ParameterType::STRING, "Thruster name"},
                                            {ParameterType::STRING, "Thrust to be applied when activated"}},
@@ -369,7 +357,6 @@ void CPhysicsManager::initComInterface()
                                                     }
                                               }),
                                           "Deactivates thruster.",
-                                          SignatureType::NONE_STRING,
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::STRING, "Thrust to be applied when activated"}},
                                           "sim"

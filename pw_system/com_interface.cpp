@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -71,7 +71,6 @@ CComInterface::CComInterface()
     CTOR_CALL("CComInterface::CComInterface")
     this->registerFunction("help",  CCommand<void, int>([&](int nVerboseLevel){this->help(nVerboseLevel);}),
                                     "Show command interface help",
-                                    SignatureType::NONE_INT,
                                     {{ParameterType::NONE,"No return value"},
                                      {ParameterType::INT,"Verbosity (0-1)"}},
                                     "system"

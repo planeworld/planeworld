@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016-2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,8 +46,8 @@
 /// Specifies a parameter type
 enum class ParameterType
 {
+    UNDEFINED,
     NONE,
-    CUSTOM_OBJ,
     BOOL,
     DOUBLE,
     INT,
@@ -61,7 +61,6 @@ enum class SignatureType
 {
     UNDEFINED,
     NONE,
-    CUSTOM_OBJ,
     DOUBLE,
     DOUBLE_STRING,
     DOUBLE_STRING_DOUBLE,
@@ -140,6 +139,10 @@ class CCommand : public IBaseCommand
         
     private:
         
+        /// --- Methods [private] --------------------------------------------//
+        void dispatchSignature();
+        
+        /// --- Variables [private] ------------------------------------------//
         std::function<TRet(TArgs...)> m_Function; ///< Function to be registered at com interface
         
 };
@@ -169,6 +172,10 @@ class CCommandToQueueWrapper : public IBaseCommand
         
     private:
         
+        /// --- Methods [private] --------------------------------------------//
+        void dispatchSignature();
+        
+        /// --- Variables [private] ------------------------------------------//
         std::function<TRet(TArgs...)> m_Function; ///< Function to be registered at com interface
         std::tuple<TArgs...>          m_Params;   ///< Parameter function is called with
         
@@ -203,6 +210,10 @@ class CCommandWritable : public IBaseCommand
         
     private:
         
+        /// --- Methods [private] --------------------------------------------//
+        void dispatchSignature();
+        
+        /// --- Variables [private] ------------------------------------------//
         std::function<void(TArgs...)> m_Function; ///< Function to be registered at com interface
         
 };
@@ -228,7 +239,6 @@ typedef std::unordered_map<std::string, moodycamel::ConcurrentQueue<IBaseCommand
 //--- Enum parser ------------------------------------------------------------//
 static std::map<ParameterType, std::string> mapParameterToString = {
     {ParameterType::NONE, "<none>"},
-    {ParameterType::CUSTOM_OBJ, "<custom_object>"},
     {ParameterType::BOOL, "<bool>"},
     {ParameterType::DOUBLE, "<double>"},
     {ParameterType::INT, "<int>"},
@@ -266,7 +276,6 @@ class CComInterface
         template <class TRet, class... TArgs>
         bool registerFunction(const std::string&, const CCommand<TRet, TArgs...>&,
                               const std::string&,
-                              const SignatureType&,
                               const ParameterListType& = {},
                               const DomainType& = "",
                               const bool = false

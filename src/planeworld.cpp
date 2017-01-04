@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -153,14 +153,12 @@ int main(int argc, char *argv[])
     ComInterface.registerFunction("exit",
                                   CCommand<void>(quit),
                                   "Exit processing, clean up and end simulation. Same as <quit>",
-                                  SignatureType::NONE,
                                   {{ParameterType::NONE, "No return value"}},
                                   "system"
                                  );
     ComInterface.registerFunction("quit",
                                   CCommand<void>(quit),
                                   "Quit processing, clean up and end simulation. Same as <exit>",
-                                  SignatureType::NONE,
                                   {{ParameterType::NONE, "No return value"}},
                                   "system"
                                  );
@@ -280,21 +278,18 @@ int main(int argc, char *argv[])
         ComInterface.registerFunction("cycle_camera",
                                       CCommand<void>([&](){pVisualsManager->cycleCamera();}),
                                       "Cycle through registered cameras",
-                                      SignatureType::NONE,
                                       {{ParameterType::NONE,"No return value"}},
                                       "system"
         );
         ComInterface.registerFunction("get_current_camera",
                                       CCommand<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}),
                                       "Returns pointer to active camera",
-                                      SignatureType::CUSTOM_OBJ,
-                                      {{ParameterType::CUSTOM_OBJ, "CCamera*, Currently active camera"}},
+                                      {{ParameterType::UNDEFINED, "CCamera*, Currently active camera"}},
                                       "system"
         );
         ComInterface.registerFunction("rotate_camera_by",
                                       CCommand<void, double>([&](const double& _fAngle){pCamera->rotateBy(_fAngle);}),
                                       "Rotate camera by given angle.",
-                                      SignatureType::NONE_DOUBLE,
                                       {{ParameterType::NONE, "No return value"},
                                        {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
                                       "system"  
@@ -302,28 +297,24 @@ int main(int argc, char *argv[])
         ComInterface.registerFunction("toggle_bboxes",
                                       CCommand<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
                                       "Toggle bounding boxes on and off.",
-                                      SignatureType::NONE,
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals"
         );
         ComInterface.registerFunction("toggle_grid",
                                       CCommand<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
                                       "Toggle universe grid on and off.",
-                                      SignatureType::NONE,
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals"  
         );
         ComInterface.registerFunction("toggle_names",
                                       CCommand<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_NAMES);}),
                                       "Toggle objects names on and off.",
-                                      SignatureType::NONE,
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals"  
         );
         ComInterface.registerFunction("toggle_timers",
                                       CCommand<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_TIMERS);}),
                                       "Toggle timers on and off.",
-                                      SignatureType::NONE,
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals"  
         );

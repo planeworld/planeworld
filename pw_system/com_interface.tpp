@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ CCommand<TRet, TArgs...>::CCommand(const std::function<TRet(TArgs...)>& _Functio
 {
     METHOD_ENTRY("CCommand::CCommand")
     CTOR_CALL("CCommand")
+    this->dispatchSignature();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,6 +61,7 @@ CCommandToQueueWrapper<TRet, TArgs...>::CCommandToQueueWrapper(const std::functi
 {
     METHOD_ENTRY("CCommandToQueueWrapper::CCommandToQueueWrapper")
     CTOR_CALL("CCommandToQueueWrapper")
+    this->dispatchSignature();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,6 +76,7 @@ CCommandWritable<TRet, TArgs...>::CCommandWritable(const std::function<void(TArg
 {
     METHOD_ENTRY("CCommandWritable::CCommandWritable")
     CTOR_CALL("CCommandWritable")
+    this->dispatchSignature();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -210,16 +213,14 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
 /// \param _strName Name the function should be registered under
 /// \param _Command Function to be registered
 /// \param _strDescription Description of the function to be registered
-/// \param _Signature Signature of the function, containing return value and parameters
 /// \param _ParamList List of parameters for given function
 /// \param _Domain Domain of function to be registeredm_RegisteredFunctions[_strName]
 /// \param _bWriter Indicates a function that writes data (will be queued for thread safety)
 ///
 ///////////////////////////////////////////////////////////////////////////////
-template<class TRet, class... TArgs>
+template<class TRet, class... TArgs> 
 bool CComInterface::registerFunction(const std::string& _strName, const CCommand<TRet, TArgs...>& _Command,
                                      const std::string& _strDescription,
-                                     const SignatureType& _Signature,
                                      const ParameterListType& _ParamList,
                                      const DomainType& _Domain,
                                      const bool _bWriter
@@ -229,10 +230,9 @@ bool CComInterface::registerFunction(const std::string& _strName, const CCommand
     
     if (_bWriter)
     {
-        m_RegisteredFunctions[_strName] = new CCommandWritable<TRet, TArgs...>([this,_strName,_Command,_Signature](TArgs... _Args)
+        m_RegisteredFunctions[_strName] = new CCommandWritable<TRet, TArgs...>([this,_strName,_Command](TArgs... _Args)
                                             {
                                                 auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Command.getFunction(), _Args...);
-                                                pCommand->Signature = _Signature;
                                                 m_WriterQueues["physics"].enqueue(pCommand);
                                                 MEM_ALLOC("IBaseCommand")
                                             });
@@ -249,7 +249,55 @@ bool CComInterface::registerFunction(const std::string& _strName, const CCommand
     m_RegisteredFunctionsDescriptions[_strName] = _strDescription;
     m_RegisteredFunctionsParams[_strName] = _ParamList;
     m_RegisteredFunctionsDomain[_strName] = _Domain;
-    m_RegisteredFunctions[_strName]->Signature = _Signature;
     
     return true;
 }
+
+//--- Misc header ------------------------------------------------------------//
+#include <eigen3/Eigen/Core>
+
+using namespace Eigen;
+
+template<class TRet, class... TArgs> void CCommand<TRet, TArgs...>::dispatchSignature() {Signature = SignatureType::UNDEFINED;}
+template<> inline void CCommand<void>::dispatchSignature() {Signature = SignatureType::NONE;}
+template<> inline void CCommand<double>::dispatchSignature() {Signature = SignatureType::DOUBLE;}
+template<> inline void CCommand<double,std::string>::dispatchSignature() {Signature = SignatureType::DOUBLE_STRING;}
+template<> inline void CCommand<double,std::string,double>::dispatchSignature() {Signature = SignatureType::DOUBLE_STRING_DOUBLE;}
+template<> inline void CCommand<int>::dispatchSignature() {Signature = SignatureType::INT;}
+template<> inline void CCommand<void, bool>::dispatchSignature() {Signature = SignatureType::NONE_BOOL;}
+template<> inline void CCommand<void, double>::dispatchSignature() {Signature = SignatureType::NONE_DOUBLE;}
+template<> inline void CCommand<void, int>::dispatchSignature() {Signature = SignatureType::NONE_INT;}
+template<> inline void CCommand<void, std::string>::dispatchSignature() {Signature = SignatureType::NONE_STRING;}
+template<> inline void CCommand<void, std::string, double, double, double, double>::dispatchSignature() {Signature = SignatureType::NONE_STRING_4DOUBLE;}
+template<> inline void CCommand<void, std::string, double>::dispatchSignature() {Signature = SignatureType::NONE_STRING_DOUBLE;}
+template<> inline void CCommand<Vector2d, std::string>::dispatchSignature() {Signature = SignatureType::VEC2DDOUBLE_STRING;}
+
+template<class TRet, class... TArgs> void CCommandToQueueWrapper<TRet, TArgs...>::dispatchSignature() {Signature = SignatureType::UNDEFINED;}
+template<> inline void CCommandToQueueWrapper<void>::dispatchSignature() {Signature = SignatureType::NONE;}
+template<> inline void CCommandToQueueWrapper<double>::dispatchSignature() {Signature = SignatureType::DOUBLE;}
+template<> inline void CCommandToQueueWrapper<double,std::string>::dispatchSignature() {Signature = SignatureType::DOUBLE_STRING;}
+template<> inline void CCommandToQueueWrapper<double,std::string,double>::dispatchSignature() {Signature = SignatureType::DOUBLE_STRING_DOUBLE;}
+template<> inline void CCommandToQueueWrapper<int>::dispatchSignature() {Signature = SignatureType::INT;}
+template<> inline void CCommandToQueueWrapper<void, bool>::dispatchSignature() {Signature = SignatureType::NONE_BOOL;}
+template<> inline void CCommandToQueueWrapper<void, double>::dispatchSignature() {Signature = SignatureType::NONE_DOUBLE;}
+template<> inline void CCommandToQueueWrapper<void, int>::dispatchSignature() {Signature = SignatureType::NONE_INT;}
+template<> inline void CCommandToQueueWrapper<void, std::string>::dispatchSignature() {Signature = SignatureType::NONE_STRING;}
+template<> inline void CCommandToQueueWrapper<void, std::string, double, double, double, double>::dispatchSignature() {Signature = SignatureType::NONE_STRING_4DOUBLE;}
+template<> inline void CCommandToQueueWrapper<void, std::string, double>::dispatchSignature() {Signature = SignatureType::NONE_STRING_DOUBLE;}
+template<> inline void CCommandToQueueWrapper<Vector2d, std::string>::dispatchSignature() {Signature = SignatureType::VEC2DDOUBLE_STRING;}
+
+template<class TRet, class... TArgs> void CCommandWritable<TRet, TArgs...>::dispatchSignature() {Signature = SignatureType::UNDEFINED;}
+template<> inline void CCommandWritable<void>::dispatchSignature() {Signature = SignatureType::NONE;}
+template<> inline void CCommandWritable<double>::dispatchSignature() {Signature = SignatureType::DOUBLE;}
+template<> inline void CCommandWritable<double,std::string>::dispatchSignature() {Signature = SignatureType::DOUBLE_STRING;}
+template<> inline void CCommandWritable<double,std::string,double>::dispatchSignature() {Signature = SignatureType::DOUBLE_STRING_DOUBLE;}
+template<> inline void CCommandWritable<int>::dispatchSignature() {Signature = SignatureType::INT;}
+template<> inline void CCommandWritable<void, bool>::dispatchSignature() {Signature = SignatureType::NONE_BOOL;}
+template<> inline void CCommandWritable<void, double>::dispatchSignature() {Signature = SignatureType::NONE_DOUBLE;}
+template<> inline void CCommandWritable<void, int>::dispatchSignature() {Signature = SignatureType::NONE_INT;}
+template<> inline void CCommandWritable<void, std::string>::dispatchSignature() {Signature = SignatureType::NONE_STRING;}
+template<> inline void CCommandWritable<void, std::string, double, double, double, double>::dispatchSignature() {Signature = SignatureType::NONE_STRING_4DOUBLE;}
+template<> inline void CCommandWritable<void, std::string, double>::dispatchSignature() {Signature = SignatureType::NONE_STRING_DOUBLE;}
+template<> inline void CCommandWritable<Vector2d, std::string>::dispatchSignature() {Signature = SignatureType::VEC2DDOUBLE_STRING;}
+
+
