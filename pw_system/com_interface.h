@@ -134,6 +134,7 @@ class CCommand : public IBaseCommand
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
+        CCommand() = delete;
         CCommand(const std::function<TRet(TArgs...)>&);
         
         //--- Constant methods -----------------------------------------------//
@@ -167,6 +168,7 @@ class CCommandToQueueWrapper : public IBaseCommand
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
+        CCommandToQueueWrapper() = delete;
         CCommandToQueueWrapper(const std::function<TRet(TArgs...)>&, TArgs...);
         
         //--- Constant methods -----------------------------------------------//
@@ -205,6 +207,7 @@ class CCommandWritable : public IBaseCommand
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
+        CCommandWritable() = delete;
         CCommandWritable(const std::function<void(TArgs...)>&);
         
         //--- Constant methods -----------------------------------------------//
