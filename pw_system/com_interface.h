@@ -41,6 +41,7 @@
 #include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
+#include "concurrentqueue.h"
 
 /// Specifies a parameter type
 enum class ParameterType
@@ -51,12 +52,14 @@ enum class ParameterType
     DOUBLE,
     INT,
     STRING,
-    UID
+    UID,
+    VEC2DDOUBLE
 };
 
 /// Specifies the signature of the function
 enum class SignatureType
 {
+    UNDEFINED,
     NONE,
     CUSTOM_OBJ,
     DOUBLE,
@@ -69,7 +72,8 @@ enum class SignatureType
     NONE_STRING,
     NONE_STRING_4DOUBLE,
     NONE_STRING_DOUBLE,
-    NONE_UID
+    NONE_UID,
+    VEC2DDOUBLE_STRING
 };
 
 /// Specifies type of possible exceptions in com interface
@@ -111,6 +115,8 @@ class IBaseCommand
     public:
         //--- Constructor/Destructor -----------------------------------------//
         virtual ~IBaseCommand(){}
+        
+        SignatureType Signature = SignatureType::UNDEFINED;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,9 +141,73 @@ class CCommand : public IBaseCommand
     private:
         
         std::function<TRet(TArgs...)> m_Function; ///< Function to be registered at com interface
+        
 };
 
-/// Map of functions, accessed by name
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Specialised callback functions with parameters to store in queue
+///
+/// This wrapper encloses commands (\ref CCommand) which are stored in a queue.
+/// In contrast to \ref CCommand, it also stores all parameters which are later
+/// needed for actual execution of the command.
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class TRet, class... TArgs>
+class CCommandToQueueWrapper : public IBaseCommand
+{
+    public:
+        
+        //--- Constructor/Destructor -----------------------------------------//
+        CCommandToQueueWrapper(const std::function<TRet(TArgs...)>&, TArgs...);
+        
+        //--- Constant methods -----------------------------------------------//
+        const std::tuple<TArgs...> getParams() const {return m_Params;}
+        
+        //--- Methods --------------------------------------------------------//
+        TRet call(TArgs...);
+        
+    private:
+        
+        std::function<TRet(TArgs...)> m_Function; ///< Function to be registered at com interface
+        std::tuple<TArgs...>          m_Params;   ///< Parameter function is called with
+        
+};
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Specialised callback functions with writable access at com interface
+///
+/// This wrapper is specialised for functions with writable access. It stores
+/// a function that will take the original function \ref CCommand which is
+/// wrapped containing its parameters by \ref CCommandToQueueWrapper) and
+/// puts them in a command queue.
+/// Hence, those functions are not called immediately, but queued and then
+/// executed, externally. Thus, given a thread save queue, commands can be 
+/// excuted over different threads.
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class TRet, class... TArgs>
+class CCommandWritable : public IBaseCommand
+{
+    public:
+        
+        //--- Constructor/Destructor -----------------------------------------//
+        CCommandWritable(const std::function<void(TArgs...)>&);
+        
+        //--- Constant methods -----------------------------------------------//
+        std::function<void(TArgs...)> getFunction() const {return m_Function;}
+        
+        //--- Methods --------------------------------------------------------//
+        TRet call(TArgs...);
+        
+    private:
+        
+        std::function<void(TArgs...)> m_Function; ///< Function to be registered at com interface
+        
+};
+
+/// Map of all functions, accessed by name
 typedef std::map<std::string, IBaseCommand*> RegisteredFunctionsType;
 /// Map of descriptions, accessed by name
 typedef std::unordered_map<std::string, std::string> RegisteredFunctionsDescriptionType;
@@ -145,12 +215,15 @@ typedef std::unordered_map<std::string, std::string> RegisteredFunctionsDescript
 typedef std::vector<std::pair<ParameterType, std::string>> ParameterListType;
 /// Map of parameter lists, accessed by function name
 typedef std::unordered_map<std::string, ParameterListType> RegisteredParameterListsType;
-/// Map of signatures, accessed by function name
-typedef std::unordered_map<std::string, SignatureType> RegisteredSignaturesType;
+/// Map of writer flags, accessed by function name
+typedef std::unordered_map<std::string, bool> WriterFlagsType;
+
 /// Domain of function being registered
 typedef std::string DomainType;
 /// Map of domains, accessed by function name
 typedef std::unordered_map<std::string, DomainType> RegisteredDomainsType;
+
+typedef std::unordered_map<std::string, moodycamel::ConcurrentQueue<IBaseCommand*>> WriterQueuesType;
 
 //--- Enum parser ------------------------------------------------------------//
 static std::map<ParameterType, std::string> mapParameterToString = {
@@ -180,21 +253,23 @@ class CComInterface
         //--- Constant Methods -----------------------------------------------//
         RegisteredDomainsType*        getDomains()    {return &m_RegisteredFunctionsDomain;} 
         RegisteredFunctionsType*      getFunctions()  {return &m_RegisteredFunctions;} 
-        RegisteredSignaturesType*     getSignatures() {return &m_RegisteredSignatures;}
+        WriterFlagsType*              getWriterFlags() {return &m_WriterFlags;}
         
         //--- Methods --------------------------------------------------------//
         template<class TRet, class... Args>
-        TRet                call(const std::string& _strName, Args...);
+        TRet                call(const std::string&, Args...);
         const std::string   call(const std::string&);
+        void                callWriters(const std::string&);
         void                help();
         void                help(int);
         
-        template <class T>
-        bool registerFunction(const std::string&, const T&,
+        template <class TRet, class... TArgs>
+        bool registerFunction(const std::string&, const CCommand<TRet, TArgs...>&,
                               const std::string&,
                               const SignatureType&,
                               const ParameterListType& = {},
-                              const DomainType& = ""
+                              const DomainType& = "",
+                              const bool = false
         );
         
         //--- friends --------------------------------------------------------//
@@ -203,11 +278,13 @@ class CComInterface
         
     private:
         
-        RegisteredFunctionsType             m_RegisteredFunctions;       ///< Registered functions provided by modules
-        RegisteredFunctionsDescriptionType  m_RegisteredFunctionsDescriptions; // Descriptions of registered functions
+        RegisteredFunctionsType             m_RegisteredFunctions;       ///< All registered functions provided by modules
+        RegisteredFunctionsDescriptionType  m_RegisteredFunctionsDescriptions; ///< Descriptions of registered functions
         RegisteredParameterListsType        m_RegisteredFunctionsParams; ///< Parameter lists of registered functions      
-        RegisteredSignaturesType            m_RegisteredSignatures;      ///< Signatures of the registered functions
         RegisteredDomainsType               m_RegisteredFunctionsDomain; ///< Domain of registered functions
+        
+        WriterQueuesType                    m_WriterQueues;              ///< Command queues for write access
+        WriterFlagsType                     m_WriterFlags;               ///< Flags for writer functions
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -46,17 +46,92 @@ CCommand<TRet, TArgs...>::CCommand(const std::function<TRet(TArgs...)>& _Functio
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Calls the functions with given arguments
+/// \brief Constructor for a registered function called from a command queue.
+///
+/// \param _Function Function to register
+/// \param _Args Parameters of registered function call
+///
+///////////////////////////////////////////////////////////////////////////////
+template <class TRet, class... TArgs>
+CCommandToQueueWrapper<TRet, TArgs...>::CCommandToQueueWrapper(const std::function<TRet(TArgs...)>& _Function,
+                                               TArgs... _Args) : 
+                                               m_Params(_Args...),
+                                               m_Function(_Function)
+{
+    METHOD_ENTRY("CCommandToQueueWrapper::CCommandToQueueWrapper")
+    CTOR_CALL("CCommandToQueueWrapper")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Constructor
+///
+/// \param _Function Function with write access to register
+///
+///////////////////////////////////////////////////////////////////////////////
+template <class TRet, class... TArgs>
+CCommandWritable<TRet, TArgs...>::CCommandWritable(const std::function<void(TArgs...)>& _Function) : m_Function(_Function)
+{
+    METHOD_ENTRY("CCommandWritable::CCommandWritable")
+    CTOR_CALL("CCommandWritable")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Calls the function with given arguments
 ///
 /// \param _Args Arguments to call the function with
 /// \return Return value of function
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template <class TRet, class... TArgs>
-inline TRet CCommand<TRet, TArgs...>::call(TArgs... _Args)
+TRet CCommand<TRet, TArgs...>::call(TArgs... _Args)
 {
     METHOD_ENTRY("CCommand::call")
+    DEBUG_MSG("Com Interface", "Command called")
     return m_Function(_Args...);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Calls the queued writer function with given arguments
+///
+/// \return Return value of function
+///
+///////////////////////////////////////////////////////////////////////////////
+template <class TRet, class... TArgs>
+TRet CCommandToQueueWrapper<TRet, TArgs...>::call(TArgs... _Args)
+{
+    METHOD_ENTRY("CCommandWriter::call")
+    try
+    {
+        DEBUG_MSG("Com Interface", "Queued writer called.")
+        m_Function(_Args...);
+    }
+    catch (CComInterfaceException ComIntEx)
+    {
+        WARNING_MSG("Com Interface", ComIntEx.getMessage())
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Calls a function with write access with given arguments
+///
+/// This method does not actually call the registered function, but puts it
+/// in a command queue with its parameters. 
+///
+/// \param _Args Arguments to call the function with
+///
+/// \return Return value of function
+///
+///////////////////////////////////////////////////////////////////////////////
+template <class TRet, class... TArgs>
+TRet CCommandWritable<TRet, TArgs...>::call(TArgs... _Args)
+{
+    METHOD_ENTRY("CCommandWritable::call")
+    DEBUG_MSG("Com Interface", "Writer called for storage in command queue.")
+    m_Function(_Args...);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,20 +151,50 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
     try
     {
         #ifdef LOGLEVEL_DEBUG
-            auto pFunction = dynamic_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-            if (pFunction != nullptr )
+            if (m_WriterFlags.at(_strName))
             {
+                DEBUG_MSG("Com Interface", "Direct writer call: <" << _strName << ">")
+                auto pFunction = dynamic_cast<CCommandWritable<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
+                if (pFunction != nullptr)
+                {
+                    return pFunction->call(_Args...);
+                }
+                else
+                {
+                    WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
+                    return TRet();
+                }
+            }
+            else
+            {
+                DEBUG_MSG("Com Interface", "Direct reader call: <" << _strName << ">")
+                auto pFunction = dynamic_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
+                if (pFunction != nullptr )
+                {
+                    return pFunction->call(_Args...);
+                }
+                else
+                {
+                    WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
+                    return TRet();
+                }
+            }
+        #else
+            if (m_WriterFlags.at(_strName))
+            {
+                auto pFunction = static_cast<CCommandWritable<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
                 return pFunction->call(_Args...);
             }
             else
             {
-                WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
-                return TRet();
+                auto pFunction = static_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
+                return pFunction->call(_Args...);
             }
-        #else
-            auto pFunction = static_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-            return pFunction->call(_Args...);
         #endif
+    }
+    catch (CComInterfaceException ComIntEx)
+    {
+        WARNING_MSG("Com Interface", ComIntEx.getMessage())
     }
     catch (const std::out_of_range& oor)
     {
@@ -107,26 +212,44 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
 /// \param _strDescription Description of the function to be registered
 /// \param _Signature Signature of the function, containing return value and parameters
 /// \param _ParamList List of parameters for given function
-/// \param _Domain Domain of function to be registered
+/// \param _Domain Domain of function to be registeredm_RegisteredFunctions[_strName]
+/// \param _bWriter Indicates a function that writes data (will be queued for thread safety)
 ///
 ///////////////////////////////////////////////////////////////////////////////
-template<class T>
-bool CComInterface::registerFunction(const std::string& _strName, const T& _Command,
+template<class TRet, class... TArgs>
+bool CComInterface::registerFunction(const std::string& _strName, const CCommand<TRet, TArgs...>& _Command,
                                      const std::string& _strDescription,
                                      const SignatureType& _Signature,
                                      const ParameterListType& _ParamList,
-                                     const DomainType& _Domain
+                                     const DomainType& _Domain,
+                                     const bool _bWriter
                                     )
 {
     METHOD_ENTRY("CComInterface::registerFunction")
     
-    m_RegisteredFunctions[_strName] = new T(_Command);
-    MEM_ALLOC("IBaseComCallback")
+    if (_bWriter)
+    {
+        m_RegisteredFunctions[_strName] = new CCommandWritable<TRet, TArgs...>([this,_strName,_Command,_Signature](TArgs... _Args)
+                                            {
+                                                auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Command.getFunction(), _Args...);
+                                                pCommand->Signature = _Signature;
+                                                m_WriterQueues["physics"].enqueue(pCommand);
+                                                MEM_ALLOC("IBaseCommand")
+                                            });
+        m_WriterFlags[_strName] = true;
+        MEM_ALLOC("IBaseCommand")
+    }
+    else
+    {
+        m_RegisteredFunctions[_strName] = new CCommand<TRet, TArgs...>(_Command);
+        m_WriterFlags[_strName] = false;
+        MEM_ALLOC("IBaseCommand")
+    }
     
     m_RegisteredFunctionsDescriptions[_strName] = _strDescription;
     m_RegisteredFunctionsParams[_strName] = _ParamList;
     m_RegisteredFunctionsDomain[_strName] = _Domain;
-    m_RegisteredSignatures[_strName] = _Signature;
+    m_RegisteredFunctions[_strName]->Signature = _Signature;
     
     return true;
 }

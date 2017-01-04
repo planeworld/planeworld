@@ -235,7 +235,7 @@ void CPhysicsManager::initComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::STRING, "Object name"},
                                            {ParameterType::DOUBLE, "Angle"}},
-                                           "physics"
+                                           "physics", true
                                          );
         m_pComInterface->registerFunction("toggle_pause",
                                           CCommand<void>([&](){this->togglePause();}),
@@ -306,6 +306,28 @@ void CPhysicsManager::initComInterface()
                                           "Returns angle of a given object.",
                                           SignatureType::DOUBLE_STRING,
                                           {{ParameterType::DOUBLE, "Angle"},
+                                           {ParameterType::STRING, "Object name"}},
+                                           "universe"
+                                         );
+        m_pComInterface->registerFunction("get_velocity",
+                                          CCommand<Vector2d, std::string>(
+                                              [&](const std::string& _strName) -> const Vector2d
+                                              {
+                                                Vector2d vecVelocity; vecVelocity.setZero();
+                                                try
+                                                {
+                                                    vecVelocity = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getKinematicsState().getVelocity();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return vecVelocity;
+                                              }),
+                                          "Returns velocity of a given object.",
+                                          SignatureType::VEC2DDOUBLE_STRING,
+                                          {{ParameterType::VEC2DDOUBLE, "Velocity (x, y)"},
                                            {ParameterType::STRING, "Object name"}},
                                            "universe"
                                          );
@@ -653,6 +675,7 @@ void CPhysicsManager::processFrame()
         CTimer ProcessingTimer;
         ProcessingTimer.start();
         
+        m_pComInterface->callWriters("physics");
         this->addGlobalForces();
         this->moveMasses(nFrame);
         this->collisionDetection();

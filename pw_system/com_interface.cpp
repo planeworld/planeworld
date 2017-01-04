@@ -30,7 +30,13 @@
 
 #include "com_interface.h"
 
+//--- Standard header --------------------------------------------------------//
 #include <sstream>
+
+//--- Misc header ------------------------------------------------------------//
+#include <eigen3/Eigen/Geometry>
+
+using namespace Eigen;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -117,7 +123,7 @@ const std::string CComInterface::call(const std::string& _strCommand)
     
     if (m_RegisteredFunctions.find(strName) != m_RegisteredFunctions.end())
     {
-        switch (m_RegisteredSignatures[strName])
+        switch (m_RegisteredFunctions[strName]->Signature)
         {
             case SignatureType::DOUBLE:
             {
@@ -188,11 +194,20 @@ const std::string CComInterface::call(const std::string& _strCommand)
             }
             case SignatureType::NONE_STRING_DOUBLE:
             {
-                std::string strS;
+                std::string strS("");
                 iss >> strS;
                 double fParam = 0.0;
                 iss >> fParam;
                 this->call<void,std::string, double>(strName, strS, fParam);
+                break;
+            }
+            case SignatureType::VEC2DDOUBLE_STRING:
+            {
+                std::string strParam = "";
+                iss >> strParam;
+                Vector2d vecRet; vecRet.setZero();
+                vecRet = this->call<Vector2d,std::string>(strName, strParam);
+                oss << vecRet[0] << " " << vecRet[1];
                 break;
             }
             default:
@@ -205,6 +220,92 @@ const std::string CComInterface::call(const std::string& _strCommand)
         throw CComInterfaceException(ComIntExceptionType::UNKNOWN_COMMAND);
     }
     return oss.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Calls all writing functions of given queue
+///
+/// \param _strQueue Queue of which functions should be called
+///
+///////////////////////////////////////////////////////////////////////////////
+void CComInterface::callWriters(const std::string& _strQueue)
+{
+    METHOD_ENTRY("CComInterface::callWriters")
+    
+    IBaseCommand* pQueuedFunction = nullptr;
+    
+    while (m_WriterQueues[_strQueue].try_dequeue(pQueuedFunction))
+    {
+        switch (pQueuedFunction->Signature)
+        {
+            case SignatureType::NONE:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call();
+                break;
+            }
+            case SignatureType::NONE_BOOL:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, bool>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_DOUBLE:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, double>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_INT:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_STRING:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_STRING_4DOUBLE:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string, double, double, double, double>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<2>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<3>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<4>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_STRING_DOUBLE:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string, double>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()), std::get<1>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::DOUBLE:
+            case SignatureType::DOUBLE_STRING:
+            case SignatureType::DOUBLE_STRING_DOUBLE:
+            case SignatureType::INT:
+            case SignatureType::VEC2DDOUBLE_STRING:
+            {
+                WARNING_MSG("Com Interface", "Something went wrong, writing functions shouldn't have a return value.")
+                break;
+            }
+            default:
+            {
+                NOTICE_MSG("Com Interface", "Queued writer call not implemented.")
+            }
+        }
+        if (pQueuedFunction != nullptr)
+        {
+            delete pQueuedFunction;
+            MEM_FREED("IBaseCommand")
+            pQueuedFunction = nullptr;
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
