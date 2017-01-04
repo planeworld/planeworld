@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ bool CLuaManager::init()
         
         if ((*m_pComInterface->getWriterFlags())[Function.first])
         {
-            switch (Function.second->Signature)
+            switch (Function.second->getSignature())
             {
                 case SignatureType::INT:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<int>*>(Function.second)->getFunction();
@@ -105,7 +105,7 @@ bool CLuaManager::init()
         }
         else
         {
-            switch (Function.second->Signature)
+            switch (Function.second->getSignature())
             {
                 case SignatureType::INT:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int>*>(Function.second)->getFunction();

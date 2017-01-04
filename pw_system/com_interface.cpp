@@ -122,7 +122,7 @@ const std::string CComInterface::call(const std::string& _strCommand)
     
     if (m_RegisteredFunctions.find(strName) != m_RegisteredFunctions.end())
     {
-        switch (m_RegisteredFunctions[strName]->Signature)
+        switch (m_RegisteredFunctions[strName]->getSignature())
         {
             case SignatureType::DOUBLE:
             {
@@ -236,7 +236,7 @@ void CComInterface::callWriters(const std::string& _strQueue)
     
     while (m_WriterQueues[_strQueue].try_dequeue(pQueuedFunction))
     {
-        switch (pQueuedFunction->Signature)
+        switch (pQueuedFunction->getSignature())
         {
             case SignatureType::NONE:
             {

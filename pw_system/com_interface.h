@@ -115,7 +115,12 @@ class IBaseCommand
         //--- Constructor/Destructor -----------------------------------------//
         virtual ~IBaseCommand(){}
         
-        SignatureType Signature = SignatureType::UNDEFINED;
+        //--- Constant methods -----------------------------------------------//
+        SignatureType getSignature() const {return m_Signature;}
+        
+    protected:
+    
+        SignatureType m_Signature = SignatureType::UNDEFINED;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
