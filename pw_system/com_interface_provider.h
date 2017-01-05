@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,11 +53,12 @@ class IComInterfaceProvider
         virtual ~IComInterfaceProvider() {}
 
         //--- Methods --------------------------------------------------------//
-        virtual void initComInterface() = 0;
-        
-        void setComInterface(CComInterface*);
+        void initComInterface(CComInterface* const, const std::string&);
         
     protected:
+        
+        //--- Protected methods --------------------------------------------------------//
+        virtual void myInitComInterface() = 0;
         
         CComInterface*  m_pComInterface;     ///< Pointer to com interface
 };
@@ -66,21 +67,27 @@ class IComInterfaceProvider
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the com interface to be used
+/// \brief Initialises the com interface by registering functions
 ///
 /// \param _pComInterface Instance of com interface to be used
+/// \param _strWriterDomain Domain for functions with write access. Each domain
+///                         will have a separate queue for writer functions.
+///                         This allows for multi-threading.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IComInterfaceProvider::setComInterface(CComInterface* _pComInterface)
+inline void IComInterfaceProvider::initComInterface(CComInterface* const _pComInterface,
+                                                   const std::string& _strWriterDomain)
 {
-    METHOD_ENTRY("IComInterfaceProvider::setComInterface")
+    METHOD_ENTRY("IComInterfaceProvider::initComInterface")
     
     if (m_pComInterface != nullptr)
     {
         NOTICE_MSG("Com Interface Provider", "Com interface instance already given, overwriting.")
     }
-    
     m_pComInterface = _pComInterface;
+    m_pComInterface->registerWriterDomain(_strWriterDomain);
+    
+    this->myInitComInterface();
 }
 
 #endif // COM_INTERFACE_PROVIDER_H

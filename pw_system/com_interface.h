@@ -35,6 +35,7 @@
 #include <functional>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
@@ -242,6 +243,9 @@ typedef std::string DomainType;
 /// Map of domains, accessed by function name
 typedef std::unordered_map<std::string, DomainType> RegisteredDomainsType;
 
+/// List of writer domains
+typedef std::unordered_set<std::string> WriterDomainsType;
+/// Map of queues with one queue for each writer domain
 typedef std::unordered_map<std::string, moodycamel::ConcurrentQueue<IBaseCommand*>> WriterQueuesType;
 
 //--- Enum parser ------------------------------------------------------------//
@@ -286,8 +290,10 @@ class CComInterface
                               const std::string&,
                               const ParameterListType& = {},
                               const DomainType& = "",
-                              const bool = false
+                              const std::string& = "Reader"
         );
+
+        void registerWriterDomain(const std::string&);
         
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CComInterface&);
@@ -300,11 +306,28 @@ class CComInterface
         RegisteredParameterListsType        m_RegisteredFunctionsParams; ///< Parameter lists of registered functions      
         RegisteredDomainsType               m_RegisteredFunctionsDomain; ///< Domain of registered functions
         
+        WriterDomainsType                   m_WriterDomains;             ///< Domains for queued functions
         WriterQueuesType                    m_WriterQueues;              ///< Command queues for write access
         WriterFlagsType                     m_WriterFlags;               ///< Flags for writer functions
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Initialises the com interface by registering functions
+///
+/// \param _strWriterDomain Domain for functions with write access. Each domain
+///                         will have a separate queue for writer functions.
+///                         This allows for multi-threading.
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CComInterface::registerWriterDomain(const std::string& _strWriterDomain)
+{
+    METHOD_ENTRY("CComInterface::registerWriterDomain")
+    m_WriterDomains.emplace(_strWriterDomain);
+}
+
 
 #include "com_interface.tpp"
 

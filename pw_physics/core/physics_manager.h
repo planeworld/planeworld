@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2016 Torsten Büschenfeld
+// Copyright (C) 2011-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -88,7 +88,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         void addComponents(const ComponentsType&);
         void addEmitter(IEmitter* const);
         void addEmitters(const EmittersType&);
-        void initComInterface();
         void initComponents();
         void initEmitters();
         bool initLua();
@@ -119,6 +118,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         //--- Methods [private] ----------------------------------------------//
         void addGlobalForces();
         void collisionDetection();
+        void myInitComInterface();
         void updateCells();
       
         CUniverse*          m_pUniverse;            ///< The procedurally generated universe

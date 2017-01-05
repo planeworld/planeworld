@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2016 Torsten Büschenfeld
+// Copyright (C) 2010-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -1209,6 +1209,8 @@ void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
 
+    m_pComInterface->callWriters("visuals");
+    
     m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
     
     this->drawGrid();
@@ -1221,4 +1223,53 @@ void CVisualsManager::processFrame()
     this->drawConsole();
     
     this->finishFrame();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Initialise the command interface
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::myInitComInterface()
+{
+    METHOD_ENTRY("CVisualsManager::myInitComInterface")
+
+    INFO_MSG("Visuals Manager", "Initialising com interace.")
+    
+    m_pComInterface->registerFunction("cycle_camera",
+                                      CCommand<void>([&](){this->cycleCamera();}),
+                                      "Cycle through registered cameras",
+                                      {{ParameterType::NONE,"No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("get_current_camera",
+                                      CCommand<CCamera*>([&](){return this->getCurrentCamera();}),
+                                      "Returns pointer to active camera",
+                                      {{ParameterType::UNDEFINED, "CCamera*, Currently active camera"}},
+                                      "system"
+    );
+    m_pComInterface->registerFunction("toggle_bboxes",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
+                                      "Toggle bounding boxes on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_grid",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
+                                      "Toggle universe grid on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_names",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_NAMES);}),
+                                      "Toggle objects names on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_timers",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_TIMERS);}),
+                                      "Toggle timers on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
 }

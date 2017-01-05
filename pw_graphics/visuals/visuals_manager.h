@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2016 Torsten Büschenfeld
+// Copyright (C) 2010-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "com_console.h"
+#include "com_interface_provider.h"
 #include "physics_manager.h"
 #include "universe.h"
 #include "visuals_data_storage_user.h"
@@ -52,6 +53,7 @@ const double VISUALS_DEFAULT_FREQUENCY = 60.0;               ///< Default freque
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CVisualsManager : virtual public CGraphicsBase,
+                                public IComInterfaceProvider,
                                 public IVisualsDataStorageUser,
                                 public IWorldDataStorageUser
 {
@@ -106,6 +108,9 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            drawTimers() const;
         void            drawTrajectories() const;
         void            drawWorld() const;
+        
+        //--- Methods [private] ----------------------------------------------//
+        void myInitComInterface();
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         CPhysicsManager*                m_pPhysicsManager;  ///< Reference to physics

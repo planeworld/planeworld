@@ -215,7 +215,9 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
 /// \param _strDescription Description of the function to be registered
 /// \param _ParamList List of parameters for given function
 /// \param _Domain Domain of function to be registeredm_RegisteredFunctions[_strName]
-/// \param _bWriter Indicates a function that writes data (will be queued for thread safety)
+/// \param _strWriterDomain Indicates a function that writes data (will be
+///                         queued for thread safety). Reader functions will
+///                         have the default domain "Reader"
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template<class TRet, class... TArgs> 
@@ -223,21 +225,35 @@ bool CComInterface::registerFunction(const std::string& _strName, const CCommand
                                      const std::string& _strDescription,
                                      const ParameterListType& _ParamList,
                                      const DomainType& _Domain,
-                                     const bool _bWriter
+                                     const std::string& _strWriterDomain
                                     )
 {
     METHOD_ENTRY("CComInterface::registerFunction")
     
-    if (_bWriter)
+    DEBUG_MSG("Com Interface", "Registering function <" << _strName << ">.")
+
+    if (_strWriterDomain != "Reader")
     {
-        m_RegisteredFunctions[_strName] = new CCommandWritable<TRet, TArgs...>([this,_strName,_Command](TArgs... _Args)
-                                            {
-                                                auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Command.getFunction(), _Args...);
-                                                m_WriterQueues["physics"].enqueue(pCommand);
-                                                MEM_ALLOC("IBaseCommand")
-                                            });
-        m_WriterFlags[_strName] = true;
-        MEM_ALLOC("IBaseCommand")
+        if (m_WriterDomains.find(_strWriterDomain) != m_WriterDomains.end())
+        {
+            m_RegisteredFunctions[_strName] = new CCommandWritable<TRet, TArgs...>([this,_strName,_Command, _strWriterDomain](TArgs... _Args)
+                                                {
+                                                    auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Command.getFunction(), _Args...);
+                                                    m_WriterQueues[_strWriterDomain].enqueue(pCommand);
+                                                    MEM_ALLOC("IBaseCommand")
+                                                });
+            m_WriterFlags[_strName] = true;
+            MEM_ALLOC("IBaseCommand")
+        }
+        else
+        {
+            ERROR_MSG("Com Interface", "Unknown writer domain <" << _strWriterDomain <<
+                                       ">. Registered writer domains are:")
+            ERROR(
+                for (auto Domain : m_WriterDomains) std::cout << " - " << Domain << std::endl;
+            )
+            return false;
+        }
     }
     else
     {

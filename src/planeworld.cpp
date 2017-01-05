@@ -148,21 +148,9 @@ int main(int argc, char *argv[])
     CComConsole   ComConsole;
     CComInterface ComInterface;
     
+    ComInterface.registerWriterDomain("main");
     ComConsole.setComInterface(&ComInterface);
     
-    ComInterface.registerFunction("exit",
-                                  CCommand<void>(quit),
-                                  "Exit processing, clean up and end simulation. Same as <quit>",
-                                  {{ParameterType::NONE, "No return value"}},
-                                  "system"
-                                 );
-    ComInterface.registerFunction("quit",
-                                  CCommand<void>(quit),
-                                  "Quit processing, clean up and end simulation. Same as <exit>",
-                                  {{ParameterType::NONE, "No return value"}},
-                                  "system"
-                                 );
-  
     if (argc < 2 || argc > 3)
     {
         usage();
@@ -219,6 +207,7 @@ int main(int argc, char *argv[])
         pVisualsManager->setComConsole(&ComConsole);
         pVisualsManager->setWorldDataStorage(&WorldDataStorage);
         pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
+        pVisualsManager->initComInterface(&ComInterface, "visuals");
     }
     
     //--- Import from xml file ----------------------------------------------//
@@ -259,8 +248,7 @@ int main(int argc, char *argv[])
     pPhysicsManager->initObjects();
     pPhysicsManager->initEmitters();
     pPhysicsManager->initComponents();
-    pPhysicsManager->setComInterface(&ComInterface);
-    pPhysicsManager->initComInterface();
+    pPhysicsManager->initComInterface(&ComInterface, "physics");
     if (!pPhysicsManager->initLua()) CLEAN_UP_AND_EXIT_FAILURE;
     
     #ifdef PW_MULTITHREADING    
@@ -275,18 +263,19 @@ int main(int argc, char *argv[])
         pVisualsManager->initGraphics();
         pWindow=pVisualsManager->getWindowHandle();
         
-        ComInterface.registerFunction("cycle_camera",
-                                      CCommand<void>([&](){pVisualsManager->cycleCamera();}),
-                                      "Cycle through registered cameras",
-                                      {{ParameterType::NONE,"No return value"}},
-                                      "system"
+        ComInterface.registerFunction("exit",
+                                      CCommand<void>(quit),
+                                      "Exit processing, clean up and end simulation. Same as <quit>",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "main"
         );
-        ComInterface.registerFunction("get_current_camera",
-                                      CCommand<CCamera*>([&](){return pVisualsManager->getCurrentCamera();}),
-                                      "Returns pointer to active camera",
-                                      {{ParameterType::UNDEFINED, "CCamera*, Currently active camera"}},
-                                      "system"
+        ComInterface.registerFunction("quit",
+                                      CCommand<void>(quit),
+                                      "Quit processing, clean up and end simulation. Same as <exit>",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "main"
         );
+        
         ComInterface.registerFunction("rotate_camera_by",
                                       CCommand<void, double>([&](const double& _fAngle){pCamera->rotateBy(_fAngle);}),
                                       "Rotate camera by given angle.",
@@ -294,30 +283,7 @@ int main(int argc, char *argv[])
                                        {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
                                       "system"  
         );
-        ComInterface.registerFunction("toggle_bboxes",
-                                      CCommand<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
-                                      "Toggle bounding boxes on and off.",
-                                      {{ParameterType::NONE, "No return value"}},
-                                      "visuals"
-        );
-        ComInterface.registerFunction("toggle_grid",
-                                      CCommand<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
-                                      "Toggle universe grid on and off.",
-                                      {{ParameterType::NONE, "No return value"}},
-                                      "visuals"  
-        );
-        ComInterface.registerFunction("toggle_names",
-                                      CCommand<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_NAMES);}),
-                                      "Toggle objects names on and off.",
-                                      {{ParameterType::NONE, "No return value"}},
-                                      "visuals"  
-        );
-        ComInterface.registerFunction("toggle_timers",
-                                      CCommand<void>([&](){pVisualsManager->toggleVisualisations(VISUALS_TIMERS);}),
-                                      "Toggle timers on and off.",
-                                      {{ParameterType::NONE, "No return value"}},
-                                      "visuals"  
-        );
+        
         LuaManager.setComInterface(&ComInterface);
         LuaManager.init();
         
@@ -624,6 +590,9 @@ int main(int argc, char *argv[])
             #else
                 Timer.sleepRemaining(pVisualsManager->getFrequency());
             #endif
+                
+            //--- Call Commands from com interface ---//
+            ComInterface.callWriters("main");
         }
     }
     else // if (!bGraphics)
@@ -653,7 +622,5 @@ int main(int argc, char *argv[])
         PhysicsThread.join();
     #endif
 
-    ComInterface.help();
-        
     CLEAN_UP_AND_EXIT_SUCCESS;
 }
