@@ -62,6 +62,38 @@ CVisualsManager::~CVisualsManager()
     DTOR_CALL("CVisualsManager::~CVisualsManager")
 }
 
+#ifdef PW_MULTITHREADING
+  ////////////////////////////////////////////////////////////////////////////////
+  ///
+  /// \brief Runs the visuals engine, called as a thread.
+  ///
+  ///////////////////////////////////////////////////////////////////////////////
+  void CVisualsManager::run()
+  {
+      METHOD_ENTRY("CVisualsManager::run")
+      
+      INFO_MSG("Visuals Manager", "Visuals thread started.")
+      
+      m_Graphics.getWindow()->setActive(true);
+      m_bRunning = true;
+      
+      CTimer VisualsTimer;
+      
+      VisualsTimer.start();
+      while (m_bRunning)
+      {
+          this->processFrame();
+          double fTimeSlept = VisualsTimer.sleepRemaining(m_fFrequency);
+          
+          if (fTimeSlept < 0.0)
+          {
+              NOTICE_MSG("Visuals Manager", "Execution time of visuals code is too large: " << 1.0/m_fFrequency - fTimeSlept << 
+                                          "s of " << 1.0/m_fFrequency << "s max.")
+          }
+      }
+      INFO_MSG("Visuals Manager", "Visuals thread stopped.")
+  }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -1102,7 +1134,7 @@ void CVisualsManager::drawWorld() const
                 m_Graphics.getWindow()->draw(text);
             }
         }
-//         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
+        if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
             for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
             {
@@ -1193,7 +1225,9 @@ void CVisualsManager::finishFrame()
 {
     METHOD_ENTRY("CVisualsManager::finishFrame")
     m_Graphics.swapBuffers();
+    DEBUG(Log.setLoglevel(LOG_LEVEL_NOTICE);)
     m_pDataStorage->swapFront();
+    DEBUG(Log.setLoglevel(LOG_LEVEL_DEBUG);)
 
     // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
     if (m_pCamera->gotRef())
@@ -1247,6 +1281,13 @@ void CVisualsManager::myInitComInterface()
                                       "Returns pointer to active camera",
                                       {{ParameterType::UNDEFINED, "CCamera*, Currently active camera"}},
                                       "system"
+    );
+    m_pComInterface->registerFunction("rotate_camera_by",
+                                      CCommand<void, double>([&](const double& _fAngle){m_pCamera->rotateBy(_fAngle);}),
+                                      "Rotate camera by given angle.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
+                                      "system", "visuals"  
     );
     m_pComInterface->registerFunction("toggle_bboxes",
                                       CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),

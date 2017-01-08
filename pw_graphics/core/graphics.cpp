@@ -30,6 +30,7 @@
 
 #include "graphics.h"
 
+#include "conf_pw.h"
 #include "math_constants.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,13 +68,6 @@ CGraphics::~CGraphics()
 {
     METHOD_ENTRY("CGraphics::CGraphics")
     DTOR_CALL("CGraphics::CGraphics")
-    
-    if (m_pWindow != nullptr)
-    {
-        delete m_pWindow;
-        MEM_FREED("WindowHandleType")
-        m_pWindow = nullptr;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -200,9 +194,6 @@ bool CGraphics::init()
     //--------------------------------------------------------------------------
     // Initialize window and graphics
     //--------------------------------------------------------------------------
-    m_pWindow = new WindowHandleType(sf::VideoMode(m_unWidthScr, m_unHeightScr),
-                                     "Planeworld", sf::Style::Default);
-    MEM_ALLOC("WindowHandleType")
     m_pWindow->setMouseCursorVisible(false);
     m_pWindow->setVerticalSyncEnabled(false);
     DOM_VAR(INFO_MSG("Graphics", "Found OpenGL version: " << m_pWindow->getSettings().majorVersion << "." << m_pWindow->getSettings().minorVersion))
@@ -274,6 +265,9 @@ bool CGraphics::init()
 //     float mcolor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
 //     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mcolor);
 //     glFrontFace(GL_CCW);
+    #ifdef PW_MULTITHREADING
+        m_pWindow->setActive(false);
+    #endif
     
     return (true);
 }

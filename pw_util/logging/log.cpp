@@ -435,7 +435,9 @@ void CLog::setLoglevel(const LogLevelType& _Loglevel)
         {
             if (_Loglevel < m_LogLevel)
             {
-                DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
+                // Dynmically calling loglevel might used for loops to avoid
+                // message flooding. Hence, this shouldn't be done here.
+                // DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
                 #ifdef DOMAIN_MEMORY
                 if (m_LogLevel == LOG_LEVEL_DEBUG)
                     m_nMemCounter = 0;
@@ -449,7 +451,10 @@ void CLog::setLoglevel(const LogLevelType& _Loglevel)
                     m_nMemCounter = 0;
                 #endif
                 m_LogLevel = _Loglevel;
-                DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
+                
+                // Dynmically calling loglevel might used for loops to avoid
+                // message flooding. Hence, this shouldn't be done here.
+                // DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
             }
         }
     }

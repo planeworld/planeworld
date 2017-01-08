@@ -59,6 +59,10 @@
 
 //--- Misc-Header ------------------------------------------------------------//
 
+#ifdef __linux__
+    #include "X11/Xlib.h"
+#endif
+
 #define CLEAN_UP_AND_EXIT_FAILURE { \
     if (pPhysicsManager != nullptr) \
     { \
@@ -132,25 +136,23 @@ void quit()
 /// \param  argv array, storing the arguments
 /// \return exit code
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
-	#ifdef WIN32
-		Log.setColourScheme(LOG_COLOUR_SCHEME_DEFAULT);
-	#else
-		Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
-	#endif
-  
+    #ifdef WIN32
+        Log.setColourScheme(LOG_COLOUR_SCHEME_DEFAULT);
+    #else
+        Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
+    #endif
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 1. Check for given arguments
+    //
+    //////////////////////////////////////////////////////////////////////////// 
     bool bGraphics = true;
     std::string strArgOptions("");
     std::string strArgData("");
-    
-    CComConsole   ComConsole;
-    CComInterface ComInterface;
-    
-    ComInterface.registerWriterDomain("main");
-    ComConsole.setComInterface(&ComInterface);
-    
+        
     if (argc < 2 || argc > 3)
     {
         usage();
@@ -174,12 +176,38 @@ int main(int argc, char *argv[])
     {
         strArgData = argv[1];
     }
+    
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 2. Initialise com interface
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    CComInterface ComInterface;
+    
+    ComInterface.registerWriterDomain("main");
+    
+    
+    ComInterface.registerFunction("exit",
+                                    CCommand<void>(quit),
+                                    "Exit processing, clean up and end simulation. Same as <quit>",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system", "main"
+    );
+    ComInterface.registerFunction("quit",
+                                    CCommand<void>(quit),
+                                    "Quit processing, clean up and end simulation. Same as <exit>",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system", "main"
+    );
 
-    CTimer              Timer;
-
-    //--- Major instances ----------------------------------------------------//
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 3. Initialise major objects
+    //
+    ////////////////////////////////////////////////////////////////////////////
     CGraphics&          Graphics = CGraphics::getInstance();
     CCamera*            pCamera = nullptr;
+    CComConsole         ComConsole;
     CGameStateManager   GameStateManager;
     CPhysicsManager*    pPhysicsManager = nullptr;
     CVisualsManager*    pVisualsManager = nullptr;
@@ -190,7 +218,6 @@ int main(int argc, char *argv[])
     CThruster           Thruster;
     CLuaManager         LuaManager;
     
-    //--- Initialisation -----------------------------------------------------//
     pPhysicsManager = new CPhysicsManager;
     MEM_ALLOC("CPhysicsManager")
     if (bGraphics)
@@ -199,7 +226,11 @@ int main(int argc, char *argv[])
         MEM_ALLOC("CVisualsManager")
     }
     
-    //--- Initialize storage access for engine managers ----------------------//
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 4. Initialise storage access
+    //
+    ////////////////////////////////////////////////////////////////////////////
     GameStateManager.setWorldDataStorage(&WorldDataStorage);
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
     if (bGraphics)
@@ -210,7 +241,11 @@ int main(int argc, char *argv[])
         pVisualsManager->initComInterface(&ComInterface, "visuals");
     }
     
-    //--- Import from xml file ----------------------------------------------//
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 5. Import simulation data
+    //
+    ////////////////////////////////////////////////////////////////////////////
     {
         // XML-Importer is initialised in its own scope to free memory after
         // objects are handed over to managers. However, this only applies for
@@ -236,7 +271,7 @@ int main(int argc, char *argv[])
         }
         Universe.clone(XMLImporter.getUniverse());
     }
-
+    
     if (bGraphics)
     {
         pVisualsManager->setPhysicsManager(pPhysicsManager);
@@ -244,7 +279,11 @@ int main(int argc, char *argv[])
     }
     pPhysicsManager->setUniverse(&Universe);
 
-    //--- Initialise physics -------------------------------------------------//
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 6. Start physics
+    //
+    ////////////////////////////////////////////////////////////////////////////
     pPhysicsManager->initObjects();
     pPhysicsManager->initEmitters();
     pPhysicsManager->initComponents();
@@ -255,34 +294,30 @@ int main(int argc, char *argv[])
         std::thread PhysicsThread(&CPhysicsManager::run, pPhysicsManager);
     #endif
     
-    //--- Initialise graphics ------------------------------------------------//
-    WindowHandleType* pWindow = nullptr;
-
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 7. Start graphcis
+    //
+    ////////////////////////////////////////////////////////////////////////////
+        
+    CTimer Timer;
+    Timer.start();
     if (bGraphics)
     {
+        // X11 need special care when for threaded graphics
+        #ifdef __linux__
+            XInitThreads();
+        #endif
+            
+        ComConsole.setComInterface(&ComInterface);
+        
+        //--------------------------------------------------------------------------
+        // Initialize window and graphics
+        //--------------------------------------------------------------------------
+        WindowHandleType Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()), "Planeworld", sf::Style::Default);
+        
+        pVisualsManager->setWindow(&Window);
         pVisualsManager->initGraphics();
-        pWindow=pVisualsManager->getWindowHandle();
-        
-        ComInterface.registerFunction("exit",
-                                      CCommand<void>(quit),
-                                      "Exit processing, clean up and end simulation. Same as <quit>",
-                                      {{ParameterType::NONE, "No return value"}},
-                                      "system", "main"
-        );
-        ComInterface.registerFunction("quit",
-                                      CCommand<void>(quit),
-                                      "Quit processing, clean up and end simulation. Same as <exit>",
-                                      {{ParameterType::NONE, "No return value"}},
-                                      "system", "main"
-        );
-        
-        ComInterface.registerFunction("rotate_camera_by",
-                                      CCommand<void, double>([&](const double& _fAngle){pCamera->rotateBy(_fAngle);}),
-                                      "Rotate camera by given angle.",
-                                      {{ParameterType::NONE, "No return value"},
-                                       {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
-                                      "system"  
-        );
         
         LuaManager.setComInterface(&ComInterface);
         LuaManager.init();
@@ -292,31 +327,39 @@ int main(int argc, char *argv[])
         bool bConsoleMode = false;
         std::string strConsoleCommand("");
         
+        #ifdef PW_MULTITHREADING    
+            std::thread VisualsThread(&CVisualsManager::run, pVisualsManager);
+        #endif
+        
+        //////////////////////////////////////////////////////////////////////// 
+        //
+        // 8. Main loop
+        //
+        ////////////////////////////////////////////////////////////////////////
+            
         //--- Prepare for querying relative mouse movement -----------------------//
         sf::Vector2i vecMouse;
-        sf::Vector2i vecMouseCenter(sf::Vector2i(pWindow->getSize().x >> 1, pWindow->getSize().y >> 1));
-        sf::Mouse::setPosition(vecMouseCenter,*pWindow);
+        sf::Vector2i vecMouseCenter(sf::Vector2i(Window.getSize().x >> 1, Window.getSize().y >> 1));
+        sf::Mouse::setPosition(vecMouseCenter,Window);
         
-        //--- Run the main loop --------------------------------------------------//
         #ifndef PW_MULTITHREADING
             auto nFrame = 0u;
         #endif
-        Timer.start();
         while (!g_bDone)
         {
             #ifndef PW_MULTITHREADING
-            if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()/
-                                        pVisualsManager->getFrequency()) == 0)
+            if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()*
+                                            pPhysicsManager->getTimeAccel()/30.0) == 0)
             {
             #endif
-                vecMouse = vecMouseCenter-sf::Mouse::getPosition(*pWindow);
+                vecMouse = vecMouseCenter-sf::Mouse::getPosition(Window);
                 vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
                 if (!bMouseCursorVisible)
-                    sf::Mouse::setPosition(vecMouseCenter,*pWindow);
-                
+                    sf::Mouse::setPosition(vecMouseCenter,Window);
+
                 //--- Handle events ---//
                 sf::Event Event;
-                while (pWindow->pollEvent(Event))
+                while (Window.pollEvent(Event))
                 {
                     switch (Event.type)
                     {
@@ -329,7 +372,7 @@ int main(int argc, char *argv[])
                         case sf::Event::Resized:
                         {
                             // Adjust the viewport when the window is resized
-                            vecMouseCenter = sf::Vector2i(pWindow->getSize().x >> 1, pWindow->getSize().y >> 1);
+                            vecMouseCenter = sf::Vector2i(Window.getSize().x >> 1, Window.getSize().y >> 1);
                             Graphics.resizeWindow(Event.size.width, Event.size.height);
                             pCamera->setViewport(Graphics.getViewPort().rightplane-Graphics.getViewPort().leftplane - 20.0,
                                                 Graphics.getViewPort().topplane  -Graphics.getViewPort().bottomplane - 20.0);
@@ -504,7 +547,7 @@ int main(int argc, char *argv[])
                                     {
                                         bGraphicsOn ^= 1;
                                         bMouseCursorVisible ^= 1;
-                                        pWindow->setMouseCursorVisible(bMouseCursorVisible);
+                                        Window.setMouseCursorVisible(bMouseCursorVisible);
                                         vecMouse.x=0;
                                         vecMouse.y=0;
                                         
@@ -566,34 +609,36 @@ int main(int argc, char *argv[])
                             break;
                     }
                 }
+                //--- Call Commands from com interface ---//
+                ComInterface.callWriters("main");
+                
             #ifndef PW_MULTITHREADING
             }
                 //--- Run Physics ---//
                 pPhysicsManager->processFrame();
-                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency()/
-                                          pVisualsManager->getFrequency()) == 0)
+                
+                if (bGraphicsOn)
                 {
-            #endif
-                    //--- Draw visuals if requested ---//
-                    if (bGraphicsOn)
+                    if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                                  pPhysicsManager->getTimeAccel() /
+                                                  pVisualsManager->getFrequency()) == 0)
                     {
                         pVisualsManager->processFrame();
                     }
-            #ifndef PW_MULTITHREADING
                 }
                 pPhysicsManager->setTimeSlept(
-                  Timer.sleepRemaining(pPhysicsManager->getFrequency() * 
-                                      pPhysicsManager->getTimeAccel())
-                );
-                
+                    Timer.sleepRemaining(pPhysicsManager->getFrequency() *
+                                         pPhysicsManager->getTimeAccel()));
                 if (nFrame % 1000u == 0u) nFrame = 0u;
             #else
-                Timer.sleepRemaining(pVisualsManager->getFrequency());
+                Timer.sleepRemaining(30.0);
             #endif
-                
-            //--- Call Commands from com interface ---//
-            ComInterface.callWriters("main");
         }
+        #ifdef PW_MULTITHREADING
+            pVisualsManager->terminate();
+            INFO_MSG("Main", "Visuals thread stopped.")
+            VisualsThread.join();
+        #endif
     }
     else // if (!bGraphics)
     {
@@ -604,7 +649,7 @@ int main(int argc, char *argv[])
             pPhysicsManager->processFrame();
             pPhysicsManager->setTimeSlept(
               Timer.sleepRemaining(pPhysicsManager->getFrequency() * 
-                                  pPhysicsManager->getTimeAccel())
+                                   pPhysicsManager->getTimeAccel())
             );
         }
         #else

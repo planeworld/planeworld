@@ -466,7 +466,9 @@ void CPhysicsManager::processFrame()
         this->collisionDetection();
     //     this->updateCells();
         
+        DEBUG(Log.setLoglevel(LOG_LEVEL_NOTICE);)
         m_pDataStorage->swapBack();
+        DEBUG(Log.setLoglevel(LOG_LEVEL_DEBUG);)
         m_bProcessOneFrame = false;
     }
 }
@@ -910,7 +912,7 @@ void CPhysicsManager::updateCells()
           this->processFrame();
           m_fTimeSlept = PhysicsTimer.sleepRemaining(m_fFrequency * m_fTimeAccel);
           
-          if (m_fTimeSlept < 0.0)
+          if (m_fTimeSlept < 0.0 && m_fTimeAccel == 1.0)
           {
               NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << 1.0/m_fFrequency - m_fTimeSlept << 
                                           "s of " << 1.0/m_fFrequency << "s max.")

@@ -48,8 +48,6 @@
 using namespace Eigen;
 
 
-static sf::Window g_Window;                             ///< Main window
-
 /// Type definition for window handle to enable easy changes
 typedef sf::RenderWindow WindowHandleType;
 

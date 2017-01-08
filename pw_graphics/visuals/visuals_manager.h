@@ -70,7 +70,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         bool            getVisualisation(const int&) const;
         int             getVisualisations() const;
         WindowHandleType*
-                        getWindowHandle() const;
+                        getWindow() const;
         bool            initGraphics() const;
                 
         //--- Methods --------------------------------------------------------//
@@ -91,6 +91,11 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            toggleVisualisations(const int&);
         void            unsetVisualisations(const int&);
 
+        #ifdef PW_MULTITHREADING
+          void run();
+          void terminate();
+        #endif
+        
     private:
 
         //--- Constant methods [private] -------------------------------------//
@@ -112,6 +117,10 @@ class CVisualsManager : virtual public CGraphicsBase,
         //--- Methods [private] ----------------------------------------------//
         void myInitComInterface();
 
+        #ifdef PW_MULTITHREADING
+          bool                          m_bRunning = false; ///< Indicates if visuals thread is running
+        #endif
+        
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         CPhysicsManager*                m_pPhysicsManager;  ///< Reference to physics
         double                          m_fFrequency;       ///< Frequency of visuals update
@@ -175,7 +184,7 @@ inline int CVisualsManager::getVisualisations() const
 /// \return Window handle
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline WindowHandleType* CVisualsManager::getWindowHandle() const
+inline WindowHandleType* CVisualsManager::getWindow() const
 {
     METHOD_ENTRY("CVisualsManager::getWindowHandle")
     return (m_Graphics.getWindow());
@@ -349,5 +358,18 @@ inline void CVisualsManager::unsetVisualisations(const int& _nVis)
     METHOD_ENTRY("CVisualsManager::unsetVisualisations")
     m_nVisualisations &= (~_nVis);
 }
+
+#ifdef PW_MULTITHREADING
+  ////////////////////////////////////////////////////////////////////////////////
+  ///
+  /// \brief Stops visuals thread
+  ///
+  ////////////////////////////////////////////////////////////////////////////////
+  inline void CVisualsManager::terminate()
+  {
+      METHOD_ENTRY("CVisualsManager::terminate")
+      m_bRunning = false;
+  }
+#endif
 
 #endif
