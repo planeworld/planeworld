@@ -99,7 +99,7 @@ double CTimer::sleepRemaining(const double& _fFreq)
     }
     
     this->stop();
-    double fFrametime = 1.0e6*(1.0/_fFreq-m_fDiffTime);
+    double fFrametime = (1.0/_fFreq-m_fDiffTime);
     
     std::unique_lock<std::mutex> lk(m_MutexCV);
     if (m_CV.wait_until(lk, m_StartAbsolute + std::chrono::duration<double>(m_fCountAbsolute/_fFreq), [](){return false;}))

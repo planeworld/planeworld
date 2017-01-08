@@ -46,7 +46,6 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                      m_fFrequencyLua(PHYSICS_LUA_DEFAULT_FREQUENCY),
-                                     m_fProcessingTime(0.0),
                                      m_fTimeAccel(1.0),
                                      m_fTimeSlept(1.0),
                                      m_fCellUpdateResidual(0.0),
@@ -459,8 +458,7 @@ void CPhysicsManager::processFrame()
         static auto nFrame = 0u;
         if (++nFrame == 10000) nFrame = 0;    
         
-        CTimer ProcessingTimer;
-        ProcessingTimer.start();
+        
         
         m_pComInterface->callWriters("physics");
         this->addGlobalForces();
@@ -468,13 +466,6 @@ void CPhysicsManager::processFrame()
         this->collisionDetection();
     //     this->updateCells();
         
-        ProcessingTimer.stop();
-        m_fProcessingTime = ProcessingTimer.getTime();
-        if (m_fProcessingTime > 1.0/ m_fFrequency)
-        {
-            NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << m_fProcessingTime << 
-                                          "s of " << 1.0/m_fFrequency << "s max.")
-        }
         m_pDataStorage->swapBack();
         m_bProcessOneFrame = false;
     }
@@ -918,6 +909,12 @@ void CPhysicsManager::updateCells()
       {
           this->processFrame();
           m_fTimeSlept = PhysicsTimer.sleepRemaining(m_fFrequency * m_fTimeAccel);
+          
+          if (m_fTimeSlept < 0.0)
+          {
+              NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << 1.0/m_fFrequency - m_fTimeSlept << 
+                                          "s of " << 1.0/m_fFrequency << "s max.")
+          }
       }
       INFO_MSG("Physics Manager", "Physics thread stopped.")
   }

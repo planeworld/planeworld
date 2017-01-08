@@ -70,7 +70,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         
         //--- Constant Methods -----------------------------------------------//
         double      getFrequency() const;
-        double      getProcessingTime() const;
         CUniverse*  getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
@@ -128,7 +127,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         double              m_fFrequency;           ///< Frequency of physics processing
         double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
         double              m_fFrequencyLua;        ///< Frequency of Lua interface
-        double              m_fProcessingTime;      ///< Overall processing time
         double              m_fTimeAccel;           ///< Time acceleration of simulation
         double              m_fTimeSlept;           ///< Sleep time of thread
         
@@ -193,19 +191,6 @@ inline double CPhysicsManager::getFrequency() const
 {
     METHOD_ENTRY("CPhysicsManager::getFrequency()")
     return (m_fFrequency);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns overall processing time for physics calculations
-///
-/// \return Processing time in seconds
-///
-////////////////////////////////////////////////////////////////////////////////
-inline double CPhysicsManager::getProcessingTime() const
-{
-    METHOD_ENTRY("CPhysicsManager::getProcessingTime()")
-    return (m_fProcessingTime);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
