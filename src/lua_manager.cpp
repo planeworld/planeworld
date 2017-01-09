@@ -81,6 +81,9 @@ bool CLuaManager::init()
                 case SignatureType::NONE_DOUBLE:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,double>*>(Function.second)->getFunction();
                     break;
+                case SignatureType::NONE_2DOUBLE:
+                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,double,double>*>(Function.second)->getFunction();
+                    break;
                 case SignatureType::NONE_INT:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int>*>(Function.second)->getFunction();
                     break;
@@ -101,6 +104,8 @@ bool CLuaManager::init()
                         return std::tie(vecVel[0],vecVel[1]);
                     };
                     break;
+                default:
+                    NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
             }
         }
         else
@@ -128,6 +133,9 @@ bool CLuaManager::init()
                 case SignatureType::NONE_DOUBLE:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double>*>(Function.second)->getFunction();
                     break;
+                case SignatureType::NONE_2DOUBLE:
+                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double,double>*>(Function.second)->getFunction();
+                    break;
                 case SignatureType::NONE_INT:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int>*>(Function.second)->getFunction();
                     break;
@@ -148,6 +156,8 @@ bool CLuaManager::init()
                         return std::tie(vecVel[0],vecVel[1]);
                     };
                     break;
+                default:
+                    NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
             }
         }
     }

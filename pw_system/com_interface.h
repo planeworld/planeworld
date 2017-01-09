@@ -68,6 +68,7 @@ enum class SignatureType
     INT,
     NONE_BOOL,
     NONE_DOUBLE,
+    NONE_2DOUBLE,
     NONE_INT,
     NONE_STRING,
     NONE_STRING_4DOUBLE,
@@ -79,6 +80,7 @@ enum class SignatureType
 /// Specifies type of possible exceptions in com interface
 enum class ComIntExceptionType
 {
+    INVALID_VALUE,
     UNKNOWN_COMMAND,
     PARAM_ERROR
 };

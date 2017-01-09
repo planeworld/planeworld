@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
     #else
         Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
     #endif
+        
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 1. Check for given arguments
@@ -225,6 +226,9 @@ int main(int argc, char *argv[])
         pVisualsManager = new CVisualsManager;
         MEM_ALLOC("CVisualsManager")
     }
+    
+    /// Frequency of main program, polling input events
+    const double PLANEWORLD_INPUT_FREQUENCY = 100.0;
     
     //////////////////////////////////////////////////////////////////////////// 
     //
@@ -349,7 +353,8 @@ int main(int argc, char *argv[])
         {
             #ifndef PW_MULTITHREADING
             if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()*
-                                            pPhysicsManager->getTimeAccel()/30.0) == 0)
+                                            pPhysicsManager->getTimeAccel()/
+                                            PLANEWORLD_INPUT_FREQUENCY) == 0)
             {
             #endif
                 vecMouse = vecMouseCenter-sf::Mouse::getPosition(Window);
@@ -384,7 +389,7 @@ int main(int argc, char *argv[])
                             {
                                 strConsoleCommand = "";
                                 bConsoleMode ^= true;
-                                pVisualsManager->toggleConsoleMode();
+                                ComInterface.call<void>("toggle_console_mode");
                                 INFO_MSG("Main","Console mode toggled")
                                 break;
                             }
@@ -405,7 +410,7 @@ int main(int argc, char *argv[])
                                     {
                                         strConsoleCommand = "";
                                         bConsoleMode ^= true;
-                                        pVisualsManager->toggleConsoleMode();
+                                        ComInterface.call<void>("toggle_console_mode");
                                         INFO_MSG("Main","Console mode toggled")
                                         break;
                                     }
@@ -442,22 +447,22 @@ int main(int argc, char *argv[])
                                     }
                                     case sf::Keyboard::Num0:
                                     {
-                                        pVisualsManager->toggleVisualisations(VISUALS_TIMERS);
+                                        ComInterface.call("toggle_timers");
                                         break;
                                     }
                                     case sf::Keyboard::Num1:
                                     {
-                                        pPhysicsManager->getSimTimerLocal()[0].toggle();
+                                        ComInterface.call<void,int>("toggle_timer", 0);
                                         break;
                                     }
                                     case sf::Keyboard::Num2:
                                     {
-                                        pPhysicsManager->getSimTimerLocal()[1].toggle();
+                                        ComInterface.call<void,int>("toggle_timer", 1);
                                         break;
                                     }
                                     case sf::Keyboard::Num3:
                                     {
-                                        pPhysicsManager->getSimTimerLocal()[2].toggle();
+                                        ComInterface.call<void,int>("toggle_timer", 2);
                                         break;
                                     }
                                     case sf::Keyboard::Add:
@@ -465,39 +470,37 @@ int main(int argc, char *argv[])
                                     {
                                         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
                                             sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
-                                            pPhysicsManager->accelerateTime(PHYSICS_ALLOW_STEP_SIZE_INC);
+                                            ComInterface.call<void, bool>("accelerate_time", PHYSICS_ALLOW_STEP_SIZE_INC);
                                         else
-                                            pPhysicsManager->accelerateTime();
+                                            ComInterface.call<void, bool>("accelerate_time", PHYSICS_FORBID_STEP_SIZE_INC);
                                         break;
                                     }
                                     case sf::Keyboard::Subtract:
                                     case sf::Keyboard::Dash:
                                     case sf::Keyboard::D:
                                     {
-                                        pPhysicsManager->decelerateTime();
+                                        ComInterface.call<void>("decelerate_time");
                                         break;
                                     }
                                     case sf::Keyboard::Return:
                                     {
-                                        pPhysicsManager->resetTime();
+                                        ComInterface.call<void>("reset_time");
                                         break;
                                     }
                                     case sf::Keyboard::C:
                                     {
-    //                                     pVisualsManager->cycleCamera();
                                         ComInterface.call<void>("cycle_camera");
                                         pCamera=ComInterface.call<CCamera*>("get_current_camera");
-    //                                     pCamera=pVisualsManager->getCurrentCamera();
                                         break;
                                     }
                                     case sf::Keyboard::B:
                                     {
-                                        pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
+                                        ComInterface.call<void>("toggle_bboxes");
                                         break;
                                     }
                                     case sf::Keyboard::G:
                                     {
-                                        pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
+                                        ComInterface.call<void>("toggle_grid");
                                         break;
                                     }
                                     case sf::Keyboard::K:
@@ -508,29 +511,29 @@ int main(int argc, char *argv[])
                                     case sf::Keyboard::L:
                                     {
                                         /// \todo Really check if physics thread is paused before saving the simulation
-                                        pPhysicsManager->pause();
+                                        ComInterface.call<void>("pause");
                                         GameStateManager.load();
                                         pCamera=(*VisualsDataStorage.getCamerasByName().cbegin()).second;
-                                        pPhysicsManager->togglePause();
+                                        ComInterface.call<void>("toggle_pause");
                                         break;
                                     }
                                     case sf::Keyboard::N:
                                     {
-                                        pVisualsManager->toggleVisualisations(VISUALS_NAMES);
+                                        ComInterface.call<void>("toggle_names");
                                         LuaManager.test();
                                         break;
                                     }
                                     case sf::Keyboard::P:
                                     {
-                                        pPhysicsManager->togglePause();
+                                        ComInterface.call<void>("toggle_pause");
                                         break;
                                     }
                                     case sf::Keyboard::S:
                                     {
                                         /// \todo Really check if physics thread is paused before saving the simulation
-                                        pPhysicsManager->pause();
+                                        ComInterface.call<void>("pause");
                                         GameStateManager.save();
-                                        pPhysicsManager->togglePause();
+                                        ComInterface.call<void>("toggle_pause");
                                         break;
                                     }
                                     case sf::Keyboard::Space:
@@ -573,15 +576,19 @@ int main(int argc, char *argv[])
                             {
                                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                                 {
-                                    pCamera->translateBy(0.2/GRAPHICS_PX_PER_METER * Vector2d(double(vecMouse.x)/pCamera->getZoom(),double(vecMouse.y)/pCamera->getZoom()));
+                                    double fZoom = ComInterface.call<double>("get_camera_zoom");
+                                    ComInterface.call<void,double,double>("translate_camera_by",
+                                                    0.2/GRAPHICS_PX_PER_METER*double(vecMouse.x)/fZoom,
+                                                    0.2/GRAPHICS_PX_PER_METER*double(vecMouse.y)/fZoom);
                                 }
                                 if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                                 {
                                     ComInterface.call<void, double>("rotate_camera_by", -double(vecMouse.x)*0.001);
-//                                     pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
-                                    pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
-                                    if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
-                                    else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
+                                    ComInterface.call<void, double>("zoom_camera_by",1.0+double(vecMouse.y)*0.001);
+                                    if (pCamera->getZoom() < 1.0e-18)
+                                        ComInterface.call<void,double>("zoom_camera_to",1.0e-18);
+                                    else if (pCamera->getZoom() > 1.0e3)
+                                        ComInterface.call<void,double>("zoom_camera_to",1.0e3);
                                 }
                                 break;
                             }
@@ -589,9 +596,11 @@ int main(int argc, char *argv[])
                         case sf::Event::MouseWheelMoved:
                             if (bGraphicsOn)
                             {
-                                pCamera->zoomBy(1.0+double(Event.mouseWheel.delta)*0.1);
-                                if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
-                                else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
+                                ComInterface.call<void, double>("zoom_camera_by",1.0+double(Event.mouseWheel.delta)*0.1);
+                                if (pCamera->getZoom() < 1.0e-18)
+                                    ComInterface.call<void,double>("zoom_camera_to",1.0e-18);
+                                else if (pCamera->getZoom() > 1.0e3)
+                                    ComInterface.call<void,double>("zoom_camera_to",1.0e3);
                             }
                         case sf::Event::TextEntered:
                         {
@@ -631,7 +640,7 @@ int main(int argc, char *argv[])
                                          pPhysicsManager->getTimeAccel()));
                 if (nFrame % 1000u == 0u) nFrame = 0u;
             #else
-                Timer.sleepRemaining(30.0);
+                Timer.sleepRemaining(PLANEWORLD_INPUT_FREQUENCY);
             #endif
         }
         #ifdef PW_MULTITHREADING

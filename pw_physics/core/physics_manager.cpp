@@ -663,25 +663,31 @@ void CPhysicsManager::myInitComInterface()
                                           "Accelerates time using more cpu power unless scaling is allowed, which will increase the time step.",
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::BOOL, "Flag if time scaling by increasing time step is allowed (reduces accuracy)"}},
-                                          "sim"
+                                          "sim", "physics"
                                          );
         m_pComInterface->registerFunction("decelerate_time",
                                           CCommand<void>([&](){this->decelerateTime();}),
                                           "Decelerates time.",
                                           {{ParameterType::NONE, "No return value"}},
-                                          "sim"
+                                          "sim", "physics"
+                                         );
+        m_pComInterface->registerFunction("reset_time",
+                                          CCommand<void>([&](){this->resetTime();}),
+                                          "Resets time to realtime.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                          "sim", "physics"
                                          );
         m_pComInterface->registerFunction("pause",
                                           CCommand<void>([&](){this->m_bPaused = true;}),
                                           "Pauses physics simulation.",
                                           {{ParameterType::NONE, "No return value"}},
-                                           "physics"
+                                           "physics", "physics"
                                          );
         m_pComInterface->registerFunction("resume",
                                           CCommand<void>([&](){this->m_bPaused = false;}),
                                           "Resumes physics simulation if paused.",
                                           {{ParameterType::NONE, "No return value"}},
-                                           "physics"
+                                           "physics", "physics"
                                          );
         m_pComInterface->registerFunction("set_angle",
                                           CCommand<void, std::string, double>(
@@ -707,13 +713,31 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<void>([&](){this->togglePause();}),
                                           "Pauses or unpauses physics simulation.",
                                           {{ParameterType::NONE, "No return value"}},
-                                           "physics"
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("toggle_timer",
+                                          CCommand<void, int>([&](const int& _nNr)
+                                          {
+                                              if (_nNr < 0 || _nNr < m_SimTimerLocal.size())
+                                              {
+                                                  this->m_SimTimerLocal[_nNr].toggle();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Physics manager", "Invalid sim timer ID")
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                              }
+                                          }),
+                                          "Toggles the given local timer of or on.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "ID of timer"}},
+                                           "physics", "physics"
                                          );
         m_pComInterface->registerFunction("get_time",
                                           CCommand<double>([&]() -> double {return this->m_SimTimerGlobal.getSecondsRaw();}),
                                           "Provides simulation time (raw seconds, years excluded).",
                                           {{ParameterType::DOUBLE, "Seconds of simulation time"}},
-                                           "physics"
+                                           "physics", "physics"
                                          );
         m_pComInterface->registerFunction("get_time_years",
                                           CCommand<int>([&]() -> int {return this->m_SimTimerGlobal.getYears();}),
@@ -747,7 +771,7 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DOUBLE, "Force Y"},
                                            {ParameterType::DOUBLE, "Point of attack X"},
                                            {ParameterType::DOUBLE, "Point of attack Y"}},
-                                           "universe"
+                                           "universe", "physics"
                                          );
         m_pComInterface->registerFunction("get_angle",
                                           CCommand<double, std::string>(
@@ -810,7 +834,7 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::DOUBLE, "Actually applied thrust"},
                                            {ParameterType::STRING, "Thruster name"},
                                            {ParameterType::STRING, "Thrust to be applied when activated"}},
-                                          "sim"
+                                          "sim", "physics"
                                          );
         m_pComInterface->registerFunction("deactivate_thruster",
                                           CCommand<void, std::string>(
@@ -830,7 +854,7 @@ void CPhysicsManager::myInitComInterface()
                                           "Deactivates thruster.",
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::STRING, "Thrust to be applied when activated"}},
-                                          "sim"
+                                          "sim", "physics"
                                          );
     }
     else

@@ -51,6 +51,8 @@ const std::string CComInterfaceException::getMessage() const
     
     switch (m_EType)
     {
+        case ComIntExceptionType::INVALID_VALUE:
+            return "Invalid parameter value";
         case ComIntExceptionType::UNKNOWN_COMMAND:
             return "Unknown command";
         case ComIntExceptionType::PARAM_ERROR:
@@ -168,6 +170,14 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 this->call<void,double>(strName, fParam);
                 break;
             }
+            case SignatureType::NONE_2DOUBLE:
+            {
+                double fParam1 = 0.0;
+                double fParam2 = 0.0;
+                iss >> fParam1 >> fParam2;
+                this->call<void,double>(strName, fParam1, fParam2);
+                break;
+            }
             case SignatureType::NONE_INT:
             {
                 int nParam = 0;
@@ -254,6 +264,13 @@ void CComInterface::callWriters(const std::string& _strQueue)
             {
                 auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, double>*>(pQueuedFunction);
                 pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_2DOUBLE:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, double, double>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
             case SignatureType::NONE_INT:
