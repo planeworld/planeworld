@@ -44,13 +44,11 @@
 #include "world_data_storage_user.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include "lua.hpp"
 
 const bool        PHYSICS_ALLOW_STEP_SIZE_INC   = true;     ///< Increasing step size when accelerating is allowed
 const bool        PHYSICS_FORBID_STEP_SIZE_INC  = false;    ///< Increasing step size when accelerating is forbidden
 const double      PHYSICS_DEFAULT_FREQUENCY     = 200.0;    ///< Default physics frequency
 const double      PHYSICS_DEBRIS_DEFAULT_FREQUENCY = 30.0;  ///< Default physics frequency for debris
-const double      PHYSICS_LUA_DEFAULT_FREQUENCY = 10.0;     ///< Default frequency for lua interface
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -80,8 +78,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         void setConstantGravity(const Vector2d&);
         void setFrequency(const double&);
         void setFrequencyDebris(const double&);
-        void setFrequencyLua(const double&);
-        void setPhysicsInterface(const std::string&);
         void setUniverse(CUniverse* const);
         
         void addComponent(CThruster* const);
@@ -90,7 +86,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         void addEmitters(const EmittersType&);
         void initComponents();
         void initEmitters();
-        bool initLua();
         void initObjects();
         
         void pause();
@@ -127,7 +122,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         double              m_fG;                   ///< Gravitational constant
         double              m_fFrequency;           ///< Frequency of physics processing
         double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
-        double              m_fFrequencyLua;        ///< Frequency of Lua interface
         double              m_fTimeAccel;           ///< Time acceleration of simulation
         double              m_fTimeSlept;           ///< Sleep time of thread
         
@@ -147,36 +141,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         CSimTimer                   m_SimTimerGlobal;           ///< Simulation time since beginning of simulation
         std::array<CSimTimer,3>     m_SimTimerLocal;            ///< Local timer / stop watch in simulation time
         
-        ///--- Lua access ----------------------------------------------------//
-        lua_State*                 m_pLuaState;                 ///< Lua state for external access
-        std::string                m_strLuaPhysicsInterface;    ///< Lua physics interface file
-        
-        static CPhysicsManager*    m_pLuaThis;                  ///< Store this-pointer for Lua access
-        static int                 luaAccelerateTime(lua_State*);
-        static int                 luaDecelerateTime(lua_State*);
-        static int                 luaActivateThruster(lua_State*);
-        static int                 luaDeactivateThruster(lua_State*);
-        
-        static int                 luaApplyForce(lua_State*);
-        static int                 luaGetAngle(lua_State*);
-        static int                 luaGetAngleRef(lua_State*);
-        static int                 luaGetAngleVelocity(lua_State*);
-        static int                 luaGetAngleVelocityRef(lua_State*);
-        static int                 luaGetFrequency(lua_State*);
-        static int                 luaGetInertia(lua_State*);
-        static int                 luaGetMass(lua_State*);
-        static int                 luaGetPosition(lua_State*);
-        static int                 luaGetPositionRef(lua_State*);
-        static int                 luaGetTime(lua_State*);
-        static int                 luaGetTimeYears(lua_State*);
-        static int                 luaGetVelocity(lua_State*);
-        static int                 luaGetVelocityRef(lua_State*);
-        static int                 luaPause(lua_State*);
-        static int                 luaResume(lua_State*);
-        static int                 luaSetFrequency(lua_State*);
-        
-        static int                 luaGetVar(lua_State*);
-        static int                 luaSetVar(lua_State*);
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -271,32 +235,6 @@ inline void CPhysicsManager::setFrequencyDebris(const double& _fFrequency)
 {
     METHOD_ENTRY("CPhysicsManager::setFrequencyDebris")
     m_fFrequencyDebris = _fFrequency;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Set frequency for Lua interface
-///
-/// \param _fFrequency Frequency for Lua interface
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::setFrequencyLua(const double& _fFrequency)
-{
-    METHOD_ENTRY("CPhysicsManager::setFrequencyLua")
-    m_fFrequencyLua = _fFrequency;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the lua physics interface
-///
-/// \param _strPhysicsInterface Lua physics interface
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::setPhysicsInterface(const std::string& _strPhysicsInterface)
-{
-    METHOD_ENTRY("CPhysicsManager::setPhysicsInterface")
-    m_strLuaPhysicsInterface = _strPhysicsInterface;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

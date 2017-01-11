@@ -294,7 +294,6 @@ int main(int argc, char *argv[])
     pPhysicsManager->initEmitters();
     pPhysicsManager->initComponents();
     pPhysicsManager->initComInterface(&ComInterface, "physics");
-    if (!pPhysicsManager->initLua()) CLEAN_UP_AND_EXIT_FAILURE;
     
     #ifdef PW_MULTITHREADING    
         std::thread PhysicsThread(&CPhysicsManager::run, pPhysicsManager);

@@ -43,7 +43,7 @@ using namespace Eigen;
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CLuaManager::CLuaManager() : m_fFrequency(30.0)
+CLuaManager::CLuaManager() : m_fFrequency(LUA_DEFAULT_FREQUENCY)
 {
     METHOD_ENTRY("CLuaManager::CLuaManager")
     CTOR_CALL("CLuaManager::CLuaManager")

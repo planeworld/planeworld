@@ -44,7 +44,8 @@
 #include "selene.h"
 
 // Constants
-const char LUA_PACKAGE_PREFIX[2] = {'p','w'};
+const double LUA_DEFAULT_FREQUENCY = 30.0;    ///< Default Lua processing frequency
+const char   LUA_PACKAGE_PREFIX[2] = {'p','w'};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
