@@ -260,13 +260,15 @@ int main(int argc, char *argv[])
         XMLImporter.setVisualsDataStorage(&VisualsDataStorage);
         if (!XMLImporter.import(strArgData)) CLEAN_UP_AND_EXIT_FAILURE;
 //         WorldDataStorage.setCamera(XMLImporter.getCamera());
+        
+        LuaManager.setPhysicsInterface(XMLImporter.getPhysicsInterface());
+        LuaManager.setFrequency(XMLImporter.getFrequencyLua());
+        
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
         pPhysicsManager->addComponents(XMLImporter.getComponents());
         pPhysicsManager->addEmitters(XMLImporter.getEmitters());
-        pPhysicsManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
         pPhysicsManager->setFrequency(XMLImporter.getPhysicsFrequency());
         pPhysicsManager->setFrequencyDebris(XMLImporter.getFrequencyDebris());
-        pPhysicsManager->setFrequencyLua(XMLImporter.getFrequencyLua());
         if (bGraphics)
         {
             pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
@@ -300,9 +302,24 @@ int main(int argc, char *argv[])
     
     //////////////////////////////////////////////////////////////////////////// 
     //
-    // 7. Start graphcis
+    // 7. Start lua
     //
     ////////////////////////////////////////////////////////////////////////////
+    LuaManager.initComInterface(&ComInterface, "lua");
+    LuaManager.init();
+    
+    #ifdef PW_MULTITHREADING    
+        std::thread LuaThread(&CLuaManager::run, &LuaManager);
+    #endif
+        
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 8. Start graphcis
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    #ifndef PW_MULTITHREADING
+        auto nFrame = 0u;
+    #endif
         
     CTimer Timer;
     Timer.start();
@@ -322,9 +339,6 @@ int main(int argc, char *argv[])
         
         pVisualsManager->setWindow(&Window);
         pVisualsManager->initGraphics();
-        
-        LuaManager.setComInterface(&ComInterface);
-        LuaManager.init();
         
         bool bGraphicsOn = true;
         bool bMouseCursorVisible = false;
@@ -346,9 +360,6 @@ int main(int argc, char *argv[])
         sf::Vector2i vecMouseCenter(sf::Vector2i(Window.getSize().x >> 1, Window.getSize().y >> 1));
         sf::Mouse::setPosition(vecMouseCenter,Window);
         
-        #ifndef PW_MULTITHREADING
-            auto nFrame = 0u;
-        #endif
         while (!g_bDone)
         {
             #ifndef PW_MULTITHREADING
@@ -520,7 +531,6 @@ int main(int argc, char *argv[])
                                     case sf::Keyboard::N:
                                     {
                                         ComInterface.call<void>("toggle_names");
-                                        LuaManager.test();
                                         break;
                                     }
                                     case sf::Keyboard::P:
@@ -538,7 +548,7 @@ int main(int argc, char *argv[])
                                     }
                                     case sf::Keyboard::Space:
                                     {
-                                        pPhysicsManager->processOneFrame();
+                                        ComInterface.call<void>("process_one_frame");
                                         break;
                                     }
                                     case sf::Keyboard::T:
@@ -635,6 +645,12 @@ int main(int argc, char *argv[])
                         pVisualsManager->processFrame();
                     }
                 }
+                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                              pPhysicsManager->getTimeAccel() /
+                                              LuaManager.getFrequency()) == 0)
+                {
+                    LuaManager.processFrame();
+                }
                 pPhysicsManager->setTimeSlept(
                     Timer.sleepRemaining(pPhysicsManager->getFrequency() *
                                          pPhysicsManager->getTimeAccel()));
@@ -654,6 +670,13 @@ int main(int argc, char *argv[])
         #ifndef PW_MULTITHREADING
         while (!g_bDone)
         {
+            if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                              pPhysicsManager->getTimeAccel() /
+                                              LuaManager.getFrequency()) == 0)
+            {
+                LuaManager.processFrame();
+            }
+            
             //--- Run Physics ---//
             pPhysicsManager->processFrame();
             pPhysicsManager->setTimeSlept(
@@ -671,6 +694,9 @@ int main(int argc, char *argv[])
     }
       
     #ifdef PW_MULTITHREADING
+        LuaManager.terminate();
+        INFO_MSG("Main", "Lua thread stopped.")
+        LuaThread.join();
         pPhysicsManager->terminate();
         INFO_MSG("Main", "Physics thread stopped.")
         PhysicsThread.join();

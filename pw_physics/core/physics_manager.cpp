@@ -437,17 +437,14 @@ void CPhysicsManager::resetTime()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Initialise all objects
-///
-/// Initialisiation of all objects resets objects position, speed etc. to
-/// their state at the beginning of the simulation. It has to be called at
-/// least once at start to ensure a proper state of fixed objects.
+/// \brief Processes one single frame
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CPhysicsManager::processFrame()
 {
     METHOD_ENTRY("CPhysicsManager::processFrame")
- 
+
+    static auto nFrame = 0u;
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {
         m_SimTimerGlobal.inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
@@ -455,13 +452,11 @@ void CPhysicsManager::processFrame()
         m_SimTimerLocal[1].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
         m_SimTimerLocal[2].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
         
-        static auto nFrame = 0u;
-        if (++nFrame == 10000) nFrame = 0;    
-        
-        
-        
-        m_pComInterface->callWriters("physics");
         this->addGlobalForces();
+    }
+    m_pComInterface->callWriters("physics");
+    if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
+    {    
         this->moveMasses(nFrame);
         this->collisionDetection();
     //     this->updateCells();
@@ -471,6 +466,7 @@ void CPhysicsManager::processFrame()
         DEBUG(Log.setLoglevel(LOG_LEVEL_DEBUG);)
         m_bProcessOneFrame = false;
     }
+    if (++nFrame == 10000) nFrame = 0;    
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -658,62 +654,49 @@ void CPhysicsManager::myInitComInterface()
     INFO_MSG("Physics Manager", "Initialising com interace.")
     if (m_pComInterface != nullptr)
     {
+        // System package
         m_pComInterface->registerFunction("accelerate_time",
                                           CCommand<void,bool>([&](bool _bAllowTimeScaling){this->accelerateTime(_bAllowTimeScaling);}),
                                           "Accelerates time using more cpu power unless scaling is allowed, which will increase the time step.",
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::BOOL, "Flag if time scaling by increasing time step is allowed (reduces accuracy)"}},
-                                          "sim", "physics"
+                                          "system", "physics"
                                          );
         m_pComInterface->registerFunction("decelerate_time",
                                           CCommand<void>([&](){this->decelerateTime();}),
                                           "Decelerates time.",
                                           {{ParameterType::NONE, "No return value"}},
-                                          "sim", "physics"
-                                         );
-        m_pComInterface->registerFunction("reset_time",
-                                          CCommand<void>([&](){this->resetTime();}),
-                                          "Resets time to realtime.",
-                                          {{ParameterType::NONE, "No return value"}},
-                                          "sim", "physics"
+                                          "system", "physics"
                                          );
         m_pComInterface->registerFunction("pause",
                                           CCommand<void>([&](){this->m_bPaused = true;}),
                                           "Pauses physics simulation.",
                                           {{ParameterType::NONE, "No return value"}},
-                                           "physics", "physics"
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("process_one_frame",
+                                          CCommand<void>([&](){this->processOneFrame();}),
+                                          "Processes one single frame of the physics simulation.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("reset_time",
+                                          CCommand<void>([&](){this->resetTime();}),
+                                          "Resets time to realtime.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                          "system", "physics"
                                          );
         m_pComInterface->registerFunction("resume",
                                           CCommand<void>([&](){this->m_bPaused = false;}),
                                           "Resumes physics simulation if paused.",
                                           {{ParameterType::NONE, "No return value"}},
-                                           "physics", "physics"
-                                         );
-        m_pComInterface->registerFunction("set_angle",
-                                          CCommand<void, std::string, double>(
-                                                [&](const std::string& _strName, const double& _fAngle)
-                                                {
-                                                    try
-                                                    {
-                                                        m_pDataStorage->getObjectsByNameBack()->at(_strName)->setAngle(_fAngle);
-                                                    }
-                                                    catch (const std::out_of_range& oor)
-                                                    {
-                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
-                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
-                                                    }
-                                                }),
-                                          "Sets rotation angle of a given object.",
-                                          {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::STRING, "Object name"},
-                                           {ParameterType::DOUBLE, "Angle"}},
-                                           "physics", "physics"
+                                           "system", "physics"
                                          );
         m_pComInterface->registerFunction("toggle_pause",
                                           CCommand<void>([&](){this->togglePause();}),
                                           "Pauses or unpauses physics simulation.",
                                           {{ParameterType::NONE, "No return value"}},
-                                           "physics", "physics"
+                                           "system", "physics"
                                          );
         m_pComInterface->registerFunction("toggle_timer",
                                           CCommand<void, int>([&](const int& _nNr)
@@ -731,20 +714,10 @@ void CPhysicsManager::myInitComInterface()
                                           "Toggles the given local timer of or on.",
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::INT, "ID of timer"}},
-                                           "physics", "physics"
+                                           "system", "physics"
                                          );
-        m_pComInterface->registerFunction("get_time",
-                                          CCommand<double>([&]() -> double {return this->m_SimTimerGlobal.getSecondsRaw();}),
-                                          "Provides simulation time (raw seconds, years excluded).",
-                                          {{ParameterType::DOUBLE, "Seconds of simulation time"}},
-                                           "physics", "physics"
-                                         );
-        m_pComInterface->registerFunction("get_time_years",
-                                          CCommand<int>([&]() -> int {return this->m_SimTimerGlobal.getYears();}),
-                                          "Provides full years of simulation time.",
-                                          {{ParameterType::INT, "Full years of simulation time"}},
-                                           "physics"
-                                         );
+        
+        // Physics package
         m_pComInterface->registerFunction("apply_force",
                                           CCommand<void, std::string, double, double, double, double>(
                                               [&](const std::string& _strName,
@@ -771,7 +744,7 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DOUBLE, "Force Y"},
                                            {ParameterType::DOUBLE, "Point of attack X"},
                                            {ParameterType::DOUBLE, "Point of attack Y"}},
-                                           "universe", "physics"
+                                           "physics", "physics"
                                          );
         m_pComInterface->registerFunction("get_angle",
                                           CCommand<double, std::string>(
@@ -792,7 +765,82 @@ void CPhysicsManager::myInitComInterface()
                                           "Returns angle of a given object.",
                                           {{ParameterType::DOUBLE, "Angle"},
                                            {ParameterType::STRING, "Object name"}},
-                                           "universe"
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_inertia",
+                                          CCommand<double, std::string>(
+                                              [&](const std::string& _strName) -> const double
+                                              {
+                                                double fInertia = 1.0;
+                                                try
+                                                {
+                                                    fInertia = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getInertia();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return fInertia;
+                                              }),
+                                          "Returns inertia of a given object.",
+                                          {{ParameterType::DOUBLE, "Inertia"},
+                                           {ParameterType::STRING, "Object name"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_mass",
+                                          CCommand<double, std::string>(
+                                              [&](const std::string& _strName) -> const double
+                                              {
+                                                double fMass = 1.0;
+                                                try
+                                                {
+                                                    fMass = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getMass();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return fMass;
+                                              }),
+                                          "Returns mass of a given object.",
+                                          {{ParameterType::DOUBLE, "Mass"},
+                                           {ParameterType::STRING, "Object name"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_position",
+                                          CCommand<Vector2d, std::string>(
+                                              [&](const std::string& _strName) -> const Vector2d
+                                              {
+                                                Vector2d vecPosition; vecPosition.setZero();
+                                                try
+                                                {
+                                                    vecPosition = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getKinematicsState().getOrigin();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return vecPosition;
+                                              }),
+                                          "Returns position of a given object.",
+                                          {{ParameterType::VEC2DDOUBLE, "Position (x, y)"},
+                                           {ParameterType::STRING, "Object name"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time",
+                                          CCommand<double>([&]() -> double {return this->m_SimTimerGlobal.getSecondsRaw();}),
+                                          "Provides simulation time (raw seconds, years excluded).",
+                                          {{ParameterType::DOUBLE, "Seconds of simulation time"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_years",
+                                          CCommand<int>([&]() -> int {return this->m_SimTimerGlobal.getYears();}),
+                                          "Provides full years of simulation time.",
+                                          {{ParameterType::INT, "Full years of simulation time"}},
+                                           "physics"
                                          );
         m_pComInterface->registerFunction("get_velocity",
                                           CCommand<Vector2d, std::string>(
@@ -813,8 +861,30 @@ void CPhysicsManager::myInitComInterface()
                                           "Returns velocity of a given object.",
                                           {{ParameterType::VEC2DDOUBLE, "Velocity (x, y)"},
                                            {ParameterType::STRING, "Object name"}},
-                                           "universe"
+                                           "physics"
                                          );
+        m_pComInterface->registerFunction("set_angle",
+                                          CCommand<void, std::string, double>(
+                                                [&](const std::string& _strName, const double& _fAngle)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByNameBack()->at(_strName)->setAngle(_fAngle);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                                }),
+                                          "Sets rotation angle of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "Object name"},
+                                           {ParameterType::DOUBLE, "Angle"}},
+                                           "physics", "physics"
+                                         );
+        
+        // Sim package
         m_pComInterface->registerFunction("activate_thruster",
                                           CCommand<double,std::string,double>(
                                               [&](const std::string& _strName, const double& _fThrust) -> double 
