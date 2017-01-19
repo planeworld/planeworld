@@ -367,6 +367,35 @@ void CPhysicsManager::processFrame()
         m_pDataStorage->swapBack();
         DEBUG(Log.setLoglevel(LOG_LEVEL_DEBUG);)
         m_bProcessOneFrame = false;
+        
+        for (const auto pComp : m_Components)
+        {
+            pComp.second->IObjectReferrer::attachTo(
+                static_cast<CObject*>(
+                    m_pDataStorage->getUIDUsersByValueBack()->operator[](
+                        pComp.second->IObjectReferrer::getUIDRef()
+                    )
+                )
+            );
+            if (pComp.second->IEmitterReferrer::gotRef())
+                pComp.second->IEmitterReferrer::attachTo(
+                    static_cast<IEmitter*>(
+                        m_pDataStorage->getUIDUsersByValueBack()->operator[](
+                            pComp.second->IEmitterReferrer::getUIDRef()
+                        )
+                    )
+                );
+        }
+        for (const auto pEmit : m_Emitters)
+        {
+            pEmit.second->getKinematicsState().attachTo(
+                static_cast<CKinematicsState*>(
+                    m_pDataStorage->getUIDUsersByValueBack()->operator[](
+                        pEmit.second->getKinematicsState().getUIDRef()
+                    )
+                )
+            );
+        }
     }
     if (++nFrame == 10000) nFrame = 0;    
 }
@@ -380,26 +409,6 @@ void CPhysicsManager::moveMasses(int nTest) const
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
     
-    for (const auto pComp : m_Components)
-    {
-        pComp.second->IObjectReferrer::attachTo(
-            static_cast<CObject*>(
-                m_pDataStorage->getUIDUsersByValueBack()->operator[](
-                    pComp.second->IObjectReferrer::getUIDRef()
-                )
-            )
-        );
-    }
-    for (const auto pEmit : m_Emitters)
-    {
-        pEmit.second->getKinematicsState().attachTo(
-            static_cast<CKinematicsState*>(
-                m_pDataStorage->getUIDUsersByValueBack()->operator[](
-                    pEmit.second->getKinematicsState().getUIDRef()
-                )
-            )
-        );
-    }
     for (auto ci = m_Emitters.cbegin();
         ci != m_Emitters.cend(); ++ci)
     {
@@ -421,8 +430,6 @@ void CPhysicsManager::moveMasses(int nTest) const
         FrameTimeDebris.start();
         
         for (const auto Debris : *m_pDataStorage->getDebrisByValueBack())
-//         for (const auto ci  = m_pDataStorage->getDebrisByNameBack()->cbegin();
-//                         ci != m_pDataStorage->getDebrisByNameBack()->cend(); ++ci)
         {
             Debris.second->dynamics(1.0/m_fFrequencyDebris*m_pDataStorage->getTimeScale());
         }

@@ -144,13 +144,13 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* 
         if (fInc > 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS) fInc = 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS;
         fAngEnd += fInc;
         
-		if (fAngEnd < fAng)
-		{
-			double fTmp = fAng;
-			fAng = fAngEnd;
-			fAngEnd = fTmp;
-			// std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
-		}
+        if (fAngEnd < fAng)
+        {
+            double fTmp = fAng;
+            fAng = fAngEnd;
+            fAngEnd = fTmp;
+            // std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
+        }
         
         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
 
@@ -252,13 +252,13 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         fAng    -= fAngleSnap;
         fAngEnd += fAngleSnap;
         
-		if (fAngEnd < fAng)
-		{
-			double fTmp = fAng;
-			fAng = fAngEnd;
-			fAngEnd = fTmp;
-			// std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
-		}
+        if (fAngEnd < fAng)
+        {
+            double fTmp = fAng;
+            fAng = fAngEnd;
+            fAngEnd = fTmp;
+            // std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
+        }
         
 //         double fAngBak = fAng;
         
@@ -1169,6 +1169,7 @@ void CVisualsManager::drawWorld() const
     }
     
     this->drawObjects(m_pCamera);
+//     this->drawDebris(m_pCamera);
     for (auto ci = m_pVisualsDataStorage->getDebrisVisuals().begin();
          ci != m_pVisualsDataStorage->getDebrisVisuals().end(); ++ci)
     {

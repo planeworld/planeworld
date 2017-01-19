@@ -227,10 +227,11 @@ void CObject::addForceLC(const Vector2d& _vecF, const Vector2d& _vecPOC)
 
     Rotation2Dd Rotation(m_KinematicsState.getAngle());
     
-    m_vecForce  +=  Rotation * _vecF;
+    Vector2d vecV = Rotation * _vecF;
+    m_vecForce  +=  vecV;
     
     Vector2d vecTmp = Rotation * (_vecPOC-m_Geometry.getCOM());
-    m_fTorque   +=  vecTmp[0] * m_vecForce[1] - vecTmp[1] * m_vecForce[0];
+    m_fTorque   +=  vecTmp[0] * vecV[1] - vecTmp[1] * vecV[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

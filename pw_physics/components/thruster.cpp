@@ -95,10 +95,7 @@ void CThruster::execute()
 
     if (m_bActive)
     {
-        Rotation2Dd ThrusterRotation(m_KinematicsState.getLocalAngle());
-        static_cast<CObject*>(m_pDataStorage->getUIDUsersByValueBack()->operator[](IObjectReferrer::m_UIDRef))->
-        addForce(ThrusterRotation * Vector2d(-m_fThrust,0.0), m_KinematicsState.getOrigin());
-//         IObjectReferrer::m_pRef->addForce(ThrusterRotation * Vector2d(-m_fThrust,0.0), m_KinematicsState.getOrigin());
+        IObjectReferrer::m_pRef->addForceLC(Vector2d(0.0,m_fThrust), m_KinematicsState.getLocalOrigin());
         
         if (m_fThrustMax != 0.0)
         {

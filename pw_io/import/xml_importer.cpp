@@ -664,6 +664,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 
                 m_pCurrentEmitter = pObjEmitter;
                 m_Emitters.insert(std::pair<std::string,IEmitter*>(pObjEmitter->getName(), pObjEmitter));
+                m_pDataStorage->addUIDUser(m_pCurrentEmitter);
             }
             else if (strType == "debris_emitter")
             {
@@ -750,6 +751,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 ));
                 m_pCurrentEmitter = pDebrisEmitter;
                 m_Emitters.insert(std::pair<std::string,IEmitter*>(pDebrisEmitter->getName(), pDebrisEmitter));
+                m_pDataStorage->addUIDUser(m_pCurrentEmitter);
             }
             else
             {

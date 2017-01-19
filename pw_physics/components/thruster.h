@@ -235,7 +235,10 @@ inline double CThruster::getThrust() const
 inline void CThruster::myAttachTo()
 {
     METHOD_ENTRY("CThruster::myAttachTo")
-//     m_KinematicsState.attachTo(&(IObjectReferrer::m_pRef->getKinematicsState()));
+    if (IEmitterReferrer::gotRef())
+        m_KinematicsState.attachTo(&(IEmitterReferrer::m_pRef->getKinematicsState()));
+    if (IObjectReferrer::gotRef())
+        m_KinematicsState.attachTo(&(IObjectReferrer::m_pRef->getKinematicsState()));
 }
 
 #endif // THRUSTER_H
