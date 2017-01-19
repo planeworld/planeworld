@@ -224,7 +224,7 @@ void CWorldDataStorage::swapBack()
 {
     METHOD_ENTRY("CWorldDataStorage::swapBack")
 
-    m_MutexFrontNew.lock();
+    std::lock_guard<std::mutex> lock(m_MutexFrontNew);
 
     m_DebrisByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_DebrisByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
@@ -236,7 +236,6 @@ void CWorldDataStorage::swapBack()
     m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
 
     m_bFrontNew = true;
-    m_MutexFrontNew.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +246,9 @@ void CWorldDataStorage::swapBack()
 void CWorldDataStorage::swapFront()
 {
     METHOD_ENTRY("CWorldDataStorage::swapFront")
-    m_MutexFrontNew.lock();
+   
+    std::lock_guard<std::mutex> lock(m_MutexFrontNew);
+    
     if (m_bFrontNew)
     {
         m_DebrisByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
@@ -258,7 +259,6 @@ void CWorldDataStorage::swapFront()
         m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_bFrontNew = false;
     }
-    m_MutexFrontNew.unlock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
