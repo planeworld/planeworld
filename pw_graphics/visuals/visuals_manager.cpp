@@ -420,6 +420,59 @@ void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, CCamer
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draw all debris
+///
+/// \param _pCamera Draw visuals with respect to this camera
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawDebris(CCamera* const _pCamera) const
+{
+    METHOD_ENTRY("CVisualsManager::drawDebris")
+    
+    for (auto Debris : *m_pDataStorage->getDebrisByValueFront())
+    {
+        switch (Debris.second->getDebrisType())
+        {
+            case DEBRIS_TYPE_DOT:
+            {
+                m_Graphics.dots((*Debris.second->getPositions()),-_pCamera->getCenter()+
+                      IUniverseScaled::cellToDouble(Debris.second->getCell() - _pCamera->getCell()));
+                break;
+            }
+            case DEBRIS_TYPE_THRUST:
+            {
+                double fSizeR = 1.0 / Debris.second->getPositions()->size();
+        
+                if (m_Graphics.getResPMX() > 0.02)
+                {
+                    for (auto i=0u; i<Debris.second->getPositions()->size(); ++i)
+                    {
+//                         if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
+                        {
+                            m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
+                            m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter(),
+                    //                         IUniverseScaled::cellToDouble(pDebris->getCell() - _pCamera->getCell()),
+                                            (double(Debris.second->getPositions()->size()-i) * 0.01 + 3.0)
+                            );
+                        }
+                    }
+                    m_Graphics.setColor(1.0,1.0,1.0);
+                }
+                break;
+            }
+            default:
+            {
+                WARNING_MSG("Visuals Manager", "Wrong debris type, visualisation not implemented.")
+                break;
+            }
+        }
+        
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw all shape visuals of this object
 ///
 /// \todo At the moment, an object is only drawn if in the same cell as the
@@ -1169,17 +1222,8 @@ void CVisualsManager::drawWorld() const
     }
     
     this->drawObjects(m_pCamera);
-//     this->drawDebris(m_pCamera);
-    for (auto ci = m_pVisualsDataStorage->getDebrisVisuals().begin();
-         ci != m_pVisualsDataStorage->getDebrisVisuals().end(); ++ci)
-    {
-        (*ci)->draw(m_pCamera);
-    }
-    for (std::list<CDebrisVisualsThruster*>::const_iterator ci = m_pVisualsDataStorage->getDebrisVisualsThruster().begin();
-         ci != m_pVisualsDataStorage->getDebrisVisualsThruster().end(); ++ci)
-    {
-        (*ci)->draw(m_pCamera);
-    }
+    this->drawDebris(m_pCamera);
+
     for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
     {
         if (m_nStarIndex == i)

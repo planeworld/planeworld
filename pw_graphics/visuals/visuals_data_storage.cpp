@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016-2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -61,39 +61,6 @@ CVisualsDataStorage::~CVisualsDataStorage()
             MEM_FREED("CCamera")
         }
     }
-    
-    for (DebrisVisualsType::iterator it = m_DebrisVisuals.begin();
-        it != m_DebrisVisuals.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it) != nullptr)
-        {
-            delete (*it);
-            (*it) = nullptr;
-            MEM_FREED("CDebrisVisuals")
-        }
-        else
-        {
-            DOM_MEMF(DEBUG_MSG("CDebrisVisuals", "Memory already freed."))
-        }
-    }
-    
-    for (DebrisVisualsThrusterType::iterator it = m_DebrisVisualsThruster.begin();
-        it != m_DebrisVisualsThruster.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it) != nullptr)
-        {
-            delete (*it);
-            (*it) = nullptr;
-            MEM_FREED("CDebrisVisualsThruster")
-        }
-        else
-        {
-            DOM_MEMF(DEBUG_MSG("CDebrisVisualsThruster", "Memory already freed."))
-        }
-    }
-    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,38 +78,6 @@ void CVisualsDataStorage::addCamera(CCamera* _pCamera)
     
     m_CamerasByName.insert({_pCamera->getName(), _pCamera});
     m_CamerasByIndex.push_back(_pCamera);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add a debris visuals to list
-///
-/// This method adds the given debris visual to the list of debris visuals.
-///
-/// \param _pDebrisVisuals Debris visual that should be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-void CVisualsDataStorage::addDebrisVisuals(CDebrisVisuals* _pDebrisVisuals)
-{
-    METHOD_ENTRY("CVisualsDataStorage::addDebrisVisuals")
-    m_DebrisVisuals.push_back(_pDebrisVisuals);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add a thruster debris visuals to list
-///
-/// This method adds the given thruster debris visual to the list of thruster
-/// debris visuals.
-///
-/// \param _pDebrisVisualsThruster Thruster debris visual that should be added
-///                                to list
-///
-///////////////////////////////////////////////////////////////////////////////
-void CVisualsDataStorage::addDebrisVisualsThruster(CDebrisVisualsThruster* _pDebrisVisualsThruster)
-{
-    METHOD_ENTRY("CVisualsDataStorage::addDebrisVisualsThruster")
-    m_DebrisVisualsThruster.push_back(_pDebrisVisualsThruster);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -40,8 +40,6 @@ INCLUDE_DIRECTORIES (
 
 SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/debris_visuals_thruster.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/game_state_manager.cpp

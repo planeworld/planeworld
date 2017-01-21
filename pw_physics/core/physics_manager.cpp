@@ -409,11 +409,6 @@ void CPhysicsManager::moveMasses(int nTest) const
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
     
-    for (auto ci = m_Emitters.cbegin();
-        ci != m_Emitters.cend(); ++ci)
-    {
-        (*ci).second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-    }
     for (auto ci = m_Components.cbegin();
         ci != m_Components.cend(); ++ci)
     {
@@ -423,6 +418,11 @@ void CPhysicsManager::moveMasses(int nTest) const
     {
         Obj.second->dynamics(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
         Obj.second->transform();
+    }
+    for (auto ci = m_Emitters.cbegin();
+        ci != m_Emitters.cend(); ++ci)
+    {
+        (*ci).second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
     }
     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
     {

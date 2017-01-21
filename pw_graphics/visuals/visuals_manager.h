@@ -102,6 +102,8 @@ class CVisualsManager : virtual public CGraphicsBase,
         void drawCircle(CObject*, CCircle*, CCamera*) const;
         void drawPlanet(CObject*, CPlanet*, CCamera*) const;
         void drawPolygon(CObject*, CPolygon*, CCamera*) const;
+
+        void drawDebris(CCamera* const) const;
         void drawObjects(CCamera* const) const;
         
         void            drawBoundingBoxes() const;

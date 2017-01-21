@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2016 Torsten Büschenfeld
+// Copyright (C) 2014-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "debris_emitter.h"
-#include "debris_visuals_thruster.h"
 
 uint32_t CDebrisEmitter::m_unNrOfEmitters = 0;
 
@@ -73,27 +72,16 @@ void CDebrisEmitter::init()
     METHOD_ENTRY("CDebrisEmitter::init")
     
     // Add debris
-    m_pDataStorage->addDebris(m_pRef);
-    
-    // Create visuals
     if (m_DebrisType == DEBRIS_TYPE_DOT)
     {
-        CDebrisVisuals* pDebrisVisuals = new CDebrisVisuals(m_pRef);
-        MEM_ALLOC("CDebrisVisuals")
-        
-        // Add visuals
-        m_pVisualsDataStorage->addDebrisVisuals(pDebrisVisuals);
-        pDebrisVisuals->setWorldDataStorage(m_pDataStorage);
+        m_pRef->setDebrisType(DEBRIS_TYPE_DOT);
     }
     else
     {
-        CDebrisVisualsThruster* pDebrisVisuals = new CDebrisVisualsThruster(m_pRef);
-        MEM_ALLOC("CDebrisVisualsThruster")
-        
-        // Add visuals
-        m_pVisualsDataStorage->addDebrisVisualsThruster(pDebrisVisuals);
-        pDebrisVisuals->setWorldDataStorage(m_pDataStorage);
+        m_pRef->setDebrisType(DEBRIS_TYPE_THRUST);
     }
+    
+    m_pDataStorage->addDebris(m_pRef);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,7 +145,7 @@ void CDebrisEmitter::emit(const double& _fF)
 //                     }
 //                     else
                     {
-                        static_cast<CDebris*>(m_pDataStorage->getUIDUsersByValueBack()->operator[](m_UIDRef))->generate(m_KinematicsState.getOrigin(),
+                        (m_pDataStorage->getDebrisByValueBack()->operator[](m_UIDRef))->generate(m_KinematicsState.getOrigin(),
                                             fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());
 //                         m_pDebris->generate(m_KinematicsState.getOrigin(),
 //                                             fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2016 Torsten Büschenfeld
+// Copyright (C) 2011-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 CDebris::CDebris() : IUniqueIDUser(),
                      IUniverseScaled(),
+                     m_DebrisType(DEBRIS_TYPE_DOT),
                      m_fTimeFac(1.0)
 {
     METHOD_ENTRY("CDebris::CDebris")
@@ -192,6 +193,9 @@ std::istream& operator>>(std::istream& _is, CDebris* const _pDebris)
     // From IUniqueIDUser
     _is >> _pDebris->m_UID;
     
+    strTmp="";
+    _is >> strTmp; _pDebris->m_DebrisType = mapStringToDebrisType.at(strTmp);
+    
     _is >> _pDebris->m_Lifetime;
     _is >> _pDebris->m_fTimeFac;
     
@@ -229,6 +233,8 @@ std::ostream& operator<<(std::ostream& _os, CDebris* const _pDebris)
     // From IUniqueIDUser
     _os << _pDebris->m_UID << std::endl;
     
+    _os << mapDebrisTypeToString.at(_pDebris->getDebrisType()) << std::endl;
+    
     _os << _pDebris->m_Lifetime << std::endl;
     _os << _pDebris->m_fTimeFac << std::endl;
     
@@ -261,6 +267,7 @@ void CDebris::copy(const CDebris& _Debris)
     m_VelList = _Debris.m_VelList;
     m_StateList = _Debris.m_StateList;
     // m_Lifetime: New individual object
+    m_DebrisType = _Debris.m_DebrisType;
     m_fTimeFac = _Debris.m_fTimeFac;
     m_fDamping = _Debris.m_fDamping;
     m_nDepthlayers = _Debris.m_nDepthlayers;

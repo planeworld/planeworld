@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2016 Torsten Büschenfeld
+// Copyright (C) 2014-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,13 +37,6 @@
 #include "debris.h"
 #include "emitter.h"
 
-/// Specifies the type of debris
-typedef enum
-{
-    DEBRIS_TYPE_DOT,
-    DEBRIS_TYPE_THRUST
-} DebrisTypeType;
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for a source that emits debris.
@@ -76,17 +69,6 @@ class CDebrisEmitter : public IEmitter,
         DebrisTypeType      m_DebrisType;       ///< Type of debris
         static uint32_t     m_unNrOfEmitters;   ///< Static counter for name initialisation and tracking
 };
-
-//--- Enum parser ------------------------------------------------------------//
-const std::map<DebrisTypeType, std::string> mapDebrisTypeToString = {
-    {DEBRIS_TYPE_DOT, "debris_dot"},
-    {DEBRIS_TYPE_THRUST, "debris_thrust"}
-}; ///< Map from DebrisTypeType to string
-
-const std::map<std::string, DebrisTypeType> mapStringToDebrisType = {
-    {"debris_dot", DEBRIS_TYPE_DOT},
-    {"debris_thrust", DEBRIS_TYPE_THRUST}
-}; ///< Map from string to DebrisTypeType
 
 //--- Implementation is done here for inline optimisation --------------------//
 
