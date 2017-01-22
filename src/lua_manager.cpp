@@ -115,6 +115,13 @@ bool CLuaManager::init()
                         return std::tie(vecVel[0],vecVel[1]);
                     };
                     break;
+                case SignatureType::VEC2DDOUBLE_2STRING:
+                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
+                    {
+                        Vector2d vecVel = static_cast<CCommandWritable<Vector2d,std::string,std::string>*>(Function.second)->call(_strS1,_strS2);
+                        return std::tie(vecVel[0],vecVel[1]);
+                    };
+                    break;
                 default:
                     NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
             }
@@ -164,6 +171,13 @@ bool CLuaManager::init()
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS) -> std::tuple<double,double>
                     {
                         Vector2d vecVel = static_cast<CCommand<Vector2d,std::string>*>(Function.second)->call(_strS);
+                        return std::tie(vecVel[0],vecVel[1]);
+                    };
+                    break;
+                case SignatureType::VEC2DDOUBLE_2STRING:
+                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
+                    {
+                        Vector2d vecVel = static_cast<CCommand<Vector2d,std::string,std::string>*>(Function.second)->call(_strS1,_strS2);
                         return std::tie(vecVel[0],vecVel[1]);
                     };
                     break;

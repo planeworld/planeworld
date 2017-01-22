@@ -74,7 +74,8 @@ enum class SignatureType
     NONE_STRING_4DOUBLE,
     NONE_STRING_DOUBLE,
     NONE_UID,
-    VEC2DDOUBLE_STRING
+    VEC2DDOUBLE_STRING,
+    VEC2DDOUBLE_2STRING
 };
 
 /// Specifies type of possible exceptions in com interface

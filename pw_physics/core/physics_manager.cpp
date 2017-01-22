@@ -388,6 +388,9 @@ void CPhysicsManager::processFrame()
         }
         for (const auto pEmit : m_Emitters)
         {
+//             pEmit.second->attachTo(m_pDataStorage->getDebrisByValueBack()->at(
+//                 pEmit.second->getUIDRef));
+            
             pEmit.second->getKinematicsState().attachTo(
                 static_cast<CKinematicsState*>(
                     m_pDataStorage->getUIDUsersByValueBack()->operator[](
@@ -419,12 +422,14 @@ void CPhysicsManager::moveMasses(int nTest) const
         Obj.second->dynamics(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
         Obj.second->transform();
     }
+    
     for (auto ci = m_Emitters.cbegin();
         ci != m_Emitters.cend(); ++ci)
     {
         (*ci).second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
     }
-    if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
+    
+//     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
     {
         CTimer FrameTimeDebris;
         FrameTimeDebris.start();
@@ -441,6 +446,7 @@ void CPhysicsManager::moveMasses(int nTest) const
                                         "s of " << 1.0/m_fFrequencyDebris << "s max.")
         }
     }
+    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -715,6 +721,52 @@ void CPhysicsManager::myInitComInterface()
                                           "Returns position of a given object.",
                                           {{ParameterType::VEC2DDOUBLE, "Position (x, y)"},
                                            {ParameterType::STRING, "Object name"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_position_ref",
+                                          CCommand<Vector2d, std::string, std::string>(
+                                              [&](const std::string& _strName, const std::string& _strRef) -> const Vector2d
+                                              {
+                                                Vector2d vecPosition; vecPosition.setZero();
+                                                try
+                                                {
+                                                    vecPosition = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getKinematicsState().getOriginReferredTo(
+                                                                  m_pDataStorage->getObjectsByNameBack()->at(_strRef)->getKinematicsState());
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return vecPosition;
+                                              }),
+                                          "Returns position of a given object Obj_1 referred to another object Obj_2.",
+                                          {{ParameterType::VEC2DDOUBLE, "Position (x, y)"},
+                                           {ParameterType::STRING, "Object name (Obj_1)"},
+                                           {ParameterType::STRING, "Reference object's name (Obj_2)"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_velocity_ref",
+                                          CCommand<Vector2d, std::string, std::string>(
+                                              [&](const std::string& _strName, const std::string& _strRef) -> const Vector2d
+                                              {
+                                                Vector2d vecVelocity; vecVelocity.setZero();
+                                                try
+                                                {
+                                                    vecVelocity = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getKinematicsState().getVelocityReferredTo(
+                                                                  m_pDataStorage->getObjectsByNameBack()->at(_strRef)->getKinematicsState());
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return vecVelocity;
+                                              }),
+                                          "Returns velocity of a given object Obj_1 referred to another object Obj_2.",
+                                          {{ParameterType::VEC2DDOUBLE, "Velocity (x, y)"},
+                                           {ParameterType::STRING, "Object name (Obj_1)"},
+                                           {ParameterType::STRING, "Reference object's name (Obj_2)"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("get_time",

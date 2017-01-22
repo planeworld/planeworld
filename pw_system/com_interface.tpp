@@ -288,6 +288,7 @@ template<> inline void CCommand<void, std::string>::dispatchSignature() {m_Signa
 template<> inline void CCommand<void, std::string, double, double, double, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_4DOUBLE;}
 template<> inline void CCommand<void, std::string, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_DOUBLE;}
 template<> inline void CCommand<Vector2d, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_STRING;}
+template<> inline void CCommand<Vector2d, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2STRING;}
 
 template<class TRet, class... TArgs> void CCommandToQueueWrapper<TRet, TArgs...>::dispatchSignature() {m_Signature = SignatureType::UNDEFINED;}
 template<> inline void CCommandToQueueWrapper<void>::dispatchSignature() {m_Signature = SignatureType::NONE;}
@@ -303,6 +304,7 @@ template<> inline void CCommandToQueueWrapper<void, std::string>::dispatchSignat
 template<> inline void CCommandToQueueWrapper<void, std::string, double, double, double, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_4DOUBLE;}
 template<> inline void CCommandToQueueWrapper<void, std::string, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_DOUBLE;}
 template<> inline void CCommandToQueueWrapper<Vector2d, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_STRING;}
+template<> inline void CCommandToQueueWrapper<Vector2d, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2STRING;}
 
 template<class TRet, class... TArgs> void CCommandWritable<TRet, TArgs...>::dispatchSignature() {m_Signature = SignatureType::UNDEFINED;}
 template<> inline void CCommandWritable<void>::dispatchSignature() {m_Signature = SignatureType::NONE;}
@@ -318,5 +320,6 @@ template<> inline void CCommandWritable<void, std::string>::dispatchSignature() 
 template<> inline void CCommandWritable<void, std::string, double, double, double, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_4DOUBLE;}
 template<> inline void CCommandWritable<void, std::string, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_DOUBLE;}
 template<> inline void CCommandWritable<Vector2d, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_STRING;}
+template<> inline void CCommandWritable<Vector2d, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2STRING;}
 
 

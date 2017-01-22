@@ -219,6 +219,16 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 oss << vecRet[0] << " " << vecRet[1];
                 break;
             }
+            case SignatureType::VEC2DDOUBLE_2STRING:
+            {
+                std::string strParam1 = "";
+                std::string strParam2 = "";
+                iss >> strParam1 >> strParam2;
+                Vector2d vecRet; vecRet.setZero();
+                vecRet = this->call<Vector2d,std::string,std::string>(strName, strParam1, strParam2);
+                oss << vecRet[0] << " " << vecRet[1];
+                break;
+            }
             default:
                 NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
         }
@@ -306,6 +316,7 @@ void CComInterface::callWriters(const std::string& _strQueue)
             case SignatureType::DOUBLE_STRING_DOUBLE:
             case SignatureType::INT:
             case SignatureType::VEC2DDOUBLE_STRING:
+            case SignatureType::VEC2DDOUBLE_2STRING:
             {
                 WARNING_MSG("Com Interface", "Something went wrong, writing functions shouldn't have a return value.")
                 break;
