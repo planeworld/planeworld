@@ -388,9 +388,7 @@ int main(int argc, char *argv[])
                         {
                             // Adjust the viewport when the window is resized
                             vecMouseCenter = sf::Vector2i(Window.getSize().x >> 1, Window.getSize().y >> 1);
-                            Graphics.resizeWindow(Event.size.width, Event.size.height);
-                            pCamera->setViewport(Graphics.getViewPort().rightplane-Graphics.getViewPort().leftplane - 20.0,
-                                                Graphics.getViewPort().topplane  -Graphics.getViewPort().bottomplane - 20.0);
+                            ComInterface.call<void,double,double>("resize_window", Event.size.width, Event.size.height);
                             break;
                         }
                         case sf::Event::KeyPressed:
@@ -594,9 +592,10 @@ int main(int argc, char *argv[])
                                 {
                                     ComInterface.call<void, double>("rotate_camera_by", -double(vecMouse.x)*0.001);
                                     ComInterface.call<void, double>("zoom_camera_by",1.0+double(vecMouse.y)*0.001);
-                                    if (pCamera->getZoom() < 1.0e-18)
+                                    double fZoom = ComInterface.call<double>("get_camera_zoom");
+                                    if (fZoom < 1.0e-18)
                                         ComInterface.call<void,double>("zoom_camera_to",1.0e-18);
-                                    else if (pCamera->getZoom() > 1.0e3)
+                                    else if (fZoom > 1.0e3)
                                         ComInterface.call<void,double>("zoom_camera_to",1.0e3);
                                 }
                                 break;
@@ -606,9 +605,10 @@ int main(int argc, char *argv[])
                             if (bGraphicsOn)
                             {
                                 ComInterface.call<void, double>("zoom_camera_by",1.0+double(Event.mouseWheel.delta)*0.1);
-                                if (pCamera->getZoom() < 1.0e-18)
+                                double fZoom = ComInterface.call<double>("get_camera_zoom");
+                                if (fZoom < 1.0e-18)
                                     ComInterface.call<void,double>("zoom_camera_to",1.0e-18);
-                                else if (pCamera->getZoom() > 1.0e3)
+                                else if (fZoom > 1.0e3)
                                     ComInterface.call<void,double>("zoom_camera_to",1.0e3);
                             }
                         case sf::Event::TextEntered:

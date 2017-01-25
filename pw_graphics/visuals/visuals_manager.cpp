@@ -1333,6 +1333,24 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::DOUBLE, "Zoom level of active camera"}},
                                       "system"
     );
+    m_pComInterface->registerFunction("resize_window",
+                                      CCommand<void, double, double>([=](const double& _fX,
+                                                                         const double& _fY)
+                                      {
+                                          m_Graphics.resizeWindow(int(_fX), int(_fY));
+                                          if (m_pCamera != nullptr)
+                                          {
+                                                m_pCamera->setViewport(m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane - 20.0,
+                                                                       m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane - 20.0);
+                                          }
+                                      }),
+                                      "Resize window to given size.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Window width (x)"},
+                                      {ParameterType::DOUBLE, "Window height (y)"}
+                                      },
+                                      "system", "visuals"  
+    );
     m_pComInterface->registerFunction("rotate_camera_by",
                                       CCommand<void, double>([&](const double& _fAngle){m_pCamera->rotateBy(_fAngle);}),
                                       "Rotate camera by given angle.",
