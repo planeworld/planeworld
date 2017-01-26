@@ -63,9 +63,9 @@ CXMLImporter::CXMLImporter() : m_pCurrentEmitter(nullptr),
                                m_strFont(""),
                                m_strLuaPhysicsInterface(""),
                                m_fDebrisFrequency(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
-                               m_fLuaFrequency(LUA_DEFAULT_FREQUENCY),
+                               m_fLuaFrequency(30.0),
                                m_fPhysicsFrequency(PHYSICS_DEFAULT_FREQUENCY),
-                               m_fVisualsFrequency(VISUALS_DEFAULT_FREQUENCY)
+                               m_fVisualsFrequency(60.0)
 {
     METHOD_ENTRY("CXMLImporter::CXMLImporter")
     CTOR_CALL("CXMLImporter::CXMLImporter")

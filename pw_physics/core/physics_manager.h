@@ -36,9 +36,9 @@
 //--- Program header ---------------------------------------------------------//
 #include "collision_manager.h"
 #include "com_interface_provider.h"
-#include "conf_pw.h"
 #include "emitter.h"
 #include "sim_timer.h"
+#include "thread_module.h"
 #include "thruster.h"
 #include "universe.h"
 #include "world_data_storage_user.h"
@@ -58,6 +58,7 @@ const double      PHYSICS_DEBRIS_DEFAULT_FREQUENCY = 30.0;  ///< Default physics
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CPhysicsManager : public IComInterfaceProvider,
+                        public IThreadModule,
                         public IWorldDataStorageUser
 {
     
@@ -68,7 +69,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         ~CPhysicsManager();
         
         //--- Constant Methods -----------------------------------------------//
-        double      getFrequency() const;
         CUniverse*  getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
@@ -76,7 +76,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         std::array<CSimTimer,3>&          getSimTimerLocal();
 
         void setConstantGravity(const Vector2d&);
-        void setFrequency(const double&);
         void setFrequencyDebris(const double&);
         void setUniverse(CUniverse* const);
         
@@ -97,10 +96,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         void decelerateTime();
         void resetTime();
         
-        #ifdef PW_MULTITHREADING
-          void run();
-          void terminate();
-        #else
+        #ifndef PW_MULTITHREADING
           const double& getTimeAccel() const;
           void setTimeSlept(const double&);
         #endif
@@ -120,10 +116,8 @@ class CPhysicsManager : public IComInterfaceProvider,
         CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
 
         double              m_fG;                   ///< Gravitational constant
-        double              m_fFrequency;           ///< Frequency of physics processing
         double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
         double              m_fTimeAccel;           ///< Time acceleration of simulation
-        double              m_fTimeSlept;           ///< Sleep time of thread
         
         Vector2d                    m_vecConstantGravitation;   ///< Vector for constant gravitation
 
@@ -134,9 +128,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         bool                        m_bCellUpdateFirst;         ///< Indicates the first cell update (to initialise access)
         bool                        m_bPaused;                  ///< Indicates if physics caluculations are paused
         bool                        m_bProcessOneFrame;         ///< Indicates if physics should be run stepwise
-        #ifdef PW_MULTITHREADING
-          bool                      m_bRunning = false;         ///< Indicates if physics thread is running
-        #endif
         
         CSimTimer                   m_SimTimerGlobal;           ///< Simulation time since beginning of simulation
         std::array<CSimTimer,3>     m_SimTimerLocal;            ///< Local timer / stop watch in simulation time
@@ -144,19 +135,6 @@ class CPhysicsManager : public IComInterfaceProvider,
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns frequency of physics calculations
-///
-/// \return Frequency in Hertz
-///
-////////////////////////////////////////////////////////////////////////////////
-inline double CPhysicsManager::getFrequency() const
-{
-    METHOD_ENTRY("CPhysicsManager::getFrequency()")
-    return (m_fFrequency);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -213,19 +191,6 @@ inline void CPhysicsManager::setConstantGravity(const Vector2d& _vecG)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set frequency for physics processing
-///
-/// \param _fFrequency Frequency for physics processing
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::setFrequency(const double& _fFrequency)
-{
-    METHOD_ENTRY("CPhysicsManager::setFrequency")
-    m_fFrequency = _fFrequency;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Set frequency for debris physics processing
 ///
 /// \param _fFrequency Frequency for debris physics processing
@@ -276,18 +241,7 @@ inline void CPhysicsManager::processOneFrame()
     m_bProcessOneFrame = true;
 }
 
-#ifdef PW_MULTITHREADING
-  ////////////////////////////////////////////////////////////////////////////////
-  ///
-  /// \brief Stops physics thread
-  ///
-  ////////////////////////////////////////////////////////////////////////////////
-  inline void CPhysicsManager::terminate()
-  {
-      METHOD_ENTRY("CPhysicsManager::terminate")
-      m_bRunning = false;
-  }
-#else
+#ifndef PW_MULTITHREADING
   ////////////////////////////////////////////////////////////////////////////////
   ///
   /// \brief Returns time acceleration factor

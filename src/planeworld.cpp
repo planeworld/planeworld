@@ -660,7 +660,6 @@ int main(int argc, char *argv[])
         }
         #ifdef PW_MULTITHREADING
             pVisualsManager->terminate();
-            INFO_MSG("Main", "Visuals thread stopped.")
             VisualsThread.join();
         #endif
     }
@@ -694,10 +693,8 @@ int main(int argc, char *argv[])
       
     #ifdef PW_MULTITHREADING
         LuaManager.terminate();
-        INFO_MSG("Main", "Lua thread stopped.")
         LuaThread.join();
         pPhysicsManager->terminate();
-        INFO_MSG("Main", "Physics thread stopped.")
         PhysicsThread.join();
     #endif
 

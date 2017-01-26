@@ -43,10 +43,12 @@ using namespace Eigen;
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CLuaManager::CLuaManager() : m_fFrequency(LUA_DEFAULT_FREQUENCY)
+CLuaManager::CLuaManager()
 {
     METHOD_ENTRY("CLuaManager::CLuaManager")
     CTOR_CALL("CLuaManager::CLuaManager")
+    
+    m_strModuleName = "Lua Manager";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -208,37 +210,6 @@ void CLuaManager::processFrame()
     m_LuaState["physics_interface"]();
     m_pComInterface->callWriters("lua");
 }
-
-#ifdef PW_MULTITHREADING
-  ////////////////////////////////////////////////////////////////////////////////
-  ///
-  /// \brief Runs the lua engine, called as a thread.
-  ///
-  ///////////////////////////////////////////////////////////////////////////////
-  void CLuaManager::run()
-  {
-      METHOD_ENTRY("CLuaManager::run")
-      
-      INFO_MSG("Lua Manager", "Lua thread started.")
-      m_bRunning = true;
-      
-      CTimer LuaTimer;
-      
-      LuaTimer.start();
-      while (m_bRunning)
-      {
-          this->processFrame();
-          double fTimeSlept = LuaTimer.sleepRemaining(m_fFrequency);
-          
-          if (fTimeSlept < 0.0)
-          {
-              NOTICE_MSG("Lua Manager", "Execution time of Lua code is too large: " << 1.0/m_fFrequency - fTimeSlept << 
-                                          "s of " << 1.0/m_fFrequency << "s max.")
-          }
-      }
-      INFO_MSG("Lua Manager", "Lua thread stopped.")
-  }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 ///

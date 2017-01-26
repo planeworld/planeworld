@@ -74,6 +74,7 @@ SET(SRCS
     parzival.cpp
     planeworld.cpp
     star_system.cpp
+    thread_module.cpp
     universe.cpp
     world_data_storage.cpp
     

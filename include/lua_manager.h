@@ -32,19 +32,17 @@
 #define LUA_MANAGER_H
 
 //--- Program header ---------------------------------------------------------//
-#include "log.h"
+#include "com_interface_provider.h"
+#include "thread_module.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <array>
 #include <sstream>
 
 //--- Misc. header -----------------------------------------------------------//
-#include "com_interface_provider.h"
-#include "conf_pw.h"
 #include "selene.h"
 
 // Constants
-const double LUA_DEFAULT_FREQUENCY = 30.0;    ///< Default Lua processing frequency
 const char   LUA_PACKAGE_PREFIX[2] = {'p','w'};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +53,8 @@ const char   LUA_PACKAGE_PREFIX[2] = {'p','w'};
 /// access to game entities and much more
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CLuaManager : public IComInterfaceProvider
+class CLuaManager : public IComInterfaceProvider,
+                    public IThreadModule
 {
     
     public:
@@ -69,13 +68,7 @@ class CLuaManager : public IComInterfaceProvider
         //--- Methods --------------------------------------------------------//
         bool init();
         void processFrame();
-        void setFrequency(const double&);
         void setPhysicsInterface(const std::string&);
-        
-        #ifdef PW_MULTITHREADING
-          void run();
-          void terminate();
-        #endif
         
         //--- friends --------------------------------------------------------//
         friend std::istream&    operator>>(std::istream&, CLuaManager&);
@@ -90,41 +83,9 @@ class CLuaManager : public IComInterfaceProvider
         sel::State  m_LuaState{true}; ///< Current lua state
         
         std::string     m_strPhysicsInterface; ///< Path and filename of physics interface
-        double          m_fFrequency;          ///< Processing frequency for lua scripts
-        
-        #ifdef PW_MULTITHREADING
-          bool          m_bRunning = false;    ///< Indicates if Lua thread is running
-        #endif
-        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns frequency of Lua processing
-///
-/// \return Frequency in Hertz
-///
-////////////////////////////////////////////////////////////////////////////////
-inline double CLuaManager::getFrequency() const
-{
-    METHOD_ENTRY("CLuaManager::getFrequency()")
-    return (m_fFrequency);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Set frequency for Lua interface
-///
-/// \param _fFrequency Frequency for Lua interface
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CLuaManager::setFrequency(const double& _fFrequency)
-{
-    METHOD_ENTRY("CLuaManager::setFrequency")
-    m_fFrequency = _fFrequency;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -138,18 +99,5 @@ inline void CLuaManager::setPhysicsInterface(const std::string& _strPhysicsInter
     METHOD_ENTRY("CLuaManager::setPhysicsInterface")
     m_strPhysicsInterface = _strPhysicsInterface;
 }
-
-#ifdef PW_MULTITHREADING
-  ////////////////////////////////////////////////////////////////////////////////
-  ///
-  /// \brief Stops Lua thread
-  ///
-  ////////////////////////////////////////////////////////////////////////////////
-  inline void CLuaManager::terminate()
-  {
-      METHOD_ENTRY("CLuaManager::terminate")
-      m_bRunning = false;
-  }
-#endif
 
 #endif // LUA_MANAGER_H

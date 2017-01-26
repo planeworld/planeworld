@@ -37,6 +37,7 @@
 #include "com_console.h"
 #include "com_interface_provider.h"
 #include "physics_manager.h"
+#include "thread_module.h"
 #include "universe.h"
 #include "visuals_data_storage_user.h"
 #include "world_data_storage_user.h"
@@ -45,7 +46,6 @@ const double CIRCLE_DEFAULT_RESOLUTION =  5.0;               ///< Default resolu
 const double CIRCLE_MINIMUM_SEGMENTS = 10.0;                 ///< Minimum number of circle segments
 const double PLANET_VISUALS_DEFAULT_RESOLUTION=3.0;          ///< Default resolution for visual sampling px/vertex
 const double PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE=M_PI*0.01; ///< Default minium of 200 segments if above resolution limit
-const double VISUALS_DEFAULT_FREQUENCY = 60.0;               ///< Default frequency for graphics update
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -54,6 +54,7 @@ const double VISUALS_DEFAULT_FREQUENCY = 60.0;               ///< Default freque
 ////////////////////////////////////////////////////////////////////////////////
 class CVisualsManager : virtual public CGraphicsBase,
                                 public IComInterfaceProvider,
+                                public IThreadModule,
                                 public IVisualsDataStorageUser,
                                 public IWorldDataStorageUser
 {
@@ -66,7 +67,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         //--- Constant Methods -----------------------------------------------//
         CCamera*        getCurrentCamera() const;
-        const double&   getFrequency() const;
         bool            getVisualisation(const int&) const;
         int             getVisualisations() const;
         WindowHandleType*
@@ -82,7 +82,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            setComConsole(CComConsole* const);
         void            setConsoleText(const std::string&);
         void            setFont(const std::string&);
-        void            setFrequency(const double&);
         void            setUniverse(CUniverse* const);
         void            setPhysicsManager(CPhysicsManager* const);
         void            setVisualisations(const int&);
@@ -91,11 +90,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            toggleVisualisations(const int&);
         void            unsetVisualisations(const int&);
 
-        #ifdef PW_MULTITHREADING
-          void run();
-          void terminate();
-        #endif
-        
     private:
 
         //--- Constant methods [private] -------------------------------------//
@@ -116,13 +110,13 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            drawTrajectories() const;
         void            drawWorld() const;
         
+        #ifdef PW_MULTITHREADING
+            void        preRun();
+        #endif
+        
         //--- Methods [private] ----------------------------------------------//
         void myInitComInterface();
 
-        #ifdef PW_MULTITHREADING
-          bool                          m_bRunning = false; ///< Indicates if visuals thread is running
-        #endif
-        
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         CPhysicsManager*                m_pPhysicsManager;  ///< Reference to physics
         double                          m_fFrequency;       ///< Frequency of visuals update
@@ -151,19 +145,6 @@ inline CCamera* CVisualsManager::getCurrentCamera() const
 {
     METHOD_ENTRY("CVisualsManager::getCurrentCamera")
     return (m_pVisualsDataStorage->getCamerasByIndex())[m_unCameraIndex];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns frequency of visuals update
-///
-/// \return Frequency in Hertz
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const double& CVisualsManager::getFrequency() const
-{
-    METHOD_ENTRY("CVisualsManager::getFrequency")
-    return (m_fFrequency);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -261,19 +242,6 @@ inline void CVisualsManager::setFont(const std::string& _strFont)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the frequency for visual update
-///
-/// \param _fFrequency Frequency for visual update
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setFrequency(const double& _fFrequency)
-{
-    METHOD_ENTRY("CVisualsManager::setFrequency")
-    m_fFrequency = _fFrequency;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Sets procedurally generated universe for visualisation
 ///
 /// \param _pUniverse Procedurally generated universe
@@ -362,16 +330,11 @@ inline void CVisualsManager::unsetVisualisations(const int& _nVis)
 }
 
 #ifdef PW_MULTITHREADING
-  ////////////////////////////////////////////////////////////////////////////////
-  ///
-  /// \brief Stops visuals thread
-  ///
-  ////////////////////////////////////////////////////////////////////////////////
-  inline void CVisualsManager::terminate()
-  {
-      METHOD_ENTRY("CVisualsManager::terminate")
-      m_bRunning = false;
-  }
+    inline void CVisualsManager::preRun()
+    {
+        METHOD_ENTRY("CVisualsManager::preRun")
+        m_Graphics.getWindow()->setActive(true);
+    }
 #endif
 
 #endif

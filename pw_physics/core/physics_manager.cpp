@@ -41,10 +41,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fG(6.67408e-11),
-                                     m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                      m_fTimeAccel(1.0),
-                                     m_fTimeSlept(1.0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_bPaused(false),
@@ -54,6 +52,7 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
     METHOD_ENTRY("CPhysicsManager::CPhysicsManager")
     CTOR_CALL("CPhysicsManager::CPhysicsManager")
     
+    m_strModuleName = "Physics Manager";
     m_vecConstantGravitation.setZero();
     m_SimTimerGlobal.start();
 }
@@ -388,8 +387,8 @@ void CPhysicsManager::processFrame()
         }
         for (const auto pEmit : m_Emitters)
         {
-//             pEmit.second->attachTo(m_pDataStorage->getDebrisByValueBack()->at(
-//                 pEmit.second->getUIDRef));
+            static_cast<CDebrisEmitter*>(pEmit.second)->attachTo(m_pDataStorage->getDebrisByValueBack()->at(
+                static_cast<CDebrisEmitter*>(pEmit.second)->getUIDRef()));
             
             pEmit.second->getKinematicsState().attachTo(
                 static_cast<CKinematicsState*>(
@@ -923,34 +922,3 @@ void CPhysicsManager::updateCells()
 //     }
     
 }
-
-#ifdef PW_MULTITHREADING
-  ////////////////////////////////////////////////////////////////////////////////
-  ///
-  /// \brief Runs the physics engine, called as a thread.
-  ///
-  ///////////////////////////////////////////////////////////////////////////////
-  void CPhysicsManager::run()
-  {
-      METHOD_ENTRY("CPhysicsManager::run")
-      
-      INFO_MSG("Physics Manager", "Physics thread started.")
-      m_bRunning = true;
-      
-      CTimer PhysicsTimer;
-      
-      PhysicsTimer.start();
-      while (m_bRunning)
-      {
-          this->processFrame();
-          m_fTimeSlept = PhysicsTimer.sleepRemaining(m_fFrequency * m_fTimeAccel);
-          
-          if (m_fTimeSlept < 0.0 && m_fTimeAccel == 1.0)
-          {
-              NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << 1.0/m_fFrequency - m_fTimeSlept << 
-                                          "s of " << 1.0/m_fFrequency << "s max.")
-          }
-      }
-      INFO_MSG("Physics Manager", "Physics thread stopped.")
-  }
-#endif

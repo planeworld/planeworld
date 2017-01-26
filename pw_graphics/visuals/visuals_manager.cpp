@@ -37,7 +37,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_pPhysicsManager(nullptr),
-                                     m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
                                      m_nVisualisations(0),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
@@ -48,6 +47,7 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
     
+    m_strModuleName = "Visuals Manager";
     m_strFont = "";
 }
 
@@ -61,39 +61,6 @@ CVisualsManager::~CVisualsManager()
     METHOD_ENTRY("CVisualsManager::~CVisualsManager")
     DTOR_CALL("CVisualsManager::~CVisualsManager")
 }
-
-#ifdef PW_MULTITHREADING
-  ////////////////////////////////////////////////////////////////////////////////
-  ///
-  /// \brief Runs the visuals engine, called as a thread.
-  ///
-  ///////////////////////////////////////////////////////////////////////////////
-  void CVisualsManager::run()
-  {
-      METHOD_ENTRY("CVisualsManager::run")
-      
-      INFO_MSG("Visuals Manager", "Visuals thread started.")
-      
-      m_Graphics.getWindow()->setActive(true);
-      m_bRunning = true;
-      
-      CTimer VisualsTimer;
-      
-      VisualsTimer.start();
-      while (m_bRunning)
-      {
-          this->processFrame();
-          double fTimeSlept = VisualsTimer.sleepRemaining(m_fFrequency);
-          
-          if (fTimeSlept < 0.0)
-          {
-              NOTICE_MSG("Visuals Manager", "Execution time of visuals code is too large: " << 1.0/m_fFrequency - fTimeSlept << 
-                                          "s of " << 1.0/m_fFrequency << "s max.")
-          }
-      }
-      INFO_MSG("Visuals Manager", "Visuals thread stopped.")
-  }
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
