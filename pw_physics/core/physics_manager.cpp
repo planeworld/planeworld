@@ -52,7 +52,9 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
     METHOD_ENTRY("CPhysicsManager::CPhysicsManager")
     CTOR_CALL("CPhysicsManager::CPhysicsManager")
     
-    m_strModuleName = "Physics Manager";
+    #ifdef PW_MULTITHREADING
+        m_strModuleName = "Physics Manager";
+    #endif
     m_vecConstantGravitation.setZero();
     m_SimTimerGlobal.start();
 }

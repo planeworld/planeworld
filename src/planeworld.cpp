@@ -45,10 +45,9 @@
 
 #include "conf_pw.h"
 #include "circular_buffer.h"
-#include "com_console.h"
-#include "com_interface.h"
 #include "debris_emitter.h"
 #include "game_state_manager.h"
+#include "input_manager.h"
 #include "lua_manager.h"
 #include "physics_manager.h"
 #include "objects_emitter.h"
@@ -63,23 +62,19 @@
     #include "X11/Xlib.h"
 #endif
 
-#define CLEAN_UP_AND_EXIT_FAILURE { \
-    if (pPhysicsManager != nullptr) \
+#define CLEAN_UP { \
+    if (pInputManager != nullptr) \
     { \
-        delete pPhysicsManager;\
-        Log.log("Memory freed", "CPhysicsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
-        pPhysicsManager = nullptr; \
+        delete pInputManager;\
+        Log.log("Memory freed", "CInputManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pInputManager = nullptr; \
     } \
-    if (pVisualsManager != nullptr) \
+    if (pLuaManager != nullptr) \
     { \
-        delete pVisualsManager; \
-        Log.log("Memory freed", "CVisualsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
-        pVisualsManager = nullptr; \
+        delete pLuaManager;\
+        Log.log("Memory freed", "CLuaManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pLuaManager = nullptr; \
     } \
-    return EXIT_FAILURE; \
-}
-
-#define CLEAN_UP_AND_EXIT_SUCCESS { \
     if (pPhysicsManager != nullptr) \
     { \
         delete pPhysicsManager; \
@@ -92,7 +87,36 @@
         Log.log("Memory freed", "CVisualsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
         pVisualsManager = nullptr; \
     } \
-    return EXIT_SUCCESS; \
+    if (pInputThread != nullptr) \
+    { \
+        delete pInputThread; \
+        Log.log("Memory freed", "std::thread", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pInputThread = nullptr; \
+    } \
+    if (pLuaThread != nullptr) \
+    { \
+        delete pLuaThread; \
+        Log.log("Memory freed", "std::thread", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pLuaThread = nullptr; \
+    } \
+    if (pPhysicsThread != nullptr) \
+    { \
+        delete pPhysicsThread; \
+        Log.log("Memory freed", "std::thread", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pPhysicsThread = nullptr; \
+    } \
+    if (pVisualsThread != nullptr) \
+    { \
+        delete pVisualsThread; \
+        Log.log("Memory freed", "std::thread", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pVisualsThread = nullptr; \
+    } \
+    if (pWindow != nullptr) \
+    { \
+        delete pWindow; \
+        Log.log("Memory freed", "WindowHandleType", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pWindow = nullptr; \
+    } \
 }
 
 //--- Global variables -------------------------------------------------------//
@@ -180,7 +204,48 @@ int main(int argc, char *argv[])
     
     //////////////////////////////////////////////////////////////////////////// 
     //
-    // 2. Initialise com interface
+    // 2. Initialise major objects
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    CGraphics&          Graphics = CGraphics::getInstance();
+    CComConsole         ComConsole;
+    CGameStateManager   GameStateManager;
+    CXFigLoader         XFigLoader;
+    CUniverse           Universe;
+    CVisualsDataStorage VisualsDataStorage;
+    CWorldDataStorage   WorldDataStorage;
+    CThruster           Thruster;
+
+    CInputManager*      pInputManager   = nullptr;
+    CLuaManager*        pLuaManager     = nullptr;
+    CPhysicsManager*    pPhysicsManager = nullptr;
+    CVisualsManager*    pVisualsManager = nullptr;
+    
+    std::thread*        pInputThread = nullptr;
+    std::thread*        pLuaThread = nullptr;
+    std::thread*        pPhysicsThread = nullptr;
+    std::thread*        pVisualsThread = nullptr;
+        
+    WindowHandleType*   pWindow = nullptr;
+    
+    pLuaManager     = new CLuaManager;
+    pPhysicsManager = new CPhysicsManager;
+    MEM_ALLOC("CLuaManager")
+    MEM_ALLOC("CPhysicsManager")
+    if (bGraphics)
+    {
+        pInputManager   = new CInputManager;
+        pVisualsManager = new CVisualsManager;
+        MEM_ALLOC("CInputManager")
+        MEM_ALLOC("CVisualsManager")
+    }
+    
+    /// Frequency of main program (writer commands) and input module
+    const double PLANEWORLD_INPUT_FREQUENCY = 100.0;
+    
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 3. Initialise com interface
     //
     ////////////////////////////////////////////////////////////////////////////
     CComInterface ComInterface;
@@ -200,35 +265,20 @@ int main(int argc, char *argv[])
                                     {{ParameterType::NONE, "No return value"}},
                                     "system", "main"
     );
-
-    //////////////////////////////////////////////////////////////////////////// 
-    //
-    // 3. Initialise major objects
-    //
-    ////////////////////////////////////////////////////////////////////////////
-    CGraphics&          Graphics = CGraphics::getInstance();
-    CCamera*            pCamera = nullptr;
-    CComConsole         ComConsole;
-    CGameStateManager   GameStateManager;
-    CPhysicsManager*    pPhysicsManager = nullptr;
-    CVisualsManager*    pVisualsManager = nullptr;
-    CXFigLoader         XFigLoader;
-    CUniverse           Universe;
-    CVisualsDataStorage VisualsDataStorage;
-    CWorldDataStorage   WorldDataStorage;
-    CThruster           Thruster;
-    CLuaManager         LuaManager;
     
-    pPhysicsManager = new CPhysicsManager;
-    MEM_ALLOC("CPhysicsManager")
+    pLuaManager->initComInterface(&ComInterface, "lua");
+    pPhysicsManager->initComInterface(&ComInterface, "physics");
     if (bGraphics)
     {
-        pVisualsManager = new CVisualsManager;
-        MEM_ALLOC("CVisualsManager")
+        ComConsole.setComInterface(&ComInterface);
+        
+        pInputManager->setComConsole(&ComConsole);
+        pVisualsManager->setComConsole(&ComConsole);
+        
+        pInputManager->initComInterface(&ComInterface, "input");
+        pVisualsManager->initComInterface(&ComInterface, "visuals");
+        
     }
-    
-    /// Frequency of main program, polling input events
-    const double PLANEWORLD_INPUT_FREQUENCY = 100.0;
     
     //////////////////////////////////////////////////////////////////////////// 
     //
@@ -239,10 +289,8 @@ int main(int argc, char *argv[])
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
     if (bGraphics)
     {
-        pVisualsManager->setComConsole(&ComConsole);
         pVisualsManager->setWorldDataStorage(&WorldDataStorage);
         pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
-        pVisualsManager->initComInterface(&ComInterface, "visuals");
     }
     
     //////////////////////////////////////////////////////////////////////////// 
@@ -258,11 +306,10 @@ int main(int argc, char *argv[])
         
         XMLImporter.setWorldDataStorage(&WorldDataStorage);
         XMLImporter.setVisualsDataStorage(&VisualsDataStorage);
-        if (!XMLImporter.import(strArgData)) CLEAN_UP_AND_EXIT_FAILURE;
-//         WorldDataStorage.setCamera(XMLImporter.getCamera());
+        if (!XMLImporter.import(strArgData)) {CLEAN_UP; return EXIT_FAILURE;}
         
-        LuaManager.setPhysicsInterface(XMLImporter.getPhysicsInterface());
-        LuaManager.setFrequency(XMLImporter.getFrequencyLua());
+        pLuaManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
+        pLuaManager->setFrequency(XMLImporter.getFrequencyLua());
         
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
         pPhysicsManager->addComponents(XMLImporter.getComponents());
@@ -273,7 +320,6 @@ int main(int argc, char *argv[])
         {
             pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
             pVisualsManager->setFont(XMLImporter.getFont());
-            pCamera=pVisualsManager->getCurrentCamera();
         }
         Universe.clone(XMLImporter.getUniverse());
     }
@@ -293,24 +339,24 @@ int main(int argc, char *argv[])
     pPhysicsManager->initObjects();
     pPhysicsManager->initEmitters();
     pPhysicsManager->initComponents();
-    pPhysicsManager->initComInterface(&ComInterface, "physics");
     
     #ifdef PW_MULTITHREADING    
-        std::thread PhysicsThread(&CPhysicsManager::run, pPhysicsManager);
+        pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
+        MEM_ALLOC("std::thread")
     #endif
-    
+        
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 7. Start lua
     //
     ////////////////////////////////////////////////////////////////////////////
-    LuaManager.initComInterface(&ComInterface, "lua");
-    LuaManager.init();
+    if (!pLuaManager->init()) {CLEAN_UP; return EXIT_FAILURE;}
     
     #ifdef PW_MULTITHREADING    
-        std::thread LuaThread(&CLuaManager::run, &LuaManager);
+        pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);
+        MEM_ALLOC("std::thread")
     #endif
-        
+    
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 8. Start graphcis
@@ -319,7 +365,7 @@ int main(int argc, char *argv[])
     #ifndef PW_MULTITHREADING
         auto nFrame = 0u;
     #endif
-        
+
     CTimer Timer;
     Timer.start();
     if (bGraphics)
@@ -329,374 +375,104 @@ int main(int argc, char *argv[])
             XInitThreads();
         #endif
             
-        ComConsole.setComInterface(&ComInterface);
-        
         //--------------------------------------------------------------------------
         // Initialize window and graphics
         //--------------------------------------------------------------------------
-        WindowHandleType Window(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()), "Planeworld", sf::Style::Default);
+        pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()), "Planeworld", sf::Style::Default);
         
-        pVisualsManager->setWindow(&Window);
+        pVisualsManager->setWindow(pWindow);
         pVisualsManager->initGraphics();
         
-        bool bGraphicsOn = true;
-        bool bMouseCursorVisible = false;
-        bool bConsoleMode = false;
-        std::string strConsoleCommand("");
-        
         #ifdef PW_MULTITHREADING    
-            std::thread VisualsThread(&CVisualsManager::run, pVisualsManager);
+            pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);
+            MEM_ALLOC("std::thread")
         #endif
         
         //////////////////////////////////////////////////////////////////////// 
         //
-        // 8. Main loop
+        // 9. Start input
         //
         ////////////////////////////////////////////////////////////////////////
-            
-        //--- Prepare for querying relative mouse movement -----------------------//
-        sf::Vector2i vecMouse;
-        sf::Vector2i vecMouseCenter(sf::Vector2i(Window.getSize().x >> 1, Window.getSize().y >> 1));
-        sf::Mouse::setPosition(vecMouseCenter,Window);
-        
+        pInputManager->setFrequency(100.0);
+        pInputManager->setWindow(pWindow);
+    
+        #ifdef PW_MULTITHREADING    
+            pInputThread = new std::thread(&CInputManager::run, pInputManager);
+            MEM_ALLOC("std::thread")
+        #endif
+
         while (!g_bDone)
         {
             #ifndef PW_MULTITHREADING
-            if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()*
-                                            pPhysicsManager->getTimeAccel()/
-                                            PLANEWORLD_INPUT_FREQUENCY) == 0)
-            {
-            #endif
-                vecMouse = vecMouseCenter-sf::Mouse::getPosition(Window);
-                vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
-                if (!bMouseCursorVisible)
-                    sf::Mouse::setPosition(vecMouseCenter,Window);
-
-                //--- Handle events ---//
-                sf::Event Event;
-                while (Window.pollEvent(Event))
-                {
-                    switch (Event.type)
-                    {
-                        case sf::Event::Closed:
-                        {
-                            // End the program
-                            ComInterface.call<void>("quit");
-                            break;
-                        }
-                        case sf::Event::Resized:
-                        {
-                            // Adjust the viewport when the window is resized
-                            vecMouseCenter = sf::Vector2i(Window.getSize().x >> 1, Window.getSize().y >> 1);
-                            ComInterface.call<void,double,double>("resize_window", Event.size.width, Event.size.height);
-                            break;
-                        }
-                        case sf::Event::KeyPressed:
-                        {
-                            if (Event.key.code == sf::Keyboard::Home)
-                            {
-                                strConsoleCommand = "";
-                                bConsoleMode ^= true;
-                                ComInterface.call<void>("toggle_console_mode");
-                                INFO_MSG("Main","Console mode toggled")
-                                break;
-                            }
-                            if (bConsoleMode)
-                            {
-                                switch (Event.key.code)
-                                {
-                                    case sf::Keyboard::BackSpace:
-                                    {
-                                        if (!strConsoleCommand.empty())
-                                        {
-                                            strConsoleCommand.pop_back();
-                                        }
-                                        ComConsole.setCurrentCommand(strConsoleCommand);
-                                        break;
-                                    }
-                                    case sf::Keyboard::Home:
-                                    {
-                                        strConsoleCommand = "";
-                                        bConsoleMode ^= true;
-                                        ComInterface.call<void>("toggle_console_mode");
-                                        INFO_MSG("Main","Console mode toggled")
-                                        break;
-                                    }
-                                    case sf::Keyboard::Up:
-                                    {
-                                        ComConsole.prevCommand();
-                                        strConsoleCommand = ComConsole.getCurrentCommand();
-                                        break;
-                                    }
-                                    case sf::Keyboard::Down:
-                                    {
-                                        ComConsole.nextCommand();
-                                        strConsoleCommand = ComConsole.getCurrentCommand();
-                                        break;
-                                    }
-                                    case sf::Keyboard::Return:
-                                    {
-                                        strConsoleCommand = "";
-                                        ComConsole.execute();
-                                        break;
-                                    }
-                                    default:
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                switch (Event.key.code)
-                                {
-                                    case sf::Keyboard::Escape:
-                                    {
-                                        ComInterface.call<void>("quit");
-                                        break;
-                                    }
-                                    case sf::Keyboard::Num0:
-                                    {
-                                        ComInterface.call("toggle_timers");
-                                        break;
-                                    }
-                                    case sf::Keyboard::Num1:
-                                    {
-                                        ComInterface.call<void,int>("toggle_timer", 0);
-                                        break;
-                                    }
-                                    case sf::Keyboard::Num2:
-                                    {
-                                        ComInterface.call<void,int>("toggle_timer", 1);
-                                        break;
-                                    }
-                                    case sf::Keyboard::Num3:
-                                    {
-                                        ComInterface.call<void,int>("toggle_timer", 2);
-                                        break;
-                                    }
-                                    case sf::Keyboard::Add:
-                                    case sf::Keyboard::A:
-                                    {
-                                        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
-                                            sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
-                                            ComInterface.call<void, bool>("accelerate_time", PHYSICS_ALLOW_STEP_SIZE_INC);
-                                        else
-                                            ComInterface.call<void, bool>("accelerate_time", PHYSICS_FORBID_STEP_SIZE_INC);
-                                        break;
-                                    }
-                                    case sf::Keyboard::Subtract:
-                                    case sf::Keyboard::Dash:
-                                    case sf::Keyboard::D:
-                                    {
-                                        ComInterface.call<void>("decelerate_time");
-                                        break;
-                                    }
-                                    case sf::Keyboard::Return:
-                                    {
-                                        ComInterface.call<void>("reset_time");
-                                        break;
-                                    }
-                                    case sf::Keyboard::C:
-                                    {
-                                        ComInterface.call<void>("cycle_camera");
-                                        pCamera=ComInterface.call<CCamera*>("get_current_camera");
-                                        break;
-                                    }
-                                    case sf::Keyboard::B:
-                                    {
-                                        ComInterface.call<void>("toggle_bboxes");
-                                        break;
-                                    }
-                                    case sf::Keyboard::G:
-                                    {
-                                        ComInterface.call<void>("toggle_grid");
-                                        break;
-                                    }
-                                    case sf::Keyboard::K:
-                                    {
-                                        pVisualsManager->toggleVisualisations(VISUALS_KINEMATICS_STATES);
-                                        break;
-                                    }
-                                    case sf::Keyboard::L:
-                                    {
-                                        /// \todo Really check if physics thread is paused before saving the simulation
-                                        ComInterface.call<void>("pause");
-                                        GameStateManager.load();
-                                        pCamera=(*VisualsDataStorage.getCamerasByName().cbegin()).second;
-                                        ComInterface.call<void>("toggle_pause");
-                                        break;
-                                    }
-                                    case sf::Keyboard::N:
-                                    {
-                                        ComInterface.call<void>("toggle_names");
-                                        break;
-                                    }
-                                    case sf::Keyboard::P:
-                                    {
-                                        ComInterface.call<void>("toggle_pause");
-                                        break;
-                                    }
-                                    case sf::Keyboard::S:
-                                    {
-                                        /// \todo Really check if physics thread is paused before saving the simulation
-                                        ComInterface.call<void>("pause");
-                                        GameStateManager.save();
-                                        ComInterface.call<void>("toggle_pause");
-                                        break;
-                                    }
-                                    case sf::Keyboard::Space:
-                                    {
-                                        ComInterface.call<void>("process_one_frame");
-                                        break;
-                                    }
-                                    case sf::Keyboard::T:
-                                    {
-                                        pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
-                                        break;
-                                    }
-                                    case sf::Keyboard::V:
-                                    {
-                                        bGraphicsOn ^= 1;
-                                        bMouseCursorVisible ^= 1;
-                                        Window.setMouseCursorVisible(bMouseCursorVisible);
-                                        vecMouse.x=0;
-                                        vecMouse.y=0;
-                                        
-                                        if (bGraphicsOn)
-                                        {
-                                            INFO_MSG("Main", "Graphics reactivated.")
-                                        }
-                                        else
-                                        {
-                                            INFO_MSG("Main", "Graphics deactivated, simulation still running...")
-                                        }
-                                        break;
-                                    }
-                                    default:
-                                        break;
-                                }
-                            }
-                            break;
-                        }
-                        case sf::Event::MouseMoved:
-                        {
-                            if (bGraphicsOn)
-                            {
-                                if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-                                {
-                                    double fZoom = ComInterface.call<double>("get_camera_zoom");
-                                    ComInterface.call<void,double,double>("translate_camera_by",
-                                                    0.2/GRAPHICS_PX_PER_METER*double(vecMouse.x)/fZoom,
-                                                    0.2/GRAPHICS_PX_PER_METER*double(vecMouse.y)/fZoom);
-                                }
-                                if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-                                {
-                                    ComInterface.call<void, double>("rotate_camera_by", -double(vecMouse.x)*0.001);
-                                    ComInterface.call<void, double>("zoom_camera_by",1.0+double(vecMouse.y)*0.001);
-                                    double fZoom = ComInterface.call<double>("get_camera_zoom");
-                                    if (fZoom < 1.0e-18)
-                                        ComInterface.call<void,double>("zoom_camera_to",1.0e-18);
-                                    else if (fZoom > 1.0e3)
-                                        ComInterface.call<void,double>("zoom_camera_to",1.0e3);
-                                }
-                                break;
-                            }
-                        }
-                        case sf::Event::MouseWheelMoved:
-                            if (bGraphicsOn)
-                            {
-                                ComInterface.call<void, double>("zoom_camera_by",1.0+double(Event.mouseWheel.delta)*0.1);
-                                double fZoom = ComInterface.call<double>("get_camera_zoom");
-                                if (fZoom < 1.0e-18)
-                                    ComInterface.call<void,double>("zoom_camera_to",1.0e-18);
-                                else if (fZoom > 1.0e3)
-                                    ComInterface.call<void,double>("zoom_camera_to",1.0e3);
-                            }
-                        case sf::Event::TextEntered:
-                        {
-                            if (bConsoleMode)
-                            {
-                                if (Event.text.unicode > 31 && Event.text.unicode < 127)
-                                {
-                                    strConsoleCommand += static_cast<char>(Event.text.unicode);
-                                    ComConsole.setCurrentCommand(strConsoleCommand);
-                                }
-                            }
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                }
-                //--- Call Commands from com interface ---//
-                ComInterface.callWriters("main");
-                
-            #ifndef PW_MULTITHREADING
-            }
                 //--- Run Physics ---//
                 pPhysicsManager->processFrame();
                 
-                if (bGraphicsOn)
+                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                              pPhysicsManager->getTimeAccel() /
+                                              pInputManager->getFrequency()) == 0)
                 {
-                    if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
-                                                  pPhysicsManager->getTimeAccel() /
-                                                  pVisualsManager->getFrequency()) == 0)
-                    {
-                        pVisualsManager->processFrame();
-                    }
+                    pInputManager->processFrame();
+                }
+                
+                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                              pPhysicsManager->getTimeAccel() /
+                                              pVisualsManager->getFrequency()) == 0)
+                {
+                    pVisualsManager->processFrame();
                 }
                 if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
                                               pPhysicsManager->getTimeAccel() /
-                                              LuaManager.getFrequency()) == 0)
+                                              pLuaManager->getFrequency()) == 0)
                 {
-                    LuaManager.processFrame();
+                    pLuaManager->processFrame();
                 }
                 pPhysicsManager->setTimeSlept(
                     Timer.sleepRemaining(pPhysicsManager->getFrequency() *
                                          pPhysicsManager->getTimeAccel()));
-                if (nFrame % 1000u == 0u) nFrame = 0u;
+                if (++nFrame == 1000u) nFrame = 0u;
             #else
                 Timer.sleepRemaining(PLANEWORLD_INPUT_FREQUENCY);
             #endif
+                
+            //--- Call Commands from com interface ---//
+            ComInterface.callWriters("main");
         }
         #ifdef PW_MULTITHREADING
+            pInputManager->terminate();
+            pInputThread->join();
             pVisualsManager->terminate();
-            VisualsThread.join();
+            pVisualsThread->join();
         #endif
     }
     else // if (!bGraphics)
     {
         #ifndef PW_MULTITHREADING
-        while (!g_bDone)
-        {
-            if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
-                                              pPhysicsManager->getTimeAccel() /
-                                              LuaManager.getFrequency()) == 0)
+            while (!g_bDone)
             {
-                LuaManager.processFrame();
+                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                              pPhysicsManager->getTimeAccel() /
+                                              pLuaManager->getFrequency()) == 0)
+                {
+                    pLuaManager->processFrame();
+                }
+                
+                //--- Run Physics ---//
+                pPhysicsManager->processFrame();
+                pPhysicsManager->setTimeSlept(
+                Timer.sleepRemaining(pPhysicsManager->getFrequency() * 
+                                     pPhysicsManager->getTimeAccel())
+                );
+                if (++nFrame == 1000u) nFrame = 0u;
             }
-            
-            //--- Run Physics ---//
-            pPhysicsManager->processFrame();
-            pPhysicsManager->setTimeSlept(
-              Timer.sleepRemaining(pPhysicsManager->getFrequency() * 
-                                   pPhysicsManager->getTimeAccel())
-            );
-        }
-        #else
-        Timer.start();
-        while (!g_bDone)
-        {
-            Timer.sleepRemaining(0.1);
-        }
         #endif
     }
       
     #ifdef PW_MULTITHREADING
-        LuaManager.terminate();
-        LuaThread.join();
+        pLuaManager->terminate();
+        pLuaThread->join();
         pPhysicsManager->terminate();
-        PhysicsThread.join();
+        pPhysicsThread->join();
     #endif
 
-    CLEAN_UP_AND_EXIT_SUCCESS;
+     CLEAN_UP; return EXIT_SUCCESS;
 }

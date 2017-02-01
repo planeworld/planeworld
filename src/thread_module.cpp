@@ -35,12 +35,15 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-IThreadModule::IThreadModule() : m_strModuleName("Thread Module"),
-                                 m_fFrequency(THREAD_MODULE_DEFAULT_FREQUENCY),
+IThreadModule::IThreadModule() : m_fFrequency(THREAD_MODULE_DEFAULT_FREQUENCY),
                                  m_fTimeSlept(1.0)
 {
     METHOD_ENTRY("IThreadModule::IThreadModule")
     CTOR_CALL("IThreadModule::IThreadModule")
+    
+    #ifdef PW_MULTITHREADING
+        m_strModuleName = "Thread Module";
+    #endif
 }
 
 #ifdef PW_MULTITHREADING

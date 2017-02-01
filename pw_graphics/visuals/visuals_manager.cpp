@@ -47,7 +47,9 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
     
-    m_strModuleName = "Visuals Manager";
+    #ifdef PW_MULTITHREADING
+        m_strModuleName = "Visuals Manager";
+    #endif
     m_strFont = "";
 }
 

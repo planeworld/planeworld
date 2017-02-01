@@ -43,6 +43,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/game_state_manager.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_io/input_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/debris_emitter.cpp
