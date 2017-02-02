@@ -34,9 +34,11 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "circle.h"
 #include "com_console.h"
 #include "com_interface_provider.h"
-#include "physics_manager.h"
+#include "planet.h"
+#include "polygon.h"
 #include "thread_module.h"
 #include "universe.h"
 #include "visuals_data_storage_user.h"
@@ -83,7 +85,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            setConsoleText(const std::string&);
         void            setFont(const std::string&);
         void            setUniverse(CUniverse* const);
-        void            setPhysicsManager(CPhysicsManager* const);
         void            setVisualisations(const int&);
         void            setWindow(WindowHandleType* const);
         void            toggleConsoleMode();
@@ -118,7 +119,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         void myInitComInterface();
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
-        CPhysicsManager*                m_pPhysicsManager;  ///< Reference to physics
         double                          m_fFrequency;       ///< Frequency of visuals update
         int                             m_nVisualisations;  ///< Additional graphical output
         std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star
@@ -251,19 +251,6 @@ inline void CVisualsManager::setUniverse(CUniverse* const _pUniverse)
 {
     METHOD_ENTRY("CVisualsManager::setUniverse")
     m_pUniverse = _pUniverse;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets reference to physics to access its parameters
-///
-/// \param _pPhysMan Reference to physics manager
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setPhysicsManager(CPhysicsManager* const _pPhysMan)
-{
-    METHOD_ENTRY("CVisualsManager::setPhysicsManager")
-    m_pPhysicsManager = _pPhysMan;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

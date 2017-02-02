@@ -155,17 +155,17 @@ void CInputManager::processFrame()
                         }
                         case sf::Keyboard::Num1:
                         {
-                            m_pComInterface->call<void,int>("toggle_timer", 0);
+                            m_pComInterface->call<void,int>("toggle_timer", 1);
                             break;
                         }
                         case sf::Keyboard::Num2:
                         {
-                            m_pComInterface->call<void,int>("toggle_timer", 1);
+                            m_pComInterface->call<void,int>("toggle_timer", 2);
                             break;
                         }
                         case sf::Keyboard::Num3:
                         {
-                            m_pComInterface->call<void,int>("toggle_timer", 2);
+                            m_pComInterface->call<void,int>("toggle_timer", 3);
                             break;
                         }
                         case sf::Keyboard::Add:

@@ -66,6 +66,7 @@ enum class SignatureType
     DOUBLE_STRING,
     DOUBLE_STRING_DOUBLE,
     INT,
+    INT_INT,
     NONE_BOOL,
     NONE_DOUBLE,
     NONE_2DOUBLE,

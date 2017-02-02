@@ -151,6 +151,13 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 oss << this->call<int>(strName);
                 break;
             }
+            case SignatureType::INT_INT:
+            {
+                int nParam = 0;
+                iss >> nParam;
+                oss << this->call<int,int>(strName, nParam);
+                break;
+            }
             case SignatureType::NONE:
             {
                 this->call<void>(strName);
@@ -315,6 +322,7 @@ void CComInterface::callWriters(const std::string& _strQueue)
             case SignatureType::DOUBLE_STRING:
             case SignatureType::DOUBLE_STRING_DOUBLE:
             case SignatureType::INT:
+            case SignatureType::INT_INT:
             case SignatureType::VEC2DDOUBLE_STRING:
             case SignatureType::VEC2DDOUBLE_2STRING:
             {

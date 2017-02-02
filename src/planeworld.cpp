@@ -326,7 +326,6 @@ int main(int argc, char *argv[])
     
     if (bGraphics)
     {
-        pVisualsManager->setPhysicsManager(pPhysicsManager);
         pVisualsManager->setUniverse(&Universe);
     }
     pPhysicsManager->setUniverse(&Universe);

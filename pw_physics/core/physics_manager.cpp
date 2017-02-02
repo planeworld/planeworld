@@ -56,7 +56,9 @@ CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
         m_strModuleName = "Physics Manager";
     #endif
     m_vecConstantGravitation.setZero();
-    m_SimTimerGlobal.start();
+    
+    // Start global timer (index 0)
+    m_SimTimer[0].start();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,7 +71,8 @@ CPhysicsManager::~CPhysicsManager()
     METHOD_ENTRY("CPhysicsManager::~CPhysicsManager")
     DTOR_CALL("CPhysicsManager::~CPhysicsManager")
 
-    m_SimTimerGlobal.stop();
+    // Stop global timer (index 0)
+    m_SimTimer[0].stop();
     
     for (auto it = m_Emitters.begin();
         it != m_Emitters.end(); ++it)
@@ -350,11 +353,10 @@ void CPhysicsManager::processFrame()
     static auto nFrame = 0u;
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {
-        m_SimTimerGlobal.inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        m_SimTimerLocal[0].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        m_SimTimerLocal[1].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        m_SimTimerLocal[2].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        
+        for (auto i=0u; i < m_SimTimer.size(); ++i)        
+        {
+            m_SimTimer[i].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        }
         this->addGlobalForces();
     }
     m_pComInterface->callWriters("physics");
@@ -595,9 +597,9 @@ void CPhysicsManager::myInitComInterface()
         m_pComInterface->registerFunction("toggle_timer",
                                           CCommand<void, int>([&](const int& _nNr)
                                           {
-                                              if (_nNr < 0 || _nNr < m_SimTimerLocal.size())
+                                              if (_nNr > 0 && _nNr < m_SimTimer.size())
                                               {
-                                                  this->m_SimTimerLocal[_nNr].toggle();
+                                                  this->m_SimTimer[_nNr].toggle();
                                               }
                                               else
                                               {
@@ -703,6 +705,12 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::STRING, "Object name"}},
                                            "physics"
                                          );
+        m_pComInterface->registerFunction("get_nrof_timers",
+                                          CCommand<int>([&]() -> int {return this->m_SimTimer.size();}),
+                                          "Provides number of simulation timers.",
+                                          {{ParameterType::INT, "Number of simulation timers"}},
+                                           "physics"
+                                         );
         m_pComInterface->registerFunction("get_position",
                                           CCommand<Vector2d, std::string>(
                                               [&](const std::string& _strName) -> const Vector2d
@@ -771,15 +779,104 @@ void CPhysicsManager::myInitComInterface()
                                            "physics"
                                          );
         m_pComInterface->registerFunction("get_time",
-                                          CCommand<double>([&]() -> double {return this->m_SimTimerGlobal.getSecondsRaw();}),
+                                          CCommand<double>([&]() -> double {return this->m_SimTimer[0].getSecondsRaw();}),
                                           "Provides simulation time (raw seconds, years excluded).",
                                           {{ParameterType::DOUBLE, "Seconds of simulation time"}},
                                            "physics"
                                          );
+        m_pComInterface->registerFunction("get_time_seconds_part",
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              {
+                                                  return this->m_SimTimer[_nT].getSecondsPart();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only seconds part).",
+                                          {{ParameterType::INT, "Seconds part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_minutes_part",
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              {
+                                                  return this->m_SimTimer[_nT].getMinutesPart();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only minutes part).",
+                                          {{ParameterType::INT, "Minutes part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_hours_part",
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              {
+                                                  return this->m_SimTimer[_nT].getHoursPart();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only hours part).",
+                                          {{ParameterType::INT, "Hours part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_days_part",
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              {
+                                                  return this->m_SimTimer[_nT].getDaysPart();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only days part).",
+                                          {{ParameterType::INT, "Days part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
+                                           "physics"
+                                         );
         m_pComInterface->registerFunction("get_time_years",
-                                          CCommand<int>([&]() -> int {return this->m_SimTimerGlobal.getYears();}),
-                                          "Provides full years of simulation time.",
-                                          {{ParameterType::INT, "Full years of simulation time"}},
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              {
+                                                  return this->m_SimTimer[_nT].getYears();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only years part).",
+                                          {{ParameterType::INT, "Years part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
                                            "physics"
                                          );
         m_pComInterface->registerFunction("get_velocity",

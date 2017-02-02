@@ -30,13 +30,16 @@
 
 #include "visuals_manager.h"
 
+#include <random>
+
+#include "debris.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
-                                     m_pPhysicsManager(nullptr),
                                      m_nVisualisations(0),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
@@ -914,19 +917,19 @@ void CVisualsManager::drawTimers() const
         std::stringstream oss;
         
         oss << "Simulation time: "
-            << m_pPhysicsManager->getSimTimerGlobal().getYears() << "y "
-            << m_pPhysicsManager->getSimTimerGlobal().getDaysPart() << "d "
-            << m_pPhysicsManager->getSimTimerGlobal().getHoursPart() << "h "
-            << m_pPhysicsManager->getSimTimerGlobal().getMinutesPart() << "m "
-            << m_pPhysicsManager->getSimTimerGlobal().getSecondsPart() << "s" << std::endl;
-        for (auto i=0u; i<3; ++i)
+            << m_pComInterface->call<int,int>("get_time_years", 0) << "y "
+            << m_pComInterface->call<int,int>("get_time_days_part", 0) << "d "
+            << m_pComInterface->call<int,int>("get_time_hours_part", 0) << "h "
+            << m_pComInterface->call<int,int>("get_time_minutes_part", 0) << "m "
+            << m_pComInterface->call<int,int>("get_time_seconds_part", 0) << "s" << std::endl;
+        for (auto i=1u; i<m_pComInterface->call<int>("get_nrof_timers"); ++i)
         {
-            oss << "Local timer " << i+1 << ":   "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getYears() << "y "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getDaysPart() << "d "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getHoursPart() << "h "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getMinutesPart() << "m "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getSecondsPart() << "s" << std::endl;
+            oss << "Local timer " << i << ":   "
+                << m_pComInterface->call<int,int>("get_time_years", i) << "y "
+                << m_pComInterface->call<int,int>("get_time_days_part", i) << "d "
+                << m_pComInterface->call<int,int>("get_time_hours_part", i) << "h "
+                << m_pComInterface->call<int,int>("get_time_minutes_part", i) << "m "
+                << m_pComInterface->call<int,int>("get_time_seconds_part", i) << "s" << std::endl;
         }
         
         /// \todo Check: Somehow showing text increases framerate when activating the first time

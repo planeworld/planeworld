@@ -79,7 +79,6 @@ void CComConsole::execute()
     catch (CComInterfaceException ComIntEx)
     {
         m_strRet = ComIntEx.getMessage();
-        
     }
     this->addCommand(m_strCurrent);
 }

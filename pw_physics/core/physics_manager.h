@@ -69,12 +69,10 @@ class CPhysicsManager : public IComInterfaceProvider,
         ~CPhysicsManager();
         
         //--- Constant Methods -----------------------------------------------//
-        CUniverse*  getUniverse() const;
+        const std::array<CSimTimer,4>&    getSimTimer() const;
+        CUniverse*                        getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
-        CSimTimer&                        getSimTimerGlobal();
-        std::array<CSimTimer,3>&          getSimTimerLocal();
-
         void setConstantGravity(const Vector2d&);
         void setFrequencyDebris(const double&);
         void setUniverse(CUniverse* const);
@@ -129,12 +127,24 @@ class CPhysicsManager : public IComInterfaceProvider,
         bool                        m_bPaused;                  ///< Indicates if physics caluculations are paused
         bool                        m_bProcessOneFrame;         ///< Indicates if physics should be run stepwise
         
-        CSimTimer                   m_SimTimerGlobal;           ///< Simulation time since beginning of simulation
-        std::array<CSimTimer,3>     m_SimTimerLocal;            ///< Local timer / stop watch in simulation time
+        std::array<CSimTimer,4>     m_SimTimer;                 ///< Timer / stop watch in simulation time
         
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns timers / stop watches counting in simulation time
+///
+/// \return Simulation timers
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::array<CSimTimer,4>& CPhysicsManager::getSimTimer() const
+{
+    METHOD_ENTRY("CPhysicsManager::getSimTimerLocal")
+    return m_SimTimer;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -147,33 +157,6 @@ inline CUniverse* CPhysicsManager::getUniverse() const
 {
     METHOD_ENTRY("CPhysicsManager::getUniverse()")
     return m_pUniverse;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the timer in simulation time that counts from the beginning of
-///        the simulation.
-///
-/// \return Simulation timer
-///
-////////////////////////////////////////////////////////////////////////////////
-inline CSimTimer& CPhysicsManager::getSimTimerGlobal()
-{
-    METHOD_ENTRY("CPhysicsManager::getSimTimerGlobal")
-    return m_SimTimerGlobal;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns local timers / stop watches counting in simulation time
-///
-/// \return Local simulation timers
-///
-////////////////////////////////////////////////////////////////////////////////
-inline std::array<CSimTimer,3>& CPhysicsManager::getSimTimerLocal()
-{
-    METHOD_ENTRY("CPhysicsManager::getSimTimerLocal")
-    return m_SimTimerLocal;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
