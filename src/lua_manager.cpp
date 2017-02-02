@@ -124,6 +124,9 @@ bool CLuaManager::init()
                 case SignatureType::INT:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int>*>(Function.second)->getFunction();
                     break;
+                case SignatureType::INT_INT:
+                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,int>*>(Function.second)->getFunction();
+                    break;
                 case SignatureType::DOUBLE:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double>*>(Function.second)->getFunction();
                     break;
