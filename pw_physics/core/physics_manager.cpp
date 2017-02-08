@@ -362,37 +362,6 @@ void CPhysicsManager::processFrame()
     m_pComInterface->callWriters("physics");
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {    
-//         for (const auto pComp : m_Components)
-//         {
-//             pComp.second->IObjectReferrer::attachTo(
-//                 static_cast<CObject*>(
-//                     m_pDataStorage->getUIDUsersByValueBack()->operator[](
-//                         pComp.second->IObjectReferrer::getUIDRef()
-//                     )
-//                 )
-//             );
-//             if (pComp.second->IEmitterReferrer::gotRef())
-//                 pComp.second->IEmitterReferrer::attachTo(
-//                     static_cast<IEmitter*>(
-//                         m_pDataStorage->getUIDUsersByValueBack()->operator[](
-//                             pComp.second->IEmitterReferrer::getUIDRef()
-//                         )
-//                     )
-//                 );
-//         }
-//         for (const auto pEmit : m_Emitters)
-//         {
-//             static_cast<CDebrisEmitter*>(pEmit.second)->attachTo(m_pDataStorage->getDebrisByValueBack()->at(
-//                 static_cast<CDebrisEmitter*>(pEmit.second)->getUIDRef()));
-//             
-//             pEmit.second->getKinematicsState().attachTo(
-//                 static_cast<CKinematicsState*>(
-//                     m_pDataStorage->getUIDUsersByValueBack()->operator[](
-//                         pEmit.second->getKinematicsState().getUIDRef()
-//                     )
-//                 )
-//             );
-//         }
         this->moveMasses(nFrame);
         this->collisionDetection();
     //     this->updateCells();
