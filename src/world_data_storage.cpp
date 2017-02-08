@@ -130,7 +130,7 @@ bool CWorldDataStorage::addDebris(CDebris* _pDebris)
     METHOD_ENTRY("CWorldDataStorage::addDebris")
     
     std::array<CDebris*, BUFFER_QUADRUPLE> aDebris =
-    {_pDebris,_pDebris->clone(),_pDebris->clone(),_pDebris->clone()};
+    {_pDebris->clone(),_pDebris->clone(),_pDebris->clone(),_pDebris};
     
     std::array<IUniqueIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
     {aDebris[0],aDebris[1],aDebris[2],aDebris[3]};
@@ -174,7 +174,7 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
     METHOD_ENTRY("CWorldDataStorage::addObject")
 
     std::array<CObject*, BUFFER_QUADRUPLE> aObjects =
-    {_pObject,_pObject->clone(),_pObject->clone(),_pObject->clone()};
+    {_pObject->clone(),_pObject->clone(),_pObject->clone(),_pObject};
     std::array<IUniqueIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
     {aObjects[0], aObjects[1], aObjects[2], aObjects[3]};
     
@@ -228,12 +228,14 @@ void CWorldDataStorage::swapBack()
 
     m_DebrisByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_DebrisByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
+    
     m_DebrisByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
 //     m_EmittersByValue.copyDeep(BUFFER_TRIPLE_BACK, BUFFER_TRIPLE_MIDDLE);
     m_ObjectsByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
-    m_ObjectsByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
     m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
+    
+    m_ObjectsByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
 
     m_bFrontNew = true;
 }

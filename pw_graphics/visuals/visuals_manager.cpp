@@ -419,7 +419,7 @@ void CVisualsManager::drawDebris(CCamera* const _pCamera) const
                 {
                     for (auto i=0u; i<Debris.second->getPositions()->size(); ++i)
                     {
-//                         if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
+                        if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
                         {
                             m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
                             m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter(),

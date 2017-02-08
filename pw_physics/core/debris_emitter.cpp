@@ -47,7 +47,7 @@ CDebrisEmitter::CDebrisEmitter() : m_DebrisType(DEBRIS_TYPE_DOT)
     m_pRef->setNumber(1);
     this->attachTo(m_pRef);
     
-    m_Generator.seed(m_unNrOfEmitters);
+    m_Generator.seed(m_unNrOfEmitters++);
 //     IHooker::m_strName += ": Debris_"+ std::to_string(m_unNrOfEmitters++);
 }
 
@@ -137,19 +137,8 @@ void CDebrisEmitter::emit(const double& _fF)
                     double      fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
                     Rotation2Dd Rotation(fAngle);
 
-//                     if (m_bIsHooked)
-//                     {
-//                         m_pDebris->generate(m_KinematicsState.getOrigin(),
-//                                             fVelocity*(Rotation*Vector2d(0.0, 1.0)) +
-//                                             0.75*static_cast<CObject*>(m_pHookable)->getVelocity());
-//                     }
-//                     else
-                    {
-                        (m_pDataStorage->getDebrisByValueBack()->operator[](m_UIDRef))->generate(m_KinematicsState.getOrigin(),
-                                            fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());
-//                         m_pDebris->generate(m_KinematicsState.getOrigin(),
-//                                             fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());
-                    }
+                    (m_pDataStorage->getDebrisByValueBack()->operator[](m_UIDRef))->generate(m_KinematicsState.getOrigin(),
+                                                   fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());
                 }
         }
     }
