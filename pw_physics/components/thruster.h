@@ -55,7 +55,7 @@ class CThruster : public IKinematicsStateUser,
     
         //--- Constructor/Destructor -----------------------------------------//
         CThruster();
-        virtual ~CThruster(){}
+        ~CThruster(){}
         
         //--- Constant methods -----------------------------------------------//
         double    getAngle() const;

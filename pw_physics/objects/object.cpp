@@ -37,7 +37,7 @@ uint32_t CObject::m_unNrOfObjects = 0;
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IUniverseScaled(),
+CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IGridUser(),
                 m_bGravitation(true),
                 m_bDynamics(true),
                 m_fTimeFac(1.0),
@@ -74,7 +74,7 @@ CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IUniverseScaled(),
 CObject::CObject(const CObject& _Obj) : 
                 IUniqueIDUser(_Obj),
                 IKinematicsStateUser(_Obj),
-                IUniverseScaled(_Obj)
+                IGridUser(_Obj)
 {
     METHOD_ENTRY("CObject::CObject")
     CTOR_CALL("CObject::CObject")
@@ -150,7 +150,7 @@ CObject& CObject::operator=(const CObject& _Obj)
     {
         IUniqueIDUser::operator=(_Obj);
         IKinematicsStateUser::operator=(_Obj);
-        IUniverseScaled::operator=(_Obj);
+        IGridUser::operator=(_Obj);
         this->copy(_Obj);
     }
     return *this;
@@ -251,7 +251,7 @@ void CObject::clearForces()
 ///
 /// \brief Update the cell of this object
 ///
-/// \todo Shouldn't this be a method of IUniverseScaled?!
+/// \todo Shouldn't this be a method of IGridUser?!
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CObject::updateCell()

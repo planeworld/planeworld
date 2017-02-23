@@ -456,7 +456,7 @@ void CPhysicsManager::addGlobalForces()
             while (cj != m_pDataStorage->getObjectsByValueBack()->cend())
             {
                 vecCC = (*ci).second->getCOM() - (*cj).second->getCOM() +
-                        IUniverseScaled::cellToDouble((*ci).second->getCell()-(*cj).second->getCell());
+                        IGridUser::cellToDouble((*ci).second->getCell()-(*cj).second->getCell());
 
                 fCCSqr = vecCC.squaredNorm();
                 

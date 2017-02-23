@@ -38,7 +38,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state_user.h"
-#include "universe_scaled.h"
 #include "unique_id_user.h"
 #include "unique_id_referrer.h"
 #include "visuals_data_storage_user.h"
@@ -91,7 +90,6 @@ const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter ty
 ////////////////////////////////////////////////////////////////////////////////
 class IEmitter : public IKinematicsStateUser,
                  public IUniqueIDUser,
-                 public IUniverseScaled,
                  public IVisualsDataStorageUser,
                  public IWorldDataStorageUser
 {

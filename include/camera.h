@@ -52,10 +52,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CCamera : public CGraphicsBase,
+                public IGridUser,
                 public IKinematicsStateUser,
                 public IObjectReferrer,
-                public IUniqueIDUser,
-                public IUniverseScaled
+                public IUniqueIDUser
 {
 
     public:
@@ -123,7 +123,7 @@ class CCamera : public CGraphicsBase,
 inline const Vector2d CCamera::getCenter() const
 {
     METHOD_ENTRY("CCamera::getCenter")
-    return m_KinematicsState.getOrigin() - IUniverseScaled::cellToDouble(m_vecCell);
+    return m_KinematicsState.getOrigin() - IGridUser::cellToDouble(m_vecCell);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

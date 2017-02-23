@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2012-2016 Torsten Büschenfeld
+// Copyright (C) 2012-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,16 +20,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       universe_scaled.h
-/// \brief      Prototype of interface "IUniverseScaled"
+/// \file       grid_user.h
+/// \brief      Prototype of interface "IGridUser"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2012-12-17
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef UNIVERSE_SCALED_H
-#define UNIVERSE_SCALED_H
+#ifndef GRID_USER_H
+#define GRID_USER_H
 
 //--- Program header ---------------------------------------------------------//
 #include "engine_common.h"
@@ -41,21 +41,21 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Base class for everything that is in the universe scale.
+/// \brief Base class for everything that is in the universe scaled cell grid.
 ///
 /// This abstract class provides all basic methods and variables for objects
 /// that are freely located within a whole universe. This mainly means a cell
 /// in the universe grid and methods to have access to the cell.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class IUniverseScaled
+class IGridUser
 {
     
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
-        IUniverseScaled(){m_vecCell.setZero();}
-        virtual ~IUniverseScaled(){};
+        IGridUser(){m_vecCell.setZero();}
+        virtual ~IGridUser(){};
         
         //--- Static methods -------------------------------------------------//
         static const Vector2d   cellToDouble(const Vector2i&);
@@ -93,9 +93,9 @@ class IUniverseScaled
 /// \return The grid cell as position in double value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2d IUniverseScaled::cellToDouble(const Vector2i& _vecCell)
+inline const Vector2d IGridUser::cellToDouble(const Vector2i& _vecCell)
 {
-    METHOD_ENTRY("IUniverseScaled::cellToDouble")
+    METHOD_ENTRY("IGridUser::cellToDouble")
     return _vecCell.cast<double>() * DEFAULT_CELL_SIZE_2;
 }
 
@@ -109,9 +109,9 @@ inline const Vector2d IUniverseScaled::cellToDouble(const Vector2i& _vecCell)
 /// \return The grid cell of the entity
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const Vector2i IUniverseScaled::getCell() const
+inline const Vector2i IGridUser::getCell() const
 {
-    METHOD_ENTRY("IUniverseScaled::getCell")
+    METHOD_ENTRY("IGridUser::getCell")
     return m_vecCell;
 }
 
@@ -125,11 +125,11 @@ inline const Vector2i IUniverseScaled::getCell() const
 /// \param _vecCell Resulting grid cell
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IUniverseScaled::separateCenterCell(const Vector2d& _vecV,
+inline void IGridUser::separateCenterCell(const Vector2d& _vecV,
                                                 Vector2d& _vecCenter,
                                                 Vector2i& _vecCell)
 {
-    METHOD_ENTRY("IUniverseScaled::separateCenterCell")
+    METHOD_ENTRY("IGridUser::separateCenterCell")
 
     Vector2d vecTmp((_vecV+DEFAULT_CELL_SIZE_VEC)/DEFAULT_CELL_SIZE_2);
     vecTmp = Vector2d(floor(vecTmp[0]), floor(vecTmp[1]));
@@ -148,9 +148,9 @@ inline void IUniverseScaled::separateCenterCell(const Vector2d& _vecV,
 /// \param _vecCell Grid cell of the entity
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IUniverseScaled::setCell(const Vector2i& _vecCell)
+inline void IGridUser::setCell(const Vector2i& _vecCell)
 {
-    METHOD_ENTRY("IUniverseScaled::setCell")
+    METHOD_ENTRY("IGridUser::setCell")
 
     m_vecCell = _vecCell;
 }
@@ -166,12 +166,12 @@ inline void IUniverseScaled::setCell(const Vector2i& _vecCell)
 /// \param _nCellY Grid cell of the entity, y coordinate
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IUniverseScaled::setCell(const int& _nCellX, const int& _nCellY)
+inline void IGridUser::setCell(const int& _nCellX, const int& _nCellY)
 {
-    METHOD_ENTRY("IUniverseScaled::setCell")
+    METHOD_ENTRY("IGridUser::setCell")
 
     m_vecCell = Vector2i(_nCellX, _nCellY);
 }
 
 
-#endif
+#endif // GRID_USER_H

@@ -33,8 +33,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "circular_buffer.h"
+#include "grid_user.h"
 #include "unique_id_user.h"
-#include "universe_scaled.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <vector>
@@ -66,8 +66,8 @@ typedef enum
 ///       std::vector is a little restricted when accessing elements.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CDebris : public IUniqueIDUser,
-                public IUniverseScaled
+class CDebris : public IGridUser,
+                public IUniqueIDUser
 {
     
     public:

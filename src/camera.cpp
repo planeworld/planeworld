@@ -42,7 +42,7 @@
 CCamera::CCamera() : IKinematicsStateUser(),
                      IObjectReferrer(),
                      IUniqueIDUser(),
-                     IUniverseScaled(),
+                     IGridUser(),
                      m_fViewportWidth(m_Graphics.getViewPort().rightplane-m_Graphics.getViewPort().leftplane),
                      m_fViewportHeight(m_Graphics.getViewPort().topplane-m_Graphics.getViewPort().bottomplane)
 {
@@ -67,7 +67,7 @@ CCamera::CCamera(const CCamera& _Camera) : CGraphicsBase(_Camera),
                                            IKinematicsStateUser(_Camera),
                                            IObjectReferrer(_Camera),
                                            IUniqueIDUser(_Camera),
-                                           IUniverseScaled(_Camera)
+                                           IGridUser(_Camera)
 {
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
@@ -102,7 +102,7 @@ CCamera& CCamera::operator=(const CCamera& _Camera)
         IKinematicsStateUser::operator=(_Camera);
         IObjectReferrer::operator=(_Camera);
         IUniqueIDUser::operator=(_Camera);
-        IUniverseScaled::operator=(_Camera);
+        IGridUser::operator=(_Camera);
         this->copy(_Camera);
     }
     return *this;
@@ -407,7 +407,7 @@ std::istream& operator>>(std::istream& _is, CCamera* const _pCam)
     _is >> _pCam->m_fViewportWidth;
     _is >> _pCam->m_fViewportHeight;
     _is >> _pCam->m_fZoom;
-    /// \todo Stream IUniverseScaled information
+    /// \todo Stream IGridUser information
     
     return _is;
 }
@@ -444,7 +444,7 @@ std::ostream& operator<<(std::ostream& _os, CCamera* const _pCam)
     _os << _pCam->m_fViewportHeight << std::endl;
     _os << _pCam->m_fZoom << std::endl;
     
-    /// \todo Stream IUniverseScaled information
+    /// \todo Stream IGridUser information
     
     return _os;
 }
@@ -484,24 +484,24 @@ void CCamera::updateWithHook()
     
     std::array<Vector2d,4> vecFrame;
     
-    m_vecCenter = m_KinematicsState.getOrigin();// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
+    m_vecCenter = m_KinematicsState.getOrigin();// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
 
     // m_vecCenter is in absolute coordinates while m_vecCell is zero. Thus, they
     // have to be separated:
-    IUniverseScaled::separateCenterCell(m_vecCenter,m_vecCenter,m_vecCell);
+    IGridUser::separateCenterCell(m_vecCenter,m_vecCenter,m_vecCell);
 
     // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
     // Hence, accuracy is low, so it can stay with the double value.
-    vecFrame[0] = m_KinematicsState.getPosition(m_vecFrame0[0]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
-    vecFrame[1] = m_KinematicsState.getPosition(m_vecFrame0[1]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
-    vecFrame[2] = m_KinematicsState.getPosition(m_vecFrame0[2]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
-    vecFrame[3] = m_KinematicsState.getPosition(m_vecFrame0[3]/m_fZoom);// + IUniverseScaled::cellToDouble(m_KinematicsStateReference.getCell());
+    vecFrame[0] = m_KinematicsState.getPosition(m_vecFrame0[0]/m_fZoom);// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
+    vecFrame[1] = m_KinematicsState.getPosition(m_vecFrame0[1]/m_fZoom);// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
+    vecFrame[2] = m_KinematicsState.getPosition(m_vecFrame0[2]/m_fZoom);// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
+    vecFrame[3] = m_KinematicsState.getPosition(m_vecFrame0[3]/m_fZoom);// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
     
-    m_BoundingBox.setLowerLeft(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.setUpperRight(vecFrame[0]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[1]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[2]-IUniverseScaled::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[3]-IUniverseScaled::cellToDouble(m_vecCell));
+    m_BoundingBox.setLowerLeft(vecFrame[0]-IGridUser::cellToDouble(m_vecCell));
+    m_BoundingBox.setUpperRight(vecFrame[0]-IGridUser::cellToDouble(m_vecCell));
+    m_BoundingBox.update(vecFrame[1]-IGridUser::cellToDouble(m_vecCell));
+    m_BoundingBox.update(vecFrame[2]-IGridUser::cellToDouble(m_vecCell));
+    m_BoundingBox.update(vecFrame[3]-IGridUser::cellToDouble(m_vecCell));
     
     m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
                                    m_fViewportHeight*m_fViewportHeight)/m_fZoom;
@@ -522,7 +522,7 @@ void CCamera::updateWithoutHook()
     std::array<Vector2d,4>  vecFrame;
     Vector2i                vecCell;
     
-    IUniverseScaled::separateCenterCell(m_KinematicsState.getLocalOrigin(), m_KinematicsState.Origin(), vecCell);
+    IGridUser::separateCenterCell(m_KinematicsState.getLocalOrigin(), m_KinematicsState.Origin(), vecCell);
     m_vecCenter = m_KinematicsState.getLocalOrigin();
     m_vecCell  += vecCell;
     

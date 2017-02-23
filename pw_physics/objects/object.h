@@ -54,7 +54,7 @@ typedef std::uint16_t AnchorIDType;
 ////////////////////////////////////////////////////////////////////////////////
 class CObject : public IUniqueIDUser,
                 public IKinematicsStateUser,
-                public IUniverseScaled
+                public IGridUser
 {
     
     public:

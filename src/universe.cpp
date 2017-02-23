@@ -130,7 +130,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             Vector2d vecOrigin;
             Vector2d vecPosition(UniformDistribution(Generator), UniformDistribution(Generator));
             
-            IUniverseScaled::separateCenterCell(vecPosition,vecOrigin,vecCell);
+            IGridUser::separateCenterCell(vecPosition,vecOrigin,vecCell);
             
             pStarSystem->Star().setName(StarNameGenerator.getName());
             pStarSystem->Star().setStarType(int(nNrOfStarTypes*fNumber));

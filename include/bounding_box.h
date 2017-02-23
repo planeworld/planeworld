@@ -34,7 +34,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "universe_scaled.h"
+#include "grid_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include <eigen3/Eigen/Core>
@@ -46,7 +46,7 @@ using namespace Eigen;
 /// \brief Class representing an Axis Aligned Bounding Box
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CBoundingBox : public IUniverseScaled
+class CBoundingBox : public IGridUser
 {
     
     public:

@@ -36,7 +36,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CDebris::CDebris() : IUniqueIDUser(),
-                     IUniverseScaled(),
+                     IGridUser(),
                      m_DebrisType(DEBRIS_TYPE_DOT),
                      m_fTimeFac(1.0)
 {
@@ -59,7 +59,7 @@ CDebris::CDebris() : IUniqueIDUser(),
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CDebris::CDebris(const CDebris& _Debris) : IUniqueIDUser(_Debris),
-                                           IUniverseScaled(_Debris)
+                                           IGridUser(_Debris)
 {
     METHOD_ENTRY("CDebris::CDebris")
     CTOR_CALL("CDebris::CDebris")
@@ -97,7 +97,7 @@ CDebris& CDebris::operator=(const CDebris& _Debris)
 {
     METHOD_ENTRY("CDebris::operator=")
     IUniqueIDUser::operator=(_Debris);
-    IUniverseScaled::operator=(_Debris);
+    IGridUser::operator=(_Debris);
     this->copy(_Debris);
     
     return *this;
@@ -188,7 +188,7 @@ std::istream& operator>>(std::istream& _is, CDebris* const _pDebris)
     std::string strTmp;
     _is >> strTmp;
     
-    /// \todo Stream data from IUniverseScaled
+    /// \todo Stream data from IGridUser
     
     // From IUniqueIDUser
     _is >> _pDebris->m_UID;
@@ -228,7 +228,7 @@ std::ostream& operator<<(std::ostream& _os, CDebris* const _pDebris)
     
     _os << "Debris:" << std::endl;
     
-    /// \todo Stream data from IUniverseScaled
+    /// \todo Stream data from IGridUser
     
     // From IUniqueIDUser
     _os << _pDebris->m_UID << std::endl;

@@ -32,6 +32,7 @@
 #define KINEMATICS_STATE_H
 
 //--- Program header ---------------------------------------------------------//
+#include "grid_user.h"
 #include "log.h"
 #include "unique_id_referrer.h"
 #include "unique_id_user.h"
@@ -58,7 +59,8 @@ using namespace Eigen;
 /// planet.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CKinematicsState  : public IUniqueIDUser,
+class CKinematicsState  : public IGridUser,
+                          public IUniqueIDUser,
                           public IUniqueIDReferrer<CKinematicsState>
 {
     
@@ -72,6 +74,7 @@ class CKinematicsState  : public IUniqueIDUser,
             
         //--- Constructor/Destructor -----------------------------------------//
         CKinematicsState();
+        virtual ~CKinematicsState(){};
 
         //--- Constant methods -----------------------------------------------//
         Vector2d  getOrigin() const;
@@ -102,7 +105,7 @@ class CKinematicsState  : public IUniqueIDUser,
         
         void increaseAngle(const double&);
         
-        void setCell(const Vector2i&);
+//         void setCell(const Vector2i&);
         void setOrigin(const Vector2d&);
         void setVelocity(const Vector2d&);
         void setAngle(const double&);

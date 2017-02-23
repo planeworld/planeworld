@@ -35,7 +35,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CBoundingBox::CBoundingBox() : IUniverseScaled()
+CBoundingBox::CBoundingBox() : IGridUser()
 {
     METHOD_ENTRY("CBoundingBox::CBoundingBox")
     CTOR_CALL("CBoundingBox::CBoundingBox")
@@ -105,7 +105,7 @@ bool CBoundingBox::overlaps(const CBoundingBox& _BBox,
             std::abs(
                 ((m_vecLowerLeft[0]+m_vecUpperRight[0]) / 2.0) -
                 ((_BBox.getLowerLeft()[0]+_BBox.getUpperRight()[0]) / 2.0)+
-                IUniverseScaled::cellToDouble(m_vecCell-_BBox.m_vecCell)[0]
+                IGridUser::cellToDouble(m_vecCell-_BBox.m_vecCell)[0]
             )
             <
             (
@@ -117,7 +117,7 @@ bool CBoundingBox::overlaps(const CBoundingBox& _BBox,
             std::abs(
                 ((m_vecLowerLeft[1]+m_vecUpperRight[1]) / 2.0) -
                 ((_BBox.getLowerLeft()[1]+_BBox.getUpperRight()[1]) / 2.0)+
-                IUniverseScaled::cellToDouble(m_vecCell-_BBox.m_vecCell)[1]
+                IGridUser::cellToDouble(m_vecCell-_BBox.m_vecCell)[1]
             )
             <
             (
@@ -200,7 +200,7 @@ std::istream& operator>>(std::istream& _is, CBoundingBox& _BBox)
     _is >> _BBox.m_vecUpperRight[0];
     _is >> _BBox.m_vecUpperRight[1];
     
-    // From IUniverseScaled:
+    // From IGridUser:
     _is >> _BBox.m_vecCell[0];
     _is >> _BBox.m_vecCell[1];
 
@@ -228,7 +228,7 @@ std::ostream& operator<<(std::ostream& _os, CBoundingBox& _BBox)
     _os << _BBox.m_vecUpperRight[0] << " " <<
            _BBox.m_vecUpperRight[1] << std::endl;
     
-    // From IUniverseScaled:
+    // From IGridUser:
     _os << _BBox.m_vecCell[0] << " " <<
            _BBox.m_vecCell[1] << std::endl;
         
