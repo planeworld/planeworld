@@ -549,10 +549,10 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
         
         m_pCamera->setPosition(_Node.attribute("position_x").as_double(),
                               _Node.attribute("position_y").as_double());
-        m_pCamera->getKinematicsState().setAngle(checkAttributeDouble(_Node,"angle", 0.0, false));
-        m_pCamera->setViewport(_Node.attribute("viewport_width").as_int(),
-                              _Node.attribute("viewport_height").as_int());
-        m_pCamera->zoomTo(GRAPHICS_PX_PER_METER/checkAttributeDouble(_Node, "m_per_px", 0.5, false));
+        m_pCamera->getKinematicsState().setAngle(checkAttributeDouble(_Node,"angle", 0.0, XML_IMPORTER_DO_NOT_NOTICE));
+        m_pCamera->setViewport(checkAttributeInt(_Node, "viewport_width", 600, XML_IMPORTER_DO_NOT_NOTICE),
+                               checkAttributeInt(_Node, "viewport_height", 400, XML_IMPORTER_DO_NOT_NOTICE));
+        m_pCamera->zoomTo(GRAPHICS_PX_PER_METER/checkAttributeDouble(_Node, "m_per_px", 0.5, XML_IMPORTER_DO_NOT_NOTICE));
 //         if (checkAttributeBool(_Node, "enable_angle_hook", true)) m_pCamera->enableAngleHook();
 //         else m_pCamera->disableAngleHook();
         std::string strReferredObject = checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE);
