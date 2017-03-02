@@ -565,13 +565,13 @@ void CPhysicsManager::myInitComInterface()
         m_pComInterface->registerFunction("toggle_timer",
                                           CCommand<void, int>([&](const int& _nNr)
                                           {
-                                              if (_nNr > 0 && _nNr < m_SimTimer.size())
+                                              if (_nNr > 0 && _nNr < int(m_SimTimer.size()))
                                               {
                                                   this->m_SimTimer[_nNr].toggle();
                                               }
                                               else
                                               {
-                                                  WARNING_MSG("Physics manager", "Invalid sim timer ID")
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nNr << ">")
                                                   throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                               }
                                           }),
@@ -612,7 +612,7 @@ void CPhysicsManager::myInitComInterface()
                                          );
         m_pComInterface->registerFunction("get_angle",
                                           CCommand<double, std::string>(
-                                              [&](const std::string& _strName) -> const double
+                                              [&](const std::string& _strName) -> double
                                               {
                                                 double fAngle = 0.0;
                                                 try
@@ -633,7 +633,7 @@ void CPhysicsManager::myInitComInterface()
                                          );
         m_pComInterface->registerFunction("get_inertia",
                                           CCommand<double, std::string>(
-                                              [&](const std::string& _strName) -> const double
+                                              [&](const std::string& _strName) -> double
                                               {
                                                 double fInertia = 1.0;
                                                 try
@@ -654,7 +654,7 @@ void CPhysicsManager::myInitComInterface()
                                          );
         m_pComInterface->registerFunction("get_mass",
                                           CCommand<double, std::string>(
-                                              [&](const std::string& _strName) -> const double
+                                              [&](const std::string& _strName) -> double
                                               {
                                                 double fMass = 1.0;
                                                 try
@@ -755,14 +755,14 @@ void CPhysicsManager::myInitComInterface()
         m_pComInterface->registerFunction("get_time_seconds_part",
                                           CCommand<int,int>([&](const int _nT) -> int 
                                           {
-                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
                                               {
                                                   return this->m_SimTimer[_nT].getSecondsPart();
                                               }
                                               else
                                               {
                                                   WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
-                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                   return 0;
                                               }
                                           }),
@@ -774,14 +774,14 @@ void CPhysicsManager::myInitComInterface()
         m_pComInterface->registerFunction("get_time_minutes_part",
                                           CCommand<int,int>([&](const int _nT) -> int 
                                           {
-                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
                                               {
                                                   return this->m_SimTimer[_nT].getMinutesPart();
                                               }
                                               else
                                               {
                                                   WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
-                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                   return 0;
                                               }
                                           }),
@@ -793,14 +793,14 @@ void CPhysicsManager::myInitComInterface()
         m_pComInterface->registerFunction("get_time_hours_part",
                                           CCommand<int,int>([&](const int _nT) -> int 
                                           {
-                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
                                               {
                                                   return this->m_SimTimer[_nT].getHoursPart();
                                               }
                                               else
                                               {
                                                   WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
-                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                   return 0;
                                               }
                                           }),
@@ -812,14 +812,14 @@ void CPhysicsManager::myInitComInterface()
         m_pComInterface->registerFunction("get_time_days_part",
                                           CCommand<int,int>([&](const int _nT) -> int 
                                           {
-                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
                                               {
                                                   return this->m_SimTimer[_nT].getDaysPart();
                                               }
                                               else
                                               {
                                                   WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
-                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                   return 0;
                                               }
                                           }),
@@ -831,14 +831,14 @@ void CPhysicsManager::myInitComInterface()
         m_pComInterface->registerFunction("get_time_years",
                                           CCommand<int,int>([&](const int _nT) -> int 
                                           {
-                                              if (_nT >= 0 && _nT < this->m_SimTimer.size())
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
                                               {
                                                   return this->m_SimTimer[_nT].getYears();
                                               }
                                               else
                                               {
                                                   WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
-                                                  throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                   return 0;
                                               }
                                           }),

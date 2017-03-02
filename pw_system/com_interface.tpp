@@ -56,8 +56,8 @@ CCommand<TRet, TArgs...>::CCommand(const std::function<TRet(TArgs...)>& _Functio
 template <class TRet, class... TArgs>
 CCommandToQueueWrapper<TRet, TArgs...>::CCommandToQueueWrapper(const std::function<TRet(TArgs...)>& _Function,
                                                TArgs... _Args) : 
-                                               m_Params(_Args...),
-                                               m_Function(_Function)
+                                               m_Function(_Function),
+                                               m_Params(_Args...)
 {
     METHOD_ENTRY("CCommandToQueueWrapper::CCommandToQueueWrapper")
     CTOR_CALL("CCommandToQueueWrapper")
@@ -135,6 +135,7 @@ TRet CCommandWritable<TRet, TArgs...>::call(TArgs... _Args)
     METHOD_ENTRY("CCommandWritable::call")
     DEBUG_MSG("Com Interface", "Writer called for storage in command queue.")
     m_Function(_Args...);
+    return TRet();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

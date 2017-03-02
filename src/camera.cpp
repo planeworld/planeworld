@@ -39,10 +39,10 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CCamera::CCamera() : IKinematicsStateUser(),
+CCamera::CCamera() : IGridUser(),
+                     IKinematicsStateUser(),
                      IObjectReferrer(),
                      IUniqueIDUser(),
-                     IGridUser(),
                      m_fViewportWidth(m_Graphics.getViewPort().rightplane-m_Graphics.getViewPort().leftplane),
                      m_fViewportHeight(m_Graphics.getViewPort().topplane-m_Graphics.getViewPort().bottomplane)
 {
@@ -64,10 +64,10 @@ CCamera::CCamera() : IKinematicsStateUser(),
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CCamera::CCamera(const CCamera& _Camera) : CGraphicsBase(_Camera),
+                                           IGridUser(_Camera),
                                            IKinematicsStateUser(_Camera),
                                            IObjectReferrer(_Camera),
-                                           IUniqueIDUser(_Camera),
-                                           IGridUser(_Camera)
+                                           IUniqueIDUser(_Camera)
 {
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");

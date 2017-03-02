@@ -102,9 +102,6 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 
     int nNrOfPlanets = 0;
     
-    double fMin = 10000.0;
-    double fMax = 10000.0;
-    
     // Create a star field
     for (int i=0; i<_nNumberOfStars; ++i)
     {

@@ -555,8 +555,7 @@ void CVisualsManager::drawConsole() const
         
 
         std::stringstream oss;
-        int i = m_pComConsole->getCommands().size() - nComHistory;
-        if (i<0) i=0;
+        auto i = m_pComConsole->getCommands().size() - nComHistory;
         while (i < m_pComConsole->getCommands().size())
         {
             oss << "> " << m_pComConsole->getCommands().at(i);
@@ -945,7 +944,7 @@ void CVisualsManager::drawTimers() const
             << m_pComInterface->call<int,int>("get_time_hours_part", 0) << "h "
             << m_pComInterface->call<int,int>("get_time_minutes_part", 0) << "m "
             << m_pComInterface->call<int,int>("get_time_seconds_part", 0) << "s" << std::endl;
-        for (auto i=1u; i<m_pComInterface->call<int>("get_nrof_timers"); ++i)
+        for (auto i=1; i<m_pComInterface->call<int>("get_nrof_timers"); ++i)
         {
             oss << "Local timer " << i << ":   "
                 << m_pComInterface->call<int,int>("get_time_years", i) << "y "

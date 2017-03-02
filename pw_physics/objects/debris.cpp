@@ -35,8 +35,8 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebris::CDebris() : IUniqueIDUser(),
-                     IGridUser(),
+CDebris::CDebris() : IGridUser(),
+                     IUniqueIDUser(),
                      m_DebrisType(DEBRIS_TYPE_DOT),
                      m_fTimeFac(1.0)
 {
@@ -58,8 +58,9 @@ CDebris::CDebris() : IUniqueIDUser(),
 /// \param _Debris Debris to be copied
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebris::CDebris(const CDebris& _Debris) : IUniqueIDUser(_Debris),
-                                           IGridUser(_Debris)
+CDebris::CDebris(const CDebris& _Debris) : IGridUser(_Debris),
+                                           IUniqueIDUser(_Debris)
+                                           
 {
     METHOD_ENTRY("CDebris::CDebris")
     CTOR_CALL("CDebris::CDebris")
