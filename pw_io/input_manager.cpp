@@ -193,7 +193,6 @@ void CInputManager::processFrame()
                         case sf::Keyboard::C:
                         {
                             m_pComInterface->call<void>("cycle_camera");
-//                             pCamera=m_pComInterface->call<CCamera*>("get_current_camera");
                             break;
                         }
                         case sf::Keyboard::B:

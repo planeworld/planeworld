@@ -557,6 +557,7 @@ void CVisualsManager::drawConsole() const
 
         std::stringstream oss;
         auto i = m_pComConsole->getCommands().size() - nComHistory;
+        if (i > m_pComConsole->getCommands().size()) i = 0;
         while (i < m_pComConsole->getCommands().size())
         {
             oss << "> " << m_pComConsole->getCommands().at(i);
