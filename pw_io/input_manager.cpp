@@ -220,6 +220,11 @@ void CInputManager::processFrame()
                             m_pComInterface->call<void>("toggle_pause");
                             break;
                         }
+                        case sf::Keyboard::M:
+                        {
+                            m_pComInterface->call<void>("toggle_com");
+                            break;
+                        }
                         case sf::Keyboard::N:
                         {
                             m_pComInterface->call<void>("toggle_names");

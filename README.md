@@ -45,6 +45,7 @@ Usage
 | k                        | Show kinematics states          |
 | c                        | Cycle through cameras           |
 | l                        | Load game state                 |
+| n                        | Show center of mass (COM)       |
 | n                        | Show names                      |
 | s                        | Save game state                 |
 | t                        | Show object trajectories        |

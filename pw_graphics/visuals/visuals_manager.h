@@ -102,6 +102,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void drawObjects(CCamera* const) const;
         
         void            drawBoundingBoxes() const;
+        void            drawCOM() const;
         void            drawConsole() const;
         void            drawGrid() const;
         void            drawGridHUD() const;

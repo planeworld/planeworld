@@ -490,16 +490,39 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
                     }
                 }
             }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw center of mass (COM) of all objects
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawCOM() const
+{
+    METHOD_ENTRY("CVisualsManager::drawCOM")
+
+    if (m_nVisualisations & VISUALS_OBJECT_COM)
+    {
+        for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
+        {
             
-    //         m_Graphics.circle(m_pRef->getCOM() - _pCamera->getCenter(), 0.6);
-    //         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(-0.6, 0.0)) -_pCamera->getCenter());
-    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(+0.6, 0.0)) -_pCamera->getCenter());
-    //         m_Graphics.endLine();
-    //         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, -0.6)) -_pCamera->getCenter());
-    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, +0.6)) -_pCamera->getCenter());
-    //         m_Graphics.endLine();
+            if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(m_pCamera->getBoundingBox()))
+            {
+                if (m_Graphics.getResPMX() > 0.5)
+                {
+                    m_Graphics.circle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.5, 36.0);
+                    m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+                    m_Graphics.addVertex((Obj.second->getCOM() - Vector2d(-0.5, 0.0))-m_pCamera->getCenter());
+                    m_Graphics.addVertex((Obj.second->getCOM() - Vector2d(+0.5, 0.0))-m_pCamera->getCenter());
+                    m_Graphics.endLine();
+                    m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+                    m_Graphics.addVertex((Obj.second->getCOM() - Vector2d(0.0, -0.5))-m_pCamera->getCenter());
+                    m_Graphics.addVertex((Obj.second->getCOM() - Vector2d(0.0, +0.5))-m_pCamera->getCenter());
+                    m_Graphics.endLine();
+                }
+            }
         }
     }
 }
@@ -1269,6 +1292,7 @@ void CVisualsManager::processFrame()
     this->drawWorld();
     this->drawKinematicsStates();
     this->drawBoundingBoxes();
+    this->drawCOM();
     this->drawGridHUD();
     this->drawTimers();
     this->drawConsole();
@@ -1347,6 +1371,12 @@ void CVisualsManager::myInitComInterface()
     m_pComInterface->registerFunction("toggle_bboxes",
                                       CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
                                       "Toggle bounding boxes on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_com",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_COM);}),
+                                      "Toggle center of mass (COM) on and off.",
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals", "visuals"
     );
