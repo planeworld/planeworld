@@ -364,7 +364,7 @@ void CPhysicsManager::processFrame()
     {    
         this->moveMasses(nFrame);
         this->collisionDetection();
-    //     this->updateCells();
+        this->updateCells();
         
         DEBUG(Log.setLoglevel(LOG_LEVEL_NOTICE);)
         m_pDataStorage->swapBack();
@@ -888,6 +888,27 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DOUBLE, "Angle"}},
                                            "physics", "physics"
                                          );
+        m_pComInterface->registerFunction("set_cell",
+                                          CCommand<void, std::string, int, int>(
+                                                [&](const std::string& _strName, const int _nX, const int _nY)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByNameBack()->at(_strName)->setCell(_nX, _nY);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                                }),
+                                          "Sets residing grid cell of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "Object name"},
+                                           {ParameterType::INT, "Cell X"},
+                                           {ParameterType::INT, "Cell Y"}},
+                                           "physics", "physics"
+                                         );
         
         // Sim package
         m_pComInterface->registerFunction("activate_thruster",
@@ -987,5 +1008,8 @@ void CPhysicsManager::updateCells()
 //             ci = m_pDataStorage->getObjectsByValueBack()->begin();
 //         m_pDataStorage->memorizeDynamicObject("CellUpdater", ci);
 //     }
-    
+    for (auto Obj : *m_pDataStorage->getObjectsByValueBack())
+    {
+        Obj.second->updateCell();
+    }
 }

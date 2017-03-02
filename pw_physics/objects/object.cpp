@@ -391,6 +391,21 @@ void CObject::setCell(const Vector2i& _vecCell)
     }    
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Method to set cell, overloaded to hand cell to bounding box.
+///
+/// \param _nCellX Grid cell of the object, x coordinate 
+/// \param _nCellY Grid cell of the object, x coordinate
+///
+////////////////////////////////////////////////////////////////////////////////
+void CObject::setCell(const int& _nGridX, const int& _nGridY)
+{
+    METHOD_ENTRY("CObject::setCell")
+
+    this->setCell(Vector2i(_nGridX, _nGridY));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Sets a new integrator for this instance

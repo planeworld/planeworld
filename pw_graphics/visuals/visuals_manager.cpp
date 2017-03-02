@@ -81,8 +81,8 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* 
 {
     METHOD_ENTRY("CVisualsManager::drawCircle")
     double   fRad      = _pCircle->getRadius();
-    Vector2d vecCenter = _pCircle->getCenter() - _pCamera->getCenter()/* +
-                         IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell())*/;
+    Vector2d vecCenter = _pCircle->getCenter() - _pCamera->getCenter() +
+                         IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell());
 
     if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&
         (vecCenter.norm() >  fRad-_pCamera->getBoundingCircleRadius())
@@ -465,7 +465,8 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
         {
             if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth() * m_Graphics.getResPMX() < 2.0)
             {
-                m_Graphics.dot(Obj.second->getCOM()-_pCamera->getCenter());
+                m_Graphics.dot(Obj.second->getCOM()-_pCamera->getCenter() +
+                               IGridUser::cellToDouble(Obj.second->getCell() - _pCamera->getCell()));
             }
             else
             {

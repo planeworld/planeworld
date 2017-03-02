@@ -96,6 +96,7 @@ class CObject : public IUniqueIDUser,
         void                setAngle(const double&);
         void                setAngleVelocity(const double&);
         void                setCell(const Vector2i&);
+        void                setCell(const int&, const int&);
         void                setOrigin(const Vector2d&);
         void                setOrigin(const double&, const double&);
         void                setDepths(const int&);

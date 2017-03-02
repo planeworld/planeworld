@@ -32,7 +32,6 @@
 #define KINEMATICS_STATE_H
 
 //--- Program header ---------------------------------------------------------//
-#include "grid_user.h"
 #include "log.h"
 #include "unique_id_referrer.h"
 #include "unique_id_user.h"
@@ -59,8 +58,7 @@ using namespace Eigen;
 /// planet.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CKinematicsState  : public IGridUser,
-                          public IUniqueIDUser,
+class CKinematicsState  : public IUniqueIDUser,
                           public IUniqueIDReferrer<CKinematicsState>
 {
     
