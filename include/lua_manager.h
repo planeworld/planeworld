@@ -91,11 +91,11 @@ class CLuaManager : public IComInterfaceProvider,
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline CLuaManager::CLuaManager()
+inline CLuaManager::CLuaManager() : m_strPhysicsInterface("")
 {
     METHOD_ENTRY("CLuaManager::CLuaManager")
     CTOR_CALL("CLuaManager::CLuaManager")
-
+    
     #ifdef PW_MULTITHREADING
         // Somehow, there is a problem with Selene and the module name if 
         // constructor is not inline. The error is pretty weird, lua 

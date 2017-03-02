@@ -187,11 +187,12 @@ bool CLuaManager::init()
         }
     }
     
-    if (!m_LuaState.Load(m_strPhysicsInterface))
-    {
-        ERROR_MSG("Lua Manager", "Cannot load lua file " << m_strPhysicsInterface << ".")
-        return false;
-    }
+    if (!m_strPhysicsInterface.empty())
+        if (!m_LuaState.Load(m_strPhysicsInterface))
+        {
+            ERROR_MSG("Lua Manager", "Cannot load lua file " << m_strPhysicsInterface << ".")
+            return false;
+        }
     
     return true;
 }
@@ -205,8 +206,11 @@ void CLuaManager::processFrame()
 {
     METHOD_ENTRY("CLuaManager::processFrame")
 
-    m_LuaState["physics_interface"]();
-    m_pComInterface->callWriters("lua");
+    if (!m_strPhysicsInterface.empty())
+    {
+        m_LuaState["physics_interface"]();
+        m_pComInterface->callWriters("lua");
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
