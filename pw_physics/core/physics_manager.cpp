@@ -42,7 +42,6 @@
 CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fG(6.67408e-11),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
-                                     m_fTimeAccel(1.0),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_bPaused(false),

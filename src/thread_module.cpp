@@ -36,7 +36,8 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 IThreadModule::IThreadModule() : m_fFrequency(THREAD_MODULE_DEFAULT_FREQUENCY),
-                                 m_fTimeSlept(1.0)
+                                 m_fTimeSlept(1.0),
+                                 m_fTimeAccel(1.0)
 {
     METHOD_ENTRY("IThreadModule::IThreadModule")
     CTOR_CALL("IThreadModule::IThreadModule")
@@ -67,11 +68,11 @@ IThreadModule::IThreadModule() : m_fFrequency(THREAD_MODULE_DEFAULT_FREQUENCY),
       while (m_bRunning)
       {
           this->processFrame();
-          m_fTimeSlept = ThreadModuleTimer.sleepRemaining(m_fFrequency);
+          m_fTimeSlept = ThreadModuleTimer.sleepRemaining(m_fFrequency*m_fTimeAccel);
           
           if (m_fTimeSlept < 0.0)
           {
-              NOTICE_MSG("Thread Module", "Execution time of thread " << m_strModuleName << " is too large: " << 1.0/m_fFrequency - m_fTimeSlept << 
+              DEBUG_MSG("Thread Module", "Execution time of thread " << m_strModuleName << " is too large: " << 1.0/m_fFrequency - m_fTimeSlept << 
                                           "s of " << 1.0/m_fFrequency << "s max.")
           }
       }

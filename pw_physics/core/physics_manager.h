@@ -115,7 +115,6 @@ class CPhysicsManager : public IComInterfaceProvider,
 
         double              m_fG;                   ///< Gravitational constant
         double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
-        double              m_fTimeAccel;           ///< Time acceleration of simulation
         
         Vector2d                    m_vecConstantGravitation;   ///< Vector for constant gravitation
 

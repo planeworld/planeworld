@@ -77,6 +77,7 @@ class IThreadModule
         
         double          m_fFrequency;       ///< Frequency of module update
         double          m_fTimeSlept;       ///< Sleep time of thread
+        double          m_fTimeAccel;       ///< Time acceleration of module
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
