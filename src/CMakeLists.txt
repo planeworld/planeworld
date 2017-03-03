@@ -23,9 +23,6 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/3rdparty/Selene/include
     ${CMAKE_HOME_DIRECTORY}/pw_io
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
-    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures
-    ${CMAKE_HOME_DIRECTORY}/pw_util/logging
-    ${CMAKE_HOME_DIRECTORY}/pw_util/math
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core
@@ -33,24 +30,34 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/universe
     ${CMAKE_HOME_DIRECTORY}/pw_system
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures
+    ${CMAKE_HOME_DIRECTORY}/pw_util/logging
+    ${CMAKE_HOME_DIRECTORY}/pw_util/math
+    ${CMAKE_HOME_DIRECTORY}/pw_util/pcg
     ${CMAKE_HOME_DIRECTORY}/pw_unit
     ${CMAKE_HOME_DIRECTORY}/include
 )
 
 SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/camera.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/game_state_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/input_manager.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_io/parzival.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/core/collision_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/debris_emitter.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/core/kinematics_state.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/objects_emitter.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/physics_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/sim_timer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/components/thruster.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/bounding_box.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/circle.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/geometry.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/planet.cpp
@@ -60,25 +67,19 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/debris.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/object.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/universe/star_system.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/universe/universe.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/com_console.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/com_interface.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_system/lua_manager.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_system/thread_module.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/world_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/pcg/namegenerator.cpp
         
-    bounding_box.cpp
-    camera.cpp
-    collision_manager.cpp
-    kinematics_state.cpp
-    lua_manager.cpp
-    namegenerator.cpp
-    parzival.cpp
     planeworld.cpp
-    star_system.cpp
-    thread_module.cpp
-    universe.cpp
-    world_data_storage.cpp
-    
 )
 
 ADD_EXECUTABLE (planeworld ${SRCS})
