@@ -42,6 +42,7 @@
 CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fG(6.67408e-11),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
+                                     m_strCellUpdateLast(""),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_bPaused(false),
@@ -531,6 +532,12 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"}},
                                           "system", "physics"
                                          );
+        m_pComInterface->registerFunction("get_time_accel",
+                                          CCommand<double>([&](){return m_fTimeAccel;}),
+                                          "Returns time acceleration factor, keeping step size.",
+                                          {{ParameterType::DOUBLE, "Time acceleration factor"}},
+                                          "system"
+                                         );
         m_pComInterface->registerFunction("pause",
                                           CCommand<void>([&](){this->m_bPaused = true;}),
                                           "Pauses physics simulation.",
@@ -981,34 +988,34 @@ void CPhysicsManager::updateCells()
 {
     METHOD_ENTRY("CPhysicsManager::updateCells")
     
-//     // Use double frequency just to avoid any surprises
-//     double fFreq = 6.0e9*m_pDataStorage->getTimeScale()*m_pDataStorage->getObjectsByValueBack()->size()/DEFAULT_CELL_SIZE_2;
-// 
-//     double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
-//     uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
-// 
-//     if (nNrOfObj > m_pDataStorage->getObjectsByValueBack()->size()) nNrOfObj = m_pDataStorage->getObjectsByValueBack()->size();
-//     
-//     m_fCellUpdateResidual = fNrOfObj - nNrOfObj;
-//     
-//     for (uint32_t i=0; i<nNrOfObj; ++i)
-//     {
-//         // Initialise the iterator for dynamic cell update.
-//         /// \todo Somehow, this doesn't work if initialised outside of loop. Evaluate.
-//         if (m_bCellUpdateFirst)
-//         {
-//             m_pDataStorage->memorizeDynamicObject("CellUpdater", m_pDataStorage->getObjectsByValueBack()->begin());
-//             m_bCellUpdateFirst = false;
-//         }
-//         
-//         ObjectsType::const_iterator ci = m_pDataStorage->recallDynamicObject("CellUpdater");
-//         ci->second->updateCell();
-//         if (++ci == m_pDataStorage->getObjectsByValueBack()->end())
-//             ci = m_pDataStorage->getObjectsByValueBack()->begin();
-//         m_pDataStorage->memorizeDynamicObject("CellUpdater", ci);
-//     }
-    for (auto Obj : *m_pDataStorage->getObjectsByValueBack())
+    // Use double frequency of v_max (v_max = speed of light = 3.0e9m/s)
+    // just to avoid any surprises
+    double      fFreq = 6.0e9*m_pDataStorage->getTimeScale()*
+                        m_fTimeAccel *
+                        m_pDataStorage->getObjectsByValueBack()->size()/DEFAULT_CELL_SIZE_2;
+                        
+    double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
+    uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
+
+    if (nNrOfObj > m_pDataStorage->getObjectsByValueBack()->size())
+        nNrOfObj = m_pDataStorage->getObjectsByValueBack()->size();
+    
+    m_fCellUpdateResidual = fNrOfObj - nNrOfObj;
+    
+    // From now on use ObjectsByName since they are ordered by name in a std::map.
+    // Hence, a correct entry point to continue cell update can be found
+    if (m_bCellUpdateFirst)
     {
-        Obj.second->updateCell();
+        m_strCellUpdateLast = m_pDataStorage->getObjectsByNameBack()->begin()->second->getName();
+        m_bCellUpdateFirst = false;
     }
+    
+    auto it = m_pDataStorage->getObjectsByNameBack()->find(m_strCellUpdateLast);
+    for (auto i=0u; i<nNrOfObj; ++i)
+    {
+        it->second->updateCell();
+        if (++it == m_pDataStorage->getObjectsByNameBack()->end())
+              it =  m_pDataStorage->getObjectsByNameBack()->begin();
+    }
+    m_strCellUpdateLast = it->second->getName();
 }

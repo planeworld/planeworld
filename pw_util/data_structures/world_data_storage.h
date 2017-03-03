@@ -33,6 +33,7 @@
 
 //--- Standard header --------------------------------------------------------//
 #include <list>
+#include <map>
 #include <unordered_map>
 #include <vector>
 
@@ -63,7 +64,7 @@ typedef std::unordered_map<UIDType, IEmitter*> EmittersByValueType;
 typedef CMultiBuffer<BUFFER_TRIPLE, EmittersByValueType, UIDType, IEmitter*> BufferedEmittersByValueType;
 
 /// Map of objects, accessed by name
-typedef std::unordered_map<std::string, CObject*> ObjectsByNameType;
+typedef std::map<std::string, CObject*> ObjectsByNameType;
 /// Map of buffered objects, accessed by name
 typedef CMultiBuffer<BUFFER_QUADRUPLE, ObjectsByNameType, std::string, CObject*> BufferedObjectsByNameType;
 /// Map of objects, accessed by UID value

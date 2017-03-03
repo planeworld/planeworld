@@ -121,6 +121,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         ComponentsType              m_Components;               ///< List of components
         EmittersType                m_Emitters;                 ///< List of emitters
         
+        std::string                 m_strCellUpdateLast;        ///< Last updated object concerning grid cells
         double                      m_fCellUpdateResidual;      ///< Residual for calculation of cell update
         bool                        m_bCellUpdateFirst;         ///< Indicates the first cell update (to initialise access)
         bool                        m_bPaused;                  ///< Indicates if physics caluculations are paused

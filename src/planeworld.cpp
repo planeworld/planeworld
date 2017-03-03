@@ -214,7 +214,6 @@ int main(int argc, char *argv[])
     CUniverse           Universe;
     CVisualsDataStorage VisualsDataStorage;
     CWorldDataStorage   WorldDataStorage;
-    CThruster           Thruster;
 
     CInputManager*      pInputManager   = nullptr;
     CLuaManager*        pLuaManager     = nullptr;
