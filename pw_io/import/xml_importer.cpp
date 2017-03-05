@@ -1016,7 +1016,7 @@ void CXMLImporter::createShapePolygon(CObject* const _pObject,
     if (!checkFile(_Node))
     {
         CPolygon* pPolygon = new CPolygon;
-        MEM_ALLOC("CPolygon")
+        MEM_ALLOC("IShape")
         
         if (std::string(_Node.attribute("polygon_type").as_string()) == "filled")
             pPolygon->setPolygonType(PolygonType::FILLED);

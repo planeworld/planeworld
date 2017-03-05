@@ -322,7 +322,6 @@ int main(int argc, char *argv[])
         }
         Universe.clone(XMLImporter.getUniverse());
     }
-    
     if (bGraphics)
     {
         pVisualsManager->setUniverse(&Universe);
@@ -377,6 +376,7 @@ int main(int argc, char *argv[])
         // Initialize window and graphics
         //--------------------------------------------------------------------------
         pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()), "Planeworld", sf::Style::Default);
+        MEM_ALLOC("WindowHandleType")
         
         pVisualsManager->setWindow(pWindow);
         pVisualsManager->initGraphics();

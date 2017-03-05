@@ -44,7 +44,7 @@ CPolygon* CPolygon::clone() const
     METHOD_ENTRY("CPolygon::clone")
     
     CPolygon* pClone = new CPolygon();
-    MEM_ALLOC("CPolygon")
+    MEM_ALLOC("IShape")
     
     pClone->copy(this);
     
