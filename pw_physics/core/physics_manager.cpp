@@ -637,6 +637,27 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::STRING, "Object name"}},
                                            "physics"
                                          );
+        m_pComInterface->registerFunction("get_angle_vel",
+                                          CCommand<double, std::string>(
+                                              [&](const std::string& _strName) -> double
+                                              {
+                                                double fAngVel = 0.0;
+                                                try
+                                                {
+                                                    fAngVel = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getAngleVelocity();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return fAngVel;
+                                              }),
+                                          "Returns angle velocity of a given object.",
+                                          {{ParameterType::DOUBLE, "Angle velocity"},
+                                           {ParameterType::STRING, "Object name"}},
+                                           "physics"
+                                         );
         m_pComInterface->registerFunction("get_inertia",
                                           CCommand<double, std::string>(
                                               [&](const std::string& _strName) -> double
