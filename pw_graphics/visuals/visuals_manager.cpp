@@ -513,15 +513,30 @@ void CVisualsManager::drawCOM() const
             {
                 if (m_Graphics.getResPMX() > 0.5)
                 {
-                    m_Graphics.circle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.5, 36.0);
-                    m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-                    m_Graphics.addVertex((Obj.second->getCOM() - Vector2d(-0.5, 0.0))-m_pCamera->getCenter());
-                    m_Graphics.addVertex((Obj.second->getCOM() - Vector2d(+0.5, 0.0))-m_pCamera->getCenter());
-                    m_Graphics.endLine();
-                    m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-                    m_Graphics.addVertex((Obj.second->getCOM() - Vector2d(0.0, -0.5))-m_pCamera->getCenter());
-                    m_Graphics.addVertex((Obj.second->getCOM() - Vector2d(0.0, +0.5))-m_pCamera->getCenter());
-                    m_Graphics.endLine();
+                    m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
+                    m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.5, 36.0);
+                    m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
+                    m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.3, 36.0);
+                    
+                    m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
+                    // Draw shapes centroids
+                    for (auto Shp : Obj.second->getGeometry()->getShapes())
+                    {
+                        m_Graphics.filledCircle(
+                            Obj.second->getKinematicsState().getPosition(
+                                Shp->getCentroid()
+                            ) - m_pCamera->getCenter(), 0.3, 36.0);
+                    }
+                    m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
+                    // Draw shapes centroids
+                    for (auto Shp : Obj.second->getGeometry()->getShapes())
+                    {
+                        m_Graphics.filledCircle(
+                            Obj.second->getKinematicsState().getPosition(
+                                Shp->getCentroid()
+                            ) - m_pCamera->getCenter(), 0.2, 36.0);
+                    }
+                    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
                 }
             }
         }
