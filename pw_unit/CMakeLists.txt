@@ -29,6 +29,12 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/include
 )
 
+SET(SRCS_MULTITHREADING
+    ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
+    pw_eval_multithreading.cpp
+)
+
 SET(SRCS_MULTI_BUFFER
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
@@ -43,10 +49,13 @@ SET(SRCS_UID
     pw_unit_uid.cpp
 )
 
+ADD_EXECUTABLE (pw_eval_multithreading ${SRCS_MULTITHREADING})
 ADD_EXECUTABLE (pw_unit_multi_buffer ${SRCS_MULTI_BUFFER})
 ADD_EXECUTABLE (pw_unit_uid ${SRCS_UID})
 
+
 INSTALL (TARGETS
+    pw_eval_multithreading
     pw_unit_multi_buffer
     pw_unit_uid
     RUNTIME DESTINATION bin
