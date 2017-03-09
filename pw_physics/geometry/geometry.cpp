@@ -172,30 +172,35 @@ void CGeometry::transform(const double& _fAngle, const Vector2d& _vecOrigin)
     
     // Initialise multi frame bounding box with previous time step
     ShapesType::const_iterator ci = m_Shapes.cbegin();
-    m_AABB = (*ci)->getBoundingBox();
-    while ((++ci) != m_Shapes.cend())
+    
+    // If there are any shapes, go on
+    if (ci != m_Shapes.cend())
     {
+        m_AABB = (*ci)->getBoundingBox();
+    
+        while ((++ci) != m_Shapes.cend())
+        {
+            m_AABB.update((*ci)->getBoundingBox());
+        }
         
-        m_AABB.update((*ci)->getBoundingBox());
-    }
-    
-    this->update();
-    
-    // Initialise single frame bounding box
-    m_AABBS.setLowerLeft(m_vecCOM+_vecOrigin);
-    m_AABBS.setUpperRight(m_vecCOM+_vecOrigin);
-    
-    // Update Bounding boxes with current time step
-    for (ShapesType::const_iterator ci = m_Shapes.cbegin();
-         ci != m_Shapes.cend(); ++ci)
-    {
-        (*ci)->transform(_fAngle, m_vecCOM, _vecOrigin);
+        this->update();
+        
+        // Initialise single frame bounding box
+        m_AABBS.setLowerLeft(m_vecCOM+_vecOrigin);
+        m_AABBS.setUpperRight(m_vecCOM+_vecOrigin);
+        
+        // Update Bounding boxes with current time step
+        for (ShapesType::const_iterator ci = m_Shapes.cbegin();
+            ci != m_Shapes.cend(); ++ci)
+        {
+            (*ci)->transform(_fAngle, m_vecCOM, _vecOrigin);
 
-        // Update depthlayers
-//         m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
+            // Update depthlayers
+    //         m_nDepthlayers |= (*ci)->getShapeCur()->getDepths();
 
-        m_AABB.update((*ci)->getBoundingBox());
-        m_AABBS.update((*ci)->getBoundingBox());
+            m_AABB.update((*ci)->getBoundingBox());
+            m_AABBS.update((*ci)->getBoundingBox());
+        }
     }
 }
 
