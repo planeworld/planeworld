@@ -1327,23 +1327,54 @@ void CVisualsManager::myInitComInterface()
 
     INFO_MSG("Visuals Manager", "Initialising com interace.")
     
-    m_pComInterface->registerFunction("cycle_camera",
+    m_pComInterface->registerFunction("cam_cycle",
                                       CCommand<void>([&](){this->cycleCamera();}),
                                       "Cycle through registered cameras",
                                       {{ParameterType::NONE,"No return value"}},
                                       "system", "visuals"
     );
-    m_pComInterface->registerFunction("get_current_camera",
+    m_pComInterface->registerFunction("cam_get_current",
                                       CCommand<CCamera*>([&](){return this->getCurrentCamera();}),
                                       "Returns pointer to active camera",
                                       {{ParameterType::UNDEFINED, "CCamera*, Currently active camera"}},
                                       "system"
     );
-    m_pComInterface->registerFunction("get_camera_zoom",
+    m_pComInterface->registerFunction("cam_get_zoom",
                                       CCommand<double>([&](){return m_pCamera->getZoom();}),
                                       "Returns zoom level of active camera",
                                       {{ParameterType::DOUBLE, "Zoom level of active camera"}},
                                       "system"
+    );
+    m_pComInterface->registerFunction("cam_rotate_by",
+                                      CCommand<void, double>([&](const double& _fAngle){m_pCamera->rotateBy(_fAngle);}),
+                                      "Rotate camera by given angle.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("cam_translate_by",
+                                      CCommand<void, double, double>([&](const double& _fX,
+                                                                         const double& _fY)
+                                      {m_pCamera->translateBy(Vector2d(_fX,_fY));}),
+                                      "Translate camera by given vector.",
+                                      {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::DOUBLE, "X component to translate the camera by"},
+                                       {ParameterType::DOUBLE, "Y component to translate the camera by"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("cam_zoom_by",
+                                      CCommand<void,double>([&](const double& _fZoom){m_pCamera->zoomBy(_fZoom);}),
+                                      "Zooms active camera by given level.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Level to zoom active camera by"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("cam_zoom_to",
+                                      CCommand<void,double>([&](const double& _fZoom){m_pCamera->zoomTo(_fZoom);}),
+                                      "Zooms active camera to given level.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Level to zoom active camera to"}},
+                                      "system","visuals"
     );
     m_pComInterface->registerFunction("resize_window",
                                       CCommand<void, double, double>([=](const double& _fX,
@@ -1362,27 +1393,6 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::DOUBLE, "Window height (y)"}
                                       },
                                       "system", "visuals"  
-    );
-    m_pComInterface->registerFunction("rotate_camera_by",
-                                      CCommand<void, double>([&](const double& _fAngle){m_pCamera->rotateBy(_fAngle);}),
-                                      "Rotate camera by given angle.",
-                                      {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
-                                      "system", "visuals"  
-    );
-    m_pComInterface->registerFunction("zoom_camera_by",
-                                      CCommand<void,double>([&](const double& _fZoom){m_pCamera->zoomBy(_fZoom);}),
-                                      "Zooms active camera by given level.",
-                                      {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::DOUBLE, "Level to zoom active camera by"}},
-                                      "system","visuals"
-    );
-    m_pComInterface->registerFunction("zoom_camera_to",
-                                      CCommand<void,double>([&](const double& _fZoom){m_pCamera->zoomTo(_fZoom);}),
-                                      "Zooms active camera to given level.",
-                                      {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::DOUBLE, "Level to zoom active camera to"}},
-                                      "system","visuals"
     );
     m_pComInterface->registerFunction("toggle_bboxes",
                                       CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
@@ -1419,15 +1429,5 @@ void CVisualsManager::myInitComInterface()
                                       "Toggle timers on and off.",
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals", "visuals"
-    );
-    m_pComInterface->registerFunction("translate_camera_by",
-                                      CCommand<void, double, double>([&](const double& _fX,
-                                                                         const double& _fY)
-                                      {m_pCamera->translateBy(Vector2d(_fX,_fY));}),
-                                      "Translate camera by given vector.",
-                                      {{ParameterType::NONE, "No return value"},
-                                       {ParameterType::DOUBLE, "X component to translate the camera by"},
-                                       {ParameterType::DOUBLE, "Y component to translate the camera by"}},
-                                      "system", "visuals"  
     );
 }
