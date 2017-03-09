@@ -16,10 +16,10 @@ function physics_interface()
     frequency = pw.system.get_lua_frequency()
     Frametime = 1.0/frequency
     
---     pw.universe.apply_force(Object["name"], "0.0", math.random()*200000000.0 - 100000000.0, "0.0", "0.0")
+--     pw.universe.obj_apply_force(Object["name"], "0.0", math.random()*200000000.0 - 100000000.0, "0.0", "0.0")
     
-    Object["p_x"], Object["p_y"] = pw.physics.get_position_ref(Object["name"], ObjectRef["name2"])
-    Object["v_x"], Object["v_y"] = pw.physics.get_velocity_ref(Object["name"], ObjectRef["name2"])
+    Object["p_x"], Object["p_y"] = pw.physics.obj_get_position_ref(Object["name"], ObjectRef["name2"])
+    Object["v_x"], Object["v_y"] = pw.physics.obj_get_velocity_ref(Object["name"], ObjectRef["name2"])
     
     output(Object)
     
