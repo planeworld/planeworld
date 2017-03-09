@@ -32,7 +32,7 @@
 
 #include "debris_emitter.h"
 #include "joint.h"
-#include "physics_manager.h"
+#include "shape.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -104,6 +104,86 @@ CPhysicsManager::~CPhysicsManager()
             DOM_MEMF(DEBUG_MSG("CThruster", "Memory already freed."))
         }
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create an object and insert to world data storage
+///
+/// \return UID value of object
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createObject()
+{
+    METHOD_ENTRY("CPhysicsManager::createObject")
+    
+    CObject* pObject = new CObject();
+    MEM_ALLOC("CObject")
+    
+    m_ObjectsToBeAddedToWorld.enqueue(pObject);
+    
+    return pObject->getUID();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create a shape of given type
+///
+/// \param _ShapeType Type of shape to be created
+///
+/// \return UID value of object
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createShape(const ShapeType _ShapeType)
+{
+    METHOD_ENTRY("CPhysicsManager::createShape")
+    
+    UIDType nUID=0u;
+    
+    switch (_ShapeType)
+    {
+        case ShapeType::CIRCLE:
+        {
+            CCircle* pCircle = new CCircle();
+            MEM_ALLOC("IShape")
+            nUID = pCircle->getUID();
+            m_ShapesToBeAddedToWorld.enqueue(pCircle);
+            break;
+        }
+        case ShapeType::PLANET:
+        {
+            CPlanet* pPlanet = new CPlanet();
+            MEM_ALLOC("IShape")
+            nUID = pPlanet->getUID();
+            m_ShapesToBeAddedToWorld.enqueue(pPlanet);
+            break;
+        }
+        default:
+        {
+            WARNING_MSG("Physics Manager", "Unknown shape type. Cannot create shape")
+        }
+    }
+//     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    
+//     std::unique_lock<std::mutex> lk(m);
+//     cv.wait(lk, []{return processed;});
+    
+    return nUID;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create a shape of given type
+///
+/// \param _strShapeType Type of shape to be created as string
+///
+/// \return UID value of object
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createShape(const std::string& _strShapeType)
+{
+    METHOD_ENTRY("CPhysicsManager::createShape")
+    return this->createShape(mapStringToShapeType[_strShapeType]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -351,6 +431,19 @@ void CPhysicsManager::processFrame()
     METHOD_ENTRY("CPhysicsManager::processFrame")
 
     static auto nFrame = 0u;
+    
+    // Add new objects to world
+    CObject* pObj = nullptr;
+    while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
+    {
+        m_pDataStorage->addObject(pObj);
+    }
+    IShape* pShp = nullptr;
+    while (m_ShapesToBeAddedToWorld.try_dequeue(pShp))
+    {
+        m_pDataStorage->addShape(pShp);
+    }
+    
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {
         for (auto i=0u; i < m_SimTimer.size(); ++i)        
@@ -518,13 +611,28 @@ void CPhysicsManager::myInitComInterface()
     INFO_MSG("Physics Manager", "Initialising com interace.")
     if (m_pComInterface != nullptr)
     {
+        //----------------------------------------------------------------------
         // System package
+        //----------------------------------------------------------------------
         m_pComInterface->registerFunction("accelerate_time",
                                           CCommand<void,bool>([&](bool _bAllowTimeScaling){this->accelerateTime(_bAllowTimeScaling);}),
                                           "Accelerates time using more cpu power unless scaling is allowed, which will increase the time step.",
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::BOOL, "Flag if time scaling by increasing time step is allowed (reduces accuracy)"}},
                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("create_obj",
+                                          CCommand<int>([&]() -> int {return this->createObject();}),
+                                          "Creates a default object.",
+                                          {{ParameterType::INT, "UID of object"}},
+                                          "system"
+                                         );
+        m_pComInterface->registerFunction("create_shp",
+                                          CCommand<int, std::string>([&](const std::string& _strShapeType) -> int {return this->createShape(_strShapeType);}),
+                                          "Creates a shape.",
+                                          {{ParameterType::INT, "UID of shape"},
+                                           {ParameterType::STRING, "Shape type"}},
+                                          "system"
                                          );
         m_pComInterface->registerFunction("decelerate_time",
                                           CCommand<void>([&](){this->decelerateTime();}),
@@ -542,6 +650,28 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<void>([&](){this->m_bPaused = true;}),
                                           "Pauses physics simulation.",
                                           {{ParameterType::NONE, "No return value"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_add_shp",
+                                          CCommand<void, std::string, int>(
+                                                [&](const std::string& _strName, const int _nUID)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByNameBack()->at(_strName)->getGeometry()->addShape(
+                                                            static_cast<IShape*>(m_pDataStorage->getShapesByValue()->at(_nUID))
+                                                        );
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                                }),
+                                          "Add shape with given UID to object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "Object name"},
+                                           {ParameterType::INT, "UID of shape to be added"}},
                                            "system", "physics"
                                          );
         m_pComInterface->registerFunction("process_one_frame",
@@ -586,9 +716,37 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "ID of timer"}},
                                            "system", "physics"
                                          );
-        
+        //----------------------------------------------------------------------
         // Physics package
-        m_pComInterface->registerFunction("apply_force",
+        //----------------------------------------------------------------------
+        m_pComInterface->registerFunction("get_nrof_timers",
+                                          CCommand<int>([&]() -> int {return this->m_SimTimer.size();}),
+                                          "Provides number of simulation timers.",
+                                          {{ParameterType::INT, "Number of simulation timers"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_mass",
+                                          CCommand<double, std::string>(
+                                              [&](const std::string& _strName) -> double
+                                              {
+                                                double fMass = 1.0;
+                                                try
+                                                {
+                                                    fMass = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getMass();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return fMass;
+                                              }),
+                                          "Returns mass of a given object.",
+                                          {{ParameterType::DOUBLE, "Mass"},
+                                           {ParameterType::STRING, "Object name"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_apply_force",
                                           CCommand<void, std::string, double, double, double, double>(
                                               [&](const std::string& _strName,
                                                   const double _fForceX,
@@ -616,7 +774,7 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DOUBLE, "Point of attack Y"}},
                                            "physics", "physics"
                                          );
-        m_pComInterface->registerFunction("get_angle",
+        m_pComInterface->registerFunction("obj_get_angle",
                                           CCommand<double, std::string>(
                                               [&](const std::string& _strName) -> double
                                               {
@@ -637,7 +795,7 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::STRING, "Object name"}},
                                            "physics"
                                          );
-        m_pComInterface->registerFunction("get_angle_vel",
+        m_pComInterface->registerFunction("obj_get_angle_vel",
                                           CCommand<double, std::string>(
                                               [&](const std::string& _strName) -> double
                                               {
@@ -658,7 +816,7 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::STRING, "Object name"}},
                                            "physics"
                                          );
-        m_pComInterface->registerFunction("get_inertia",
+        m_pComInterface->registerFunction("obj_get_inertia",
                                           CCommand<double, std::string>(
                                               [&](const std::string& _strName) -> double
                                               {
@@ -679,34 +837,7 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::STRING, "Object name"}},
                                            "physics"
                                          );
-        m_pComInterface->registerFunction("get_mass",
-                                          CCommand<double, std::string>(
-                                              [&](const std::string& _strName) -> double
-                                              {
-                                                double fMass = 1.0;
-                                                try
-                                                {
-                                                    fMass = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getMass();
-                                                }
-                                                catch (const std::out_of_range& oor)
-                                                {
-                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
-                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
-                                                }
-                                                return fMass;
-                                              }),
-                                          "Returns mass of a given object.",
-                                          {{ParameterType::DOUBLE, "Mass"},
-                                           {ParameterType::STRING, "Object name"}},
-                                           "physics"
-                                         );
-        m_pComInterface->registerFunction("get_nrof_timers",
-                                          CCommand<int>([&]() -> int {return this->m_SimTimer.size();}),
-                                          "Provides number of simulation timers.",
-                                          {{ParameterType::INT, "Number of simulation timers"}},
-                                           "physics"
-                                         );
-        m_pComInterface->registerFunction("get_position",
+        m_pComInterface->registerFunction("obj_get_position",
                                           CCommand<Vector2d, std::string>(
                                               [&](const std::string& _strName) -> const Vector2d
                                               {
@@ -727,7 +858,7 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::STRING, "Object name"}},
                                            "physics"
                                          );
-        m_pComInterface->registerFunction("get_position_ref",
+        m_pComInterface->registerFunction("obj_get_position_ref",
                                           CCommand<Vector2d, std::string, std::string>(
                                               [&](const std::string& _strName, const std::string& _strRef) -> const Vector2d
                                               {
@@ -750,7 +881,28 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::STRING, "Reference object's name (Obj_2)"}},
                                            "physics"
                                          );
-        m_pComInterface->registerFunction("get_velocity_ref",
+        m_pComInterface->registerFunction("obj_get_velocity",
+                                          CCommand<Vector2d, std::string>(
+                                              [&](const std::string& _strName) -> const Vector2d
+                                              {
+                                                Vector2d vecVelocity; vecVelocity.setZero();
+                                                try
+                                                {
+                                                    vecVelocity = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getKinematicsState().getVelocity();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("orage", "Unknown object <" << _strName << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return vecVelocity;
+                                              }),
+                                          "Returns velocity of a given object.",
+                                          {{ParameterType::VEC2DDOUBLE, "Velocity (x, y)"},
+                                           {ParameterType::STRING, "Object name"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_velocity_ref",
                                           CCommand<Vector2d, std::string, std::string>(
                                               [&](const std::string& _strName, const std::string& _strRef) -> const Vector2d
                                               {
@@ -772,6 +924,95 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::STRING, "Object name (Obj_1)"},
                                            {ParameterType::STRING, "Reference object's name (Obj_2)"}},
                                            "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_set_angle",
+                                          CCommand<void, std::string, double>(
+                                                [&](const std::string& _strName, const double& _fAngle)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByNameBack()->at(_strName)->setAngle(_fAngle);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                                }),
+                                          "Sets rotation angle of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "Object name"},
+                                           {ParameterType::DOUBLE, "Angle"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_set_cell",
+                                          CCommand<void, std::string, int, int>(
+                                                [&](const std::string& _strName, const int _nX, const int _nY)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByNameBack()->at(_strName)->setCell(_nX, _nY);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                                }),
+                                          "Sets residing grid cell of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "Object name"},
+                                           {ParameterType::INT, "Cell X"},
+                                           {ParameterType::INT, "Cell Y"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("shp_set_mass",
+                                          CCommand<void, int, double>(
+                                                [&](const int _nUID, const double& _fMass)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getShapesByValue()->at(_nUID)->setMass(_fMass);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown shape with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                                }),
+                                          "Set mass of shape with given UID.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Shapes UID"},
+                                           {ParameterType::DOUBLE, "Mass to be set"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("shp_set_radius",
+                                          CCommand<void, int, double>(
+                                                [&](const int _nUID, const double& _fRad)
+                                                {
+                                                    try
+                                                    {
+                                                        if (static_cast<CCircle*>(m_pDataStorage->getShapesByValue()->at(_nUID))->getShapeType() == ShapeType::CIRCLE)
+                                                        {
+                                                            static_cast<CCircle*>(m_pDataStorage->getShapesByValue()->at(_nUID))->setRadius(_fRad);
+                                                        }
+                                                        else
+                                                        {
+                                                            WARNING_MSG("World Data Storage", "Wrong shape type of shape with UID <" << _nUID << ">")
+                                                            throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                        }
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown shape with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                                }),
+                                          "Set radius of shape (if applicable) with given UID.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Shapes UID"},
+                                           {ParameterType::DOUBLE, "Radius to be set"}},
+                                           "physics", "physics"
                                          );
         m_pComInterface->registerFunction("get_time",
                                           CCommand<double>([&]() -> double {return this->m_SimTimer[0].getSecondsRaw();}),
@@ -874,70 +1115,10 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Index of timer"}},
                                            "physics"
                                          );
-        m_pComInterface->registerFunction("get_velocity",
-                                          CCommand<Vector2d, std::string>(
-                                              [&](const std::string& _strName) -> const Vector2d
-                                              {
-                                                Vector2d vecVelocity; vecVelocity.setZero();
-                                                try
-                                                {
-                                                    vecVelocity = m_pDataStorage->getObjectsByNameBack()->at(_strName)->getKinematicsState().getVelocity();
-                                                }
-                                                catch (const std::out_of_range& oor)
-                                                {
-                                                    WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
-                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
-                                                }
-                                                return vecVelocity;
-                                              }),
-                                          "Returns velocity of a given object.",
-                                          {{ParameterType::VEC2DDOUBLE, "Velocity (x, y)"},
-                                           {ParameterType::STRING, "Object name"}},
-                                           "physics"
-                                         );
-        m_pComInterface->registerFunction("set_angle",
-                                          CCommand<void, std::string, double>(
-                                                [&](const std::string& _strName, const double& _fAngle)
-                                                {
-                                                    try
-                                                    {
-                                                        m_pDataStorage->getObjectsByNameBack()->at(_strName)->setAngle(_fAngle);
-                                                    }
-                                                    catch (const std::out_of_range& oor)
-                                                    {
-                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
-                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
-                                                    }
-                                                }),
-                                          "Sets rotation angle of a given object.",
-                                          {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::STRING, "Object name"},
-                                           {ParameterType::DOUBLE, "Angle"}},
-                                           "physics", "physics"
-                                         );
-        m_pComInterface->registerFunction("set_cell",
-                                          CCommand<void, std::string, int, int>(
-                                                [&](const std::string& _strName, const int _nX, const int _nY)
-                                                {
-                                                    try
-                                                    {
-                                                        m_pDataStorage->getObjectsByNameBack()->at(_strName)->setCell(_nX, _nY);
-                                                    }
-                                                    catch (const std::out_of_range& oor)
-                                                    {
-                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
-                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
-                                                    }
-                                                }),
-                                          "Sets residing grid cell of a given object.",
-                                          {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::STRING, "Object name"},
-                                           {ParameterType::INT, "Cell X"},
-                                           {ParameterType::INT, "Cell Y"}},
-                                           "physics", "physics"
-                                         );
         
+        //----------------------------------------------------------------------
         // Sim package
+        //----------------------------------------------------------------------
         m_pComInterface->registerFunction("activate_thruster",
                                           CCommand<double,std::string,double>(
                                               [&](const std::string& _strName, const double& _fThrust) -> double 

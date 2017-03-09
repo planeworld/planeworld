@@ -184,10 +184,57 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
     m_ObjectsByName.add(_pObject->getName(),aObjects);
     m_ObjectsByValue.add(_pObject->getUID(), aObjects);
     
+    for (auto Shape : _pObject->getGeometry()->getShapes())
+    {
+        m_ShapesByValue.insert(std::pair<UIDType, IShape*>(Shape->getUID(), Shape));
+    }
+    
     if (!this->addUIDUser(aUIDUsers)) return false;
     return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Explicitely add a shape to data storage
+///
+/// This method adds the given shape to data storage, which is normally done
+/// by its object (\ref addObject). It is needed, if shapes are created and
+/// externally while not added to an object or if the shape is added for an
+/// object that is already registered to data storage.
+///
+/// \param _pShape Shape that should be added to map
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWorldDataStorage::addShape(IShape* _pShape)
+{
+    METHOD_ENTRY("CWorldDataStorage::addShape")
+    m_ShapesByValue.insert(std::pair<UIDType, IShape*>(_pShape->getUID(), _pShape));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Updates an object whichs structure was modified externally
+///
+/// This method updates an object if structural modifications where done. At
+/// the moment, this applies for adding a new shape, which than has to be
+/// added to the map of shapes.
+///
+/// \param _nUID UID of object that should be updated
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWorldDataStorage::updateObject(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::updateObject")
+
+    for (auto pShape : m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->at(_nUID)->getGeometry()->getShapes())
+    {
+        if (m_ShapesByValue.find(pShape->getUID()) == m_ShapesByValue.end())
+        {
+            m_ShapesByValue.insert(std::pair<UIDType, IShape*>(pShape->getUID(), pShape));
+            break;
+        }
+    }
+}
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Add a UID user to buffer
@@ -261,36 +308,6 @@ void CWorldDataStorage::swapFront()
         m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_bFrontNew = false;
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Store index of specific object
-///
-/// \param _strRef Reference name to access object
-/// \param _It Iterator pointing to object to be store
-///
-///////////////////////////////////////////////////////////////////////////////
-void CWorldDataStorage::memorizeDynamicObject(const std::string& _strRef,
-                                              const ObjectsByNameType::const_iterator _It)
-{
-    METHOD_ENTRY("CWorldDataStorage::memorizeDynamicObject")
-    m_DynamicObjectsMemory[_strRef] = _It;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Get index of specific memorized object
-///
-/// \param _strRef Reference name to access object
-///
-/// \return Iterator pointing to memorized object
-///
-///////////////////////////////////////////////////////////////////////////////
-const ObjectsByNameType::const_iterator CWorldDataStorage::recallDynamicObject(const std::string& _strRef)
-{
-    METHOD_ENTRY("CWorldDataStorage::recallDynamicObject")
-    return m_DynamicObjectsMemory.at(_strRef);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -530,3 +547,4 @@ bool CWorldDataStorage::addUIDUser(const std::array<IUniqueIDUser*, BUFFER_QUADR
         return true;
     }
 }
+

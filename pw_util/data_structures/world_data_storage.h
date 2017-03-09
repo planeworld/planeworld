@@ -71,6 +71,8 @@ typedef CMultiBuffer<BUFFER_QUADRUPLE, ObjectsByNameType, std::string, CObject*>
 typedef std::unordered_map<UIDType, CObject*> ObjectsByValueType;
 /// Map of buffered objects, accessed by UID value
 typedef CMultiBuffer<BUFFER_QUADRUPLE, ObjectsByValueType, UIDType, CObject*> BufferedObjectsByValueType;
+/// Map of shapes, accessed by UID value
+typedef std::unordered_map<UIDType, IShape*> ShapesByValueType;
 
 /// Vector of UID users, accessed by UID value
 typedef std::vector<IUniqueIDUser*> UIDUsersByValueType;
@@ -98,14 +100,14 @@ class CWorldDataStorage
         const JointsType&                   getJoints() const;
         const double&                       getTimeScale() const;
         
-        const ObjectsByNameType::const_iterator recallDynamicObject(const std::string&);
-        
-        
         //--- Methods --------------------------------------------------------//
         bool addDebris(CDebris*);
         void addJoint(IJoint*);
         bool addObject(CObject*);
+        void addShape(IShape*);
         bool addUIDUser(IUniqueIDUser*);
+        
+        void updateObject(const UIDType);
         
         BufferedObjectsByNameType&  getObjectsBuffer();
         DebrisByNameType*           getDebrisByNameBack();
@@ -118,11 +120,10 @@ class CWorldDataStorage
         UIDUsersByValueType*        getUIDUsersByValueFront();
         UIDUsersByValueType*        getUIDUsersByValueBack();
         
+        ShapesByValueType*          getShapesByValue();
+        
         void                        swapBack();
         void                        swapFront();
-        
-        void memorizeDynamicObject(const std::string&,
-                                   const ObjectsByNameType::const_iterator);
         
         void setTimeScale(const double&);
         
@@ -142,11 +143,11 @@ class CWorldDataStorage
         BufferedObjectsByValueType  m_ObjectsByValue;           ///< Buffered objects, accessed by UID value
         BufferedUIDUsersByValueType m_UIDUsersByValue;          ///< Buffered UID users, accessed by value
         
+        ShapesByValueType           m_ShapesByValue;            ///< Shapes, accessed by UID value
+        
         JointsType                  m_Joints;                   ///< List of joints
         UIDUserType                 m_UIDUserRef;               ///< Store objects referred by their UID
         
-        std::unordered_map<std::string, ObjectsByNameType::const_iterator> m_DynamicObjectsMemory; ///< Stores index to specific object
-
         std::mutex                  m_MutexFrontNew;            ///< Mutex for thread safety when swapping
         bool                        m_bFrontNew;                ///< Indicates new information for front buffer
         double                      m_fTimeScale;               ///< Factor for global acceleration of time
@@ -296,6 +297,19 @@ inline UIDUsersByValueType* CWorldDataStorage::getUIDUsersByValueBack()
 {
     METHOD_ENTRY("CWorldDataStorage::getUIDUsersByValueBack")
     return m_UIDUsersByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns shapes, accessed by value
+///
+/// \return Shapes, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline ShapesByValueType* CWorldDataStorage::getShapesByValue()
+{
+    METHOD_ENTRY("CWorldDataStorage::getShapesByValue")
+    return &m_ShapesByValue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -45,10 +45,17 @@
 
 //--- Misc header ------------------------------------------------------------//
 
+//--- Constants --------------------------------------------------------------//
 const bool        PHYSICS_ALLOW_STEP_SIZE_INC   = true;     ///< Increasing step size when accelerating is allowed
 const bool        PHYSICS_FORBID_STEP_SIZE_INC  = false;    ///< Increasing step size when accelerating is forbidden
 const double      PHYSICS_DEFAULT_FREQUENCY     = 200.0;    ///< Default physics frequency
 const double      PHYSICS_DEBRIS_DEFAULT_FREQUENCY = 30.0;  ///< Default physics frequency for debris
+
+//--- Type definitions -------------------------------------------------------//
+
+/// Type for concurrent object queue 
+typedef moodycamel::ConcurrentQueue<CObject*> ObjectsQueueType;
+typedef moodycamel::ConcurrentQueue<IShape*>  ShapesQueueType;  
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -73,6 +80,10 @@ class CPhysicsManager : public IComInterfaceProvider,
         CUniverse*                        getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
+        UIDType createObject();
+        UIDType createShape(const ShapeType);
+        UIDType createShape(const std::string&);
+        
         void setConstantGravity(const Vector2d&);
         void setFrequencyDebris(const double&);
         void setUniverse(CUniverse* const);
@@ -109,12 +120,15 @@ class CPhysicsManager : public IComInterfaceProvider,
         void collisionDetection();
         void myInitComInterface();
         void updateCells();
+        
+        ObjectsQueueType    m_ObjectsToBeAddedToWorld;          ///< Objects already created to be added to world
+        ShapesQueueType     m_ShapesToBeAddedToWorld;           ///< Shapes already created to be added to world
       
-        CUniverse*          m_pUniverse;            ///< The procedurally generated universe
-        CCollisionManager   m_CollisionManager;     ///< Instance for collision handling
+        CUniverse*          m_pUniverse;                        ///< The procedurally generated universe
+        CCollisionManager   m_CollisionManager;                 ///< Instance for collision handling
 
-        double              m_fG;                   ///< Gravitational constant
-        double              m_fFrequencyDebris;     ///< Frequency of debris physics processing
+        double              m_fG;                               ///< Gravitational constant
+        double              m_fFrequencyDebris;                 ///< Frequency of debris physics processing
         
         Vector2d                    m_vecConstantGravitation;   ///< Vector for constant gravitation
 

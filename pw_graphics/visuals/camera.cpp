@@ -484,7 +484,7 @@ void CCamera::updateWithHook()
     
     std::array<Vector2d,4> vecFrame;
     
-    m_vecCenter = m_KinematicsState.getOrigin();// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
+    m_vecCenter = m_KinematicsState.getOrigin();
 
     // m_vecCenter is in absolute coordinates while m_vecCell is zero. Thus, they
     // have to be separated:
