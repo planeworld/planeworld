@@ -156,7 +156,7 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
     //int      nSeed     = _pPlanet->getSeed();
     //double   fSmooth   = _pPlanet->getSmoothness();
     Vector2d vecCenter = _pPlanet->getCenter()-_pCamera->getCenter() +
-                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;
+                         IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell());
     
     if ((vecCenter.norm() <= fRad+fHeight+_pCamera->getBoundingCircleRadius()) &&
         (vecCenter.norm() >  fRad-fHeight-_pCamera->getBoundingCircleRadius())
@@ -387,7 +387,7 @@ void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, CCamer
     METHOD_ENTRY("CVisualsManager::drawPolygon")
     m_Graphics.polygon(_pPolygon->getVertices(), _pPolygon->getPolygonType(),
                 -_pCamera->getCenter() + 
-                (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2);
+                IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -422,8 +422,8 @@ void CVisualsManager::drawDebris(CCamera* const _pCamera) const
                         if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
                         {
                             m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
-                            m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter(),
-                    //                         IGridUser::cellToDouble(pDebris->getCell() - _pCamera->getCell()),
+                            m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
+                                            IGridUser::cellToDouble(Debris.second->getCell() - _pCamera->getCell()),
                                             (double(Debris.second->getPositions()->size()-i) * 0.01 + 3.0)
                             );
                         }
