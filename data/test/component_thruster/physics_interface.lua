@@ -4,10 +4,10 @@ K_p = 50000.0
 K_v = 100000.0
 
 Object = {}
-Object["name"] = "RocketBody"
+Object["uid_rocket"] = pw.system.get_uid("RocketBody")
 
 ObjectRef = {}
-ObjectRef["name2"] = "Earth"
+ObjectRef["uid_earth"] = pw.system.get_uid("Earth")
 
 pw.system.pause()
 
@@ -18,8 +18,8 @@ function physics_interface()
     
 --     pw.universe.obj_apply_force(Object["name"], "0.0", math.random()*200000000.0 - 100000000.0, "0.0", "0.0")
     
-    Object["p_x"], Object["p_y"] = pw.physics.obj_get_position_ref(Object["name"], ObjectRef["name2"])
-    Object["v_x"], Object["v_y"] = pw.physics.obj_get_velocity_ref(Object["name"], ObjectRef["name2"])
+    Object["p_x"], Object["p_y"] = pw.physics.obj_get_position_ref(Object["uid_rocket"], ObjectRef["uid_earth"])
+    Object["v_x"], Object["v_y"] = pw.physics.obj_get_velocity_ref(Object["uid_rocket"], ObjectRef["uid_earth"])
     
     output(Object)
     

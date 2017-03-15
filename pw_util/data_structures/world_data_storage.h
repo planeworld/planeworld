@@ -78,6 +78,8 @@ typedef std::unordered_map<UIDType, IShape*> ShapesByValueType;
 typedef std::vector<IUniqueIDUser*> UIDUsersByValueType;
 /// Vector of buffered UID users, accessed by UID value
 typedef CMultiBuffer<BUFFER_QUADRUPLE, UIDUsersByValueType, IUniqueIDUser*> BufferedUIDUsersByValueType;
+/// Map of UIDs, accessed by name
+typedef std::unordered_map<std::string, UIDType> UIDsByNameType;
 
 const std::uint16_t WDS_DEFAULT_UID_BUFFER_SIZE = 32768; ///< Default size of value buffer
 
@@ -119,7 +121,8 @@ class CWorldDataStorage
         ObjectsByValueType*         getObjectsByValueFront();
         UIDUsersByValueType*        getUIDUsersByValueFront();
         UIDUsersByValueType*        getUIDUsersByValueBack();
-        
+
+        UIDsByNameType*             getUIDsByName();
         ShapesByValueType*          getShapesByValue();
         
         void                        swapBack();
@@ -144,6 +147,7 @@ class CWorldDataStorage
         BufferedUIDUsersByValueType m_UIDUsersByValue;          ///< Buffered UID users, accessed by value
         
         ShapesByValueType           m_ShapesByValue;            ///< Shapes, accessed by UID value
+        UIDsByNameType              m_UIDsByName;               ///< UIDs of entities, accessed by name
         
         JointsType                  m_Joints;                   ///< List of joints
         UIDUserType                 m_UIDUserRef;               ///< Store objects referred by their UID
@@ -297,6 +301,19 @@ inline UIDUsersByValueType* CWorldDataStorage::getUIDUsersByValueBack()
 {
     METHOD_ENTRY("CWorldDataStorage::getUIDUsersByValueBack")
     return m_UIDUsersByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns UIDs, accessed by name
+///
+/// \return UIDs, accessed by name
+///
+////////////////////////////////////////////////////////////////////////////////
+inline UIDsByNameType* CWorldDataStorage::getUIDsByName()
+{
+    METHOD_ENTRY("CWorldDataStorage::getUIDsByName")
+    return &m_UIDsByName;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

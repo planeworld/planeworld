@@ -258,6 +258,7 @@ bool CWorldDataStorage::addUIDUser(IUniqueIDUser* _pUIDUser)
     else
     {
         m_UIDUsersByValue.setAt(_pUIDUser->getUID(), _pUIDUser);
+        m_UIDsByName.insert(std::pair<std::string,UIDType>(_pUIDUser->getName(), _pUIDUser->getUID()));
         return true;
     }
 }
@@ -544,6 +545,7 @@ bool CWorldDataStorage::addUIDUser(const std::array<IUniqueIDUser*, BUFFER_QUADR
     else
     {
         m_UIDUsersByValue.setAt(_aUIDUser[0]->getUID(), _aUIDUser);
+        m_UIDsByName.insert(std::pair<std::string,UIDType>(_aUIDUser[0]->getName(), _aUIDUser[0]->getUID()));
         return true;
     }
 }

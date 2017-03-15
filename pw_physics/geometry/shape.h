@@ -118,19 +118,19 @@ class IShape : public IUniqueIDUser
 
 //--- Enum parser ------------------------------------------------------------//
 const std::unordered_map<ShapeType, std::string> mapShapeTypeToString = {
-    {ShapeType::NONE, "shape_none"},
-    {ShapeType::CIRCLE, "shape_circle"},
-    {ShapeType::PLANET, "shape_planet"},
-    {ShapeType::POLYGON, "shape_polygon"},
-    {ShapeType::TERRAIN, "shape_terrain"}
+    {ShapeType::NONE, "shp_none"},
+    {ShapeType::CIRCLE, "shp_circle"},
+    {ShapeType::PLANET, "shp_planet"},
+    {ShapeType::POLYGON, "shp_polygon"},
+    {ShapeType::TERRAIN, "shp_terrain"}
 }; ///< Map from ShapeType to string
 
 static std::unordered_map<std::string, ShapeType> mapStringToShapeType = {
-    {"shape_none", ShapeType::NONE},
-    {"shape_circle", ShapeType::CIRCLE},
-    {"shape_planet", ShapeType::PLANET},
-    {"shape_polygon", ShapeType::POLYGON},
-    {"shape_terrain", ShapeType::TERRAIN}
+    {"shp_none", ShapeType::NONE},
+    {"shp_circle", ShapeType::CIRCLE},
+    {"shp_planet", ShapeType::PLANET},
+    {"shp_polygon", ShapeType::POLYGON},
+    {"shp_terrain", ShapeType::TERRAIN}
 }; ///< Map from string to ShapeType
 
 //--- Implementation is done here for inline optimisation --------------------//

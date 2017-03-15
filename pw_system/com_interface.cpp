@@ -131,6 +131,13 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 oss << this->call<double>(strName);
                 break;
             }
+            case SignatureType::DOUBLE_INT:
+            {
+                int nParam(0);
+                iss >> nParam;
+                oss << this->call<double,int>(strName, nParam);
+                break;
+            }
             case SignatureType::DOUBLE_STRING:
             {
                 std::string strParam = "";
@@ -199,6 +206,23 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 this->call<void,int>(strName, nParam);
                 break;
             }
+            case SignatureType::NONE_2INT:
+            {
+                int nParam1(0);
+                int nParam2(0);
+                iss >> nParam1 >> nParam2;
+                this->call<void,int,int>(strName, nParam1, nParam2);
+                break;
+            }
+            case SignatureType::NONE_3INT:
+            {
+                int nParam1(0);
+                int nParam2(0);
+                int nParam3(0);
+                iss >> nParam1 >> nParam2 >> nParam3;
+                this->call<void,int,int>(strName, nParam1, nParam2, nParam3);
+                break;
+            }
             case SignatureType::NONE_INT_DOUBLE:
             {
                 int    nParam = 0;
@@ -214,13 +238,13 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 this->call<void,std::string>(strName, strS);
                 break;
             }
-            case SignatureType::NONE_STRING_4DOUBLE:
+            case SignatureType::NONE_INT_4DOUBLE:
             {
-                std::string strS;
-                iss >> strS;
+                int nParam(0);
+                iss >> nParam;
                 double fParam[4] = {0.0, 0.0, 0.0, 0.0};
                 iss >> fParam[0] >> fParam[1] >> fParam[2] >> fParam[3];
-                this->call<void,std::string, double, double, double, double>(strName, strS, fParam[0], fParam[1], fParam[2], fParam[3]);
+                this->call<void, int, double, double, double, double>(strName, nParam, fParam[0], fParam[1], fParam[2], fParam[3]);
                 break;
             }
             case SignatureType::NONE_STRING_DOUBLE:
@@ -251,6 +275,25 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 this->call<void,std::string,int,int>(strName, strS, nParam1, nParam2);
                 break;
             }
+            case SignatureType::VEC2DDOUBLE_INT:
+            {
+                int nParam(0);
+                iss >> nParam;
+                Vector2d vecRet; vecRet.setZero();
+                vecRet = this->call<Vector2d,int>(strName, nParam);
+                oss << vecRet[0] << " " << vecRet[1];
+                break;
+            }
+            case SignatureType::VEC2DDOUBLE_2INT:
+            {
+                int nParam1(0);
+                int nParam2(0);
+                iss >> nParam1 >> nParam2;
+                Vector2d vecRet; vecRet.setZero();
+                vecRet = this->call<Vector2d,int,int>(strName, nParam1, nParam2);
+                oss << vecRet[0] << " " << vecRet[1];
+                break;
+            }
             case SignatureType::VEC2DDOUBLE_STRING:
             {
                 std::string strParam = "";
@@ -267,6 +310,15 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 iss >> strParam1 >> strParam2;
                 Vector2d vecRet; vecRet.setZero();
                 vecRet = this->call<Vector2d,std::string,std::string>(strName, strParam1, strParam2);
+                oss << vecRet[0] << " " << vecRet[1];
+                break;
+            }
+            case SignatureType::VEC2DINT_INT:
+            {
+                int nParam(0);
+                iss >> nParam;
+                Vector2i vecRet; vecRet.setZero();
+                vecRet = this->call<Vector2i,int>(strName, nParam);
                 oss << vecRet[0] << " " << vecRet[1];
                 break;
             }
@@ -330,6 +382,21 @@ void CComInterface::callWriters(const std::string& _strQueue)
                 pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
+            case SignatureType::NONE_2INT:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, int>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_3INT:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, int, int>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<2>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
             case SignatureType::NONE_INT_DOUBLE:
             {
                 auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, double>*>(pQueuedFunction);
@@ -337,20 +404,20 @@ void CComInterface::callWriters(const std::string& _strQueue)
                                               std::get<1>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
-            case SignatureType::NONE_STRING:
+            case SignatureType::NONE_INT_4DOUBLE:
             {
-                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string>*>(pQueuedFunction);
-                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
-                break;
-            }
-            case SignatureType::NONE_STRING_4DOUBLE:
-            {
-                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string, double, double, double, double>*>(pQueuedFunction);
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, double, double, double, double>*>(pQueuedFunction);
                 pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
                                               std::get<1>(pQueuedFunctionConcrete->getParams()),
                                               std::get<2>(pQueuedFunctionConcrete->getParams()),
                                               std::get<3>(pQueuedFunctionConcrete->getParams()),
                                               std::get<4>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_STRING:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
             case SignatureType::NONE_STRING_DOUBLE:
@@ -375,13 +442,17 @@ void CComInterface::callWriters(const std::string& _strQueue)
                 break;
             }
             case SignatureType::DOUBLE:
+            case SignatureType::DOUBLE_INT:
             case SignatureType::DOUBLE_STRING:
             case SignatureType::DOUBLE_STRING_DOUBLE:
             case SignatureType::INT:
             case SignatureType::INT_INT:
             case SignatureType::INT_STRING:
+            case SignatureType::VEC2DDOUBLE_INT:
+            case SignatureType::VEC2DDOUBLE_2INT:
             case SignatureType::VEC2DDOUBLE_STRING:
             case SignatureType::VEC2DDOUBLE_2STRING:
+            case SignatureType::VEC2DINT_INT:
             {
                 WARNING_MSG("Com Interface", "Something went wrong, writing functions shouldn't have a return value.")
                 break;

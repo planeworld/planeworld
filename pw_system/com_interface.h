@@ -54,7 +54,8 @@ enum class ParameterType
     INT,
     STRING,
     UID,
-    VEC2DDOUBLE
+    VEC2DDOUBLE,
+    VEC2DINT
 };
 
 /// Specifies the signature of the function
@@ -63,6 +64,7 @@ enum class SignatureType
     UNDEFINED,
     NONE,
     DOUBLE,
+    DOUBLE_INT,
     DOUBLE_STRING,
     DOUBLE_STRING_DOUBLE,
     INT,
@@ -72,15 +74,20 @@ enum class SignatureType
     NONE_DOUBLE,
     NONE_2DOUBLE,
     NONE_INT,
+    NONE_2INT,
+    NONE_3INT,
     NONE_INT_DOUBLE,
+    NONE_INT_4DOUBLE,
     NONE_STRING,
-    NONE_STRING_4DOUBLE,
     NONE_STRING_DOUBLE,
     NONE_STRING_INT,
     NONE_STRING_2INT,
     NONE_UID,
+    VEC2DDOUBLE_INT,
+    VEC2DDOUBLE_2INT,
     VEC2DDOUBLE_STRING,
-    VEC2DDOUBLE_2STRING
+    VEC2DDOUBLE_2STRING,
+    VEC2DINT_INT
 };
 
 /// Specifies type of possible exceptions in com interface
@@ -258,12 +265,15 @@ typedef std::unordered_map<std::string, moodycamel::ConcurrentQueue<IBaseCommand
 
 //--- Enum parser ------------------------------------------------------------//
 static std::map<ParameterType, std::string> mapParameterToString = {
+    {ParameterType::UNDEFINED, "<undefined>"},
     {ParameterType::NONE, "<none>"},
     {ParameterType::BOOL, "<bool>"},
     {ParameterType::DOUBLE, "<double>"},
     {ParameterType::INT, "<int>"},
     {ParameterType::STRING, "<string>"},
-    {ParameterType::UID, "<uid>"}
+    {ParameterType::UID, "<uid>"},
+    {ParameterType::VEC2DDOUBLE, "<vec2ddouble>"},
+    {ParameterType::VEC2DINT, "<vec2dint>"}
 }; ///< Map from ParameterType to string
 
 ////////////////////////////////////////////////////////////////////////////////
