@@ -587,7 +587,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 INFO_MSG("XML Importer", "Creating object emitter.")
                 
                 CObjectEmitter* pObjEmitter = new CObjectEmitter;
-                MEM_ALLOC("CObjectEmitter")
+                MEM_ALLOC("IEmitter")
                 
                 pObjEmitter->setName(checkAttributeString(_Node, "name", pObjEmitter->getName()));
                 pObjEmitter->setVisualsDataStorage(m_pVisualsDataStorage);
@@ -671,7 +671,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 INFO_MSG("XML Importer", "Creating debris emitter.")
                 
                 CDebrisEmitter* pDebrisEmitter = new CDebrisEmitter;
-                MEM_ALLOC("CDebrisEmitter")
+                MEM_ALLOC("IEmitter")
                 
                 pDebrisEmitter->setName(checkAttributeString(_Node, "name", pDebrisEmitter->getName()));
                 pDebrisEmitter->setVisualsDataStorage(m_pVisualsDataStorage);

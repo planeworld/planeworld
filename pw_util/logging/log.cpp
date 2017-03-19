@@ -51,35 +51,42 @@ CLog::~CLog()
     DTOR_CALL("CLog::~CLog");
     
     #ifdef DOMAIN_MEMORY
+        std::lock_guard<std::mutex> lock(m_Mutex);
+    
         // The memory domain is given by the enclosing macro
         if (m_nMemCounter > 0)
         {
-            NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
-            WARNING_MSG("Logging", "There may be memory leaks, please check: " << m_nMemCounter)
+//             NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
+//             WARNING_MSG("Logging", "There may be memory leaks, please check: " << m_nMemCounter)
             
-                std::cout << "\n";
-                std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
-                while (ci != m_MemCounterMap.end())
-                {
-                    if (ci->second != 0) std::cout << m_strColWarning;
-                    std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
-                    ++ci;
-                }
+            std::cout << "There may be memory leaks, please check: " << m_nMemCounter << std::endl;
+        
+            std::cout << "\n";
+            std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
+            while (ci != m_MemCounterMap.end())
+            {
+                if (ci->second != 0) std::cout << m_strColWarning;
+                std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
+                ++ci;
+            }
         }
         if (m_nMemCounter < 0)
         {
-            NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
-            WARNING_MSG("Logging", "Maybe more memory freed (" << -m_nMemCounter << " frees) than allocated, please check.")
+//             NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
+//             WARNING_MSG("Logging", "Maybe more memory freed (" << -m_nMemCounter << " frees) than allocated, please check.")
             
-                std::cout << "\n";
-                std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
-                while (ci != m_MemCounterMap.end())
-                {
-                    if (ci->second != 0) std::cout << m_strColWarning;
-                    std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
-                    ++ci;
-                }
+            std::cout << "Maybe more memory freed (" << -m_nMemCounter << " frees) than allocated, please check." << std::endl;
+        
+            std::cout << "\n";
+            std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
+            while (ci != m_MemCounterMap.end())
+            {
+                if (ci->second != 0) std::cout << m_strColWarning;
+                std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
+                ++ci;
+            }
         }
+        
     #endif
 }
 
@@ -160,10 +167,10 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
     // !!! Do not log the logging method, this action will never stop !!!
     // METHOD_ENTRY("CLog::log");
 
+    std::lock_guard<std::mutex> lock(m_Mutex);
+    
     if (!m_bLock)
     {
-        m_Mutex.lock();
-
         std::string strDomFlag;
     
         // Messages to be displayed
@@ -317,8 +324,6 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
         m_strMsgBufMsg = _strMessage;
         m_MsgBufLevel = _Level;
         m_MsgBufDom = _Domain;
-        
-        m_Mutex.unlock();
     }
 }
 
