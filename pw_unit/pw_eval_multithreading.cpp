@@ -48,7 +48,10 @@
 
 volatile int     g_nTest;
 volatile double  g_fTest;
-std::atomic<int> g_nTestAtomic;
+std::atomic_int  g_nTestAtomic;
+
+std::atomic_bool g_bClean;
+std::atomic_bool g_bExit;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -58,10 +61,11 @@ std::atomic<int> g_nTestAtomic;
 void inc()
 {
     METHOD_ENTRY("inc")
-    while (true)
+    while (!g_bExit)
     {
         g_nTest++;
         g_fTest += 0.00072387350902;
+        if (g_nTest == 1000000000) g_bExit = true;
     }
 }
 
@@ -73,7 +77,7 @@ void inc()
 void incAtomic()
 {
     METHOD_ENTRY("incAtomic")
-    while (true)
+    while (!g_bExit)
     {
         g_nTestAtomic++;
     }
@@ -87,10 +91,19 @@ void incAtomic()
 void read()
 {
     METHOD_ENTRY("read")
-    while (true)
+    
+    int    nTestLast = 0;
+    double fTestLast = 0.0;
+    
+    while (!g_bExit)
     {
-        std::cout << "Raw:    " << g_nTest << " " << g_fTest << std::endl;
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
+        int    nTest = g_nTest;
+        double fTest = g_fTest;
+        if (nTest < nTestLast || fTest < fTestLast) g_bClean = false;
+        //         std::cout << "Raw:    " << g_nTest << " " << g_fTest << std::endl;
+        //         std::this_thread::sleep_for(std::chrono::microseconds(10));
+        nTestLast = nTest;
+        fTestLast = fTest;
     }
 }
 
@@ -102,10 +115,10 @@ void read()
 void readAtomic()
 {
     METHOD_ENTRY("readAtomic")
-    while (true)
+    while (!g_bExit)
     {
-        std::cout << "Atomic: " << g_nTestAtomic.load() << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        //         std::cout << "Atomic: " << g_nTestAtomic.load() << std::endl;
+        //         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 
@@ -121,6 +134,8 @@ void readAtomic()
 int main()
 {
     Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
+    g_bClean = true;
+    g_bExit = false;
     g_nTest = 0;
     g_fTest = 0.0;
     g_nTestAtomic.store(0);
@@ -134,6 +149,15 @@ int main()
     IncrementAtomicThread.join();
     ReadThread.join();
     ReadAtomicThread.join();
- 
-    return EXIT_SUCCESS;
+    
+    if (g_bClean)
+    {
+        INFO_MSG("Multithreading Evaluation", "Passed.")
+        return EXIT_SUCCESS;
+    }
+    else
+    {
+        ERROR_MSG("Multithreading Evaluation", "Failed. Invalid values.")
+        return EXIT_FAILURE;
+    }
 }
