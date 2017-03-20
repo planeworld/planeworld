@@ -25,8 +25,8 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects
+    ${CMAKE_HOME_DIRECTORY}/pw_system
     ${CMAKE_HOME_DIRECTORY}/pw_unit
-    ${CMAKE_HOME_DIRECTORY}/include
 )
 
 SET(SRCS_MULTITHREADING
