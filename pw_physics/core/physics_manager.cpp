@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2016 Torsten Büschenfeld
+// Copyright (C) 2011-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,9 +32,7 @@
 
 #include "debris_emitter.h"
 #include "joint.h"
-#include "physics_manager.h"
-
-CPhysicsManager* CPhysicsManager::m_pLuaThis;
+#include "shape.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -43,25 +41,24 @@ CPhysicsManager* CPhysicsManager::m_pLuaThis;
 ///////////////////////////////////////////////////////////////////////////////
 CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
                                      m_fG(6.67408e-11),
-                                     m_fFrequency(PHYSICS_DEFAULT_FREQUENCY),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
-                                     m_fFrequencyLua(PHYSICS_LUA_DEFAULT_FREQUENCY),
-                                     m_fProcessingTime(0.0),
-                                     m_fTimeAccel(1.0),
-                                     m_fTimeSlept(1.0),
+                                     m_strCellUpdateLast(""),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_bPaused(false),
-                                     m_bProcessOneFrame(false),
-                                     m_strLuaPhysicsInterface("")
+                                     m_bProcessOneFrame(false)
                                    
 {
     METHOD_ENTRY("CPhysicsManager::CPhysicsManager")
     CTOR_CALL("CPhysicsManager::CPhysicsManager")
     
+    #ifdef PW_MULTITHREADING
+        m_strModuleName = "Physics Manager";
+    #endif
     m_vecConstantGravitation.setZero();
-    m_pLuaThis = this;
-    m_SimTimerGlobal.start();
+    
+    // Start global timer (index 0)
+    m_SimTimer[0].start();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,8 +71,8 @@ CPhysicsManager::~CPhysicsManager()
     METHOD_ENTRY("CPhysicsManager::~CPhysicsManager")
     DTOR_CALL("CPhysicsManager::~CPhysicsManager")
 
-    if (m_strLuaPhysicsInterface != "") lua_close(m_pLuaState);
-    m_SimTimerGlobal.stop();
+    // Stop global timer (index 0)
+    m_SimTimer[0].stop();
     
     for (auto it = m_Emitters.begin();
         it != m_Emitters.end(); ++it)
@@ -111,6 +108,86 @@ CPhysicsManager::~CPhysicsManager()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Create an object and insert to world data storage
+///
+/// \return UID value of object
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createObject()
+{
+    METHOD_ENTRY("CPhysicsManager::createObject")
+    
+    CObject* pObject = new CObject();
+    MEM_ALLOC("CObject")
+    
+    m_ObjectsToBeAddedToWorld.enqueue(pObject);
+    
+    return pObject->getUID();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create a shape of given type
+///
+/// \param _ShapeType Type of shape to be created
+///
+/// \return UID value of object
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createShape(const ShapeType _ShapeType)
+{
+    METHOD_ENTRY("CPhysicsManager::createShape")
+    
+    UIDType nUID=0u;
+    
+    switch (_ShapeType)
+    {
+        case ShapeType::CIRCLE:
+        {
+            CCircle* pCircle = new CCircle();
+            MEM_ALLOC("IShape")
+            nUID = pCircle->getUID();
+            m_ShapesToBeAddedToWorld.enqueue(pCircle);
+            break;
+        }
+        case ShapeType::PLANET:
+        {
+            CPlanet* pPlanet = new CPlanet();
+            MEM_ALLOC("IShape")
+            nUID = pPlanet->getUID();
+            m_ShapesToBeAddedToWorld.enqueue(pPlanet);
+            break;
+        }
+        default:
+        {
+            WARNING_MSG("Physics Manager", "Unknown shape type. Cannot create shape")
+        }
+    }
+//     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    
+//     std::unique_lock<std::mutex> lk(m);
+//     cv.wait(lk, []{return processed;});
+    
+    return nUID;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create a shape of given type
+///
+/// \param _strShapeType Type of shape to be created as string
+///
+/// \return UID value of object
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createShape(const std::string& _strShapeType)
+{
+    METHOD_ENTRY("CPhysicsManager::createShape")
+    return this->createShape(mapStringToShapeType[_strShapeType]);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Add a component to internal list of components
 ///
 /// \param _pComponent Component that should be added to list
@@ -120,6 +197,7 @@ void CPhysicsManager::addComponent(CThruster* const _pComponent)
 {
     METHOD_ENTRY("CPhysicsManager::addComponent")
     m_Components.insert(std::pair<std::string,CThruster*>(_pComponent->getName(), _pComponent));
+    m_pDataStorage->addUIDUser(_pComponent);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -153,6 +231,7 @@ void CPhysicsManager::addEmitter(IEmitter* const _pEmitter)
 {
     METHOD_ENTRY("CPhysicsManager::addEmitter")
     m_Emitters.insert(std::pair<std::string,IEmitter*>(_pEmitter->getName(), _pEmitter));
+    m_pDataStorage->addUIDUser(_pEmitter);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -235,98 +314,6 @@ void CPhysicsManager::initEmitters()
         }
         
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Initialise Lua scripting engine
-///
-/// \return Initialisation succesful?
-///
-///////////////////////////////////////////////////////////////////////////////
-bool CPhysicsManager::initLua()
-{
-    METHOD_ENTRY("CPhysicsManager::initLua")
-
-    //--- Init Lua -----------------------------------------------------------//
-    if (m_strLuaPhysicsInterface != "")
-    {
-        const struct luaL_Reg VarAccessMetaTable[] =
-        {
-          { "__index", luaGetVar},
-          { "__newindex", luaSetVar},
-          { NULL, NULL }
-        };
-      
-        m_pLuaState = luaL_newstate();
-        
-        luaL_openlibs(m_pLuaState);
-        
-        lua_newtable(m_pLuaState);
-            lua_newtable(m_pLuaState);
-                lua_pushcfunction(m_pLuaState, luaAccelerateTime);
-                lua_setfield(m_pLuaState, -2, "accelerate_time");
-                lua_pushcfunction(m_pLuaState, luaDecelerateTime);
-                lua_setfield(m_pLuaState, -2, "decelerate_time");
-                lua_pushcfunction(m_pLuaState, luaGetFrequency);
-                lua_setfield(m_pLuaState, -2, "get_frequency");
-                lua_pushcfunction(m_pLuaState, luaPause);
-                lua_setfield(m_pLuaState, -2, "pause");
-                lua_pushcfunction(m_pLuaState, luaResume);
-                lua_setfield(m_pLuaState, -2, "resume");
-                lua_pushcfunction(m_pLuaState, luaSetFrequency);
-                lua_setfield(m_pLuaState, -2, "set_frequency");
-            lua_setfield(m_pLuaState, -2, "system");
-            lua_newtable(m_pLuaState);
-                lua_pushcfunction(m_pLuaState, luaActivateThruster);
-                lua_setfield(m_pLuaState, -2, "activate_thruster");
-                lua_pushcfunction(m_pLuaState, luaDeactivateThruster);
-                lua_setfield(m_pLuaState, -2, "deactivate_thruster");
-            lua_setfield(m_pLuaState, -2, "sim");
-            lua_newtable(m_pLuaState);
-                lua_pushcfunction(m_pLuaState, luaApplyForce);
-                lua_setfield(m_pLuaState, -2, "apply_force");
-                lua_pushcfunction(m_pLuaState, luaGetAngle);
-                lua_setfield(m_pLuaState, -2, "get_angle");
-                lua_pushcfunction(m_pLuaState, luaGetAngleRef);
-                lua_setfield(m_pLuaState, -2, "get_angle_ref");
-                lua_pushcfunction(m_pLuaState, luaGetAngleVelocity);
-                lua_setfield(m_pLuaState, -2, "get_angle_vel");
-                lua_pushcfunction(m_pLuaState, luaGetAngleVelocityRef);
-                lua_setfield(m_pLuaState, -2, "get_angle_vel_ref");
-                lua_pushcfunction(m_pLuaState, luaGetInertia);
-                lua_setfield(m_pLuaState, -2, "get_inertia");
-                lua_pushcfunction(m_pLuaState, luaGetMass);
-                lua_setfield(m_pLuaState, -2, "get_mass");
-                lua_pushcfunction(m_pLuaState, luaGetPosition);
-                lua_setfield(m_pLuaState, -2, "get_position");
-                lua_pushcfunction(m_pLuaState, luaGetPositionRef);
-                lua_setfield(m_pLuaState, -2, "get_position_ref");
-                lua_pushcfunction(m_pLuaState, luaGetTime);
-                lua_setfield(m_pLuaState, -2, "get_time");
-                lua_pushcfunction(m_pLuaState, luaGetTimeYears);
-                lua_setfield(m_pLuaState, -2, "get_time_years");
-                lua_pushcfunction(m_pLuaState, luaGetVelocity);
-                lua_setfield(m_pLuaState, -2, "get_velocity");
-                lua_pushcfunction(m_pLuaState, luaGetVelocityRef);
-                lua_setfield(m_pLuaState, -2, "get_velocity_ref");
-                
-                luaL_newmetatable(m_pLuaState, "VarAccessMetaTable");
-                luaL_setfuncs(m_pLuaState, VarAccessMetaTable, 0);
-                lua_setmetatable(m_pLuaState, -2);
-              
-            lua_setfield(m_pLuaState, -2, "universe");
-        lua_setglobal(m_pLuaState, "pw");
-
-        if (luaL_dofile(m_pLuaState, m_strLuaPhysicsInterface.c_str()) != 0)
-        {
-            ERROR_MSG("Physics Manager", "File " << m_strLuaPhysicsInterface <<
-                                        " could not be loaded.")
-            WARNING_MSG("Physics Manager", "Lua Error: " << lua_tostring(m_pLuaState, -1))
-            return false;
-        }
-    }
-    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -438,45 +425,50 @@ void CPhysicsManager::resetTime()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Initialise all objects
-///
-/// Initialisiation of all objects resets objects position, speed etc. to
-/// their state at the beginning of the simulation. It has to be called at
-/// least once at start to ensure a proper state of fixed objects.
+/// \brief Processes one single frame
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CPhysicsManager::processFrame()
 {
     METHOD_ENTRY("CPhysicsManager::processFrame")
- 
+
+    static auto nFrame = 0u;
+    
+    // Add new objects to world
+    CObject* pObj = nullptr;
+    while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
+    {
+        m_pDataStorage->addObject(pObj);
+    }
+    IShape* pShp = nullptr;
+    while (m_ShapesToBeAddedToWorld.try_dequeue(pShp))
+    {
+        m_pDataStorage->addShape(pShp);
+    }
+    
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {
-        m_SimTimerGlobal.inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        m_SimTimerLocal[0].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        m_SimTimerLocal[1].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        m_SimTimerLocal[2].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        
-        static auto nFrame = 0u;
-        if (++nFrame == 10000) nFrame = 0;    
-        
-        CTimer ProcessingTimer;
-        ProcessingTimer.start();
-        
+        for (auto i=0u; i < m_SimTimer.size(); ++i)        
+        {
+            m_SimTimer[i].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        }
         this->addGlobalForces();
+    }
+    m_pComInterface->callWriters("physics");
+    if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
+    {    
         this->moveMasses(nFrame);
         this->collisionDetection();
-    //     this->updateCells();
+        this->updateCells();
         
-        ProcessingTimer.stop();
-        m_fProcessingTime = ProcessingTimer.getTime();
-        if (m_fProcessingTime > 1.0/ m_fFrequency)
-        {
-            NOTICE_MSG("Physics Manager", "Execution time of physics code is too large: " << m_fProcessingTime << 
-                                          "s of " << 1.0/m_fFrequency << "s max.")
-        }
+        DEBUG(Log.setLoglevel(LOG_LEVEL_NOTICE);)
         m_pDataStorage->swapBack();
+        DEBUG(Log.setLoglevel(LOG_LEVEL_DEBUG);)
         m_bProcessOneFrame = false;
+        
+        
     }
+    if (++nFrame == 10000) nFrame = 0;    
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -488,71 +480,27 @@ void CPhysicsManager::moveMasses(int nTest) const
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
     
-    for (const auto pComp : m_Components)
-    {
-        pComp.second->IObjectReferrer::attachTo(
-            static_cast<CObject*>(
-                m_pDataStorage->getUIDUsersByValueBack()->operator[](
-                    pComp.second->IObjectReferrer::getUIDRef()
-                )
-            )
-        );
-    }
-    for (const auto pEmit : m_Emitters)
-    {
-        pEmit.second->getKinematicsState().attachTo(
-            static_cast<CKinematicsState*>(
-                m_pDataStorage->getUIDUsersByValueBack()->operator[](
-                    pEmit.second->getKinematicsState().getUIDRef()
-                )
-            )
-        );
-    }
-    
-    if ((nTest % static_cast<int>(m_fFrequency/m_fFrequencyLua) == 0) &&
-        (m_strLuaPhysicsInterface != ""))
-    {
-        CTimer FrameTimeLua;
-        FrameTimeLua.start();
-        
-        lua_getglobal(m_pLuaState, "physics_interface");
-        if (lua_pcall(m_pLuaState, 0, 0, 0) != 0)
-        {
-            WARNING_MSG("Physics Manager", "Couldn't call Lua function.")
-            WARNING_MSG("Physics Manager", "Lua Error: " << lua_tostring(m_pLuaState, -1))
-        }
-        
-        FrameTimeLua.stop();
-        if (FrameTimeLua.getTime() > 1.0/m_fFrequencyLua)
-        {
-          NOTICE_MSG("Physics Manager", "Execution time of Lua code is too large: " << FrameTimeLua.getTime() << 
-                                        "s of " << 1.0/m_fFrequencyLua << "s max.")
-        }
-    }
-
-    for (auto ci = m_Emitters.cbegin();
-        ci != m_Emitters.cend(); ++ci)
-    {
-        (*ci).second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-    }
     for (auto ci = m_Components.cbegin();
         ci != m_Components.cend(); ++ci)
     {
         (*ci).second->execute();
+    }
+    for (auto ci = m_Emitters.cbegin();
+        ci != m_Emitters.cend(); ++ci)
+    {
+        (*ci).second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
     }
     for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
     {
         Obj.second->dynamics(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
         Obj.second->transform();
     }
-    if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
+//     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
     {
         CTimer FrameTimeDebris;
         FrameTimeDebris.start();
         
         for (const auto Debris : *m_pDataStorage->getDebrisByValueBack())
-//         for (const auto ci  = m_pDataStorage->getDebrisByNameBack()->cbegin();
-//                         ci != m_pDataStorage->getDebrisByNameBack()->cend(); ++ci)
         {
             Debris.second->dynamics(1.0/m_fFrequencyDebris*m_pDataStorage->getTimeScale());
         }
@@ -564,6 +512,7 @@ void CPhysicsManager::moveMasses(int nTest) const
                                         "s of " << 1.0/m_fFrequencyDebris << "s max.")
         }
     }
+    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -602,7 +551,7 @@ void CPhysicsManager::addGlobalForces()
             while (cj != m_pDataStorage->getObjectsByValueBack()->cend())
             {
                 vecCC = (*ci).second->getCOM() - (*cj).second->getCOM() +
-                        IUniverseScaled::cellToDouble((*ci).second->getCell()-(*cj).second->getCell());
+                        IGridUser::cellToDouble((*ci).second->getCell()-(*cj).second->getCell());
 
                 fCCSqr = vecCC.squaredNorm();
                 
@@ -654,6 +603,616 @@ void CPhysicsManager::collisionDetection()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Initialise the command interface
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::myInitComInterface()
+{
+    METHOD_ENTRY("CPhysicsManager::myInitComInterface")
+
+    INFO_MSG("Physics Manager", "Initialising com interace.")
+    if (m_pComInterface != nullptr)
+    {
+        //----------------------------------------------------------------------
+        // System package
+        //----------------------------------------------------------------------
+        m_pComInterface->registerFunction("accelerate_time",
+                                          CCommand<void,bool>([&](bool _bAllowTimeScaling){this->accelerateTime(_bAllowTimeScaling);}),
+                                          "Accelerates time using more cpu power unless scaling is allowed, which will increase the time step.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::BOOL, "Flag if time scaling by increasing time step is allowed (reduces accuracy)"}},
+                                          "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("create_obj",
+                                          CCommand<int>([&]() -> int {return this->createObject();}),
+                                          "Creates a default object.",
+                                          {{ParameterType::INT, "UID of object"}},
+                                          "system"
+                                         );
+        m_pComInterface->registerFunction("create_shp",
+                                          CCommand<int, std::string>([&](const std::string& _strShapeType) -> int {return this->createShape(_strShapeType);}),
+                                          "Creates a shape.",
+                                          {{ParameterType::INT, "UID of shape"},
+                                           {ParameterType::STRING, "Shape type"}},
+                                          "system"
+                                         );
+        m_pComInterface->registerFunction("decelerate_time",
+                                          CCommand<void>([&](){this->decelerateTime();}),
+                                          "Decelerates time.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                          "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_accel",
+                                          CCommand<double>([&](){return m_fTimeAccel;}),
+                                          "Returns time acceleration factor, keeping step size.",
+                                          {{ParameterType::DOUBLE, "Time acceleration factor"}},
+                                          "system"
+                                         );
+        m_pComInterface->registerFunction("get_uid",
+                                          CCommand<int, std::string>(
+                                                [&](const std::string& _strName) -> int
+                                                {
+                                                    int nUID(0);
+                                                    try
+                                                    {
+                                                        nUID = m_pDataStorage->getUIDsByName()->at(_strName);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                    return nUID;
+                                                }),
+                                          "Returns UID for entity with given name.",
+                                          {{ParameterType::INT, "UID of entity with given name"},
+                                           {ParameterType::STRING, "Name of entity"}},
+                                          "system"
+                                         );
+        m_pComInterface->registerFunction("pause",
+                                          CCommand<void>([&](){this->m_bPaused = true;}),
+                                          "Pauses physics simulation.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_add_shp",
+                                          CCommand<void, int, int>(
+                                                [&](const int _nUIDObj, const int _nUIDShp)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByValueBack()->at(_nUIDObj)->getGeometry()->addShape(
+                                                            static_cast<IShape*>(m_pDataStorage->getShapesByValue()->at(_nUIDShp))
+                                                        );
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object/shape with UID <" << _nUIDObj << "/"<< _nUIDShp << "> ")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }),
+                                          "Add shape with given UID to object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "UID of object"},
+                                           {ParameterType::INT, "UID of shape to be added"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("process_one_frame",
+                                          CCommand<void>([&](){this->processOneFrame();}),
+                                          "Processes one single frame of the physics simulation.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("reset_time",
+                                          CCommand<void>([&](){this->resetTime();}),
+                                          "Resets time to realtime.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                          "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("resume",
+                                          CCommand<void>([&](){this->m_bPaused = false;}),
+                                          "Resumes physics simulation if paused.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("toggle_pause",
+                                          CCommand<void>([&](){this->togglePause();}),
+                                          "Pauses or unpauses physics simulation.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("toggle_timer",
+                                          CCommand<void, int>([&](const int& _nNr)
+                                          {
+                                              if (_nNr > 0 && _nNr < int(m_SimTimer.size()))
+                                              {
+                                                  this->m_SimTimer[_nNr].toggle();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nNr << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                              }
+                                          }),
+                                          "Toggles the given local timer of or on.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "ID of timer"}},
+                                           "system", "physics"
+                                         );
+        //----------------------------------------------------------------------
+        // Physics package
+        //----------------------------------------------------------------------
+        m_pComInterface->registerFunction("get_nrof_timers",
+                                          CCommand<int>([&]() -> int {return this->m_SimTimer.size();}),
+                                          "Provides number of simulation timers.",
+                                          {{ParameterType::INT, "Number of simulation timers"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_mass",
+                                          CCommand<double, int>(
+                                              [&](const int _nUID) -> double
+                                              {
+                                                double fMass(1.0);
+                                                try
+                                                {
+                                                    fMass = m_pDataStorage->getObjectsByValueBack()->at(_nUID)->getMass();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                                return fMass;
+                                              }),
+                                          "Returns mass of a given object.",
+                                          {{ParameterType::DOUBLE, "Mass"},
+                                           {ParameterType::INT, "Object UID"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_apply_force",
+                                          CCommand<void, int, double, double, double, double>(
+                                              [&](const int _nUID,
+                                                  const double _fForceX,
+                                                  const double _fForceY,
+                                                  const double _fPOAX,
+                                                  const double _fPOAY)
+                                              {
+                                                try
+                                                {
+                                                    m_pDataStorage->getObjectsByValueBack()->at(_nUID)->addForceLC(
+                                                    Vector2d(_fForceX, _fForceY) /** m_pLuaThis->m_fFrequency/m_pLuaThis->m_fFrequencyLua*/, Vector2d(_fPOAX, _fPOAY));
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                              }),
+                                          "Applies a force on given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Force X"},
+                                           {ParameterType::DOUBLE, "Force Y"},
+                                           {ParameterType::DOUBLE, "Point of attack X"},
+                                           {ParameterType::DOUBLE, "Point of attack Y"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_angle",
+                                          CCommand<double, int>(
+                                              [&](const int _nUID) -> double
+                                              {
+                                                double fAngle(0.0);
+                                                try
+                                                {
+                                                    fAngle = m_pDataStorage->getObjectsByValueBack()->at(_nUID)->getAngle();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                                return fAngle;
+                                              }),
+                                          "Returns angle of a given object.",
+                                          {{ParameterType::DOUBLE, "Angle"},
+                                           {ParameterType::INT, "Object UID"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_angle_vel",
+                                          CCommand<double, int>(
+                                              [&](const int _nUID) -> double
+                                              {
+                                                double fAngVel(0.0);
+                                                try
+                                                {
+                                                    fAngVel = m_pDataStorage->getObjectsByValueBack()->at(_nUID)->getAngleVelocity();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                                return fAngVel;
+                                              }),
+                                          "Returns angle velocity of a given object.",
+                                          {{ParameterType::DOUBLE, "Angle velocity"},
+                                           {ParameterType::INT, "Object UID"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_cell",
+                                          CCommand<Vector2i, int>(
+                                              [&](const int _nUID) -> const Vector2i
+                                              {
+                                                Vector2i vecCell; vecCell.setZero();
+                                                try
+                                                {
+                                                    vecCell = m_pDataStorage->getObjectsByValueBack()->at(_nUID)->getCell();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("orage", "Unknown object with UID <" << _nUID << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                }
+                                                return vecCell;
+                                              }),
+                                          "Returns cell of object with given uid.",
+                                          {{ParameterType::VEC2DINT, "Cell (x, y)"},
+                                           {ParameterType::INT, "Object's UID"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_inertia",
+                                          CCommand<double, int>(
+                                              [&](const int _nUID) -> double
+                                              {
+                                                double fInertia(1.0);
+                                                try
+                                                {
+                                                    fInertia = m_pDataStorage->getObjectsByValueBack()->at(_nUID)->getInertia();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                                return fInertia;
+                                              }),
+                                          "Returns inertia of a given object.",
+                                          {{ParameterType::DOUBLE, "Inertia"},
+                                           {ParameterType::INT, "Object UID"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_position",
+                                          CCommand<Vector2d, int>(
+                                              [&](const int _nUID) -> const Vector2d
+                                              {
+                                                Vector2d vecPosition; vecPosition.setZero();
+                                                try
+                                                {
+                                                    vecPosition = m_pDataStorage->getObjectsByValueBack()->at(_nUID)->getKinematicsState().getOrigin();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                                return vecPosition;
+                                              }),
+                                          "Returns position of a given object.",
+                                          {{ParameterType::VEC2DDOUBLE, "Position (x, y)"},
+                                           {ParameterType::INT, "Object UID"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_position_ref",
+                                          CCommand<Vector2d, int, int>(
+                                              [&](const int _nUID, const int _nUIDRef) -> const Vector2d
+                                              {
+                                                Vector2d vecPosition; vecPosition.setZero();
+                                                try
+                                                {
+                                                    vecPosition = m_pDataStorage->getObjectsByValueBack()->at(_nUID)->getKinematicsState().getOriginReferredTo(
+                                                                  m_pDataStorage->getObjectsByValueBack()->at(_nUIDRef)->getKinematicsState());
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << "/" << _nUIDRef << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                                return vecPosition;
+                                              }),
+                                          "Returns position of a given object Obj_1 referred to another object Obj_2.",
+                                          {{ParameterType::VEC2DDOUBLE, "Position (x, y)"},
+                                           {ParameterType::INT, "Object UID (Obj_1)"},
+                                           {ParameterType::INT, "Reference object's UID (Obj_2)"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_velocity",
+                                          CCommand<Vector2d, int>(
+                                              [&](const int _nUID) -> const Vector2d
+                                              {
+                                                Vector2d vecVelocity; vecVelocity.setZero();
+                                                try
+                                                {
+                                                    vecVelocity = m_pDataStorage->getObjectsByValueBack()->at(_nUID)->getKinematicsState().getVelocity();
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("orage", "Unknown object with UID <" << _nUID << ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                                return vecVelocity;
+                                              }),
+                                          "Returns velocity of a given object.",
+                                          {{ParameterType::VEC2DDOUBLE, "Velocity (x, y)"},
+                                           {ParameterType::INT, "Object UID"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_get_velocity_ref",
+                                          CCommand<Vector2d, int, int>(
+                                              [&](const int _nUID, const int _nUIDRef) -> const Vector2d
+                                              {
+                                                Vector2d vecVelocity; vecVelocity.setZero();
+                                                try
+                                                {
+                                                    vecVelocity = m_pDataStorage->getObjectsByValueBack()->at(_nUID)->getKinematicsState().getVelocityReferredTo(
+                                                                  m_pDataStorage->getObjectsByValueBack()->at(_nUIDRef)->getKinematicsState());
+                                                }
+                                                catch (const std::out_of_range& oor)
+                                                {
+                                                    WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << "/" << _nUIDRef<< ">")
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                                return vecVelocity;
+                                              }),
+                                          "Returns velocity of a given object Obj_1 referred to another object Obj_2.",
+                                          {{ParameterType::VEC2DDOUBLE, "Velocity (x, y)"},
+                                           {ParameterType::INT, "Object UID (Obj_1)"},
+                                           {ParameterType::INT, "Reference object's UID (Obj_2)"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_set_angle",
+                                          CCommand<void, int, double>(
+                                                [&](const int _nUID, const double& _fAngle)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByValueBack()->at(_nUID)->setAngle(_fAngle);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }),
+                                          "Sets rotation angle of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Angle"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_set_cell",
+                                          CCommand<void, int, int, int>(
+                                                [&](const int _nUID, const int _nX, const int _nY)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByValueBack()->at(_nUID)->setCell(_nX, _nY);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }),
+                                          "Sets residing grid cell of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::INT, "Cell X"},
+                                           {ParameterType::INT, "Cell Y"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("shp_set_mass",
+                                          CCommand<void, int, double>(
+                                                [&](const int _nUID, const double& _fMass)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getShapesByValue()->at(_nUID)->setMass(_fMass);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown shape with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }),
+                                          "Set mass of shape with given UID.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Shapes UID"},
+                                           {ParameterType::DOUBLE, "Mass to be set"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("shp_set_radius",
+                                          CCommand<void, int, double>(
+                                                [&](const int _nUID, const double& _fRad)
+                                                {
+                                                    try
+                                                    {
+                                                        if (static_cast<CCircle*>(m_pDataStorage->getShapesByValue()->at(_nUID))->getShapeType() == ShapeType::CIRCLE)
+                                                        {
+                                                            static_cast<CCircle*>(m_pDataStorage->getShapesByValue()->at(_nUID))->setRadius(_fRad);
+                                                        }
+                                                        else
+                                                        {
+                                                            WARNING_MSG("World Data Storage", "Wrong shape type of shape with UID <" << _nUID << ">")
+                                                            throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                        }
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown shape with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                                }),
+                                          "Set radius of shape (if applicable) with given UID.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Shapes UID"},
+                                           {ParameterType::DOUBLE, "Radius to be set"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time",
+                                          CCommand<double>([&]() -> double {return this->m_SimTimer[0].getSecondsRaw();}),
+                                          "Provides simulation time (raw seconds, years excluded).",
+                                          {{ParameterType::DOUBLE, "Seconds of simulation time"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_seconds_part",
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
+                                              {
+                                                  return this->m_SimTimer[_nT].getSecondsPart();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only seconds part).",
+                                          {{ParameterType::INT, "Seconds part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_minutes_part",
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
+                                              {
+                                                  return this->m_SimTimer[_nT].getMinutesPart();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only minutes part).",
+                                          {{ParameterType::INT, "Minutes part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_hours_part",
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
+                                              {
+                                                  return this->m_SimTimer[_nT].getHoursPart();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only hours part).",
+                                          {{ParameterType::INT, "Hours part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_days_part",
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
+                                              {
+                                                  return this->m_SimTimer[_nT].getDaysPart();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only days part).",
+                                          {{ParameterType::INT, "Days part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
+                                           "physics"
+                                         );
+        m_pComInterface->registerFunction("get_time_years",
+                                          CCommand<int,int>([&](const int _nT) -> int 
+                                          {
+                                              if (_nT >= 0 && _nT < int(this->m_SimTimer.size()))
+                                              {
+                                                  return this->m_SimTimer[_nT].getYears();
+                                              }
+                                              else
+                                              {
+                                                  WARNING_MSG("Sim Timer", "Unknown ID <" << _nT << ">")
+                                                  throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                  return 0;
+                                              }
+                                          }),
+                                          "Provides simulation time (only years part).",
+                                          {{ParameterType::INT, "Years part of simulation time"},
+                                           {ParameterType::INT, "Index of timer"}},
+                                           "physics"
+                                         );
+        
+        //----------------------------------------------------------------------
+        // Sim package
+        //----------------------------------------------------------------------
+        m_pComInterface->registerFunction("activate_thruster",
+                                          CCommand<double,std::string,double>(
+                                              [&](const std::string& _strName, const double& _fThrust) -> double 
+                                              {
+                                                    auto itThruster  = m_Components.find(_strName);
+                                                    if ( itThruster != m_Components.end())
+                                                    {
+                                                        return (*itThruster).second->activate(_fThrust);
+                                                    }
+                                                    else
+                                                    {
+                                                        WARNING_MSG("Physics Manager", "Unknown thruster " << _strName)
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                              }),
+                                          "Activates thruster with given thrust.",
+                                          {{ParameterType::DOUBLE, "Actually applied thrust"},
+                                           {ParameterType::STRING, "Thruster name"},
+                                           {ParameterType::STRING, "Thrust to be applied when activated"}},
+                                          "sim", "physics"
+                                         );
+        m_pComInterface->registerFunction("deactivate_thruster",
+                                          CCommand<void, std::string>(
+                                              [&](const std::string& _strName)
+                                              {
+                                                    auto itThruster  = m_Components.find(_strName);
+                                                    if ( itThruster != m_Components.end())
+                                                    {
+                                                        return (*itThruster).second->deactivate();
+                                                    }
+                                                    else
+                                                    {
+                                                        WARNING_MSG("Physics Manager", "Unknown thruster " << _strName)
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                              }),
+                                          "Deactivates thruster.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "Thrust to be applied when activated"}},
+                                          "sim", "physics"
+                                         );
+    }
+    else
+    {
+        WARNING_MSG("Physics Manager", "Com interface not set, cannot register functions.")
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Method that updates the cells of all objects.
 ///
 /// An object has a maximum speed of 3e9 m/s, which means it moves 
@@ -668,880 +1227,34 @@ void CPhysicsManager::updateCells()
 {
     METHOD_ENTRY("CPhysicsManager::updateCells")
     
-//     // Use double frequency just to avoid any surprises
-//     double fFreq = 6.0e9*m_pDataStorage->getTimeScale()*m_pDataStorage->getObjectsByValueBack()->size()/DEFAULT_CELL_SIZE_2;
-// 
-//     double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
-//     uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
-// 
-//     if (nNrOfObj > m_pDataStorage->getObjectsByValueBack()->size()) nNrOfObj = m_pDataStorage->getObjectsByValueBack()->size();
-//     
-//     m_fCellUpdateResidual = fNrOfObj - nNrOfObj;
-//     
-//     for (uint32_t i=0; i<nNrOfObj; ++i)
-//     {
-//         // Initialise the iterator for dynamic cell update.
-//         /// \todo Somehow, this doesn't work if initialised outside of loop. Evaluate.
-//         if (m_bCellUpdateFirst)
-//         {
-//             m_pDataStorage->memorizeDynamicObject("CellUpdater", m_pDataStorage->getObjectsByValueBack()->begin());
-//             m_bCellUpdateFirst = false;
-//         }
-//         
-//         ObjectsType::const_iterator ci = m_pDataStorage->recallDynamicObject("CellUpdater");
-//         ci->second->updateCell();
-//         if (++ci == m_pDataStorage->getObjectsByValueBack()->end())
-//             ci = m_pDataStorage->getObjectsByValueBack()->begin();
-//         m_pDataStorage->memorizeDynamicObject("CellUpdater", ci);
-//     }
+    // Use double frequency of v_max (v_max = speed of light = 3.0e9m/s)
+    // just to avoid any surprises
+    double      fFreq = 6.0e9*m_pDataStorage->getTimeScale()*
+                        m_fTimeAccel *
+                        m_pDataStorage->getObjectsByValueBack()->size()/DEFAULT_CELL_SIZE_2;
+                        
+    double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
+    uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
+
+    if (nNrOfObj > m_pDataStorage->getObjectsByValueBack()->size())
+        nNrOfObj = m_pDataStorage->getObjectsByValueBack()->size();
     
-}
-
-#ifdef PW_MULTITHREADING
-  ////////////////////////////////////////////////////////////////////////////////
-  ///
-  /// \brief Runs the physics engine, called as a thread.
-  ///
-  ///////////////////////////////////////////////////////////////////////////////
-  void CPhysicsManager::run()
-  {
-      METHOD_ENTRY("CPhysicsManager::run")
-      
-      INFO_MSG("Physics Manager", "Physics thread started.")
-      m_bRunning = true;
-      
-      CTimer PhysicsTimer;
-      
-      PhysicsTimer.start();
-      while (m_bRunning)
-      {
-          this->processFrame();
-          m_fTimeSlept = PhysicsTimer.sleepRemaining(m_fFrequency * m_fTimeAccel);
-      }
-      INFO_MSG("Physics Manager", "Physics thread stopped.")
-  }
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Accelerates time by decreasing remaining sleep in between frames
-///        or increasing time step if forced to do so 
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaAccelerateTime(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaAccelerateTime")
-
-    int nParam = lua_gettop(_pLuaState);
+    m_fCellUpdateResidual = fNrOfObj - nNrOfObj;
     
-    if (nParam == 0)
+    // From now on use ObjectsByName since they are ordered by name in a std::map.
+    // Hence, a correct entry point to continue cell update can be found
+    if (m_bCellUpdateFirst)
     {
-        m_pLuaThis->accelerateTime();
-    }
-    else if (nParam == 1)
-    {
-        bool bAllowTimeScaling = lua_toboolean(_pLuaState,1);
-        m_pLuaThis->accelerateTime(bAllowTimeScaling);
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function luaAccelerateTime (" << nParam << "/1[max]).")
+        m_strCellUpdateLast = m_pDataStorage->getObjectsByNameBack()->begin()->second->getName();
+        m_bCellUpdateFirst = false;
     }
     
-    return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Decelerates time by decreasing remaining sleep in between frames or
-///        reducing time step.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaDecelerateTime(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaDecelerateTime")
-
-    int nParam = lua_gettop(_pLuaState);
-    
-    if (nParam == 0)
+    auto it = m_pDataStorage->getObjectsByNameBack()->find(m_strCellUpdateLast);
+    for (auto i=0u; i<nNrOfObj; ++i)
     {
-        m_pLuaThis->decelerateTime();
+        it->second->updateCell();
+        if (++it == m_pDataStorage->getObjectsByNameBack()->end())
+              it =  m_pDataStorage->getObjectsByNameBack()->begin();
     }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function luaDecelerateTime (" << nParam << "/0).")
-    }
-    
-    return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Activates the given thruster
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaActivateThruster(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaActivateThruster")
-
-    int nParam = lua_gettop(_pLuaState);
-    
-    if (nParam == 2)
-    {
-        size_t l;
-        std::string     strThruster = lua_tolstring(_pLuaState,1,&l);
-        double          fThrust     = lua_tonumber (_pLuaState,2);
-        
-        auto itThruster  = m_pLuaThis->m_Components.find(strThruster);
-        if ( itThruster != m_pLuaThis->m_Components.end())
-        {
-            lua_pushnumber(_pLuaState, (*itThruster).second->activate(fThrust));
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown thruster " << strThruster)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function activate_thruster (" << nParam << "/2).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Deactivates the given thruster
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaDeactivateThruster(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaDeactivateThruster")
-
-    int nParam = lua_gettop(_pLuaState);
-    
-    if (nParam == 1)
-    {
-        size_t l;
-        std::string strThruster = lua_tolstring(_pLuaState,1,&l);
-        
-        auto itThruster  = m_pLuaThis->m_Components.find(strThruster);
-        if ( itThruster != m_pLuaThis->m_Components.end())
-        {
-            (*itThruster).second->deactivate();
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown thruster " << strThruster)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function deactivate_thruster (" << nParam << "/1).")
-    }
-    
-    return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to apply force on object.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaApplyForce(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaApplyForce")
-
-    int nParam = lua_gettop(_pLuaState);
-    
-    if (nParam == 5)
-    {
-        // Read force vector and point of attack (POA).
-        Vector2d vecForce(lua_tonumber(_pLuaState, 2), lua_tonumber(_pLuaState, 3));
-        Vector2d vecPOA(lua_tonumber(_pLuaState, 4), lua_tonumber(_pLuaState, 5));
-        
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->addForceLC(
-                vecForce * m_pLuaThis->m_fFrequency/m_pLuaThis->m_fFrequencyLua, vecPOA);
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function apply_force (" << nParam << "/5).")
-    }
-    
-    return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects angle.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetAngle(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetAngle")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 1)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            double fAng = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState().getAngle();
-            lua_pushnumber(_pLuaState, fAng);
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_angle (" << nParam << "/1).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects angle with reference to another object.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetAngleRef(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetAngleRef")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 2)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        std::string strReference = lua_tolstring(_pLuaState,2,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strReference) != 
-                m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-            {
-                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState();
-                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strReference)->getKinematicsState();
-                double fAng = KinObj.getAngleReferredTo(KinRef);
-                lua_pushnumber(_pLuaState, fAng);
-            }
-            else
-            {
-                WARNING_MSG("Physics Manager", "Unknown reference " << strReference)
-            }
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_angle_ref (" << nParam << "/2).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects angle velocity
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetAngleVelocity(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetAngleVelocity")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 1)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            double fAngVel = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState().getAngleVelocity();
-            lua_pushnumber(_pLuaState, fAngVel);
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_angle_vel (" << nParam << "/1).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects angle velocity with reference to another object.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetAngleVelocityRef(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetAngleVelocityRef")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 2)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        std::string strReference = lua_tolstring(_pLuaState,2,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strReference) != 
-                m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-            {
-                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState();
-                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strReference)->getKinematicsState();
-                double fAngVel = KinObj.getAngleVelocityReferredTo(KinRef);
-                lua_pushnumber(_pLuaState, fAngVel);
-            }
-            else
-            {
-                WARNING_MSG("Physics Manager", "Unknown reference " << strReference)
-            }
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_angle_vel_ref (" << nParam << "/2).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get frequency.
-///
-/// \param _pLuaState Lua access to frequency
-///
-/// \return Frequency in Hz and time acceleration.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetFrequency(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetFrequency")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 0)
-    {
-        lua_pushnumber(_pLuaState, m_pLuaThis->m_fFrequency * m_pLuaThis->m_pDataStorage->getTimeScale());
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_frequency (" << nParam << "/0).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects mass.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetMass(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetMass")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 1)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            double fMass = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getMass();
-            lua_pushnumber(_pLuaState, fMass);
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_mass (" << nParam << "/1).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects inertia.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetInertia(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetInertia")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 1)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            double fInertia = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getInertia();
-            lua_pushnumber(_pLuaState, fInertia);
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_mass (" << nParam << "/1).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects position.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetPosition(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetPosition")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 1)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            Vector2d vecPos(m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getOrigin());
-            lua_pushnumber(_pLuaState, vecPos[0]);
-            lua_pushnumber(_pLuaState, vecPos[1]);
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_position (" << nParam << "/1).")
-    }
-    
-    return 2;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects position with reference to another object.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetPositionRef(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetPositionRef")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 2)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        std::string strReference = lua_tolstring(_pLuaState,2,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strReference) != 
-                m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-            {
-                CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState();
-                CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strReference)->getKinematicsState();
-                Vector2d vecPos(KinObj.getOriginReferredTo(KinRef));
-                lua_pushnumber(_pLuaState, vecPos[0]);
-                lua_pushnumber(_pLuaState, vecPos[1]);
-            }
-            else
-            {
-                WARNING_MSG("Physics Manager", "Unknown reference " << strReference)
-            }
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_position (" << nParam << "/2).")
-    }
-    
-    return 2;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get simulation time.
-///
-/// \param _pLuaState Lua access to simulation time
-///
-/// \return Simulation time in seconds.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetTime(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetTime")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 0)
-    {
-        lua_pushnumber(_pLuaState, m_pLuaThis->m_SimTimerGlobal.getSecondsRaw());
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_time (" << nParam << "/0).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get years of simulation time.
-///
-/// \param _pLuaState Lua access to years of simulation time
-///
-/// \return Simulation time in years.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetTimeYears(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetTimeYears")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 0)
-    {
-        lua_pushnumber(_pLuaState, m_pLuaThis->m_SimTimerGlobal.getYears());
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_time_years (" << nParam << "/0).")
-    }
-    
-    return 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects velocity.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetVelocity(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetVelocity")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 1)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            Vector2d vecVel(m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getVelocity());
-            lua_pushnumber(_pLuaState, vecVel[0]);
-            lua_pushnumber(_pLuaState, vecVel[1]);
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_velocity (" << nParam << "/1).")
-    }
-    
-    return 2;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Lua access to get objects velocity with reference to another object.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetVelocityRef(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetVelocityRef")  
-    
-    int nParam = lua_gettop(_pLuaState);
-
-    if (nParam == 2)
-    {
-        size_t l;
-        std::string strObject = lua_tolstring(_pLuaState,1,&l);
-        std::string strReference = lua_tolstring(_pLuaState,2,&l);
-        if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strObject) != 
-            m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-        {
-            if (m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->find(strReference) != 
-                m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->end())
-            {
-//                 CKinematicsState KinObj = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strObject)->getKinematicsState();
-//                 CKinematicsState KinRef = m_pLuaThis->m_pDataStorage->getObjectsByNameBack()->at(strReference)->getKinematicsState();
-                Vector2d vecVel;//(KinObj.getVelocityReferredTo(KinRef));
-                lua_pushnumber(_pLuaState, vecVel[0]);
-                lua_pushnumber(_pLuaState, vecVel[1]);
-            }
-            else
-            {
-                WARNING_MSG("Physics Manager", "Unknown reference " << strReference)
-            }
-        }
-        else
-        {
-            WARNING_MSG("Physics Manager", "Unknown object " << strObject)
-        }
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function get_velocity (" << nParam << "/2).")
-    }
-    
-    return 2;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Pauses the simulation
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaPause(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaPause")
-
-    int nParam = lua_gettop(_pLuaState);
-    
-    if (nParam == 0)
-    {
-        m_pLuaThis->m_bPaused = true;
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function pause (" << nParam << "/0).")
-    }
-    
-    return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Resumes the simulation
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaResume(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaResume")
-
-    int nParam = lua_gettop(_pLuaState);
-    
-    if (nParam == 0)
-    {
-        m_pLuaThis->m_bPaused = false;
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function resume (" << nParam << "/0).")
-    }
-    
-    return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the frequency for lua calls.
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaSetFrequency(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaSetFrequency")
-
-    int nParam = lua_gettop(_pLuaState);
-    
-    if (nParam == 1)
-    {
-        m_pLuaThis->m_fFrequencyLua = lua_tonumber(_pLuaState, 1);
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Invalid number of parameters for Lua function set_frequency (" << nParam << "/1).")
-    }
-    
-    return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Gets an internal variable from Lua script
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaGetVar(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaGetVar")
-
-    const char* pKey = luaL_checkstring(_pLuaState, 2);
-
-    if (strcmp(pKey, "G") == 0)
-    {
-        lua_pushnumber(_pLuaState, m_pLuaThis->m_fG);
-        return 1;
-    }
-    else
-    {
-        WARNING_MSG("Physics Manager", "Unknown variable " << pKey << ".")
-    }
-    
-    return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets an internal variable from Lua script
-///
-/// \param _pLuaState Lua access to physics
-///
-/// \return Number of parameters returned to Lua script.
-///
-///////////////////////////////////////////////////////////////////////////////
-int CPhysicsManager::luaSetVar(lua_State* _pLuaState)
-{
-    METHOD_ENTRY("luaSetVar")
-
-    const char* pKey = luaL_checkstring(_pLuaState, 2);
-
-    if (strcmp(pKey, "G") == 0)
-        m_pLuaThis->m_fG = luaL_checknumber(_pLuaState, 3);
-    else
-    {
-        // Fall back to default lua creation of value within table
-        lua_rawset(m_pLuaThis->m_pLuaState, -3);
-    }
-    
-    return 0;
+    m_strCellUpdateLast = it->second->getName();
 }

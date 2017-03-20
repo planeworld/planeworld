@@ -30,6 +30,9 @@
 
 #include "graphics.h"
 
+#include "conf_pw.h"
+#include "math_constants.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -77,13 +80,6 @@ CGraphics::~CGraphics()
 {
     METHOD_ENTRY("CGraphics::CGraphics")
     DTOR_CALL("CGraphics::CGraphics")
-    
-    if (m_pWindow != nullptr)
-    {
-        delete m_pWindow;
-        MEM_FREED("WindowHandleType")
-        m_pWindow = nullptr;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,16 +102,16 @@ Vector2d CGraphics::screen2World(const Vector2d& _vecV) const
     double fX;
     double fY;
         
-    fX = ((m_ViewPort.right-m_ViewPort.left) / m_unWidthScr * _vecV[0]+
-                    m_ViewPort.left) / m_fCamZoom;
-    fY = ((m_ViewPort.top-m_ViewPort.bottom) / m_unHeightScr * _vecV[1]+
-                    m_ViewPort.bottom) /  m_fCamZoom;
+    fX = ((m_ViewPort.rightplane-m_ViewPort.leftplane) / m_unWidthScr * _vecV[0]+
+                    m_ViewPort.leftplane) / m_fCamZoom;
+    fY = ((m_ViewPort.topplane-m_ViewPort.bottomplane) / m_unHeightScr * _vecV[1]+
+                    m_ViewPort.bottomplane) /  m_fCamZoom;
     
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (MATH_PI2-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (MATH_PI2-m_fCamAng))- m_vecCamPos[1];
 
     return vecResult;
 }
@@ -141,16 +137,16 @@ Vector2d CGraphics::screen2World(const double& _fX, const double& _fY) const
     double fX;
     double fY;
         
-    fX = ((m_ViewPort.right-m_ViewPort.left) / m_unWidthScr * _fX +
-           m_ViewPort.left) / m_fCamZoom;
-    fY = ((m_ViewPort.top-m_ViewPort.bottom) / m_unHeightScr * _fY +
-           m_ViewPort.bottom) /  m_fCamZoom;
+    fX = ((m_ViewPort.rightplane-m_ViewPort.leftplane) / m_unWidthScr * _fX +
+           m_ViewPort.leftplane) / m_fCamZoom;
+    fY = ((m_ViewPort.topplane-m_ViewPort.bottomplane) / m_unHeightScr * _fY +
+           m_ViewPort.bottomplane) /  m_fCamZoom;
     
     fL = sqrt(fX*fX+fY*fY);
     fAtan = atan2(fX,fY);
     
-    vecResult[0] = fL*cos(fAtan - (M_PI_2-m_fCamAng))+ m_vecCamPos[0];
-    vecResult[1] = fL*sin(fAtan - (M_PI_2-m_fCamAng))- m_vecCamPos[1];
+    vecResult[0] = fL*cos(fAtan - (MATH_PI2-m_fCamAng))+ m_vecCamPos[0];
+    vecResult[1] = fL*sin(fAtan - (MATH_PI2-m_fCamAng))- m_vecCamPos[1];
 
     return vecResult;
 }
@@ -170,8 +166,8 @@ Vector2d CGraphics::world2Screen(const Vector2d& _vecV) const
 
     Rotation2Dd Rot(m_fCamAng);
     
-    return (Rot*Vector2d(_vecV[0],-_vecV[1])*m_fCamZoom-Vector2d(m_ViewPort.left,-m_ViewPort.top))
-            *m_unWidthScr/(m_ViewPort.right-m_ViewPort.left);
+    return (Rot*Vector2d(_vecV[0],-_vecV[1])*m_fCamZoom-Vector2d(m_ViewPort.leftplane,-m_ViewPort.topplane))
+            *m_unWidthScr/(m_ViewPort.rightplane-m_ViewPort.leftplane);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -255,11 +251,6 @@ bool CGraphics::init()
     //--------------------------------------------------------------------------
     // Initialize window and graphics
     //--------------------------------------------------------------------------
-    m_pWindow = new WindowHandleType(sf::VideoMode(m_unWidthScr, m_unHeightScr),
-                                     "Planeworld", sf::Style::Default,
-                                     sf::ContextSettings(24,8,4,3,3,sf::ContextSettings::Core)
-                                    );
-    MEM_ALLOC("WindowHandleType")
     m_pWindow->setMouseCursorVisible(false);
     m_pWindow->setVerticalSyncEnabled(false);
     DOM_VAR(INFO_MSG("Graphics", "Found OpenGL version: " << m_pWindow->getSettings().majorVersion << "." << m_pWindow->getSettings().minorVersion))
@@ -282,9 +273,9 @@ bool CGraphics::init()
     m_ShaderProgram.link();
     m_ShaderProgram.use();
     
-    m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
-                                        m_ViewPort.bottom, m_ViewPort.top,
-                                        m_ViewPort.near, m_ViewPort.far);
+    m_matProjection = glm::ortho<float>(m_ViewPort.leftplane, m_ViewPort.rightplane,
+            m_ViewPort.bottomplane, m_ViewPort.topplane,
+            m_ViewPort.nearplane, m_ViewPort.farplane);
     GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
     
@@ -334,6 +325,9 @@ bool CGraphics::init()
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineStrip);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineStrip.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    #ifdef PW_MULTITHREADING
+        m_pWindow->setActive(false);
+    #endif
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLineLoop);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLineLoop.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
@@ -371,14 +365,14 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     sf::FloatRect View(0,0,_unWidthScr,_unHeightScr);
     m_pWindow->setView(sf::View(View));
 
-    m_ViewPort.right = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
-    m_ViewPort.top   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
-    m_ViewPort.left   = -m_ViewPort.right;
-    m_ViewPort.bottom = -m_ViewPort.top;
+    m_ViewPort.rightplane = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.topplane   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.leftplane   = -m_ViewPort.rightplane;
+    m_ViewPort.bottomplane = -m_ViewPort.topplane;
     
-    m_matProjection = glm::ortho<float>(m_ViewPort.left, m_ViewPort.right,
-                                        m_ViewPort.bottom, m_ViewPort.top,
-                                        m_ViewPort.near, m_ViewPort.far);
+    m_matProjection = glm::ortho<float>(m_ViewPort.leftplane, m_ViewPort.rightplane,
+            m_ViewPort.bottomplane, m_ViewPort.topplane,
+            m_ViewPort.nearplane, m_ViewPort.farplane);
     GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
     
@@ -386,8 +380,8 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     m_unWidthScr = _unWidthScr;
     m_unHeightScr = _unHeightScr;
     
-    INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.right - m_ViewPort.left << "m x " <<
-                                                   m_ViewPort.top   - m_ViewPort.bottom << "m (" <<
+    INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.rightplane - m_ViewPort.leftplane << "m x " <<
+                                                   m_ViewPort.topplane   - m_ViewPort.bottomplane << "m (" <<
                                                    _unWidthScr << "x" << _unHeightScr << ").")
     
     return (true);
@@ -648,6 +642,31 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR, const dou
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draw a filled rectangle in screen space
+///
+/// \param _vecLL   Lower left corner
+/// \param _vecUR   Upper right corner
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::filledRectSS(const Vector2d& _vecLL, const Vector2d& _vecUR) const
+{
+    METHOD_ENTRY("CGraphics::filledRectSS")
+    
+    Vector2d vecLL = screen2World(_vecLL[0], _vecLL[1]);
+    Vector2d vecLR = screen2World(_vecUR[0], _vecLL[1]);
+    Vector2d vecUL = screen2World(_vecLL[0], _vecUR[1]);
+    Vector2d vecUR = screen2World(_vecUR[0], _vecUR[1]);
+    
+    glBegin(GL_QUADS);
+        glVertex3d(vecLL[0], vecLL[1], -15.0);
+        glVertex3d(vecLR[0], vecLR[1], -15.0);
+        glVertex3d(vecUR[0], vecUR[1], -15.0);
+        glVertex3d(vecUL[0], vecUL[1], -15.0);
+    glEnd();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw a polygon line
 ///
 /// \param _Vertices List of vertices
@@ -713,6 +732,31 @@ void CGraphics::rect(const Vector2d& _vecLL, const Vector2d& _vecUR) const
         glVertex3d(_vecUR[0], _vecLL[1], -15.0);
         glVertex3d(_vecUR[0], _vecUR[1], -15.0);
         glVertex3d(_vecLL[0], _vecUR[1], -15.0);
+    glEnd();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw a rectangle in screen space
+///
+/// \param _vecLL   Lower left corner
+/// \param _vecUR   Upper right corner
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::rectSS(const Vector2d& _vecLL, const Vector2d& _vecUR) const
+{
+    METHOD_ENTRY("CGraphics::rectSS")
+    
+    Vector2d vecLL = screen2World(_vecLL[0], _vecLL[1]);
+    Vector2d vecLR = screen2World(_vecUR[0], _vecLL[1]);
+    Vector2d vecUL = screen2World(_vecLL[0], _vecUR[1]);
+    Vector2d vecUR = screen2World(_vecUR[0], _vecUR[1]);
+    
+    glBegin(GL_LINE_LOOP);
+        glVertex3d(vecLL[0], vecLL[1], -15.0);
+        glVertex3d(vecLR[0], vecLR[1], -15.0);
+        glVertex3d(vecUR[0], vecUR[1], -15.0);
+        glVertex3d(vecUL[0], vecUL[1], -15.0);
     glEnd();
 }
 

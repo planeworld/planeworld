@@ -71,7 +71,7 @@ CCircle* CCircle::clone() const
     METHOD_ENTRY("CCircle::clone");
     
     CCircle* pClone = new CCircle();
-    MEM_ALLOC("CCircle")
+    MEM_ALLOC("IShape")
         
     pClone->copy(this);
     

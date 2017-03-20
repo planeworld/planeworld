@@ -791,7 +791,12 @@ int main(int argc, char *argv[])
     
     CGraphics& Graphics = CGraphics::getInstance();
     
-    Graphics.init();
+    WindowHandleType* pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
+                                                    "Planeworld", sf::Style::Default,
+                                                    sf::ContextSettings(24,8,4,3,3,sf::ContextSettings::Core));
+    MEM_ALLOC("WindowHandleType")
+    
+    Graphics.setWindow(pWindow);
     
     CShader VertexShader;
     CShader FragmentShader;
@@ -806,9 +811,9 @@ int main(int argc, char *argv[])
     ShaderProgram.use();
     
     glm::mat4 matProjection = glm::ortho<float>(
-        Graphics.getViewPort().left, Graphics.getViewPort().right,
-        Graphics.getViewPort().bottom, Graphics.getViewPort().top,
-        Graphics.getViewPort().near, Graphics.getViewPort().far);
+        Graphics.getViewPort().leftplane, Graphics.getViewPort().rightplane,
+        Graphics.getViewPort().bottomplane, Graphics.getViewPort().topplane,
+        Graphics.getViewPort().nearplane, Graphics.getViewPort().farplane);
     GLint nProjMatLoc=glGetUniformLocation(ShaderProgram.getID(), "matTransform");
     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(matProjection));
     
@@ -840,4 +845,11 @@ int main(int argc, char *argv[])
     testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_STATIC_DRAW, GL_LINE_LOOP);
     testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_DYNAMIC_DRAW, GL_LINE_LOOP);
     testOneBufferedVBOPerMultipleShapes(1000, 100, 100, GL_STREAM_DRAW, GL_LINE_LOOP);
+    
+    if (pWindow != nullptr)
+    {
+        delete pWindow;
+        MEM_FREED("WindowHandleType")
+        pWindow = nullptr;
+    }
 }

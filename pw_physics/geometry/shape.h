@@ -38,7 +38,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "graphics.h"
-// #include "unique_id_user.h"
+#include "unique_id_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -59,7 +59,7 @@ enum class ShapeType
 /// \brief Abstract class representing a simple shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IShape
+class IShape : public IUniqueIDUser
 {
     
     public:
@@ -115,6 +115,23 @@ class IShape
         int             m_nDepthlayers;             ///< Depths in which shape exists
         Vector2d        m_vecCentroid;              ///< Centroid of this shape
 };
+
+//--- Enum parser ------------------------------------------------------------//
+const std::unordered_map<ShapeType, std::string> mapShapeTypeToString = {
+    {ShapeType::NONE, "shp_none"},
+    {ShapeType::CIRCLE, "shp_circle"},
+    {ShapeType::PLANET, "shp_planet"},
+    {ShapeType::POLYGON, "shp_polygon"},
+    {ShapeType::TERRAIN, "shp_terrain"}
+}; ///< Map from ShapeType to string
+
+static std::unordered_map<std::string, ShapeType> mapStringToShapeType = {
+    {"shp_none", ShapeType::NONE},
+    {"shp_circle", ShapeType::CIRCLE},
+    {"shp_planet", ShapeType::PLANET},
+    {"shp_polygon", ShapeType::POLYGON},
+    {"shp_terrain", ShapeType::TERRAIN}
+}; ///< Map from string to ShapeType
 
 //--- Implementation is done here for inline optimisation --------------------//
 

@@ -30,7 +30,9 @@
 
 #include "log.h"
 
-#include <sys/ioctl.h>
+#ifdef __linux__
+	#include <sys/ioctl.h>
+#endif
 
 std::ostringstream  CLog::s_strStr; ///< Used for streaming functionality in macros
 LogDomainType       CLog::s_Dom = LOG_DOMAIN_NONE;    ///< Used for domain handling in macros
@@ -49,35 +51,42 @@ CLog::~CLog()
     DTOR_CALL("CLog::~CLog");
     
     #ifdef DOMAIN_MEMORY
+        std::lock_guard<std::mutex> lock(m_Mutex);
+    
         // The memory domain is given by the enclosing macro
         if (m_nMemCounter > 0)
         {
-            NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
-            WARNING_MSG("Logging", "There may be memory leaks, please check: " << m_nMemCounter)
+//             NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
+//             WARNING_MSG("Logging", "There may be memory leaks, please check: " << m_nMemCounter)
             
-                std::cout << "\n";
-                std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
-                while (ci != m_MemCounterMap.end())
-                {
-                    if (ci->second != 0) std::cout << m_strColWarning;
-                    std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
-                    ++ci;
-                }
+            std::cout << "There may be memory leaks, please check: " << m_nMemCounter << std::endl;
+        
+            std::cout << "\n";
+            std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
+            while (ci != m_MemCounterMap.end())
+            {
+                if (ci->second != 0) std::cout << m_strColWarning;
+                std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
+                ++ci;
+            }
         }
         if (m_nMemCounter < 0)
         {
-            NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
-            WARNING_MSG("Logging", "Maybe more memory freed (" << -m_nMemCounter << " frees) than allocated, please check.")
+//             NOTICE_MSG ("Logging", "The next message results from debug information. A lower loglevel won't display it.")
+//             WARNING_MSG("Logging", "Maybe more memory freed (" << -m_nMemCounter << " frees) than allocated, please check.")
             
-                std::cout << "\n";
-                std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
-                while (ci != m_MemCounterMap.end())
-                {
-                    if (ci->second != 0) std::cout << m_strColWarning;
-                    std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
-                    ++ci;
-                }
+            std::cout << "Maybe more memory freed (" << -m_nMemCounter << " frees) than allocated, please check." << std::endl;
+        
+            std::cout << "\n";
+            std::map<std::string,int>::const_iterator ci = m_MemCounterMap.begin();
+            while (ci != m_MemCounterMap.end())
+            {
+                if (ci->second != 0) std::cout << m_strColWarning;
+                std::cout << "    " << (*ci).first << ": " << (*ci).second << m_strColDefault << std::endl;
+                ++ci;
+            }
         }
+        
     #endif
 }
 
@@ -158,10 +167,10 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
     // !!! Do not log the logging method, this action will never stop !!!
     // METHOD_ENTRY("CLog::log");
 
+    std::lock_guard<std::mutex> lock(m_Mutex);
+    
     if (!m_bLock)
     {
-        m_Mutex.lock();
-
         std::string strDomFlag;
     
         // Messages to be displayed
@@ -212,9 +221,9 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                 unsigned short unLengthMax = m_unColsMax;
                 
                 #ifdef DOMAIN_METHOD_HIERARCHY 
-                    unsigned short unIndent = _strSrc.size() + 30 + m_nHierLevel*2;
+                    unsigned short unIndent = _strSrc.size() + 26 + m_nHierLevel*2;
                 #else
-                    unsigned short unIndent = _strSrc.size() + 30;
+                    unsigned short unIndent = _strSrc.size() + 26;
                 #endif
                 std::string strIndent(unIndent, ' ');
     
@@ -259,8 +268,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cerr << "  ";
                         #endif
                         std::cerr << m_strColSender << 
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_WARNING:
                         std::cout << m_strColWarning << std::left << std::setw(14) <<  "[warning]";
@@ -270,8 +278,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cout << "  ";
                         #endif
                         std::cout << m_strColSender << \
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_NOTICE:
                         std::cout << m_strColNotice << std::left << std::setw(14) <<  "[notice]";
@@ -281,8 +288,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cout << "  ";
                         #endif
                         std::cout << m_strColSender << \
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_INFO:
                         std::cout << m_strColInfo << std::left << std::setw(14) <<  "[info]";
@@ -292,8 +298,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cout << "  ";
                         #endif
                         std::cout << m_strColSender << \
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_DEBUG:
                         std::cout << m_strColDebug << std::left << std::setw(14) <<  "[debug]";
@@ -303,8 +308,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                                 std::cout << m_strColDefault << "  ";
                         #endif
                         std::cout << m_strColSender << \
-                        _strSrc << ": " << m_strColDefault << strMessage <<
-                        "\033[s" << std::endl;
+                        _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                 }
             }
@@ -320,8 +324,6 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
         m_strMsgBufMsg = _strMessage;
         m_MsgBufLevel = _Level;
         m_MsgBufDom = _Domain;
-        
-        m_Mutex.unlock();
     }
 }
 
@@ -438,7 +440,9 @@ void CLog::setLoglevel(const LogLevelType& _Loglevel)
         {
             if (_Loglevel < m_LogLevel)
             {
-                DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
+                // Dynmically calling loglevel might used for loops to avoid
+                // message flooding. Hence, this shouldn't be done here.
+                // DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
                 #ifdef DOMAIN_MEMORY
                 if (m_LogLevel == LOG_LEVEL_DEBUG)
                     m_nMemCounter = 0;
@@ -452,7 +456,10 @@ void CLog::setLoglevel(const LogLevelType& _Loglevel)
                     m_nMemCounter = 0;
                 #endif
                 m_LogLevel = _Loglevel;
-                DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
+                
+                // Dynmically calling loglevel might used for loops to avoid
+                // message flooding. Hence, this shouldn't be done here.
+                // DEBUG_MSG("Logging", "Dynamically setting loglevel "+convLogLev2Str(_Loglevel))
             }
         }
     }
@@ -833,10 +840,14 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
 
 //  CTOR_CALL("CLog::CLog");
     
-    // Request the terminal width from the system
-    struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-    m_unColsMax = w.ws_col;
+	#ifdef __linux__
+		// Request the terminal width from the system
+		struct winsize w;
+		ioctl(0, TIOCGWINSZ, &w);
+		m_unColsMax = w.ws_col;
+	#else
+		m_unColsMax = 80u;
+	#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -39,6 +39,9 @@ std::deque<UIDType> CUniqueID::s_UnusedUIDs;
 /// Global list for reference counting of uids
 std::unordered_map<UIDType, std::uint32_t> CUniqueID::s_ReferencedUIDs;
 
+/// Global mutex
+std::mutex CUniqueID::m_Mtx;
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
@@ -51,6 +54,8 @@ CUniqueID::CUniqueID()
 {
     METHOD_ENTRY("CUniqueID::CUniqueID")
     DTOR_CALL("CUniqueID::CUniqueID")
+    
+    std::lock_guard<std::mutex> lock(m_Mtx);
     
     if (s_UnusedUIDs.empty())
     {
@@ -80,6 +85,8 @@ CUniqueID::CUniqueID(const CUniqueID& _UID)
     METHOD_ENTRY("CUniqueID::CUniqueID")
     DTOR_CALL("CUniqueID::CUniqueID")
     
+    std::lock_guard<std::mutex> lock(m_Mtx);
+    
     this->copy(_UID);
 }
 
@@ -96,6 +103,8 @@ CUniqueID::~CUniqueID()
 {
     METHOD_ENTRY("CUniqueID::~CUniqueID")
     DTOR_CALL("CUniqueID::~CUniqueID")
+    
+    std::lock_guard<std::mutex> lock(m_Mtx);
     
     s_ReferencedUIDs[m_nUID] -= 1u;
     if (s_ReferencedUIDs[m_nUID] == 0u)
@@ -118,6 +127,8 @@ CUniqueID& CUniqueID::operator=(const CUniqueID& _UID)
     
     if (this != &_UID)
     {
+        std::lock_guard<std::mutex> lock(m_Mtx);
+        
         s_ReferencedUIDs[m_nUID] -= 1u;
         if (s_ReferencedUIDs[m_nUID] == 0u)
         {
@@ -138,6 +149,9 @@ CUniqueID& CUniqueID::operator=(const CUniqueID& _UID)
 void CUniqueID::setNewID()
 {
     METHOD_ENTRY("CUniqueID::setNewID")
+    
+    std::lock_guard<std::mutex> lock(m_Mtx);
+    
     UIDType nTmp;
     if (s_UnusedUIDs.empty())
     {

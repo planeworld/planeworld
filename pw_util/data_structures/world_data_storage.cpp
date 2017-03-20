@@ -130,7 +130,7 @@ bool CWorldDataStorage::addDebris(CDebris* _pDebris)
     METHOD_ENTRY("CWorldDataStorage::addDebris")
     
     std::array<CDebris*, BUFFER_QUADRUPLE> aDebris =
-    {_pDebris,_pDebris->clone(),_pDebris->clone(),_pDebris->clone()};
+    {_pDebris->clone(),_pDebris->clone(),_pDebris->clone(),_pDebris};
     
     std::array<IUniqueIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
     {aDebris[0],aDebris[1],aDebris[2],aDebris[3]};
@@ -174,7 +174,7 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
     METHOD_ENTRY("CWorldDataStorage::addObject")
 
     std::array<CObject*, BUFFER_QUADRUPLE> aObjects =
-    {_pObject,_pObject->clone(),_pObject->clone(),_pObject->clone()};
+    {_pObject->clone(),_pObject->clone(),_pObject->clone(),_pObject};
     std::array<IUniqueIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
     {aObjects[0], aObjects[1], aObjects[2], aObjects[3]};
     
@@ -184,10 +184,57 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
     m_ObjectsByName.add(_pObject->getName(),aObjects);
     m_ObjectsByValue.add(_pObject->getUID(), aObjects);
     
+    for (auto Shape : _pObject->getGeometry()->getShapes())
+    {
+        m_ShapesByValue.insert(std::pair<UIDType, IShape*>(Shape->getUID(), Shape));
+    }
+    
     if (!this->addUIDUser(aUIDUsers)) return false;
     return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Explicitely add a shape to data storage
+///
+/// This method adds the given shape to data storage, which is normally done
+/// by its object (\ref addObject). It is needed, if shapes are created and
+/// externally while not added to an object or if the shape is added for an
+/// object that is already registered to data storage.
+///
+/// \param _pShape Shape that should be added to map
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWorldDataStorage::addShape(IShape* _pShape)
+{
+    METHOD_ENTRY("CWorldDataStorage::addShape")
+    m_ShapesByValue.insert(std::pair<UIDType, IShape*>(_pShape->getUID(), _pShape));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Updates an object whichs structure was modified externally
+///
+/// This method updates an object if structural modifications where done. At
+/// the moment, this applies for adding a new shape, which than has to be
+/// added to the map of shapes.
+///
+/// \param _nUID UID of object that should be updated
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWorldDataStorage::updateObject(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::updateObject")
+
+    for (auto pShape : m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->at(_nUID)->getGeometry()->getShapes())
+    {
+        if (m_ShapesByValue.find(pShape->getUID()) == m_ShapesByValue.end())
+        {
+            m_ShapesByValue.insert(std::pair<UIDType, IShape*>(pShape->getUID(), pShape));
+            break;
+        }
+    }
+}
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Add a UID user to buffer
@@ -211,6 +258,7 @@ bool CWorldDataStorage::addUIDUser(IUniqueIDUser* _pUIDUser)
     else
     {
         m_UIDUsersByValue.setAt(_pUIDUser->getUID(), _pUIDUser);
+        m_UIDsByName.insert(std::pair<std::string,UIDType>(_pUIDUser->getName(), _pUIDUser->getUID()));
         return true;
     }
 }
@@ -224,19 +272,20 @@ void CWorldDataStorage::swapBack()
 {
     METHOD_ENTRY("CWorldDataStorage::swapBack")
 
-    m_MutexFrontNew.lock();
+    std::lock_guard<std::mutex> lock(m_MutexFrontNew);
 
     m_DebrisByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_DebrisByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
+    
     m_DebrisByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
 //     m_EmittersByValue.copyDeep(BUFFER_TRIPLE_BACK, BUFFER_TRIPLE_MIDDLE);
     m_ObjectsByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
-    m_ObjectsByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
     m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
+    
+    m_ObjectsByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
 
     m_bFrontNew = true;
-    m_MutexFrontNew.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +296,9 @@ void CWorldDataStorage::swapBack()
 void CWorldDataStorage::swapFront()
 {
     METHOD_ENTRY("CWorldDataStorage::swapFront")
-    m_MutexFrontNew.lock();
+   
+    std::lock_guard<std::mutex> lock(m_MutexFrontNew);
+    
     if (m_bFrontNew)
     {
         m_DebrisByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
@@ -258,37 +309,6 @@ void CWorldDataStorage::swapFront()
         m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_bFrontNew = false;
     }
-    m_MutexFrontNew.unlock();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Store index of specific object
-///
-/// \param _strRef Reference name to access object
-/// \param _It Iterator pointing to object to be store
-///
-///////////////////////////////////////////////////////////////////////////////
-void CWorldDataStorage::memorizeDynamicObject(const std::string& _strRef,
-                                              const ObjectsByNameType::const_iterator _It)
-{
-    METHOD_ENTRY("CWorldDataStorage::memorizeDynamicObject")
-    m_DynamicObjectsMemory[_strRef] = _It;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Get index of specific memorized object
-///
-/// \param _strRef Reference name to access object
-///
-/// \return Iterator pointing to memorized object
-///
-///////////////////////////////////////////////////////////////////////////////
-const ObjectsByNameType::const_iterator CWorldDataStorage::recallDynamicObject(const std::string& _strRef)
-{
-    METHOD_ENTRY("CWorldDataStorage::recallDynamicObject")
-    return m_DynamicObjectsMemory.at(_strRef);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -525,6 +545,8 @@ bool CWorldDataStorage::addUIDUser(const std::array<IUniqueIDUser*, BUFFER_QUADR
     else
     {
         m_UIDUsersByValue.setAt(_aUIDUser[0]->getUID(), _aUIDUser);
+        m_UIDsByName.insert(std::pair<std::string,UIDType>(_aUIDUser[0]->getName(), _aUIDUser[0]->getUID()));
         return true;
     }
 }
+

@@ -37,7 +37,7 @@ uint32_t CObject::m_unNrOfObjects = 0;
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IUniverseScaled(),
+CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IGridUser(),
                 m_bGravitation(true),
                 m_bDynamics(true),
                 m_fTimeFac(1.0),
@@ -50,13 +50,13 @@ CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IUniverseScaled(),
     m_UID.setName("Object_" + m_UID.getName());
     
     m_pIntAng = new CEulerIntegrator<double>;
-    MEM_ALLOC("CEulerIntegrator");
+    MEM_ALLOC("IIntegrator")
     m_pIntAngVel = new CEulerIntegrator<double>;
-    MEM_ALLOC("CEulerIntegrator");
+    MEM_ALLOC("IIntegrator")
     m_pIntPos = new CEulerIntegrator<Vector2d>;
-    MEM_ALLOC("CEulerIntegrator")
+    MEM_ALLOC("IIntegrator")
     m_pIntVel = new CEulerIntegrator<Vector2d>;
-    MEM_ALLOC("CEulerIntegrator")
+    MEM_ALLOC("IIntegrator")
 
     m_vecForce.setZero();
     m_vecCell.setZero();
@@ -74,19 +74,19 @@ CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IUniverseScaled(),
 CObject::CObject(const CObject& _Obj) : 
                 IUniqueIDUser(_Obj),
                 IKinematicsStateUser(_Obj),
-                IUniverseScaled(_Obj)
+                IGridUser(_Obj)
 {
     METHOD_ENTRY("CObject::CObject")
     CTOR_CALL("CObject::CObject")
     
     m_pIntAng = new CEulerIntegrator<double>;
-    MEM_ALLOC("CEulerIntegrator");
+    MEM_ALLOC("IIntegrator")
     m_pIntAngVel = new CEulerIntegrator<double>;
-    MEM_ALLOC("CEulerIntegrator");
+    MEM_ALLOC("IIntegrator")
     m_pIntPos = new CEulerIntegrator<Vector2d>;
-    MEM_ALLOC("CEulerIntegrator")
+    MEM_ALLOC("IIntegrator")
     m_pIntVel = new CEulerIntegrator<Vector2d>;
-    MEM_ALLOC("CEulerIntegrator")
+    MEM_ALLOC("IIntegrator")
     
     this->copy(_Obj);
 }
@@ -150,7 +150,7 @@ CObject& CObject::operator=(const CObject& _Obj)
     {
         IUniqueIDUser::operator=(_Obj);
         IKinematicsStateUser::operator=(_Obj);
-        IUniverseScaled::operator=(_Obj);
+        IGridUser::operator=(_Obj);
         this->copy(_Obj);
     }
     return *this;
@@ -227,10 +227,11 @@ void CObject::addForceLC(const Vector2d& _vecF, const Vector2d& _vecPOC)
 
     Rotation2Dd Rotation(m_KinematicsState.getAngle());
     
-    m_vecForce  +=  Rotation * _vecF;
+    Vector2d vecV = Rotation * _vecF;
+    m_vecForce  +=  vecV;
     
     Vector2d vecTmp = Rotation * (_vecPOC-m_Geometry.getCOM());
-    m_fTorque   +=  vecTmp[0] * m_vecForce[1] - vecTmp[1] * m_vecForce[0];
+    m_fTorque   +=  vecTmp[0] * vecV[1] - vecTmp[1] * vecV[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -250,7 +251,7 @@ void CObject::clearForces()
 ///
 /// \brief Update the cell of this object
 ///
-/// \todo Shouldn't this be a method of IUniverseScaled?!
+/// \todo Shouldn't this be a method of IGridUser?!
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CObject::updateCell()
@@ -390,6 +391,21 @@ void CObject::setCell(const Vector2i& _vecCell)
     }    
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Method to set cell, overloaded to hand cell to bounding box.
+///
+/// \param _nCellX Grid cell of the object, x coordinate 
+/// \param _nCellY Grid cell of the object, x coordinate
+///
+////////////////////////////////////////////////////////////////////////////////
+void CObject::setCell(const int& _nGridX, const int& _nGridY)
+{
+    METHOD_ENTRY("CObject::setCell")
+
+    this->setCell(Vector2i(_nGridX, _nGridY));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Sets a new integrator for this instance
@@ -433,10 +449,10 @@ void CObject::setNewIntegrator(const IntegratorType& _IntType)
             m_pIntAngVel = new CEulerIntegrator<double>;
             m_pIntPos = new CEulerIntegrator<Vector2d>;
             m_pIntVel = new CEulerIntegrator<Vector2d>;
-            MEM_ALLOC("CEulerIntegrator")
-            MEM_ALLOC("CEulerIntegrator")
-            MEM_ALLOC("CEulerIntegrator")
-            MEM_ALLOC("CEulerIntegrator")
+            MEM_ALLOC("IIntegrator")
+            MEM_ALLOC("IIntegrator")
+            MEM_ALLOC("IIntegrator")
+            MEM_ALLOC("IIntegrator")
             break;
         case INTEGRATOR_ADAMS_BASHFORTH:
             m_pIntAng = new CAdamsBashforthIntegrator<double>;
@@ -582,7 +598,7 @@ void CObject::copy(const CObject& _Obj)
 
     m_bGravitation      = _Obj.m_bGravitation;
     m_bDynamics         = _Obj.m_bDynamics;
-    m_Lifetime          = _Obj.m_Lifetime;
+//     m_Lifetime          = _Obj.m_Lifetime;
     m_fTimeFac          = _Obj.m_fTimeFac;
     m_Geometry          = _Obj.m_Geometry;
     m_vecForce          = _Obj.m_vecForce;

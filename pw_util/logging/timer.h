@@ -36,7 +36,9 @@
 
 //--- Standard header --------------------------------------------------------//
 #include <chrono>
+#include <condition_variable>
 #include <istream>
+#include <mutex>
 #include <ostream>
 
 //--- Program header ---------------------------------------------------------//
@@ -75,8 +77,14 @@ class CTimer
         //--- Private Variables ----------------------------------------------//
         std::chrono::high_resolution_clock::time_point m_Start; ///< Starting time
         std::chrono::high_resolution_clock::time_point m_Stop;  ///< Stopping time
+        std::chrono::high_resolution_clock::time_point m_StartAbsolute; ///< Absolute starting time
+        
+        std::condition_variable m_CV;               ///< Condition variable for sleeping 
+        std::mutex              m_MutexCV;          ///< Mutex for sleeping
+        double                  m_fCountAbsolute;   ///< Absolute time counter 
+        double                  m_fFrequency;       ///< Frequency
 
-        double  m_fDiffTime = 0.0;                         ///< Time between start and stop
+        double                  m_fDiffTime = 0.0;  ///< Time between start and stop
 
 };
 

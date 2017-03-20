@@ -37,6 +37,7 @@
 #include "log.h"
 
 #include "circle.h"
+#include "lua_manager.h"
 #include "physics_manager.h"
 #include "planet.h"
 #include "polygon.h"
@@ -62,9 +63,9 @@ CXMLImporter::CXMLImporter() : m_pCurrentEmitter(nullptr),
                                m_strFont(""),
                                m_strLuaPhysicsInterface(""),
                                m_fDebrisFrequency(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
-                               m_fLuaFrequency(PHYSICS_LUA_DEFAULT_FREQUENCY),
+                               m_fLuaFrequency(30.0),
                                m_fPhysicsFrequency(PHYSICS_DEFAULT_FREQUENCY),
-                               m_fVisualsFrequency(VISUALS_DEFAULT_FREQUENCY)
+                               m_fVisualsFrequency(60.0)
 {
     METHOD_ENTRY("CXMLImporter::CXMLImporter")
     CTOR_CALL("CXMLImporter::CXMLImporter")
@@ -180,21 +181,23 @@ bool CXMLImporter::import(const std::string& _strFilename,
                 m_fPhysicsFrequency = checkAttributeDouble(N, "physics_frequency", m_fPhysicsFrequency);
                 m_fVisualsFrequency = checkAttributeDouble(N, "visuals_frequency", m_fVisualsFrequency);
                 
-                if (m_fLuaFrequency > m_fPhysicsFrequency)
-                {
-                    m_fLuaFrequency=m_fPhysicsFrequency;
-                    NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fLuaFrequency << "Hz.")
-                }
-                if (m_fDebrisFrequency > m_fPhysicsFrequency)
-                {
-                    m_fDebrisFrequency=m_fPhysicsFrequency;
-                    NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fDebrisFrequency << "Hz.")
-                }
-                if (m_fVisualsFrequency > m_fPhysicsFrequency)
-                {
-                     m_fVisualsFrequency=m_fPhysicsFrequency;
-                    NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fVisualsFrequency << "Hz.")
-                }
+                #ifndef PW_MULTITHREADING
+                    if (m_fLuaFrequency > m_fPhysicsFrequency)
+                    {
+                        m_fLuaFrequency=m_fPhysicsFrequency;
+                        NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fLuaFrequency << "Hz.")
+                    }
+                    if (m_fDebrisFrequency > m_fPhysicsFrequency)
+                    {
+                        m_fDebrisFrequency=m_fPhysicsFrequency;
+                        NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fDebrisFrequency << "Hz.")
+                    }
+                    if (m_fVisualsFrequency > m_fPhysicsFrequency)
+                    {
+                        m_fVisualsFrequency=m_fPhysicsFrequency;
+                        NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fVisualsFrequency << "Hz.")
+                    }
+                #endif
             }
         }
         else if (std::string(N.name()) == "emitter")
@@ -546,10 +549,10 @@ void CXMLImporter::createCamera(const pugi::xml_node& _Node)
         
         m_pCamera->setPosition(_Node.attribute("position_x").as_double(),
                               _Node.attribute("position_y").as_double());
-        m_pCamera->getKinematicsState().setAngle(checkAttributeDouble(_Node,"angle", 0.0, false));
-        m_pCamera->setViewport(_Node.attribute("viewport_width").as_int(),
-                              _Node.attribute("viewport_height").as_int());
-        m_pCamera->zoomTo(GRAPHICS_PX_PER_METER/checkAttributeDouble(_Node, "m_per_px", 0.5, false));
+        m_pCamera->getKinematicsState().setAngle(checkAttributeDouble(_Node,"angle", 0.0, XML_IMPORTER_DO_NOT_NOTICE));
+        m_pCamera->setViewport(checkAttributeInt(_Node, "viewport_width", 600, XML_IMPORTER_DO_NOT_NOTICE),
+                               checkAttributeInt(_Node, "viewport_height", 400, XML_IMPORTER_DO_NOT_NOTICE));
+        m_pCamera->zoomTo(GRAPHICS_PX_PER_METER/checkAttributeDouble(_Node, "m_per_px", 0.5, XML_IMPORTER_DO_NOT_NOTICE));
 //         if (checkAttributeBool(_Node, "enable_angle_hook", true)) m_pCamera->enableAngleHook();
 //         else m_pCamera->disableAngleHook();
         std::string strReferredObject = checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE);
@@ -584,7 +587,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 INFO_MSG("XML Importer", "Creating object emitter.")
                 
                 CObjectEmitter* pObjEmitter = new CObjectEmitter;
-                MEM_ALLOC("CObjectEmitter")
+                MEM_ALLOC("IEmitter")
                 
                 pObjEmitter->setName(checkAttributeString(_Node, "name", pObjEmitter->getName()));
                 pObjEmitter->setVisualsDataStorage(m_pVisualsDataStorage);
@@ -661,13 +664,14 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 
                 m_pCurrentEmitter = pObjEmitter;
                 m_Emitters.insert(std::pair<std::string,IEmitter*>(pObjEmitter->getName(), pObjEmitter));
+                m_pDataStorage->addUIDUser(m_pCurrentEmitter);
             }
             else if (strType == "debris_emitter")
             {
                 INFO_MSG("XML Importer", "Creating debris emitter.")
                 
                 CDebrisEmitter* pDebrisEmitter = new CDebrisEmitter;
-                MEM_ALLOC("CDebrisEmitter")
+                MEM_ALLOC("IEmitter")
                 
                 pDebrisEmitter->setName(checkAttributeString(_Node, "name", pDebrisEmitter->getName()));
                 pDebrisEmitter->setVisualsDataStorage(m_pVisualsDataStorage);
@@ -747,6 +751,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 ));
                 m_pCurrentEmitter = pDebrisEmitter;
                 m_Emitters.insert(std::pair<std::string,IEmitter*>(pDebrisEmitter->getName(), pDebrisEmitter));
+                m_pDataStorage->addUIDUser(m_pCurrentEmitter);
             }
             else
             {
@@ -978,7 +983,7 @@ void CXMLImporter::createShapePlanet(CObject* const _pObject,
     if (!checkFile(_Node))
     {
         CPlanet* pPlanet = new CPlanet;
-        MEM_ALLOC("CPlanet")
+        MEM_ALLOC("IShape")
         
         pPlanet->setMass(checkAttributeDouble(_Node, "mass", pPlanet->getMass()));
         pPlanet->setRadius(_Node.attribute("radius").as_double());
@@ -1011,7 +1016,7 @@ void CXMLImporter::createShapePolygon(CObject* const _pObject,
     if (!checkFile(_Node))
     {
         CPolygon* pPolygon = new CPolygon;
-        MEM_ALLOC("CPolygon")
+        MEM_ALLOC("IShape")
         
         if (std::string(_Node.attribute("polygon_type").as_string()) == "filled")
             pPolygon->setPolygonType(PolygonType::FILLED);

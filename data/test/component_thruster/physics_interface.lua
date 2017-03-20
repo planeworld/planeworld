@@ -4,22 +4,22 @@ K_p = 50000.0
 K_v = 100000.0
 
 Object = {}
-Object["name"] = "RocketBody"
+Object["uid_rocket"] = pw.system.get_uid("RocketBody")
 
 ObjectRef = {}
-ObjectRef["name2"] = "Earth"
+ObjectRef["uid_earth"] = pw.system.get_uid("Earth")
 
 pw.system.pause()
 
 function physics_interface()
     
-    frequency = pw.system.get_frequency()
+    frequency = pw.system.get_lua_frequency()
     Frametime = 1.0/frequency
     
---     pw.universe.apply_force(Object["name"], "0.0", math.random()*200000000.0 - 100000000.0, "0.0", "0.0")
+--     pw.universe.obj_apply_force(Object["name"], "0.0", math.random()*200000000.0 - 100000000.0, "0.0", "0.0")
     
-    Object["p_x"], Object["p_y"] = pw.universe.get_position_ref(Object["name"], ObjectRef["name2"])
-    Object["v_x"], Object["v_y"] = pw.universe.get_velocity_ref(Object["name"], ObjectRef["name2"])
+    Object["p_x"], Object["p_y"] = pw.physics.obj_get_position_ref(Object["uid_rocket"], ObjectRef["uid_earth"])
+    Object["v_x"], Object["v_y"] = pw.physics.obj_get_velocity_ref(Object["uid_rocket"], ObjectRef["uid_earth"])
     
     output(Object)
     
@@ -38,7 +38,7 @@ function physics_interface()
 --     end
     
     if Object["v_y"] > 200.0 then
-        pw.system.set_frequency(0.5)
+--        pw.system.set_frequency(0.5)
     end
     
 end

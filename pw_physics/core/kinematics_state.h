@@ -72,6 +72,7 @@ class CKinematicsState  : public IUniqueIDUser,
             
         //--- Constructor/Destructor -----------------------------------------//
         CKinematicsState();
+        virtual ~CKinematicsState(){};
 
         //--- Constant methods -----------------------------------------------//
         Vector2d  getOrigin() const;
@@ -102,7 +103,7 @@ class CKinematicsState  : public IUniqueIDUser,
         
         void increaseAngle(const double&);
         
-        void setCell(const Vector2i&);
+//         void setCell(const Vector2i&);
         void setOrigin(const Vector2d&);
         void setVelocity(const Vector2d&);
         void setAngle(const double&);

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016-2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,16 +36,11 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "camera.h"
-#include "debris_visuals.h"
-#include "debris_visuals_thruster.h"
 
 /// Map of cameras, accessed by name
 typedef std::unordered_map<std::string, CCamera*> CamerasByNameType;
 /// Vector of cameras, accessed by index to cycle through cameras
 typedef std::vector<CCamera*> CamerasByIndexType;
-
-typedef std::vector<CDebrisVisuals*>            DebrisVisualsType;          ///< Specifies a list of debris visuals
-typedef std::list<CDebrisVisualsThruster*>      DebrisVisualsThrusterType;  ///< Specifies a list of debris visuals
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -64,14 +59,10 @@ class CVisualsDataStorage
         //--- Constant Methods -----------------------------------------------//
         const CamerasByIndexType&           getCamerasByIndex() const;
         const CamerasByNameType&            getCamerasByName() const;
-        const DebrisVisualsType&            getDebrisVisuals() const;
-        const DebrisVisualsThrusterType&    getDebrisVisualsThruster() const;
         
         //--- Methods --------------------------------------------------------//
         void addCamera(CCamera*);
-        void addDebrisVisuals(CDebrisVisuals*);
-        void addDebrisVisualsThruster(CDebrisVisualsThruster*);
-        
+
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CVisualsDataStorage&);
         friend std::ostream& operator<<(std::ostream&, CVisualsDataStorage&);
@@ -80,8 +71,6 @@ class CVisualsDataStorage
       
         CamerasByIndexType          m_CamerasByIndex;           ///< Cameras, accessed by index
         CamerasByNameType           m_CamerasByName;            ///< Cameras, accessed by name
-        DebrisVisualsType           m_DebrisVisuals;            ///< List of debris visuals
-        DebrisVisualsThrusterType   m_DebrisVisualsThruster;    ///< List of debris visuals
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -110,32 +99,6 @@ inline const CamerasByNameType& CVisualsDataStorage::getCamerasByName() const
 {
     METHOD_ENTRY("CVisualsDataStorage::getCamerasByName")
     return m_CamerasByName;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns a list of debris visuals.
-///
-/// \return List of debris visuals
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const DebrisVisualsType& CVisualsDataStorage::getDebrisVisuals() const
-{
-    METHOD_ENTRY("CVisualsDataStorage::getDebrisVisuals")
-    return m_DebrisVisuals;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns a list of thruster debris visuals.
-///
-/// \return List of thruster debris visuals
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const DebrisVisualsThrusterType& CVisualsDataStorage::getDebrisVisualsThruster() const
-{
-    METHOD_ENTRY("CVisualsDataStorage::getDebrisVisualsThruster")
-    return m_DebrisVisualsThruster;
 }
 
 #endif // VISUALS_DATA_STORAGE_H

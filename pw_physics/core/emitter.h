@@ -38,7 +38,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state_user.h"
-#include "universe_scaled.h"
 #include "unique_id_user.h"
 #include "unique_id_referrer.h"
 #include "visuals_data_storage_user.h"
@@ -91,7 +90,6 @@ const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter ty
 ////////////////////////////////////////////////////////////////////////////////
 class IEmitter : public IKinematicsStateUser,
                  public IUniqueIDUser,
-                 public IUniverseScaled,
                  public IVisualsDataStorageUser,
                  public IWorldDataStorageUser
 {
@@ -123,7 +121,7 @@ class IEmitter : public IKinematicsStateUser,
         void setFrequency(const double&);
         void setLimits(const double&, const double&, const double&, const double&);
         void setMode(const EmitterModeType&);
-        void setNumber(const u_int32_t&);
+        void setNumber(const std::uint32_t&);
         void setOrigin(const Vector2d&);
         void setVelocity(const double&);
         void setVelocityStd(const double&);
@@ -451,7 +449,7 @@ inline void IEmitter::setMode(const EmitterModeType& _EmM)
 /// \param _nNr Number of entities.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void IEmitter::setNumber(const u_int32_t& _nNr)
+inline void IEmitter::setNumber(const std::uint32_t& _nNr)
 {
     METHOD_ENTRY("IEmitter::setNumber")
     m_nNr = _nNr;

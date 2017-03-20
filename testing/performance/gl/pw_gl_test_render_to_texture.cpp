@@ -268,9 +268,9 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
     ShaderProgram.use();
     
     glm::mat4 matProjection = glm::ortho<float>(
-        Graphics.getViewPort().left, Graphics.getViewPort().right,
-        Graphics.getViewPort().bottom, Graphics.getViewPort().top,
-        Graphics.getViewPort().near, Graphics.getViewPort().far);
+        Graphics.getViewPort().leftplane, Graphics.getViewPort().rightplane,
+        Graphics.getViewPort().bottomplane, Graphics.getViewPort().topplane,
+        Graphics.getViewPort().nearplane, Graphics.getViewPort().farplane);
     GLint nProjMatLoc=glGetUniformLocation(ShaderProgram.getID(), "matTransform");
     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(matProjection));
     
@@ -294,10 +294,10 @@ const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
     
     CRenderTarget RenderTarget;
     RenderTarget.init(Graphics.getWidthScr(), Graphics.getHeightScr());
-    RenderTarget.setTarget(Graphics.getViewPort().left,  Graphics.getViewPort().bottom,
-                           Graphics.getViewPort().right, Graphics.getViewPort().bottom,
-                           Graphics.getViewPort().right, Graphics.getViewPort().top,
-                           Graphics.getViewPort().left,  Graphics.getViewPort().top);
+    RenderTarget.setTarget(Graphics.getViewPort().leftplane,  Graphics.getViewPort().bottomplane,
+                           Graphics.getViewPort().rightplane, Graphics.getViewPort().bottomplane,
+                           Graphics.getViewPort().rightplane, Graphics.getViewPort().topplane,
+                           Graphics.getViewPort().leftplane,  Graphics.getViewPort().topplane);
     
     GLuint unUVBuffer;
     glGenBuffers(1, &unUVBuffer);
@@ -435,11 +435,22 @@ int main(int argc, char *argv[])
     Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
     
     CGraphics& Graphics = CGraphics::getInstance();
+ 
+    WindowHandleType* pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
+                                                    "Planeworld", sf::Style::Default,
+                                                    sf::ContextSettings(24,8,4,3,3,sf::ContextSettings::Core));
+    MEM_ALLOC("WindowHandleType")
     
-    Graphics.init();
+    Graphics.setWindow(pWindow);
     
     INFO_MSG("GL Test", "Starting test with one VBO per multiple shapes")
     testOneVBOPerMultipleShapes(1000, 10, 1000, GL_STREAM_DRAW, GL_TRIANGLES);
     testOneVBOPerMultipleShapes(1000, 10, 1000, GL_STREAM_DRAW, GL_LINE_LOOP);
 
+    if (pWindow != nullptr)
+    {
+        delete pWindow;
+        MEM_FREED("WindowHandleType")
+        pWindow = nullptr;
+    }
 }

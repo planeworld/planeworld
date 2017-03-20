@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2016 Torsten Büschenfeld
+// Copyright (C) 2011-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "circular_buffer.h"
+#include "grid_user.h"
 #include "unique_id_user.h"
-#include "universe_scaled.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <vector>
@@ -48,6 +48,13 @@ const uint8_t DEBRIS_STATE_INACTIVE = 1;
 
 using namespace Eigen;
 
+/// Specifies the type of debris
+typedef enum
+{
+    DEBRIS_TYPE_DOT,
+    DEBRIS_TYPE_THRUST
+} DebrisTypeType;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for debris
@@ -59,8 +66,8 @@ using namespace Eigen;
 ///       std::vector is a little restricted when accessing elements.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CDebris : public IUniqueIDUser,
-                public IUniverseScaled
+class CDebris : public IGridUser,
+                public IUniqueIDUser
 {
     
     public:
@@ -73,7 +80,8 @@ class CDebris : public IUniqueIDUser,
 
         //--- Constant methods -----------------------------------------------//
         
-        int         getDepths() const;
+        const DebrisTypeType& getDebrisType()  const;
+        int                   getDepths() const;
 
         //--- Methods --------------------------------------------------------//
         CCircularBuffer<Vector2d>* getPositions();
@@ -82,6 +90,7 @@ class CDebris : public IUniqueIDUser,
         CCircularBuffer<std::uint8_t>*  getStates();
         
         void                setDamping(const double&);
+        void                setDebrisType(const DebrisTypeType&);
         void                setDepths(const int&);
         void                setForce(const Vector2d&);
         void                setNumber(const int&);
@@ -105,6 +114,7 @@ class CDebris : public IUniqueIDUser,
         CCircularBuffer<Vector2d> m_VelList;                 ///< Velocity of derbis
         CCircularBuffer<std::uint8_t>  m_StateList;          ///< Is the debris active or inactive
         
+        DebrisTypeType          m_DebrisType;                ///< Type of debris
         CTimer                  m_Lifetime;                  ///< Lifetime counter
         double                  m_fTimeFac;                  ///< Factor of realtime
         double                  m_fDamping;                  ///< Damping of debris
@@ -116,7 +126,31 @@ class CDebris : public IUniqueIDUser,
 
 typedef std::vector<CDebris*>   DebrisType;                  ///< Specifies a list of debris
 
+//--- Enum parser ------------------------------------------------------------//
+const std::map<DebrisTypeType, std::string> mapDebrisTypeToString = {
+    {DEBRIS_TYPE_DOT, "debris_dot"},
+    {DEBRIS_TYPE_THRUST, "debris_thrust"}
+}; ///< Map from DebrisTypeType to string
+
+const std::map<std::string, DebrisTypeType> mapStringToDebrisType = {
+    {"debris_dot", DEBRIS_TYPE_DOT},
+    {"debris_thrust", DEBRIS_TYPE_THRUST}
+}; ///< Map from string to DebrisTypeType
+
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Get the type of debris
+///
+/// \return Type of debris
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const DebrisTypeType& CDebris::getDebrisType() const
+{
+    METHOD_ENTRY("CDebris::getDebrisTypeType")
+    return m_DebrisType;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -197,6 +231,19 @@ inline void CDebris::setDamping(const double& _fD)
 {
     METHOD_ENTRY("CDebris::setDamping")
     m_fDamping = _fD;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the type of debris
+///
+/// \param _DebrisType Type of debris
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CDebris::setDebrisType(const DebrisTypeType& _DebrisType)
+{
+    METHOD_ENTRY("CDebris::setDebrisTypeType")
+    m_DebrisType = _DebrisType;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

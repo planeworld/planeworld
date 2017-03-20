@@ -87,6 +87,7 @@ class CUniqueID
         static std::deque<UIDType> s_UnusedUIDs;        ///< Storage for unused / released IDs
         static std::unordered_map<UIDType, std::uint32_t> s_ReferencedUIDs; ///< Storage for reference counting of uids
         
+        static std::mutex m_Mtx;                        ///< Global mutex
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,6 +47,8 @@
 #include "circular_buffer.h"
 #include "debris_emitter.h"
 #include "game_state_manager.h"
+#include "input_manager.h"
+#include "lua_manager.h"
 #include "physics_manager.h"
 #include "objects_emitter.h"
 #include "thruster.h"
@@ -56,23 +58,23 @@
 
 //--- Misc-Header ------------------------------------------------------------//
 
-#define CLEAN_UP_AND_EXIT_FAILURE { \
-    if (pPhysicsManager != nullptr) \
-    { \
-        delete pPhysicsManager;\
-        Log.log("Memory freed", "CPhysicsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
-        pPhysicsManager = nullptr; \
-    } \
-    if (pVisualsManager != nullptr) \
-    { \
-        delete pVisualsManager; \
-        Log.log("Memory freed", "CVisualsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
-        pVisualsManager = nullptr; \
-    } \
-    return EXIT_FAILURE; \
-}
+#ifdef __linux__
+    #include "X11/Xlib.h"
+#endif
 
-#define CLEAN_UP_AND_EXIT_SUCCESS { \
+#define CLEAN_UP { \
+    if (pInputManager != nullptr) \
+    { \
+        delete pInputManager;\
+        Log.log("Memory freed", "CInputManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pInputManager = nullptr; \
+    } \
+    if (pLuaManager != nullptr) \
+    { \
+        delete pLuaManager;\
+        Log.log("Memory freed", "CLuaManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pLuaManager = nullptr; \
+    } \
     if (pPhysicsManager != nullptr) \
     { \
         delete pPhysicsManager; \
@@ -85,16 +87,49 @@
         Log.log("Memory freed", "CVisualsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
         pVisualsManager = nullptr; \
     } \
-    return EXIT_SUCCESS; \
+    if (pInputThread != nullptr) \
+    { \
+        delete pInputThread; \
+        Log.log("Memory freed", "std::thread", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pInputThread = nullptr; \
+    } \
+    if (pLuaThread != nullptr) \
+    { \
+        delete pLuaThread; \
+        Log.log("Memory freed", "std::thread", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pLuaThread = nullptr; \
+    } \
+    if (pPhysicsThread != nullptr) \
+    { \
+        delete pPhysicsThread; \
+        Log.log("Memory freed", "std::thread", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pPhysicsThread = nullptr; \
+    } \
+    if (pVisualsThread != nullptr) \
+    { \
+        delete pVisualsThread; \
+        Log.log("Memory freed", "std::thread", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pVisualsThread = nullptr; \
+    } \
+    if (pWindow != nullptr) \
+    { \
+        delete pWindow; \
+        Log.log("Memory freed", "WindowHandleType", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
+        pWindow = nullptr; \
+    } \
 }
+
+//--- Global variables -------------------------------------------------------//
+bool g_bDone = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Usage to call program
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void usage()
 {
+    METHOD_ENTRY("usage")
     std::cout << "Usage: planeworld <OPTIONS> <UNIVERSE_DATA_FILE>" << std::endl;
     std::cout << "\nOptions: " << std::endl;
     std::cout << "--no graphics: Start simulation without graphical output." << std::endl;
@@ -102,6 +137,17 @@ void usage()
     std::cout << "planeworld path/to/scene.xml" << std::endl;
     std::cout << "planeworld --no-graphics path/to/scene.xml" << std::endl;
     
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Quit program
+///
+////////////////////////////////////////////////////////////////////////////////
+void quit()
+{
+    METHOD_ENTRY("quit")
+    g_bDone = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,15 +160,24 @@ void usage()
 /// \param  argv array, storing the arguments
 /// \return exit code
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
-    Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
-  
+    #ifdef WIN32
+        Log.setColourScheme(LOG_COLOUR_SCHEME_DEFAULT);
+    #else
+        Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
+    #endif
+        
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 1. Check for given arguments
+    //
+    //////////////////////////////////////////////////////////////////////////// 
     bool bGraphics = true;
     std::string strArgOptions("");
     std::string strArgData("");
-  
+        
     if (argc < 2 || argc > 3)
     {
         usage();
@@ -146,32 +201,89 @@ int main(int argc, char *argv[])
     {
         strArgData = argv[1];
     }
-
-    bool                bDone = false;
-    CTimer              Timer;
-
-    //--- Major instances ----------------------------------------------------//
+    
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 2. Initialise major objects
+    //
+    ////////////////////////////////////////////////////////////////////////////
     CGraphics&          Graphics = CGraphics::getInstance();
-    CCamera*            pCamera = nullptr;
+    CComConsole         ComConsole;
     CGameStateManager   GameStateManager;
-    CPhysicsManager*    pPhysicsManager = nullptr;
-    CVisualsManager*    pVisualsManager = nullptr;
     CXFigLoader         XFigLoader;
     CUniverse           Universe;
     CVisualsDataStorage VisualsDataStorage;
     CWorldDataStorage   WorldDataStorage;
-    CThruster           Thruster;
+
+    CInputManager*      pInputManager   = nullptr;
+    CLuaManager*        pLuaManager     = nullptr;
+    CPhysicsManager*    pPhysicsManager = nullptr;
+    CVisualsManager*    pVisualsManager = nullptr;
     
-    //--- Initialisation -----------------------------------------------------//
+    std::thread*        pInputThread = nullptr;
+    std::thread*        pLuaThread = nullptr;
+    std::thread*        pPhysicsThread = nullptr;
+    std::thread*        pVisualsThread = nullptr;
+        
+    WindowHandleType*   pWindow = nullptr;
+    
+    pLuaManager     = new CLuaManager;
     pPhysicsManager = new CPhysicsManager;
+    MEM_ALLOC("CLuaManager")
     MEM_ALLOC("CPhysicsManager")
     if (bGraphics)
     {
+        pInputManager   = new CInputManager;
         pVisualsManager = new CVisualsManager;
+        MEM_ALLOC("CInputManager")
         MEM_ALLOC("CVisualsManager")
     }
     
-    //--- Initialize storage access for engine managers ----------------------//
+    /// Frequency of main program (writer commands) and input module
+    const double PLANEWORLD_INPUT_FREQUENCY = 100.0;
+    
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 3. Initialise com interface
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    CComInterface ComInterface;
+    
+    ComInterface.registerWriterDomain("main");
+    
+    
+    ComInterface.registerFunction("exit",
+                                    CCommand<void>(quit),
+                                    "Exit processing, clean up and end simulation. Same as <quit>",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system", "main"
+    );
+    ComInterface.registerFunction("quit",
+                                    CCommand<void>(quit),
+                                    "Quit processing, clean up and end simulation. Same as <exit>",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system", "main"
+    );
+    
+    pLuaManager->initComInterface(&ComInterface, "lua");
+    pPhysicsManager->initComInterface(&ComInterface, "physics");
+    if (bGraphics)
+    {
+        ComConsole.setComInterface(&ComInterface);
+        
+        pInputManager->setComConsole(&ComConsole);
+        pVisualsManager->setComConsole(&ComConsole);
+        
+        pInputManager->initComInterface(&ComInterface, "input");
+        pVisualsManager->initComInterface(&ComInterface, "visuals");
+        
+    }
+    
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 4. Initialise storage access
+    //
+    ////////////////////////////////////////////////////////////////////////////
     GameStateManager.setWorldDataStorage(&WorldDataStorage);
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
     if (bGraphics)
@@ -180,7 +292,11 @@ int main(int argc, char *argv[])
         pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
     }
     
-    //--- Import from xml file ----------------------------------------------//
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 5. Import simulation data
+    //
+    ////////////////////////////////////////////////////////////////////////////
     {
         // XML-Importer is initialised in its own scope to free memory after
         // objects are handed over to managers. However, this only applies for
@@ -189,308 +305,175 @@ int main(int argc, char *argv[])
         
         XMLImporter.setWorldDataStorage(&WorldDataStorage);
         XMLImporter.setVisualsDataStorage(&VisualsDataStorage);
-        if (!XMLImporter.import(strArgData)) CLEAN_UP_AND_EXIT_FAILURE;
-//         WorldDataStorage.setCamera(XMLImporter.getCamera());
+        if (!XMLImporter.import(strArgData)) {CLEAN_UP; return EXIT_FAILURE;}
+        
+        pLuaManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
+        pLuaManager->setFrequency(XMLImporter.getFrequencyLua());
+        
         pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
         pPhysicsManager->addComponents(XMLImporter.getComponents());
         pPhysicsManager->addEmitters(XMLImporter.getEmitters());
-        pPhysicsManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
         pPhysicsManager->setFrequency(XMLImporter.getPhysicsFrequency());
         pPhysicsManager->setFrequencyDebris(XMLImporter.getFrequencyDebris());
-        pPhysicsManager->setFrequencyLua(XMLImporter.getFrequencyLua());
         if (bGraphics)
         {
             pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
             pVisualsManager->setFont(XMLImporter.getFont());
-            pCamera=pVisualsManager->getCurrentCamera();
         }
         Universe.clone(XMLImporter.getUniverse());
     }
-
     if (bGraphics)
     {
-        pVisualsManager->setPhysicsManager(pPhysicsManager);
         pVisualsManager->setUniverse(&Universe);
     }
     pPhysicsManager->setUniverse(&Universe);
 
-    //--- Initialise physics -------------------------------------------------//
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 6. Start physics
+    //
+    ////////////////////////////////////////////////////////////////////////////
     pPhysicsManager->initObjects();
     pPhysicsManager->initEmitters();
     pPhysicsManager->initComponents();
-    if (!pPhysicsManager->initLua()) CLEAN_UP_AND_EXIT_FAILURE;
     
     #ifdef PW_MULTITHREADING    
-        std::thread PhysicsThread(&CPhysicsManager::run, pPhysicsManager);
+        pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
+        MEM_ALLOC("std::thread")
+    #endif
+        
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 7. Start lua
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    if (!pLuaManager->init()) {CLEAN_UP; return EXIT_FAILURE;}
+    
+    #ifdef PW_MULTITHREADING    
+        pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);
+        MEM_ALLOC("std::thread")
     #endif
     
-    //--- Initialise graphics ------------------------------------------------//
-    WindowHandleType* pWindow = nullptr;
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 8. Start graphcis
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    #ifndef PW_MULTITHREADING
+        auto nFrame = 0u;
+    #endif
 
+    CTimer Timer;
+    Timer.start();
     if (bGraphics)
     {
-        pVisualsManager->initGraphics();
-        pWindow=pVisualsManager->getWindowHandle();
-        
-        bool bGraphicsOn = true;
-        bool bMouseCursorVisible = false;
-        
-        //--- Prepare for querying relative mouse movement -----------------------//
-        sf::Vector2i vecMouse;
-        sf::Vector2i vecMouseCenter(sf::Vector2i(pWindow->getSize().x >> 1, pWindow->getSize().y >> 1));
-        sf::Mouse::setPosition(vecMouseCenter,*pWindow);
-        
-        //--- Run the main loop --------------------------------------------------//
-        #ifndef PW_MULTITHREADING
-            auto nFrame = 0u;
+        // X11 need special care when for threaded graphics
+        #ifdef __linux__
+            XInitThreads();
         #endif
-        Timer.start();
-        while (!bDone)
+            
+        //--------------------------------------------------------------------------
+        // Initialize window and graphics
+        //--------------------------------------------------------------------------
+        pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
+                                       "Planeworld", sf::Style::Default,
+                                       sf::ContextSettings(24,8,4,3,3,sf::ContextSettings::Core)
+                                      );
+        MEM_ALLOC("WindowHandleType")
+        
+        pVisualsManager->setWindow(pWindow);
+        pVisualsManager->initGraphics();
+        
+        #ifdef PW_MULTITHREADING    
+            pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);
+            MEM_ALLOC("std::thread")
+        #endif
+        
+        //////////////////////////////////////////////////////////////////////// 
+        //
+        // 9. Start input
+        //
+        ////////////////////////////////////////////////////////////////////////
+        pInputManager->setFrequency(100.0);
+        pInputManager->setWindow(pWindow);
+    
+        #ifdef PW_MULTITHREADING    
+            pInputThread = new std::thread(&CInputManager::run, pInputManager);
+            MEM_ALLOC("std::thread")
+        #endif
+
+        while (!g_bDone)
         {
             #ifndef PW_MULTITHREADING
-            if (nFrame++ % static_cast<int>(pPhysicsManager->getFrequency()/
-                                        pVisualsManager->getFrequency()) == 0)
-            {
-            #endif
-                vecMouse = vecMouseCenter-sf::Mouse::getPosition(*pWindow);
-                vecMouse.x = -vecMouse.x; // Horizontal movements to the left should be negative
-                if (!bMouseCursorVisible)
-                    sf::Mouse::setPosition(vecMouseCenter,*pWindow);
-                
-                //--- Handle events ---//
-                sf::Event Event;
-                while (pWindow->pollEvent(Event))
-                {
-                    switch (Event.type)
-                    {
-                        case sf::Event::Closed:
-                        {
-                            // End the program
-                            bDone = true;
-                            break;
-                        }
-                        case sf::Event::Resized:
-                        {
-                            // Adjust the viewport when the window is resized
-                            vecMouseCenter = sf::Vector2i(pWindow->getSize().x >> 1, pWindow->getSize().y >> 1);
-                            Graphics.resizeWindow(Event.size.width, Event.size.height);
-                            pCamera->setViewport(Graphics.getViewPort().right-Graphics.getViewPort().left - 20.0,
-                                                Graphics.getViewPort().top  -Graphics.getViewPort().bottom - 20.0);
-                            break;
-                        }
-                        case sf::Event::KeyPressed:
-                        {
-                            switch (Event.key.code)
-                            {
-                                case sf::Keyboard::Escape:
-                                {
-                                    bDone = true;
-                                    break;
-                                }
-                                case sf::Keyboard::Num0:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_TIMERS);
-                                    break;
-                                }
-                                case sf::Keyboard::Num1:
-                                {
-                                    pPhysicsManager->getSimTimerLocal()[0].toggle();
-                                    break;
-                                }
-                                case sf::Keyboard::Num2:
-                                {
-                                    pPhysicsManager->getSimTimerLocal()[1].toggle();
-                                    break;
-                                }
-                                case sf::Keyboard::Num3:
-                                {
-                                    pPhysicsManager->getSimTimerLocal()[2].toggle();
-                                    break;
-                                }
-                                case sf::Keyboard::Add:
-                                case sf::Keyboard::A:
-                                {
-                                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
-                                        sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
-                                        pPhysicsManager->accelerateTime(PHYSICS_ALLOW_STEP_SIZE_INC);
-                                    else
-                                        pPhysicsManager->accelerateTime();
-                                    break;
-                                }
-                                case sf::Keyboard::Subtract:
-                                case sf::Keyboard::Dash:
-                                case sf::Keyboard::D:
-                                {
-                                    pPhysicsManager->decelerateTime();
-                                    break;
-                                }
-                                case sf::Keyboard::Return:
-                                {
-                                    pPhysicsManager->resetTime();
-                                    break;
-                                }
-                                case sf::Keyboard::C:
-                                {
-                                    pVisualsManager->cycleCamera();
-                                    pCamera=pVisualsManager->getCurrentCamera();
-                                    break;
-                                }
-                                case sf::Keyboard::B:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_OBJECT_BBOXES);
-                                    break;
-                                }
-                                case sf::Keyboard::G:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_UNIVERSE_GRID);
-                                    break;
-                                }
-                                case sf::Keyboard::K:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_KINEMATICS_STATES);
-                                    break;
-                                }
-                                case sf::Keyboard::L:
-                                {
-                                    /// \todo Really check if physics thread is paused before saving the simulation
-                                    pPhysicsManager->pause();
-                                    GameStateManager.load();
-                                    pCamera=(*VisualsDataStorage.getCamerasByName().cbegin()).second;
-                                    pPhysicsManager->togglePause();
-                                    break;
-                                }
-                                case sf::Keyboard::N:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_NAMES);
-                                    break;
-                                }
-                                case sf::Keyboard::P:
-                                {
-                                    pPhysicsManager->togglePause();
-                                    break;
-                                }
-                                case sf::Keyboard::S:
-                                {
-                                    /// \todo Really check if physics thread is paused before saving the simulation
-                                    pPhysicsManager->pause();
-                                    GameStateManager.save();
-                                    pPhysicsManager->togglePause();
-                                    break;
-                                }
-                                case sf::Keyboard::Space:
-                                {
-                                    pPhysicsManager->processOneFrame();
-                                    break;
-                                }
-                                case sf::Keyboard::T:
-                                {
-                                    pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
-                                    break;
-                                }
-                                case sf::Keyboard::V:
-                                {
-                                    bGraphicsOn ^= 1;
-                                    bMouseCursorVisible ^= 1;
-                                    pWindow->setMouseCursorVisible(bMouseCursorVisible);
-                                    vecMouse.x=0;
-                                    vecMouse.y=0;
-                                    
-                                    if (bGraphicsOn)
-                                    {
-                                        INFO_MSG("Main", "Graphics reactivated.")
-                                    }
-                                    else
-                                    {
-                                        INFO_MSG("Main", "Graphics deactivated, simulation still running...")
-                                    }
-                                    break;
-                                }
-                                default:
-                                    break;
-                            }
-                            break;
-                        }
-                        case sf::Event::MouseMoved:
-                        {
-                            if (bGraphicsOn)
-                            {
-                                if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-                                {
-                                    pCamera->translateBy(0.2/GRAPHICS_PX_PER_METER * Vector2d(double(vecMouse.x)/pCamera->getZoom(),double(vecMouse.y)/pCamera->getZoom()));
-                                }
-                                if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-                                {
-                                    pCamera->rotateBy(-double(vecMouse.x)*0.001); // Rotate clockwise for right mouse movement
-                                    pCamera->zoomBy(1.0+double(vecMouse.y)*0.001);
-                                    if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
-                                    else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
-                                }
-                                break;
-                            }
-                        }
-                        case sf::Event::MouseWheelMoved:
-                            if (bGraphicsOn)
-                            {
-                                pCamera->zoomBy(1.0+double(Event.mouseWheel.delta)*0.1);
-                                if      (pCamera->getZoom() < 1.0e-18) pCamera->zoomTo(1.0e-18);
-                                else if (pCamera->getZoom() > 1.0e3) pCamera->zoomTo(1.0e3);
-                            }
-                        default:
-                            break;
-                    }
-                }
-            #ifndef PW_MULTITHREADING
-            }
                 //--- Run Physics ---//
                 pPhysicsManager->processFrame();
-                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency()/
-                                          pVisualsManager->getFrequency()) == 0)
+                
+                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                              pPhysicsManager->getTimeAccel() /
+                                              pInputManager->getFrequency()) == 0)
                 {
-            #endif
-                    //--- Draw visuals if requested ---//
-                    if (bGraphicsOn)
-                    {
-                        pVisualsManager->processFrame();
-                    }
-            #ifndef PW_MULTITHREADING
+                    pInputManager->processFrame();
+                }
+                
+                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                              pPhysicsManager->getTimeAccel() /
+                                              pVisualsManager->getFrequency()) == 0)
+                {
+                    pVisualsManager->processFrame();
+                }
+                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                              pPhysicsManager->getTimeAccel() /
+                                              pLuaManager->getFrequency()) == 0)
+                {
+                    pLuaManager->processFrame();
                 }
                 pPhysicsManager->setTimeSlept(
-                  Timer.sleepRemaining(pPhysicsManager->getFrequency() * 
-                                      pPhysicsManager->getTimeAccel())
-                );
-                
-                if (nFrame % 1000u == 0u) nFrame = 0u;
+                    Timer.sleepRemaining(pPhysicsManager->getFrequency() *
+                                         pPhysicsManager->getTimeAccel()));
+                if (++nFrame == 1000u) nFrame = 0u;
             #else
-                Timer.sleepRemaining(pVisualsManager->getFrequency());
+                Timer.sleepRemaining(PLANEWORLD_INPUT_FREQUENCY);
             #endif
+                
+            //--- Call Commands from com interface ---//
+            ComInterface.callWriters("main");
         }
+        #ifdef PW_MULTITHREADING
+            pInputManager->terminate();
+            pInputThread->join();
+            pVisualsManager->terminate();
+            pVisualsThread->join();
+        #endif
     }
     else // if (!bGraphics)
     {
         #ifndef PW_MULTITHREADING
-        while (!bDone)
-        {
-            //--- Run Physics ---//
-            pPhysicsManager->processFrame();
-            pPhysicsManager->setTimeSlept(
-              Timer.sleepRemaining(pPhysicsManager->getFrequency() * 
-                                  pPhysicsManager->getTimeAccel())
-            );
-        }
-        #else
-        Timer.start();
-        while (!bDone)
-        {
-            Timer.sleepRemaining(0.1);
-        }
+            while (!g_bDone)
+            {
+                if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
+                                              pPhysicsManager->getTimeAccel() /
+                                              pLuaManager->getFrequency()) == 0)
+                {
+                    pLuaManager->processFrame();
+                }
+                
+                //--- Run Physics ---//
+                pPhysicsManager->processFrame();
+                pPhysicsManager->setTimeSlept(
+                Timer.sleepRemaining(pPhysicsManager->getFrequency() * 
+                                     pPhysicsManager->getTimeAccel())
+                );
+                if (++nFrame == 1000u) nFrame = 0u;
+            }
         #endif
     }
       
     #ifdef PW_MULTITHREADING
+        pLuaManager->terminate();
+        pLuaThread->join();
         pPhysicsManager->terminate();
-        INFO_MSG("Main", "Physics thread stopped.")
-        PhysicsThread.join();
+        pPhysicsThread->join();
     #endif
 
-    CLEAN_UP_AND_EXIT_SUCCESS;
+     CLEAN_UP; return EXIT_SUCCESS;
 }

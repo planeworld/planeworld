@@ -45,10 +45,12 @@ Usage
 | k                        | Show kinematics states          |
 | c                        | Cycle through cameras           |
 | l                        | Load game state                 |
+| n                        | Show center of mass (COM)       |
 | n                        | Show names                      |
 | s                        | Save game state                 |
 | t                        | Show object trajectories        |
 | v                        | Toggle graphics (on/off)        |
+| Home                     | Toggle command console          |
 | ESC                      | Quit                            |
 | + / a                    | Accelerate time (only key-pad +)|
 | + / a  and CTRL          | ... and allow timestep increment|

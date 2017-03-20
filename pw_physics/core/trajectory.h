@@ -33,7 +33,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "circular_buffer.h"
-#include "universe_scaled.h"
+#include "grid_user.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <mutex>

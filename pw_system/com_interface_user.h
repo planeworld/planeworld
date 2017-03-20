@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2015-2016 Torsten Büschenfeld
+// Copyright (C) 2016 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,50 +20,65 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       debris_visuals_thruster.h
-/// \brief      Prototype of class "CDebrisVisualsThruster"
+/// \file       com_interface_user.h
+/// \brief      Prototype of interface "IComInterfaceUser"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2015-04-03
+/// \date       2016-08-31
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEBRIS_VISUALS_THRUSTER_H
-#define DEBRIS_VISUALS_THRUSTER_H
+#ifndef COM_INTERFACE_USER_H
+#define COM_INTERFACE_USER_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "camera.h"
-#include "debris.h"
-#include "unique_id_referrer.h"
-#include "world_data_storage_user.h"
+#include "com_interface.h"
+
+//--- Misc header ------------------------------------------------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for managing the visualisation of thruster output
+/// \brief Interface for classes that use the com interface
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CDebrisVisualsThruster : virtual public CGraphicsBase,
-                                       public IUniqueIDReferrer<CDebris>,
-                                       public IWorldDataStorageUser
+class IComInterfaceUser
 {
-    
-    public:
 
+    public:
+   
         //--- Constructor/Destructor -----------------------------------------//
-        CDebrisVisualsThruster(CDebris*);
-        
-        //--- Constant Methods -----------------------------------------------//
-        void draw(CCamera* const) const;
-                
+        IComInterfaceUser() : m_pComInterface(nullptr){}
+        virtual ~IComInterfaceUser() {}
+
         //--- Methods --------------------------------------------------------//
+        void setComInterface(CComInterface*);
         
+    protected:
         
-    private:
-        
+        CComInterface*  m_pComInterface;     ///< Pointer to com interface
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-#endif // DEBRIS_VISUALS_THRUSTER_H
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the com interface to be used
+///
+/// \param _pComInterface Instance of com interface to be used
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IComInterfaceUser::setComInterface(CComInterface* _pComInterface)
+{
+    METHOD_ENTRY("IComInterfaceUser::setComInterface")
+    
+    if (m_pComInterface != nullptr)
+    {
+        NOTICE_MSG("Com Interface User", "Com interface instance already given, overwriting.")
+    }
+    
+    m_pComInterface = _pComInterface;
+}
+
+#endif // COM_INTERFACE_USER_H

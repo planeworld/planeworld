@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2016 Torsten Büschenfeld
+// Copyright (C) 2010-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,22 +30,29 @@
 
 #include "visuals_manager.h"
 
+#include <random>
+
+#include "debris.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
-                                     m_pPhysicsManager(nullptr),
-                                     m_fFrequency(VISUALS_DEFAULT_FREQUENCY),
                                      m_nVisualisations(0),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
-                                     m_pCamera(nullptr)
+                                     m_pCamera(nullptr),
+                                     m_pComConsole(nullptr),
+                                     m_bConsoleMode(false)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
     
+    #ifdef PW_MULTITHREADING
+        m_strModuleName = "Visuals Manager";
+    #endif
     m_strFont = "";
 }
 
@@ -59,7 +66,6 @@ CVisualsManager::~CVisualsManager()
     METHOD_ENTRY("CVisualsManager::~CVisualsManager")
     DTOR_CALL("CVisualsManager::~CVisualsManager")
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -75,8 +81,8 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* 
 {
     METHOD_ENTRY("CVisualsManager::drawCircle")
     double   fRad      = _pCircle->getRadius();
-    Vector2d vecCenter = _pCircle->getCenter() - _pCamera->getCenter()/* +
-                         IUniverseScaled::cellToDouble(_pObject->getCell() - _pCamera->getCell())*/;
+    Vector2d vecCenter = _pCircle->getCenter() - _pCamera->getCenter() +
+                         IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell());
 
     if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&
         (vecCenter.norm() >  fRad-_pCamera->getBoundingCircleRadius())
@@ -110,7 +116,13 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* 
         if (fInc > 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS) fInc = 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS;
         fAngEnd += fInc;
         
-        if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+        if (fAngEnd < fAng)
+        {
+            double fTmp = fAng;
+            fAng = fAngEnd;
+            fAngEnd = fTmp;
+            // std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
+        }
         
         m_Graphics.beginLine(LineT, SHAPE_DEFAULT_DEPTH);
 
@@ -144,7 +156,7 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
     //int      nSeed     = _pPlanet->getSeed();
     //double   fSmooth   = _pPlanet->getSmoothness();
     Vector2d vecCenter = _pPlanet->getCenter()-_pCamera->getCenter() +
-                         (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2;
+                         IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell());
     
     if ((vecCenter.norm() <= fRad+fHeight+_pCamera->getBoundingCircleRadius()) &&
         (vecCenter.norm() >  fRad-fHeight-_pCamera->getBoundingCircleRadius())
@@ -212,7 +224,13 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         fAng    -= fAngleSnap;
         fAngEnd += fAngleSnap;
         
-        if (fAngEnd < fAng) std::swap<double>(fAng, fAngEnd);
+        if (fAngEnd < fAng)
+        {
+            double fTmp = fAng;
+            fAng = fAngEnd;
+            fAngEnd = fTmp;
+            // std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
+        }
         
 //         double fAngBak = fAng;
         
@@ -369,8 +387,61 @@ void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, CCamer
     METHOD_ENTRY("CVisualsManager::drawPolygon")
     m_Graphics.polygon(_pPolygon->getVertices(), _pPolygon->getPolygonType(),
                 -_pCamera->getCenter() + 
-                (_pObject->getCell() - _pCamera->getCell()).cast<double>() * DEFAULT_CELL_SIZE_2);
+                IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell()));
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw all debris
+///
+/// \param _pCamera Draw visuals with respect to this camera
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawDebris(CCamera* const _pCamera) const
+{
+    METHOD_ENTRY("CVisualsManager::drawDebris")
+    
+    for (auto Debris : *m_pDataStorage->getDebrisByValueFront())
+    {
+        switch (Debris.second->getDebrisType())
+        {
+            case DEBRIS_TYPE_DOT:
+            {
+                m_Graphics.dots((*Debris.second->getPositions()),-_pCamera->getCenter()+
+                      IGridUser::cellToDouble(Debris.second->getCell() - _pCamera->getCell()));
+                break;
+            }
+            case DEBRIS_TYPE_THRUST:
+            {
+                double fSizeR = 1.0 / Debris.second->getPositions()->size();
+        
+                if (m_Graphics.getResPMX() > 0.02)
+                {
+                    for (auto i=0u; i<Debris.second->getPositions()->size(); ++i)
+                    {
+                        if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
+                        {
+                            m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
+                            m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
+                                            IGridUser::cellToDouble(Debris.second->getCell() - _pCamera->getCell()),
+                                            (double(Debris.second->getPositions()->size()-i) * 0.01 + 3.0)
+                            );
+                        }
+                    }
+                    m_Graphics.setColor(1.0,1.0,1.0);
+                }
+                break;
+            }
+            default:
+            {
+                WARNING_MSG("Visuals Manager", "Wrong debris type, visualisation not implemented.")
+                break;
+            }
+        }
+        
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -394,7 +465,8 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
         {
             if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth() * m_Graphics.getResPMX() < 2.0)
             {
-                m_Graphics.dot(Obj.second->getCOM()-_pCamera->getCenter());
+                m_Graphics.dot(Obj.second->getCOM()-_pCamera->getCenter() +
+                               IGridUser::cellToDouble(Obj.second->getCell() - _pCamera->getCell()));
             }
             else
             {
@@ -419,17 +491,113 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
                     }
                 }
             }
-            
-    //         m_Graphics.circle(m_pRef->getCOM() - _pCamera->getCenter(), 0.6);
-    //         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(-0.6, 0.0)) -_pCamera->getCenter());
-    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(+0.6, 0.0)) -_pCamera->getCenter());
-    //         m_Graphics.endLine();
-    //         m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
-    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, -0.6)) -_pCamera->getCenter());
-    //         m_Graphics.addVertex(m_pRef->getKinematicsState().getLocalPosition(m_pRef->getGeometry()->getCOM() - Vector2d(0.0, +0.6)) -_pCamera->getCenter());
-    //         m_Graphics.endLine();
         }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw center of mass (COM) of all objects
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawCOM() const
+{
+    METHOD_ENTRY("CVisualsManager::drawCOM")
+
+    if (m_nVisualisations & VISUALS_OBJECT_COM)
+    {
+        for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
+        {
+            
+            if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(m_pCamera->getBoundingBox()))
+            {
+                if (m_Graphics.getResPMX() > 0.5)
+                {
+                    m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
+                    m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.5, 36.0);
+                    m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
+                    m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.3, 36.0);
+                    
+                    m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
+                    // Draw shapes centroids
+                    for (auto Shp : Obj.second->getGeometry()->getShapes())
+                    {
+                        m_Graphics.filledCircle(
+                            Obj.second->getKinematicsState().getPosition(
+                                Shp->getCentroid()
+                            ) - m_pCamera->getCenter(), 0.3, 36.0);
+                    }
+                    m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
+                    // Draw shapes centroids
+                    for (auto Shp : Obj.second->getGeometry()->getShapes())
+                    {
+                        m_Graphics.filledCircle(
+                            Obj.second->getKinematicsState().getPosition(
+                                Shp->getCentroid()
+                            ) - m_pCamera->getCenter(), 0.2, 36.0);
+                    }
+                    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+                }
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws console if console mode is active
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawConsole() const
+{
+    METHOD_ENTRY("CVisualsManager::drawConsole")
+    
+    int nTextSize = 12;
+    int nComHistory = 5;
+    int nWindowBorderLeft = 10;
+    int nWindowBorderTop = 10;
+    int nWindowHeight = (m_Font.getLineSpacing(nTextSize))*(nComHistory+1) + nWindowBorderLeft;
+    int nWindowWidth = 300;
+    
+    if (m_bConsoleMode)
+    {
+        m_Graphics.setColor(1.0, 0.0, 0.0, 0.8);
+        m_Graphics.rectSS(Vector2d(nWindowBorderLeft, nWindowHeight),
+                          Vector2d(nWindowBorderLeft+nWindowWidth, nWindowBorderTop));
+        m_Graphics.setColor(0.25, 0.0, 0.0, 0.8);
+        m_Graphics.filledRectSS(Vector2d(nWindowBorderLeft, nWindowHeight),
+                                Vector2d(nWindowBorderLeft+nWindowWidth, nWindowBorderTop));
+        m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
+        
+
+        std::stringstream oss;
+        auto i = m_pComConsole->getCommands().size() - nComHistory;
+        if (i > m_pComConsole->getCommands().size()) i = 0;
+        while (i < m_pComConsole->getCommands().size())
+        {
+            oss << "> " << m_pComConsole->getCommands().at(i);
+            if (m_pComConsole->getReturnValues().at(i) != "")
+            {
+                oss << " => " << m_pComConsole->getReturnValues().at(i);
+            }
+            oss << "\n";
+            
+            ++i;
+        }
+        oss << "> " << m_pComConsole->getCurrentCommand() << "_";
+        
+        m_Graphics.getWindow()->pushGLStates();
+        sf::Text Text;
+
+        Text.setString(oss.str());
+        Text.setFont(m_Font);
+        Text.setCharacterSize(nTextSize);
+        Text.setPosition(nWindowBorderLeft, nWindowBorderTop);
+        m_Graphics.getWindow()->draw(Text);
+        m_Graphics.getWindow()->popGLStates();        
+            
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        
     }
 }
     
@@ -466,38 +634,38 @@ void CVisualsManager::drawBoundingBoxes() const
             // Multiframe
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
             m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                            IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
                             pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                            IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
             m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                  IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
                                   pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                                  IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
             // Singleframe
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
             m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
-                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                            IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
                             pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
-                            IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                            IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
             m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
             m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
-                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                  IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
                                   pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
-                                  IUniverseScaled::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                                  IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
              // Shape bounding boxes
             for (const auto pShp : pObj.second->getGeometry()->getShapes())
             {
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
                 m_Graphics.rect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                IUniverseScaled::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
+                                IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
                                 pShp->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                IUniverseScaled::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
+                                IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
                 m_Graphics.filledRect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() +
-                                    IUniverseScaled::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
+                                    IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
                                     pShp->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
-                                    IUniverseScaled::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
+                                    IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
             }
         }
     }
@@ -545,8 +713,8 @@ void CVisualsManager::drawGrid() const
         }
         else
         {
-            fGridLeftCell = IUniverseScaled::cellToDouble(m_pCamera->getCell())[0];
-            fGridTopCell  = IUniverseScaled::cellToDouble(m_pCamera->getCell())[1];
+            fGridLeftCell = IGridUser::cellToDouble(m_pCamera->getCell())[0];
+            fGridTopCell  = IGridUser::cellToDouble(m_pCamera->getCell())[1];
         }
 
         // Snap sub grid to sub grid size
@@ -788,19 +956,19 @@ void CVisualsManager::drawTimers() const
         std::stringstream oss;
         
         oss << "Simulation time: "
-            << m_pPhysicsManager->getSimTimerGlobal().getYears() << "y "
-            << m_pPhysicsManager->getSimTimerGlobal().getDaysPart() << "d "
-            << m_pPhysicsManager->getSimTimerGlobal().getHoursPart() << "h "
-            << m_pPhysicsManager->getSimTimerGlobal().getMinutesPart() << "m "
-            << m_pPhysicsManager->getSimTimerGlobal().getSecondsPart() << "s" << std::endl;
-        for (auto i=0u; i<3; ++i)
+            << m_pComInterface->call<int,int>("get_time_years", 0) << "y "
+            << m_pComInterface->call<int,int>("get_time_days_part", 0) << "d "
+            << m_pComInterface->call<int,int>("get_time_hours_part", 0) << "h "
+            << m_pComInterface->call<int,int>("get_time_minutes_part", 0) << "m "
+            << m_pComInterface->call<int,int>("get_time_seconds_part", 0) << "s" << std::endl;
+        for (auto i=1; i<m_pComInterface->call<int>("get_nrof_timers"); ++i)
         {
-            oss << "Local timer " << i+1 << ":   "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getYears() << "y "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getDaysPart() << "d "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getHoursPart() << "h "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getMinutesPart() << "m "
-                << m_pPhysicsManager->getSimTimerLocal()[i].getSecondsPart() << "s" << std::endl;
+            oss << "Local timer " << i << ":   "
+                << m_pComInterface->call<int,int>("get_time_years", i) << "y "
+                << m_pComInterface->call<int,int>("get_time_days_part", i) << "d "
+                << m_pComInterface->call<int,int>("get_time_hours_part", i) << "h "
+                << m_pComInterface->call<int,int>("get_time_minutes_part", i) << "m "
+                << m_pComInterface->call<int,int>("get_time_seconds_part", i) << "s" << std::endl;
         }
         
         /// \todo Check: Somehow showing text increases framerate when activating the first time
@@ -868,7 +1036,7 @@ void CVisualsManager::drawTrajectories() const
             {
                 m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
                 m_Graphics.addVertex(pObj.second->getTrajectory().getPositions().at(i) - m_pCamera->getCenter() +
-                    IUniverseScaled::cellToDouble(pObj.second->getTrajectory().getCells().at(i)-m_pCamera->getCell())
+                    IGridUser::cellToDouble(pObj.second->getTrajectory().getCells().at(i)-m_pCamera->getCell())
                 );
                 fColourFade += 0.9/TRAJECTORY_CAPACITY;
             }
@@ -912,11 +1080,11 @@ void CVisualsManager::drawWorld() const
         {
             Vector2d vecPos = CKinematicsState::clipToWorldLimit(
                                 m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
-                                IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell())
+                                IGridUser::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell())
                               );
             Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(
                                     m_pUniverse->getStarSystems()[i]->Star().getOrigin() - m_pCamera->getCenter() +
-                                     IUniverseScaled::cellToDouble
+                                     IGridUser::cellToDouble
                                      (m_pUniverse->getStarSystems()[i]->getCell() -
                                       m_pCamera->getCell())
                                 );
@@ -937,7 +1105,7 @@ void CVisualsManager::drawWorld() const
                     m_Graphics.filledCircle(vecPosRel, (m_pUniverse->getStarSystems()[i]->Star().getRadius()), 100.0);
             }
 //             // Draw stars in reduced scale for background
-//             if (m_pCamera->getBoundingBox().isInside(1.0/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)) + m_pCamera->getCenter()+IUniverseScaled::cellToDouble(m_pCamera->getCell())))
+//             if (m_pCamera->getBoundingBox().isInside(1.0/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)) + m_pCamera->getCenter()+IGridUser::cellToDouble(m_pCamera->getCell())))
 //             {
 //                 
 //                 double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
@@ -979,7 +1147,7 @@ void CVisualsManager::drawWorld() const
 //                     for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
 //                     {
 //                         m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
-//                                           IUniverseScaled::cellToDouble(
+//                                           IGridUser::cellToDouble(
 //                                               m_pUniverse->getStarSystems()[i]->getCell()-
 //                                               m_pCamera->getCell()),
 //                                           std::fabs(OrbitDistribution(LocalGenerator))
@@ -1011,7 +1179,7 @@ void CVisualsManager::drawWorld() const
                 Vector2d vecPosRel = CKinematicsState::clipToWorldLimit( 
                                     pObj.second->getCOM()-
                                     m_pCamera->getCenter()+
-                                    IUniverseScaled::cellToDouble
+                                    IGridUser::cellToDouble
                                     (pObj.second->getCell()-
                                     m_pCamera->getCell()));
                 
@@ -1030,17 +1198,17 @@ void CVisualsManager::drawWorld() const
                 m_Graphics.getWindow()->draw(text);
             }
         }
-//         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
+        if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
             for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
             {
                 Vector2d vecPos = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
-                                  IUniverseScaled::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()));
+                                  IGridUser::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()));
                 if (m_pCamera->getBoundingBox().isInside(vecPos))
                 {
                     Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-
                                         m_pCamera->getCenter()+
-                                        IUniverseScaled::cellToDouble
+                                        IGridUser::cellToDouble
                                         (m_pUniverse->getStarSystems()[i]->getCell()-
                                           m_pCamera->getCell()));
                     
@@ -1065,16 +1233,8 @@ void CVisualsManager::drawWorld() const
     }
     
     this->drawObjects(m_pCamera);
-    for (auto ci = m_pVisualsDataStorage->getDebrisVisuals().begin();
-         ci != m_pVisualsDataStorage->getDebrisVisuals().end(); ++ci)
-    {
-        (*ci)->draw(m_pCamera);
-    }
-    for (std::list<CDebrisVisualsThruster*>::const_iterator ci = m_pVisualsDataStorage->getDebrisVisualsThruster().begin();
-         ci != m_pVisualsDataStorage->getDebrisVisualsThruster().end(); ++ci)
-    {
-        (*ci)->draw(m_pCamera);
-    }
+    this->drawDebris(m_pCamera);
+
     for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
     {
         if (m_nStarIndex == i)
@@ -1088,7 +1248,7 @@ void CVisualsManager::drawWorld() const
             {
                 m_Graphics.setColor(0.2,0.2,0.5);
                 m_Graphics.circle(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-m_pCamera->getCenter()+
-                                    IUniverseScaled::cellToDouble(
+                                    IGridUser::cellToDouble(
                                         m_pUniverse->getStarSystems()[i]->getCell()-
                                         m_pCamera->getCell()),
                                     std::fabs(OrbitDistribution(LocalGenerator))
@@ -1121,9 +1281,11 @@ void CVisualsManager::finishFrame()
 {
     METHOD_ENTRY("CVisualsManager::finishFrame")
     m_Graphics.swapBuffers();
+    DEBUG(Log.setLoglevel(LOG_LEVEL_NOTICE);)
     m_pDataStorage->swapFront();
+    DEBUG(Log.setLoglevel(LOG_LEVEL_DEBUG);)
 
-    // Attach camera to current front buffer (at the moment, this is need for the kinematics state)
+    // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
     if (m_pCamera->gotRef())
         m_pCamera->attachTo(m_pDataStorage->getObjectsByValueFront()->at(m_pCamera->getUIDRef()));
 }
@@ -1137,6 +1299,8 @@ void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
 
+    m_pComInterface->callWriters("visuals");
+    
     m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
     
     this->drawGrid();
@@ -1144,8 +1308,126 @@ void CVisualsManager::processFrame()
     this->drawWorld();
     this->drawKinematicsStates();
     this->drawBoundingBoxes();
+    this->drawCOM();
     this->drawGridHUD();
     this->drawTimers();
+    this->drawConsole();
     
     this->finishFrame();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Initialise the command interface
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::myInitComInterface()
+{
+    METHOD_ENTRY("CVisualsManager::myInitComInterface")
+
+    INFO_MSG("Visuals Manager", "Initialising com interace.")
+    
+    m_pComInterface->registerFunction("cam_cycle",
+                                      CCommand<void>([&](){this->cycleCamera();}),
+                                      "Cycle through registered cameras",
+                                      {{ParameterType::NONE,"No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("cam_get_current",
+                                      CCommand<CCamera*>([&](){return this->getCurrentCamera();}),
+                                      "Returns pointer to active camera",
+                                      {{ParameterType::UNDEFINED, "CCamera*, Currently active camera"}},
+                                      "system"
+    );
+    m_pComInterface->registerFunction("cam_get_zoom",
+                                      CCommand<double>([&](){return m_pCamera->getZoom();}),
+                                      "Returns zoom level of active camera",
+                                      {{ParameterType::DOUBLE, "Zoom level of active camera"}},
+                                      "system"
+    );
+    m_pComInterface->registerFunction("cam_rotate_by",
+                                      CCommand<void, double>([&](const double& _fAngle){m_pCamera->rotateBy(_fAngle);}),
+                                      "Rotate camera by given angle.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("cam_translate_by",
+                                      CCommand<void, double, double>([&](const double& _fX,
+                                                                         const double& _fY)
+                                      {m_pCamera->translateBy(Vector2d(_fX,_fY));}),
+                                      "Translate camera by given vector.",
+                                      {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::DOUBLE, "X component to translate the camera by"},
+                                       {ParameterType::DOUBLE, "Y component to translate the camera by"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("cam_zoom_by",
+                                      CCommand<void,double>([&](const double& _fZoom){m_pCamera->zoomBy(_fZoom);}),
+                                      "Zooms active camera by given level.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Level to zoom active camera by"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("cam_zoom_to",
+                                      CCommand<void,double>([&](const double& _fZoom){m_pCamera->zoomTo(_fZoom);}),
+                                      "Zooms active camera to given level.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Level to zoom active camera to"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("resize_window",
+                                      CCommand<void, double, double>([=](const double& _fX,
+                                                                         const double& _fY)
+                                      {
+                                          m_Graphics.resizeWindow(int(_fX), int(_fY));
+                                          if (m_pCamera != nullptr)
+                                          {
+                                                m_pCamera->setViewport(m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane - 20.0,
+                                                                       m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane - 20.0);
+                                          }
+                                      }),
+                                      "Resize window to given size.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Window width (x)"},
+                                      {ParameterType::DOUBLE, "Window height (y)"}
+                                      },
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("toggle_bboxes",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
+                                      "Toggle bounding boxes on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_com",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_COM);}),
+                                      "Toggle center of mass (COM) on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_console_mode",
+                                      CCommand<void>([&](){this->toggleConsoleMode();}),
+                                      "Toggle command console on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_grid",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
+                                      "Toggle universe grid on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_names",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_NAMES);}),
+                                      "Toggle objects names on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_timers",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_TIMERS);}),
+                                      "Toggle timers on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
 }
