@@ -324,6 +324,7 @@ const std::string CComInterface::call(const std::string& _strCommand)
             }
             default:
                 NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
+                break;
         }
     }
     else

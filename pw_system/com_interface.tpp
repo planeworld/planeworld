@@ -251,7 +251,7 @@ bool CComInterface::registerFunction(const std::string& _strName, const CCommand
         {
             ERROR_MSG("Com Interface", "Unknown writer domain <" << _strWriterDomain <<
                                        ">. Registered writer domains are:")
-            ERROR(
+            DEBUG(
                 for (auto Domain : m_WriterDomains) std::cout << " - " << Domain << std::endl;
             )
             return false;
