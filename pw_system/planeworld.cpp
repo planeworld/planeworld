@@ -87,12 +87,6 @@
         Log.log("Memory freed", "CVisualsManager", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
         pVisualsManager = nullptr; \
     } \
-    if (pInputThread != nullptr) \
-    { \
-        delete pInputThread; \
-        Log.log("Memory freed", "std::thread", LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED); \
-        pInputThread = nullptr; \
-    } \
     if (pLuaThread != nullptr) \
     { \
         delete pLuaThread; \
@@ -220,7 +214,6 @@ int main(int argc, char *argv[])
     CPhysicsManager*    pPhysicsManager = nullptr;
     CVisualsManager*    pVisualsManager = nullptr;
     
-    std::thread*        pInputThread = nullptr;
     std::thread*        pLuaThread = nullptr;
     std::thread*        pPhysicsThread = nullptr;
     std::thread*        pVisualsThread = nullptr;
@@ -391,13 +384,8 @@ int main(int argc, char *argv[])
         // 9. Start input
         //
         ////////////////////////////////////////////////////////////////////////
-        pInputManager->setFrequency(100.0);
+        pInputManager->setFrequency(PLANEWORLD_INPUT_FREQUENCY);
         pInputManager->setWindow(pWindow);
-    
-        #ifdef PW_MULTITHREADING    
-            pInputThread = new std::thread(&CInputManager::run, pInputManager);
-            MEM_ALLOC("std::thread")
-        #endif
 
         while (!g_bDone)
         {
@@ -429,15 +417,14 @@ int main(int argc, char *argv[])
                                          pPhysicsManager->getTimeAccel()));
                 if (++nFrame == 1000u) nFrame = 0u;
             #else
-                Timer.sleepRemaining(PLANEWORLD_INPUT_FREQUENCY);
+                pInputManager->processFrame();
+                Timer.sleepRemaining(pInputManager->getFrequency());
             #endif
                 
             //--- Call Commands from com interface ---//
             ComInterface.callWriters("main");
         }
         #ifdef PW_MULTITHREADING
-            pInputManager->terminate();
-            pInputThread->join();
             pVisualsManager->terminate();
             pVisualsThread->join();
         #endif
