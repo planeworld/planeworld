@@ -98,8 +98,6 @@ class CCamera : public CGraphicsBase,
         virtual void myAttachTo();
         
         void copy(const CCamera&);
-        void updateWithHook();
-        void updateWithoutHook();
 
         //--- Variables [protected] ------------------------------------------//
         std::array<Vector2d,4>  m_vecFrame0;        ///< Initial camera frame

@@ -138,7 +138,7 @@ CCamera* CCamera::clone() const
 const CBoundingBox CCamera::getBoundingBox()
 {
     METHOD_ENTRY("CCamera::getBoundingBox")
-    this->updateWithHook();
+//     this->updateWithHook();
     return m_BoundingBox;
 }
 
@@ -155,7 +155,7 @@ const CBoundingBox CCamera::getBoundingBox()
 const double& CCamera::getBoundingCircleRadius() 
 {
     METHOD_ENTRY("CCamera::BoundingCircleRadius")
-    this->updateWithHook();
+//     this->updateWithHook();
     return m_fBoundingCircleRadius;
 }
 
@@ -234,19 +234,28 @@ void CCamera::update()
 {
     METHOD_ENTRY("CCamera::update")
     
-    // If method UpdateFromHooked is not called, m_bIsHooked is false. In this
-    // case, camera update has to be done without hook
     m_Graphics.rotCamTo(m_KinematicsState.getAngle());
-//     if (!m_bIsHooked)
-//     {
-//         updateWithoutHook();        
-//         m_Graphics.rotCamTo(m_KinematicsState.getLocalAngle());
-//     }
-//     else
-    {
-        updateWithHook();
-//         m_Graphics.rotCamTo(m_KinematicsState.getAngleReferredTo(m_KinematicsStateReference));
-    }
+
+    std::array<Vector2d,4> vecFrame;
+    
+    m_vecCenter = m_KinematicsState.getOrigin();
+
+    // m_vecCenter is in absolute coordinates while m_vecCell is zero. Thus, they
+    // have to be separated:
+    IGridUser::separateCenterCell(m_vecCenter,m_vecCenter,m_vecCell);
+
+    // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
+    // Hence, accuracy is low, so it can stay with the double value.
+    m_KinematicsState.getPositions<4>(m_vecFrame0, vecFrame, m_fZoom);
+        
+    m_BoundingBox.setLowerLeft(vecFrame[0]-IGridUser::cellToDouble(m_vecCell));
+    m_BoundingBox.setUpperRight(vecFrame[0]-IGridUser::cellToDouble(m_vecCell));
+    m_BoundingBox.update(vecFrame[1]-IGridUser::cellToDouble(m_vecCell));
+    m_BoundingBox.update(vecFrame[2]-IGridUser::cellToDouble(m_vecCell));
+    m_BoundingBox.update(vecFrame[3]-IGridUser::cellToDouble(m_vecCell));
+    
+    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
+                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
     
     m_BoundingBox.setCell(m_vecCell);
     
@@ -468,74 +477,4 @@ void CCamera::copy(const CCamera& _Camera)
     m_fViewportWidth        = _Camera.m_fViewportWidth;
     m_fViewportHeight       = _Camera.m_fViewportHeight;
     m_fZoom                 = _Camera.m_fZoom;    
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Helper method. Update of the bounding box, frame and position.
-///
-/// Update of bounding box etc is called from updateFromHooked as well as
-/// from internal update method to synchronise camera and object graphics.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CCamera::updateWithHook()
-{
-    METHOD_ENTRY("CCamera::updateWithHook")
-    
-    std::array<Vector2d,4> vecFrame;
-    
-    m_vecCenter = m_KinematicsState.getOrigin();
-
-    // m_vecCenter is in absolute coordinates while m_vecCell is zero. Thus, they
-    // have to be separated:
-    IGridUser::separateCenterCell(m_vecCenter,m_vecCenter,m_vecCell);
-
-    // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
-    // Hence, accuracy is low, so it can stay with the double value.
-    vecFrame[0] = m_KinematicsState.getPosition(m_vecFrame0[0]/m_fZoom);// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
-    vecFrame[1] = m_KinematicsState.getPosition(m_vecFrame0[1]/m_fZoom);// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
-    vecFrame[2] = m_KinematicsState.getPosition(m_vecFrame0[2]/m_fZoom);// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
-    vecFrame[3] = m_KinematicsState.getPosition(m_vecFrame0[3]/m_fZoom);// + IGridUser::cellToDouble(m_KinematicsStateReference.getCell());
-    
-    m_BoundingBox.setLowerLeft(vecFrame[0]-IGridUser::cellToDouble(m_vecCell));
-    m_BoundingBox.setUpperRight(vecFrame[0]-IGridUser::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[1]-IGridUser::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[2]-IGridUser::cellToDouble(m_vecCell));
-    m_BoundingBox.update(vecFrame[3]-IGridUser::cellToDouble(m_vecCell));
-    
-    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
-                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Helper method. Update of the bounding box, frame and position.
-///
-/// Update of bounding box etc is called from from internal update method if
-/// no hook is given.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CCamera::updateWithoutHook()
-{
-    METHOD_ENTRY("CCamera::updateWithoutHook")
-    
-    std::array<Vector2d,4>  vecFrame;
-    Vector2i                vecCell;
-    
-    IGridUser::separateCenterCell(m_KinematicsState.getLocalOrigin(), m_KinematicsState.Origin(), vecCell);
-    m_vecCenter = m_KinematicsState.getLocalOrigin();
-    m_vecCell  += vecCell;
-    
-    // The frame doesn't need to care about the grid. If it is large, the camera is zoomed out.
-    // Hence, accuracy is low, so it can stay with the double value.
-    vecFrame[0] = m_KinematicsState.getPosition(m_vecFrame0[0]/m_fZoom);
-    vecFrame[1] = m_KinematicsState.getPosition(m_vecFrame0[1]/m_fZoom);
-    vecFrame[2] = m_KinematicsState.getPosition(m_vecFrame0[2]/m_fZoom);
-    vecFrame[3] = m_KinematicsState.getPosition(m_vecFrame0[3]/m_fZoom);
-    
-    m_BoundingBox.setLowerLeft(vecFrame[0]);
-    m_BoundingBox.setUpperRight(vecFrame[0]);
-    m_BoundingBox.update(vecFrame[1]);
-    m_BoundingBox.update(vecFrame[2]);
-    m_BoundingBox.update(vecFrame[3]);
 }
