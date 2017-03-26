@@ -75,6 +75,9 @@ const double GRAPHICS_DEPTH_DEFAULT = -15.0;            ///< Default drawing dep
 const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn-objects
 
 const double GRAPHICS_RAD2DEG = 180.0 / M_PI;           ///< Converts radiant to degree values
+const double GRAPHICS_MAX_CACHE_SIZE = 1024;            ///< Maximum size of cache
+
+const bool GRAPHICS_CIRCLE_USE_CACHE = true;            ///< Flag for using sine/cosine cache
 
 /// Specifies the type of polygon to be drawn
 enum class PolygonType
@@ -164,6 +167,7 @@ class CGraphics
         
         void setWindow(WindowHandleType* const);
 
+        void cacheSinCos(const int);
         //
         //--- Methods for camera movement ------------------------------------//
         //
@@ -190,11 +194,11 @@ class CGraphics
         //
 
         //--- Constant methods -----------------------------------------------//
-        void circle(const Vector2d&, const double&, const double& = 12.0) const;
+        void circle(const Vector2d&, const double&, const int = 12, const bool = false) const;
         void dot(const Vector2d&) const;
         void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void dots(CCircularBuffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
-        void filledCircle(const Vector2d&, const double&, const double& = 12.0) const;
+        void filledCircle(const Vector2d&, const double&, const int = 12, const bool = false) const;
         void filledRect(const Vector2d&, const Vector2d&) const;
         void filledRectSS(const Vector2d&, const Vector2d&) const;
         void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
@@ -231,6 +235,8 @@ class CGraphics
         unsigned short          m_unHeightScr;  ///< Screen height
 
         std::list<Vector2d>     m_VertList;     ///< list, containing the coordinates of vertices
+        std::vector<double>     m_CosCache;     ///< Cache for cosine values
+        std::vector<double>     m_SinCache;     ///< Cache of sine values
 
         //--- Constructor/destructor [private] -------------------------------//
         CGraphics();

@@ -340,7 +340,7 @@ void CKinematicsState::getPositions(const std::array<Vector2d, T>& _Pos0,
     {
         for (auto i=0u; i<T; ++i)
         {
-            _Pos1[i] = m_matRotRef * (_Pos0[i] / _fZoom) + m_vecOrigin;
+            _Pos1[i] = m_matRot * (_Pos0[i] / _fZoom) + m_vecOrigin;
         }
     }
 }

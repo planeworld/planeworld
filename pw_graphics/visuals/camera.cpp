@@ -44,7 +44,8 @@ CCamera::CCamera() : IGridUser(),
                      IObjectReferrer(),
                      IUniqueIDUser(),
                      m_fViewportWidth(m_Graphics.getViewPort().rightplane-m_Graphics.getViewPort().leftplane),
-                     m_fViewportHeight(m_Graphics.getViewPort().topplane-m_Graphics.getViewPort().bottomplane)
+                     m_fViewportHeight(m_Graphics.getViewPort().topplane-m_Graphics.getViewPort().bottomplane),
+                     m_fZoom(1.0)
 {
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
