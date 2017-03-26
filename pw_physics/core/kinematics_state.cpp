@@ -127,10 +127,11 @@ CKinematicsState CKinematicsState::referredTo(const CKinematicsState& _Reference
     
     CKinematicsState Return;
     
-    Rotation2Dd Rotation(_Reference.m_fAngle);
+    Matrix2d matRotRef = Rotation2Dd(_Reference.m_fAngle).toRotationMatrix();
     
-    Return.m_vecOrigin      = _Reference.m_vecOrigin + Rotation*m_vecOrigin;
-    Return.m_vecVelocity    = Rotation * m_vecVelocity +
+    
+    Return.m_vecOrigin      = _Reference.m_vecOrigin + matRotRef*m_vecOrigin;
+    Return.m_vecVelocity    =  matRotRef * m_vecVelocity +
                               _Reference.m_vecVelocity +
                               _Reference.m_fAngleVelocity * Vector2d(- m_vecOrigin[1],
                                                                        m_vecOrigin[0]);
@@ -153,10 +154,12 @@ Vector2d CKinematicsState::getOrigin() const
     
     if (m_pRef != nullptr)
     {
-        Rotation2Dd Rotation(m_pRef->m_fAngle);
-        Vector2d vecResult = m_pRef->m_vecOrigin + Rotation*m_vecOrigin;
-        
-        return vecResult;
+        if (m_fAngleRef != m_pRef->m_fAngle)
+        {
+            m_fAngleRef = m_pRef->m_fAngle;
+            m_matRotRef = Rotation2Dd(m_pRef->m_fAngle).toRotationMatrix();
+        }
+        return m_pRef->m_vecOrigin + m_matRotRef*m_vecOrigin;
     }
     else
         return m_vecOrigin;
@@ -173,14 +176,17 @@ Vector2d CKinematicsState::getVelocity() const
 {
     METHOD_ENTRY("CKinematicsState::getVelocity")
     
-    if (m_bGotReference)
+    if (m_pRef != nullptr)
     {
-        Rotation2Dd Rotation(m_pRef->m_fAngle);
-        Vector2d vecResult = Rotation * m_vecVelocity +
-                                        m_pRef->m_vecVelocity;
-                                        m_pRef->m_fAngleVelocity * Vector2d(- m_vecOrigin[1],
-                                                                              m_vecOrigin[0]);
-        return vecResult;
+        if (m_fAngleRef != m_pRef->m_fAngle)
+        {
+            m_fAngleRef = m_pRef->m_fAngle;
+            m_matRotRef = Rotation2Dd(m_pRef->m_fAngle).toRotationMatrix();
+        }
+        return m_matRotRef * m_vecVelocity +
+                            m_pRef->m_vecVelocity;
+                            m_pRef->m_fAngleVelocity * Vector2d(- m_vecOrigin[1],
+                                                                    m_vecOrigin[0]);
     }
     else
         return m_vecVelocity;
@@ -196,7 +202,7 @@ Vector2d CKinematicsState::getVelocity() const
 double CKinematicsState::getAngle() const
 {
     METHOD_ENTRY("CKinematicsState::getAngle")
-    if (m_bGotReference)
+    if (m_pRef != nullptr)
         return m_pRef->m_fAngle + m_fAngle;
     else
         return m_fAngle;
@@ -212,7 +218,7 @@ double CKinematicsState::getAngle() const
 double CKinematicsState::getAngleVelocity() const
 {
     METHOD_ENTRY("CKinematicsState::getAngleVelocity")
-    if (m_bGotReference)
+    if (m_pRef != nullptr)
         return m_pRef->m_fAngleVelocity + m_fAngleVelocity;
     else
         return m_fAngleVelocity;
@@ -286,9 +292,8 @@ Vector2d CKinematicsState::getPositionReferredTo(const Vector2d& _vecLocal,
 {
     METHOD_ENTRY("CKinematicsState::getPositionReferredTo")
     
-    Rotation2Dd RotationLocal(m_fAngle);
     Rotation2Dd Rotation(_Reference.m_fAngle);
-    Vector2d vecResult = Rotation * ((RotationLocal*_vecLocal) + m_vecOrigin)
+    Vector2d vecResult = Rotation * ((m_matRot*_vecLocal) + m_vecOrigin)
                          + _Reference.m_vecOrigin;
     return vecResult;
 }
@@ -311,10 +316,10 @@ Vector2d CKinematicsState::getVelocityReferredTo(const CKinematicsState& _Refere
 //                                                     Vector2d(-_Reference.m_vecOrigin[1],
 //                                                               _Reference.m_vecOrigin[0]);
                                                     
-    Rotation2Dd Rotation(-_Reference.m_fAngle);
-    Vector2d vecResult = Rotation * m_vecVelocity - _Reference.m_vecVelocity;
-    Vector2d vecTmp = Rotation * Vector2d(- m_vecOrigin[1],
-                                            m_vecOrigin[0]);
+    Matrix2d matRotRef = Rotation2Dd(-_Reference.m_fAngle).toRotationMatrix();
+    Vector2d vecResult = matRotRef * m_vecVelocity - _Reference.m_vecVelocity;
+    Vector2d vecTmp =    matRotRef * Vector2d(- m_vecOrigin[1],
+                                                m_vecOrigin[0]);
              vecResult += _Reference.m_fAngleVelocity * vecTmp;
     return vecResult;
 }
@@ -332,8 +337,7 @@ Vector2d CKinematicsState::getLocalPosition(const Vector2d& _vecLocal) const
 {
     METHOD_ENTRY("CKinematicsState::getPosition")
     
-    Rotation2Dd RotationLocal(m_fAngle);
-    Vector2d vecResult = RotationLocal*_vecLocal + m_vecOrigin;
+    Vector2d vecResult = m_matRot*_vecLocal + m_vecOrigin;
     return vecResult;
 }
 
@@ -350,18 +354,19 @@ Vector2d CKinematicsState::getPosition(const Vector2d& _vecLocal) const
 {
     METHOD_ENTRY("CKinematicsState::getPosition")
     
-    Rotation2Dd RotationLocal(m_fAngle);
-    if (m_bGotReference)
+    if (m_pRef != nullptr)
     {
-        Rotation2Dd Rotation(m_pRef->m_fAngle);
-        Vector2d vecResult = Rotation * ((RotationLocal*_vecLocal) + m_vecOrigin)
-                            + m_pRef->m_vecOrigin;
-        return vecResult;
+        if (m_fAngleRef != m_pRef->m_fAngle)
+        {
+            m_fAngleRef = m_pRef->m_fAngle;
+            m_matRotRef = Rotation2Dd(m_pRef->m_fAngle).toRotationMatrix();
+        }
+        return m_matRotRef * ((m_matRot*_vecLocal) + m_vecOrigin) +
+                             m_pRef->m_vecOrigin;
     }
     else
     {
-        Vector2d vecResult = RotationLocal*_vecLocal + m_vecOrigin;
-        return vecResult;
+        return m_matRot*_vecLocal + m_vecOrigin;
     }
 }
 
@@ -376,10 +381,10 @@ void CKinematicsState::referTo(const CKinematicsState& _Reference)
 {
     METHOD_ENTRY("CKinematicsState::referTo")
     
-    Rotation2Dd Rotation(_Reference.m_fAngle);
+    Matrix2d matRotRef = Rotation2Dd(_Reference.m_fAngle).toRotationMatrix();
     
-    m_vecOrigin       = _Reference.m_vecOrigin + Rotation*m_vecOrigin;
-    m_vecVelocity     = Rotation * m_vecVelocity +
+    m_vecOrigin       = _Reference.m_vecOrigin + matRotRef*m_vecOrigin;
+    m_vecVelocity     =  matRotRef * m_vecVelocity +
                         _Reference.m_vecVelocity +
                         _Reference.m_fAngleVelocity * Vector2d(- m_vecOrigin[1],
                                                                  m_vecOrigin[0]);
@@ -400,9 +405,7 @@ void CKinematicsState::transform(const Vector2d& _vecAxisGlobal,
 {
     METHOD_ENTRY("CKinematicsState::transform")
     
-    Rotation2Dd Rotation(m_fAngle);
-    
-    m_vecOrigin = _vecAxisGlobal - Rotation * _vecAxisLocal;
+    m_vecOrigin = _vecAxisGlobal - m_matRot * _vecAxisLocal;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -433,7 +436,6 @@ std::istream& operator>>(std::istream& _is, CKinematicsState& _KS)
     _is >> _KS.s_fWorldLimitX;
     _is >> _KS.s_fWorldLimitY;
     
-    _is >> _KS.m_bGotReference;
     _is >> _KS.m_vecOrigin[0];
     _is >> _KS.m_vecOrigin[1];
     _is >> _KS.m_vecVelocity[0];
@@ -471,7 +473,6 @@ std::ostream& operator<<(std::ostream& _os, CKinematicsState& _KS)
     
     _os << _KS.s_fWorldLimitX << std::endl;
     _os << _KS.s_fWorldLimitY << std::endl;
-    _os << _KS.m_bGotReference << std::endl;
     _os << _KS.m_vecOrigin[0] << " " <<
            _KS.m_vecOrigin[1] << std::endl;
     _os << _KS.m_vecVelocity[0] << " " <<

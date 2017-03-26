@@ -37,7 +37,6 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/pw_util/math
     ${CMAKE_HOME_DIRECTORY}/pw_util/pcg
     ${CMAKE_HOME_DIRECTORY}/pw_unit
-    ${CMAKE_HOME_DIRECTORY}/include
 )
 
 SET(SRCS
@@ -74,14 +73,13 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_system/com_console.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/com_interface.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/lua_manager.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_system/planeworld.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/thread_module.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/world_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/pcg/namegenerator.cpp
-        
-    planeworld.cpp
 )
 
 ADD_EXECUTABLE (planeworld ${SRCS})

@@ -157,6 +157,7 @@ bool CLuaManager::init()
                     break;
                 default:
                     NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
+                    break;
             }
         }
         else
@@ -261,6 +262,7 @@ bool CLuaManager::init()
                     break;
                 default:
                     NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
+                    break;
             }
         }
     }

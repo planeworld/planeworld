@@ -58,6 +58,8 @@ CGraphics::CGraphics() : m_pWindow(nullptr),
     CTOR_CALL("CGraphics::CGraphics")
     
     m_vecCamPos.setZero();
+    m_CosCache.resize(GRAPHICS_MAX_CACHE_SIZE);
+    m_SinCache.resize(GRAPHICS_MAX_CACHE_SIZE);
     m_vecIndicesLines.reserve(m_unIndexMax);
     m_vecIndicesLineStrip.reserve(m_unIndexMax);
     m_vecIndicesLineLoop.reserve(m_unIndexMax);
@@ -168,6 +170,24 @@ Vector2d CGraphics::world2Screen(const Vector2d& _vecV) const
     
     return (Rot*Vector2d(_vecV[0],-_vecV[1])*m_fCamZoom-Vector2d(m_ViewPort.leftplane,-m_ViewPort.topplane))
             *m_unWidthScr/(m_ViewPort.rightplane-m_ViewPort.leftplane);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Cache sine and cosine values for circle calculations
+///
+/// \param _nSeg Number of segment per circle
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::cacheSinCos(const int _nSeg) 
+{
+    METHOD_ENTRY("CGraphics::cacheSinCos")
+    
+    for (int i=0; i<_nSeg+1; ++i)
+    {
+        m_CosCache[i] =  std::cos(double(i)*MATH_2PI/_nSeg);
+        m_SinCache[i] =  std::sin(double(i)*MATH_2PI/_nSeg);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -534,25 +554,46 @@ void CGraphics::zoomCamTo(const double& _fFac)
 ///
 /// \param _vecC    Center of circle
 /// \param _fR      Radius of circle
-/// \param _fNrOfSeg Number of segments
+/// \param _nNrOfSeg Number of segments
+/// \param _bCache  Flag if sine/cosine cache should be used
+///                 (call \ref cacheSinCos before).
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::circle(const Vector2d& _vecC, const double& _fR, const double& _fNrOfSeg) const
+void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
+                                              const int _nNrOfSeg,
+                                              const bool _bCache) const
 {
     METHOD_ENTRY("CGraphics::circle")
 
     double fAng = 0.0;
-    double fFac = 2.0/_fNrOfSeg;
+    double fFac = MATH_2PI/_nNrOfSeg;
 
-    glBegin(GL_LINE_LOOP);
-        while (fAng < 2.0*M_PI)
-        {
-            glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
-                        _vecC[1]+std::cos(fAng)*_fR,
-                        -10.0);
-            fAng += M_PI * fFac;
-        }
-    glEnd();
+    if (_bCache)
+    {
+        glBegin(GL_LINE_LOOP);
+            for (int i=0; i<_nNrOfSeg; ++i)
+            {
+                glVertex3d( _vecC[0]+m_SinCache[i]*_fR,
+                            _vecC[1]+m_CosCache[i]*_fR,
+                            -10.0);
+            }
+        glEnd();
+    }
+    else
+    {
+        double fAng = 0.0;
+        double fFac = MATH_2PI /_nNrOfSeg;
+
+        glBegin(GL_LINE_LOOP);
+            while (fAng < MATH_2PI)
+            {
+                glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
+                            _vecC[1]+std::cos(fAng)*_fR,
+                            -10.0);
+                fAng += fFac;
+            }
+        glEnd();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -615,29 +656,48 @@ void CGraphics::dots(const std::vector<Vector2d>& _Dots,
 ///
 /// \param _vecC    Center of circle
 /// \param _fR      Radius of circle
-/// \param _fNrOfSeg Number of segments
+/// \param _nNrOfSeg Number of segments
+/// \param _bCache  Flag if sine/cosine cache should be used
+///                 (call \ref cacheSinCos before).
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR, const double& _fNrOfSeg) const
+void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
+                                                    const int _nNrOfSeg,
+                                                    const bool _bCache) const
 {
     METHOD_ENTRY("CGraphics::filledCircle")
 
-    double fAng = 0.0;
-    double fFac = 2.0/_fNrOfSeg;
+    if (_bCache)
+    {
+        glBegin(GL_TRIANGLE_FAN);
+            glVertex3d( _vecC[0], _vecC[1],-10.0);
+            for (int i=0; i<_nNrOfSeg+1; ++i)
+            {
+                glVertex3d( _vecC[0]+m_SinCache[i]*_fR,
+                            _vecC[1]+m_CosCache[i]*_fR,
+                            -10.0);
+            }
+        glEnd();
+    }
+    else
+    {
+        double fAng = 0.0;
+        double fFac = MATH_2PI /_nNrOfSeg;
 
-    glBegin(GL_TRIANGLE_FAN);
-        glVertex3d( _vecC[0], _vecC[1],-10.0);
-        while (fAng < 2.0*M_PI)
-        {
+        glBegin(GL_TRIANGLE_FAN);
+            glVertex3d( _vecC[0], _vecC[1],-10.0);
+            while (fAng < MATH_2PI)
+            {
+                glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
+                            _vecC[1]+std::cos(fAng)*_fR,
+                            -10.0);
+                fAng += fFac;
+            }
             glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
                         _vecC[1]+std::cos(fAng)*_fR,
                         -10.0);
-            fAng += M_PI * fFac;
-        }
-        glVertex3d( _vecC[0]+std::sin(fAng)*_fR,
-                    _vecC[1]+std::cos(fAng)*_fR,
-                    -10.0);
-    glEnd();
+        glEnd();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

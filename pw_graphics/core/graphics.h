@@ -83,6 +83,9 @@ const double GRAPHICS_DEPTH_DEFAULT = -15.0;            ///< Default drawing dep
 
 const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn-objects
 
+const double GRAPHICS_MAX_CACHE_SIZE = 1024;            ///< Maximum size of cache
+
+const bool GRAPHICS_CIRCLE_USE_CACHE = true;            ///< Flag for using sine/cosine cache
 /// Specifies the type of polygon to be drawn
 enum class PolygonType
 {
@@ -171,6 +174,7 @@ class CGraphics
         
         void setWindow(WindowHandleType* const);
 
+        void cacheSinCos(const int);
         //
         //--- Methods for camera movement ------------------------------------//
         //
@@ -197,10 +201,10 @@ class CGraphics
         //
 
         //--- Constant methods -----------------------------------------------//
-        void circle(const Vector2d&, const double&, const double& = 12.0) const;
+        void circle(const Vector2d&, const double&, const int = 12, const bool = false) const;
         void dot(const Vector2d&) const;
         void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
-        void filledCircle(const Vector2d&, const double&, const double& = 12.0) const;
+        void filledCircle(const Vector2d&, const double&, const int = 12, const bool = false) const;
         void filledRectSS(const Vector2d&, const Vector2d&) const;
         void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void rect(const Vector2d&, const Vector2d&) const;
@@ -270,6 +274,8 @@ class CGraphics
         unsigned short      m_unWidthScr;           ///< Screen width
         unsigned short      m_unHeightScr;          ///< Screen height
 
+        std::vector<double>     m_CosCache;     ///< Cache for cosine values
+        std::vector<double>     m_SinCache;     ///< Cache of sine values
         //--- Constructor/destructor [private] -------------------------------//
         CGraphics();
         ~CGraphics();

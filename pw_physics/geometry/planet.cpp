@@ -404,8 +404,8 @@ void CPlanet::myInitTerrain()
             
             INFO_MSG("Planet", "Generating Terrain (Mountains)")
             DOM_VAR(DEBUG(
-                double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
-                double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
+                double fNrOfPoints = MATH_2PI * m_fRadius / m_fGroundResolution;
+                double fNrOfMountains = MATH_2PI * m_fRadius / (m_fHeightMax*MATH_PI2);
 
                 DEBUG_MSG("Planet", "Number of Mountains:       " << fNrOfMountains)
                 DEBUG_MSG("Planet", "Number of Points:          " << fNrOfPoints)
@@ -490,8 +490,8 @@ void CPlanet::myInitTerrain()
             
             INFO_MSG("Planet", "Generating Terrain (Mountains)")
             DOM_VAR(DEBUG(
-                double fNrOfPoints = 2.0*M_PI * m_fRadius / m_fGroundResolution;
-                double fNrOfMountains = 2.0*M_PI * m_fRadius / (m_fHeightMax*M_PI_2);
+                double fNrOfPoints = MATH_2PI * m_fRadius / m_fGroundResolution;
+                double fNrOfMountains = MATH_2PI * m_fRadius / (m_fHeightMax*MATH_PI2);
             
               DEBUG_MSG("Planet", "Number of Mountains:       " << fNrOfMountains)
               DEBUG_MSG("Planet", "Number of Points:          " << fNrOfPoints)

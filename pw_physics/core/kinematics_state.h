@@ -37,6 +37,7 @@
 #include "unique_id_user.h"
 
 //--- Standard header --------------------------------------------------------//
+#include <array>
 
 //--- Misc. header -----------------------------------------------------------//
 #include <eigen3/Eigen/Geometry>
@@ -96,14 +97,18 @@ class CKinematicsState  : public IUniqueIDUser,
         Vector2d            getLocalPosition(const Vector2d&) const;
         Vector2d            getPosition(const Vector2d&) const;
         
-        const bool&         gotReference() const;
+        template<int T>
+        void                getPositions(const std::array<Vector2d, T>&,
+                                               std::array<Vector2d, T>&,
+                                         const double& = 1.0) const;
+        
+        const bool          gotReference() const;
         
         //--- Methods --------------------------------------------------------//
         Vector2d& Origin();
         
         void increaseAngle(const double&);
         
-//         void setCell(const Vector2i&);
         void setOrigin(const Vector2d&);
         void setVelocity(const Vector2d&);
         void setAngle(const double&);
@@ -123,15 +128,17 @@ class CKinematicsState  : public IUniqueIDUser,
         static double s_fWorldLimitY;   ///< Maximum world coordinate abs(x) before repetition
 
         //--- Variables ------------------------------------------------------//
-        bool        m_bGotReference;    ///< Flags if reference is given
-      
+        Matrix2d    m_matRot;           ///< Rotation
         Vector2d    m_vecOrigin;        ///< Origin of local coordinates
         Vector2d    m_vecVelocity;      ///< Velocity
         double      m_fAngle;           ///< Orientation angle
         double      m_fAngleVelocity;   ///< Angle velocity
+
+        mutable Matrix2d    m_matRotRef;     ///< Rotation of reference
+        mutable double      m_fAngleRef;     ///< Angle of reference if attached
         
         /// \todo Implement myAttachTo in a proper method
-        void myAttachTo() {m_bGotReference = true;}
+        void myAttachTo() {}
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -143,14 +150,16 @@ class CKinematicsState  : public IUniqueIDUser,
 ////////////////////////////////////////////////////////////////////////////////
 inline CKinematicsState::CKinematicsState() : IUniqueIDUser(),
                                               IUniqueIDReferrer< CKinematicsState >(),
-                                              m_bGotReference(false),
                                               m_fAngle(0.0),
-                                              m_fAngleVelocity(0.0)
+                                              m_fAngleVelocity(0.0),
+                                              m_fAngleRef(0.0)
 {
     METHOD_ENTRY("CKinematicsState::CKinematicsState")
     CTOR_CALL("CKinematicsState::CKinematicsState")
+    m_matRot.setZero();
     m_vecOrigin.setZero();
     m_vecVelocity.setZero();
+    m_matRotRef.setZero();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,10 +221,10 @@ inline const double& CKinematicsState::getLocalAngleVelocity() const
 /// \return Reference given (true/false)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const bool& CKinematicsState::gotReference() const
+inline const bool CKinematicsState::gotReference() const
 {
     METHOD_ENTRY("CKinematicsState::gotReference")
-    return m_bGotReference;
+    return (m_pRef != nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -242,6 +251,7 @@ inline void CKinematicsState::increaseAngle(const double& _fAngle)
 {
     METHOD_ENTRY("CKinematicsState::increaseAngle")
     m_fAngle += _fAngle;
+    m_matRot = Rotation2Dd(m_fAngle).toRotationMatrix();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -281,6 +291,7 @@ inline void CKinematicsState::setAngle(const double& _fAngle)
 {
     METHOD_ENTRY("CKinematicsState::setAngle")
     m_fAngle = _fAngle;
+    m_matRot = Rotation2Dd(_fAngle).toRotationMatrix();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -294,6 +305,44 @@ inline void CKinematicsState::setAngleVelocity(const double& _fAngleVelocity)
 {
     METHOD_ENTRY("CKinematicsState::setAngleVelocity")
     m_fAngleVelocity = _fAngleVelocity;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Convert local positons to global position referring to reference
+///
+/// \param _Pos0 Array of positions in local coordinates
+/// \param _Pos1 Resulting global coordinates when referring to reference
+/// \param _fZoom Zoom factor
+///
+////////////////////////////////////////////////////////////////////////////////
+template<int T>
+void CKinematicsState::getPositions(const std::array<Vector2d, T>& _Pos0,
+                                          std::array<Vector2d, T>& _Pos1,
+                                    const double& _fZoom) const
+{
+    METHOD_ENTRY("CKinematicsState::getPositions")
+    
+    if (m_pRef != nullptr)
+    {
+        if (m_fAngleRef != m_pRef->m_fAngle)
+        {
+            m_fAngleRef = m_pRef->m_fAngle;
+            m_matRotRef = Rotation2Dd(m_pRef->m_fAngle).toRotationMatrix();
+        }
+        for (auto i=0u; i<T; ++i)
+        {
+            _Pos1[i] = m_matRotRef * ((m_matRot * (_Pos0[i] / _fZoom)) + m_vecOrigin) +
+                       m_pRef->m_vecOrigin;
+        }
+    }
+    else
+    {
+        for (auto i=0u; i<T; ++i)
+        {
+            _Pos1[i] = m_matRot * (_Pos0[i] / _fZoom) + m_vecOrigin;
+        }
+    }
 }
 
 #endif // KINEMATICS_STATE_H

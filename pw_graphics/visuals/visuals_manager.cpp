@@ -417,14 +417,16 @@ void CVisualsManager::drawDebris(CCamera* const _pCamera) const
         
                 if (m_Graphics.getResPMX() > 0.02)
                 {
+                    m_Graphics.cacheSinCos(12);
                     for (auto i=0u; i<Debris.second->getPositions()->size(); ++i)
                     {
                         if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
                         {
                             m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
-                            m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
+                            m_Graphics.circle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
                                             IGridUser::cellToDouble(Debris.second->getCell() - _pCamera->getCell()),
-                                            (double(Debris.second->getPositions()->size()-i) * 0.01 + 3.0)
+                                            (double(Debris.second->getPositions()->size()-i) * 0.01 + 3.0),
+                                            12, GRAPHICS_CIRCLE_USE_CACHE
                             );
                         }
                     }
@@ -687,8 +689,6 @@ void CVisualsManager::drawGrid() const
 {
     METHOD_ENTRY("CVisualsManager::drawGrid")
     
-        m_pCamera->update();
-
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
         // Default sub grid size every 1m
@@ -1302,6 +1302,7 @@ void CVisualsManager::processFrame()
     m_pComInterface->callWriters("visuals");
     
     m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
+    m_pCamera->update();
     
     this->drawGrid();
     this->drawTrajectories();
