@@ -445,7 +445,8 @@ void CPhysicsManager::processFrame()
     {
         m_pDataStorage->addShape(pShp);
     }
-    
+
+    m_pComInterface->callWriters("physics");
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {
         for (auto i=0u; i < m_SimTimer.size(); ++i)        
@@ -454,7 +455,6 @@ void CPhysicsManager::processFrame()
         }
         this->addGlobalForces();
     }
-    m_pComInterface->callWriters("physics");
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {    
         this->moveMasses(nFrame);
