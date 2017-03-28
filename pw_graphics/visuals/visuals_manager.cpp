@@ -423,7 +423,7 @@ void CVisualsManager::drawDebris(CCamera* const _pCamera) const
                         if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
                         {
                             m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
-                            m_Graphics.circle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
+                            m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
                                             IGridUser::cellToDouble(Debris.second->getCell() - _pCamera->getCell()),
                                             (double(Debris.second->getPositions()->size()-i) * 0.01 + 3.0),
                                             12, GRAPHICS_CIRCLE_USE_CACHE
@@ -669,6 +669,15 @@ void CVisualsManager::drawBoundingBoxes() const
                                     pShp->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
                                     IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
             }
+        }
+        for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
+        {
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+            m_Graphics.rect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
+                            Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+            m_Graphics.filledRect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
+                                  Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
         }
     }
 
