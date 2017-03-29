@@ -49,6 +49,8 @@ CDebris::CDebris() : IGridUser(),
     m_StateList.reserve(DEBRIS_DEFAULT_NUMBER);
     
     m_vecForce.setZero();
+    
+    m_UID.setName("Debris_"+m_UID.getName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

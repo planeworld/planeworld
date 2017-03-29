@@ -445,8 +445,11 @@ void CPhysicsManager::processFrame()
     {
         m_pDataStorage->addShape(pShp);
     }
+    for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
+        Obj.second->clearForces();
 
     m_pComInterface->callWriters("physics");
+    
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {
         for (auto i=0u; i < m_SimTimer.size(); ++i)        
@@ -455,6 +458,7 @@ void CPhysicsManager::processFrame()
         }
         this->addGlobalForces();
     }
+    
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {    
         this->moveMasses(nFrame);
@@ -537,9 +541,6 @@ void CPhysicsManager::addGlobalForces()
         (*ci)->react();
     }
 
-    for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
-        Obj.second->clearForces();
-
     for (auto ci  = m_pDataStorage->getObjectsByValueBack()->cbegin();
               ci != m_pDataStorage->getObjectsByValueBack()->cend(); ++ci)
     {
@@ -613,6 +614,12 @@ void CPhysicsManager::myInitComInterface()
     INFO_MSG("Physics Manager", "Initialising com interace.")
     if (m_pComInterface != nullptr)
     {
+        // Helpers
+        std::ostringstream ossDebrisType("");
+        for (auto DebrisType : mapStringToDebrisType) ossDebrisType << " " << DebrisType.first;
+        std::ostringstream ossShapeType("");
+        for (auto ShpType : mapStringToShapeType) ossShapeType << " " << ShpType.first;
+
         //----------------------------------------------------------------------
         // System package
         //----------------------------------------------------------------------
@@ -633,8 +640,29 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<int, std::string>([&](const std::string& _strShapeType) -> int {return this->createShape(_strShapeType);}),
                                           "Creates a shape.",
                                           {{ParameterType::INT, "UID of shape"},
-                                           {ParameterType::STRING, "Shape type"}},
+                                           {ParameterType::STRING, "Shape type ("+ossShapeType.str()+" )"}},
                                           "system"
+                                         );
+        m_pComInterface->registerFunction("debris_set_type",
+                                          CCommand<void, int, std::string>(
+                                                [&](const int _nUID, const std::string& _strType)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getDebrisByValueBack()->at(_nUID)->setDebrisType(mapStringToDebrisType.at(_strType));
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown debris with UID <" << _nUID << "> or "
+                                                                                          "unknown debris type <" << _strType << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }),
+                                          "Sets type of given debris.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Debris UID"},
+                                           {ParameterType::STRING, "Debris type (" + ossDebrisType.str() + " )"}},
+                                           "system", "physics"
                                          );
         m_pComInterface->registerFunction("decelerate_time",
                                           CCommand<void>([&](){this->decelerateTime();}),
@@ -989,6 +1017,26 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DOUBLE, "Angle"}},
                                            "physics", "physics"
                                          );
+        m_pComInterface->registerFunction("obj_set_angle_vel",
+                                          CCommand<void, int, double>(
+                                                [&](const int _nUID, const double& _fAngleVel)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByValueBack()->at(_nUID)->setAngleVelocity(_fAngleVel);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }),
+                                          "Sets angle velocity of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Angle velocity"}},
+                                           "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("obj_set_cell",
                                           CCommand<void, int, int, int>(
                                                 [&](const int _nUID, const int _nX, const int _nY)
@@ -1008,6 +1056,48 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Object UID"},
                                            {ParameterType::INT, "Cell X"},
                                            {ParameterType::INT, "Cell Y"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_set_position",
+                                          CCommand<void, int, double, double>(
+                                                [&](const int _nUID, const double& _fX, const double& _fY)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByValueBack()->at(_nUID)->setOrigin(_fX, _fY);
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }),
+                                          "Sets position of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Position X"},
+                                           {ParameterType::DOUBLE, "Position Y"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_set_velocity",
+                                          CCommand<void, int, double, double>(
+                                                [&](const int _nUID, const double& _fX, const double& _fY)
+                                                {
+                                                    try
+                                                    {
+                                                        m_pDataStorage->getObjectsByValueBack()->at(_nUID)->setVelocity(Vector2d(_fX, _fY));
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }),
+                                          "Sets velocity of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Velocity X"},
+                                           {ParameterType::DOUBLE, "Velocity Y"}},
                                            "physics", "physics"
                                          );
         m_pComInterface->registerFunction("shp_set_mass",

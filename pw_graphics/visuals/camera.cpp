@@ -52,7 +52,7 @@ CCamera::CCamera() : IGridUser(),
     
     m_vecCell.setZero();
     
-    m_UID.setName("Camera_"+m_UID.getName());
+    m_UID.setName("Cam_"+m_UID.getName());
     
     this->reset();
 }

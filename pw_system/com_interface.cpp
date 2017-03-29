@@ -231,11 +231,28 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 this->call<void,int,double>(strName, nParam, fParam);
                 break;
             }
+            case SignatureType::NONE_INT_STRING:
+            {
+                int         nParam(0);
+                std::string strParam("");
+                iss >> nParam >> strParam;
+                this->call<void,int,std::string>(strName, nParam, strParam);
+                break;
+            }
             case SignatureType::NONE_STRING:
             {
                 std::string strS;
                 iss >> strS;
                 this->call<void,std::string>(strName, strS);
+                break;
+            }
+            case SignatureType::NONE_INT_2DOUBLE:
+            {
+                int nParam(0);
+                iss >> nParam;
+                double fParam[2] = {0.0, 0.0};
+                iss >> fParam[0] >> fParam[1];
+                this->call<void, int, double, double>(strName, nParam, fParam[0], fParam[1]);
                 break;
             }
             case SignatureType::NONE_INT_4DOUBLE:
@@ -405,6 +422,14 @@ void CComInterface::callWriters(const std::string& _strQueue)
                                               std::get<1>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
+            case SignatureType::NONE_INT_2DOUBLE:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, double, double>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<2>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
             case SignatureType::NONE_INT_4DOUBLE:
             {
                 auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, double, double, double, double>*>(pQueuedFunction);
@@ -413,6 +438,13 @@ void CComInterface::callWriters(const std::string& _strQueue)
                                               std::get<2>(pQueuedFunctionConcrete->getParams()),
                                               std::get<3>(pQueuedFunctionConcrete->getParams()),
                                               std::get<4>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_INT_STRING:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, std::string>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
             case SignatureType::NONE_STRING:

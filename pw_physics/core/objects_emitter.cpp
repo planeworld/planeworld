@@ -107,6 +107,7 @@ void CObjectEmitter::emit(const double& _fF)
                     
                     CObject* pObject = m_pTemplate->clone();
                     pObject->setNewID();
+                    pObject->setName("Obj_"+pObject->getName());
                     
                     pObject->setOrigin(Vector2d(fX, fY) + m_KinematicsState.getOrigin());
                     m_pDataStorage->addObject(pObject);

@@ -47,7 +47,7 @@ CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IGridUser(),
     CTOR_CALL("CObject::CObject")
 
     // Default name for any object:
-    m_UID.setName("Object_" + m_UID.getName());
+    m_UID.setName("Obj_" + m_UID.getName());
     
     m_pIntAng = new CEulerIntegrator<double>;
     MEM_ALLOC("IIntegrator")

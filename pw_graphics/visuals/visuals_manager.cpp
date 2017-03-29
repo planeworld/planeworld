@@ -1207,6 +1207,32 @@ void CVisualsManager::drawWorld() const
                 m_Graphics.getWindow()->draw(text);
             }
         }
+        for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
+        {
+            if (m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() > 1.0)
+            {
+                Vector2d vecPosRel = CKinematicsState::clipToWorldLimit( 
+                                    Debris.second->getBoundingBox().getUpperRight()-
+                                    m_pCamera->getCenter()+
+                                    IGridUser::cellToDouble
+                                    (Debris.second->getCell()-
+                                    m_pCamera->getCell()));
+                
+                // Now draw the text
+                sf::Text text;
+                double fColor = (m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() - 1.0) * 255.0;
+                if (fColor > 255.0) fColor = 255.0;
+                sf::Color color(255.0,255.0,255.0, fColor);
+                
+                text.setString(Debris.second->getName());
+                text.setFont(m_Font);
+                text.setCharacterSize(nTextSize);
+                text.setFillColor(color);
+                text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+
+                m_Graphics.getWindow()->draw(text);
+            }
+        }
         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
             for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)

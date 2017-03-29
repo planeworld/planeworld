@@ -437,7 +437,7 @@ inline void CObject::setOrigin(const Vector2d& _vecOrigin)
     METHOD_ENTRY("CObject::setOrigin")
 
     m_KinematicsState.setOrigin(_vecOrigin);
-//     m_pIntPos->init(m_KinematicsState.getOrigin());
+    m_pIntPos->init(m_KinematicsState.getOrigin());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -453,7 +453,7 @@ inline void CObject::setOrigin(const double& _fX, const double& _fY)
     METHOD_ENTRY("CObject::setOrigin")
 
     m_KinematicsState.setOrigin(Vector2d(_fX, _fY));
-//     m_pIntPos->init(m_KinematicsState.getOrigin());
+    m_pIntPos->init(m_KinematicsState.getOrigin());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
