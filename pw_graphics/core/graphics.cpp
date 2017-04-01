@@ -310,6 +310,7 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     
     sf::FloatRect View(0,0,_unWidthScr,_unHeightScr);
     m_pWindow->setView(sf::View(View));
+    m_pWindow->setSize(sf::Vector2u(_unWidthScr, _unHeightScr));
 
     m_ViewPort.rightplane = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
     m_ViewPort.topplane   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));

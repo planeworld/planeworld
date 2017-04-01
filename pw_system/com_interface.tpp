@@ -111,7 +111,7 @@ TRet CCommandToQueueWrapper<TRet, TArgs...>::call(TArgs... _Args)
         DEBUG_MSG("Com Interface", "Queued writer called.")
         m_Function(_Args...);
     }
-    catch (CComInterfaceException ComIntEx)
+    catch (const CComInterfaceException& ComIntEx)
     {
         WARNING_MSG("Com Interface", ComIntEx.getMessage())
     }
@@ -196,7 +196,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
             }
         #endif
     }
-    catch (CComInterfaceException ComIntEx)
+    catch (const CComInterfaceException& ComIntEx)
     {
         WARNING_MSG("Com Interface", ComIntEx.getMessage())
         throw; // To be caught bei com console

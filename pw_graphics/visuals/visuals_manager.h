@@ -103,7 +103,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         void            drawBoundingBoxes() const;
         void            drawCOM() const;
-        void            drawConsole() const;
         void            drawGrid() const;
         void            drawGridHUD() const;
         void            drawKinematicsState(const CKinematicsState&, const double&) const;
@@ -117,10 +116,10 @@ class CVisualsManager : virtual public CGraphicsBase,
         #endif
         
         //--- Methods [private] ----------------------------------------------//
-        void myInitComInterface();
+        void            drawConsole();
+        void            myInitComInterface();
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
-        double                          m_fFrequency;       ///< Frequency of visuals update
         int                             m_nVisualisations;  ///< Additional graphical output
         std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star
         std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera
@@ -131,6 +130,14 @@ class CVisualsManager : virtual public CGraphicsBase,
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name and location
         sf::Font                        m_Font;             ///< Font for displayed output
+        ColorTypeRGBA                   m_TextColor;        ///< Color of text in console
+        ColorTypeRGBA                   m_BGColor;          ///< Background color of console window
+        int                             m_nTextSize;        ///< Size of text in console
+        int                             m_nComHistory;      ///< Visible history (lines) in console
+        int                             m_nWindowBorderLeft;///< Distance to left window border
+        int                             m_nWindowBorderTop; ///< Distance to top window border
+        int                             m_nWindowHeight;    ///< Height of console window
+        int                             m_nWindowWidth;     ///< Width of console window
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
