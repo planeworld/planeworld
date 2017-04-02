@@ -267,6 +267,7 @@ bool CComInterface::registerFunction(const std::string& _strName, const CCommand
     m_RegisteredFunctionsDescriptions[_strName] = _strDescription;
     m_RegisteredFunctionsParams[_strName] = _ParamList;
     m_RegisteredFunctionsDomain[_strName] = _Domain;
+    m_RegisteredDomains.emplace(_Domain);
     
     return true;
 }

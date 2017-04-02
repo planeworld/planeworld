@@ -34,8 +34,8 @@
 //--- Standard header --------------------------------------------------------//
 #include <functional>
 #include <map>
+#include <set>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
@@ -261,7 +261,7 @@ typedef std::string DomainType;
 typedef std::unordered_map<std::string, DomainType> RegisteredDomainsType;
 
 /// List of writer domains
-typedef std::unordered_set<std::string> WriterDomainsType;
+typedef std::set<std::string> DomainsType;
 /// Map of queues with one queue for each writer domain
 typedef std::unordered_map<std::string, moodycamel::ConcurrentQueue<IBaseCommand*>> WriterQueuesType;
 
@@ -293,7 +293,8 @@ class CComInterface
         virtual ~CComInterface();
         
         //--- Constant Methods -----------------------------------------------//
-        RegisteredDomainsType*        getDomains()    {return &m_RegisteredFunctionsDomain;} 
+        DomainsType*                  getDomains() {return &m_RegisteredDomains;} 
+        RegisteredDomainsType*        getDomainsByFunction() {return &m_RegisteredFunctionsDomain;}
         RegisteredFunctionsType*      getFunctions()  {return &m_RegisteredFunctions;} 
         WriterFlagsType*              getWriterFlags() {return &m_WriterFlags;}
         
@@ -325,8 +326,8 @@ class CComInterface
         RegisteredFunctionsDescriptionType  m_RegisteredFunctionsDescriptions; ///< Descriptions of registered functions
         RegisteredParameterListsType        m_RegisteredFunctionsParams; ///< Parameter lists of registered functions      
         RegisteredDomainsType               m_RegisteredFunctionsDomain; ///< Domain of registered functions
-        
-        WriterDomainsType                   m_WriterDomains;             ///< Domains for queued functions
+        DomainsType                         m_RegisteredDomains;         ///< All domains registered
+        DomainsType                         m_WriterDomains;             ///< Domains for queued functions
         WriterQueuesType                    m_WriterQueues;              ///< Command queues for write access
         WriterFlagsType                     m_WriterFlags;               ///< Flags for writer functions
 };

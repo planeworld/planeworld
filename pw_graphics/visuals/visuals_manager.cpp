@@ -1338,7 +1338,7 @@ void CVisualsManager::drawConsole()
             
             ++i;
         }
-        oss << "> " << m_pComConsole->getCurrentCommand() << "_";
+        oss << mapConsoleModeTypeToString[m_pComConsole->getMode()] << " > " << m_pComConsole->getCurrentCommand() << "_";
         
         m_Graphics.getWindow()->pushGLStates();
         sf::Text Text;
@@ -1419,6 +1419,13 @@ void CVisualsManager::myInitComInterface()
                                       "Zooms active camera to given level.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::DOUBLE, "Level to zoom active camera to"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("com_set_mode",
+                                      CCommand<void,std::string>([&](const std::string& _strS){m_pComConsole->setMode(mapStringToConsoleModeType.at(_strS));}),
+                                      "Sets mode for console command interpretation.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::STRING, "Mode (lua, raw)"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("com_set_text_size",

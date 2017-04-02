@@ -135,6 +135,12 @@ void CInputManager::processFrame()
                             m_pComConsole->execute();
                             break;
                         }
+                        case sf::Keyboard::Tab:
+                        {
+                            m_pComConsole->complementCommand();
+                            m_strConsoleCommand = m_pComConsole->getCurrentCommand();
+                            break;
+                        }
                         default:
                             break;
                     }

@@ -56,7 +56,7 @@ bool CLuaManager::init()
     
     for (auto Function : *m_pComInterface->getFunctions())
     {
-        std::string strDomain((*m_pComInterface->getDomains())[Function.first]);
+        std::string strDomain((*m_pComInterface->getDomainsByFunction())[Function.first]);
         
         if ((*m_pComInterface->getWriterFlags())[Function.first])
         {
@@ -323,6 +323,15 @@ void CLuaManager::myInitComInterface()
                                           "Provides processing frequency of Lua module.",
                                           {{ParameterType::DOUBLE, "Processing frequency of Lua module"}},
                                            "system");
+        m_pComInterface->registerFunction("execute_lua",
+                                          CCommand<void, std::string>([&](const std::string& _strS)
+                                          {
+                                              m_LuaState(_strS.c_str());
+                                          }),
+                                          "Interpretes and executes given string in Lua.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "String to be executed"}},
+                                           "system", "lua");
     }
     else
     {

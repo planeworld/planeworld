@@ -40,9 +40,15 @@
 
 //--- Misc header ------------------------------------------------------------//
 
-
 /// Command queue
 typedef CCircularBuffer<std::string> CommandBufferType;
+
+/// Specifies the type of debris
+enum class ConsoleModeType
+{
+    COM,
+    LUA
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -60,14 +66,17 @@ class CComConsole : public IComInterfaceUser
         //--- Constant Methods -----------------------------------------------//
         const CommandBufferType&    getCommands() const;
         const std::string&          getCurrentCommand() const;
+        ConsoleModeType             getMode() const {return m_ConsoleMode;}
         const CommandBufferType&    getReturnValues() const;
         
         //--- Methods --------------------------------------------------------//
         void addCommand(const std::string& _strCom);
+        void complementCommand();
         void execute();
         void nextCommand();
         void prevCommand();
         void setCurrentCommand(const std::string&);
+        void setMode(const ConsoleModeType _Mode) {m_ConsoleMode = _Mode;}
                 
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CComConsole&);
@@ -79,8 +88,25 @@ class CComConsole : public IComInterfaceUser
         CommandBufferType   m_RetValBuffer;  ///< Return value buffer
         std::string         m_strRet;        ///< Return value of last command
         std::string         m_strCurrent;    ///< Currently selected/entered command
+        std::string         m_strPart;       ///< Command part, for domain handling etc.
+        std::string         m_strFind;       ///< Command Part entered for completion
+        std::string         m_strFindLast;   ///< Last command found for completion
+        bool                m_bFirstFind;    ///< Signals the first match of search
         int                 m_nICurrent;     ///< Index of currently selected command
+        int                 m_nState;        ///< Parsing state (domain, function,...)
+        ConsoleModeType     m_ConsoleMode;   ///< Specifies console mode 
 };
+
+//--- Enum parser ------------------------------------------------------------//
+static std::unordered_map<ConsoleModeType, std::string> mapConsoleModeTypeToString = {
+    {ConsoleModeType::COM, "com"},
+    {ConsoleModeType::LUA, "lua"}
+}; ///< Map from ConsoleModeType to string
+
+const std::unordered_map<std::string, ConsoleModeType> mapStringToConsoleModeType = {
+    {"com", ConsoleModeType::COM},
+    {"lua", ConsoleModeType::LUA}
+}; ///< Map from string to ConsoleModeType
 
 //--- Implementation is done here for inline optimisation --------------------//
 
@@ -124,22 +150,6 @@ inline const CommandBufferType& CComConsole::getReturnValues() const
 {
     METHOD_ENTRY("CComConsole::getReturnValue")
     return m_RetValBuffer;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Externally sets the currently active command
-///
-/// The currently active command might originate from sources suche like
-/// keyboard input.
-///
-/// \param _strCurrent Currently active command string
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CComConsole::setCurrentCommand(const std::string& _strCurrent)
-{
-    METHOD_ENTRY("CComConsole::setCurrentCommand")
-    m_strCurrent = _strCurrent;
 }
 
 #endif // COM_CONSOLE_H
