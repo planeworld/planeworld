@@ -88,6 +88,7 @@ void CComConsole::complementCommand()
             case 0: 
             {
                 m_strCurrent = "pw.";
+                m_nState = 1;
                 break;
             }
             case 1:
@@ -196,10 +197,6 @@ void CComConsole::complementCommand()
                   itCom =  m_pComInterface->getFunctions()->begin();
         }
     }
-    std::cout << "Current: " << m_strCurrent << std::endl;
-    std::cout << "Find: " << m_strFind << std::endl;
-    std::cout << "Find last: " << m_strFindLast << std::endl;
-    std::cout << "Part: " << m_strPart << "\n" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
