@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 CComConsole::CComConsole() : m_strRet(""),
                              m_strCurrent(""),
+                             m_strDomain(""),
                              m_strFind(""),
                              m_bFirstFind(true),
                              m_nState(0),
@@ -148,7 +149,8 @@ void CComConsole::complementCommand()
                     }
                     else
                     {
-                        if (itCom->first.find(m_strFind) != std::string::npos)
+                        if ((itCom->first.find(m_strFind) != std::string::npos) && 
+                            (m_strDomain == m_pComInterface->getDomainsByFunction()->at(itCom->first)))
                         {
                             if (m_strFindLast != "")
                                 m_strCurrent.erase(m_strCurrent.end() - m_strFindLast.length(), m_strCurrent.end());
@@ -279,10 +281,12 @@ void CComConsole::setCurrentCommand(const std::string& _strCurrent)
     if (Pos != std::string::npos)
     {
         m_strFind = _strCurrent.substr(Pos+1);
+        if (m_nState == 1) m_strDomain = m_strFind;
         m_nState = 1;
         Pos = m_strFind.find(".");
         if (Pos != std::string::npos)
         {
+            if (m_strDomain.back() == '.') m_strDomain.pop_back();
             m_strFind = m_strFind.substr(Pos+1);
             m_nState = 2;
         }

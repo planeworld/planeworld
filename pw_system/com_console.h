@@ -88,6 +88,7 @@ class CComConsole : public IComInterfaceUser
         CommandBufferType   m_RetValBuffer;  ///< Return value buffer
         std::string         m_strRet;        ///< Return value of last command
         std::string         m_strCurrent;    ///< Currently selected/entered command
+        std::string         m_strDomain;     ///< Currently active domain
         std::string         m_strPart;       ///< Command part, for domain handling etc.
         std::string         m_strFind;       ///< Command Part entered for completion
         std::string         m_strFindLast;   ///< Last command found for completion
