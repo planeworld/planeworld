@@ -40,7 +40,7 @@ CComConsole::CComConsole() : m_strRet(""),
                              m_strDomain(""),
                              m_strFind(""),
                              m_bFirstFind(true),
-                             m_nState(0),
+                             m_nState(1),
                              m_nICurrent(0),
                              m_ConsoleMode(ConsoleModeType::COM)
 {
@@ -70,7 +70,7 @@ void CComConsole::addCommand(const std::string& _strCom)
     m_strPart = "";
     m_bFirstFind = true;
     m_nICurrent = m_CommandBuffer.size();
-    m_nState=0;
+    m_nState=1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,18 +81,23 @@ void CComConsole::addCommand(const std::string& _strCom)
 void CComConsole::complementCommand()
 {
     METHOD_ENTRY("CComConsole::complementCommand")
-
+    
     if (m_ConsoleMode == ConsoleModeType::LUA)
     {
         switch (m_nState)
         {
-            case 0: 
+            case 1: 
             {
-                m_strCurrent = "pw.";
-                m_nState = 1;
+                std::string strPW = "pw";
+                if (strPW.find(m_strFind) != std::string::npos)
+                {
+                    m_strCurrent = "pw.";
+                    m_nState = 2;
+                    m_strFind = "";
+                }   
                 break;
             }
-            case 1:
+            case 2:
             {
                 auto itDom = m_pComInterface->getDomains()->begin();
                 auto i = 0u;
@@ -131,7 +136,7 @@ void CComConsole::complementCommand()
                 }
                 break;
             }
-            case 2:
+            case 3:
             {
                 auto itCom = m_pComInterface->getFunctions()->begin();
                 auto i = 0u;
@@ -168,6 +173,8 @@ void CComConsole::complementCommand()
                 }
                 break;
             }
+            default:
+                break;
         }
     }
     else
@@ -277,24 +284,46 @@ void CComConsole::setCurrentCommand(const std::string& _strCurrent)
     METHOD_ENTRY("CComConsole::setCurrentCommand")
     
     m_strCurrent = _strCurrent;
+    
+    // Find "." indicating a state change
     auto Pos = _strCurrent.find(".");
     if (Pos != std::string::npos)
     {
-        m_strFind = _strCurrent.substr(Pos+1);
-        if (m_nState == 1) m_strDomain = m_strFind;
-        m_nState = 1;
-        Pos = m_strFind.find(".");
-        if (Pos != std::string::npos)
+        // Namespace too short to fit pw?
+        if (Pos < 2)
         {
-            if (m_strDomain.back() == '.') m_strDomain.pop_back();
-            m_strFind = m_strFind.substr(Pos+1);
-            m_nState = 2;
+            m_nState = 0;
+        }
+        else
+        {
+            // Namespace pw?
+            if (_strCurrent.substr(Pos-2, Pos) != "pw")
+            {
+                m_nState = 0;
+            }
+            else
+            {
+                // Start domain completion
+                m_strFind = _strCurrent.substr(Pos+1);
+                if (m_nState == 2) m_strDomain = m_strFind;
+                m_nState = 2;
+                
+                // Domain completed?
+                Pos = m_strFind.find(".");
+                if (Pos != std::string::npos)
+                {
+                    // Start command completion
+                    if (m_strDomain.back() == '.') m_strDomain.pop_back();
+                    m_strFind = m_strFind.substr(Pos+1);
+                    m_nState = 3;
+                }
+            }
         }
     }
     else
     {
         m_strFind = _strCurrent;
-        m_nState = 0;
+        m_nState = 1;
     }
     m_strFindLast = "";
     m_strPart = "";
