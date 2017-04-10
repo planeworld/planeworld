@@ -46,6 +46,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management/widget_console.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management/widget_text.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management/window.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management/win_frame_user.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/game_state_manager.cpp

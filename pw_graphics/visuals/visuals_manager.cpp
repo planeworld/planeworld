@@ -1266,11 +1266,32 @@ bool CVisualsManager::init()
     m_pConsoleWidget->setFontSize(16);
     m_pConsoleWidget->setFontColor({0.0, 1.0, 0.0, 1.0}, WIN_INHERIT);
     m_pConsoleWidget->setComConsole(m_pComConsole);
+    
+    m_ConsoleWindow.setTitle("Command console");
+    m_ConsoleWindow.setFont(&m_Font);
+    m_ConsoleWindow.setFontSize(20);
+    m_ConsoleWindow.setFontColor({1.0, 1.0, 1.0, 1.0}, WIN_NO_INHERIT);
     m_ConsoleWindow.setWidget(m_pConsoleWidget);
-    m_ConsoleWindow.setColorBG({0.1, 0.1, 0.1, 0.85}, WIN_INHERIT);
-    m_ConsoleWindow.setColorFG({0.3, 0.3, 0.3, 0.85}, WIN_INHERIT);
+    m_ConsoleWindow.setColorBG({0.1, 0.1, 0.1, 0.75}, WIN_INHERIT);
+    m_ConsoleWindow.setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
     m_ConsoleWindow.setPosition(10, 10);
-    m_ConsoleWindow.resize(1000, 150);
+    m_ConsoleWindow.resize(800, 150);
+    
+    m_pTextWidget = new CWidgetText();
+    MEM_ALLOC("IWidget")
+    m_pTextWidget->setFont(&m_Font);
+    m_pTextWidget->setFontSize(16);
+    m_pTextWidget->setText("This might be a tutorial text.\nIt will later be accessible from Lua.");
+    
+    m_TextWindow.setTitle("Text Window");
+    m_TextWindow.setFont(&m_Font);
+    m_TextWindow.setFontSize(20);
+    m_TextWindow.setFontColor({1.0, 1.0, 1.0, 1.0}, WIN_INHERIT);
+    m_TextWindow.setWidget(m_pTextWidget);
+    m_TextWindow.setColorBG({0.1, 0.1, 0.1, 0.75}, WIN_INHERIT);
+    m_TextWindow.setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
+    m_TextWindow.setPosition(1000, 10);
+    m_TextWindow.resize(350, 100);
     
     return (m_Graphics.init());
 }
@@ -1332,6 +1353,7 @@ void CVisualsManager::drawConsole()
     if (m_bConsoleMode)
     {
         m_ConsoleWindow.draw();
+        m_TextWindow.draw();
     }
 }
 

@@ -49,3 +49,22 @@ IWinFrameUser::IWinFrameUser() : m_WinColorBG({0.3, 0.3, 0.3, 1.0}),
     METHOD_ENTRY("IWinFrameUser::IWinFrameUser");
     CTOR_CALL("IWinFrameUser::IWinFrameUser");
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw frame for this window/widget 
+///
+/// This is a helper method that might be called by inherited classes
+///
+////////////////////////////////////////////////////////////////////////////////
+void IWinFrameUser::drawFrame()
+{
+    METHOD_ENTRY("IWinFrameUser::drawFrame")
+    
+    m_Graphics.setColor(m_WinColorBG);
+    m_Graphics.filledRectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                            Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+    m_Graphics.setColor(m_WinColorFG);
+    m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                      Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+}

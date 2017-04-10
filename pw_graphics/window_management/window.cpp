@@ -80,9 +80,26 @@ void CWindow::draw() const
     m_Graphics.filledRectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
                             Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
     m_Graphics.setColor(m_WinColorFG);
-    m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+    int nSpacing = m_pFont->getLineSpacing(m_nFontSize);
+    m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
                       Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+    m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                      Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+nSpacing));
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+
+    m_Graphics.getWindow()->pushGLStates();
+    sf::Text Text;
+
+    Text.setString(m_strTitle);
+    Text.setFont(*m_pFont);
+    Text.setCharacterSize(m_nFontSize);
+    Text.setPosition(m_nFramePosX + m_nFrameWidth/2 - Text.getGlobalBounds().width/2, m_nFramePosY);
+    Text.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                m_FontColor[1]*255.0,
+                                m_FontColor[2]*255.0,
+                                m_FontColor[3]*255.0));
+    m_Graphics.getWindow()->draw(Text);
+    m_Graphics.getWindow()->popGLStates();        
     
     m_pWidget->draw();
 }

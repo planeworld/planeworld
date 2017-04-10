@@ -34,6 +34,7 @@
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
+#include "font_user.h"
 #include "log.h"
 #include "unique_id_user.h"
 #include "widget.h"
@@ -46,7 +47,7 @@
 /// \brief Definition of a graphical window
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CWindow : virtual public CGraphicsBase,
+class CWindow : public IFontUser,
                 public IUniqueIDUser,
                 public IWinFrameUser
 {
@@ -62,6 +63,7 @@ class CWindow : virtual public CGraphicsBase,
         
         //--- Methods --------------------------------------------------------//
         void center();
+        void setTitle(const std::string&);
         void setWidget(IWidget* const);
         
     private:
@@ -79,6 +81,19 @@ class CWindow : virtual public CGraphicsBase,
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the title of this window
+///
+/// \param _strTitle Title to be set
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWindow::setTitle(const std::string& _strTitle)
+{
+    METHOD_ENTRY("CWindow::setTitle")
+    m_strTitle = _strTitle;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -110,7 +125,7 @@ inline void CWindow::setWidget(IWidget* const _pWidget)
 inline void CWindow::resizeInherit(const int _nX, const int _nY)
 {
     METHOD_ENTRY("CWindow::resizeInherit")
-    m_pWidget->resize(_nX-m_nFrameBorderX*2, _nY-m_nFrameBorderY*2);
+    m_pWidget->resize(_nX-m_nFrameBorderX*2, _nY-m_nFrameBorderY*2-m_pFont->getLineSpacing(m_nFontSize));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +165,7 @@ inline void CWindow::setColorFGInherit(const ColorTypeRGBA& _RGBA)
 inline void CWindow::setPositionInherit(const int _nPosX, const int _nPosY)
 {
     METHOD_ENTRY("CWindow::setPositionInherit")
-    m_pWidget->setPosition(_nPosX + m_nFrameBorderX, _nPosY+m_nFrameBorderY);
+    m_pWidget->setPosition(_nPosX + m_nFrameBorderX, _nPosY+m_nFrameBorderY+m_pFont->getLineSpacing(m_nFontSize));
 }
 
 #endif // WINDOW_H

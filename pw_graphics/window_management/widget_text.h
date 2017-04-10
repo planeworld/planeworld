@@ -20,57 +20,65 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       widget.h
-/// \brief      Prototype of interface "IWidget"
+/// \file       widget_text.h
+/// \brief      Prototype of "CWidgetTexte"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2017-04-08
+/// \date       2017-04-10
 ///
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef WIDGET_H
-#define WIDGET_H
+#ifndef WIDGET_TEXT_H
+#define WIDGET_TEXT_H
 
 //--- Standard header --------------------------------------------------------//
-#include <vector>
 
 //--- Program header ---------------------------------------------------------//
-#include "graphics.h"
-#include "unique_id_user.h"
-#include "win_frame_user.h"
+#include "font_user.h"
+#include "widget.h"
 
 //--- Misc header ------------------------------------------------------------//
 
-// Forward declaration
-class IWidget;
-
-/// List type of Widgets
-typedef std::vector<IWidget*> WidgetsType;
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Defines a generic widget interface
+/// \brief Defines a text widget
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IWidget : public IUniqueIDUser,
-                public IWinFrameUser
+class CWidgetText : public IFontUser,
+                    public IWidget
 {
 
     public:
     
         //--- Constructor/Destructor------------------------------------------//
-        virtual ~IWidget() {}
+        CWidgetText();
+        ~CWidgetText() override {}
         
         //--- Constant methods -----------------------------------------------//
-        virtual void draw() = 0;
-
-        //--- Methods --------------------------------------------------------//
         
-    private:
+        //--- Methods --------------------------------------------------------//
+        void draw() override;
+        void setText(const std::string&);
+        
+    protected:
         
         //--- Variables [private] --------------------------------------------//
+        std::string     m_strText; ///< Text displayed in this widget
 
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-#endif // WIDGET_H
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the text displayed in this widget
+///
+/// \param _strText Text to be displayed within widget
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWidgetText::setText(const std::string& _strText)
+{
+    METHOD_ENTRY("CWidgetText::setText")
+    m_strText = _strText;
+}
+
+#endif // WIDGET_TEXT_H

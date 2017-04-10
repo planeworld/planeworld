@@ -43,6 +43,7 @@
 #include "universe.h"
 #include "visuals_data_storage_user.h"
 #include "widget_console.h"
+#include "widget_text.h"
 #include "window.h"
 #include "world_data_storage_user.h"
 
@@ -129,7 +130,9 @@ class CVisualsManager : virtual public CGraphicsBase,
         CCamera*                        m_pCamera;          ///< Camera for player view
         
         CWindow                         m_ConsoleWindow;    ///< Window for command console
+        CWindow                         m_TextWindow;       ///< Window for text output
         CWidgetConsole*                 m_pConsoleWidget;   ///< Widget for command console
+        CWidgetText*                    m_pTextWidget;      ///< Widget for text output
         
         CComConsole*                    m_pComConsole;      ///< Active com console
         bool                            m_bConsoleMode;     ///< Indicates if console mode is active

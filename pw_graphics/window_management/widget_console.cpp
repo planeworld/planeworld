@@ -32,11 +32,11 @@
 
 //--- Program header ---------------------------------------------------------//
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor, initialising members
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 CWidgetConsole::CWidgetConsole() : IFontUser(),
                                    IWidget(),
                                    m_nComHistoryVisible(10)
@@ -47,25 +47,16 @@ CWidgetConsole::CWidgetConsole() : IFontUser(),
     m_UID.setName("Widget_Console_"+m_UID.getName());
 }
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Draw this widget
 ///
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void CWidgetConsole::draw()
 {
     METHOD_ENTRY("CWidgetConsole::draw")
 
-    m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
-    
-    //m_nFrameHeight = (m_pFont->getLineSpacing(m_nFontSize))*(m_nComHistoryVisible+1);
-        
-    m_Graphics.setColor(m_WinColorBG);
-    m_Graphics.filledRectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                            Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
-    m_Graphics.setColor(m_WinColorFG);
-    m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                      Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+    this->drawFrame();
     
     m_nComHistoryVisible = m_nFrameHeight / m_pFont->getLineSpacing(m_nFontSize) - 1;
 

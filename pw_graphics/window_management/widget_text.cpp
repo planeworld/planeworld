@@ -20,57 +20,57 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       widget.h
-/// \brief      Prototype of interface "IWidget"
+/// \file       widget_text.cpp
+/// \brief      Implementation of class "CWidgetText"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2017-04-08
+/// \date       2017-04-10
 ///
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef WIDGET_H
-#define WIDGET_H
 
-//--- Standard header --------------------------------------------------------//
-#include <vector>
+#include "widget_text.h"
 
 //--- Program header ---------------------------------------------------------//
-#include "graphics.h"
-#include "unique_id_user.h"
-#include "win_frame_user.h"
-
-//--- Misc header ------------------------------------------------------------//
-
-// Forward declaration
-class IWidget;
-
-/// List type of Widgets
-typedef std::vector<IWidget*> WidgetsType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Defines a generic widget interface
+/// \brief Constructor, initialising members
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IWidget : public IUniqueIDUser,
-                public IWinFrameUser
+CWidgetText::CWidgetText() : IFontUser(),
+                             IWidget(),
+                             m_strText("")
 {
-
-    public:
+    METHOD_ENTRY("CWidgetText::CWidgetText");
+    CTOR_CALL("CWidgetText::CWidgetText");
     
-        //--- Constructor/Destructor------------------------------------------//
-        virtual ~IWidget() {}
-        
-        //--- Constant methods -----------------------------------------------//
-        virtual void draw() = 0;
+    m_UID.setName("Widget_Text_"+m_UID.getName());
+}
 
-        //--- Methods --------------------------------------------------------//
-        
-    private:
-        
-        //--- Variables [private] --------------------------------------------//
+/////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws widget with text included
+///
+////////////////////////////////////////////////////////////////////////////////
+void CWidgetText::draw()
+{
+    METHOD_ENTRY("CWidgetText::draw")
+    this->drawFrame();
+    
+    m_Graphics.getWindow()->pushGLStates();
+    sf::Text Text;
 
-};
+    Text.setString(m_strText);
+    Text.setFont(*m_pFont);
+    Text.setCharacterSize(m_nFontSize);
+    Text.setPosition(m_nFramePosX, m_nFramePosY);
+    Text.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                m_FontColor[1]*255.0,
+                                m_FontColor[2]*255.0,
+                                m_FontColor[3]*255.0));
+    m_Graphics.getWindow()->draw(Text);
+    m_Graphics.getWindow()->popGLStates();
+    
+    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+}
 
-//--- Implementation is done here for inline optimisation --------------------//
-
-#endif // WIDGET_H

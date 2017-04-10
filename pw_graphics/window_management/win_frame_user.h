@@ -39,6 +39,7 @@
 //--- Misc header ------------------------------------------------------------//
 
 const bool WIN_INHERIT = true;
+const bool WIN_NO_INHERIT = false;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,7 +47,7 @@ const bool WIN_INHERIT = true;
 /// \brief Defines a window frame and its properties
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IWinFrameUser
+class IWinFrameUser : virtual public CGraphicsBase
 {
 
     public:
@@ -64,6 +65,7 @@ class IWinFrameUser
         
     protected:
         
+                void drawFrame();
         virtual void resizeInherit(const int, const int) {}
         virtual void setColorBGInherit(const ColorTypeRGBA&) {}
         virtual void setColorFGInherit(const ColorTypeRGBA&) {}
