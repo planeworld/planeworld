@@ -83,7 +83,7 @@ void CInputManager::processFrame()
             {
                 // Adjust the viewport when the window is resized
                 m_vecMouseCenter = sf::Vector2i(m_pWindow->getSize().x >> 1, m_pWindow->getSize().y >> 1);
-                m_pComInterface->call<void,double,double>("win_resize", Event.size.width, Event.size.height);
+                m_pComInterface->call<void,double,double>("win_main_resize", Event.size.width, Event.size.height);
                 break;
             }
             case sf::Event::KeyPressed:

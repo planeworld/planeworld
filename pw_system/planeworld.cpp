@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
         MEM_ALLOC("WindowHandleType")
         
         pVisualsManager->setWindow(pWindow);
-        pVisualsManager->initGraphics();
+        pVisualsManager->init();
         
         #ifdef PW_MULTITHREADING    
             pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);

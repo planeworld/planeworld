@@ -45,13 +45,7 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_unCameraIndex(0u),
                                      m_pCamera(nullptr),
                                      m_pComConsole(nullptr),
-                                     m_bConsoleMode(false),
-                                     m_TextColor({{0.0, 1.0, 0.0, 1.0}}),
-                                     m_BGColor({{0.1, 0.1, 0.1, 0.85}}),
-                                     m_nTextSize(20),
-                                     m_nComHistory(5),
-                                     m_nWindowBorderLeft(10),
-                                     m_nWindowBorderTop(10)
+                                     m_bConsoleMode(false)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -60,8 +54,6 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
         m_strModuleName = "Visuals Manager";
     #endif
     m_strFont = "";
-    m_nWindowWidth  = m_Graphics.getWidthScr() - 20;
-    m_nWindowHeight = (m_Font.getLineSpacing(m_nTextSize))*(m_nComHistory+1) + m_nWindowBorderTop;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1259,6 +1251,32 @@ void CVisualsManager::cycleCamera()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Initialises the Graphics
+///
+/// \return Success
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CVisualsManager::init()
+{
+    METHOD_ENTRY("CVisualsManager::init")
+    
+    m_pConsoleWidget = new CWidgetConsole();
+    MEM_ALLOC("IWidget")
+    m_pConsoleWidget->setFont(&m_Font);
+    m_pConsoleWidget->setFontSize(16);
+    m_pConsoleWidget->setFontColor({0.0, 1.0, 0.0, 1.0}, WIN_INHERIT);
+    m_pConsoleWidget->setComConsole(m_pComConsole);
+    m_ConsoleWindow.setWidget(m_pConsoleWidget);
+    m_ConsoleWindow.setColorBG({0.1, 0.1, 0.1, 0.85}, WIN_INHERIT);
+    m_ConsoleWindow.setColorFG({0.3, 0.3, 0.3, 0.85}, WIN_INHERIT);
+    m_ConsoleWindow.setPosition(10, 10);
+    m_ConsoleWindow.resize(1000, 150);
+    
+    return (m_Graphics.init());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Drawing finished, now swap buffers
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -1313,48 +1331,7 @@ void CVisualsManager::drawConsole()
     
     if (m_bConsoleMode)
     {
-        m_nWindowHeight = (m_Font.getLineSpacing(m_nTextSize))*(m_nComHistory+1);
-        
-        m_Graphics.setColor(m_BGColor);
-        m_Graphics.rectSS(Vector2d(m_nWindowBorderLeft, m_nWindowBorderTop+m_nWindowHeight),
-                          Vector2d(m_nWindowBorderLeft+m_nWindowWidth, m_nWindowBorderTop));
-        m_Graphics.setColor(m_BGColor);
-        m_Graphics.filledRectSS(Vector2d(m_nWindowBorderLeft, m_nWindowBorderTop+m_nWindowHeight),
-                                Vector2d(m_nWindowBorderLeft+m_nWindowWidth, m_nWindowBorderTop));
-        m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
-        
-
-        std::stringstream oss;
-        auto i = m_pComConsole->getCommands().size() - m_nComHistory;
-        if (i > m_pComConsole->getCommands().size()) i = 0;
-        while (i < m_pComConsole->getCommands().size())
-        {
-            oss << "> " << m_pComConsole->getCommands().at(i);
-            if (m_pComConsole->getReturnValues().at(i) != "")
-            {
-                oss << " => " << m_pComConsole->getReturnValues().at(i);
-            }
-            oss << "\n";
-            
-            ++i;
-        }
-        oss << mapConsoleModeTypeToString[m_pComConsole->getMode()] << " > " << m_pComConsole->getCurrentCommand() << "_";
-        
-        m_Graphics.getWindow()->pushGLStates();
-        sf::Text Text;
-
-        Text.setString(oss.str());
-        Text.setFont(m_Font);
-        Text.setCharacterSize(m_nTextSize);
-        Text.setPosition(m_nWindowBorderLeft, m_nWindowBorderTop);
-        Text.setFillColor(sf::Color(m_TextColor[0]*255.0,
-                                    m_TextColor[1]*255.0,
-                                    m_TextColor[2]*255.0,
-                                    m_TextColor[3]*255.0));
-        m_Graphics.getWindow()->draw(Text);
-        m_Graphics.getWindow()->popGLStates();        
-            
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        m_ConsoleWindow.draw();
     }
 }
 
@@ -1428,28 +1405,32 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::STRING, "Mode (lua, raw)"}},
                                       "system","visuals"
     );
-    m_pComInterface->registerFunction("com_set_text_size",
-                                      CCommand<void,int>([&](const int _nSize){m_nTextSize = _nSize;}),
+    m_pComInterface->registerFunction("com_set_font_size",
+                                      CCommand<void,int>([&](const int _nSize){m_pConsoleWidget->setFontSize(_nSize);}),
                                       "Sets font size for command console.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Font size"}},
                                       "system","visuals"
     );
-    m_pComInterface->registerFunction("com_set_window_width",
-                                      CCommand<void,int>([&](const int _nWidth){m_nWindowWidth = _nWidth;}),
-                                      "Sets window width of command console.",
+    m_pComInterface->registerFunction("com_resize",
+                                      CCommand<void,int,int>([&](const int _nWidth, const int _nHeight){m_ConsoleWindow.resize(_nWidth, _nHeight);}),
+                                      "Resizr command console window.",
                                       {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::INT, "Window width"}},
+                                      {ParameterType::INT, "Window width"},
+                                      {ParameterType::INT, "Window height"}},
                                       "system","visuals"
     );
-    m_pComInterface->registerFunction("com_set_history",
-                                      CCommand<void,int>([&](const int _nHist){m_nComHistory = _nHist;}),
-                                      "Sets size of visible command history in console.",
+    m_pComInterface->registerFunction("win_center",
+                                      CCommand<void, int>([&](const int _nUIDDummy)
+                                      {
+                                          m_ConsoleWindow.center();
+                                      }),
+                                      "Center window referring to the main application.",
                                       {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::INT, "History size"}},
-                                      "system","visuals"
+                                      {ParameterType::INT, "Window UID"}},
+                                      "system", "visuals"  
     );
-    m_pComInterface->registerFunction("win_resize",
+    m_pComInterface->registerFunction("win_main_resize",
                                       CCommand<void, double, double>([=](const double& _fX,
                                                                          const double& _fY)
                                       {
@@ -1475,7 +1456,7 @@ void CVisualsManager::myInitComInterface()
                                               const double _fB,
                                               const double _fA
                                         )
-                                      {m_BGColor = {{_fR, _fG, _fB, _fA}};}),
+                                      {m_ConsoleWindow.setColorBG({_fR, _fG, _fB, _fA}, WIN_INHERIT);}),
                                       "Sets color of console window background.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Window UID"},
@@ -1493,7 +1474,7 @@ void CVisualsManager::myInitComInterface()
                                               const double _fB,
                                               const double _fA
                                         )
-                                      {m_TextColor = {{_fR, _fG, _fB, _fA}};}),
+                                      {m_pConsoleWidget->setFontColor({_fR, _fG, _fB, _fA}, WIN_INHERIT);}),
                                       "Sets color of console text.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Window UID"},

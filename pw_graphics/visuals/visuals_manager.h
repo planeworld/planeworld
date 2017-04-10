@@ -42,6 +42,8 @@
 #include "thread_module.h"
 #include "universe.h"
 #include "visuals_data_storage_user.h"
+#include "widget_console.h"
+#include "window.h"
 #include "world_data_storage_user.h"
 
 const double CIRCLE_DEFAULT_RESOLUTION =  5.0;               ///< Default resolution for visual sampling, px/vertex.
@@ -73,11 +75,12 @@ class CVisualsManager : virtual public CGraphicsBase,
         int             getVisualisations() const;
         WindowHandleType*
                         getWindow() const;
-        bool            initGraphics() const;
                 
         //--- Methods --------------------------------------------------------//
-        void            cycleCamera();
+        bool            init();
         
+        void            cycleCamera();
+
         void            finishFrame();
         void            processFrame();
         
@@ -125,19 +128,14 @@ class CVisualsManager : virtual public CGraphicsBase,
         std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera
         CCamera*                        m_pCamera;          ///< Camera for player view
         
+        CWindow                         m_ConsoleWindow;    ///< Window for command console
+        CWidgetConsole*                 m_pConsoleWidget;   ///< Widget for command console
+        
         CComConsole*                    m_pComConsole;      ///< Active com console
         bool                            m_bConsoleMode;     ///< Indicates if console mode is active
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name and location
         sf::Font                        m_Font;             ///< Font for displayed output
-        ColorTypeRGBA                   m_TextColor;        ///< Color of text in console
-        ColorTypeRGBA                   m_BGColor;          ///< Background color of console window
-        int                             m_nTextSize;        ///< Size of text in console
-        int                             m_nComHistory;      ///< Visible history (lines) in console
-        int                             m_nWindowBorderLeft;///< Distance to left window border
-        int                             m_nWindowBorderTop; ///< Distance to top window border
-        int                             m_nWindowHeight;    ///< Height of console window
-        int                             m_nWindowWidth;     ///< Width of console window
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -177,22 +175,8 @@ inline int CVisualsManager::getVisualisations() const
 ////////////////////////////////////////////////////////////////////////////////
 inline WindowHandleType* CVisualsManager::getWindow() const
 {
-    METHOD_ENTRY("CVisualsManager::getWindowHandle")
+    METHOD_ENTRY("CVisualsManager::getWindow")
     return (m_Graphics.getWindow());
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Initialises the Graphics
-///
-/// \return Success
-///
-////////////////////////////////////////////////////////////////////////////////
-inline bool CVisualsManager::initGraphics() const
-{
-    METHOD_ENTRY("CVisualsManager::getVisualisations")
-    return (m_Graphics.init());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
