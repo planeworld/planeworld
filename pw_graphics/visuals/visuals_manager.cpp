@@ -423,7 +423,7 @@ void CVisualsManager::drawDebris(CCamera* const _pCamera) const
                         if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
                         {
                             m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
-                            m_Graphics.circle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
+                            m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
                                             IGridUser::cellToDouble(Debris.second->getCell() - _pCamera->getCell()),
                                             (double(Debris.second->getPositions()->size()-i) * 0.01 + 3.0),
                                             12, GRAPHICS_CIRCLE_USE_CACHE
@@ -547,64 +547,6 @@ void CVisualsManager::drawCOM() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Draws console if console mode is active
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawConsole() const
-{
-    METHOD_ENTRY("CVisualsManager::drawConsole")
-    
-    int nTextSize = 12;
-    int nComHistory = 5;
-    int nWindowBorderLeft = 10;
-    int nWindowBorderTop = 10;
-    int nWindowHeight = (m_Font.getLineSpacing(nTextSize))*(nComHistory+1) + nWindowBorderLeft;
-    int nWindowWidth = 300;
-    
-    if (m_bConsoleMode)
-    {
-        m_Graphics.setColor(1.0, 0.0, 0.0, 0.8);
-        m_Graphics.rectSS(Vector2d(nWindowBorderLeft, nWindowHeight),
-                          Vector2d(nWindowBorderLeft+nWindowWidth, nWindowBorderTop));
-        m_Graphics.setColor(0.25, 0.0, 0.0, 0.8);
-        m_Graphics.filledRectSS(Vector2d(nWindowBorderLeft, nWindowHeight),
-                                Vector2d(nWindowBorderLeft+nWindowWidth, nWindowBorderTop));
-        m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
-        
-
-        std::stringstream oss;
-        auto i = m_pComConsole->getCommands().size() - nComHistory;
-        if (i > m_pComConsole->getCommands().size()) i = 0;
-        while (i < m_pComConsole->getCommands().size())
-        {
-            oss << "> " << m_pComConsole->getCommands().at(i);
-            if (m_pComConsole->getReturnValues().at(i) != "")
-            {
-                oss << " => " << m_pComConsole->getReturnValues().at(i);
-            }
-            oss << "\n";
-            
-            ++i;
-        }
-        oss << "> " << m_pComConsole->getCurrentCommand() << "_";
-        
-        m_Graphics.getWindow()->pushGLStates();
-        sf::Text Text;
-
-        Text.setString(oss.str());
-        Text.setFont(m_Font);
-        Text.setCharacterSize(nTextSize);
-        Text.setPosition(nWindowBorderLeft, nWindowBorderTop);
-        m_Graphics.getWindow()->draw(Text);
-        m_Graphics.getWindow()->popGLStates();        
-            
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-        
-    }
-}
-    
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Draws bounding box of objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -669,6 +611,15 @@ void CVisualsManager::drawBoundingBoxes() const
                                     pShp->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
                                     IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
             }
+        }
+        for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
+        {
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+            m_Graphics.rect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
+                            Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
+            m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+            m_Graphics.filledRect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
+                                  Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
         }
     }
 
@@ -1198,6 +1149,32 @@ void CVisualsManager::drawWorld() const
                 m_Graphics.getWindow()->draw(text);
             }
         }
+        for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
+        {
+            if (m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() > 1.0)
+            {
+                Vector2d vecPosRel = CKinematicsState::clipToWorldLimit( 
+                                    Debris.second->getBoundingBox().getUpperRight()-
+                                    m_pCamera->getCenter()+
+                                    IGridUser::cellToDouble
+                                    (Debris.second->getCell()-
+                                    m_pCamera->getCell()));
+                
+                // Now draw the text
+                sf::Text text;
+                double fColor = (m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() - 1.0) * 255.0;
+                if (fColor > 255.0) fColor = 255.0;
+                sf::Color color(255.0,255.0,255.0, fColor);
+                
+                text.setString(Debris.second->getName());
+                text.setFont(m_Font);
+                text.setCharacterSize(nTextSize);
+                text.setFillColor(color);
+                text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+
+                m_Graphics.getWindow()->draw(text);
+            }
+        }
         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
             for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
@@ -1274,6 +1251,53 @@ void CVisualsManager::cycleCamera()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Initialises the Graphics
+///
+/// \return Success
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CVisualsManager::init()
+{
+    METHOD_ENTRY("CVisualsManager::init")
+    
+    m_pConsoleWidget = new CWidgetConsole();
+    MEM_ALLOC("IWidget")
+    m_pConsoleWidget->setFont(&m_Font);
+    m_pConsoleWidget->setFontSize(16);
+    m_pConsoleWidget->setFontColor({0.0, 1.0, 0.0, 1.0}, WIN_INHERIT);
+    m_pConsoleWidget->setComConsole(m_pComConsole);
+    
+    m_ConsoleWindow.setTitle("Command console");
+    m_ConsoleWindow.setFont(&m_Font);
+    m_ConsoleWindow.setFontSize(20);
+    m_ConsoleWindow.setFontColor({1.0, 1.0, 1.0, 1.0}, WIN_NO_INHERIT);
+    m_ConsoleWindow.setWidget(m_pConsoleWidget);
+    m_ConsoleWindow.setColorBG({0.1, 0.1, 0.1, 0.75}, WIN_INHERIT);
+    m_ConsoleWindow.setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
+    m_ConsoleWindow.setPosition(10, 10);
+    m_ConsoleWindow.resize(800, 150);
+    
+    m_pTextWidget = new CWidgetText();
+    MEM_ALLOC("IWidget")
+    m_pTextWidget->setFont(&m_Font);
+    m_pTextWidget->setFontSize(16);
+    m_pTextWidget->setText("This might be a tutorial text.\nIt will later be accessible from Lua.");
+    
+    m_TextWindow.setTitle("Text Window");
+    m_TextWindow.setFont(&m_Font);
+    m_TextWindow.setFontSize(20);
+    m_TextWindow.setFontColor({1.0, 1.0, 1.0, 1.0}, WIN_INHERIT);
+    m_TextWindow.setWidget(m_pTextWidget);
+    m_TextWindow.setColorBG({0.1, 0.1, 0.1, 0.75}, WIN_INHERIT);
+    m_TextWindow.setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
+    m_TextWindow.setPosition(1000, 10);
+    m_TextWindow.resize(350, 100);
+    
+    return (m_Graphics.init());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Drawing finished, now swap buffers
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -1308,13 +1332,29 @@ void CVisualsManager::processFrame()
     this->drawTrajectories();
     this->drawWorld();
     this->drawKinematicsStates();
-    this->drawBoundingBoxes();
     this->drawCOM();
+    this->drawBoundingBoxes();
     this->drawGridHUD();
     this->drawTimers();
     this->drawConsole();
     
     this->finishFrame();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws console if console mode is active
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawConsole()
+{
+    METHOD_ENTRY("CVisualsManager::drawConsole")
+    
+    if (m_bConsoleMode)
+    {
+        m_ConsoleWindow.draw();
+        m_TextWindow.draw();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1328,6 +1368,9 @@ void CVisualsManager::myInitComInterface()
 
     INFO_MSG("Visuals Manager", "Initialising com interace.")
     
+    //----------------------------------------------------------------------
+    // System package
+    //----------------------------------------------------------------------
     m_pComInterface->registerFunction("cam_cycle",
                                       CCommand<void>([&](){this->cycleCamera();}),
                                       "Cycle through registered cameras",
@@ -1377,7 +1420,39 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::DOUBLE, "Level to zoom active camera to"}},
                                       "system","visuals"
     );
-    m_pComInterface->registerFunction("resize_window",
+    m_pComInterface->registerFunction("com_set_mode",
+                                      CCommand<void,std::string>([&](const std::string& _strS){m_pComConsole->setMode(mapStringToConsoleModeType.at(_strS));}),
+                                      "Sets mode for console command interpretation.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::STRING, "Mode (lua, raw)"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("com_set_font_size",
+                                      CCommand<void,int>([&](const int _nSize){m_pConsoleWidget->setFontSize(_nSize);}),
+                                      "Sets font size for command console.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Font size"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("com_resize",
+                                      CCommand<void,int,int>([&](const int _nWidth, const int _nHeight){m_ConsoleWindow.resize(_nWidth, _nHeight);}),
+                                      "Resizr command console window.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window width"},
+                                      {ParameterType::INT, "Window height"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_center",
+                                      CCommand<void, int>([&](const int _nUIDDummy)
+                                      {
+                                          m_ConsoleWindow.center();
+                                      }),
+                                      "Center window referring to the main application.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("win_main_resize",
                                       CCommand<void, double, double>([=](const double& _fX,
                                                                          const double& _fY)
                                       {
@@ -1395,6 +1470,45 @@ void CVisualsManager::myInitComInterface()
                                       },
                                       "system", "visuals"  
     );
+    m_pComInterface->registerFunction("win_set_bg_color",
+                                      CCommand<void,int,double,double,double,double>(
+                                          [&](const int _nUIDDummy,
+                                              const double _fR,
+                                              const double _fG,
+                                              const double _fB,
+                                              const double _fA
+                                        )
+                                      {m_ConsoleWindow.setColorBG({_fR, _fG, _fB, _fA}, WIN_INHERIT);}),
+                                      "Sets color of console window background.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"},
+                                      {ParameterType::DOUBLE, "Color red (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Color green (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Color blue (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Alpha (0.0-1.0)"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_set_text_color",
+                                      CCommand<void,int,double,double,double,double>(
+                                          [&](const int _nUIDDummy,
+                                              const double _fR,
+                                              const double _fG,
+                                              const double _fB,
+                                              const double _fA
+                                        )
+                                      {m_pConsoleWidget->setFontColor({_fR, _fG, _fB, _fA}, WIN_INHERIT);}),
+                                      "Sets color of console text.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"},
+                                      {ParameterType::DOUBLE, "Color red (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Color green (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Color blue (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Alpha (0.0-1.0)"}},
+                                      "system","visuals"
+    );
+    //----------------------------------------------------------------------
+    // Visuals package
+    //----------------------------------------------------------------------
     m_pComInterface->registerFunction("toggle_bboxes",
                                       CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_BBOXES);}),
                                       "Toggle bounding boxes on and off.",
@@ -1416,6 +1530,12 @@ void CVisualsManager::myInitComInterface()
     m_pComInterface->registerFunction("toggle_grid",
                                       CCommand<void>([&](){this->toggleVisualisations(VISUALS_UNIVERSE_GRID);}),
                                       "Toggle universe grid on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_kin_states",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_KINEMATICS_STATES);}),
+                                      "Toggle kinematics states on and off.",
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals", "visuals"
     );

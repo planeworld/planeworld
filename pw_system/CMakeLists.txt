@@ -25,6 +25,7 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core
     ${CMAKE_HOME_DIRECTORY}/pw_physics/components
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry
@@ -46,6 +47,10 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/camera.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management/widget_console.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management/widget_text.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management/window.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management/win_frame_user.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/game_state_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/input_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/parzival.cpp

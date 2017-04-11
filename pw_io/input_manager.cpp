@@ -83,7 +83,7 @@ void CInputManager::processFrame()
             {
                 // Adjust the viewport when the window is resized
                 m_vecMouseCenter = sf::Vector2i(m_pWindow->getSize().x >> 1, m_pWindow->getSize().y >> 1);
-                m_pComInterface->call<void,double,double>("resize_window", Event.size.width, Event.size.height);
+                m_pComInterface->call<void,double,double>("win_main_resize", Event.size.width, Event.size.height);
                 break;
             }
             case sf::Event::KeyPressed:
@@ -133,6 +133,12 @@ void CInputManager::processFrame()
                         {
                             m_strConsoleCommand = "";
                             m_pComConsole->execute();
+                            break;
+                        }
+                        case sf::Keyboard::Tab:
+                        {
+                            m_pComConsole->complementCommand();
+                            m_strConsoleCommand = m_pComConsole->getCurrentCommand();
                             break;
                         }
                         default:
@@ -207,7 +213,7 @@ void CInputManager::processFrame()
                         }
                         case sf::Keyboard::K:
                         {
-//                             pVisualsManager->toggleVisualisations(VISUALS_KINEMATICS_STATES);
+                            m_pComInterface->call<void>("toggle_kin_states");
                             break;
                         }
                         case sf::Keyboard::L:

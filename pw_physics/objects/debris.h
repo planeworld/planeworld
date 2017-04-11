@@ -32,6 +32,7 @@
 #define DEBRIS_H
 
 //--- Program header ---------------------------------------------------------//
+#include "bounding_box.h"
 #include "circular_buffer.h"
 #include "grid_user.h"
 #include "unique_id_user.h"
@@ -79,7 +80,7 @@ class CDebris : public IGridUser,
         CDebris* clone() const;
 
         //--- Constant methods -----------------------------------------------//
-        
+        CBoundingBox&         getBoundingBox();
         const DebrisTypeType& getDebrisType()  const;
         int                   getDepths() const;
 
@@ -114,6 +115,8 @@ class CDebris : public IGridUser,
         CCircularBuffer<Vector2d> m_VelList;                 ///< Velocity of derbis
         CCircularBuffer<std::uint8_t>  m_StateList;          ///< Is the debris active or inactive
         
+        CBoundingBox            m_BBox;                      ///< Bounding box of all debris
+        
         DebrisTypeType          m_DebrisType;                ///< Type of debris
         CTimer                  m_Lifetime;                  ///< Lifetime counter
         double                  m_fTimeFac;                  ///< Factor of realtime
@@ -138,6 +141,19 @@ const std::map<std::string, DebrisTypeType> mapStringToDebrisType = {
 }; ///< Map from string to DebrisTypeType
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the bounding box
+///
+/// \return Bounding box
+///
+////////////////////////////////////////////////////////////////////////////////
+inline CBoundingBox& CDebris::getBoundingBox()
+{
+    METHOD_ENTRY("CGeometry::getBoundingBox")
+    return m_BBox;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

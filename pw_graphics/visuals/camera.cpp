@@ -52,7 +52,7 @@ CCamera::CCamera() : IGridUser(),
     
     m_vecCell.setZero();
     
-    m_UID.setName("Camera_"+m_UID.getName());
+    m_UID.setName("Cam_"+m_UID.getName());
     
     this->reset();
 }
@@ -377,13 +377,21 @@ void CCamera::zoomBy(const double& _fZoom)
 void CCamera::zoomTo(const double& _fZoom)
 {
     METHOD_ENTRY("CCamera::zoomTo")
-    m_fZoom = _fZoom;
     
-    // Limit zoom to universe limits, worst viewport case (=> sqrt(2))
-    double fLimit = CKinematicsState::getWorldLimitX();
-    if (fLimit > CKinematicsState::getWorldLimitY()) fLimit = CKinematicsState::getWorldLimitY();
-    if (MATH_SQRT2*m_fViewportWidth/m_fZoom  > fLimit) m_fZoom = MATH_SQRT2*m_fViewportWidth/fLimit;
-    if (MATH_SQRT2*m_fViewportHeight/m_fZoom > fLimit) m_fZoom = MATH_SQRT2*m_fViewportHeight/fLimit;
+    if (_fZoom > 0.0)
+    {
+        m_fZoom = _fZoom;
+        
+        // Limit zoom to universe limits, worst viewport case (=> sqrt(2))
+        double fLimit = CKinematicsState::getWorldLimitX();
+        if (fLimit > CKinematicsState::getWorldLimitY()) fLimit = CKinematicsState::getWorldLimitY();
+        if (MATH_SQRT2*m_fViewportWidth/m_fZoom  > fLimit) m_fZoom = MATH_SQRT2*m_fViewportWidth/fLimit;
+        if (MATH_SQRT2*m_fViewportHeight/m_fZoom > fLimit) m_fZoom = MATH_SQRT2*m_fViewportHeight/fLimit;
+    }
+    else
+    {
+        NOTICE_MSG("Camera", "Invalid zoom factor " << _fZoom << ".")
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #define GRAPHICS_H
 
 //--- Standard header --------------------------------------------------------//
+#include <array>
 #include <list>
 #include <vector>
 
@@ -102,6 +103,11 @@ enum class CircleType
     OUTLINE
 };
 
+/// Type definition for RGB colours
+typedef std::array<double, 3> ColorTypeRGB;
+/// Type definition for RGBA colours
+typedef std::array<double, 4> ColorTypeRGBA;
+
 /// Type definition for vertex list
 typedef std::vector<Vector2d> VertexListType;
 
@@ -158,6 +164,7 @@ class CGraphics
         double          getResPMY() const;
         unsigned short  getWidthScr() const;
         unsigned short  getHeightScr() const;
+        void setColor(const ColorTypeRGBA&) const;
         void setColor(const double&, const double&, const double&) const;
         void setColor(const double&, const double&, const double&, const double&) const;
         void setPointSize(const double&) const;
@@ -409,6 +416,19 @@ inline unsigned short CGraphics::getHeightScr() const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Set RGBA colour
+///
+/// \param _RGBA Colour as RGBA values between 0.0 and 1.0
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CGraphics::setColor(const ColorTypeRGBA& _RGBA) const
+{
+    METHOD_ENTRY("CGraphics::setColor");
+    glColor4d(_RGBA[0], _RGBA[1], _RGBA[2], _RGBA[3]);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Set RGB color
 ///
 /// \param _fR Red value between 0.0 and 1.0
@@ -510,7 +530,7 @@ inline void CGraphics::setWidthScr(const unsigned short& _unWidthScr)
 /// Actually, this method does not resize the screen, it just modifies the
 /// variable. To resize the screen, it must be initialized again.
 ///
-/// \param _unWidth Screen height in pel
+/// \param _unHeightScr Screen height in pel
 ///
 ///////////////////////////////////////////////////////////////////////////////
 inline void CGraphics::setHeightScr(const unsigned short& _unHeightScr)

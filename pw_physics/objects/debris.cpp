@@ -49,6 +49,8 @@ CDebris::CDebris() : IGridUser(),
     m_StateList.reserve(DEBRIS_DEFAULT_NUMBER);
     
     m_vecForce.setZero();
+    
+    m_UID.setName("Debris_"+m_UID.getName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -116,15 +118,20 @@ void CDebris::dynamics(const double& _fStep)
 {
     METHOD_ENTRY("CDebris::dynamics")
     
+    m_BBox.setLowerLeft(m_PosList[0]);
+    m_BBox.setUpperRight(m_PosList[0]);
+    
     Vector2d vecStep = m_vecForce * _fStep * m_fTimeFac;
     for (auto i=0u; i<m_PosList.size(); ++i)
     {
         // Only if state is active
         if (m_StateList[i] == DEBRIS_STATE_ACTIVE)
         {
+            m_BBox.update(m_PosList[i]);
             m_PosListPrev[i] = m_PosList[i];
             m_VelList[i] += vecStep;
             m_PosList[i] += m_VelList[i] * _fStep;
+            m_BBox.update(m_PosList[i]);
         }
     }
 }
@@ -205,6 +212,8 @@ std::istream& operator>>(std::istream& _is, CDebris* const _pDebris)
     _is >> _pDebris->m_VelList;
     _is >> _pDebris->m_StateList;
     
+    _is >> _pDebris->m_BBox;
+    
     _is >> _pDebris->m_fDamping;
     _is >> _pDebris->m_nDepthlayers;
     _is >> _pDebris->m_vecForce[0] >> _pDebris->m_vecForce[1];
@@ -244,6 +253,8 @@ std::ostream& operator<<(std::ostream& _os, CDebris* const _pDebris)
     _os << _pDebris->m_VelList << std::endl;
     _os << _pDebris->m_StateList << std::endl;
     
+    _os << _pDebris->m_StateList << std::endl;
+    
     _os << _pDebris->m_fDamping << std::endl;
     _os << _pDebris->m_nDepthlayers << std::endl;
     _os << _pDebris->m_vecForce[0] << " " << _pDebris->m_vecForce[1] << std::endl;
@@ -267,6 +278,8 @@ void CDebris::copy(const CDebris& _Debris)
     m_PosListPrev = _Debris.m_PosListPrev;
     m_VelList = _Debris.m_VelList;
     m_StateList = _Debris.m_StateList;
+    m_BBox = _Debris.m_BBox;
+    
     // m_Lifetime: New individual object
     m_DebrisType = _Debris.m_DebrisType;
     m_fTimeFac = _Debris.m_fTimeFac;

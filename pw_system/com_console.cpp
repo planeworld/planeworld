@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,7 +37,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 CComConsole::CComConsole() : m_strRet(""),
                              m_strCurrent(""),
-                             m_nICurrent(0)
+                             m_strDomain(""),
+                             m_strFind(""),
+                             m_bFirstFind(true),
+                             m_nICurrent(0),
+                             m_State(ConsoleStateType::PACKAGE_COMPLETION),
+                             m_ConsoleMode(ConsoleModeType::COM)
 {
     METHOD_ENTRY("CComConsole::CComConsole")
     DTOR_CALL("CComConsole::CComConsole")
@@ -60,7 +65,148 @@ void CComConsole::addCommand(const std::string& _strCom)
     m_CommandBuffer.push_back(_strCom);
     m_RetValBuffer.push_back(m_strRet);
     m_strCurrent = "";
-    m_nICurrent = m_CommandBuffer.size()-1;
+    m_strFind = "";
+    m_strFindLast = "";
+    m_strPart = "";
+    m_bFirstFind = true;
+    m_nICurrent = m_CommandBuffer.size();
+    m_State = ConsoleStateType::PACKAGE_COMPLETION;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Complements the currently given command (see tab completion)
+///
+////////////////////////////////////////////////////////////////////////////////
+void CComConsole::complementCommand()
+{
+    METHOD_ENTRY("CComConsole::complementCommand")
+    
+    if (m_ConsoleMode == ConsoleModeType::LUA)
+    {
+        switch (m_State)
+        {
+            case ConsoleStateType::PACKAGE_COMPLETION: 
+            {
+                std::string strPW = "pw";
+                if (strPW.find(m_strFind) != std::string::npos)
+                {
+                    m_strCurrent = "pw.";
+                    m_State = ConsoleStateType::DOMAIN_COMPLETION;
+                    m_strFind = "";
+                }   
+                break;
+            }
+            case ConsoleStateType::DOMAIN_COMPLETION:
+            {
+                auto itDom = m_pComInterface->getDomains()->begin();
+                auto i = 0u;
+                //--------------------------------------------------------
+                // Worst case search range is roughly twice the functions
+                // container size, since the first find might be next to 
+                // the end of the container. After that, the second search
+                // has to cover the whole container again.
+                //--------------------------------------------------------
+                while (i++ < m_pComInterface->getDomains()->size()*2)
+                {
+                    if (!m_bFirstFind)
+                    {
+                        if (*itDom == m_strFindLast)
+                        {
+                            m_bFirstFind = true;
+                        }
+                    }
+                    else
+                    {
+                        if (itDom->find(m_strFind) != std::string::npos)
+                        {
+                            if (m_strFindLast != "")
+                                m_strCurrent.erase(m_strCurrent.end() - m_strFindLast.length(), m_strCurrent.end());
+                            else
+                                m_strCurrent.erase(m_strCurrent.end() - m_strFind.length(), m_strCurrent.end());
+                            m_strPart = *itDom;
+                            m_strDomain = m_strPart;
+                            m_strFindLast = m_strPart;
+                            m_strCurrent += m_strPart;
+                            m_bFirstFind = false;
+                            break;
+                        }
+                    }
+                    if (++itDom == m_pComInterface->getDomains()->end())
+                        itDom =  m_pComInterface->getDomains()->begin();
+                }
+                break;
+            }
+            case ConsoleStateType::FUNCTION_COMPLETION:
+            {
+                auto itCom = m_pComInterface->getFunctions()->begin();
+                auto i = 0u;
+                //-----------------------
+                // Search range see above
+                //-----------------------
+                while (i++ < m_pComInterface->getFunctions()->size()*2)
+                {
+                    if (!m_bFirstFind)
+                    {
+                        if (itCom->first == m_strFindLast)
+                        {
+                            m_bFirstFind = true;
+                        }
+                    }
+                    else
+                    {
+                        if ((itCom->first.find(m_strFind) != std::string::npos) && 
+                            (m_strDomain == m_pComInterface->getDomainsByFunction()->at(itCom->first)))
+                        {
+                            if (m_strFindLast != "")
+                                m_strCurrent.erase(m_strCurrent.end() - m_strFindLast.length(), m_strCurrent.end());
+                            else
+                                m_strCurrent.erase(m_strCurrent.end() - m_strFind.length(), m_strCurrent.end());
+                            m_strPart = itCom->first;
+                            m_strFindLast = m_strPart;
+                            m_strCurrent += m_strPart;
+                            m_bFirstFind = false;
+                            break;
+                        }
+                    }
+                    if (++itCom == m_pComInterface->getFunctions()->end())
+                        itCom =  m_pComInterface->getFunctions()->begin();
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    else
+    {
+        auto itCom = m_pComInterface->getFunctions()->begin();
+        auto i = 0u;
+        //-----------------------
+        // Search range see above
+        //-----------------------
+        while (i++ < m_pComInterface->getFunctions()->size()*2)
+        {
+            if (m_strFindLast != "")
+            {
+                if (itCom->first == m_strFindLast)
+                {
+                    m_strFindLast = "";
+                }
+            }
+            else
+            {
+                if (itCom->first.find(m_strFind) != std::string::npos)
+                {
+                    m_strCurrent = itCom->first;
+                    m_strFindLast = m_strCurrent;
+                    break;
+                }
+            }
+            if (++itCom == m_pComInterface->getFunctions()->end())
+                  itCom =  m_pComInterface->getFunctions()->begin();
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,13 +218,20 @@ void CComConsole::execute()
 {
     METHOD_ENTRY("CComConsole::execute")
     
-    try
+    if (m_ConsoleMode == ConsoleModeType::LUA)
     {
-        m_strRet = m_pComInterface->call(m_strCurrent);
+        m_pComInterface->call<void, std::string>("execute_lua", m_strCurrent);
     }
-    catch (CComInterfaceException ComIntEx)
+    else
     {
-        m_strRet = ComIntEx.getMessage();
+        try
+        {
+            m_strRet = m_pComInterface->call(m_strCurrent);
+        }
+        catch (CComInterfaceException ComIntEx)
+        {
+            m_strRet = ComIntEx.getMessage();
+        }
     }
     this->addCommand(m_strCurrent);
 }
@@ -94,8 +247,9 @@ void CComConsole::nextCommand()
     
     if (m_CommandBuffer.size() > 0)
     {
+        if (++m_nICurrent >= static_cast<int>(m_CommandBuffer.size())) m_nICurrent = 0;
         m_strCurrent = m_CommandBuffer[m_nICurrent];
-        if (++m_nICurrent == static_cast<int>(m_CommandBuffer.size())) m_nICurrent = 0;
+        
     }
 }
 
@@ -110,7 +264,67 @@ void CComConsole::prevCommand()
     
     if (m_CommandBuffer.size() > 0)
     {
-        m_strCurrent = m_CommandBuffer[m_nICurrent];
         if (--m_nICurrent < 0) m_nICurrent = m_CommandBuffer.size()-1;
+        m_strCurrent = m_CommandBuffer[m_nICurrent];
+        
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Externally sets the currently active command
+///
+/// The currently active command might originate from sources suche like
+/// keyboard input.
+///
+/// \param _strCurrent Currently active command string
+///
+////////////////////////////////////////////////////////////////////////////////
+void CComConsole::setCurrentCommand(const std::string& _strCurrent)
+{
+    METHOD_ENTRY("CComConsole::setCurrentCommand")
+    
+    m_strCurrent = _strCurrent;
+    
+    // Find last "." indicating a state change
+    auto PosPkg = _strCurrent.find_last_of('.');
+    
+    if (PosPkg != std::string::npos)
+    {
+        // Currently entered string too short to fit pw?
+        if (PosPkg < 2)
+        {
+            m_State = ConsoleStateType::NO_COMPLETION;
+        }
+        else
+        {
+            // Was the domain already entered? Further search for pw
+            if (_strCurrent.substr(PosPkg-2, 2) != "pw")
+            {
+                auto PosDom = _strCurrent.substr(0, PosPkg).find_last_of('.');
+                if (PosDom != std::string::npos)
+                {
+                    if (_strCurrent.substr(PosDom-2, 2) == "pw")
+                    {
+                        m_State = ConsoleStateType::FUNCTION_COMPLETION;
+                        m_strFind = _strCurrent.substr(PosPkg+1);
+                    }
+                }
+            }
+            else
+            {
+                m_State = ConsoleStateType::DOMAIN_COMPLETION;
+                m_strFind = _strCurrent.substr(PosPkg+1);
+                m_strDomain = m_strFind;
+            }
+        }
+    }
+    else
+    {
+        m_strFind = _strCurrent;
+        m_State = ConsoleStateType::PACKAGE_COMPLETION;
+    }
+    m_strFindLast = "";
+    m_strPart = "";
+    m_bFirstFind = true;
 }
