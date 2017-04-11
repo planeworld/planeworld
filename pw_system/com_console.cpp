@@ -40,8 +40,8 @@ CComConsole::CComConsole() : m_strRet(""),
                              m_strDomain(""),
                              m_strFind(""),
                              m_bFirstFind(true),
-                             m_nState(1),
                              m_nICurrent(0),
+                             m_State(ConsoleStateType::PACKAGE_COMPLETION),
                              m_ConsoleMode(ConsoleModeType::COM)
 {
     METHOD_ENTRY("CComConsole::CComConsole")
@@ -70,7 +70,7 @@ void CComConsole::addCommand(const std::string& _strCom)
     m_strPart = "";
     m_bFirstFind = true;
     m_nICurrent = m_CommandBuffer.size();
-    m_nState=1;
+    m_State = ConsoleStateType::PACKAGE_COMPLETION;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -84,20 +84,20 @@ void CComConsole::complementCommand()
     
     if (m_ConsoleMode == ConsoleModeType::LUA)
     {
-        switch (m_nState)
+        switch (m_State)
         {
-            case 1: 
+            case ConsoleStateType::PACKAGE_COMPLETION: 
             {
                 std::string strPW = "pw";
                 if (strPW.find(m_strFind) != std::string::npos)
                 {
                     m_strCurrent = "pw.";
-                    m_nState = 2;
+                    m_State = ConsoleStateType::DOMAIN_COMPLETION;
                     m_strFind = "";
                 }   
                 break;
             }
-            case 2:
+            case ConsoleStateType::DOMAIN_COMPLETION:
             {
                 auto itDom = m_pComInterface->getDomains()->begin();
                 auto i = 0u;
@@ -125,6 +125,7 @@ void CComConsole::complementCommand()
                             else
                                 m_strCurrent.erase(m_strCurrent.end() - m_strFind.length(), m_strCurrent.end());
                             m_strPart = *itDom;
+                            m_strDomain = m_strPart;
                             m_strFindLast = m_strPart;
                             m_strCurrent += m_strPart;
                             m_bFirstFind = false;
@@ -136,7 +137,7 @@ void CComConsole::complementCommand()
                 }
                 break;
             }
-            case 3:
+            case ConsoleStateType::FUNCTION_COMPLETION:
             {
                 auto itCom = m_pComInterface->getFunctions()->begin();
                 auto i = 0u;
@@ -285,45 +286,43 @@ void CComConsole::setCurrentCommand(const std::string& _strCurrent)
     
     m_strCurrent = _strCurrent;
     
-    // Find "." indicating a state change
-    auto Pos = _strCurrent.find(".");
-    if (Pos != std::string::npos)
+    // Find last "." indicating a state change
+    auto PosPkg = _strCurrent.find_last_of('.');
+    
+    if (PosPkg != std::string::npos)
     {
-        // Namespace too short to fit pw?
-        if (Pos < 2)
+        // Currently entered string too short to fit pw?
+        if (PosPkg < 2)
         {
-            m_nState = 0;
+            m_State = ConsoleStateType::NO_COMPLETION;
         }
         else
         {
-            // Namespace pw?
-            if (_strCurrent.substr(Pos-2, Pos) != "pw")
+            // Was the domain already entered? Further search for pw
+            if (_strCurrent.substr(PosPkg-2, 2) != "pw")
             {
-                m_nState = 0;
+                auto PosDom = _strCurrent.substr(0, PosPkg).find_last_of('.');
+                if (PosDom != std::string::npos)
+                {
+                    if (_strCurrent.substr(PosDom-2, 2) == "pw")
+                    {
+                        m_State = ConsoleStateType::FUNCTION_COMPLETION;
+                        m_strFind = _strCurrent.substr(PosPkg+1);
+                    }
+                }
             }
             else
             {
-                // Start domain completion
-                m_strFind = _strCurrent.substr(Pos+1);
-                if (m_nState == 2) m_strDomain = m_strFind;
-                m_nState = 2;
-                
-                // Domain completed?
-                Pos = m_strFind.find(".");
-                if (Pos != std::string::npos)
-                {
-                    // Start command completion
-                    if (m_strDomain.back() == '.') m_strDomain.pop_back();
-                    m_strFind = m_strFind.substr(Pos+1);
-                    m_nState = 3;
-                }
+                m_State = ConsoleStateType::DOMAIN_COMPLETION;
+                m_strFind = _strCurrent.substr(PosPkg+1);
+                m_strDomain = m_strFind;
             }
         }
     }
     else
     {
         m_strFind = _strCurrent;
-        m_nState = 1;
+        m_State = ConsoleStateType::PACKAGE_COMPLETION;
     }
     m_strFindLast = "";
     m_strPart = "";

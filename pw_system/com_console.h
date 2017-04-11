@@ -50,6 +50,14 @@ enum class ConsoleModeType
     LUA
 };
 
+enum class ConsoleStateType
+{
+    DOMAIN_COMPLETION,
+    FUNCTION_COMPLETION,
+    PACKAGE_COMPLETION,
+    NO_COMPLETION
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class providing an command console
@@ -94,7 +102,7 @@ class CComConsole : public IComInterfaceUser
         std::string         m_strFindLast;   ///< Last command found for completion
         bool                m_bFirstFind;    ///< Signals the first match of search
         int                 m_nICurrent;     ///< Index of currently selected command
-        int                 m_nState;        ///< Parsing state (domain, function,...)
+        ConsoleStateType    m_State;         ///< Parsing state (domain, function,...)
         ConsoleModeType     m_ConsoleMode;   ///< Specifies console mode 
 };
 
