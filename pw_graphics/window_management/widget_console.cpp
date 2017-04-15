@@ -43,6 +43,8 @@ CWidgetConsole::CWidgetConsole() : IFontUser(),
 {
     METHOD_ENTRY("CWidgetConsole::CWidgetConsole");
     CTOR_CALL("CWidgetConsole::CWidgetConsole");
+
+    m_Type = WidgetTypeType::CONSOLE;
     
     m_UID.setName("Widget_Console_"+m_UID.getName());
 }

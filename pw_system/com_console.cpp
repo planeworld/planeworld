@@ -238,6 +238,66 @@ void CComConsole::execute()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Expands the current command by given string.
+///
+/// This method expands the internal command by the given string sequence. This
+/// is needed for external input which isn't aware of or shouldn't keep track
+/// of the command string.
+///
+/// \param _strS Expansion von the current command
+///
+////////////////////////////////////////////////////////////////////////////////
+void CComConsole::expandCommand(const std::string& _strS)
+{
+    METHOD_ENTRY("CComConsole::expandCommand")
+    
+    m_strCurrent += _strS;
+    
+    // Find last "." indicating a state change
+    auto PosPkg = m_strCurrent.find_last_of('.');
+    
+    if (PosPkg != std::string::npos)
+    {
+        // Currently entered string too short to fit pw?
+        if (PosPkg < 2)
+        {
+            m_State = ConsoleStateType::NO_COMPLETION;
+        }
+        else
+        {
+            // Was the domain already entered? Further search for pw
+            if (m_strCurrent.substr(PosPkg-2, 2) != "pw")
+            {
+                auto PosDom = m_strCurrent.substr(0, PosPkg).find_last_of('.');
+                if (PosDom != std::string::npos)
+                {
+                    if (m_strCurrent.substr(PosDom-2, 2) == "pw")
+                    {
+                        m_State = ConsoleStateType::FUNCTION_COMPLETION;
+                        m_strFind = m_strCurrent.substr(PosPkg+1);
+                    }
+                }
+            }
+            else
+            {
+                m_State = ConsoleStateType::DOMAIN_COMPLETION;
+                m_strFind = m_strCurrent.substr(PosPkg+1);
+                m_strDomain = m_strFind;
+            }
+        }
+    }
+    else
+    {
+        m_strFind = m_strCurrent;
+        m_State = ConsoleStateType::PACKAGE_COMPLETION;
+    }
+    m_strFindLast = "";
+    m_strPart = "";
+    m_bFirstFind = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Cycle through command buffer, get next command
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -272,59 +332,15 @@ void CComConsole::prevCommand()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Externally sets the currently active command
-///
-/// The currently active command might originate from sources suche like
-/// keyboard input.
-///
-/// \param _strCurrent Currently active command string
+/// \brief Remove last character of command string
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CComConsole::setCurrentCommand(const std::string& _strCurrent)
+void CComConsole::backspace()
 {
-    METHOD_ENTRY("CComConsole::setCurrentCommand")
+    METHOD_ENTRY("CComConsole::backspace")
     
-    m_strCurrent = _strCurrent;
-    
-    // Find last "." indicating a state change
-    auto PosPkg = _strCurrent.find_last_of('.');
-    
-    if (PosPkg != std::string::npos)
+    if (!m_strCurrent.empty())
     {
-        // Currently entered string too short to fit pw?
-        if (PosPkg < 2)
-        {
-            m_State = ConsoleStateType::NO_COMPLETION;
-        }
-        else
-        {
-            // Was the domain already entered? Further search for pw
-            if (_strCurrent.substr(PosPkg-2, 2) != "pw")
-            {
-                auto PosDom = _strCurrent.substr(0, PosPkg).find_last_of('.');
-                if (PosDom != std::string::npos)
-                {
-                    if (_strCurrent.substr(PosDom-2, 2) == "pw")
-                    {
-                        m_State = ConsoleStateType::FUNCTION_COMPLETION;
-                        m_strFind = _strCurrent.substr(PosPkg+1);
-                    }
-                }
-            }
-            else
-            {
-                m_State = ConsoleStateType::DOMAIN_COMPLETION;
-                m_strFind = _strCurrent.substr(PosPkg+1);
-                m_strDomain = m_strFind;
-            }
-        }
+        m_strCurrent.pop_back();
     }
-    else
-    {
-        m_strFind = _strCurrent;
-        m_State = ConsoleStateType::PACKAGE_COMPLETION;
-    }
-    m_strFindLast = "";
-    m_strPart = "";
-    m_bFirstFind = true;
 }

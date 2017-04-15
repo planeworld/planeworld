@@ -434,7 +434,10 @@ void CPhysicsManager::processFrame()
 
     static auto nFrame = 0u;
     
-    // Add new objects to world
+    for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
+        Obj.second->clearForces();
+
+    // Add new objects and new shapes to world
     CObject* pObj = nullptr;
     while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
     {
@@ -445,9 +448,6 @@ void CPhysicsManager::processFrame()
     {
         m_pDataStorage->addShape(pShp);
     }
-    for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
-        Obj.second->clearForces();
-
     m_pComInterface->callWriters("physics");
     
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))

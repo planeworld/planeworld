@@ -81,9 +81,10 @@ class CComConsole : public IComInterfaceUser
         void addCommand(const std::string& _strCom);
         void complementCommand();
         void execute();
+        void expandCommand(const std::string&);
         void nextCommand();
         void prevCommand();
-        void setCurrentCommand(const std::string&);
+        void backspace();
         void setMode(const ConsoleModeType _Mode) {m_ConsoleMode = _Mode;}
                 
         //--- friends --------------------------------------------------------//

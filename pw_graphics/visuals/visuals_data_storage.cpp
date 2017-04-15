@@ -30,6 +30,9 @@
 
 #include "visuals_data_storage.h"
 
+#include "widget_console.h"
+#include "widget_text.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
@@ -40,6 +43,9 @@ CVisualsDataStorage::CVisualsDataStorage()
 {
     METHOD_ENTRY("CVisualsDataStorage::CVisualsDataStorage")
     CTOR_CALL("CVisualsDataStorage::CVisualsDataStorage")
+    
+    m_pComConsole = new CComConsole();
+    MEM_ALLOC("CComConsole")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,6 +58,13 @@ CVisualsDataStorage::~CVisualsDataStorage()
     METHOD_ENTRY("CVisualsDataStorage::~CVisualsDataStorage")
     DTOR_CALL("CVisualsDataStorage::~CVisualsDataStorage")
     
+    if (m_pComConsole != nullptr)
+    {
+        delete m_pComConsole;
+        MEM_FREED("CComConsole")
+        m_pComConsole = nullptr;
+    }
+    
     for (auto pCam : m_CamerasByName)
     {
         if (pCam.second != nullptr)
@@ -59,6 +72,17 @@ CVisualsDataStorage::~CVisualsDataStorage()
             delete pCam.second;
             pCam.second = nullptr;
             MEM_FREED("CCamera")
+        }
+    }
+    
+    // Delete windows, this will delete widget, too
+    for (auto Win : m_WindowsByValue)
+    {
+        if (Win.second != nullptr)
+        {
+            delete Win.second;
+            Win.second = nullptr;
+            MEM_FREED("CWindow")
         }
     }
 }
@@ -78,6 +102,131 @@ void CVisualsDataStorage::addCamera(CCamera* _pCamera)
     
     m_CamerasByName.insert({_pCamera->getName(), _pCamera});
     m_CamerasByIndex.push_back(_pCamera);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a window
+///
+/// This method adds the given window to the list of available cameras
+///
+/// \param _pWindow Window to be added
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsDataStorage::addWindow(CWindow* _pWindow)
+{
+    METHOD_ENTRY("CVisualsDataStorage::addWindow")
+    
+    m_WindowsByValue.insert({_pWindow->getUID(), _pWindow});
+    m_WinFrameUsersByValue.insert({_pWindow->getUID(), _pWindow});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a widget
+///
+/// This method adds the given widget to the list of available widgets
+///
+/// \param _pWidget Widget to be added
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsDataStorage::addWidget(IWidget* _pWidget)
+{
+    METHOD_ENTRY("CVisualsDataStorage::addWidget")
+    
+    m_WidgetsByValue.insert({_pWidget->getUID(), _pWidget});
+    m_WinFrameUsersByValue.insert({_pWidget->getUID(), _pWidget});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Close window with given UID
+///
+/// This method removes the given window from the internal list and deletes it.
+///
+/// \param _nUID UID of window to be removed
+/// \return Success?
+///
+///////////////////////////////////////////////////////////////////////////////
+bool CVisualsDataStorage::closeWindow(const UIDType _nUID)
+{
+    METHOD_ENTRY("CVisualsDataStorage::closeWindow")
+    
+    auto it = m_WindowsByValue.find(_nUID);
+    if (it != m_WindowsByValue.end())
+    {
+        delete it->second;
+        MEM_FREED("CWindow")
+        m_WindowsByValue.erase(_nUID);
+        return true;
+    }
+    else
+    {
+        WARNING_MSG("Visuals Data Storage", "Unknown window with UID <" << _nUID << ">")
+        return false;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates a widget of the given type
+///
+/// \param _WidgetType Type of widget to be created
+///
+/// \return UID of newly created window
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CVisualsDataStorage::createWidget(const WidgetTypeType _WidgetType)
+{
+    METHOD_ENTRY("CVisualsDataStorage::createWidget")
+    
+    IWidget* pWidget = nullptr;
+    
+    switch (_WidgetType)
+    {
+        case WidgetTypeType::CONSOLE:
+        {
+            CWidgetConsole* pConsoleWidget = new CWidgetConsole();
+            pConsoleWidget->setFont(&m_Font);
+            pConsoleWidget->setComConsole(m_pComConsole);
+            m_pComConsole->setComInterface(m_pComInterface);
+            pWidget = pConsoleWidget;
+            break;
+        }
+        case WidgetTypeType::TEXT:
+        {
+            CWidgetText* pTextWidget = new CWidgetText();
+            pTextWidget->setFont(&m_Font);
+            pWidget = pTextWidget;
+            break;
+        }
+    }
+    MEM_ALLOC("IWidget")
+    this->addWidget(pWidget);
+    
+    return pWidget->getUID();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates a generic window
+///
+/// This method creates a generic window and returns its unique ID
+///
+/// \return UID of newly created window
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CVisualsDataStorage::createWindow()
+{
+    METHOD_ENTRY("CVisualsDataStorage::addWidget")
+    
+    CWindow* pWin = new CWindow();
+    MEM_ALLOC("CWindow")
+    
+    pWin->setFont(&m_Font);
+    this->addWindow(pWin);
+    
+    return pWin->getUID();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

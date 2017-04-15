@@ -43,6 +43,8 @@ CWidgetText::CWidgetText() : IFontUser(),
 {
     METHOD_ENTRY("CWidgetText::CWidgetText");
     CTOR_CALL("CWidgetText::CWidgetText");
+
+    m_Type = WidgetTypeType::TEXT;
     
     m_UID.setName("Widget_Text_"+m_UID.getName());
 }

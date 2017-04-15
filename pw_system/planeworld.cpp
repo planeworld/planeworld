@@ -202,7 +202,6 @@ int main(int argc, char *argv[])
     //
     ////////////////////////////////////////////////////////////////////////////
     CGraphics&          Graphics = CGraphics::getInstance();
-    CComConsole         ComConsole;
     CGameStateManager   GameStateManager;
     CXFigLoader         XFigLoader;
     CUniverse           Universe;
@@ -262,11 +261,6 @@ int main(int argc, char *argv[])
     pPhysicsManager->initComInterface(&ComInterface, "physics");
     if (bGraphics)
     {
-        ComConsole.setComInterface(&ComInterface);
-        
-        pInputManager->setComConsole(&ComConsole);
-        pVisualsManager->setComConsole(&ComConsole);
-        
         pInputManager->initComInterface(&ComInterface, "input");
         pVisualsManager->initComInterface(&ComInterface, "visuals");
         

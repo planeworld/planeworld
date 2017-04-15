@@ -56,31 +56,48 @@ class CWindow : public IFontUser,
     
         //--- Constructor/Destructor------------------------------------------//
         CWindow();
-        ~CWindow();
+        virtual ~CWindow();
         
         //--- Constant methods -----------------------------------------------//
         void draw() const; 
+        bool isVisible() const;
         
         //--- Methods --------------------------------------------------------//
         void center();
         void setTitle(const std::string&);
+        void setVisibilty(const bool);
         void setWidget(IWidget* const);
+        void toggleVisibility();
         
     private:
         
-        void resizeInherit(const int, const int);
-        void setColorBGInherit(const ColorTypeRGBA&);
-        void setColorFGInherit(const ColorTypeRGBA&);
-        void setPositionInherit(const int, const int);
+        void myResize(const int, const int);
+        void mySetColorBG(const ColorTypeRGBA&);
+        void mySetColorFG(const ColorTypeRGBA&);
+        void mySetPosition(const int, const int);
         
         //--- Variables [private] --------------------------------------------//
         std::string m_strTitle; ///< Window title
         
         IWidget*    m_pWidget;  ///< Widget of this \ref CWindow
+        bool        m_bCenter;  ///< Indicates, if this window is centered
         bool        m_bVisible; ///< Indicates, if this window is visible
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns visibility of window
+///
+/// \return Visible?
+///
+////////////////////////////////////////////////////////////////////////////////
+inline bool CWindow::isVisible() const
+{
+    METHOD_ENTRY("CWindow::isVisible")
+    return m_bVisible;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -93,6 +110,19 @@ inline void CWindow::setTitle(const std::string& _strTitle)
 {
     METHOD_ENTRY("CWindow::setTitle")
     m_strTitle = _strTitle;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the visibility of this window
+///
+/// \param _bVisible Set window invisible (false) or visible (true)
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWindow::setVisibilty(const bool _bVisible)
+{
+    METHOD_ENTRY("CWindow::setVisibilty")
+    m_bVisible = _bVisible;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +142,19 @@ inline void CWindow::setWidget(IWidget* const _pWidget)
         MEM_FREED("IWidget")
     }
     m_pWidget = _pWidget;
+    this->mySetPosition(m_nFramePosX, m_nFramePosY);
+    this->myResize(m_nFrameWidth, m_nFrameHeight);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Toggles the visibility of this window
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWindow::toggleVisibility()
+{
+    METHOD_ENTRY("CWindow::toggleVisibility")
+    m_bVisible ^= true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,10 +165,12 @@ inline void CWindow::setWidget(IWidget* const _pWidget)
 /// \param _nY Size Y, height
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::resizeInherit(const int _nX, const int _nY)
+inline void CWindow::myResize(const int _nX, const int _nY)
 {
-    METHOD_ENTRY("CWindow::resizeInherit")
-    m_pWidget->resize(_nX-m_nFrameBorderX*2, _nY-m_nFrameBorderY*2-m_pFont->getLineSpacing(m_nFontSize));
+    METHOD_ENTRY("CWindow::myResize")
+    if (m_pWidget != nullptr)
+        m_pWidget->resize(_nX-m_nFrameBorderX*2, _nY-m_nFrameBorderY*2-m_pFont->getLineSpacing(m_nFontSize));
+    if (m_bCenter) this->center();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,10 +180,11 @@ inline void CWindow::resizeInherit(const int _nX, const int _nY)
 /// \param _RGBA Colour as RGBA array (0.0 - 1.0)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::setColorBGInherit(const ColorTypeRGBA& _RGBA)
+inline void CWindow::mySetColorBG(const ColorTypeRGBA& _RGBA)
 {
-    METHOD_ENTRY("CWindow::setColorBGInherit")
-    m_pWidget->setColorBG(_RGBA, WIN_INHERIT);
+    METHOD_ENTRY("CWindow::mySetColorBG")
+    if (m_pWidget != nullptr)
+        m_pWidget->setColorBG(_RGBA, WIN_INHERIT);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,10 +194,11 @@ inline void CWindow::setColorBGInherit(const ColorTypeRGBA& _RGBA)
 /// \param _RGBA Colour as RGBA array (0.0 - 1.0)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::setColorFGInherit(const ColorTypeRGBA& _RGBA)
+inline void CWindow::mySetColorFG(const ColorTypeRGBA& _RGBA)
 {
-    METHOD_ENTRY("CWindow::setColorFGInherit")
-    m_pWidget->setColorFG(_RGBA, WIN_INHERIT);
+    METHOD_ENTRY("CWindow::mySetColorFG")
+    if (m_pWidget != nullptr)
+        m_pWidget->setColorFG(_RGBA, WIN_INHERIT);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,10 +209,12 @@ inline void CWindow::setColorFGInherit(const ColorTypeRGBA& _RGBA)
 /// \param _nPosY Position Y
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::setPositionInherit(const int _nPosX, const int _nPosY)
+inline void CWindow::mySetPosition(const int _nPosX, const int _nPosY)
 {
-    METHOD_ENTRY("CWindow::setPositionInherit")
-    m_pWidget->setPosition(_nPosX + m_nFrameBorderX, _nPosY+m_nFrameBorderY+m_pFont->getLineSpacing(m_nFontSize));
+    METHOD_ENTRY("CWindow::mySetPosition")
+    m_bCenter = false;
+    if (m_pWidget != nullptr)
+        m_pWidget->setPosition(_nPosX + m_nFrameBorderX, _nPosY+m_nFrameBorderY+m_pFont->getLineSpacing(m_nFontSize));
 }
 
 #endif // WINDOW_H

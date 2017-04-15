@@ -39,7 +39,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 CInputManager::CInputManager() : m_pWindow(nullptr),
                                  m_bMouseCursorVisible(false),
-                                 m_strConsoleCommand(""),
                                  m_bConsoleMode(false)
 {
     METHOD_ENTRY("CInputManager::CInputManager")
@@ -90,7 +89,6 @@ void CInputManager::processFrame()
             {
                 if (Event.key.code == sf::Keyboard::Home)
                 {
-                    m_strConsoleCommand = "";
                     m_bConsoleMode ^= true;
                     m_pComInterface->call<void>("toggle_console_mode");
                     INFO_MSG("Main","Console mode toggled")
@@ -102,16 +100,11 @@ void CInputManager::processFrame()
                     {
                         case sf::Keyboard::BackSpace:
                         {
-                            if (!m_strConsoleCommand.empty())
-                            {
-                                m_strConsoleCommand.pop_back();
-                            }
-                            m_pComConsole->setCurrentCommand(m_strConsoleCommand);
+                            m_pComInterface->call<void>("com_console_backspace");
                             break;
                         }
                         case sf::Keyboard::Home:
                         {
-                            m_strConsoleCommand = "";
                             m_bConsoleMode ^= true;
                             m_pComInterface->call<void>("toggle_console_mode");
                             INFO_MSG("Main","Console mode toggled")
@@ -119,26 +112,22 @@ void CInputManager::processFrame()
                         }
                         case sf::Keyboard::Up:
                         {
-                            m_pComConsole->prevCommand();
-                            m_strConsoleCommand = m_pComConsole->getCurrentCommand();
+                            m_pComInterface->call<void>("com_console_prev");
                             break;
                         }
                         case sf::Keyboard::Down:
                         {
-                            m_pComConsole->nextCommand();
-                            m_strConsoleCommand = m_pComConsole->getCurrentCommand();
+                            m_pComInterface->call<void>("com_console_next");
                             break;
                         }
                         case sf::Keyboard::Return:
                         {
-                            m_strConsoleCommand = "";
-                            m_pComConsole->execute();
+                            m_pComInterface->call<void>("com_console_execute");
                             break;
                         }
                         case sf::Keyboard::Tab:
                         {
-                            m_pComConsole->complementCommand();
-                            m_strConsoleCommand = m_pComConsole->getCurrentCommand();
+                            m_pComInterface->call<void>("com_console_complement");
                             break;
                         }
                         default:
@@ -324,8 +313,7 @@ void CInputManager::processFrame()
                 {
                     if (Event.text.unicode > 31 && Event.text.unicode < 127)
                     {
-                        m_strConsoleCommand += static_cast<char>(Event.text.unicode);
-                        m_pComConsole->setCurrentCommand(m_strConsoleCommand);
+                        m_pComInterface->call<void, std::string>("com_console_expand", sf::String(Event.text.unicode).toAnsiString());
                     }
                 }
                 break;

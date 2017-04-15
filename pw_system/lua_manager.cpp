@@ -126,6 +126,13 @@ bool CLuaManager::init()
                 case SignatureType::NONE_STRING_DOUBLE:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,double>*>(Function.second)->getFunction();
                     break;
+                case SignatureType::STRING:
+                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [&]() -> std::string
+                    {
+                        std::string strRet = static_cast<CCommandWritable<std::string>*>(Function.second)->call();
+                        return strRet;
+                    };
+                    break;
                 case SignatureType::VEC2DDOUBLE_INT:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
                     {

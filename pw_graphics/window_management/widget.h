@@ -46,6 +46,14 @@ class IWidget;
 /// List type of Widgets
 typedef std::vector<IWidget*> WidgetsType;
 
+/// Specifies the type of the widget
+enum class WidgetTypeType
+{
+    INVALID,
+    CONSOLE,
+    TEXT
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Defines a generic widget interface
@@ -62,14 +70,28 @@ class IWidget : public IUniqueIDUser,
         
         //--- Constant methods -----------------------------------------------//
         virtual void draw() = 0;
+        
+        const WidgetTypeType getType() const {return m_Type;}
 
         //--- Methods --------------------------------------------------------//
         
-    private:
+    protected:
         
         //--- Variables [private] --------------------------------------------//
+        WidgetTypeType m_Type{WidgetTypeType::INVALID};
 
 };
+
+//--- Enum parser ------------------------------------------------------------//
+static std::unordered_map<WidgetTypeType, std::string> mapWidgetTypeToString = {
+    {WidgetTypeType::CONSOLE, "console"},
+    {WidgetTypeType::TEXT, "text"}
+}; ///< Map from WidgetTypeType to string
+
+const std::unordered_map<std::string, WidgetTypeType> mapStringToWidgetType = {
+    {"console", WidgetTypeType::CONSOLE},
+    {"text", WidgetTypeType::TEXT}
+}; ///< Map from string to ConsoleModeType
 
 //--- Implementation is done here for inline optimisation --------------------//
 
