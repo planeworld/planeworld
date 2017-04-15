@@ -1484,7 +1484,7 @@ void CVisualsManager::myInitComInterface()
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("com_set_font_size",
-                                      CCommand<void,int>([&](const int _nSize){m_pConsoleWidget->setFontSize(_nSize);}),
+                                      CCommand<void,int>([&](const int _nSize){static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID))->setFontSize(_nSize);}),
                                       "Sets font size for command console.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Font size"}},

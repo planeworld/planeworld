@@ -131,10 +131,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         UIDType                         m_ConsoleWidgetID;  ///< ID of console widget for later access
         UIDType                         m_ConsoleWindowID;  ///< ID of console window for later access
-        CWidgetConsole*                 m_pConsoleWidget;   ///< Widget for command console
-        CWidgetText*                    m_pTextWidget;      ///< Widget for text output
         
-//         CComConsole*                    m_pComConsole;      ///< Active com console
         bool                            m_bConsoleMode;     ///< Indicates if console mode is active
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name and location
