@@ -32,6 +32,7 @@
 #define VISUALS_DATA_STORAGE_H
 
 //--- Standard header --------------------------------------------------------//
+#include <list>
 #include <unordered_map>
 
 //--- Program header ---------------------------------------------------------//
@@ -52,6 +53,8 @@ typedef std::unordered_map<UIDType, IWinFrameUser*> WinFrameUsersByValueType;
 typedef std::unordered_map<UIDType, IWidget*> WidgetsByValueType;
 /// Map of windows, accessed by UID value
 typedef std::unordered_map<UIDType, CWindow*> WindowsByValueType;
+/// Queue for display order of windows
+typedef std::list<UIDType> WindowOrderType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -86,6 +89,8 @@ class CVisualsDataStorage : public IComInterfaceUser
         UIDType createWidget(const WidgetTypeType);
         UIDType createWindow();
         
+        WindowOrderType* getWindowUIDsInOrder() {return &m_WindowsOrder;}
+
         void setFont(const sf::Font& _Font) {m_Font = _Font;}
 
         //--- friends --------------------------------------------------------//
@@ -99,6 +104,7 @@ class CVisualsDataStorage : public IComInterfaceUser
         WidgetsByValueType          m_WidgetsByValue;           ///< Widgets, accessed by value
         WindowsByValueType          m_WindowsByValue;           ///< Windows, accessed by value
         WinFrameUsersByValueType    m_WinFrameUsersByValue;     ///< Entities using a window frame, accessed by value
+        WindowOrderType             m_WindowsOrder;             ///< Display order of windows
         
         CComConsole*                m_pComConsole;              ///< Com console for command input
         sf::Font                    m_Font;                     ///< Currently used font for visuals

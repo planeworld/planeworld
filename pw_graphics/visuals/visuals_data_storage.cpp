@@ -119,6 +119,7 @@ void CVisualsDataStorage::addWindow(CWindow* _pWindow)
     
     m_WindowsByValue.insert({_pWindow->getUID(), _pWindow});
     m_WinFrameUsersByValue.insert({_pWindow->getUID(), _pWindow});
+    m_WindowsOrder.push_back(_pWindow->getUID());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1342,9 +1342,9 @@ void CVisualsManager::drawWindows()
 {
     METHOD_ENTRY("CVisualsManager::drawWindows")
     
-    for (auto Window : *m_pVisualsDataStorage->getWindowsByValue())
+    for (const auto WinUID : *m_pVisualsDataStorage->getWindowUIDsInOrder())
     {
-        Window.second->draw();
+        m_pVisualsDataStorage->getWindowsByValue()->at(WinUID)->draw();
     }
 }
 
@@ -1532,11 +1532,10 @@ void CVisualsManager::myInitComInterface()
                                                     throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                             }),
-                                      "Resizr command console window.",
+                                      "Set text of text widget.",
                                       {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::INT, "Window UID"},
-                                      {ParameterType::INT, "Window width"},
-                                      {ParameterType::INT, "Window height"}},
+                                      {ParameterType::INT, "Widget UID"},
+                                      {ParameterType::STRING, "Widget text"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("win_set_widget",
@@ -1561,7 +1560,7 @@ void CVisualsManager::myInitComInterface()
                                                     throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                             }),
-                                      "Sets widget for the given windown.",
+                                      "Sets widget for the given window.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Window UID"},
                                       {ParameterType::INT, "Widget UID"}},
@@ -1752,6 +1751,18 @@ void CVisualsManager::myInitComInterface()
                                       "Shows all windows.",
                                       {{ParameterType::NONE, "No return value"}},
                                       "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_toggle_focus",
+                                      CCommand<void>(
+                                          [&]()
+                                            {
+                                                m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(m_pVisualsDataStorage->getWindowUIDsInOrder()->front());
+                                                m_pVisualsDataStorage->getWindowUIDsInOrder()->pop_front();
+                                            }),
+                                      "Center window referring to the main application.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"}},
+                                      "system", "visuals"  
     );
     //----------------------------------------------------------------------
     // Visuals package
