@@ -74,6 +74,7 @@ class CWindow : public IFontUser,
         void myResize(const int, const int);
         void mySetColorBG(const ColorTypeRGBA&);
         void mySetColorFG(const ColorTypeRGBA&);
+        void mySetFontColor(const ColorTypeRGBA&);
         void mySetPosition(const int, const int);
         
         //--- Variables [private] --------------------------------------------//
@@ -199,6 +200,20 @@ inline void CWindow::mySetColorFG(const ColorTypeRGBA& _RGBA)
     METHOD_ENTRY("CWindow::mySetColorFG")
     if (m_pWidget != nullptr)
         m_pWidget->setColorFG(_RGBA, WIN_INHERIT);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the font colour for inherited widget
+///
+/// \param _RGBA Colour as RGBA array (0.0 - 1.0)
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWindow::mySetFontColor(const ColorTypeRGBA& _RGBA)
+{
+    METHOD_ENTRY("CWindow::mySetFontColor")
+    if (m_pWidget != nullptr)
+        m_pWidget->setFontColor(_RGBA, WIN_INHERIT);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

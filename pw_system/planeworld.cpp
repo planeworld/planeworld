@@ -263,7 +263,6 @@ int main(int argc, char *argv[])
     {
         pInputManager->initComInterface(&ComInterface, "input");
         pVisualsManager->initComInterface(&ComInterface, "visuals");
-        
     }
     
     //////////////////////////////////////////////////////////////////////////// 

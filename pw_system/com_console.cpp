@@ -75,6 +75,21 @@ void CComConsole::addCommand(const std::string& _strCom)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Remove last character of command string
+///
+////////////////////////////////////////////////////////////////////////////////
+void CComConsole::backspace()
+{
+    METHOD_ENTRY("CComConsole::backspace")
+    
+    if (!m_strCurrent.empty())
+    {
+        m_strCurrent.pop_back();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Complements the currently given command (see tab completion)
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -332,15 +347,21 @@ void CComConsole::prevCommand()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Remove last character of command string
+/// \brief Set console mode
+///
+/// \param _Mode Console mode to be set
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CComConsole::backspace()
+void CComConsole::setMode(const ConsoleModeType _Mode)
 {
-    METHOD_ENTRY("CComConsole::backspace")
+    METHOD_ENTRY("CComConsole::setMode")
     
-    if (!m_strCurrent.empty())
+    if (_Mode != ConsoleModeType::INVALID)
     {
-        m_strCurrent.pop_back();
+        m_ConsoleMode = _Mode;
+    }
+    else
+    {
+        WARNING_MSG("Command Console", "Unknown console mode.")
     }
 }

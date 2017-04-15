@@ -46,6 +46,7 @@ typedef CCircularBuffer<std::string> CommandBufferType;
 /// Specifies the type of debris
 enum class ConsoleModeType
 {
+    INVALID,
     COM,
     LUA
 };
@@ -79,13 +80,13 @@ class CComConsole : public IComInterfaceUser
         
         //--- Methods --------------------------------------------------------//
         void addCommand(const std::string& _strCom);
+        void backspace();
         void complementCommand();
         void execute();
         void expandCommand(const std::string&);
         void nextCommand();
         void prevCommand();
-        void backspace();
-        void setMode(const ConsoleModeType _Mode) {m_ConsoleMode = _Mode;}
+        void setMode(const ConsoleModeType);
                 
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CComConsole&);
@@ -108,15 +109,33 @@ class CComConsole : public IComInterfaceUser
 };
 
 //--- Enum parser ------------------------------------------------------------//
-static std::unordered_map<ConsoleModeType, std::string> mapConsoleModeTypeToString = {
+static std::unordered_map<ConsoleModeType, std::string> s_mapConsoleModeTypeToString = {
     {ConsoleModeType::COM, "com"},
     {ConsoleModeType::LUA, "lua"}
 }; ///< Map from ConsoleModeType to string
 
-const std::unordered_map<std::string, ConsoleModeType> mapStringToConsoleModeType = {
+const std::unordered_map<std::string, ConsoleModeType> STRING_TO_CONSOLE_MODE_MAP = {
     {"com", ConsoleModeType::COM},
     {"lua", ConsoleModeType::LUA}
 }; ///< Map from string to ConsoleModeType
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Maps given string to console mode
+///
+/// \return Console mode
+///
+////////////////////////////////////////////////////////////////////////////////
+static ConsoleModeType mapStringToConsoleMode(const std::string& _strS)
+{
+    METHOD_ENTRY("mapStringToConsoleMode")
+    
+    const auto ci = STRING_TO_CONSOLE_MODE_MAP.find(_strS);
+    if (ci != STRING_TO_CONSOLE_MODE_MAP.end())
+        return ci->second;
+    else
+        return ConsoleModeType::INVALID;
+}
 
 //--- Implementation is done here for inline optimisation --------------------//
 

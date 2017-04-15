@@ -34,7 +34,6 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "com_console.h"
-#include "font_user.h"
 #include "widget.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -44,8 +43,7 @@
 /// \brief Defines a command console widget
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CWidgetConsole : public IFontUser,
-                       public IWidget
+class CWidgetConsole : public IWidget
 {
 
     public:

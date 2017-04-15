@@ -37,8 +37,7 @@
 /// \brief Constructor, initialising members
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CWidgetText::CWidgetText() : IFontUser(),
-                             IWidget(),
+CWidgetText::CWidgetText() : IWidget(),
                              m_strText("")
 {
     METHOD_ENTRY("CWidgetText::CWidgetText");
@@ -75,4 +74,3 @@ void CWidgetText::draw()
     
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
 }
-

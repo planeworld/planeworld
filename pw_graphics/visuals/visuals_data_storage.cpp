@@ -187,7 +187,6 @@ UIDType CVisualsDataStorage::createWidget(const WidgetTypeType _WidgetType)
         case WidgetTypeType::CONSOLE:
         {
             CWidgetConsole* pConsoleWidget = new CWidgetConsole();
-            pConsoleWidget->setFont(&m_Font);
             pConsoleWidget->setComConsole(m_pComConsole);
             m_pComConsole->setComInterface(m_pComInterface);
             pWidget = pConsoleWidget;
@@ -196,15 +195,28 @@ UIDType CVisualsDataStorage::createWidget(const WidgetTypeType _WidgetType)
         case WidgetTypeType::TEXT:
         {
             CWidgetText* pTextWidget = new CWidgetText();
-            pTextWidget->setFont(&m_Font);
             pWidget = pTextWidget;
+            break;
+        }
+        default:
+        {
+            WARNING_MSG("Visuals Data Storage", "Unknown widget type.")
             break;
         }
     }
     MEM_ALLOC("IWidget")
-    this->addWidget(pWidget);
+
+    if (pWidget != nullptr)
+    {
+        pWidget->setFont(&m_Font);
+        this->addWidget(pWidget);
     
-    return pWidget->getUID();
+        return pWidget->getUID();
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
