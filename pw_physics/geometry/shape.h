@@ -117,7 +117,7 @@ class IShape : public IUniqueIDUser
 };
 
 //--- Enum parser ------------------------------------------------------------//
-const std::unordered_map<ShapeType, std::string> mapShapeTypeToString = {
+static std::unordered_map<ShapeType, std::string> s_ShapeTypeToStringMap = {
     {ShapeType::NONE, "shp_none"},
     {ShapeType::CIRCLE, "shp_circle"},
     {ShapeType::PLANET, "shp_planet"},
@@ -125,13 +125,31 @@ const std::unordered_map<ShapeType, std::string> mapShapeTypeToString = {
     {ShapeType::TERRAIN, "shp_terrain"}
 }; ///< Map from ShapeType to string
 
-static std::unordered_map<std::string, ShapeType> mapStringToShapeType = {
+const std::unordered_map<std::string, ShapeType> STRING_TO_SHAPE_TYPE_MAP = {
     {"shp_none", ShapeType::NONE},
     {"shp_circle", ShapeType::CIRCLE},
     {"shp_planet", ShapeType::PLANET},
     {"shp_polygon", ShapeType::POLYGON},
     {"shp_terrain", ShapeType::TERRAIN}
 }; ///< Map from string to ShapeType
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Maps given string to shape type
+///
+/// \return Shape type
+///
+////////////////////////////////////////////////////////////////////////////////
+static ShapeType mapStringToShapeType(const std::string& _strS)
+{
+    METHOD_ENTRY("mapStringToShapeType")
+    
+    const auto ci = STRING_TO_SHAPE_TYPE_MAP.find(_strS);
+    if (ci != STRING_TO_SHAPE_TYPE_MAP.end())
+        return ci->second;
+    else
+        return ShapeType::NONE;
+}
 
 //--- Implementation is done here for inline optimisation --------------------//
 

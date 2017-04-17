@@ -75,7 +75,7 @@ void CWidgetConsole::draw()
         
         ++i;
     }
-    oss << s_mapConsoleModeTypeToString[m_pComConsole->getMode()] << " > " << m_pComConsole->getCurrentCommand() << "_";
+    oss << s_ConsoleModeTypeToStringMap[m_pComConsole->getMode()] << " > " << m_pComConsole->getCurrentCommand() << "_";
     
     m_Graphics.getWindow()->pushGLStates();
     sf::Text Text;

@@ -1589,9 +1589,16 @@ void CVisualsManager::myInitComInterface()
                                       CCommand<void, int>(
                                           [&](const int _nUID)
                                             {
-                                                if (!m_pVisualsDataStorage->closeWindow(_nUID))
+                                                if (_nUID != m_ConsoleWindowID)
                                                 {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    if (!m_pVisualsDataStorage->closeWindow(_nUID))
+                                                    {
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    NOTICE_MSG("Visuals Manager", "Deleting native console window is not allowed. Maybe hide the window.")
                                                 }
                                             }),
                                       "Center window referring to the main application.",

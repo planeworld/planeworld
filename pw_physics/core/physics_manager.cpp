@@ -163,10 +163,6 @@ UIDType CPhysicsManager::createShape(const ShapeType _ShapeType)
             WARNING_MSG("Physics Manager", "Unknown shape type. Cannot create shape")
         }
     }
-//     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    
-//     std::unique_lock<std::mutex> lk(m);
-//     cv.wait(lk, []{return processed;});
     
     return nUID;
 }
@@ -183,7 +179,7 @@ UIDType CPhysicsManager::createShape(const ShapeType _ShapeType)
 UIDType CPhysicsManager::createShape(const std::string& _strShapeType)
 {
     METHOD_ENTRY("CPhysicsManager::createShape")
-    return this->createShape(mapStringToShapeType[_strShapeType]);
+    return this->createShape(mapStringToShapeType(_strShapeType));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -616,9 +612,9 @@ void CPhysicsManager::myInitComInterface()
     {
         // Helpers
         std::ostringstream ossDebrisType("");
-        for (auto DebrisType : mapStringToDebrisType) ossDebrisType << " " << DebrisType.first;
+        for (auto DebrisType : STRING_TO_DEBRIS_TYPE_MAP) ossDebrisType << " " << DebrisType.first;
         std::ostringstream ossShapeType("");
-        for (auto ShpType : mapStringToShapeType) ossShapeType << " " << ShpType.first;
+        for (auto ShpType : STRING_TO_SHAPE_TYPE_MAP) ossShapeType << " " << ShpType.first;
 
         //----------------------------------------------------------------------
         // System package
@@ -649,12 +645,11 @@ void CPhysicsManager::myInitComInterface()
                                                 {
                                                     try
                                                     {
-                                                        m_pDataStorage->getDebrisByValueBack()->at(_nUID)->setDebrisType(mapStringToDebrisType.at(_strType));
+                                                        m_pDataStorage->getDebrisByValueBack()->at(_nUID)->setDebrisType(mapStringToDebrisType(_strType));
                                                     }
                                                     catch (const std::out_of_range& oor)
                                                     {
-                                                        WARNING_MSG("World Data Storage", "Unknown debris with UID <" << _nUID << "> or "
-                                                                                          "unknown debris type <" << _strType << ">")
+                                                        WARNING_MSG("World Data Storage", "Unknown debris with UID <" << _nUID << ">")
                                                         throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                     }
                                                 }),

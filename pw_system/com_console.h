@@ -109,12 +109,12 @@ class CComConsole : public IComInterfaceUser
 };
 
 //--- Enum parser ------------------------------------------------------------//
-static std::unordered_map<ConsoleModeType, std::string> s_mapConsoleModeTypeToString = {
+static std::unordered_map<ConsoleModeType, std::string> s_ConsoleModeTypeToStringMap = {
     {ConsoleModeType::COM, "com"},
     {ConsoleModeType::LUA, "lua"}
 }; ///< Map from ConsoleModeType to string
 
-const std::unordered_map<std::string, ConsoleModeType> STRING_TO_CONSOLE_MODE_MAP = {
+const std::unordered_map<std::string, ConsoleModeType> STRING_TO_CONSOLE_MODE_TYPE_MAP = {
     {"com", ConsoleModeType::COM},
     {"lua", ConsoleModeType::LUA}
 }; ///< Map from string to ConsoleModeType
@@ -130,8 +130,8 @@ static ConsoleModeType mapStringToConsoleMode(const std::string& _strS)
 {
     METHOD_ENTRY("mapStringToConsoleMode")
     
-    const auto ci = STRING_TO_CONSOLE_MODE_MAP.find(_strS);
-    if (ci != STRING_TO_CONSOLE_MODE_MAP.end())
+    const auto ci = STRING_TO_CONSOLE_MODE_TYPE_MAP.find(_strS);
+    if (ci != STRING_TO_CONSOLE_MODE_TYPE_MAP.end())
         return ci->second;
     else
         return ConsoleModeType::INVALID;

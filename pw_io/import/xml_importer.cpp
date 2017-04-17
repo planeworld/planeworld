@@ -677,8 +677,8 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 pDebrisEmitter->setVisualsDataStorage(m_pVisualsDataStorage);
                 pDebrisEmitter->setWorldDataStorage(m_pDataStorage);
                 
-                std::string strDebrisType = checkAttributeString(_Node, "debris_type", mapDebrisTypeToString.at(pDebrisEmitter->getDebrisType()));
-                pDebrisEmitter->setDebrisType(mapStringToDebrisType.at(strDebrisType));
+                std::string strDebrisType = checkAttributeString(_Node, "debris_type", s_DebrisTypeToStringMap.at(pDebrisEmitter->getDebrisType()));
+                pDebrisEmitter->setDebrisType(mapStringToDebrisType(strDebrisType));
                 
                 std::string strMode = checkAttributeString(_Node, "mode", mapEmitterModeToString.at(EMITTER_DEFAULT_MODE));
                 if (strMode == "emit_once")

@@ -152,6 +152,15 @@ void CVisualsDataStorage::addWidget(IWidget* _pWidget)
 bool CVisualsDataStorage::closeWindow(const UIDType _nUID)
 {
     METHOD_ENTRY("CVisualsDataStorage::closeWindow")
+
+    for (auto it2 = m_WindowsOrder.begin(); it2 != m_WindowsOrder.end(); ++it2)
+    {
+        if (*it2 == _nUID)
+        {
+            m_WindowsOrder.erase(it2);
+            break;
+        }
+    }
     
     auto it = m_WindowsByValue.find(_nUID);
     if (it != m_WindowsByValue.end())

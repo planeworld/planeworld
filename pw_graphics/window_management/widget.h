@@ -85,8 +85,7 @@ class IWidget : public IFontUser,
 };
 
 //--- Enum parser ------------------------------------------------------------//
-//--- Enum parser ------------------------------------------------------------//
-static std::unordered_map<WidgetTypeType, std::string> s_mapWidgetTypeToString = {
+static std::unordered_map<WidgetTypeType, std::string> s_WidgetTypeToStringMap = {
     {WidgetTypeType::CONSOLE, "console"},
     {WidgetTypeType::TEXT, "text"}
 }; ///< Map from WidgetTypeType to string
@@ -113,8 +112,6 @@ static WidgetTypeType mapStringToWidgetType(const std::string& _strS)
     else
         return WidgetTypeType::INVALID;
 }
-
-
 
 //--- Implementation is done here for inline optimisation --------------------//
 
