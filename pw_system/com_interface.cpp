@@ -299,6 +299,13 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 oss << strRet;
                 break;
             }
+            case SignatureType::VEC2DDOUBLE:
+            {
+                Vector2d vecRet; vecRet.setZero();
+                vecRet = this->call<Vector2d>(strName);
+                oss << vecRet[0] << " " << vecRet[1];
+                break;
+            }
             case SignatureType::VEC2DDOUBLE_INT:
             {
                 int nParam(0);
@@ -489,6 +496,7 @@ void CComInterface::callWriters(const std::string& _strQueue)
             case SignatureType::INT_INT:
             case SignatureType::INT_STRING:
             case SignatureType::STRING:
+            case SignatureType::VEC2DDOUBLE:
             case SignatureType::VEC2DDOUBLE_INT:
             case SignatureType::VEC2DDOUBLE_2INT:
             case SignatureType::VEC2DDOUBLE_STRING:

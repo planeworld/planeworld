@@ -133,6 +133,13 @@ bool CLuaManager::init()
                         return strRet;
                     };
                     break;
+                case SignatureType::VEC2DDOUBLE:
+                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
+                    {
+                        Vector2d vecV = static_cast<CCommandWritable<Vector2d>*>(Function.second)->call();
+                        return std::tie(vecV[0],vecV[1]);
+                    };
+                    break;
                 case SignatureType::VEC2DDOUBLE_INT:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
                     {
@@ -243,6 +250,13 @@ bool CLuaManager::init()
                     break;
                 case SignatureType::NONE_STRING_DOUBLE:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,double>*>(Function.second)->getFunction();
+                    break;
+                case SignatureType::VEC2DDOUBLE:
+                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
+                    {
+                        Vector2d vecV = static_cast<CCommand<Vector2d>*>(Function.second)->call();
+                        return std::tie(vecV[0],vecV[1]);
+                    };
                     break;
                 case SignatureType::VEC2DDOUBLE_INT:
                     m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
