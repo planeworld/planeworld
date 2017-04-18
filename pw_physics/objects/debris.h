@@ -52,6 +52,7 @@ using namespace Eigen;
 /// Specifies the type of debris
 typedef enum
 {
+    DEBRIS_TYPE_NONE,
     DEBRIS_TYPE_DOT,
     DEBRIS_TYPE_THRUST
 } DebrisTypeType;
@@ -130,15 +131,33 @@ class CDebris : public IGridUser,
 typedef std::vector<CDebris*>   DebrisType;                  ///< Specifies a list of debris
 
 //--- Enum parser ------------------------------------------------------------//
-const std::map<DebrisTypeType, std::string> mapDebrisTypeToString = {
+static std::map<DebrisTypeType, std::string> s_DebrisTypeToStringMap = {
     {DEBRIS_TYPE_DOT, "debris_dot"},
     {DEBRIS_TYPE_THRUST, "debris_thrust"}
 }; ///< Map from DebrisTypeType to string
 
-const std::map<std::string, DebrisTypeType> mapStringToDebrisType = {
+const std::map<std::string, DebrisTypeType> STRING_TO_DEBRIS_TYPE_MAP    = {
     {"debris_dot", DEBRIS_TYPE_DOT},
     {"debris_thrust", DEBRIS_TYPE_THRUST}
 }; ///< Map from string to DebrisTypeType
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Maps given string to debris type
+///
+/// \return Debris type
+///
+////////////////////////////////////////////////////////////////////////////////
+static DebrisTypeType mapStringToDebrisType(const std::string& _strS)
+{
+    METHOD_ENTRY("mapStringToDebrisType")
+    
+    const auto ci = STRING_TO_DEBRIS_TYPE_MAP.find(_strS);
+    if (ci != STRING_TO_DEBRIS_TYPE_MAP.end())
+        return ci->second;
+    else
+        return DEBRIS_TYPE_NONE;
+}
 
 //--- Implementation is done here for inline optimisation --------------------//
 

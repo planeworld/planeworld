@@ -34,6 +34,7 @@
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
+#include "font_user.h"
 #include "graphics.h"
 #include "unique_id_user.h"
 #include "win_frame_user.h"
@@ -46,12 +47,21 @@ class IWidget;
 /// List type of Widgets
 typedef std::vector<IWidget*> WidgetsType;
 
+/// Specifies the type of the widget
+enum class WidgetTypeType
+{
+    INVALID,
+    CONSOLE,
+    TEXT
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Defines a generic widget interface
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IWidget : public IUniqueIDUser,
+class IWidget : public IFontUser,
+                public IUniqueIDUser,
                 public IWinFrameUser
 {
 
@@ -62,14 +72,46 @@ class IWidget : public IUniqueIDUser,
         
         //--- Constant methods -----------------------------------------------//
         virtual void draw() = 0;
+        
+        const WidgetTypeType getType() const {return m_Type;}
 
         //--- Methods --------------------------------------------------------//
         
-    private:
+    protected:
         
         //--- Variables [private] --------------------------------------------//
+        WidgetTypeType m_Type{WidgetTypeType::INVALID};
 
 };
+
+//--- Enum parser ------------------------------------------------------------//
+static std::unordered_map<WidgetTypeType, std::string> s_WidgetTypeToStringMap = {
+    {WidgetTypeType::CONSOLE, "console"},
+    {WidgetTypeType::TEXT, "text"}
+}; ///< Map from WidgetTypeType to string
+
+const std::unordered_map<std::string, WidgetTypeType> STRING_TO_WIDGET_TYPE_MAP = {
+    {"console", WidgetTypeType::CONSOLE},
+    {"text", WidgetTypeType::TEXT}
+}; ///< Map from string to WidgetTypeType
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Maps given string to console mode
+///
+/// \return Console mode
+///
+////////////////////////////////////////////////////////////////////////////////
+static WidgetTypeType mapStringToWidgetType(const std::string& _strS)
+{
+    METHOD_ENTRY("mapStringToWidgetType")
+    
+    const auto ci = STRING_TO_WIDGET_TYPE_MAP.find(_strS);
+    if (ci != STRING_TO_WIDGET_TYPE_MAP.end())
+        return ci->second;
+    else
+        return WidgetTypeType::INVALID;
+}
 
 //--- Implementation is done here for inline optimisation --------------------//
 

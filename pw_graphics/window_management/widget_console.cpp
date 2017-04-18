@@ -37,12 +37,13 @@
 /// \brief Constructor, initialising members
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CWidgetConsole::CWidgetConsole() : IFontUser(),
-                                   IWidget(),
+CWidgetConsole::CWidgetConsole() : IWidget(),
                                    m_nComHistoryVisible(10)
 {
     METHOD_ENTRY("CWidgetConsole::CWidgetConsole");
     CTOR_CALL("CWidgetConsole::CWidgetConsole");
+
+    m_Type = WidgetTypeType::CONSOLE;
     
     m_UID.setName("Widget_Console_"+m_UID.getName());
 }
@@ -74,7 +75,7 @@ void CWidgetConsole::draw()
         
         ++i;
     }
-    oss << mapConsoleModeTypeToString[m_pComConsole->getMode()] << " > " << m_pComConsole->getCurrentCommand() << "_";
+    oss << s_ConsoleModeTypeToStringMap[m_pComConsole->getMode()] << " > " << m_pComConsole->getCurrentCommand() << "_";
     
     m_Graphics.getWindow()->pushGLStates();
     sf::Text Text;

@@ -85,7 +85,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            finishFrame();
         void            processFrame();
         
-        void            setComConsole(CComConsole* const);
+//         void            setComConsole(CComConsole* const);
         void            setConsoleText(const std::string&);
         void            setFont(const std::string&);
         void            setUniverse(CUniverse* const);
@@ -120,7 +120,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         #endif
         
         //--- Methods [private] ----------------------------------------------//
-        void            drawConsole();
+        void            drawWindows();
         void            myInitComInterface();
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
@@ -129,12 +129,9 @@ class CVisualsManager : virtual public CGraphicsBase,
         std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera
         CCamera*                        m_pCamera;          ///< Camera for player view
         
-        CWindow                         m_ConsoleWindow;    ///< Window for command console
-        CWindow                         m_TextWindow;       ///< Window for text output
-        CWidgetConsole*                 m_pConsoleWidget;   ///< Widget for command console
-        CWidgetText*                    m_pTextWidget;      ///< Widget for text output
+        UIDType                         m_ConsoleWidgetID;  ///< ID of console widget for later access
+        UIDType                         m_ConsoleWindowID;  ///< ID of console window for later access
         
-        CComConsole*                    m_pComConsole;      ///< Active com console
         bool                            m_bConsoleMode;     ///< Indicates if console mode is active
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name and location
@@ -198,18 +195,18 @@ inline void CVisualsManager::setConsoleText(const std::string& _strText)
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the active com console for visualisation
-///
-/// \param _pComConsole Active console to be set for visualisation
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setComConsole(CComConsole* const _pComConsole)
-{
-    METHOD_ENTRY("CVisualsManager::setComConsole")
-    m_pComConsole = _pComConsole;
-}
+// ////////////////////////////////////////////////////////////////////////////////
+// ///
+// /// \brief Sets the active com console for visualisation
+// ///
+// /// \param _pComConsole Active console to be set for visualisation
+// ///
+// ////////////////////////////////////////////////////////////////////////////////
+// inline void CVisualsManager::setComConsole(CComConsole* const _pComConsole)
+// {
+//     METHOD_ENTRY("CVisualsManager::setComConsole")
+//     m_pComConsole = _pComConsole;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -283,6 +280,7 @@ inline void CVisualsManager::toggleConsoleMode()
 {
     METHOD_ENTRY("CVisualsManager::toggleConsoleMode")
     m_bConsoleMode ^= true;
+    m_pVisualsDataStorage->getWindowsByValue()->at(m_ConsoleWindowID)->toggleVisibility();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

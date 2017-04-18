@@ -33,7 +33,6 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "font_user.h"
 #include "widget.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -43,8 +42,7 @@
 /// \brief Defines a text widget
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CWidgetText : public IFontUser,
-                    public IWidget
+class CWidgetText : public IWidget
 {
 
     public:

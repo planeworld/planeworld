@@ -202,7 +202,7 @@ std::istream& operator>>(std::istream& _is, CDebris* const _pDebris)
     _is >> _pDebris->m_UID;
     
     strTmp="";
-    _is >> strTmp; _pDebris->m_DebrisType = mapStringToDebrisType.at(strTmp);
+    _is >> strTmp; _pDebris->m_DebrisType = mapStringToDebrisType(strTmp);
     
     _is >> _pDebris->m_Lifetime;
     _is >> _pDebris->m_fTimeFac;
@@ -243,7 +243,7 @@ std::ostream& operator<<(std::ostream& _os, CDebris* const _pDebris)
     // From IUniqueIDUser
     _os << _pDebris->m_UID << std::endl;
     
-    _os << mapDebrisTypeToString.at(_pDebris->getDebrisType()) << std::endl;
+    _os << s_DebrisTypeToStringMap.at(_pDebris->getDebrisType()) << std::endl;
     
     _os << _pDebris->m_Lifetime << std::endl;
     _os << _pDebris->m_fTimeFac << std::endl;

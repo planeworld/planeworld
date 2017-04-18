@@ -61,6 +61,8 @@ class IFontUser
         
     protected:
         
+        virtual void mySetFontColor(const ColorTypeRGBA&) {}
+        
         //--- Variables [private] --------------------------------------------//
         sf::Font*       m_pFont;        ///< Font instance to be used
         ColorTypeRGBA   m_FontColor;    ///< Colour of font
@@ -110,6 +112,10 @@ inline void IFontUser::setFontColor(const ColorTypeRGBA& _RGBA, const bool _bInh
 {
     METHOD_ENTRY("IFontUser::setFontColor")
     m_FontColor = _RGBA;
+    if (_bInherit)
+    {
+        this->mySetFontColor(_RGBA);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

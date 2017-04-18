@@ -66,10 +66,10 @@ class IWinFrameUser : virtual public CGraphicsBase
     protected:
         
                 void drawFrame();
-        virtual void resizeInherit(const int, const int) {}
-        virtual void setColorBGInherit(const ColorTypeRGBA&) {}
-        virtual void setColorFGInherit(const ColorTypeRGBA&) {}
-        virtual void setPositionInherit(const int, const int) {}
+        virtual void myResize(const int, const int) {}
+        virtual void mySetColorBG(const ColorTypeRGBA&) {}
+        virtual void mySetColorFG(const ColorTypeRGBA&) {}
+        virtual void mySetPosition(const int, const int) {}
         
         //--- Variables [protected] ------------------------------------------//
         ColorTypeRGBA   m_WinColorBG;    ///< Background colour for this window frame
@@ -99,7 +99,7 @@ inline void IWinFrameUser::resize(const int _nX, const int _nY)
     m_nFrameWidth = _nX;
     m_nFrameHeight = _nY;
     
-    this->resizeInherit(_nX, _nY);
+    this->myResize(_nX, _nY);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ inline void IWinFrameUser::setColorBG(const ColorTypeRGBA& _RGBA, const bool _bI
     m_WinColorBG = _RGBA;
     if (_bInherit)
     {
-        this->setColorBGInherit(_RGBA);
+        this->mySetColorBG(_RGBA);
     }
 }
 
@@ -134,7 +134,7 @@ inline void IWinFrameUser::setColorFG(const ColorTypeRGBA& _RGBA, const bool _bI
     m_WinColorFG = _RGBA;
     if (_bInherit)
     {
-        this->setColorFGInherit(_RGBA);
+        this->mySetColorFG(_RGBA);
     }
 }
 
@@ -152,7 +152,7 @@ inline void IWinFrameUser::setPosition(const int _nPosX, const int _nPosY)
     m_nFramePosX = _nPosX;
     m_nFramePosY = _nPosY;
     
-    this->setPositionInherit(_nPosX, _nPosY);
+    this->mySetPosition(_nPosX, _nPosY);
 }
 
 #endif // WIN_FRAME_USER_H

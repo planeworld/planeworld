@@ -61,7 +61,6 @@ class CInputManager : public IComInterfaceProvider,
                 
         //--- Methods --------------------------------------------------------//
         void processFrame();
-        void setComConsole(CComConsole* const);
         void setWindow(sf::RenderWindow* const _pWindow);
         
     private:
@@ -79,25 +78,10 @@ class CInputManager : public IComInterfaceProvider,
         bool            m_bMouseCursorVisible;  ///< Toggles visibilty of mouse cursor
         
         
-        CComConsole*    m_pComConsole;          ///< Active com console
-        std::string     m_strConsoleCommand;    ///< Currently entered console command if in console mode
         bool            m_bConsoleMode;         ///< Toggles com console mode
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the active com console for input
-///
-/// \param _pComConsole Active console to be set for input
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CInputManager::setComConsole(CComConsole* const _pComConsole)
-{
-    METHOD_ENTRY("CInputManager::setComConsole")
-    m_pComConsole = _pComConsole;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

@@ -44,7 +44,8 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
                                      m_pCamera(nullptr),
-                                     m_pComConsole(nullptr),
+                                     m_ConsoleWidgetID(0),
+                                     m_ConsoleWindowID(0),
                                      m_bConsoleMode(false)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
@@ -1260,38 +1261,29 @@ bool CVisualsManager::init()
 {
     METHOD_ENTRY("CVisualsManager::init")
     
-    m_pConsoleWidget = new CWidgetConsole();
-    MEM_ALLOC("IWidget")
-    m_pConsoleWidget->setFont(&m_Font);
-    m_pConsoleWidget->setFontSize(16);
-    m_pConsoleWidget->setFontColor({0.0, 1.0, 0.0, 1.0}, WIN_INHERIT);
-    m_pConsoleWidget->setComConsole(m_pComConsole);
+    // When calling init, all relevant variables have to be set up. Thus, sub 
+    // components like the visuals data storage kann be set up, eventually.
+    m_pVisualsDataStorage->setFont(m_Font);
+    m_pVisualsDataStorage->setComInterface(m_pComInterface);
     
-    m_ConsoleWindow.setTitle("Command console");
-    m_ConsoleWindow.setFont(&m_Font);
-    m_ConsoleWindow.setFontSize(20);
-    m_ConsoleWindow.setFontColor({1.0, 1.0, 1.0, 1.0}, WIN_NO_INHERIT);
-    m_ConsoleWindow.setWidget(m_pConsoleWidget);
-    m_ConsoleWindow.setColorBG({0.1, 0.1, 0.1, 0.75}, WIN_INHERIT);
-    m_ConsoleWindow.setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
-    m_ConsoleWindow.setPosition(10, 10);
-    m_ConsoleWindow.resize(800, 150);
+    m_ConsoleWidgetID = m_pVisualsDataStorage->createWidget(WidgetTypeType::CONSOLE);
+    CWidgetConsole* pConsoleWidget = static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID));
+    pConsoleWidget->setFont(&m_Font);
+    pConsoleWidget->setFontSize(16);
+    pConsoleWidget->setFontColor({0.0, 1.0, 0.0, 1.0}, WIN_INHERIT);
+    pConsoleWidget->setComConsole(m_pVisualsDataStorage->getComConsole());
     
-    m_pTextWidget = new CWidgetText();
-    MEM_ALLOC("IWidget")
-    m_pTextWidget->setFont(&m_Font);
-    m_pTextWidget->setFontSize(16);
-    m_pTextWidget->setText("This might be a tutorial text.\nIt will later be accessible from Lua.");
-    
-    m_TextWindow.setTitle("Text Window");
-    m_TextWindow.setFont(&m_Font);
-    m_TextWindow.setFontSize(20);
-    m_TextWindow.setFontColor({1.0, 1.0, 1.0, 1.0}, WIN_INHERIT);
-    m_TextWindow.setWidget(m_pTextWidget);
-    m_TextWindow.setColorBG({0.1, 0.1, 0.1, 0.75}, WIN_INHERIT);
-    m_TextWindow.setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
-    m_TextWindow.setPosition(1000, 10);
-    m_TextWindow.resize(350, 100);
+    m_ConsoleWindowID = m_pVisualsDataStorage->createWindow();
+    CWindow* pConsoleWindow  = m_pVisualsDataStorage->getWindowByValue(m_ConsoleWindowID);
+    pConsoleWindow->setTitle("Command console");
+    pConsoleWindow->setFont(&m_Font);
+    pConsoleWindow->setFontSize(20);
+    pConsoleWindow->setFontColor({1.0, 1.0, 1.0, 1.0}, WIN_NO_INHERIT);
+    pConsoleWindow->setWidget(pConsoleWidget);
+    pConsoleWindow->setColorBG({0.1, 0.1, 0.1, 0.75}, WIN_INHERIT);
+    pConsoleWindow->setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
+    pConsoleWindow->setPosition(10, 10);
+    pConsoleWindow->resize(800, 150);
     
     return (m_Graphics.init());
 }
@@ -1336,24 +1328,23 @@ void CVisualsManager::processFrame()
     this->drawBoundingBoxes();
     this->drawGridHUD();
     this->drawTimers();
-    this->drawConsole();
+    this->drawWindows();
     
     this->finishFrame();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Draws console if console mode is active
+/// \brief Draws windows if visible
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawConsole()
+void CVisualsManager::drawWindows()
 {
-    METHOD_ENTRY("CVisualsManager::drawConsole")
+    METHOD_ENTRY("CVisualsManager::drawWindows")
     
-    if (m_bConsoleMode)
+    for (const auto WinUID : *m_pVisualsDataStorage->getWindowUIDsInOrder())
     {
-        m_ConsoleWindow.draw();
-        m_TextWindow.draw();
+        m_pVisualsDataStorage->getWindowsByValue()->at(WinUID)->draw();
     }
 }
 
@@ -1367,6 +1358,9 @@ void CVisualsManager::myInitComInterface()
     METHOD_ENTRY("CVisualsManager::myInitComInterface")
 
     INFO_MSG("Visuals Manager", "Initialising com interace.")
+    
+    std::ostringstream ossWidgetType("");
+    for (auto WidgetType : STRING_TO_WIDGET_TYPE_MAP) ossWidgetType << " " << WidgetType.first;
     
     //----------------------------------------------------------------------
     // System package
@@ -1383,6 +1377,18 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::UNDEFINED, "CCamera*, Currently active camera"}},
                                       "system"
     );
+    m_pComInterface->registerFunction("cam_get_position",
+                                      CCommand<Vector2d>([&]() -> Vector2d{return m_pCamera->getCenter();}),
+                                      "Get the global position of currently active camera",
+                                      {{ParameterType::VEC2DDOUBLE, "Position (x, y)"}},
+                                      "system"
+    );
+    m_pComInterface->registerFunction("cam_get_resolution",
+                                      CCommand<double>([&](){return m_Graphics.getResMPX();}),
+                                      "Get the resolution of currently active camera",
+                                      {{ParameterType::DOUBLE, "Resolution in m/px"}},
+                                      "system"
+    );
     m_pComInterface->registerFunction("cam_get_zoom",
                                       CCommand<double>([&](){return m_pCamera->getZoom();}),
                                       "Returns zoom level of active camera",
@@ -1394,6 +1400,50 @@ void CVisualsManager::myInitComInterface()
                                       "Rotate camera by given angle.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("cam_hook_on",
+                                      CCommand<void, int>([&](const int _nUID)
+                                      {
+                                          auto it = m_pDataStorage->getObjectsByValueFront()->find(_nUID);
+                                          if (it != m_pDataStorage->getObjectsByValueFront()->end())
+                                          {
+                                                m_pCamera->attachTo(it->second);
+                                          }
+                                          else
+                                          {
+                                              WARNING_MSG("Visuals Manager", "Unknown object with UID <" << _nUID << ">")
+                                          }
+                                      }),
+                                      "Hook camera on given object.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Object UID"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("cam_set_position",
+                                      CCommand<void, double, double>([&](const double& _fX,
+                                                                         const double& _fY)
+                                      {m_pCamera->setPosition(_fX,_fY);}),
+                                      "Set position of currently active camera to given coordinates.",
+                                      {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::DOUBLE, "Position X"},
+                                       {ParameterType::DOUBLE, "Position Y"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("cam_set_resolution_mpx",
+                                      CCommand<void, double>([&](const double& _fR)
+                                      {m_pCamera->zoomTo(m_Graphics.getResMPX()/_fR * m_pCamera->getZoom());}),
+                                      "Set resolution of currently active camera (m/px).",
+                                      {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::DOUBLE, "Resolution in m/px"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("cam_set_resolution_pxm",
+                                      CCommand<void, double>([&](const double& _fR)
+                                      {m_pCamera->zoomTo(_fR / m_Graphics.getResPMX() * m_pCamera->getZoom());}),
+                                      "Set resolution of currently active camera (px/m).",
+                                      {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::DOUBLE, "Resolution in px/m"}},
                                       "system", "visuals"  
     );
     m_pComInterface->registerFunction("cam_translate_by",
@@ -1420,33 +1470,193 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::DOUBLE, "Level to zoom active camera to"}},
                                       "system","visuals"
     );
+    m_pComInterface->registerFunction("com_console_backspace",
+                                      CCommand<void>([&](){m_pVisualsDataStorage->getComConsole()->backspace();}),
+                                      "Removes last character from currently entered command.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("com_console_complement",
+                                      CCommand<void>([&](){m_pVisualsDataStorage->getComConsole()->complementCommand();}),
+                                      "Complements the currently entered command (this is relevant for tab completion).",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("com_console_execute",
+                                      CCommand<void>([&](){m_pVisualsDataStorage->getComConsole()->execute();}),
+                                      "Executes current command in com console.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("com_console_expand",
+                                      CCommand<void, std::string>([&](const std::string& _strS){m_pVisualsDataStorage->getComConsole()->expandCommand(_strS);}),
+                                      "Expands command string by given sequence.",
+                                      {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::STRING, "String (char) for command expansion"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("com_console_get_current",
+                                      CCommand<std::string>([&]() -> std::string {return m_pVisualsDataStorage->getComConsole()->getCurrentCommand();}),
+                                      "Returns current command in com console.",
+                                      {{ParameterType::STRING, "Current command in console"}},
+                                      "system"
+    );
+    m_pComInterface->registerFunction("com_console_next",
+                                      CCommand<void>([&](){m_pVisualsDataStorage->getComConsole()->nextCommand();}),
+                                      "Get the next command in com console (this is mostly relevant for tab completion).",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("com_console_prev",
+                                      CCommand<void>([&](){m_pVisualsDataStorage->getComConsole()->prevCommand();}),
+                                      "Get the previous command in com console (this is mostly relevant for tab completion).",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system","visuals"
+    );
     m_pComInterface->registerFunction("com_set_mode",
-                                      CCommand<void,std::string>([&](const std::string& _strS){m_pComConsole->setMode(mapStringToConsoleModeType.at(_strS));}),
+                                      CCommand<void,std::string>([&](const std::string& _strS){m_pVisualsDataStorage->getComConsole()->setMode(mapStringToConsoleMode(_strS));}),
                                       "Sets mode for console command interpretation.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::STRING, "Mode (lua, raw)"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("com_set_font_size",
-                                      CCommand<void,int>([&](const int _nSize){m_pConsoleWidget->setFontSize(_nSize);}),
+                                      CCommand<void,int>([&](const int _nSize){static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID))->setFontSize(_nSize);}),
                                       "Sets font size for command console.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Font size"}},
                                       "system","visuals"
     );
-    m_pComInterface->registerFunction("com_resize",
-                                      CCommand<void,int,int>([&](const int _nWidth, const int _nHeight){m_ConsoleWindow.resize(_nWidth, _nHeight);}),
-                                      "Resizr command console window.",
-                                      {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::INT, "Window width"},
-                                      {ParameterType::INT, "Window height"}},
+    m_pComInterface->registerFunction("create_widget",
+                                      CCommand<void, std::string>([&](const std::string& _strS) {m_pVisualsDataStorage->createWidget(mapStringToWidgetType(_strS));}),
+                                      "Creates a widget of given type.",
+                                      {{ParameterType::INT, "Window UID"},
+                                       {ParameterType::STRING, "Widget Type (" + ossWidgetType.str() + ")"}},
                                       "system","visuals"
     );
+    m_pComInterface->registerFunction("create_window",
+                                      CCommand<void>([&]() {m_pVisualsDataStorage->createWindow();}),
+                                      "Creates generic window.",
+                                      {{ParameterType::INT, "Window UID"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("widget_set_font_color",
+                                      CCommand<void,int,double,double,double,double>(
+                                          [&](const int _nUID,
+                                              const double _fR,
+                                              const double _fG,
+                                              const double _fB,
+                                              const double _fA)
+                                            {
+                                                IWidget* pWidget = m_pVisualsDataStorage->getWidgetByValue(_nUID);
+                                                if (pWidget != nullptr)
+                                                {
+                                                    pWidget->setFontColor({_fR, _fG, _fB, _fA}, WIN_INHERIT);
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Sets color of widget text.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Widget UID"},
+                                      {ParameterType::DOUBLE, "Color red (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Color green (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Color blue (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Alpha (0.0-1.0)"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("widget_set_text",
+                                      CCommand<void, int, std::string>(
+                                          [&](const int _nUID, const std::string _strText)
+                                            {
+                                                IWidget* pWidget = m_pVisualsDataStorage->getWidgetByValue(_nUID);
+                                                if (pWidget != nullptr)
+                                                {
+                                                    if (pWidget->getType() == WidgetTypeType::TEXT)
+                                                    {
+                                                        static_cast<CWidgetText*>(pWidget)->setText(_strText);
+                                                    }
+                                                    else
+                                                    {
+                                                        WARNING_MSG("Visuals Manager", "Wrong widget type, unknown method <setText>.")
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Set text of text widget.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Widget UID"},
+                                      {ParameterType::STRING, "Widget text"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_set_widget",
+                                      CCommand<void, int, int>(
+                                          [&](const int _nUIDWin, const int _nUIDWidget)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUIDWin);
+                                                if (pWin != nullptr)
+                                                {
+                                                    IWidget* pWidget = m_pVisualsDataStorage->getWidgetByValue(_nUIDWidget);
+                                                    if (pWidget != nullptr)
+                                                    {
+                                                        pWin->setWidget(pWidget);
+                                                    }
+                                                    else
+                                                    {
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Sets widget for the given window.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"},
+                                      {ParameterType::INT, "Widget UID"}},
+                                      "system", "visuals"  
+    );
     m_pComInterface->registerFunction("win_center",
-                                      CCommand<void, int>([&](const int _nUIDDummy)
-                                      {
-                                          m_ConsoleWindow.center();
-                                      }),
+                                      CCommand<void, int>(
+                                          [&](const int _nUID)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    pWin->center();
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Center window referring to the main application.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("win_close",
+                                      CCommand<void, int>(
+                                          [&](const int _nUID)
+                                            {
+                                                if (_nUID != m_ConsoleWindowID)
+                                                {
+                                                    if (!m_pVisualsDataStorage->closeWindow(_nUID))
+                                                    {
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    NOTICE_MSG("Visuals Manager", "Deleting native console window is not allowed. Maybe hide the window.")
+                                                }
+                                            }),
                                       "Center window referring to the main application.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Window UID"}},
@@ -1470,15 +1680,45 @@ void CVisualsManager::myInitComInterface()
                                       },
                                       "system", "visuals"  
     );
+    m_pComInterface->registerFunction("win_resize",
+                                      CCommand<void,int,int,int>(
+                                          [&](const int _nUID, const int _nWidth, const int _nHeight)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    pWin->resize(_nWidth, _nHeight);
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Resize given window.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"},
+                                      {ParameterType::INT, "Window width"},
+                                      {ParameterType::INT, "Window height"}},
+                                      "system","visuals"
+    );
     m_pComInterface->registerFunction("win_set_bg_color",
                                       CCommand<void,int,double,double,double,double>(
-                                          [&](const int _nUIDDummy,
+                                          [&](const int _nUID,
                                               const double _fR,
                                               const double _fG,
                                               const double _fB,
-                                              const double _fA
-                                        )
-                                      {m_ConsoleWindow.setColorBG({_fR, _fG, _fB, _fA}, WIN_INHERIT);}),
+                                              const double _fA)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    pWin->setColorBG({_fR, _fG, _fB, _fA}, WIN_INHERIT);
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
                                       "Sets color of console window background.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Window UID"},
@@ -1488,16 +1728,25 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::DOUBLE, "Alpha (0.0-1.0)"}},
                                       "system","visuals"
     );
-    m_pComInterface->registerFunction("win_set_text_color",
+    m_pComInterface->registerFunction("win_set_fg_color",
                                       CCommand<void,int,double,double,double,double>(
-                                          [&](const int _nUIDDummy,
+                                          [&](const int _nUID,
                                               const double _fR,
                                               const double _fG,
                                               const double _fB,
-                                              const double _fA
-                                        )
-                                      {m_pConsoleWidget->setFontColor({_fR, _fG, _fB, _fA}, WIN_INHERIT);}),
-                                      "Sets color of console text.",
+                                              const double _fA)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    pWin->setColorFG({_fR, _fG, _fB, _fA}, WIN_INHERIT);
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Sets color of console window foreground.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Window UID"},
                                       {ParameterType::DOUBLE, "Color red (0.0-1.0)"},
@@ -1505,6 +1754,78 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::DOUBLE, "Color blue (0.0-1.0)"},
                                       {ParameterType::DOUBLE, "Alpha (0.0-1.0)"}},
                                       "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_set_font_color",
+                                      CCommand<void,int,double,double,double,double>(
+                                          [&](const int _nUID,
+                                              const double _fR,
+                                              const double _fG,
+                                              const double _fB,
+                                              const double _fA)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    pWin->setFontColor({_fR, _fG, _fB, _fA}, WIN_INHERIT);
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Sets color of window text.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"},
+                                      {ParameterType::DOUBLE, "Color red (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Color green (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Color blue (0.0-1.0)"},
+                                      {ParameterType::DOUBLE, "Alpha (0.0-1.0)"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_set_position",
+                                      CCommand<void,int,int,int>(
+                                          [&](const int _nUID, const int _nX, const int _nY)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    pWin->setPosition(_nX, _nY);
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Set window position (top left corner coordinates).",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"},
+                                      {ParameterType::INT, "Window position X (left)"},
+                                      {ParameterType::INT, "Window position Y (top)"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_show_all",
+                                      CCommand<void>([&]()
+                                        {
+                                            for (auto Win : *m_pVisualsDataStorage->getWindowsByValue())
+                                            {
+                                                Win.second->setVisibilty(true);
+                                            }
+                                        }),
+                                      "Shows all windows.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_toggle_focus",
+                                      CCommand<void>(
+                                          [&]()
+                                            {
+                                                m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(m_pVisualsDataStorage->getWindowUIDsInOrder()->front());
+                                                m_pVisualsDataStorage->getWindowUIDsInOrder()->pop_front();
+                                            }),
+                                      "Center window referring to the main application.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"}},
+                                      "system", "visuals"  
     );
     //----------------------------------------------------------------------
     // Visuals package

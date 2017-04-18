@@ -37,12 +37,13 @@
 /// \brief Constructor, initialising members
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CWidgetText::CWidgetText() : IFontUser(),
-                             IWidget(),
+CWidgetText::CWidgetText() : IWidget(),
                              m_strText("")
 {
     METHOD_ENTRY("CWidgetText::CWidgetText");
     CTOR_CALL("CWidgetText::CWidgetText");
+
+    m_Type = WidgetTypeType::TEXT;
     
     m_UID.setName("Widget_Text_"+m_UID.getName());
 }
@@ -73,4 +74,3 @@ void CWidgetText::draw()
     
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
 }
-
