@@ -121,6 +121,8 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         //--- Methods [private] ----------------------------------------------//
         void            drawWindows();
+        void            updateUI();
+        
         void            myInitComInterface();
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
@@ -128,6 +130,15 @@ class CVisualsManager : virtual public CGraphicsBase,
         std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star
         std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera
         CCamera*                        m_pCamera;          ///< Camera for player view
+        
+        int                             m_nCursorX;         ///< Mouse cursor position x
+        int                             m_nCursorY;         ///< Mouse cursor position y
+        int                             m_nCursorX0;        ///< Mouse cursor position x, previous frame
+        int                             m_nCursorY0;        ///< Mouse cursor position y, previous frame
+        int                             m_nCursorOffsetX;   ///< Position x of cursor when MB left was first pressed
+        int                             m_nCursorOffsetY;   ///< Position y of cursor when MB left was first pressed
+        bool                            m_bCursor;          ///< Indicates if mouse cursor is enabled
+        bool                            m_bMBLeft;          ///< Left mouse button
         
         UIDType                         m_ConsoleWidgetID;  ///< ID of console widget for later access
         UIDType                         m_ConsoleWindowID;  ///< ID of console window for later access

@@ -49,7 +49,7 @@ Usage
 | n                        | Show names                      |
 | s                        | Save game state                 |
 | t                        | Show object trajectories        |
-| v                        | Toggle graphics (on/off)        |
+| u                        | Toggle UI mode (WORLD, UI)      |
 | Home                     | Toggle command console          |
 | TAB                      | Tab completion in console mode  |
 | ESC                      | Quit                            |

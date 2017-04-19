@@ -37,14 +37,14 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-IWinFrameUser::IWinFrameUser() : m_WinColorBG({0.3, 0.3, 0.3, 1.0}),
-                                 m_WinColorFG({0.5, 0.5, 0.5, 1.0}),
+IWinFrameUser::IWinFrameUser() : m_WinColorBG({0.1, 0.1, 0.1, 0.75}),
+                                 m_WinColorFG({0.3, 0.3, 0.3, 0.75}),
                                  m_nFrameBorderX(5),
                                  m_nFrameBorderY(5),
                                  m_nFramePosX(0),
                                  m_nFramePosY(0),
-                                 m_nFrameWidth(100),
-                                 m_nFrameHeight(100)
+                                 m_nFrameWidth(400),
+                                 m_nFrameHeight(200)
 {
     METHOD_ENTRY("IWinFrameUser::IWinFrameUser");
     CTOR_CALL("IWinFrameUser::IWinFrameUser");
@@ -62,9 +62,9 @@ void IWinFrameUser::drawFrame()
     METHOD_ENTRY("IWinFrameUser::drawFrame")
     
     m_Graphics.setColor(m_WinColorBG);
-    m_Graphics.filledRectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                            Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+    m_Graphics.filledRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                          Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
     m_Graphics.setColor(m_WinColorFG);
-    m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                      Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+    m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                    Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
 }

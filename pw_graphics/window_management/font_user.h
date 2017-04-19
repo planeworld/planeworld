@@ -81,7 +81,7 @@ class IFontUser
 ////////////////////////////////////////////////////////////////////////////////
 inline IFontUser::IFontUser() : m_pFont(nullptr),
                                 m_FontColor({1.0, 1.0, 1.0, 1.0}),
-                                m_nFontSize(12)
+                                m_nFontSize(16)
 {
     METHOD_ENTRY("IFontUser::IFontUser")
     CTOR_CALL("IFontUser")

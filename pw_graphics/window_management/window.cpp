@@ -48,6 +48,7 @@ CWindow::CWindow() : IUniqueIDUser(),
     
     m_UID.setName("Win_"+m_UID.getName());
     m_strTitle = m_UID.getName();
+    m_nFontSize = 20; // Fontsize only affects the title at the moment
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,13 +81,13 @@ void CWindow::draw() const
     if (m_bVisible)
     {
         m_Graphics.setColor(m_WinColorBG);
-        m_Graphics.filledRectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                                Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+        m_Graphics.filledRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                              Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
         m_Graphics.setColor(m_WinColorFG);
         int nSpacing = m_pFont->getLineSpacing(m_nFontSize);
-        m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
+        m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
                         Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
-        m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+        m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
                         Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+nSpacing));
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
 

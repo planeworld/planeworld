@@ -171,6 +171,8 @@ class CGraphics
         void setWidthScr(const unsigned short&);
         void setHeightScr(const unsigned short&);
         void swapBuffers();
+        void switchToScreenSpace();
+        void switchToWorldSpace();
         
         void setWindow(WindowHandleType* const);
 
@@ -207,10 +209,8 @@ class CGraphics
         void dots(CCircularBuffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void filledCircle(const Vector2d&, const double&, const int = 12, const bool = false) const;
         void filledRect(const Vector2d&, const Vector2d&) const;
-        void filledRectSS(const Vector2d&, const Vector2d&) const;
         void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
         void rect(const Vector2d&, const Vector2d&) const;
-        void rectSS(const Vector2d&, const Vector2d&) const;
         void showVec(const Vector2d&, const Vector2d&) const;
 
         //--- Methods --------------------------------------------------------//

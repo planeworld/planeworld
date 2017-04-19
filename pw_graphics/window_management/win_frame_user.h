@@ -56,6 +56,8 @@ class IWinFrameUser : virtual public CGraphicsBase
         IWinFrameUser();
         
         //--- Constant methods -----------------------------------------------//
+        int getPositionX() const {return m_nFramePosX;}
+        int getPositionY() const {return m_nFramePosY;}
 
         //--- Methods --------------------------------------------------------//
         void resize(const int, const int);

@@ -44,6 +44,14 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
                                      m_pCamera(nullptr),
+                                     m_nCursorX(0),
+                                     m_nCursorY(0),
+                                     m_nCursorX0(0),
+                                     m_nCursorY0(0),
+                                     m_nCursorOffsetX(0),
+                                     m_nCursorOffsetY(0),
+                                     m_bCursor(false),
+                                     m_bMBLeft(false),
                                      m_ConsoleWidgetID(0),
                                      m_ConsoleWindowID(0),
                                      m_bConsoleMode(false)
@@ -1296,6 +1304,7 @@ bool CVisualsManager::init()
 void CVisualsManager::finishFrame()
 {
     METHOD_ENTRY("CVisualsManager::finishFrame")
+    
     m_Graphics.swapBuffers();
     DEBUG(Log.setLoglevel(LOG_LEVEL_NOTICE);)
     m_pDataStorage->swapFront();
@@ -1315,6 +1324,8 @@ void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
 
+    m_Graphics.switchToWorldSpace();
+    
     m_pComInterface->callWriters("visuals");
     
     m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
@@ -1326,9 +1337,13 @@ void CVisualsManager::processFrame()
     this->drawKinematicsStates();
     this->drawCOM();
     this->drawBoundingBoxes();
+    
+    m_Graphics.switchToScreenSpace();
+    
     this->drawGridHUD();
     this->drawTimers();
     this->drawWindows();
+    this->updateUI();
     
     this->finishFrame();
 }
@@ -1346,6 +1361,70 @@ void CVisualsManager::drawWindows()
     {
         m_pVisualsDataStorage->getWindowsByValue()->at(WinUID)->draw();
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Updates user interface based on UI mode 
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::updateUI()
+{
+    METHOD_ENTRY("CVisualsManager::updateUI")
+
+    if (m_bMBLeft)
+    {
+        auto it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
+        while (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rend())
+        {
+            // Test, if mouse cursor is inside of window. Cursor positon of
+            // the previous frame must be used, since windows are not updated
+            // yet.
+            if (m_pVisualsDataStorage->getWindowByValue(*it)->isInside(m_nCursorX0, m_nCursorY0))
+            {
+                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(*it);
+                
+                // Test for offset (position of cursor within windows).
+                // Offset = 0 indicates, that no offset was calculated yet.
+                if (m_nCursorOffsetX == 0 && m_nCursorOffsetY == 0)
+                {
+                    m_nCursorOffsetX = m_nCursorX0 - pWin->getPositionX();
+                    m_nCursorOffsetY = m_nCursorY0 - pWin->getPositionY();
+                }
+                
+                pWin->setPosition(m_nCursorX-m_nCursorOffsetX, m_nCursorY-m_nCursorOffsetY);
+                
+                if (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin())
+                {
+                    m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(*it);
+                    m_pVisualsDataStorage->getWindowUIDsInOrder()->erase(std::prev(it.base()));
+                }
+                break;
+            }
+            ++it;
+        }
+    }
+    
+    m_nCursorX0 = m_nCursorX;
+    m_nCursorY0 = m_nCursorY;
+    
+    if (m_bCursor)
+    {
+        m_Graphics.setColor(1.0, 1.0, 1.0, 0.8);
+        m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+            m_Graphics.addVertex(m_nCursorX-10, m_nCursorY);
+            m_Graphics.addVertex(m_nCursorX-3, m_nCursorY);
+            m_Graphics.addVertex(m_nCursorX, m_nCursorY-10);
+            m_Graphics.addVertex(m_nCursorX, m_nCursorY-3);
+            m_Graphics.addVertex(m_nCursorX+10, m_nCursorY);
+            m_Graphics.addVertex(m_nCursorX+3, m_nCursorY);
+            m_Graphics.addVertex(m_nCursorX, m_nCursorY+10);
+            m_Graphics.addVertex(m_nCursorX, m_nCursorY+3);
+        m_Graphics.endLine();
+        if (m_bMBLeft)
+            m_Graphics.circle(Vector2d(m_nCursorX, m_nCursorY), 5);
+    }
+    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1539,6 +1618,48 @@ void CVisualsManager::myInitComInterface()
                                       "Creates generic window.",
                                       {{ParameterType::INT, "Window UID"}},
                                       "system","visuals"
+    );
+    m_pComInterface->registerFunction("mouse_cursor_on",
+                                      CCommand<void>([&]() {m_bCursor = true;}),
+                                      "Enables mouse cursor.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("mouse_cursor_off",
+                                      CCommand<void>([&](){m_bCursor = false;}),
+                                      "Disable mouse cursor.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("mouse_set_cursor",
+                                      CCommand<void, int, int>([&](const int _nX,
+                                                                   const int& _nY)
+                                      {
+                                          m_nCursorX = _nX;
+                                          m_nCursorY = _nY;
+                                      }),
+                                      "Set position of the mouse cursor in screen space.",
+                                      {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::INT, "Position X"},
+                                       {ParameterType::INT, "Position Y"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("mouse_mbl_pressed",
+                                      CCommand<void>([&](){m_bMBLeft = true;}),
+                                      "Indicates that left mouse button was pressed.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("mouse_mbl_released",
+                                      CCommand<void>([&]()
+                                      {
+                                          m_bMBLeft = false;
+                                          m_nCursorOffsetX = 0;
+                                          m_nCursorOffsetY = 0;
+                                      }),
+                                      "Indicates that left mouse button was released.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"  
     );
     m_pComInterface->registerFunction("widget_set_font_color",
                                       CCommand<void,int,double,double,double,double>(

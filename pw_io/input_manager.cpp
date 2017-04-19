@@ -38,7 +38,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CInputManager::CInputManager() : m_pWindow(nullptr),
-                                 m_bMouseCursorVisible(false),
+                                 m_UIMode(UIModeType::WORLD),
                                  m_bConsoleMode(false)
 {
     METHOD_ENTRY("CInputManager::CInputManager")
@@ -61,10 +61,13 @@ void CInputManager::processFrame()
 {
     METHOD_ENTRY("CInputManager::processFrame")
     
-    m_vecMouse = m_vecMouseCenter-sf::Mouse::getPosition(*m_pWindow);
+    sf::Vector2i vecMouse = sf::Mouse::getPosition(*m_pWindow);
+    m_vecMouse = m_vecMouseCenter-vecMouse;
     m_vecMouse.x = -m_vecMouse.x; // Horizontal movements to the left should be negative
-    if (!m_bMouseCursorVisible)
+    if (m_UIMode == UIModeType::WORLD)
         sf::Mouse::setPosition(m_vecMouseCenter,*m_pWindow);
+    
+    m_pComInterface->call<void, int, int>("mouse_set_cursor", vecMouse.x, vecMouse.y);
 
     //--- Handle events ---//
     sf::Event Event;
@@ -247,22 +250,20 @@ void CInputManager::processFrame()
 //                             pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
                             break;
                         }
-                        case sf::Keyboard::V:
+                        case sf::Keyboard::U:
                         {
-//                             bGraphicsOn ^= 1;
-                            m_bMouseCursorVisible ^= 1;
-                            m_pWindow->setMouseCursorVisible(m_bMouseCursorVisible);
+                            if (m_UIMode == UIModeType::WORLD)
+                            {
+                                m_UIMode = UIModeType::UI;
+                                m_pComInterface->call<void>("mouse_cursor_on");
+                            }
+                            else
+                            {
+                                m_UIMode = UIModeType::WORLD;
+                                m_pComInterface->call<void>("mouse_cursor_off");
+                            }
                             m_vecMouse.x=0;
                             m_vecMouse.y=0;
-//                             
-//                             if (bGraphicsOn)
-//                             {
-//                                 INFO_MSG("Main", "Graphics reactivated.")
-//                             }
-//                             else
-//                             {
-//                                 INFO_MSG("Main", "Graphics deactivated, simulation still running...")
-//                             }
                             break;
                         }
                         default:
@@ -271,9 +272,31 @@ void CInputManager::processFrame()
                 }
                 break;
             }
+            case sf::Event::MouseButtonPressed:
+            {
+                if (m_UIMode == UIModeType::UI)
+                {
+                    if (Event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        m_pComInterface->call<void>("mouse_mbl_pressed");
+                    }
+                }
+                break;
+            }
+            case sf::Event::MouseButtonReleased:
+            {
+                if (m_UIMode == UIModeType::UI)
+                {
+                    if (Event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        m_pComInterface->call<void>("mouse_mbl_released");
+                    }
+                }
+                break;
+            }
             case sf::Event::MouseMoved:
             {
-//                 if (bGraphicsOn)
+                if (m_UIMode == UIModeType::WORLD)
                 {
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
@@ -281,8 +304,6 @@ void CInputManager::processFrame()
                         m_pComInterface->call<void,double,double>("cam_translate_by",
                                         0.2/2.0*double(m_vecMouse.x)/fZoom,
                                         0.2/2.0*double(m_vecMouse.y)/fZoom);
-//                                         0.2/GRAPHICS_PX_PER_METER*double(m_vecMouse.x)/fZoom,
-//                                         0.2/GRAPHICS_PX_PER_METER*double(m_vecMouse.y)/fZoom);
                     }
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                     {
@@ -294,19 +315,18 @@ void CInputManager::processFrame()
                         else if (fZoom > 1.0e3)
                             m_pComInterface->call<void,double>("cam_zoom_to",1.0e3);
                     }
-                    break;
                 }
+                break;
             }
             case sf::Event::MouseWheelMoved:
-//                 if (bGraphicsOn)
-                {
-                    m_pComInterface->call<void, double>("cam_zoom_by",1.0+double(Event.mouseWheel.delta)*0.1);
-                    double fZoom = m_pComInterface->call<double>("cam_get_zoom");
-                    if (fZoom < 1.0e-18)
-                        m_pComInterface->call<void,double>("cam_zoom_to",1.0e-18);
-                    else if (fZoom > 1.0e3)
-                        m_pComInterface->call<void,double>("cam_zoom_to",1.0e3);
-                }
+            {
+                m_pComInterface->call<void, double>("cam_zoom_by",1.0+double(Event.mouseWheel.delta)*0.1);
+                double fZoom = m_pComInterface->call<double>("cam_get_zoom");
+                if (fZoom < 1.0e-18)
+                    m_pComInterface->call<void,double>("cam_zoom_to",1.0e-18);
+                else if (fZoom > 1.0e3)
+                    m_pComInterface->call<void,double>("cam_zoom_to",1.0e3);
+            }
             case sf::Event::TextEntered:
             {
                 if (m_bConsoleMode)
@@ -343,15 +363,23 @@ void CInputManager::myInitComInterface()
                                           "Provides processing frequency of Input module.",
                                           {{ParameterType::DOUBLE, "Processing frequency of Input module"}},
                                            "system");
-        m_pComInterface->registerFunction("toggle_mouse_cursor",
+        m_pComInterface->registerFunction("toggle_ui_mode",
                                           CCommand<void>([&]()
                                           {
-                                              m_bMouseCursorVisible ^= 1;
-                                              m_pWindow->setMouseCursorVisible(m_bMouseCursorVisible);
-                                              m_vecMouse.x=0;
-                                              m_vecMouse.y=0;
+                                                if (m_UIMode == UIModeType::WORLD)
+                                                {
+                                                    m_UIMode = UIModeType::UI;
+                                                    m_pComInterface->call<void>("mouse_cursor_on");
+                                                }
+                                                else
+                                                {
+                                                    m_UIMode = UIModeType::WORLD;
+                                                    m_pComInterface->call<void>("mouse_cursor_off");
+                                                }
+                                                m_vecMouse.x=0;
+                                                m_vecMouse.y=0;
                                           }),
-                                          "Toggles visibility of mouse cursor.",
+                                          "Toggles user interface mode (UI, WORLD)",
                                           {{ParameterType::NONE, "No return value"}},
                                            "system", "input");
     }

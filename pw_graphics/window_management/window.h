@@ -60,6 +60,7 @@ class CWindow : public IFontUser,
         
         //--- Constant methods -----------------------------------------------//
         void draw() const; 
+        bool isInside(const int, const int) const;
         bool isVisible() const;
         
         //--- Methods --------------------------------------------------------//
@@ -86,6 +87,23 @@ class CWindow : public IFontUser,
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns, if given coordinates are inside of window
+///
+/// \param _nX X coordinate (screen space)
+/// \param _nY Y coordinate (screen space)
+///
+/// \return Given coordinates inside of window?
+///
+////////////////////////////////////////////////////////////////////////////////
+inline bool CWindow::isInside(const int _nX, const int _nY) const
+{
+    METHOD_ENTRY("CWindow::isInside")
+    return ((_nX >= m_nFramePosX) & (_nX < m_nFramePosX+m_nFrameWidth) &
+            (_nY >= m_nFramePosY) & (_nY < m_nFramePosY+m_nFrameHeight));
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
