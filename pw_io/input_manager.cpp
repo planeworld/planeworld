@@ -38,8 +38,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CInputManager::CInputManager() : m_pWindow(nullptr),
-                                 m_UIMode(UIModeType::WORLD),
-                                 m_bConsoleMode(false)
+                                 m_UIMode(UIModeType::WORLD)
 {
     METHOD_ENTRY("CInputManager::CInputManager")
     CTOR_CALL("CInputManager::CInputManager")
@@ -90,14 +89,7 @@ void CInputManager::processFrame()
             }
             case sf::Event::KeyPressed:
             {
-                if (Event.key.code == sf::Keyboard::Home)
-                {
-                    m_bConsoleMode ^= true;
-                    m_pComInterface->call<void>("toggle_console_mode");
-                    INFO_MSG("Main","Console mode toggled")
-                    break;
-                }
-                if (m_bConsoleMode)
+                if (m_UIMode == UIModeType::UI)
                 {
                     switch (Event.key.code)
                     {
@@ -108,9 +100,9 @@ void CInputManager::processFrame()
                         }
                         case sf::Keyboard::Home:
                         {
-                            m_bConsoleMode ^= true;
-                            m_pComInterface->call<void>("toggle_console_mode");
-                            INFO_MSG("Main","Console mode toggled")
+                            m_UIMode = UIModeType::WORLD;
+                            m_pComInterface->call<void>("mouse_cursor_off");
+                            m_pComInterface->call<void>("com_console_off");
                             break;
                         }
                         case sf::Keyboard::Up:
@@ -133,6 +125,28 @@ void CInputManager::processFrame()
                             m_pComInterface->call<void>("com_console_complement");
                             break;
                         }
+                        case sf::Keyboard::U:
+                        {
+                            if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+                            {
+                                m_UIMode = UIModeType::WORLD;
+                                m_pComInterface->call<void>("mouse_cursor_off");
+                                m_pComInterface->call<void>("com_console_off");
+                            }
+                            break;
+                        }
+                        case sf::Keyboard::W:
+                        {
+                            if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+                            {
+                                m_pComInterface->call<void>("win_show_all");
+                            }
+                            if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
+                            {
+                                m_pComInterface->call<void>("win_hide_all");
+                            }
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -144,6 +158,13 @@ void CInputManager::processFrame()
                         case sf::Keyboard::Escape:
                         {
                             m_pComInterface->call<void>("quit");
+                            break;
+                        }
+                        case sf::Keyboard::Home:
+                        {
+                            m_UIMode = UIModeType::UI;
+                            m_pComInterface->call<void>("mouse_cursor_on");
+                            m_pComInterface->call<void>("com_console_on");
                             break;
                         }
                         case sf::Keyboard::Num0:
@@ -252,18 +273,25 @@ void CInputManager::processFrame()
                         }
                         case sf::Keyboard::U:
                         {
-                            if (m_UIMode == UIModeType::WORLD)
+                            if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
                             {
                                 m_UIMode = UIModeType::UI;
                                 m_pComInterface->call<void>("mouse_cursor_on");
+                                m_pComInterface->call<void>("com_console_on");
                             }
-                            else
+                            break;
+                        }
+                        case sf::Keyboard::W:
+                        {
+                            if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
                             {
-                                m_UIMode = UIModeType::WORLD;
-                                m_pComInterface->call<void>("mouse_cursor_off");
+                                m_pComInterface->call<void>("win_show_all");
                             }
-                            m_vecMouse.x=0;
-                            m_vecMouse.y=0;
+                            if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
+                            {
+                                m_pComInterface->call<void>("win_hide_all");
+                                
+                            }
                             break;
                         }
                         default:
@@ -329,7 +357,7 @@ void CInputManager::processFrame()
             }
             case sf::Event::TextEntered:
             {
-                if (m_bConsoleMode)
+                if (m_UIMode == UIModeType::UI)
                 {
                     if (Event.text.unicode > 31 && Event.text.unicode < 127)
                     {

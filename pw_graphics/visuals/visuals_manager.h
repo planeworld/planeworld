@@ -86,12 +86,11 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            processFrame();
         
 //         void            setComConsole(CComConsole* const);
-        void            setConsoleText(const std::string&);
         void            setFont(const std::string&);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
         void            setWindow(WindowHandleType* const);
-        void            toggleConsoleMode();
+//         void            toggleConsoleMode();
         void            toggleVisualisations(const int&);
         void            unsetVisualisations(const int&);
 
@@ -143,7 +142,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         UIDType                         m_ConsoleWidgetID;  ///< ID of console widget for later access
         UIDType                         m_ConsoleWindowID;  ///< ID of console window for later access
         
-        bool                            m_bConsoleMode;     ///< Indicates if console mode is active
+//         bool                            m_bConsoleMode;     ///< Indicates if console mode is active
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name and location
         sf::Font                        m_Font;             ///< Font for displayed output
@@ -190,21 +189,21 @@ inline WindowHandleType* CVisualsManager::getWindow() const
     return (m_Graphics.getWindow());
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the console text for this frame if console mode is active
-///
-/// \param _strText Console text for this frame
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setConsoleText(const std::string& _strText)
-{
-    METHOD_ENTRY("CVisualsManager::setConsoleText")
-    if (m_bConsoleMode)
-    {
-        m_strConsoleText = _strText;
-    }
-}
+// ////////////////////////////////////////////////////////////////////////////////
+// ///
+// /// \brief Sets the console text for this frame if console mode is active
+// ///
+// /// \param _strText Console text for this frame
+// ///
+// ////////////////////////////////////////////////////////////////////////////////
+// inline void CVisualsManager::setConsoleText(const std::string& _strText)
+// {
+//     METHOD_ENTRY("CVisualsManager::setConsoleText")
+//     if (m_bConsoleMode)
+//     {
+//         m_strConsoleText = _strText;
+//     }
+// }
 
 // ////////////////////////////////////////////////////////////////////////////////
 // ///
@@ -282,17 +281,17 @@ inline void CVisualsManager::setWindow(WindowHandleType* const _pWindow)
     m_Graphics.setWindow(_pWindow);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Toggles a state of console mode
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::toggleConsoleMode()
-{
-    METHOD_ENTRY("CVisualsManager::toggleConsoleMode")
-    m_bConsoleMode ^= true;
-    m_pVisualsDataStorage->getWindowsByValue()->at(m_ConsoleWindowID)->toggleVisibility();
-}
+// ////////////////////////////////////////////////////////////////////////////////
+// ///
+// /// \brief Toggles a state of console mode
+// ///
+// ////////////////////////////////////////////////////////////////////////////////
+// inline void CVisualsManager::toggleConsoleMode()
+// {
+//     METHOD_ENTRY("CVisualsManager::toggleConsoleMode")
+//     m_bConsoleMode ^= true;
+//     m_pVisualsDataStorage->getWindowsByValue()->at(m_ConsoleWindowID)->toggleVisibility();
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

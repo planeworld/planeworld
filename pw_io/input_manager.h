@@ -83,8 +83,6 @@ class CInputManager : public IComInterfaceProvider,
         sf::Vector2i    m_vecMouse;             ///< Current mouse position
         sf::Vector2i    m_vecMouseCenter;       ///< Mouse position at window center
         UIModeType      m_UIMode;               ///< Currently active UI mode
-        
-        bool            m_bConsoleMode;         ///< Toggles com console mode
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

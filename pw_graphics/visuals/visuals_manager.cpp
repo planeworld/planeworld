@@ -53,8 +53,7 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_bCursor(false),
                                      m_bMBLeft(false),
                                      m_ConsoleWidgetID(0),
-                                     m_ConsoleWindowID(0),
-                                     m_bConsoleMode(false)
+                                     m_ConsoleWindowID(0)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -1586,6 +1585,18 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"}},
                                       "system","visuals"
     );
+    m_pComInterface->registerFunction("com_console_on",
+                                      CCommand<void>([&](){m_pVisualsDataStorage->getWindowByValue(m_ConsoleWindowID)->setVisibilty(true);}),
+                                      "Switch command console on.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("com_console_off",
+                                      CCommand<void>([&](){m_pVisualsDataStorage->getWindowByValue(m_ConsoleWindowID)->setVisibilty(false);}),
+                                      "Switch command console off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
     m_pComInterface->registerFunction("com_console_prev",
                                       CCommand<void>([&](){m_pVisualsDataStorage->getComConsole()->prevCommand();}),
                                       "Get the previous command in com console (this is mostly relevant for tab completion).",
@@ -1783,6 +1794,19 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::INT, "Window UID"}},
                                       "system", "visuals"  
     );
+    m_pComInterface->registerFunction("win_hide_all",
+                                      CCommand<void>([&]()
+                                        {
+                                            for (auto Win : *m_pVisualsDataStorage->getWindowsByValue())
+                                            {
+                                                if (Win.second->getUID() != m_ConsoleWindowID)
+                                                    Win.second->setVisibilty(false);
+                                            }
+                                        }),
+                                      "Hide all windows.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system","visuals"
+    );
     m_pComInterface->registerFunction("win_main_resize",
                                       CCommand<void, double, double>([=](const double& _fX,
                                                                          const double& _fY)
@@ -1929,7 +1953,8 @@ void CVisualsManager::myInitComInterface()
                                         {
                                             for (auto Win : *m_pVisualsDataStorage->getWindowsByValue())
                                             {
-                                                Win.second->setVisibilty(true);
+                                                if (Win.second->getUID() != m_ConsoleWindowID)
+                                                    Win.second->setVisibilty(true);
                                             }
                                         }),
                                       "Shows all windows.",
@@ -1960,12 +1985,6 @@ void CVisualsManager::myInitComInterface()
     m_pComInterface->registerFunction("toggle_com",
                                       CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_COM);}),
                                       "Toggle center of mass (COM) on and off.",
-                                      {{ParameterType::NONE, "No return value"}},
-                                      "visuals", "visuals"
-    );
-    m_pComInterface->registerFunction("toggle_console_mode",
-                                      CCommand<void>([&](){this->toggleConsoleMode();}),
-                                      "Toggle command console on and off.",
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals", "visuals"
     );

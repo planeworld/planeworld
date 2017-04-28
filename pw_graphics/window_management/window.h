@@ -68,7 +68,6 @@ class CWindow : public IFontUser,
         void setTitle(const std::string&);
         void setVisibilty(const bool);
         void setWidget(IWidget* const);
-        void toggleVisibility();
         
     private:
         
@@ -163,17 +162,6 @@ inline void CWindow::setWidget(IWidget* const _pWidget)
     m_pWidget = _pWidget;
     this->mySetPosition(m_nFramePosX, m_nFramePosY);
     this->myResize(m_nFrameWidth, m_nFrameHeight);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Toggles the visibility of this window
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::toggleVisibility()
-{
-    METHOD_ENTRY("CWindow::toggleVisibility")
-    m_bVisible ^= true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
