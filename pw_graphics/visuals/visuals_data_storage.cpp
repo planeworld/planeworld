@@ -87,6 +87,56 @@ CVisualsDataStorage::~CVisualsDataStorage()
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return widget, accessed by given UID value
+///
+/// \param _nUID UID of widget to return
+///
+/// \return Widget with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+IWidget* const CVisualsDataStorage::getWidgetByValue(const UIDType _nUID) const
+{
+    METHOD_ENTRY("CVisualsDataStorage::getWidgetByValue")
+
+    const auto ci = m_WidgetsByValue.find(_nUID);
+    if (ci != m_WidgetsByValue.end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("Visuals Data Storage", "Unknown widget with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return window, accessed by given UID value
+///
+/// \param _nUID UID of window to return
+///
+/// \return Window with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+CWindow* const CVisualsDataStorage::getWindowByValue(const UIDType _nUID) const
+{
+    METHOD_ENTRY("CVisualsDataStorage::getWindowByValue")
+    
+    const auto ci = m_WindowsByValue.find(_nUID);
+    if (ci != m_WindowsByValue.end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("Visuals Data Storage", "Unknown window with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Add a camera
@@ -106,9 +156,11 @@ void CVisualsDataStorage::addCamera(CCamera* _pCamera)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Add a window
+/// \brief Add a window to data storage
 ///
-/// This method adds the given window to the list of available cameras
+/// \note Use this method to add a window to the storage that has already been
+///       created elsewhere. Otherwise, use
+///       \ref CVisualsDataStorage::createWindow. 
 ///
 /// \param _pWindow Window to be added
 ///
@@ -116,7 +168,6 @@ void CVisualsDataStorage::addCamera(CCamera* _pCamera)
 void CVisualsDataStorage::addWindow(CWindow* _pWindow)
 {
     METHOD_ENTRY("CVisualsDataStorage::addWindow")
-    
     m_WindowsByValue.insert({_pWindow->getUID(), _pWindow});
     m_WinFrameUsersByValue.insert({_pWindow->getUID(), _pWindow});
     m_WindowsOrder.push_back(_pWindow->getUID());
@@ -124,9 +175,11 @@ void CVisualsDataStorage::addWindow(CWindow* _pWindow)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Add a widget
+/// \brief Add a widget to data storage
 ///
-/// This method adds the given widget to the list of available widgets
+/// \note Use this method to add a widget to the storage that has already been
+///       created elsewhere. Otherwise, use
+///       \ref CVisualsDataStorage::createWidget.
 ///
 /// \param _pWidget Widget to be added
 ///
@@ -134,9 +187,46 @@ void CVisualsDataStorage::addWindow(CWindow* _pWindow)
 void CVisualsDataStorage::addWidget(IWidget* _pWidget)
 {
     METHOD_ENTRY("CVisualsDataStorage::addWidget")
-    
     m_WidgetsByValue.insert({_pWidget->getUID(), _pWidget});
     m_WinFrameUsersByValue.insert({_pWidget->getUID(), _pWidget});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add widgets from queue to storage
+///
+/// This method will add the widgets from queue (see
+/// \ref CVisualsDataStorage::addWidget) to storage.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsDataStorage::addWidgetsFromQueue()
+{
+    METHOD_ENTRY("CVisualsDataStorage::addWidgetsFromQueue")
+    
+    IWidget* pWidget = nullptr;
+    while (m_WidgetsQueue.try_dequeue(pWidget))
+    {
+        this->addWidget(pWidget);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add windows from queue to storage
+///
+/// This method will add the windows from queue (see
+/// \ref CVisualsDataStorage::addWindow) to storage.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsDataStorage::addWindowsFromQueue()
+{
+    METHOD_ENTRY("CVisualsDataStorage::addWindowsFromQueue")
+    
+    CWindow* pWindow = nullptr;
+    while (m_WindowsQueue.try_dequeue(pWindow))
+    {
+        this->addWindow(pWindow);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -181,12 +271,22 @@ bool CVisualsDataStorage::closeWindow(const UIDType _nUID)
 ///
 /// \brief Creates a widget of the given type
 ///
+/// This method creates a widget and adds it to storage. In
+/// \ref CreationModeType::QUEUED, it will be moved to a waiter queue and later
+/// be added to storage. The reason for this lies in multithreading and return
+/// value retrieval. When a widget is created, the UID has to be returned.
+/// Hence, it is defined as a reader command (see \ref CComInterface). The
+/// newly created widget is stored temporary in a concurrent queue and later
+/// added to storage by the appropriate thread.
+///
 /// \param _WidgetType Type of widget to be created
+/// \param _pMode Mode of creation (direct to storage or threading queue)
 ///
 /// \return UID of newly created window
 ///
 ///////////////////////////////////////////////////////////////////////////////
-UIDType CVisualsDataStorage::createWidget(const WidgetTypeType _WidgetType)
+UIDType CVisualsDataStorage::createWidget(const WidgetTypeType _WidgetType,
+                                          const CreationModeType _pMode)
 {
     METHOD_ENTRY("CVisualsDataStorage::createWidget")
     
@@ -219,7 +319,15 @@ UIDType CVisualsDataStorage::createWidget(const WidgetTypeType _WidgetType)
     if (pWidget != nullptr)
     {
         pWidget->setFont(&m_Font);
-        this->addWidget(pWidget);
+        
+        if (_pMode == CreationModeType::DIRECT)
+        {
+            this->addWidget(pWidget);
+        }
+        else
+        {
+            m_WidgetsQueue.try_enqueue(pWidget);
+        }
     
         return pWidget->getUID();
     }
@@ -233,12 +341,20 @@ UIDType CVisualsDataStorage::createWidget(const WidgetTypeType _WidgetType)
 ///
 /// \brief Creates a generic window
 ///
-/// This method creates a generic window and returns its unique ID
+/// This method creates a window and adds it to storage. In
+/// \ref CreationModeType::QUEUED, it will be moved to a waiter queue and later
+/// be added to storage. The reason for this lies in multithreading and return
+/// value retrieval. When a window is created, the UID has to be returned.
+/// Hence, it is defined as a reader command (see \ref CComInterface). The
+/// newly created window is stored temporary in a concurrent queue and later
+/// added to storage by the appropriate thread.
+///
+/// \param _pMode Mode of creation (direct to storage or threading queue)
 ///
 /// \return UID of newly created window
 ///
 ///////////////////////////////////////////////////////////////////////////////
-UIDType CVisualsDataStorage::createWindow()
+UIDType CVisualsDataStorage::createWindow(const CreationModeType _pMode)
 {
     METHOD_ENTRY("CVisualsDataStorage::addWidget")
     
@@ -246,7 +362,14 @@ UIDType CVisualsDataStorage::createWindow()
     MEM_ALLOC("CWindow")
     
     pWin->setFont(&m_Font);
-    this->addWindow(pWin);
+    if (_pMode == CreationModeType::DIRECT)
+    {
+        this->addWindow(pWin);
+    }
+    else
+    {
+        m_WindowsQueue.try_enqueue(pWin);
+    }
     
     return pWin->getUID();
 }

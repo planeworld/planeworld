@@ -1325,6 +1325,8 @@ void CVisualsManager::processFrame()
 
     m_Graphics.switchToWorldSpace();
     
+    m_pVisualsDataStorage->addWidgetsFromQueue();
+    m_pVisualsDataStorage->addWindowsFromQueue();
     m_pComInterface->callWriters("visuals");
     
     m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
@@ -1618,17 +1620,24 @@ void CVisualsManager::myInitComInterface()
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("create_widget",
-                                      CCommand<void, std::string>([&](const std::string& _strS) {m_pVisualsDataStorage->createWidget(mapStringToWidgetType(_strS));}),
+                                      CCommand<int, std::string>([&](const std::string& _strS) -> int
+                                      {
+                                          return m_pVisualsDataStorage->createWidget(mapStringToWidgetType(_strS),
+                                                                                     CreationModeType::QUEUED);
+                                      }),
                                       "Creates a widget of given type.",
                                       {{ParameterType::INT, "Window UID"},
                                        {ParameterType::STRING, "Widget Type (" + ossWidgetType.str() + ")"}},
-                                      "system","visuals"
+                                      "system"
     );
     m_pComInterface->registerFunction("create_window",
-                                      CCommand<void>([&]() {m_pVisualsDataStorage->createWindow();}),
+                                      CCommand<int>([&]() -> int
+                                      {
+                                          return m_pVisualsDataStorage->createWindow(CreationModeType::QUEUED);
+                                      }),
                                       "Creates generic window.",
                                       {{ParameterType::INT, "Window UID"}},
-                                      "system","visuals"
+                                      "system"
     );
     m_pComInterface->registerFunction("mouse_cursor_on",
                                       CCommand<void>([&]() {m_bCursor = true;}),
