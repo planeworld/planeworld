@@ -1291,6 +1291,8 @@ bool CVisualsManager::init()
     pConsoleWindow->setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
     pConsoleWindow->setPosition(10, 10);
     pConsoleWindow->resize(800, 150);
+    pConsoleWindow->setVisibilty(false);
+    pConsoleWindow->setClosability(false);
     
     return (m_Graphics.init());
 }
@@ -1378,13 +1380,27 @@ void CVisualsManager::updateUI()
         auto it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
         while (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rend())
         {
+            CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(*it);
+                
+            // Test, if cursor is in the area that closes the window
+            if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::CLOSE))
+            {
+                m_pVisualsDataStorage->closeWindow(*it);
+                m_bMBLeft = false; // Avoid focussing the underlying window
+                break;
+            }
+            // Test, if cursor is in the area that resizes the window
+            else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::RESIZE))
+            {
+                pWin->resize(pWin->getWidth() +m_nCursorX-m_nCursorX0,
+                             pWin->getHeight()+m_nCursorY-m_nCursorY0);
+                break;
+            }
             // Test, if mouse cursor is inside of window. Cursor positon of
             // the previous frame must be used, since windows are not updated
             // yet.
-            if (m_pVisualsDataStorage->getWindowByValue(*it)->isInside(m_nCursorX0, m_nCursorY0))
+            else if (pWin->isInside(m_nCursorX0, m_nCursorY0))
             {
-                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(*it);
-                
                 // Test for offset (position of cursor within windows).
                 // Offset = 0 indicates, that no offset was calculated yet.
                 if (m_nCursorOffsetX == 0 && m_nCursorOffsetY == 0)
@@ -1445,6 +1461,24 @@ void CVisualsManager::myInitComInterface()
     //----------------------------------------------------------------------
     // System package
     //----------------------------------------------------------------------
+    m_pComInterface->registerFunction("cam_attach_to",
+                                      CCommand<void, int>([&](const int _nUID)
+                                      {
+                                          auto it = m_pDataStorage->getObjectsByValueFront()->find(_nUID);
+                                          if (it != m_pDataStorage->getObjectsByValueFront()->end())
+                                          {
+                                                m_pCamera->attachTo(it->second);
+                                          }
+                                          else
+                                          {
+                                              WARNING_MSG("Visuals Manager", "Unknown object with UID <" << _nUID << ">")
+                                          }
+                                      }),
+                                      "Hook camera on given object.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Object UID"}},
+                                      "system", "visuals"  
+    );
     m_pComInterface->registerFunction("cam_cycle",
                                       CCommand<void>([&](){this->cycleCamera();}),
                                       "Cycle through registered cameras",
@@ -1480,24 +1514,6 @@ void CVisualsManager::myInitComInterface()
                                       "Rotate camera by given angle.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
-                                      "system", "visuals"  
-    );
-    m_pComInterface->registerFunction("cam_hook_on",
-                                      CCommand<void, int>([&](const int _nUID)
-                                      {
-                                          auto it = m_pDataStorage->getObjectsByValueFront()->find(_nUID);
-                                          if (it != m_pDataStorage->getObjectsByValueFront()->end())
-                                          {
-                                                m_pCamera->attachTo(it->second);
-                                          }
-                                          else
-                                          {
-                                              WARNING_MSG("Visuals Manager", "Unknown object with UID <" << _nUID << ">")
-                                          }
-                                      }),
-                                      "Hook camera on given object.",
-                                      {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::INT, "Object UID"}},
                                       "system", "visuals"  
     );
     m_pComInterface->registerFunction("cam_set_position",
@@ -1733,6 +1749,26 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Widget UID"},
                                       {ParameterType::STRING, "Widget text"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_set_title",
+                                      CCommand<void, int, std::string>(
+                                          [&](const int _nUID, const std::string _strTitle)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    pWin->setTitle(_strTitle);
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Set title of window.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"},
+                                      {ParameterType::STRING, "Window title"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("win_set_widget",

@@ -42,6 +42,14 @@
 
 //--- Misc header ------------------------------------------------------------//
 
+/// Defines areas of action, such as close, resize etc.
+enum class WinAreaType
+{
+    CLOSE,
+    RESIZE,
+    WIN
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Definition of a graphical window
@@ -60,11 +68,13 @@ class CWindow : public IFontUser,
         
         //--- Constant methods -----------------------------------------------//
         void draw() const; 
-        bool isInside(const int, const int) const;
+        bool isClosable() const {return m_bClosable;}
+        bool isInside(const int, const int, const WinAreaType = WinAreaType::WIN) const;
         bool isVisible() const;
         
         //--- Methods --------------------------------------------------------//
         void center();
+        void setClosability(const bool _bClosable) {m_bClosable = _bClosable;}
         void setTitle(const std::string&);
         void setVisibilty(const bool);
         void setWidget(IWidget* const);
@@ -78,31 +88,18 @@ class CWindow : public IFontUser,
         void mySetPosition(const int, const int);
         
         //--- Variables [private] --------------------------------------------//
-        std::string m_strTitle; ///< Window title
+        std::string m_strTitle;     ///< Window title
         
-        IWidget*    m_pWidget;  ///< Widget of this \ref CWindow
-        bool        m_bCenter;  ///< Indicates, if this window is centered
-        bool        m_bVisible; ///< Indicates, if this window is visible
+        IWidget*    m_pWidget;      ///< Widget of this \ref CWindow
+        bool        m_bCenter;      ///< Indicates, if this window is centered
+        bool        m_bVisible;     ///< Indicates, if this window is visible
+        bool        m_bClosable;    ///< Indicates, if this window may be closed
+        
+        int         m_nSizeClose;   ///< Size (both dimensions) of close area
+        int         m_nSizeResize;  ///< Size (both dimensions) of resize area
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns, if given coordinates are inside of window
-///
-/// \param _nX X coordinate (screen space)
-/// \param _nY Y coordinate (screen space)
-///
-/// \return Given coordinates inside of window?
-///
-////////////////////////////////////////////////////////////////////////////////
-inline bool CWindow::isInside(const int _nX, const int _nY) const
-{
-    METHOD_ENTRY("CWindow::isInside")
-    return ((_nX >= m_nFramePosX) & (_nX < m_nFramePosX+m_nFrameWidth) &
-            (_nY >= m_nFramePosY) & (_nY < m_nFramePosY+m_nFrameHeight));
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

@@ -41,7 +41,10 @@ CWindow::CWindow() : IUniqueIDUser(),
                      IWinFrameUser(),
                      m_pWidget(nullptr),
                      m_bCenter(false),
-                     m_bVisible(false)
+                     m_bVisible(true),
+                     m_bClosable(true),
+                     m_nSizeClose(10),
+                     m_nSizeResize(10)
 {
     METHOD_ENTRY("CWindow::CWindow");
     CTOR_CALL("CWindow::CWindow");
@@ -80,17 +83,20 @@ void CWindow::draw() const
     
     if (m_bVisible)
     {
+        // Draw background area
         m_Graphics.setColor(m_WinColorBG);
         m_Graphics.filledRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
                               Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+        // Draw title frame
         m_Graphics.setColor(m_WinColorFG);
         int nSpacing = m_pFont->getLineSpacing(m_nFontSize);
         m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
                         Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+        
+        // Draw content frame
         m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
                         Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+nSpacing));
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-
+        
         m_Graphics.getWindow()->pushGLStates();
         sf::Text Text;
 
@@ -106,7 +112,69 @@ void CWindow::draw() const
         m_Graphics.getWindow()->popGLStates();        
         
         if (m_pWidget != nullptr) m_pWidget->draw();
+        
+        m_Graphics.setColor(0.7, 0.3, 0.3, 1.0);
+
+        // Draw close button area
+        if (m_bClosable)
+        {
+            m_Graphics.filledRect(Vector2d(m_nFramePosX+m_nFrameWidth-m_nSizeClose, m_nFramePosY),
+                                  Vector2d(m_nFramePosX+m_nFrameWidth,m_nFramePosY+m_nSizeClose));
+        }
+        
+        // Draw resize button area
+        m_Graphics.filledRect(Vector2d(m_nFramePosX+m_nFrameWidth-m_nSizeResize,
+                                       m_nFramePosY+m_nFrameHeight-m_nSizeResize),
+                              Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+m_nFrameHeight));
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns, if given coordinates are inside of given window area
+///
+/// \param _nX X coordinate (screen space)
+/// \param _nY Y coordinate (screen space)
+/// \param _Area Area to be tested (this distinguishes the different areas for
+///              action such as close, resize or title)
+///
+/// \return Given coordinates inside of window?
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CWindow::isInside(const int _nX,
+                       const int _nY,
+                       const WinAreaType _Area) const
+{
+    METHOD_ENTRY("CWindow::isInside")
+    
+    bool bInside = false;
+    switch (_Area)
+    {
+        case WinAreaType::CLOSE:
+        {
+            if (m_bClosable)
+            {
+                bInside = ((_nX >= m_nFramePosX+m_nFrameWidth-m_nSizeClose) & (_nX < m_nFramePosX+m_nFrameWidth) &
+                           (_nY >= m_nFramePosY) & (_nY < m_nFramePosY+m_nSizeClose));
+            }
+            break;
+        }
+        case WinAreaType::RESIZE:
+        {
+            bInside = ((_nX >= m_nFramePosX+m_nFrameWidth-m_nSizeResize)  & (_nX < m_nFramePosX+m_nFrameWidth) &
+                       (_nY >= m_nFramePosY+m_nFrameHeight-m_nSizeResize) & (_nY < m_nFramePosY+m_nFrameHeight));
+            break;
+        }
+        case WinAreaType::WIN:
+        {
+            bInside = ((_nX >= m_nFramePosX) & (_nX < m_nFramePosX+m_nFrameWidth) &
+                       (_nY >= m_nFramePosY) & (_nY < m_nFramePosY+m_nFrameHeight));
+            break;
+        }
+    }
+    
+    return bInside;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
