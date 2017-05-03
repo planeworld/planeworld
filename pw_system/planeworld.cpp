@@ -333,7 +333,14 @@ int main(int argc, char *argv[])
     // 7. Start lua
     //
     ////////////////////////////////////////////////////////////////////////////
-    if (!pLuaManager->init()) {CLEAN_UP; return EXIT_FAILURE;}
+    if (!pLuaManager->init())
+    {
+        #ifdef PW_MULTITHREADING
+            pPhysicsManager->terminate();
+            pPhysicsThread->join();
+        #endif
+        CLEAN_UP; return EXIT_FAILURE;
+    }
     
     #ifdef PW_MULTITHREADING    
         pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);

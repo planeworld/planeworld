@@ -20,7 +20,7 @@ INCLUDE_DIRECTORIES (
     ${NOISE2D_INCLUDE_DIR}
     ${SFML_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/3rdparty/ConcurrentQueue
-    ${CMAKE_HOME_DIRECTORY}/3rdparty/Selene/include
+    ${CMAKE_HOME_DIRECTORY}/3rdparty/sol2
     ${CMAKE_HOME_DIRECTORY}/pw_io
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core

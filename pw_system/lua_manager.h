@@ -40,7 +40,7 @@
 #include <sstream>
 
 //--- Misc. header -----------------------------------------------------------//
-#include "selene.h"
+#include "sol.hpp"
 
 // Constants
 const char   LUA_PACKAGE_PREFIX[2] = {'p','w'};
@@ -79,9 +79,9 @@ class CLuaManager : public IComInterfaceProvider,
         void myInitComInterface();
 
         //--- Variables [private] --------------------------------------------//
-        sel::State  m_LuaState{true}; ///< Current lua state
+        sol::state      m_LuaState;             ///< Current lua state
         
-        std::string     m_strPhysicsInterface; ///< Path and filename of physics interface
+        std::string     m_strPhysicsInterface;  ///< Path and filename of physics interface
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

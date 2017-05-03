@@ -38,8 +38,6 @@
 
 using namespace Eigen;
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Initialise Lua scripting engine
@@ -54,6 +52,12 @@ bool CLuaManager::init()
 {
     METHOD_ENTRY("CPhysicsManager::init")
     
+    sol::table TablePW = m_LuaState.create_named_table(LUA_PACKAGE_PREFIX);
+    for (const auto& Dom : *m_pComInterface->getDomains())
+    {
+        TablePW[Dom] = m_LuaState.create_table();
+    }
+    
     for (auto Function : *m_pComInterface->getFunctions())
     {
         std::string strDomain((*m_pComInterface->getDomainsByFunction())[Function.first]);
@@ -63,113 +67,113 @@ bool CLuaManager::init()
             switch (Function.second->getSignature())
             {
                 case SignatureType::INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::INT_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<int,std::string>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<int,std::string>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::DOUBLE_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::DOUBLE_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double,std::string>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double,std::string>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::DOUBLE_STRING_DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double,std::string,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double,std::string,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_BOOL:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,bool>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,bool>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_2DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,double,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,double,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_2INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_3INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,int,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,int,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT_DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT_2DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,double,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,double,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT_4DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] =
+                    TablePW[strDomain.c_str()][Function.first.c_str()] =
                                 static_cast<CCommandWritable<void,int,double, double, double, double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,std::string>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,std::string>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_STRING_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_STRING_2INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,int,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,int,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_STRING_DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [&]() -> std::string
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [&]() -> std::string
                     {
                         std::string strRet = static_cast<CCommandWritable<std::string>*>(Function.second)->call();
                         return strRet;
                     };
                     break;
                 case SignatureType::VEC2DDOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
                     {
                         Vector2d vecV = static_cast<CCommandWritable<Vector2d>*>(Function.second)->call();
                         return std::tie(vecV[0],vecV[1]);
                     };
                     break;
                 case SignatureType::VEC2DDOUBLE_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
                     {
                         Vector2d vecV = static_cast<CCommandWritable<Vector2d,int>*>(Function.second)->call(_nP);
                         return std::tie(vecV[0],vecV[1]);
                     };
                     break;
                 case SignatureType::VEC2DDOUBLE_2INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const int _nP1, const int _nP2) -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP1, const int _nP2) -> std::tuple<double,double>
                     {
                         Vector2d vecV = static_cast<CCommandWritable<Vector2d,int,int>*>(Function.second)->call(_nP1,_nP2);
                         return std::tie(vecV[0],vecV[1]);
                     };
                     break;
                 case SignatureType::VEC2DDOUBLE_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS) -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS) -> std::tuple<double,double>
                     {
                         Vector2d vecV = static_cast<CCommandWritable<Vector2d,std::string>*>(Function.second)->call(_strS);
                         return std::tie(vecV[0],vecV[1]);
                     };
                     break;
                 case SignatureType::VEC2DDOUBLE_2STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
                     {
                         Vector2d vecV = static_cast<CCommandWritable<Vector2d,std::string,std::string>*>(Function.second)->call(_strS1,_strS2);
                         return std::tie(vecV[0],vecV[1]);
                     };
                     break;
                 case SignatureType::VEC2DINT_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const int _nUID) -> std::tuple<int,int>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nUID) -> std::tuple<int,int>
                     {
                         Vector2i vecV = static_cast<CCommandWritable<Vector2i,int>*>(Function.second)->call(_nUID);
                         return std::tie(vecV[0],vecV[1]);
@@ -185,109 +189,109 @@ bool CLuaManager::init()
             switch (Function.second->getSignature())
             {
                 case SignatureType::INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::INT_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::INT_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,std::string>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,std::string>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::DOUBLE_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::DOUBLE_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::DOUBLE_STRING_DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_BOOL:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,bool>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,bool>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_2DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_2INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_3INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT_DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT_2DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT_4DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] =
+                    TablePW[strDomain.c_str()][Function.first.c_str()] =
                                 static_cast<CCommand<void, int, double, double, double, double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_INT_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,std::string>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,std::string>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_STRING_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_STRING_2INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int,int>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int,int>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::NONE_STRING_DOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,double>*>(Function.second)->getFunction();
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,double>*>(Function.second)->getFunction();
                     break;
                 case SignatureType::VEC2DDOUBLE:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
                     {
                         Vector2d vecV = static_cast<CCommand<Vector2d>*>(Function.second)->call();
                         return std::tie(vecV[0],vecV[1]);
                     };
                     break;
                 case SignatureType::VEC2DDOUBLE_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
                     {
                         Vector2d vecV = static_cast<CCommand<Vector2d,int>*>(Function.second)->call(_nP);
                         return std::tie(vecV[0],vecV[1]);
                     };
                     break;
                 case SignatureType::VEC2DDOUBLE_2INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const int _nP1, const int _nP2) -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP1, const int _nP2) -> std::tuple<double,double>
                     {
                         Vector2d vecV = static_cast<CCommand<Vector2d,int,int>*>(Function.second)->call(_nP1,_nP2);
                         return std::tie(vecV[0],vecV[1]);
                     };
                     break;
                 case SignatureType::VEC2DDOUBLE_STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS) -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS) -> std::tuple<double,double>
                     {
                         Vector2d vecVel = static_cast<CCommand<Vector2d,std::string>*>(Function.second)->call(_strS);
                         return std::tie(vecVel[0],vecVel[1]);
                     };
                     break;
                 case SignatureType::VEC2DDOUBLE_2STRING:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
                     {
                         Vector2d vecVel = static_cast<CCommand<Vector2d,std::string,std::string>*>(Function.second)->call(_strS1,_strS2);
                         return std::tie(vecVel[0],vecVel[1]);
                     };
                     break;
                 case SignatureType::VEC2DINT_INT:
-                    m_LuaState[LUA_PACKAGE_PREFIX][strDomain.c_str()][Function.first.c_str()] = [=](const int _nUID) -> std::tuple<int,int>
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nUID) -> std::tuple<int,int>
                     {
                         Vector2i vecV = static_cast<CCommand<Vector2i,int>*>(Function.second)->call(_nUID);
                         return std::tie(vecV[0],vecV[1]);
@@ -299,14 +303,35 @@ bool CLuaManager::init()
             }
         }
     }
-    
-    if (!m_strPhysicsInterface.empty())
-        if (!m_LuaState.Load(m_strPhysicsInterface))
+    DOM_VAR(DEBUG(
+        for (const auto& TablePWEntry : TablePW)
         {
-            ERROR_MSG("Lua Manager", "Cannot load lua file " << m_strPhysicsInterface << ".")
+            std::cout << TablePWEntry.first.as<std::string>() << std::endl;
+            for (const auto& TableDOM : TablePWEntry.second.as<sol::table>())
+            {
+                std::cout << "--" << TableDOM.first.as<std::string>() << std::endl;
+            }
+        }
+    ))
+    m_LuaState.open_libraries(sol::lib::base, sol::lib::package,
+                              sol::lib::io,
+                              sol::lib::math,
+                              sol::lib::os
+    );
+
+    if (!m_strPhysicsInterface.empty())
+    {
+        try
+        {
+            m_LuaState.script_file(m_strPhysicsInterface);
+        }
+        catch (const std::exception& _E)
+        {
+            ERROR_MSG("Lua Manager", _E.what())
             return false;
         }
-    
+    }
+        
     return true;
 }
 
@@ -347,7 +372,14 @@ void CLuaManager::myInitComInterface()
         m_pComInterface->registerFunction("execute_lua",
                                           CCommand<void, std::string>([&](const std::string& _strS)
                                           {
-                                              m_LuaState(_strS.c_str());
+                                              try
+                                              {
+                                                 m_LuaState.script(_strS.c_str());
+                                              }
+                                              catch (const std::exception& _E)
+                                              {
+                                                  ERROR_MSG("Lua Manager", _E.what())
+                                              }
                                           }),
                                           "Interpretes and executes given string in Lua.",
                                           {{ParameterType::NONE, "No return value"},
