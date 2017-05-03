@@ -264,6 +264,20 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 this->call<void, int, double, double, double, double>(strName, nParam, fParam[0], fParam[1], fParam[2], fParam[3]);
                 break;
             }
+            case SignatureType::NONE_INT_DYN_ARRAY:
+            {
+                int nParam(0);
+                iss >> nParam;
+                double fParam(0);
+                std::vector<double> vecDynArray{};
+                while (!iss.eof())
+                {
+                    iss >> fParam;
+                    vecDynArray.push_back(fParam);
+                }
+                this->call<void, int, std::vector<double>>(strName, nParam, vecDynArray);
+                break;
+            }
             case SignatureType::NONE_STRING_DOUBLE:
             {
                 std::string strS("");
@@ -452,6 +466,13 @@ void CComInterface::callWriters(const std::string& _strQueue)
                                               std::get<2>(pQueuedFunctionConcrete->getParams()),
                                               std::get<3>(pQueuedFunctionConcrete->getParams()),
                                               std::get<4>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_INT_DYN_ARRAY:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, std::vector<double>>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
             case SignatureType::NONE_INT_STRING:

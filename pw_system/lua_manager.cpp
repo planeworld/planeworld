@@ -40,6 +40,21 @@ using namespace Eigen;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+CLuaManager::CLuaManager() : m_strPhysicsInterface("")
+{
+    METHOD_ENTRY("CLuaManager::CLuaManager")
+    CTOR_CALL("CLuaManager::CLuaManager")
+    
+    #ifdef PW_MULTITHREADING
+        m_strModuleName = "Lua Manager";
+    #endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Initialise Lua scripting engine
 ///
 /// Lua uses the com interface of planeworld. Therefore, all functions
@@ -114,6 +129,18 @@ bool CLuaManager::init()
                 case SignatureType::NONE_INT_4DOUBLE:
                     TablePW[strDomain.c_str()][Function.first.c_str()] =
                                 static_cast<CCommandWritable<void,int,double, double, double, double>*>(Function.second)->getFunction();
+                    break;
+                case SignatureType::NONE_INT_DYN_ARRAY:
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP, const sol::table& _Table)
+                    {
+                        auto pFunctionComInt = static_cast<CCommandWritable<void,int,std::vector<double>>*>(Function.second)->getFunction();
+                        std::vector<double> vecTable(_Table.size());
+                        for (auto i = 1u; i <= _Table.size(); ++i)
+                        {
+                            vecTable[i-1] = _Table[i];
+                        }
+                        pFunctionComInt(_nP, vecTable);
+                    };
                     break;
                 case SignatureType::NONE_INT_STRING:
                     TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,std::string>*>(Function.second)->getFunction();
@@ -239,6 +266,18 @@ bool CLuaManager::init()
                 case SignatureType::NONE_INT_4DOUBLE:
                     TablePW[strDomain.c_str()][Function.first.c_str()] =
                                 static_cast<CCommand<void, int, double, double, double, double>*>(Function.second)->getFunction();
+                    break;
+                case SignatureType::NONE_INT_DYN_ARRAY:
+                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP, const sol::table& _Table)
+                    {
+                        auto pFunctionComInt = static_cast<CCommand<void,int,std::vector<double>>*>(Function.second)->getFunction();
+                        std::vector<double> vecTable(_Table.size());
+                        for (auto i = 1u; i <= _Table.size(); ++i)
+                        {
+                            vecTable[i-1] = _Table[i];
+                        }
+                        pFunctionComInt(_nP, vecTable);
+                    };
                     break;
                 case SignatureType::NONE_INT_STRING:
                     TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,std::string>*>(Function.second)->getFunction();

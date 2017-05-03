@@ -86,26 +86,6 @@ class CLuaManager : public IComInterfaceProvider,
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Constructor
-///
-///////////////////////////////////////////////////////////////////////////////
-inline CLuaManager::CLuaManager() : m_strPhysicsInterface("")
-{
-    METHOD_ENTRY("CLuaManager::CLuaManager")
-    CTOR_CALL("CLuaManager::CLuaManager")
-    
-    #ifdef PW_MULTITHREADING
-        // Somehow, there is a problem with Selene and the module name if 
-        // constructor is not inline. The error is pretty weird, lua 
-        // registration does not recognize packages (nested tables).
-        // The error only occurs when compiled in DEBUG mode, though it 
-        // does not if DEBUG and CTOR_CALL is enabled.
-        m_strModuleName = "Lua Manager";
-    #endif
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Set path and filename for Lua physics interface

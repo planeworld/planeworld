@@ -158,6 +158,14 @@ UIDType CPhysicsManager::createShape(const ShapeType _ShapeType)
             m_ShapesToBeAddedToWorld.enqueue(pPlanet);
             break;
         }
+        case ShapeType::POLYGON:
+        {
+            CPolygon* pPolygon = new CPolygon();
+            MEM_ALLOC("IShape")
+            nUID = pPolygon->getUID();
+            m_ShapesToBeAddedToWorld.enqueue(pPolygon);
+            break;
+        }
         default:
         {
             WARNING_MSG("Physics Manager", "Unknown shape type. Cannot create shape")
@@ -1121,7 +1129,7 @@ void CPhysicsManager::myInitComInterface()
                                                 {
                                                     try
                                                     {
-                                                        if (static_cast<CCircle*>(m_pDataStorage->getShapesByValue()->at(_nUID))->getShapeType() == ShapeType::CIRCLE)
+                                                        if (m_pDataStorage->getShapesByValue()->at(_nUID)->getShapeType() == ShapeType::CIRCLE)
                                                         {
                                                             static_cast<CCircle*>(m_pDataStorage->getShapesByValue()->at(_nUID))->setRadius(_fRad);
                                                         }
@@ -1141,6 +1149,45 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::INT, "Shapes UID"},
                                            {ParameterType::DOUBLE, "Radius to be set"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("shp_set_vertices",
+                                          CCommand<void, int, std::vector<double>>(
+                                                [&](const int _nUID, const std::vector<double>& _vecVerts)
+                                                {
+                                                    try
+                                                    {
+                                                        if (m_pDataStorage->getShapesByValue()->at(_nUID)->getShapeType() == ShapeType::POLYGON)
+                                                        {
+                                                            CPolygon* pPoly = static_cast<CPolygon*>(m_pDataStorage->getShapesByValue()->at(_nUID));
+                                                            if (_vecVerts.size() % 2 != 0)
+                                                            {
+                                                                WARNING_MSG("Polygon", "Invalid number of parameters. Must be an even number (x,y).")
+                                                            }
+                                                            else
+                                                            {
+                                                                for (auto i=0u; i<_vecVerts.size(); i+=2)
+                                                                {
+                                                                    pPoly->addVertex(_vecVerts[i], _vecVerts[i+1]);
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            WARNING_MSG("World Data Storage", "Wrong shape type of shape with UID <" << _nUID << ">")
+                                                            throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                        }
+                                                    }
+                                                    catch (const std::out_of_range& oor)
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Unknown shape with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    }
+                                                }),
+                                          "Set vertices of shape (if applicable) with given UID.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Shapes UID"},
+                                           {ParameterType::DYN_ARRAY, "Vertices (x0, y0, x1, y1, ... xN, yN)"}},
                                            "physics", "physics"
                                          );
         m_pComInterface->registerFunction("get_time",
