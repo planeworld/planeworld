@@ -86,9 +86,9 @@ class CVisualsDataStorage : public IComInterfaceUser
         //--- Constant Methods -----------------------------------------------//
         const CamerasByIndexType&   getCamerasByIndex() const;
         const CamerasByNameType&    getCamerasByName() const;
-        CComConsole* const          getComConsole() const;
-        IWidget* const              getWidgetByValue(const UIDType) const;
-        CWindow* const              getWindowByValue(const UIDType) const;
+        CComConsole*                getComConsole() const;
+        IWidget*                    getWidgetByValue(const UIDType) const;
+        CWindow*                    getWindowByValue(const UIDType) const;
         const WidgetsByValueType*   getWidgetsByValue() const;
         const WindowsByValueType*   getWindowsByValue() const;
         
@@ -163,7 +163,7 @@ inline const CamerasByNameType& CVisualsDataStorage::getCamerasByName() const
 /// \return Com console
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CComConsole* const CVisualsDataStorage::getComConsole() const
+inline CComConsole* CVisualsDataStorage::getComConsole() const
 {
     METHOD_ENTRY("CVisualsDataStorage::getComConsole")
     return m_pComConsole;

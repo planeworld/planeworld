@@ -73,7 +73,7 @@ class IWidget : public IFontUser,
         //--- Constant methods -----------------------------------------------//
         virtual void draw() = 0;
         
-        const WidgetTypeType getType() const {return m_Type;}
+        WidgetTypeType getType() const {return m_Type;}
 
         //--- Methods --------------------------------------------------------//
         

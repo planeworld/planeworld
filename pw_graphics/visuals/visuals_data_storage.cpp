@@ -96,7 +96,7 @@ CVisualsDataStorage::~CVisualsDataStorage()
 /// \return Widget with given UID value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-IWidget* const CVisualsDataStorage::getWidgetByValue(const UIDType _nUID) const
+IWidget* CVisualsDataStorage::getWidgetByValue(const UIDType _nUID) const
 {
     METHOD_ENTRY("CVisualsDataStorage::getWidgetByValue")
 
@@ -121,7 +121,7 @@ IWidget* const CVisualsDataStorage::getWidgetByValue(const UIDType _nUID) const
 /// \return Window with given UID value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CWindow* const CVisualsDataStorage::getWindowByValue(const UIDType _nUID) const
+CWindow* CVisualsDataStorage::getWindowByValue(const UIDType _nUID) const
 {
     METHOD_ENTRY("CVisualsDataStorage::getWindowByValue")
     

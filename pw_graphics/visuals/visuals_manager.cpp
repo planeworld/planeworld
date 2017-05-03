@@ -1822,7 +1822,7 @@ void CVisualsManager::myInitComInterface()
                                       CCommand<void, int>(
                                           [&](const int _nUID)
                                             {
-                                                if (_nUID != m_ConsoleWindowID)
+                                                if (_nUID != int(m_ConsoleWindowID))
                                                 {
                                                     if (!m_pVisualsDataStorage->closeWindow(_nUID))
                                                     {
