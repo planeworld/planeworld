@@ -40,21 +40,6 @@ using namespace Eigen;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Constructor
-///
-///////////////////////////////////////////////////////////////////////////////
-CLuaManager::CLuaManager() : m_strPhysicsInterface("")
-{
-    METHOD_ENTRY("CLuaManager::CLuaManager")
-    CTOR_CALL("CLuaManager::CLuaManager")
-    
-    #ifdef PW_MULTITHREADING
-        m_strModuleName = "Lua Manager";
-    #endif
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Initialise Lua scripting engine
 ///
 /// Lua uses the com interface of planeworld. Therefore, all functions
