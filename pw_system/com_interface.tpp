@@ -66,21 +66,6 @@ CCommandToQueueWrapper<TRet, TArgs...>::CCommandToQueueWrapper(const std::functi
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Constructor
-///
-/// \param _Function Function with write access to register
-///
-///////////////////////////////////////////////////////////////////////////////
-template <class TRet, class... TArgs>
-CCommandWritable<TRet, TArgs...>::CCommandWritable(const std::function<void(TArgs...)>& _Function) : m_Function(_Function)
-{
-    METHOD_ENTRY("CCommandWritable::CCommandWritable")
-    CTOR_CALL("CCommandWritable")
-    this->dispatchSignature();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Calls the function with given arguments
 ///
 /// \param _Args Arguments to call the function with
@@ -119,27 +104,6 @@ TRet CCommandToQueueWrapper<TRet, TArgs...>::call(TArgs... _Args)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Calls a function with write access with given arguments
-///
-/// This method does not actually call the registered function, but puts it
-/// in a command queue with its parameters. 
-///
-/// \param _Args Arguments to call the function with
-///
-/// \return Return value of function
-///
-///////////////////////////////////////////////////////////////////////////////
-template <class TRet, class... TArgs>
-TRet CCommandWritable<TRet, TArgs...>::call(TArgs... _Args)
-{
-    METHOD_ENTRY("CCommandWritable::call")
-    DEBUG_MSG("Com Interface", "Writer called for storage in command queue.")
-    m_Function(_Args...);
-    return TRet();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Calls the given function if registered
 ///
 /// \param _strName Registered name of the function that should be called
@@ -155,45 +119,20 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
     try
     {
         #ifdef LOGLEVEL_DEBUG
-            if (m_WriterFlags.at(_strName))
+            DEBUG_MSG("Com Interface", "Direct call: <" << _strName << ">")
+            auto pFunction = dynamic_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
+            if (pFunction != nullptr )
             {
-                DEBUG_MSG("Com Interface", "Direct writer call: <" << _strName << ">")
-                auto pFunction = dynamic_cast<CCommandWritable<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-                if (pFunction != nullptr)
-                {
-                    return pFunction->call(_Args...);
-                }
-                else
-                {
-                    WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
-                    return TRet();
-                }
+                return pFunction->call(_Args...);
             }
             else
             {
-                DEBUG_MSG("Com Interface", "Direct reader call: <" << _strName << ">")
-                auto pFunction = dynamic_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-                if (pFunction != nullptr )
-                {
-                    return pFunction->call(_Args...);
-                }
-                else
-                {
-                    WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
-                    return TRet();
-                }
+                WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
+                return TRet();
             }
         #else
-            if (m_WriterFlags.at(_strName))
-            {
-                auto pFunction = static_cast<CCommandWritable<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-                return pFunction->call(_Args...);
-            }
-            else
-            {
-                auto pFunction = static_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-                return pFunction->call(_Args...);
-            }
+            auto pFunction = static_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
+            return pFunction->call(_Args...);
         #endif
     }
     catch (const CComInterfaceException& ComIntEx)
@@ -238,7 +177,7 @@ bool CComInterface::registerFunction(const std::string& _strName, const CCommand
     {
         if (m_WriterDomains.find(_strWriterDomain) != m_WriterDomains.end())
         {
-            m_RegisteredFunctions[_strName] = new CCommandWritable<TRet, TArgs...>([this,_strName,_Command, _strWriterDomain](TArgs... _Args)
+            m_RegisteredFunctions[_strName] = new CCommand<TRet, TArgs...>([this,_strName,_Command, _strWriterDomain](TArgs... _Args) -> TRet
                                                 {
                                                     auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Command.getFunction(), _Args...);
                                                     m_WriterQueues[_strWriterDomain].enqueue(pCommand);
@@ -340,37 +279,3 @@ template<> inline void CCommandToQueueWrapper<Vector2d, int, int>::dispatchSigna
 template<> inline void CCommandToQueueWrapper<Vector2d, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_STRING;}
 template<> inline void CCommandToQueueWrapper<Vector2d, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2STRING;}
 template<> inline void CCommandToQueueWrapper<Vector2i, int>::dispatchSignature() {m_Signature = SignatureType::VEC2DINT_INT;}
-
-template<class TRet, class... TArgs> void CCommandWritable<TRet, TArgs...>::dispatchSignature() {m_Signature = SignatureType::UNDEFINED;}
-template<> inline void CCommandWritable<void>::dispatchSignature() {m_Signature = SignatureType::NONE;}
-template<> inline void CCommandWritable<double>::dispatchSignature() {m_Signature = SignatureType::DOUBLE;}
-template<> inline void CCommandWritable<double,int>::dispatchSignature() {m_Signature = SignatureType::DOUBLE_INT;}
-template<> inline void CCommandWritable<double,std::string>::dispatchSignature() {m_Signature = SignatureType::DOUBLE_STRING;}
-template<> inline void CCommandWritable<double,std::string,double>::dispatchSignature() {m_Signature = SignatureType::DOUBLE_STRING_DOUBLE;}
-template<> inline void CCommandWritable<int>::dispatchSignature() {m_Signature = SignatureType::INT;}
-template<> inline void CCommandWritable<int,int>::dispatchSignature() {m_Signature = SignatureType::INT_INT;}
-template<> inline void CCommandWritable<int,std::string>::dispatchSignature() {m_Signature = SignatureType::INT_STRING;}
-template<> inline void CCommandWritable<void, bool>::dispatchSignature() {m_Signature = SignatureType::NONE_BOOL;}
-template<> inline void CCommandWritable<void, double>::dispatchSignature() {m_Signature = SignatureType::NONE_DOUBLE;}
-template<> inline void CCommandWritable<void, double, double>::dispatchSignature() {m_Signature = SignatureType::NONE_2DOUBLE;}
-template<> inline void CCommandWritable<void, int>::dispatchSignature() {m_Signature = SignatureType::NONE_INT;}
-template<> inline void CCommandWritable<void, int, double>::dispatchSignature() {m_Signature = SignatureType::NONE_INT_DOUBLE;}
-template<> inline void CCommandWritable<void, int, double, double>::dispatchSignature() {m_Signature = SignatureType::NONE_INT_2DOUBLE;}
-template<> inline void CCommandWritable<void, int, double, double, double, double>::dispatchSignature() {m_Signature = SignatureType::NONE_INT_4DOUBLE;}
-template<> inline void CCommandWritable<void, int, std::vector<double>>::dispatchSignature() {m_Signature = SignatureType::NONE_INT_DYN_ARRAY;}
-template<> inline void CCommandWritable<void, int, int>::dispatchSignature() {m_Signature = SignatureType::NONE_2INT;}
-template<> inline void CCommandWritable<void, int, int, int>::dispatchSignature() {m_Signature = SignatureType::NONE_3INT;}
-template<> inline void CCommandWritable<void, int, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_INT_STRING;}
-template<> inline void CCommandWritable<void, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING;}
-template<> inline void CCommandWritable<void, std::string, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_DOUBLE;}
-template<> inline void CCommandWritable<void, std::string, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_INT;}
-template<> inline void CCommandWritable<void, std::string, int, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_2INT;}
-template<> inline void CCommandWritable<std::string>::dispatchSignature() {m_Signature = SignatureType::STRING;}
-template<> inline void CCommandWritable<Vector2d>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE;}
-template<> inline void CCommandWritable<Vector2d, int>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_INT;}
-template<> inline void CCommandWritable<Vector2d, int, int>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2INT;}
-template<> inline void CCommandWritable<Vector2d, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_STRING;}
-template<> inline void CCommandWritable<Vector2d, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2STRING;}
-template<> inline void CCommandWritable<Vector2i, int>::dispatchSignature() {m_Signature = SignatureType::VEC2DINT_INT;}
-
-

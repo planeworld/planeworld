@@ -62,269 +62,132 @@ bool CLuaManager::init()
     {
         std::string strDomain((*m_pComInterface->getDomainsByFunction())[Function.first]);
         
-        if ((*m_pComInterface->getWriterFlags())[Function.first])
+        switch (Function.second->getSignature())
         {
-            switch (Function.second->getSignature())
-            {
-                case SignatureType::INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::INT_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<int,std::string>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::DOUBLE_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::DOUBLE_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double,std::string>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::DOUBLE_STRING_DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<double,std::string,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_BOOL:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,bool>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_2DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,double,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_2INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_3INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,int,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT_DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT_2DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,double,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT_4DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] =
-                                static_cast<CCommandWritable<void,int,double, double, double, double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT_DYN_ARRAY:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP, const sol::table& _Table)
+            case SignatureType::INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::INT_INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,int>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::INT_STRING:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,std::string>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::DOUBLE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::DOUBLE_INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,int>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::DOUBLE_STRING:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::DOUBLE_STRING_DOUBLE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string,double>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_BOOL:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,bool>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_DOUBLE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_2DOUBLE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double,double>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_2INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_3INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int,int>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_INT_DOUBLE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_INT_2DOUBLE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double,double>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_INT_4DOUBLE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] =
+                            static_cast<CCommand<void, int, double, double, double, double>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_INT_DYN_ARRAY:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP, const sol::table& _Table)
+                {
+                    auto pFunctionComInt = static_cast<CCommand<void,int,std::vector<double>>*>(Function.second)->getFunction();
+                    std::vector<double> vecTable(_Table.size());
+                    for (auto i = 1u; i <= _Table.size(); ++i)
                     {
-                        auto pFunctionComInt = static_cast<CCommandWritable<void,int,std::vector<double>>*>(Function.second)->getFunction();
-                        std::vector<double> vecTable(_Table.size());
-                        for (auto i = 1u; i <= _Table.size(); ++i)
-                        {
-                            vecTable[i-1] = _Table[i];
-                        }
-                        pFunctionComInt(_nP, vecTable);
-                    };
-                    break;
-                case SignatureType::NONE_INT_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,int,std::string>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_STRING_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_STRING_2INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,int,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_STRING_DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommandWritable<void,std::string,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [&]() -> std::string
-                    {
-                        std::string strRet = static_cast<CCommandWritable<std::string>*>(Function.second)->call();
-                        return strRet;
-                    };
-                    break;
-                case SignatureType::VEC2DDOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
-                    {
-                        Vector2d vecV = static_cast<CCommandWritable<Vector2d>*>(Function.second)->call();
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DDOUBLE_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
-                    {
-                        Vector2d vecV = static_cast<CCommandWritable<Vector2d,int>*>(Function.second)->call(_nP);
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DDOUBLE_2INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP1, const int _nP2) -> std::tuple<double,double>
-                    {
-                        Vector2d vecV = static_cast<CCommandWritable<Vector2d,int,int>*>(Function.second)->call(_nP1,_nP2);
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DDOUBLE_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS) -> std::tuple<double,double>
-                    {
-                        Vector2d vecV = static_cast<CCommandWritable<Vector2d,std::string>*>(Function.second)->call(_strS);
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DDOUBLE_2STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
-                    {
-                        Vector2d vecV = static_cast<CCommandWritable<Vector2d,std::string,std::string>*>(Function.second)->call(_strS1,_strS2);
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DINT_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nUID) -> std::tuple<int,int>
-                    {
-                        Vector2i vecV = static_cast<CCommandWritable<Vector2i,int>*>(Function.second)->call(_nUID);
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                default:
-                    NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
-                    break;
-            }
-        }
-        else
-        {
-            switch (Function.second->getSignature())
-            {
-                case SignatureType::INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::INT_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::INT_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,std::string>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::DOUBLE_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::DOUBLE_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::DOUBLE_STRING_DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_BOOL:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,bool>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_2DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_2INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_3INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT_DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT_2DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT_4DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] =
-                                static_cast<CCommand<void, int, double, double, double, double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_INT_DYN_ARRAY:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP, const sol::table& _Table)
-                    {
-                        auto pFunctionComInt = static_cast<CCommand<void,int,std::vector<double>>*>(Function.second)->getFunction();
-                        std::vector<double> vecTable(_Table.size());
-                        for (auto i = 1u; i <= _Table.size(); ++i)
-                        {
-                            vecTable[i-1] = _Table[i];
-                        }
-                        pFunctionComInt(_nP, vecTable);
-                    };
-                    break;
-                case SignatureType::NONE_INT_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,std::string>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_STRING_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_STRING_2INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int,int>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::NONE_STRING_DOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,double>*>(Function.second)->getFunction();
-                    break;
-                case SignatureType::VEC2DDOUBLE:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
-                    {
-                        Vector2d vecV = static_cast<CCommand<Vector2d>*>(Function.second)->call();
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DDOUBLE_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
-                    {
-                        Vector2d vecV = static_cast<CCommand<Vector2d,int>*>(Function.second)->call(_nP);
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DDOUBLE_2INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP1, const int _nP2) -> std::tuple<double,double>
-                    {
-                        Vector2d vecV = static_cast<CCommand<Vector2d,int,int>*>(Function.second)->call(_nP1,_nP2);
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DDOUBLE_STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS) -> std::tuple<double,double>
-                    {
-                        Vector2d vecVel = static_cast<CCommand<Vector2d,std::string>*>(Function.second)->call(_strS);
-                        return std::tie(vecVel[0],vecVel[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DDOUBLE_2STRING:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
-                    {
-                        Vector2d vecVel = static_cast<CCommand<Vector2d,std::string,std::string>*>(Function.second)->call(_strS1,_strS2);
-                        return std::tie(vecVel[0],vecVel[1]);
-                    };
-                    break;
-                case SignatureType::VEC2DINT_INT:
-                    TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nUID) -> std::tuple<int,int>
-                    {
-                        Vector2i vecV = static_cast<CCommand<Vector2i,int>*>(Function.second)->call(_nUID);
-                        return std::tie(vecV[0],vecV[1]);
-                    };
-                    break;
-                default:
-                    NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
-                    break;
-            }
+                        vecTable[i-1] = _Table[i];
+                    }
+                    pFunctionComInt(_nP, vecTable);
+                };
+                break;
+            case SignatureType::NONE_INT_STRING:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,std::string>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_STRING:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_STRING_INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_STRING_2INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int,int>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::NONE_STRING_DOUBLE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,double>*>(Function.second)->getFunction();
+                break;
+            case SignatureType::VEC2DDOUBLE:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
+                {
+                    Vector2d vecV = static_cast<CCommand<Vector2d>*>(Function.second)->call();
+                    return std::tie(vecV[0],vecV[1]);
+                };
+                break;
+            case SignatureType::VEC2DDOUBLE_INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
+                {
+                    Vector2d vecV = static_cast<CCommand<Vector2d,int>*>(Function.second)->call(_nP);
+                    return std::tie(vecV[0],vecV[1]);
+                };
+                break;
+            case SignatureType::VEC2DDOUBLE_2INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP1, const int _nP2) -> std::tuple<double,double>
+                {
+                    Vector2d vecV = static_cast<CCommand<Vector2d,int,int>*>(Function.second)->call(_nP1,_nP2);
+                    return std::tie(vecV[0],vecV[1]);
+                };
+                break;
+            case SignatureType::VEC2DDOUBLE_STRING:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS) -> std::tuple<double,double>
+                {
+                    Vector2d vecVel = static_cast<CCommand<Vector2d,std::string>*>(Function.second)->call(_strS);
+                    return std::tie(vecVel[0],vecVel[1]);
+                };
+                break;
+            case SignatureType::VEC2DDOUBLE_2STRING:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
+                {
+                    Vector2d vecVel = static_cast<CCommand<Vector2d,std::string,std::string>*>(Function.second)->call(_strS1,_strS2);
+                    return std::tie(vecVel[0],vecVel[1]);
+                };
+                break;
+            case SignatureType::VEC2DINT_INT:
+                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nUID) -> std::tuple<int,int>
+                {
+                    Vector2i vecV = static_cast<CCommand<Vector2i,int>*>(Function.second)->call(_nUID);
+                    return std::tie(vecV[0],vecV[1]);
+                };
+                break;
+            default:
+                NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
+                break;
         }
     }
     DOM_VAR(DEBUG(

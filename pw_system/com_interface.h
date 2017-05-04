@@ -210,44 +210,6 @@ class CCommandToQueueWrapper : public IBaseCommand
         
 };
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Specialised callback functions with writable access at com interface
-///
-/// This wrapper is specialised for functions with writable access. It stores
-/// a function that will take the original function \ref CCommand which is
-/// wrapped containing its parameters by \ref CCommandToQueueWrapper) and
-/// puts them in a command queue.
-/// Hence, those functions are not called immediately, but queued and then
-/// executed, externally. Thus, given a thread save queue, commands can be 
-/// excuted over different threads.
-///
-////////////////////////////////////////////////////////////////////////////////
-template <class TRet, class... TArgs>
-class CCommandWritable : public IBaseCommand
-{
-    public:
-        
-        //--- Constructor/Destructor -----------------------------------------//
-        CCommandWritable() = delete;
-        CCommandWritable(const std::function<void(TArgs...)>&);
-        
-        //--- Constant methods -----------------------------------------------//
-        std::function<void(TArgs...)> getFunction() const {return m_Function;}
-        
-        //--- Methods --------------------------------------------------------//
-        TRet call(TArgs...);
-        
-    private:
-        
-        /// --- Methods [private] --------------------------------------------//
-        void dispatchSignature();
-        
-        /// --- Variables [private] ------------------------------------------//
-        std::function<void(TArgs...)> m_Function; ///< Function to be registered at com interface
-        
-};
-
 /// Map of all functions, accessed by name
 typedef std::map<std::string, IBaseCommand*> RegisteredFunctionsType;
 /// Map of descriptions, accessed by name
