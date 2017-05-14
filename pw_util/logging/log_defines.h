@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ///
 /// \file       log_defines.h
 /// \brief      Manages some macros for logging class "CLog"
-///
+///ain
 /// \date       2009-06-29
 /// \author     Torsten Bueschenfeld (bfeld@tnt.uni-hannover.de)
 ///
@@ -37,9 +37,9 @@
 
 // Test for version of log_conf.h
 #ifndef LOGGING_VERSION
-#error LOGGING_VERSION not defined in log_conf.h
-#elif LOGGING_VERSION!=1
-#error Wrong version of log_conf.h major
+    #error LOGGING_VERSION not defined in conf_log.h
+#elif LOGGING_VERSION!=2
+    #error Wrong version of conf_log.h major
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,15 +56,15 @@
 ///         Macro wrapping warning output of logging class
 /// \def ERROR_MSG(a,b,c)
 ///         Macro wrapping error output of logging class
-/// \def DEBUG(a)
+/// \def DEBUG_BLK(a)
 ///         Macro wrapping arbitary debug code
-/// \def INFO(a)
+/// \def INFO_BLK(a)
 ///         Macro wrapping arbitary info code
-/// \def NOTICE(a)
+/// \def NOTICE_BLK(a)
 ///         Macro wrapping arbitary notice code
-/// \def WARNING(a)
+/// \def WARNING_BLK(a)
 ///         Macro wrapping arbitary warning code
-/// \def ERROR(a)
+/// \def ERROR_BLK(a)
 ///         Macro wrapping arbitary error code
 /// \def CTOR_CALL(a)
 ///         Macro simplifying log of domain: constructor call
@@ -122,8 +122,13 @@
 #else
     #define DOM_MEMF(a)
 #endif
+#ifdef DOMAIN_DEV_LOGIC
+    #define DOM_DEV(a)          {CLog::s_Dom = LOG_DOMAIN_DEV_LOGIC; a CLog::s_Dom = LOG_DOMAIN_NONE;}
+#else
+    #define DOM_DEV(a)
+#endif
 #ifdef DOMAIN_STATS
-    #define DOM_STATS(a)          {CLog::s_Dom = LOG_DOMAIN_STATS; a CLog::s_Dom = LOG_DOMAIN_NONE;}
+    #define DOM_STATS(a)        {CLog::s_Dom = LOG_DOMAIN_STATS; a CLog::s_Dom = LOG_DOMAIN_NONE;}
 #else
     #define DOM_STATS(a)
 #endif
@@ -140,82 +145,83 @@
 
 #ifdef LOGLEVEL_DEBUG
     #define DEBUG_MSG(a,b)          {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_DEBUG, CLog::s_Dom); \
                                     }
-    #define DEBUG(a)                {a}
+    #define DEBUG_BLK(a)            {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define INFO_MSG(a,b)           {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_INFO, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_INFO, CLog::s_Dom); \
                                     }
-    #define INFO(a)                 {a}
+    #define INFO_BLK(a)             {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define NOTICE_MSG(a,b)         {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_NOTICE, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_NOTICE, CLog::s_Dom); \
                                     }
-    #define NOTICE(a)               {a}
+    #define NOTICE_BLK(a)           {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define WARNING_MSG(a,b)        {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
                                     }
-    #define WARNING(a)              {a}
+    #define WARNING_BLK(a)          {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define ERROR_MSG(a,b)          {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
                                     }
-    #define ERROR(a)                {a}
+    #define ERROR_BLK(a)            {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define CTOR_CALL(a)            DOM_CTOR( \
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << a; \
-                                    Log.log("Constructor called", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+                                    std::ostringstream oss(""); \
+                                    oss << a; \
+                                    Log.log("Constructor called", oss.str(), LOG_LEVEL_DEBUG, LOG_DOMAIN_CONSTRUCTOR);)
     #define DTOR_CALL(a)            DOM_DTOR( \
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << a; \
-                                    Log.log("Destructor called", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
-    #define METHOD_ENTRY(a)         CLogMethodHelper ___LOGGING_ENTRY_EXIT_(a);
+                                    std::ostringstream oss(""); \
+                                    oss << a; \
+                                    Log.log("Destructor called", oss.str(), LOG_LEVEL_DEBUG, LOG_DOMAIN_DESTRUCTOR);)
+    #define METHOD_ENTRY(a)         DOM_MENT(CLogMethodHelper ___LOGGING_ENTRY_EXIT_(a);)
     #define METHOD_EXIT(a)
     #define MEM_ALLOC(a)            DOM_MEMA( \
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << a; \
-                                    Log.log("Memory allocated", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+                                    std::ostringstream oss(""); \
+                                    oss << a; \
+                                    Log.log("Memory allocated", oss.str(), LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_ALLOCATED);)
     #define MEM_FREED(a)            DOM_MEMF( \
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << a; \
-                                    Log.log("Memory freed", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+                                    std::ostringstream oss(""); \
+                                    oss << a; \
+                                    Log.log("Memory freed", oss.str(), LOG_LEVEL_DEBUG, LOG_DOMAIN_MEMORY_FREED);)
+    #define LOGIC_CHECK(a)          DOM_DEV(a)
 #endif
 
 #ifdef LOGLEVEL_INFO
     #define DEBUG_MSG(a,b)
-    #define DEBUG(a)
+    #define DEBUG_BLK(a)
     #define INFO_MSG(a,b)           {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_INFO, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_INFO, CLog::s_Dom); \
                                     }
-    #define INFO(a)                 {a}
+    #define INFO_BLK(a)             {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define NOTICE_MSG(a,b)         {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_NOTICE, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_NOTICE, CLog::s_Dom); \
                                     }
-    #define NOTICE(a)               {a}
+    #define NOTICE_BLK(a)           {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define WARNING_MSG(a,b)        {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
                                     }
-    #define WARNING(a)              {a}
+    #define WARNING_BLK(a)          {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define ERROR_MSG(a,b)          {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
                                     }
-    #define ERROR(a)                {a}
+    #define ERROR_BLK(a)            {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
 
     #define CTOR_CALL(a)
     #define DTOR_CALL(a)
@@ -223,31 +229,32 @@
     #define METHOD_EXIT(a)
     #define MEM_ALLOC(a)
     #define MEM_FREED(a)
+    #define LOGIC_CHECK(a)
 #endif
 
 #ifdef LOGLEVEL_NOTICE
     #define DEBUG_MSG(a,b)
-    #define DEBUG(a)
+    #define DEBUG_BLK(a)
     #define INFO_MSG(a,b)
-    #define INFO(a)
+    #define INFO_BLK(a)
     #define NOTICE_MSG(a,b)         {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_NOTICE, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_NOTICE, CLog::s_Dom); \
                                     }
-    #define NOTICE(a)               {a}
+    #define NOTICE_BLK(a)           {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define WARNING_MSG(a,b)        {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
                                     }
-    #define WARNING(a)              {a}
+    #define WARNING_BLK(a)          {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define ERROR_MSG(a,b)          {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
                                     }
-    #define ERROR(a)                {a}
+    #define ERROR_BLK(a)            {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
 
     #define CTOR_CALL(a)
     #define DTOR_CALL(a)
@@ -255,27 +262,28 @@
     #define METHOD_EXIT(a)
     #define MEM_ALLOC(a)
     #define MEM_FREED(a)
+    #define LOGIC_CHECK(a)
 #endif
 
 #ifdef LOGLEVEL_WARNING
     #define DEBUG_MSG(a,b)
-    #define DEBUG(a)
+    #define DEBUG_BLK(a)
     #define INFO_MSG(a,b)
-    #define INFO(a)
+    #define INFO_BLK(a)
     #define NOTICE_MSG(a,b)
-    #define NOTICE(a)
+    #define NOTICE_BLK(a)
     #define WARNING_MSG(a,b)        {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_WARNING, CLog::s_Dom); \
                                     }
-    #define WARNING(a)              {a}
+    #define WARNING_BLK(a)          {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
     #define ERROR_MSG(a,b)          {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
                                     }
-    #define ERROR(a)                {a}
+    #define ERROR_BLK(a)            {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
 
     #define CTOR_CALL(a)
     #define DTOR_CALL(a)
@@ -283,23 +291,24 @@
     #define METHOD_EXIT(a)
     #define MEM_ALLOC(a)
     #define MEM_FREED(a)
+    #define LOGIC_CHECK(a)
 #endif
 
 #ifdef LOGLEVEL_ERROR
     #define DEBUG_MSG(a,b)
-    #define DEBUG(a)
+    #define DEBUG_BLK(a)
     #define INFO_MSG(a,b)
-    #define INFO(a)
+    #define INFO_BLK(a)
     #define NOTICE_MSG(a,b)
-    #define NOTICE(a)
+    #define NOTICE_BLK(a)
     #define WARNING_MSG(a,b)
-    #define WARNING(a)
+    #define WARNING_BLK(a)
     #define ERROR_MSG(a,b)          {\
-                                    CLog::s_strStr.str(""); \
-                                    CLog::s_strStr << b; \
-                                    Log.log(a, CLog::s_strStr.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
+                                    std::ostringstream oss(""); \
+                                    oss << b; \
+                                    Log.log(a, oss.str(), LOG_LEVEL_ERROR, CLog::s_Dom); \
                                     }
-    #define ERROR(a)                {a}
+    #define ERROR_BLK(a)            {std::lock_guard<std::recursive_mutex> lock(Log.m_Mutex); a}
 
     #define CTOR_CALL(a)
     #define DTOR_CALL(a)
@@ -307,19 +316,20 @@
     #define METHOD_EXIT(a)
     #define MEM_ALLOC(a)
     #define MEM_FREED(a)
+    #define LOGIC_CHECK(a)
 #endif
 
 #ifdef LOGLEVEL_NONE
     #define DEBUG_MSG(a,b)
-    #define DEBUG(a)
+    #define DEBUG_BLK(a)
     #define INFO_MSG(a,b)
-    #define INFO(a)
+    #define INFO_BLK(a)
     #define NOTICE_MSG(a,b)
-    #define NOTICE(a)
+    #define NOTICE_BLK(a)
     #define WARNING_MSG(a,b)
-    #define WARNING(a)
+    #define WARNING_BLK(a)
     #define ERROR_MSG(a,b)
-    #define ERROR(a)
+    #define ERROR_BLK(a)
 
     #define CTOR_CALL(a)
     #define DTOR_CALL(a)
@@ -327,32 +337,7 @@
     #define METHOD_EXIT(a)
     #define MEM_ALLOC(a)
     #define MEM_FREED(a)
-#endif
-
-// Be sure not to compile certain domains, although loglevel debug may be active
-#ifndef DOMAIN_CONSTRUCTOR
-    #undef CTOR_CALL
-    #define CTOR_CALL(a)
-#endif
-#ifndef DOMAIN_DESTRUCTOR
-    #undef DTOR_CALL
-    #define DTOR_CALL(a)
-#endif
-#ifndef DOMAIN_METHOD_ENTRY
-    #undef METHOD_ENTRY
-    #define METHOD_ENTRY(a)
-#endif
-#ifndef DOMAIN_METHOD_EXIT
-    #undef METHOD_EXIT
-    #define METHOD_EXIT(a)
-#endif
-#ifndef DOMAIN_MEMORY_ALLOCATED
-    #undef MEM_ALLOC
-    #define MEM_ALLOC(a)
-#endif
-#ifndef DOMAIN_MEMORY_FREED
-    #undef MEM_FREED
-    #define MEM_FREED(a)
+    #define LOGIC_CHECK(a)
 #endif
 
 // Additional macro for memory management

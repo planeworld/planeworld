@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include "log_defines.h"
 
 //--- Standard header --------------------------------------------------------//
+#include <atomic>
 #include <iostream>
 #include <iomanip>
 #include <map>
@@ -67,6 +68,7 @@ typedef enum
     LOG_DOMAIN_DESTRUCTOR,
     LOG_DOMAIN_MEMORY_ALLOCATED,
     LOG_DOMAIN_MEMORY_FREED,
+    LOG_DOMAIN_DEV_LOGIC,
     LOG_DOMAIN_STATS,
     LOG_DOMAIN_VAR,
     LOG_DOMAIN_FILEIO
@@ -82,7 +84,7 @@ typedef enum
     LOG_COLOUR_SCHEME_ONWHITE
 } LogColourSchemeType;
 
-const unsigned short LOG_NOD = 10u;             ///< Number of Domains
+const unsigned short LOG_NOD = 11u;             ///< Number of Domains
 const unsigned short LOG_COLSMAX_DEFAULT = 80u; ///< Default number for maximum columns
 const bool LOG_COLOR = true;                    ///< Color logging
 const bool LOG_NO_COLOR = false;                ///< Monochrom logging
@@ -100,17 +102,15 @@ const bool LOG_DYNSET_OFF = false;              ///< Dynamic changes of loglevel
 /// instances.
 ///
 /// \todo Greater buffer for looped logentries.
-/// \bug  Method entry/exit somehow doesn't work
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CLog
 {
     
     public:
-
+        
         //--- Static variables -----------------------------------------------//
-        static std::ostringstream   s_strStr;   ///< Used for streaming functionality in macros
-        static LogDomainType        s_Dom;      ///< Used for domain handling in macros
+        static std::atomic<LogDomainType> s_Dom;
 
         //--- Destructor -----------------------------------------------------//
         ~CLog();
@@ -135,11 +135,12 @@ class CLog
         void setColourScheme(const LogColourSchemeType);
         void progressBar(const std::string&, const int&, const int&, const int& _nBarSize=60);
         
+        //--- Variables ------------------------------------------------------//
+        std::recursive_mutex    m_Mutex;        ///< Mutex to lock writing to console
+        
     private:
     
         //--- Variables ------------------------------------------------------//
-        std::mutex      m_Mutex;                ///< Mutex to lock writing to console        
-        
         LogLevelType    m_LogLevel;             ///< The loglevel
         LogLevelType    m_LogLevelCompiled;     ///< Info about the loglevel given by macros
                 
@@ -208,50 +209,23 @@ extern CLog& Log; ///< Global logging instance
 class CLogMethodHelper
 {
     public:
-      CLogMethodHelper(const std::string &methodname)
-      : m_methodname(methodname)
+        
+      CLogMethodHelper(const std::string& _strMethodname)
       {
-        DOM_MENT( \
-          CLog::s_strStr.str(""); \
-          CLog::s_strStr << m_methodname; \
-          Log.log("Method entry", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+          m_strMethodname = _strMethodname;
+          Log.log("Method entry", m_strMethodname, LOG_LEVEL_DEBUG, LOG_DOMAIN_METHOD_ENTRY);
       }
       
       ~CLogMethodHelper()
       {
-        DOM_MEXT( \
-          CLog::s_strStr.str(""); \
-          CLog::s_strStr << m_methodname; \
-          Log.log("Method exit", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+          Log.log("Method exit", m_strMethodname, LOG_LEVEL_DEBUG, LOG_DOMAIN_METHOD_EXIT);
       }
     
     private:
-      std::string m_methodname;
+        
+        //--- Variables [private] --------------------------------------------//
+        std::string m_strMethodname; ///< Name of method that was entered
 };
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Base class for logging
-// ///
-// /// This class is the base class for all classes using logging. It just defines
-// /// a constructor that initializes the meyers-singleton for the logging instance.
-// /// 
-// ////////////////////////////////////////////////////////////////////////////////
-// class CLogBase
-// {
-//  public:
-//      virtual ~CLogBase(){};
-// 
-//  protected:
-//      //--- Protected constructor ------------------------------------------//
-//      CLogBase():m_Log(CLog::getInstance())
-//      {
-//          CTOR_CALL(m_Log, "LogBase");
-//      };
-// 
-//      //--- Protected variables --------------------------------------------//
-//      CLog&   m_Log;                  ///< Instance of logging class
-// };
 
 //--- Implementation goes here for inline reasons ----------------------------//
 
@@ -286,7 +260,7 @@ inline void CLog::setBreak(const unsigned short& _unCols)
 ////////////////////////////////////////////////////////////////////////////////
 inline void CLog::indent()
 {
-//     METHOD_ENTRY("CLog::indent")
+    // METHOD_ENTRY("CLog::indent")
     ++m_nHierLevel;
 }
 
@@ -297,7 +271,7 @@ inline void CLog::indent()
 ////////////////////////////////////////////////////////////////////////////////
 inline void CLog::unindent()
 {
-//     METHOD_ENTRY("CLog::unindent")
+    // METHOD_ENTRY("CLog::unindent")
     if (m_nHierLevel > 0)
         --m_nHierLevel;
     else

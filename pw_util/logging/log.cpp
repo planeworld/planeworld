@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,8 +34,7 @@
 	#include <sys/ioctl.h>
 #endif
 
-std::ostringstream  CLog::s_strStr; ///< Used for streaming functionality in macros
-LogDomainType       CLog::s_Dom = LOG_DOMAIN_NONE;    ///< Used for domain handling in macros
+std::atomic<LogDomainType> CLog::s_Dom{LOG_DOMAIN_NONE}; ///< Used for domain handling in macros
 CLog& Log=CLog::getInstance();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -167,7 +166,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
     // !!! Do not log the logging method, this action will never stop !!!
     // METHOD_ENTRY("CLog::log");
 
-    std::lock_guard<std::mutex> lock(m_Mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_Mutex);
     
     if (!m_bLock)
     {
@@ -836,18 +835,18 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
     // Entry appears late, because just now the Logging class is initialized.
     // The entry domain is needed for correct indenting when appropriate
     // domains an debuglevel is used.
-//  METHOD_ENTRY("CLog::CLog");
+    //  METHOD_ENTRY("CLog::CLog");
 
-//  CTOR_CALL("CLog::CLog");
+    //  CTOR_CALL("CLog::CLog");
     
-	#ifdef __linux__
-		// Request the terminal width from the system
-		struct winsize w;
-		ioctl(0, TIOCGWINSZ, &w);
-		m_unColsMax = w.ws_col;
-	#else
-		m_unColsMax = 80u;
-	#endif
+    #ifdef __linux__
+        // Request the terminal width from the system
+        struct winsize w;
+        ioctl(0, TIOCGWINSZ, &w);
+        m_unColsMax = w.ws_col;
+    #else
+        m_unColsMax = 80u;
+    #endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -860,7 +859,7 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
 std::string CLog::convLogDom2Str(const LogDomainType& _LogDomain)
 {
     // METHOD_ENTRY("CLog::convLogDom2Str");
-
+    
     std::string strOut;
 
     switch(_LogDomain)
