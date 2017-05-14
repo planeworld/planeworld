@@ -1377,16 +1377,22 @@ void CPhysicsManager::updateCells()
     // Hence, a correct entry point to continue cell update can be found
     if (m_bCellUpdateFirst)
     {
-        m_strCellUpdateLast = m_pDataStorage->getObjectsByNameBack()->begin()->second->getName();
-        m_bCellUpdateFirst = false;
+        // Make sure not to try to access ->begin() within empty vector
+        if (nNrOfObj > 0)
+        {
+            m_strCellUpdateLast = m_pDataStorage->getObjectsByNameBack()->begin()->second->getName();
+            m_bCellUpdateFirst = false;
+        }
     }
-    
-    auto it = m_pDataStorage->getObjectsByNameBack()->find(m_strCellUpdateLast);
-    for (auto i=0u; i<nNrOfObj; ++i)
+    else
     {
-        it->second->updateCell();
-        if (++it == m_pDataStorage->getObjectsByNameBack()->end())
-              it =  m_pDataStorage->getObjectsByNameBack()->begin();
+        auto it = m_pDataStorage->getObjectsByNameBack()->find(m_strCellUpdateLast);
+        for (auto i=0u; i<nNrOfObj; ++i)
+        {
+            it->second->updateCell();
+            if (++it == m_pDataStorage->getObjectsByNameBack()->end())
+                it =  m_pDataStorage->getObjectsByNameBack()->begin();
+        }
+        m_strCellUpdateLast = it->second->getName();
     }
-    m_strCellUpdateLast = it->second->getName();
 }
