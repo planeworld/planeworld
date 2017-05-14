@@ -436,9 +436,10 @@ void CLuaManager::myInitComInterface()
                                           {
                                               this->registerCallback(_strFunc, _strCallback, "lua");
                                           }),
-                                          "Lua callback.",
+                                          "Register a Lua function as  callback.",
                                           {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::STRING, "String to be executed"}},
+                                           {ParameterType::STRING, "Name of function to attach callback to"},
+                                           {ParameterType::STRING, "Name of callback function"}},
                                            "system", "lua");
     }
     else
