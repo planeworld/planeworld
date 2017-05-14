@@ -289,7 +289,7 @@ void CObject::updateCell()
     m_vecCell += vecUpdateCell;
     this->setCell(m_vecCell);
 
-    DEBUG(
+    DEBUG_BLK(
         if (std::abs(vecUpdateCell[0]) > 0 || std::abs(vecUpdateCell[1] > 0))
         {
             DOM_VAR(DEBUG_MSG("Object Interface","Cell update for " << m_UID.getName() << " is " <<

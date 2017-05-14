@@ -76,7 +76,7 @@ template <class TRet, class... TArgs>
 TRet CCommand<TRet, TArgs...>::call(TArgs... _Args)
 {
     METHOD_ENTRY("CCommand::call")
-    DEBUG_MSG("Com Interface", "Command called")
+    DEBUG_MSG("Command", "Command called.")
     return m_Function(_Args...);
 }
 
@@ -93,12 +93,12 @@ TRet CCommandToQueueWrapper<TRet, TArgs...>::call(TArgs... _Args)
     METHOD_ENTRY("CCommandWriter::call")
     try
     {
-        DEBUG_MSG("Com Interface", "Queued writer called.")
+        DEBUG_MSG("Queued Command", "Queued command called.")
         m_Function(_Args...);
     }
     catch (const CComInterfaceException& ComIntEx)
     {
-        WARNING_MSG("Com Interface", ComIntEx.getMessage())
+        WARNING_MSG("Queued Command", ComIntEx.getMessage())
     }
 }
 
@@ -119,20 +119,70 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
     try
     {
         #ifdef LOGLEVEL_DEBUG
-            DEBUG_MSG("Com Interface", "Direct call: <" << _strName << ">")
-            auto pFunction = dynamic_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-            if (pFunction != nullptr )
+            
+            // Search for callbacks and execute if exist
+            const auto Range = m_RegisteredCallbacks.equal_range(_strName);
+            for_each(Range.first, Range.second, 
+                [&](RegisteredCallbacksType::value_type& _Com)
+                {
+                    DEBUG_MSG("Com Interface", "Callback called.")
+                    
+                    auto pCallback = dynamic_cast<CCommand<TRet, Args...>*>(_Com.second);
+                    if (pCallback != nullptr)
+                    {
+                        return pCallback->call(_Args...);
+                    }
+                    else
+                    {
+                        WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
+                        return TRet();
+                    }
+                }
+            );
+            
+            // Execute function if existant
+            const auto ci = m_RegisteredFunctions.find(_strName);
+            if (ci != m_RegisteredFunctions.end())
             {
+                DEBUG_MSG("Com Interface", "Command called: <" << _strName << ">")
+                
+                auto pFunction = dynamic_cast<CCommand<TRet, Args...>*>(ci->second);
+                if (pFunction != nullptr)
+                {
+                    return pFunction->call(_Args...);
+                }
+                else
+                {
+                    WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
+                    return TRet();
+                }
+            }
+            else
+            {
+                return TRet();
+            }
+        #else
+            // Search for callbacks and execute if exist
+            const auto Range = m_RegisteredCallbacks.equal_range(_strName);
+            for_each(Range.first, Range.second, 
+                [&](RegisteredCallbacksType::value_type& _Com)
+                {
+                    auto pCallback = static_cast<CCommand<TRet, Args...>*>(_Com.second);
+                    return pCallback->call(_Args...);
+                }
+            );
+
+            // Execute function if existant
+            const auto ci = m_RegisteredFunctions.find(_strName);
+            if (ci != m_RegisteredFunctions.end())
+            {
+                auto pFunction = static_cast<CCommand<TRet, Args...>*>(ci->second);
                 return pFunction->call(_Args...);
             }
             else
             {
-                WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
                 return TRet();
             }
-        #else
-            auto pFunction = static_cast<CCommand<TRet, Args...>*>(m_RegisteredFunctions.at(_strName));
-            return pFunction->call(_Args...);
         #endif
     }
     catch (const CComInterfaceException& ComIntEx)
@@ -149,16 +199,106 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Register the given callback to existing function
+///
+/// \param _strName Name the function the callback should listen to
+/// \param _Func Callback function to be registered
+/// \param _strWriterDomain Indicates a callback that writes data (will be
+///                         queued for thread safety). Reader functions will
+///                         have the default domain "Reader"
+///
+/// \return Success?
+///
+///////////////////////////////////////////////////////////////////////////////
+template<class TRet, class... TArgs> 
+bool CComInterface::registerCallback(const std::string& _strName, const std::function<TRet(TArgs...)>& _Func,
+                                     const std::string& _strWriterDomain)
+{
+    METHOD_ENTRY("CComInterface::registerCallback")
+ 
+    if (_strWriterDomain != "Reader")
+    {
+        LOGIC_CHECK(
+            if (m_WriterDomains.find(_strWriterDomain) == m_WriterDomains.end())
+            {
+                ERROR_MSG("Com Interface", "Unknown writer domain <" << _strWriterDomain <<
+                                        ">. Registered writer domains are:")
+                DEBUG_BLK(
+                    for (auto Domain : m_WriterDomains) std::cout << " - " << Domain << std::endl;
+                )
+                return false;
+            }
+        ) // LOGIC_CHECK
+        
+        m_RegisteredCallbacks.insert({{_strName,
+                                        new CCommand<TRet, TArgs...>([this, _strName, _Func, _strWriterDomain](TArgs... _Args) -> TRet
+                                        {
+                                            auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Func, _Args...);
+                                            m_WriterQueues[_strWriterDomain].enqueue(pCommand);
+                                            MEM_ALLOC("IBaseCommand")
+                                            return TRet();
+                                        })}});
+        MEM_ALLOC("IBaseCommand")
+    }
+    else
+    {
+        m_RegisteredCallbacks.insert({{_strName, new CCommand<TRet, TArgs...>(_Func)}});
+        MEM_ALLOC("IBaseCommand")
+    }    
+    
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Register the given event with its arguments
+///
+/// \param _strName Name of the event
+/// \param _strDescription Description of the event to be registered
+/// \param _ParamList List of parameters for given function
+/// \param _Domain Domain of event to be registered
+///
+/// \return Success?
+///
+///////////////////////////////////////////////////////////////////////////////
+template<class... TArgs> 
+bool CComInterface::registerEvent(const std::string& _strName,
+                                  const std::string& _strDescription,
+                                  const ParameterListType& _ParamList,
+                                  const DomainType& _Domain)
+{
+    METHOD_ENTRY("CComInterface::registerEvent")
+    
+    DEBUG_MSG("Com Interface", "Registering event <" << _strName << ">.")
+
+    // Events are always readers, since they only trigger callbacks which
+    // might then be writers
+
+    m_RegisteredFunctions[_strName] = new CCommand<void, TArgs...>([](const TArgs&...){});
+    MEM_ALLOC("IBaseCommand")
+    
+    m_RegisteredFunctionsDescriptions[_strName] = _strDescription;
+    m_RegisteredFunctionsParams[_strName] = _ParamList;
+    m_RegisteredFunctionsDomain[_strName] = _Domain;
+    m_RegisteredDomains.emplace(_Domain);
+    
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Register the given function with its arguments
 ///
 /// \param _strName Name the function should be registered under
 /// \param _Command Function to be registered
 /// \param _strDescription Description of the function to be registered
 /// \param _ParamList List of parameters for given function
-/// \param _Domain Domain of function to be registeredm_RegisteredFunctions[_strName]
+/// \param _Domain Domain of function to be registered
 /// \param _strWriterDomain Indicates a function that writes data (will be
 ///                         queued for thread safety). Reader functions will
 ///                         have the default domain "Reader"
+///
+/// \return Success?
 ///
 ///////////////////////////////////////////////////////////////////////////////
 template<class TRet, class... TArgs> 
@@ -175,31 +315,30 @@ bool CComInterface::registerFunction(const std::string& _strName, const CCommand
 
     if (_strWriterDomain != "Reader")
     {
-        if (m_WriterDomains.find(_strWriterDomain) != m_WriterDomains.end())
-        {
-            m_RegisteredFunctions[_strName] = new CCommand<TRet, TArgs...>([this,_strName,_Command, _strWriterDomain](TArgs... _Args) -> TRet
-                                                {
-                                                    auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Command.getFunction(), _Args...);
-                                                    m_WriterQueues[_strWriterDomain].enqueue(pCommand);
-                                                    MEM_ALLOC("IBaseCommand")
-                                                });
-            m_WriterFlags[_strName] = true;
-            MEM_ALLOC("IBaseCommand")
-        }
-        else
-        {
-            ERROR_MSG("Com Interface", "Unknown writer domain <" << _strWriterDomain <<
-                                       ">. Registered writer domains are:")
-            DEBUG(
-                for (auto Domain : m_WriterDomains) std::cout << " - " << Domain << std::endl;
-            )
-            return false;
-        }
+        LOGIC_CHECK(
+            if (m_WriterDomains.find(_strWriterDomain) == m_WriterDomains.end())
+            {
+                ERROR_MSG("Com Interface", "Unknown writer domain <" << _strWriterDomain <<
+                                        ">. Registered writer domains are:")
+                DEBUG_BLK(
+                    for (auto Domain : m_WriterDomains) std::cout << " - " << Domain << std::endl;
+                )
+                return false;
+            }
+        ) // LOGIC_CHECK
+        
+        m_RegisteredFunctions[_strName] = new CCommand<TRet, TArgs...>([this,_strName,_Command, _strWriterDomain](TArgs... _Args) -> TRet
+                                            {
+                                                auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Command.getFunction(), _Args...);
+                                                m_WriterQueues[_strWriterDomain].enqueue(pCommand);
+                                                MEM_ALLOC("IBaseCommand")
+                                                return TRet();
+                                            });
+        MEM_ALLOC("IBaseCommand")
     }
     else
     {
         m_RegisteredFunctions[_strName] = new CCommand<TRet, TArgs...>(_Command);
-        m_WriterFlags[_strName] = false;
         MEM_ALLOC("IBaseCommand")
     }
     
@@ -237,6 +376,7 @@ template<> inline void CCommand<void, int, int>::dispatchSignature() {m_Signatur
 template<> inline void CCommand<void, int, int, int>::dispatchSignature() {m_Signature = SignatureType::NONE_3INT;}
 template<> inline void CCommand<void, int, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_INT_STRING;}
 template<> inline void CCommand<void, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING;}
+template<> inline void CCommand<void, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_2STRING;}
 template<> inline void CCommand<void, std::string, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_DOUBLE;}
 template<> inline void CCommand<void, std::string, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_INT;}
 template<> inline void CCommand<void, std::string, int, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_2INT;}
@@ -269,6 +409,7 @@ template<> inline void CCommandToQueueWrapper<void, int, int>::dispatchSignature
 template<> inline void CCommandToQueueWrapper<void, int, int, int>::dispatchSignature() {m_Signature = SignatureType::NONE_3INT;}
 template<> inline void CCommandToQueueWrapper<void, int, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_INT_STRING;}
 template<> inline void CCommandToQueueWrapper<void, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING;}
+template<> inline void CCommandToQueueWrapper<void, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_2STRING;}
 template<> inline void CCommandToQueueWrapper<void, std::string, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_DOUBLE;}
 template<> inline void CCommandToQueueWrapper<void, std::string, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_INT;}
 template<> inline void CCommandToQueueWrapper<void, std::string, int, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_2INT;}

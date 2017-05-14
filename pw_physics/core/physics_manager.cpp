@@ -354,7 +354,7 @@ void CPhysicsManager::togglePause()
 {
     METHOD_ENTRY("CPhysicsManager::togglePause")
     m_bPaused ^= 1;
-    INFO(
+    INFO_BLK(
         if (m_bPaused)
         {
             INFO_MSG("Physics Manager", "Physics processing paused.")
@@ -469,9 +469,9 @@ void CPhysicsManager::processFrame()
         this->collisionDetection();
         this->updateCells();
         
-        DEBUG(Log.setLoglevel(LOG_LEVEL_NOTICE);)
+        DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
         m_pDataStorage->swapBack();
-        DEBUG(Log.setLoglevel(LOG_LEVEL_DEBUG);)
+        DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
         m_bProcessOneFrame = false;
         
         
@@ -1107,7 +1107,7 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<void, int, double>(
                                             [&](const int _nUID, const double& _fMass)
                                             {
-                                                IShape* pShp = m_pDataStorage->getShapesByValue()->at(_nUID);
+                                                IShape* pShp = m_pDataStorage->getShapeByValue(_nUID);
                                                 if (pShp != nullptr)
                                                 {
                                                     pShp->setMass(_fMass);

@@ -40,17 +40,40 @@ using namespace Eigen;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Constructor
+///
+///////////////////////////////////////////////////////////////////////////////
+CLuaManager::CLuaManager() : IComInterfaceProvider(),
+                             IThreadModule(),
+                             m_strPhysicsInterface("")
+{
+    METHOD_ENTRY("CLuaManager::CLuaManager")
+    CTOR_CALL("CLuaManager::CLuaManager")
+    
+    #ifdef PW_MULTITHREADING
+        m_strModuleName = "Lua Manager";
+    #endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Initialise Lua scripting engine
 ///
 /// Lua uses the com interface of planeworld. Therefore, all functions
-/// registered at the com interface will be registered for Lua. 
+/// registered at the com interface will be registered for Lua.
 ///
 /// \return Initialisation succesful?
 ///
 ///////////////////////////////////////////////////////////////////////////////
 bool CLuaManager::init()
 {
-    METHOD_ENTRY("CPhysicsManager::init")
+    METHOD_ENTRY("CLuaManager::init")
+    
+    // For Lua, calls are registered using the com interface. Functions could 
+    // be directly registered by using Function.second->getFunction() with the
+    // apropriate casting. This would result in direct access without using
+    // the com interface after registration. But it would also disable the
+    // possibility to register callbacks, since the com interface is bypassed.
     
     sol::table TablePW = m_LuaState.create_named_table(LUA_PACKAGE_PREFIX);
     for (const auto& Dom : *m_pComInterface->getDomains())
@@ -65,132 +88,259 @@ bool CLuaManager::init()
         switch (Function.second->getSignature())
         {
             case SignatureType::INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int>*>(Function.second)->getFunction();
+            {   
+                std::function<int()> Func =
+                    [=]() -> int {return m_pComInterface->call<int>(Function.first);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::INT_INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,int>*>(Function.second)->getFunction();
+            {
+                std::function<int(int)> Func =
+                    [=](const int _nN) -> int {return m_pComInterface->call<int, int>(Function.first, _nN);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::INT_STRING:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<int,std::string>*>(Function.second)->getFunction();
+            {  
+                std::function<int(std::string)> Func =
+                    [=](const std::string& _strS) -> int {return m_pComInterface->call<int, std::string>(Function.first, _strS);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
+                    
                 break;
+            }   
             case SignatureType::DOUBLE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double>*>(Function.second)->getFunction();
+            {   
+                std::function<double()> Func =
+                    [=]() -> double {return m_pComInterface->call<double>(Function.first);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
+                    
                 break;
+            }   
             case SignatureType::DOUBLE_INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,int>*>(Function.second)->getFunction();
+            {   
+                std::function<double(int)> Func =
+                    [=](const int _nN) -> double {return m_pComInterface->call<double, int>(Function.first, _nN);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::DOUBLE_STRING:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string>*>(Function.second)->getFunction();
+            {   
+                std::function<double(std::string)> Func =
+                    [=](const std::string& _strS) -> double {return m_pComInterface->call<double, std::string>(Function.first, _strS);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::DOUBLE_STRING_DOUBLE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<double,std::string,double>*>(Function.second)->getFunction();
+            {   
+                std::function<double(std::string, double)> Func = 
+                    [=](const std::string& _strS, const double& _fD) -> double
+                    {return m_pComInterface->call<double, std::string, double>(Function.first, _strS, _fD);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void>*>(Function.second)->getFunction();
+            {   
+                std::function<void()> Func =
+                    [=]() {m_pComInterface->call<void>(Function.first);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_BOOL:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,bool>*>(Function.second)->getFunction();
+            {   
+                std::function<void(bool)> Func =
+                    [=](const bool _bB) {m_pComInterface->call<void, bool>(Function.first, _bB);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_DOUBLE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double>*>(Function.second)->getFunction();
+            {   
+                std::function<void(double)> Func =
+                    [=](const double& _fD) {m_pComInterface->call<void, double>(Function.first, _fD);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_2DOUBLE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,double,double>*>(Function.second)->getFunction();
+            {   
+                std::function<void(double, double)> Func =
+                    [=](const double& _f1, const double& _f2) {m_pComInterface->call<void, double, double>(Function.first, _f1, _f2);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int>*>(Function.second)->getFunction();
+            {   
+                std::function<void(int)> Func =
+                    [=](const int _nN) {m_pComInterface->call<void, int>(Function.first, _nN);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_2INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int>*>(Function.second)->getFunction();
+            {   
+                std::function<void(int, int)> Func =
+                    [=](const int _n1, const int _n2) {m_pComInterface->call<void, int, int>(Function.first, _n1, _n2);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_3INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,int,int>*>(Function.second)->getFunction();
+            {   
+                std::function<void(int, int, int)> Func =
+                    [=](const int _n1, const int _n2, const int _n3) {m_pComInterface->call<void, int, int>(Function.first, _n1, _n2, _n3);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_INT_DOUBLE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double>*>(Function.second)->getFunction();
+            {   
+                std::function<void(int, double)> Func =
+                    [=](const int _n1, const double& _f1) {m_pComInterface->call<void, int, double>(Function.first, _n1, _f1);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_INT_2DOUBLE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,double,double>*>(Function.second)->getFunction();
+            {   
+                std::function<void(int, double, double)> Func =
+                    [=](const int _n1, const double& _f1, const double& _f2) {m_pComInterface->call<void, int, double, double>(Function.first, _n1, _f1, _f2);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }  
             case SignatureType::NONE_INT_4DOUBLE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] =
-                            static_cast<CCommand<void, int, double, double, double, double>*>(Function.second)->getFunction();
+            {   
+                std::function<void(int, double, double, double, double)> Func =
+                    [=](const int _n1, const double& _f1, const double& _f2, const double& _f3, const double& _f4)
+                        {m_pComInterface->call<void, int, double, double, double, double>(Function.first, _n1, _f1, _f2, _f3, _f4);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_INT_DYN_ARRAY:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP, const sol::table& _Table)
-                {
-                    auto pFunctionComInt = static_cast<CCommand<void,int,std::vector<double>>*>(Function.second)->getFunction();
-                    std::vector<double> vecTable(_Table.size());
-                    for (auto i = 1u; i <= _Table.size(); ++i)
+            {   
+                std::function<void(int, sol::table)> Func =
+                    [=](const int _n1, const sol::table& _T)
                     {
-                        vecTable[i-1] = _Table[i];
-                    }
-                    pFunctionComInt(_nP, vecTable);
-                };
+                        std::vector<double> vecTable(_T.size());
+                        for (auto i = 1u; i <= _T.size(); ++i)
+                        {
+                            vecTable[i-1] = _T[i];
+                        }
+                        m_pComInterface->call<void, int, std::vector<double>>(Function.first, _n1, vecTable);
+                    };
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_INT_STRING:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,int,std::string>*>(Function.second)->getFunction();
+            {   
+                std::function<void(int, std::string)> Func =
+                    [=](const int _n1, const std::string& _str1) {m_pComInterface->call<void, int, std::string>(Function.first, _n1, _str1);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_STRING:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string>*>(Function.second)->getFunction();
+            {   
+                std::function<void(std::string)> Func =
+                    [=](const std::string& _str1) {m_pComInterface->call<void, std::string>(Function.first, _str1);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
+            case SignatureType::NONE_2STRING:
+            {   
+                std::function<void(std::string, std::string)> Func =
+                    [=](const std::string& _str1, const std::string& _str2)
+                        {m_pComInterface->call<void, std::string, std::string>(Function.first, _str1, _str2);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
+                break;
+            }   
             case SignatureType::NONE_STRING_INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int>*>(Function.second)->getFunction();
+            {   
+                std::function<void(std::string, int)> Func =
+                    [=](const std::string& _str1, const int _n1) {m_pComInterface->call<void, std::string, int>(Function.first, _str1, _n1);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_STRING_2INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,int,int>*>(Function.second)->getFunction();
+            {   
+                std::function<void(std::string, int, int)> Func =
+                    [=](const std::string& _str1, const int _n1, const int _n2)
+                        {m_pComInterface->call<void, std::string, int, int>(Function.first, _str1, _n1, _n2);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::NONE_STRING_DOUBLE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = static_cast<CCommand<void,std::string,double>*>(Function.second)->getFunction();
+            {   
+                std::function<void(std::string, double)> Func =
+                    [=](const std::string& _str1, const double& _f1) {m_pComInterface->call<void, std::string, double>(Function.first, _str1, _f1);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::VEC2DDOUBLE:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = [=]() -> std::tuple<double,double>
-                {
-                    Vector2d vecV = static_cast<CCommand<Vector2d>*>(Function.second)->call();
-                    return std::tie(vecV[0],vecV[1]);
-                };
+            {   
+                std::function<std::tuple<double, double>()> Func =
+                    [=]() -> std::tuple<double,double>
+                    {
+                        Vector2d vecV = m_pComInterface->call<Vector2d>(Function.first);
+                        return std::tie(vecV[0],vecV[1]);
+                    };
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::VEC2DDOUBLE_INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP) -> std::tuple<double,double>
-                {
-                    Vector2d vecV = static_cast<CCommand<Vector2d,int>*>(Function.second)->call(_nP);
-                    return std::tie(vecV[0],vecV[1]);
-                };
+            {   
+                std::function<std::tuple<double, double>(int)> Func =
+                    [=](const int _n1) -> std::tuple<double,double>
+                    {
+                        Vector2d vecV = m_pComInterface->call<Vector2d, int>(Function.first, _n1);
+                        return std::tie(vecV[0],vecV[1]);
+                    };
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::VEC2DDOUBLE_2INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nP1, const int _nP2) -> std::tuple<double,double>
-                {
-                    Vector2d vecV = static_cast<CCommand<Vector2d,int,int>*>(Function.second)->call(_nP1,_nP2);
-                    return std::tie(vecV[0],vecV[1]);
-                };
+            {   
+                std::function<std::tuple<double, double>(int, int)> Func =
+                    [=](const int _n1, const int _n2) -> std::tuple<double,double>
+                    {
+                        Vector2d vecV = m_pComInterface->call<Vector2d, int, int>(Function.first, _n1, _n2);
+                        return std::tie(vecV[0],vecV[1]);
+                    };
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::VEC2DDOUBLE_STRING:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS) -> std::tuple<double,double>
-                {
-                    Vector2d vecVel = static_cast<CCommand<Vector2d,std::string>*>(Function.second)->call(_strS);
-                    return std::tie(vecVel[0],vecVel[1]);
-                };
+            {   
+                std::function<std::tuple<double, double>(std::string)> Func =
+                    [=](const std::string& _str1) -> std::tuple<double,double>
+                    {
+                        Vector2d vecV = m_pComInterface->call<Vector2d, std::string>(Function.first, _str1);
+                        return std::tie(vecV[0],vecV[1]);
+                    };
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::VEC2DDOUBLE_2STRING:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const std::string& _strS1, const std::string& _strS2) -> std::tuple<double,double>
-                {
-                    Vector2d vecVel = static_cast<CCommand<Vector2d,std::string,std::string>*>(Function.second)->call(_strS1,_strS2);
-                    return std::tie(vecVel[0],vecVel[1]);
-                };
+            {   
+                std::function<std::tuple<double, double>(std::string, std::string)> Func =
+                    [=](const std::string& _str1, const std::string& _str2) -> std::tuple<double,double>
+                    {
+                        Vector2d vecV = m_pComInterface->call<Vector2d, std::string, std::string>(Function.first, _str1, _str2);
+                        return std::tie(vecV[0],vecV[1]);
+                    };
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             case SignatureType::VEC2DINT_INT:
-                TablePW[strDomain.c_str()][Function.first.c_str()] = [=](const int _nUID) -> std::tuple<int,int>
-                {
-                    Vector2i vecV = static_cast<CCommand<Vector2i,int>*>(Function.second)->call(_nUID);
-                    return std::tie(vecV[0],vecV[1]);
-                };
+            {   
+                std::function<std::tuple<int, int>(int)> Func =
+                    [=](const int _n1) -> std::tuple<int, int>
+                    {
+                        Vector2i vecV = m_pComInterface->call<Vector2i, int>(Function.first, _n1);
+                        return std::tie(vecV[0],vecV[1]);
+                    };
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
+            }   
             default:
                 NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
                 break;
         }
     }
-    DOM_VAR(DEBUG(
+    DOM_VAR(DEBUG_BLK(
         for (const auto& TablePWEntry : TablePW)
         {
             std::cout << TablePWEntry.first.as<std::string>() << std::endl;
@@ -200,10 +350,18 @@ bool CLuaManager::init()
             }
         }
     ))
-    m_LuaState.open_libraries(sol::lib::base, sol::lib::package,
-                              sol::lib::io,
+    m_LuaState.open_libraries(sol::lib::base,
+                              sol::lib::package,
+                              sol::lib::coroutine,
+                              sol::lib::string,
+                              sol::lib::os,
                               sol::lib::math,
-                              sol::lib::os
+                              sol::lib::table,
+                              //sol::lib::debug,
+                              //sol::lib::bit32,
+                              sol::lib::io
+                              //sol::lib::ffi,
+                              //sol::lib::jit
     );
 
     if (!m_strPhysicsInterface.empty())
@@ -272,9 +430,190 @@ void CLuaManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::STRING, "String to be executed"}},
                                            "system", "lua");
+        m_pComInterface->registerFunction("register_lua_callback",
+                                          CCommand<void, std::string, std::string>([&](const std::string& _strFunc,
+                                                                                       const std::string& _strCallback)
+                                          {
+                                              this->registerCallback(_strFunc, _strCallback, "lua");
+                                          }),
+                                          "Lua callback.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::STRING, "String to be executed"}},
+                                           "system", "lua");
     }
     else
     {
         WARNING_MSG("Lua Manager", "Com interface not set, cannot register functions.")
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Register a Lua function as callback
+///
+/// This method takes a Lua function and wraps it in a \ref CCommand, using
+/// a std::function. This command is then registered at the \ref CComInterface.
+///
+/// \note Callbacks do not have any return value, they just inherit the
+///       parameters from function/event they are hooked on.
+///
+/// \param _strFunc Registered function/event the callback is listening to
+/// \param _strCallback Callback function to be registered
+/// \param _strWriterDomain Domain for callbacks that write data and are
+///                         therefore queued for thread safety
+///
+/// \return Success?
+///
+///////////////////////////////////////////////////////////////////////////////
+bool CLuaManager::registerCallback(const std::string& _strFunc,
+                                   const std::string& _strCallback,
+                                   const std::string& _strWriterDomain)
+{
+    METHOD_ENTRY("CLuaManager::registerCallback")
+    
+    const auto ci = m_pComInterface->getFunctions()->find(_strFunc);
+    if (ci != m_pComInterface->getFunctions()->end())
+    {
+        switch (ci->second->getSignature())
+        {
+            case SignatureType::DOUBLE:
+            case SignatureType::INT:
+            case SignatureType::NONE:
+            case SignatureType::VEC2DDOUBLE:
+            {
+                std::function<void(void)> Func = [=]() {m_LuaState[_strCallback]();};
+                m_pComInterface->registerCallback<void>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::DOUBLE_INT:
+            case SignatureType::INT_INT:
+            case SignatureType::NONE_INT:
+            case SignatureType::VEC2DDOUBLE_INT:
+            case SignatureType::VEC2DINT_INT:
+            {
+                std::function<void(int)> Func = [=](const int _nN){m_LuaState[_strCallback](_nN);};
+                m_pComInterface->registerCallback<void, int>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::DOUBLE_STRING:
+            case SignatureType::INT_STRING:
+            case SignatureType::NONE_STRING:
+            case SignatureType::VEC2DDOUBLE_STRING:
+            {
+                std::function<void(std::string)> Func = [=](const std::string& _strS){m_LuaState[_strCallback](_strS);};
+                m_pComInterface->registerCallback<void, std::string>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::DOUBLE_STRING_DOUBLE:
+            case SignatureType::NONE_STRING_DOUBLE:
+            {
+                std::function<void(std::string, double)> Func = [=](const std::string& _strS, const double& _fD){m_LuaState[_strCallback](_strS, _fD);};
+                m_pComInterface->registerCallback<void, std::string, double>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_BOOL:
+            {
+                std::function<void(bool)> Func = [=](const bool _bB){m_LuaState[_strCallback](_bB);};
+                m_pComInterface->registerCallback<void, bool>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_DOUBLE:
+            {
+                std::function<void(double)> Func = [=](const double& _fD){m_LuaState[_strCallback](_fD);};
+                m_pComInterface->registerCallback<void, double>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_2DOUBLE:
+            {
+                std::function<void(double, double)> Func = [=](const double& _f1, const double& _f2){m_LuaState[_strCallback](_f1, _f2);};
+                m_pComInterface->registerCallback<void, double, double>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_2INT:
+            case SignatureType::VEC2DDOUBLE_2INT:
+            {
+                std::function<void(int, int)> Func = [=](const int _n1, const int _n2){m_LuaState[_strCallback](_n1, _n2);};
+                m_pComInterface->registerCallback<void, int, int>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_3INT:
+            {
+                std::function<void(int, int, int)> Func = [=](const int _n1, const int _n2, const int _n3){m_LuaState[_strCallback](_n1, _n2, _n3);};
+                m_pComInterface->registerCallback<void, int, int, int>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_INT_DOUBLE:
+            {
+                std::function<void(int, double)> Func = [=](const int _nN, const double& _fD){m_LuaState[_strCallback](_nN, _fD);};
+                m_pComInterface->registerCallback<void, int, double>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_INT_2DOUBLE:
+            {
+                std::function<void(int, double, double)> Func = [=](const int _nN, const double& _f1, const double& _f2){m_LuaState[_strCallback](_nN, _f1, _f2);};
+                m_pComInterface->registerCallback<void, int, double, double>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_INT_4DOUBLE:
+            {
+                std::function<void(int, double, double, double, double)> Func = [=](const int _nN, const double& _f1, const double& _f2,
+                                                                                                   const double& _f3, const double& _f4)
+                {m_LuaState[_strCallback](_nN, _f1, _f2, _f3, _f4);};
+                m_pComInterface->registerCallback<void, int, double, double, double, double>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_INT_DYN_ARRAY:
+            {
+                std::function<void(int, std::vector<double>)> Func = [=](const int _nN, const std::vector<double>& _vecV)
+                {m_LuaState[_strCallback](_nN, _vecV);};
+                m_pComInterface->registerCallback<void, int, std::vector<double>>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_INT_STRING:
+            {
+                std::function<void(int, std::string)> Func = [=](const int _nN, const std::string& _strS)
+                {m_LuaState[_strCallback](_nN, _strS);};
+                m_pComInterface->registerCallback<void, int, std::string>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_2STRING:
+            {
+                std::function<void(std::string, std::string)> Func = [=](const std::string& _str1, const std::string& _str2)
+                    {m_LuaState[_strCallback](_str1, _str2);};
+                m_pComInterface->registerCallback<void, std::string>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_STRING_INT:
+            {
+                std::function<void(std::string, int)> Func = [=](const std::string& _strS, const int _nN)
+                {m_LuaState[_strCallback](_strS, _nN);};
+                m_pComInterface->registerCallback<void, std::string, int>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_STRING_2INT:
+            {
+                std::function<void(std::string, int, int)> Func = [=](const std::string& _strS, const int _n1, const int _n2)
+                {m_LuaState[_strCallback](_strS, _n1, _n2);};
+                m_pComInterface->registerCallback<void, std::string, int, int>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::VEC2DDOUBLE_2STRING:
+            {
+                std::function<void(std::string, std::string)> Func = [=](const std::string& _str1, const std::string& _str2)
+                {m_LuaState[_strCallback](_str1, _str2);};
+                m_pComInterface->registerCallback<void, std::string, std::string>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            default:
+                NOTICE_MSG("Lua Manager", "Wrapper for " << ci->first << "'s signature not implemented.")
+                break;
+        }
+    }
+    else
+    {
+        WARNING_MSG("Lua Manager", "Can't register callback on <" << _strFunc << ">, function unknown.")
+        return false;
+    }
+    
+    return true;
 }

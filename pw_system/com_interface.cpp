@@ -246,6 +246,14 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 this->call<void,std::string>(strName, strS);
                 break;
             }
+            case SignatureType::NONE_2STRING:
+            {
+                std::string str1{""};
+                std::string str2{""};
+                iss >> str1 >> str2;
+                this->call<void,std::string,std::string>(strName, str1, str2);
+                break;
+            }
             case SignatureType::NONE_INT_2DOUBLE:
             {
                 int nParam(0);
@@ -486,6 +494,13 @@ void CComInterface::callWriters(const std::string& _strQueue)
             {
                 auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string>*>(pQueuedFunction);
                 pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_2STRING:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string, std::string>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
             case SignatureType::NONE_STRING_DOUBLE:

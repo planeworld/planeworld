@@ -43,7 +43,7 @@
 #include "sol.hpp"
 
 // Constants
-const char   LUA_PACKAGE_PREFIX[2] = {'p','w'};
+const std::string LUA_PACKAGE_PREFIX{"pw"};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -77,6 +77,9 @@ class CLuaManager : public IComInterfaceProvider,
         
         //--- Methods [private] ----------------------------------------------//
         void myInitComInterface();
+        bool registerCallback(const std::string&,
+                              const std::string&,
+                              const std::string&);
 
         //--- Variables [private] --------------------------------------------//
         sol::state      m_LuaState;             ///< Current lua state
@@ -85,28 +88,6 @@ class CLuaManager : public IComInterfaceProvider,
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Constructor
-///
-///////////////////////////////////////////////////////////////////////////////
-inline CLuaManager::CLuaManager() : IComInterfaceProvider(),
-                                    IThreadModule(),
-                                    m_strPhysicsInterface("")
-{
-    METHOD_ENTRY("CLuaManager::CLuaManager")
-    CTOR_CALL("CLuaManager::CLuaManager")
-    
-    #ifdef PW_MULTITHREADING
-        // Somehow, there is a problem with Selene/Sol and the module name if 
-        // constructor is not inline. The error is pretty weird, lua 
-        // registration does not recognize packages (nested tables).
-        // The error only occurs when compiled in DEBUG mode, though it 
-        // does not if DEBUG and CTOR_CALL is enabled.
-        m_strModuleName = "Lua Manager";
-    #endif
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

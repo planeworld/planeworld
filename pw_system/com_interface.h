@@ -83,6 +83,7 @@ enum class SignatureType
     NONE_INT_DYN_ARRAY,
     NONE_INT_STRING,
     NONE_STRING,
+    NONE_2STRING,
     NONE_STRING_DOUBLE,
     NONE_STRING_INT,
     NONE_STRING_2INT,
@@ -218,13 +219,14 @@ typedef std::unordered_map<std::string, std::string> RegisteredFunctionsDescript
 typedef std::vector<std::pair<ParameterType, std::string>> ParameterListType;
 /// Map of parameter lists, accessed by function name
 typedef std::unordered_map<std::string, ParameterListType> RegisteredParameterListsType;
-/// Map of writer flags, accessed by function name
-typedef std::unordered_map<std::string, bool> WriterFlagsType;
 
 /// Domain of function being registered
 typedef std::string DomainType;
 /// Map of domains, accessed by function name
 typedef std::unordered_map<std::string, DomainType> RegisteredDomainsType;
+
+/// Multimap of callback functions, accessed by name
+typedef std::unordered_multimap<std::string, IBaseCommand*> RegisteredCallbacksType;
 
 /// List of writer domains
 typedef std::set<std::string> DomainsType;
@@ -263,7 +265,6 @@ class CComInterface
         DomainsType*                  getDomains() {return &m_RegisteredDomains;} 
         RegisteredDomainsType*        getDomainsByFunction() {return &m_RegisteredFunctionsDomain;}
         RegisteredFunctionsType*      getFunctions()  {return &m_RegisteredFunctions;} 
-        WriterFlagsType*              getWriterFlags() {return &m_WriterFlags;}
         
         //--- Methods --------------------------------------------------------//
         template<class TRet, class... Args>
@@ -272,6 +273,16 @@ class CComInterface
         void                callWriters(const std::string&);
         void                help();
         void                help(int);
+
+        template <class TRet, class... TArgs>
+        bool registerCallback(const std::string&, const std::function<TRet(TArgs...)>&,
+                              const std::string& = "Reader");
+        
+        template <class... TArgs>
+        bool registerEvent(const std::string& _strName,
+                           const std::string&,
+                           const ParameterListType& = {},
+                           const DomainType& = "");
         
         template <class TRet, class... TArgs>
         bool registerFunction(const std::string&, const CCommand<TRet, TArgs...>&,
@@ -280,7 +291,7 @@ class CComInterface
                               const DomainType& = "",
                               const std::string& = "Reader"
         );
-
+        
         void registerWriterDomain(const std::string&);
         
         //--- friends --------------------------------------------------------//
@@ -289,6 +300,8 @@ class CComInterface
         
     private:
         
+        RegisteredCallbacksType             m_RegisteredCallbacks;       ///< Callbacks attached to registered functions
+        
         RegisteredFunctionsType             m_RegisteredFunctions;       ///< All registered functions provided by modules
         RegisteredFunctionsDescriptionType  m_RegisteredFunctionsDescriptions; ///< Descriptions of registered functions
         RegisteredParameterListsType        m_RegisteredFunctionsParams; ///< Parameter lists of registered functions      
@@ -296,7 +309,6 @@ class CComInterface
         DomainsType                         m_RegisteredDomains;         ///< All domains registered
         DomainsType                         m_WriterDomains;             ///< Domains for queued functions
         WriterQueuesType                    m_WriterQueues;              ///< Command queues for write access
-        WriterFlagsType                     m_WriterFlags;               ///< Flags for writer functions
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

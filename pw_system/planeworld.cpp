@@ -459,5 +459,5 @@ int main(int argc, char *argv[])
         pPhysicsThread->join();
     #endif
 
-     CLEAN_UP; return EXIT_SUCCESS;
+    CLEAN_UP; return EXIT_SUCCESS;
 }

@@ -607,7 +607,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 {
                     WARNING_MSG("XML Importer", "Unknown mode " << strMode << ". Using default mode: " << 
                                                 mapEmitterModeToString.at(EMITTER_DEFAULT_MODE))
-                    WARNING(
+                    WARNING_BLK(
                         std::cout << "  Known modes: " << std::endl;
                         for (auto it = mapEmitterModeToString.cbegin(); it != mapEmitterModeToString.cend(); ++it)
                         {
@@ -649,7 +649,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 {
                     WARNING_MSG("XML Importer", "Unknown distribution " << strDist << ". Using default distribution: " <<
                                                 mapEmitterDistributionToString.at(EMITTER_DEFAULT_DISTRIBUTION))
-                    WARNING(
+                    WARNING_BLK(
                         std::cout << "  Known distributions: " << std::endl;
                         for (auto it = mapEmitterDistributionToString.cbegin(); it != mapEmitterDistributionToString.cend(); ++it)
                         {
@@ -694,7 +694,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 {
                     WARNING_MSG("XML Importer", "Unknown mode " << strMode << ". Using default mode: " << 
                                                 mapEmitterModeToString.at(EMITTER_DEFAULT_MODE))
-                    WARNING(
+                    WARNING_BLK(
                         std::cout << "  Known modes: " << std::endl;
                         for (auto it = mapEmitterModeToString.cbegin(); it != mapEmitterModeToString.cend(); ++it)
                         {
@@ -737,7 +737,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 {
                     WARNING_MSG("XML Importer", "Unknown distribution " << strDist << ". Using default distribution: " <<
                                                 mapEmitterDistributionToString.at(EMITTER_DEFAULT_DISTRIBUTION))
-                    WARNING(
+                    WARNING_BLK(
                         std::cout << "  Known distributions: " << std::endl;
                         for (auto it = mapEmitterDistributionToString.cbegin(); it != mapEmitterDistributionToString.cend(); ++it)
                         {
@@ -756,7 +756,7 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
             else
             {
                 WARNING_MSG("XML Importer", "Unknown emitter " << strType << ". Aborting creation.")
-                WARNING(
+                WARNING_BLK(
                     std::cout << "  Known emitters: " << std::endl;
                     for (auto it = mapEmitterToString.cbegin(); it != mapEmitterToString.cend(); ++it)
                     {

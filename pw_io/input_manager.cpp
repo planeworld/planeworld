@@ -89,6 +89,8 @@ void CInputManager::processFrame()
             }
             case sf::Event::KeyPressed:
             {
+                m_pComInterface->call<void>("key_pressed");
+                
                 if (m_UIMode == UIModeType::UI)
                 {
                     switch (Event.key.code)
@@ -385,6 +387,12 @@ void CInputManager::myInitComInterface()
     INFO_MSG("Input Manager", "Initialising com interace.")
     if (m_pComInterface != nullptr)
     {
+        // Events
+        m_pComInterface->registerEvent("key_pressed",
+                                        "Event, indicating that a key was pressed.",
+                                        {{ParameterType::NONE, "No return value"}},
+                                        "system");
+        
         // System package
         m_pComInterface->registerFunction("get_input_frequency",
                                           CCommand<double>([&]() -> double {return this->m_fFrequency;}),

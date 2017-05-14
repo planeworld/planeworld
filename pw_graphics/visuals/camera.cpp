@@ -199,7 +199,7 @@ void CCamera::setViewport(const double& _fW, const double& _fH)
       m_fViewportWidth  = (m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane)*0.5;
       m_fViewportHeight = (m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane)*0.5;
       NOTICE_MSG("Camera", "Given viewport is larger than actual screen, resizing to screen size.")
-      NOTICE(
+      NOTICE_BLK(
         std::cout << "  Viewport: " << _fW << "m x " << _fH << "m" << std::endl;
         std::cout << "  Screen  : " << m_fViewportWidth*2.0 << "m x " <<
                      m_fViewportHeight*2.0 << "m" << std::endl;

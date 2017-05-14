@@ -1293,7 +1293,7 @@ bool CVisualsManager::init()
     pConsoleWindow->resize(800, 150);
     pConsoleWindow->setVisibilty(false);
     pConsoleWindow->setClosability(false);
-    
+
     return (m_Graphics.init());
 }
 
@@ -1307,9 +1307,9 @@ void CVisualsManager::finishFrame()
     METHOD_ENTRY("CVisualsManager::finishFrame")
     
     m_Graphics.swapBuffers();
-    DEBUG(Log.setLoglevel(LOG_LEVEL_NOTICE);)
+    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
     m_pDataStorage->swapFront();
-    DEBUG(Log.setLoglevel(LOG_LEVEL_DEBUG);)
+    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
 
     // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
     if (m_pCamera->gotRef())

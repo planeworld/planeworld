@@ -372,7 +372,7 @@ void CPolygon::myUpdateGeometry()
             }
             else
             {
-                DEBUG(
+                DEBUG_BLK(
                     NOTICE_MSG("Polygon", "Not a valid polygon, area=0. => inertia=0.")
                 )
             }
