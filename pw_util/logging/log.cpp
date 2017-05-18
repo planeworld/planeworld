@@ -885,6 +885,9 @@ std::string CLog::convLogDom2Str(const LogDomainType& _LogDomain)
         case LOG_DOMAIN_MEMORY_FREED:
             strOut  = "mem";
             break;
+        case LOG_DOMAIN_DEV_LOGIC:
+            strOut  = "logic";
+            break;
         case LOG_DOMAIN_STATS:
             strOut  = "stats";
             break;
