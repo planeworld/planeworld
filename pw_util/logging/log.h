@@ -33,6 +33,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log_defines.h"
+#include "log_listener.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <atomic>
@@ -40,49 +41,13 @@
 #include <iomanip>
 #include <map>
 #include <mutex>
-#include <string>
 #include <sstream>
 #include <thread>
+#include <unordered_map>
+#include <vector>
 
 //--- Misc header ------------------------------------------------------------//
 #include "timer.h"
-
-/// Represents logging level
-typedef enum 
-{
-    LOG_LEVEL_NONE,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_WARNING,
-    LOG_LEVEL_NOTICE,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_DEBUG 
-} LogLevelType;
-
-/// Represents logging domain
-typedef enum 
-{
-    LOG_DOMAIN_NONE,
-    LOG_DOMAIN_METHOD_ENTRY,
-    LOG_DOMAIN_METHOD_EXIT,
-    LOG_DOMAIN_CONSTRUCTOR,
-    LOG_DOMAIN_DESTRUCTOR,
-    LOG_DOMAIN_MEMORY_ALLOCATED,
-    LOG_DOMAIN_MEMORY_FREED,
-    LOG_DOMAIN_DEV_LOGIC,
-    LOG_DOMAIN_STATS,
-    LOG_DOMAIN_VAR,
-    LOG_DOMAIN_FILEIO
-} LogDomainType;
-
-/// Represents logging level
-typedef enum 
-{
-    LOG_COLOUR_SCHEME_DEFAULT,
-    LOG_COLOUR_SCHEME_MONOONBLACK,
-    LOG_COLOUR_SCHEME_MONOONWHITE,
-    LOG_COLOUR_SCHEME_ONBLACK,
-    LOG_COLOUR_SCHEME_ONWHITE
-} LogColourSchemeType;
 
 const unsigned short LOG_NOD = 11u;             ///< Number of Domains
 const unsigned short LOG_COLSMAX_DEFAULT = 80u; ///< Default number for maximum columns
@@ -122,6 +87,8 @@ class CLog
         LogColourSchemeType stringToColourScheme(const std::string&) const;
 
         //--- Methods --------------------------------------------------------//
+        void addListener(ILogListener* const _pListener) {m_LogListeners.push_back(_pListener);}
+        
         void indent();
         void unindent();
         void log(const std::string&, const std::string&, const LogLevelType&,
@@ -179,7 +146,8 @@ class CLog
         std::string     m_strColError;          ///< Color for error text
         std::string     m_strColDom;            ///< Color for domain text
         std::string     m_strColRepetition;     ///< Color for log repetitions
-
+        
+        std::vector<ILogListener*> m_LogListeners; ///< List of listeners informed about log entries
 
         //--- Constructors ---------------------------------------------------//
         CLog();                                 ///< Empty constructor
@@ -187,12 +155,32 @@ class CLog
         
         //--- Operators ------------------------------------------------------//
         CLog& operator=(const CLog&);           ///< Empty operator=
-
-        //--- Methods --------------------------------------------------------//
-        std::string convLogDom2Str(const LogDomainType&);
-        std::string convLogLev2Str(const LogLevelType&);
-
 };
+
+//--- Enum parser ------------------------------------------------------------//
+
+static std::unordered_map<LogDomainType, std::string> s_LogDomainTypeToStringMap = {
+    {LOG_DOMAIN_NONE, ""},
+    {LOG_DOMAIN_METHOD_ENTRY, "calls"},
+    {LOG_DOMAIN_METHOD_EXIT, "calls"},
+    {LOG_DOMAIN_CONSTRUCTOR, "obj"},
+    {LOG_DOMAIN_DESTRUCTOR, "obj"},
+    {LOG_DOMAIN_MEMORY_ALLOCATED, "mem"},
+    {LOG_DOMAIN_MEMORY_FREED, "mem"},
+    {LOG_DOMAIN_DEV_LOGIC, "logic"},
+    {LOG_DOMAIN_STATS, "stats"},
+    {LOG_DOMAIN_VAR, "var"},
+    {LOG_DOMAIN_FILEIO, "file_io"}
+}; ///< Map from LogDomainType to string
+
+static std::unordered_map<LogLevelType, std::string> s_LogLevelTypeToStringMap = {
+    {LOG_LEVEL_NONE, "LOG_LEVEL_NONE"},
+    {LOG_LEVEL_ERROR, "LOG_LEVEL_ERROR"},
+    {LOG_LEVEL_WARNING, "LOG_LEVEL_WARNING"},
+    {LOG_LEVEL_NOTICE, "LOG_LEVEL_NOTICE"},
+    {LOG_LEVEL_INFO, "LOG_LEVEL_INFO"},
+    {LOG_LEVEL_DEBUG, "LOG_LEVEL_DEBUG"}
+}; ///< Map from LogLevelType to string
 
 extern CLog& Log; ///< Global logging instance
 

@@ -67,10 +67,23 @@ const std::string CComInterfaceException::getMessage() const
 /// \brief Constructor, registeres its own functions
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CComInterface::CComInterface()
+CComInterface::CComInterface() 
 {
     METHOD_ENTRY("CComInterface::CComInterface")
     CTOR_CALL("CComInterface::CComInterface")
+    
+    Log.addListener(this);
+    
+    this->registerEvent<std::string, std::string, std::string, std::string>
+                          ("log_entry", "Indicates that a new log entry was made.",
+                                    {{ParameterType::STRING,"Source of log entry"},
+                                     {ParameterType::STRING,"Log message"},
+                                     {ParameterType::STRING,"Log level"},
+                                     {ParameterType::STRING,"Log domain"}
+                                    },
+                                    "system"
+    );
+    
     this->registerFunction("help",  CCommand<void, int>([&](int nVerboseLevel){this->help(nVerboseLevel);}),
                                     "Show command interface help",
                                     {{ParameterType::NONE,"No return value"},
@@ -252,6 +265,16 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 std::string str2{""};
                 iss >> str1 >> str2;
                 this->call<void,std::string,std::string>(strName, str1, str2);
+                break;
+            }
+            case SignatureType::NONE_4STRING:
+            {
+                std::string str1{""};
+                std::string str2{""};
+                std::string str3{""};
+                std::string str4{""};
+                iss >> str1 >> str2 >> str3 >> str4;
+                this->call<void,std::string,std::string,std::string,std::string>(strName, str1, str2, str3, str4);
                 break;
             }
             case SignatureType::NONE_INT_2DOUBLE:
@@ -501,6 +524,15 @@ void CComInterface::callWriters(const std::string& _strQueue)
                 auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string, std::string>*>(pQueuedFunction);
                 pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
                                               std::get<1>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_4STRING:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string, std::string, std::string, std::string>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<2>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<3>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
             case SignatureType::NONE_STRING_DOUBLE:

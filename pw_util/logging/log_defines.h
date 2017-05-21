@@ -22,7 +22,7 @@
 ///
 /// \file       log_defines.h
 /// \brief      Manages some macros for logging class "CLog"
-///ain
+///
 /// \date       2009-06-29
 /// \author     Torsten Bueschenfeld (bfeld@tnt.uni-hannover.de)
 ///

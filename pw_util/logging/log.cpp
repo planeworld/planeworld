@@ -261,7 +261,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_ERROR:
                         std::cout << m_strColError << std::left << std::setw(14) <<  "[error]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cerr << "  ";
@@ -271,7 +271,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_WARNING:
                         std::cout << m_strColWarning << std::left << std::setw(14) <<  "[warning]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << "  ";
@@ -281,7 +281,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_NOTICE:
                         std::cout << m_strColNotice << std::left << std::setw(14) <<  "[notice]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << "  ";
@@ -291,7 +291,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_INFO:
                         std::cout << m_strColInfo << std::left << std::setw(14) <<  "[info]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << "  ";
@@ -301,7 +301,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_DEBUG:
                         std::cout << m_strColDebug << std::left << std::setw(14) <<  "[debug]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << m_strColDefault << "  ";
@@ -323,6 +323,11 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
         m_strMsgBufMsg = _strMessage;
         m_MsgBufLevel = _Level;
         m_MsgBufDom = _Domain;
+        
+        for (const auto pListener : m_LogListeners)
+        {
+            pListener->logEntry(_strSrc, _strMessage, _Level, _Domain);
+        }
     }
 }
 
@@ -431,8 +436,8 @@ void CLog::setLoglevel(const LogLevelType& _Loglevel)
     {
         if (_Loglevel > m_LogLevelCompiled)
         {
-            NOTICE_MSG("Logging", "Loglevel "+convLogLev2Str(_Loglevel)+
-            " not compiled, using "+convLogLev2Str(m_LogLevelCompiled))
+            NOTICE_MSG("Logging", "Loglevel "+s_LogLevelTypeToStringMap[_Loglevel]+
+            " not compiled, using "+s_LogLevelTypeToStringMap[m_LogLevelCompiled])
             m_LogLevel = m_LogLevelCompiled;
         }
         else
@@ -847,95 +852,4 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
     #else
         m_unColsMax = 80u;
     #endif
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Converts domain to according string.
-///
-/// \param _LogDomain Domain that should be converted
-///
-///////////////////////////////////////////////////////////////////////////////
-std::string CLog::convLogDom2Str(const LogDomainType& _LogDomain)
-{
-    // METHOD_ENTRY("CLog::convLogDom2Str");
-    
-    std::string strOut;
-
-    switch(_LogDomain)
-    {
-        case LOG_DOMAIN_NONE:
-            strOut  = "";
-            break;
-        case LOG_DOMAIN_METHOD_ENTRY:
-            strOut  = "calls";
-            break;
-        case LOG_DOMAIN_METHOD_EXIT:
-            strOut  = "calls";
-            break;
-        case LOG_DOMAIN_CONSTRUCTOR:
-            strOut  = "obj";
-            break;
-        case LOG_DOMAIN_DESTRUCTOR:
-            strOut  = "obj";
-            break;
-        case LOG_DOMAIN_MEMORY_ALLOCATED:
-            strOut  = "mem";
-            break;
-        case LOG_DOMAIN_MEMORY_FREED:
-            strOut  = "mem";
-            break;
-        case LOG_DOMAIN_DEV_LOGIC:
-            strOut  = "logic";
-            break;
-        case LOG_DOMAIN_STATS:
-            strOut  = "stats";
-            break;
-        case LOG_DOMAIN_VAR:
-            strOut  = "var";
-            break;
-        case LOG_DOMAIN_FILEIO:
-            strOut  = "file_io";
-            break;
-    }
-
-    return strOut;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Converts loglevel to according string.
-///
-/// \param _Loglevel Loglevel that should be converted
-///
-///////////////////////////////////////////////////////////////////////////////
-std::string CLog::convLogLev2Str(const LogLevelType& _Loglevel)
-{
-    METHOD_ENTRY("CLog::convLogLev2Str");
-
-    std::string strOut;
-
-    switch(_Loglevel)
-    {
-        case LOG_LEVEL_NONE:
-            strOut  = "LOG_LEVEL_NONE";
-            break;
-        case LOG_LEVEL_ERROR:
-            strOut  = "LOG_LEVEL_ERROR";
-            break;
-        case LOG_LEVEL_WARNING:
-            strOut  = "LOG_LEVEL_WARNING";
-            break;
-        case LOG_LEVEL_NOTICE:
-            strOut  = "LOG_LEVEL_NOTICE";
-            break;
-        case LOG_LEVEL_INFO:
-            strOut  = "LOG_LEVEL_INFO";
-            break;
-        case LOG_LEVEL_DEBUG:
-            strOut  = "LOG_LEVEL_DEBUG";
-            break;
-    }
-
-    return strOut;
 }

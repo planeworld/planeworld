@@ -246,7 +246,15 @@ bool CLuaManager::init()
                         {m_pComInterface->call<void, std::string, std::string>(Function.first, _str1, _str2);};
                 TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
-            }   
+            }
+            case SignatureType::NONE_4STRING:
+            {   
+                std::function<void(std::string, std::string, std::string, std::string)> Func =
+                    [=](const std::string& _str1, const std::string& _str2, const std::string& _str3, const std::string& _str4)
+                        {m_pComInterface->call<void, std::string, std::string, std::string, std::string>(Function.first, _str1, _str2, _str3, _str4);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
+                break;
+            }
             case SignatureType::NONE_STRING_INT:
             {   
                 std::function<void(std::string, int)> Func =
@@ -581,6 +589,14 @@ bool CLuaManager::registerCallback(const std::string& _strFunc,
             {
                 std::function<void(std::string, std::string)> Func = [=](const std::string& _str1, const std::string& _str2)
                     {m_LuaState[_strCallback](_str1, _str2);};
+                m_pComInterface->registerCallback<void, std::string>(_strFunc, Func, _strWriterDomain);
+                break;
+            }
+            case SignatureType::NONE_4STRING:
+            {
+                std::function<void(std::string, std::string, std::string, std::string)> Func = 
+                    [=](const std::string& _str1, const std::string& _str2, const std::string& _str3, const std::string& _str4)
+                        {m_LuaState[_strCallback](_str1, _str2, _str3, _str4);};
                 m_pComInterface->registerCallback<void, std::string>(_strFunc, Func, _strWriterDomain);
                 break;
             }

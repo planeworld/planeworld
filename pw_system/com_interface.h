@@ -40,6 +40,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "log_listener.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "concurrentqueue.h"
@@ -84,6 +85,7 @@ enum class SignatureType
     NONE_INT_STRING,
     NONE_STRING,
     NONE_2STRING,
+    NONE_4STRING,
     NONE_STRING_DOUBLE,
     NONE_STRING_INT,
     NONE_STRING_2INT,
@@ -252,7 +254,7 @@ static std::map<ParameterType, std::string> mapParameterToString = {
 /// \brief Class providing an interface to the engine
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CComInterface
+class CComInterface : public ILogListener
 {
     
     public:
@@ -279,7 +281,7 @@ class CComInterface
                               const std::string& = "Reader");
         
         template <class... TArgs>
-        bool registerEvent(const std::string& _strName,
+        bool registerEvent(const std::string&,
                            const std::string&,
                            const ParameterListType& = {},
                            const DomainType& = "");
@@ -293,6 +295,9 @@ class CComInterface
         );
         
         void registerWriterDomain(const std::string&);
+        
+        void logEntry(const std::string&, const std::string&,
+                      const LogLevelType&, const LogDomainType&);
         
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CComInterface&);
@@ -328,6 +333,24 @@ inline void CComInterface::registerWriterDomain(const std::string& _strWriterDom
     m_WriterDomains.emplace(_strWriterDomain);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Called in case of log entry, creating an event
+///
+/// \param _strSrc Source of log entry
+/// \param _strMessage Log message
+/// \param _Level Log level
+/// \param _Domain Log domain
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CComInterface::logEntry(const std::string& _strSrc, const std::string& _strMessage,
+                                    const LogLevelType& _Level, const LogDomainType& _Domain)
+{
+    METHOD_ENTRY("CComInterface::logEntry")
+    
+    this->call<void, std::string, std::string, std::string, std::string>("log_entry",
+                _strSrc, _strMessage, s_LogLevelTypeToStringMap[_Level], s_LogDomainTypeToStringMap[_Domain]);
+}
 
 #include "com_interface.tpp"
 

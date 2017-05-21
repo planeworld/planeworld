@@ -377,6 +377,7 @@ template<> inline void CCommand<void, int, int, int>::dispatchSignature() {m_Sig
 template<> inline void CCommand<void, int, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_INT_STRING;}
 template<> inline void CCommand<void, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING;}
 template<> inline void CCommand<void, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_2STRING;}
+template<> inline void CCommand<void, std::string, std::string, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_4STRING;}
 template<> inline void CCommand<void, std::string, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_DOUBLE;}
 template<> inline void CCommand<void, std::string, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_INT;}
 template<> inline void CCommand<void, std::string, int, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_2INT;}
@@ -410,6 +411,7 @@ template<> inline void CCommandToQueueWrapper<void, int, int, int>::dispatchSign
 template<> inline void CCommandToQueueWrapper<void, int, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_INT_STRING;}
 template<> inline void CCommandToQueueWrapper<void, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING;}
 template<> inline void CCommandToQueueWrapper<void, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_2STRING;}
+template<> inline void CCommandToQueueWrapper<void, std::string, std::string, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::NONE_4STRING;}
 template<> inline void CCommandToQueueWrapper<void, std::string, double>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_DOUBLE;}
 template<> inline void CCommandToQueueWrapper<void, std::string, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_INT;}
 template<> inline void CCommandToQueueWrapper<void, std::string, int, int>::dispatchSignature() {m_Signature = SignatureType::NONE_STRING_2INT;}
