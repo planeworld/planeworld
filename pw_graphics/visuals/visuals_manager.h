@@ -85,15 +85,13 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            finishFrame();
         void            processFrame();
         
-//         void            setComConsole(CComConsole* const);
         void            setFont(const std::string&);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
         void            setWindow(WindowHandleType* const);
-//         void            toggleConsoleMode();
         void            toggleVisualisations(const int&);
         void            unsetVisualisations(const int&);
-
+        
     private:
 
         //--- Constant methods [private] -------------------------------------//
@@ -142,7 +140,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         UIDType                         m_ConsoleWidgetID;  ///< ID of console widget for later access
         UIDType                         m_ConsoleWindowID;  ///< ID of console window for later access
         
-//         bool                            m_bConsoleMode;     ///< Indicates if console mode is active
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name and location
         sf::Font                        m_Font;             ///< Font for displayed output

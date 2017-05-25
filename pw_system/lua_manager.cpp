@@ -622,7 +622,7 @@ bool CLuaManager::registerCallback(const std::string& _strFunc,
                 break;
             }
             default:
-                NOTICE_MSG("Lua Manager", "Wrapper for " << ci->first << "'s signature not implemented.")
+                DOM_DEV(NOTICE_MSG("Lua Manager", "Wrapper for " << ci->first << "'s signature not implemented."))
                 break;
         }
     }

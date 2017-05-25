@@ -1458,6 +1458,32 @@ void CVisualsManager::myInitComInterface()
     std::ostringstream ossWidgetType("");
     for (auto WidgetType : STRING_TO_WIDGET_TYPE_MAP) ossWidgetType << " " << WidgetType.first;
     
+    // Callback to log entry
+    std::function<void(std::string, std::string, std::string, std::string)> Func =
+        [&](const std::string& _strSrc, const std::string& _strMsg, const std::string& _strLev, const std::string& _strDom)
+        {
+            if (_strLev == "LOG_LEVEL_ERROR" || _strLev == "LOG_LEVEL_WARNING")
+            {
+                CWidgetText* pWidget = new CWidgetText();
+                MEM_ALLOC("IWidget")
+                pWidget->setText(_strSrc + ": " + _strMsg);
+                pWidget->setFont(&m_Font);
+                m_pVisualsDataStorage->addWidget(pWidget);
+                
+                CWindow* pWin = new CWindow();
+                MEM_ALLOC("CWindow")
+                
+                pWin->setFont(&m_Font);
+                m_pVisualsDataStorage->addWindow(pWin);
+                pWin->setTitle(_strLev);
+                pWin->setWidget(pWidget);
+                pWin->center();
+                pWin->setColorBG({{0.25, 0.0, 0.0, 0.8}}, WIN_INHERIT);
+                pWin->setColorFG({{0.5, 0.0, 0.0, 0.8}}, WIN_INHERIT);
+            }
+        };
+    m_pComInterface->registerCallback("log_entry", Func);
+    
     //----------------------------------------------------------------------
     // System package
     //----------------------------------------------------------------------
