@@ -47,7 +47,7 @@ using namespace Eigen;
 ////////////////////////////////////////////////////////////////////////////////
 const std::string CComInterfaceException::getMessage() const
 {
-    METHOD_ENTRY("CComInterfaceException::getMessage")
+    METHOD_ENTRY_QUIET("CComInterfaceException::getMessage")
     
     switch (m_EType)
     {
@@ -69,10 +69,10 @@ const std::string CComInterfaceException::getMessage() const
 ///////////////////////////////////////////////////////////////////////////////
 CComInterface::CComInterface() 
 {
-    METHOD_ENTRY("CComInterface::CComInterface")
-    CTOR_CALL("CComInterface::CComInterface")
+    METHOD_ENTRY_QUIET("CComInterface::CComInterface")
+    CTOR_CALL_QUIET("CComInterface::CComInterface")
     
-    Log.addListener(this);
+    Log.addListener("com", this);
     
     this->registerEvent<std::string, std::string, std::string, std::string>
                           ("log_entry", "Indicates that a new log entry was made.",
@@ -99,15 +99,30 @@ CComInterface::CComInterface()
 ///////////////////////////////////////////////////////////////////////////////
 CComInterface::~CComInterface()
 {
-    METHOD_ENTRY("CComInterface::~CComInterface")
-    DTOR_CALL("CComInterface::~CComInterface")
+    METHOD_ENTRY_QUIET("CComInterface::~CComInterface")
+    DTOR_CALL_QUIET("CComInterface::~CComInterface")
+    
+    // Remove the listener, otherwise the already deleted com interface might
+    // be called during destruction
+    Log.removeListener("com");
+    
+    for (auto pCallback : m_RegisteredCallbacks)
+    {
+        if (pCallback.second != nullptr)
+        {
+            delete pCallback.second;
+            pCallback.second = nullptr;
+            MEM_FREED_QUIET("IBaseCommand")
+        }
+    }
+
     for (auto pFunction : m_RegisteredFunctions)
     {
         if (pFunction.second != nullptr)
         {
             delete pFunction.second;
             pFunction.second = nullptr;
-            MEM_FREED("IBaseCommand")
+            MEM_FREED_QUIET("IBaseCommand")
         }
     }
 }
@@ -127,7 +142,7 @@ CComInterface::~CComInterface()
 ///////////////////////////////////////////////////////////////////////////////
 const std::string CComInterface::call(const std::string& _strCommand)
 {
-    METHOD_ENTRY("CComInterface::call")
+    METHOD_ENTRY_QUIET("CComInterface::call")
     
     std::istringstream iss(_strCommand);
     std::ostringstream oss("");
@@ -399,7 +414,7 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 break;
             }
             default:
-                NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
+                DOM_DEV(NOTICE_MSG_QUIET("Com Interface", "Wrapper for " << strName << "'s signature not implemented."))
                 break;
         }
     }
@@ -420,7 +435,7 @@ const std::string CComInterface::call(const std::string& _strCommand)
 ///////////////////////////////////////////////////////////////////////////////
 void CComInterface::callWriters(const std::string& _strQueue)
 {
-    METHOD_ENTRY("CComInterface::callWriters")
+    METHOD_ENTRY_QUIET("CComInterface::callWriters")
     
     IBaseCommand* pQueuedFunction = nullptr;
     
@@ -571,18 +586,18 @@ void CComInterface::callWriters(const std::string& _strQueue)
             case SignatureType::VEC2DDOUBLE_2STRING:
             case SignatureType::VEC2DINT_INT:
             {
-                WARNING_MSG("Com Interface", "Something went wrong, writing functions shouldn't have a return value.")
+                DOM_DEV(WARNING_MSG("Com Interface", "Something went wrong, writing functions shouldn't have a return value."))
                 break;
             }
             default:
             {
-                NOTICE_MSG("Com Interface", "Queued writer call not implemented.")
+                DOM_DEV(NOTICE_MSG("Com Interface", "Queued writer call not implemented."))
             }
         }
         if (pQueuedFunction != nullptr)
         {
             delete pQueuedFunction;
-            MEM_FREED("IBaseCommand")
+            MEM_FREED_QUIET("IBaseCommand")
             pQueuedFunction = nullptr;
         }
     }
@@ -597,7 +612,7 @@ void CComInterface::callWriters(const std::string& _strQueue)
 ///////////////////////////////////////////////////////////////////////////////
 void CComInterface::help(int nVerboseLevel)
 {
-    METHOD_ENTRY("CComInterface::help")
+    METHOD_ENTRY_QUIET("CComInterface::help")
     switch (nVerboseLevel)
     {
         case 0:
@@ -631,6 +646,6 @@ void CComInterface::help(int nVerboseLevel)
 ///////////////////////////////////////////////////////////////////////////////
 void CComInterface::help()
 {
-    METHOD_ENTRY("CComInterface::help")
+    METHOD_ENTRY_QUIET("CComInterface::help")
     this->help(0);
 }

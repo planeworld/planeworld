@@ -40,7 +40,7 @@
 template <class TRet, class... TArgs>
 CCommand<TRet, TArgs...>::CCommand(const std::function<TRet(TArgs...)>& _Function) : m_Function(_Function)
 {
-    METHOD_ENTRY("CCommand::CCommand")
+    METHOD_ENTRY_QUIET("CCommand::CCommand")
     CTOR_CALL("CCommand")
     this->dispatchSignature();
 }
@@ -59,8 +59,8 @@ CCommandToQueueWrapper<TRet, TArgs...>::CCommandToQueueWrapper(const std::functi
                                                m_Function(_Function),
                                                m_Params(_Args...)
 {
-    METHOD_ENTRY("CCommandToQueueWrapper::CCommandToQueueWrapper")
-    CTOR_CALL("CCommandToQueueWrapper")
+    METHOD_ENTRY_QUIET("CCommandToQueueWrapper::CCommandToQueueWrapper")
+    CTOR_CALL_QUIET("CCommandToQueueWrapper")
     this->dispatchSignature();
 }
 
@@ -75,8 +75,8 @@ CCommandToQueueWrapper<TRet, TArgs...>::CCommandToQueueWrapper(const std::functi
 template <class TRet, class... TArgs>
 TRet CCommand<TRet, TArgs...>::call(TArgs... _Args)
 {
-    METHOD_ENTRY("CCommand::call")
-    DEBUG_MSG("Command", "Command called.")
+    METHOD_ENTRY_QUIET("CCommand::call")
+    DEBUG_MSG_QUIET("Command", "Command called.")
     return m_Function(_Args...);
 }
 
@@ -90,15 +90,15 @@ TRet CCommand<TRet, TArgs...>::call(TArgs... _Args)
 template <class TRet, class... TArgs>
 TRet CCommandToQueueWrapper<TRet, TArgs...>::call(TArgs... _Args)
 {
-    METHOD_ENTRY("CCommandWriter::call")
+    METHOD_ENTRY_QUIET("CCommandWriter::call")
     try
     {
-        DEBUG_MSG("Queued Command", "Queued command called.")
+        DEBUG_MSG_QUIET("Queued Command", "Queued command called.")
         m_Function(_Args...);
     }
     catch (const CComInterfaceException& ComIntEx)
     {
-        WARNING_MSG("Queued Command", ComIntEx.getMessage())
+        WARNING_MSG_QUIET("Queued Command", ComIntEx.getMessage())
     }
 }
 
@@ -114,7 +114,7 @@ TRet CCommandToQueueWrapper<TRet, TArgs...>::call(TArgs... _Args)
 template<class TRet, class... Args>
 inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
 {
-    METHOD_ENTRY("CComInterface::call")
+    METHOD_ENTRY_QUIET("CComInterface::call")
     
     try
     {
@@ -122,10 +122,11 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
             
             // Search for callbacks and execute if exist
             const auto Range = m_RegisteredCallbacks.equal_range(_strName);
+            if (Range.first != m_RegisteredCallbacks.end())
             for_each(Range.first, Range.second, 
                 [&](RegisteredCallbacksType::value_type& _Com)
                 {
-                    DEBUG_MSG("Com Interface", "Callback called.")
+                    DEBUG_MSG_QUIET("Com Interface", "Callback called.")
                     
                     auto pCallback = dynamic_cast<CCommand<TRet, Args...>*>(_Com.second);
                     if (pCallback != nullptr)
@@ -134,7 +135,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
                     }
                     else
                     {
-                        WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
+                        WARNING_MSG_QUIET("Com Interface", "Known function with different signature <" << _strName << ">. ")
                         return TRet();
                     }
                 }
@@ -144,7 +145,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
             const auto ci = m_RegisteredFunctions.find(_strName);
             if (ci != m_RegisteredFunctions.end())
             {
-                DEBUG_MSG("Com Interface", "Command called: <" << _strName << ">")
+                DEBUG_MSG_QUIET("Com Interface", "Command called: <" << _strName << ">")
                 
                 auto pFunction = dynamic_cast<CCommand<TRet, Args...>*>(ci->second);
                 if (pFunction != nullptr)
@@ -153,7 +154,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
                 }
                 else
                 {
-                    WARNING_MSG("Com Interface", "Known function with different signature <" << _strName << ">. ")
+                    WARNING_MSG_QUIET("Com Interface", "Known function with different signature <" << _strName << ">. ")
                     return TRet();
                 }
             }
@@ -214,36 +215,36 @@ template<class TRet, class... TArgs>
 bool CComInterface::registerCallback(const std::string& _strName, const std::function<TRet(TArgs...)>& _Func,
                                      const std::string& _strWriterDomain)
 {
-    METHOD_ENTRY("CComInterface::registerCallback")
+    METHOD_ENTRY_QUIET("CComInterface::registerCallback")
  
     if (_strWriterDomain != "Reader")
     {
-        LOGIC_CHECK(
+        DOM_DEV(
             if (m_WriterDomains.find(_strWriterDomain) == m_WriterDomains.end())
             {
-                ERROR_MSG("Com Interface", "Unknown writer domain <" << _strWriterDomain <<
+                ERROR_MSG_QUIET("Com Interface", "Unknown writer domain <" << _strWriterDomain <<
                                         ">. Registered writer domains are:")
                 DEBUG_BLK(
                     for (auto Domain : m_WriterDomains) std::cout << " - " << Domain << std::endl;
                 )
                 return false;
             }
-        ) // LOGIC_CHECK
+        ) // DOM_DEV
         
         m_RegisteredCallbacks.insert({{_strName,
                                         new CCommand<TRet, TArgs...>([this, _strName, _Func, _strWriterDomain](TArgs... _Args) -> TRet
                                         {
                                             auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Func, _Args...);
                                             m_WriterQueues[_strWriterDomain].enqueue(pCommand);
-                                            MEM_ALLOC("IBaseCommand")
+                                            MEM_ALLOC_QUIET("IBaseCommand")
                                             return TRet();
                                         })}});
-        MEM_ALLOC("IBaseCommand")
+        MEM_ALLOC_QUIET("IBaseCommand")
     }
     else
     {
         m_RegisteredCallbacks.insert({{_strName, new CCommand<TRet, TArgs...>(_Func)}});
-        MEM_ALLOC("IBaseCommand")
+        MEM_ALLOC_QUIET("IBaseCommand")
     }    
     
     return true;
@@ -267,15 +268,15 @@ bool CComInterface::registerEvent(const std::string& _strName,
                                   const ParameterListType& _ParamList,
                                   const DomainType& _Domain)
 {
-    METHOD_ENTRY("CComInterface::registerEvent")
+    METHOD_ENTRY_QUIET("CComInterface::registerEvent")
     
-    DEBUG_MSG("Com Interface", "Registering event <" << _strName << ">.")
+    DEBUG_MSG_QUIET("Com Interface", "Registering event <" << _strName << ">.")
 
     // Events are always readers, since they only trigger callbacks which
     // might then be writers
 
     m_RegisteredFunctions[_strName] = new CCommand<void, TArgs...>([](const TArgs&...){});
-    MEM_ALLOC("IBaseCommand")
+    MEM_ALLOC_QUIET("IBaseCommand")
     
     m_RegisteredFunctionsDescriptions[_strName] = _strDescription;
     m_RegisteredFunctionsParams[_strName] = _ParamList;
@@ -309,37 +310,37 @@ bool CComInterface::registerFunction(const std::string& _strName, const CCommand
                                      const std::string& _strWriterDomain
                                     )
 {
-    METHOD_ENTRY("CComInterface::registerFunction")
+    METHOD_ENTRY_QUIET("CComInterface::registerFunction")
     
-    DEBUG_MSG("Com Interface", "Registering function <" << _strName << ">.")
+    DEBUG_MSG_QUIET("Com Interface", "Registering function <" << _strName << ">.")
 
     if (_strWriterDomain != "Reader")
     {
-        LOGIC_CHECK(
+        DOM_DEV(
             if (m_WriterDomains.find(_strWriterDomain) == m_WriterDomains.end())
             {
-                ERROR_MSG("Com Interface", "Unknown writer domain <" << _strWriterDomain <<
+                ERROR_MSG_QUIET("Com Interface", "Unknown writer domain <" << _strWriterDomain <<
                                         ">. Registered writer domains are:")
                 DEBUG_BLK(
                     for (auto Domain : m_WriterDomains) std::cout << " - " << Domain << std::endl;
                 )
                 return false;
             }
-        ) // LOGIC_CHECK
+        ) // DOM_DEV
         
         m_RegisteredFunctions[_strName] = new CCommand<TRet, TArgs...>([this,_strName,_Command, _strWriterDomain](TArgs... _Args) -> TRet
                                             {
                                                 auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Command.getFunction(), _Args...);
                                                 m_WriterQueues[_strWriterDomain].enqueue(pCommand);
-                                                MEM_ALLOC("IBaseCommand")
+                                                MEM_ALLOC_QUIET("IBaseCommand")
                                                 return TRet();
                                             });
-        MEM_ALLOC("IBaseCommand")
+        MEM_ALLOC_QUIET("IBaseCommand")
     }
     else
     {
         m_RegisteredFunctions[_strName] = new CCommand<TRet, TArgs...>(_Command);
-        MEM_ALLOC("IBaseCommand")
+        MEM_ALLOC_QUIET("IBaseCommand")
     }
     
     m_RegisteredFunctionsDescriptions[_strName] = _strDescription;

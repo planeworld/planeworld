@@ -44,7 +44,6 @@
 #include <sstream>
 #include <thread>
 #include <unordered_map>
-#include <vector>
 
 //--- Misc header ------------------------------------------------------------//
 #include "timer.h"
@@ -55,6 +54,9 @@ const bool LOG_COLOR = true;                    ///< Color logging
 const bool LOG_NO_COLOR = false;                ///< Monochrom logging
 const bool LOG_DYNSET_ON = true;                ///< Dynamic changes of loglevel/domain allowed
 const bool LOG_DYNSET_OFF = false;              ///< Dynamic changes of loglevel/domain not allowed
+
+/// Map of Log listeners (callbacks, observers)
+typedef std::map<std::string, ILogListener*> LogListenersType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -87,12 +89,13 @@ class CLog
         LogColourSchemeType stringToColourScheme(const std::string&) const;
 
         //--- Methods --------------------------------------------------------//
-        void addListener(ILogListener* const _pListener) {m_LogListeners.push_back(_pListener);}
+        void addListener(const std::string& _strListener, ILogListener* const _pListener);
+        bool removeListener(const std::string& _strListener);
         
         void indent();
         void unindent();
         void log(const std::string&, const std::string&, const LogLevelType&,
-                const LogDomainType& = LOG_DOMAIN_NONE);
+                 const LogDomainType& = LOG_DOMAIN_NONE, const bool = false);
         void logSeparator(LogLevelType = LOG_LEVEL_INFO);
         void setBreak(const unsigned short&);
         void setDynSetting(const bool&);
@@ -147,7 +150,7 @@ class CLog
         std::string     m_strColDom;            ///< Color for domain text
         std::string     m_strColRepetition;     ///< Color for log repetitions
         
-        std::vector<ILogListener*> m_LogListeners; ///< List of listeners informed about log entries
+        LogListenersType    m_LogListeners;     ///< List of listeners informed about log entries
 
         //--- Constructors ---------------------------------------------------//
         CLog();                                 ///< Empty constructor
@@ -167,7 +170,7 @@ static std::unordered_map<LogDomainType, std::string> s_LogDomainTypeToStringMap
     {LOG_DOMAIN_DESTRUCTOR, "obj"},
     {LOG_DOMAIN_MEMORY_ALLOCATED, "mem"},
     {LOG_DOMAIN_MEMORY_FREED, "mem"},
-    {LOG_DOMAIN_DEV_LOGIC, "logic"},
+    {LOG_DOMAIN_DEV_LOGIC, "dev"},
     {LOG_DOMAIN_STATS, "stats"},
     {LOG_DOMAIN_VAR, "var"},
     {LOG_DOMAIN_FILEIO, "file_io"}
@@ -198,24 +201,68 @@ class CLogMethodHelper
 {
     public:
         
-      CLogMethodHelper(const std::string& _strMethodname)
+      CLogMethodHelper(const std::string& _strMethodname, const bool _bNoListener = false)
       {
           m_strMethodname = _strMethodname;
-          Log.log("Method entry", m_strMethodname, LOG_LEVEL_DEBUG, LOG_DOMAIN_METHOD_ENTRY);
+          m_bNoListener = _bNoListener;
+          Log.log("Method entry", m_strMethodname, LOG_LEVEL_DEBUG, LOG_DOMAIN_METHOD_ENTRY, m_bNoListener);
+          CLog::s_Dom = LOG_DOMAIN_NONE;
       }
       
       ~CLogMethodHelper()
       {
-          Log.log("Method exit", m_strMethodname, LOG_LEVEL_DEBUG, LOG_DOMAIN_METHOD_EXIT);
+          Log.log("Method exit", m_strMethodname, LOG_LEVEL_DEBUG, LOG_DOMAIN_METHOD_EXIT, m_bNoListener);
+          CLog::s_Dom = LOG_DOMAIN_NONE;
       }
     
     private:
         
         //--- Variables [private] --------------------------------------------//
         std::string m_strMethodname; ///< Name of method that was entered
+        bool        m_bNoListener;   ///< Call listeners of logging function?
 };
 
 //--- Implementation goes here for inline reasons ----------------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add log listener (callback, observer) to map of listeners
+///
+/// \param _strListener Name of listener to be added
+/// \param _pListener Listener to be added
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CLog::addListener(const std::string& _strListener, ILogListener* const _pListener)
+{
+    METHOD_ENTRY("CLog::addListener")
+    m_LogListeners.insert({_strListener,_pListener});
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Remove log listener (callback, observer) from map of listeners
+///
+/// \param _strListener Name of listener to be removed
+///
+/// \return Success?
+///
+////////////////////////////////////////////////////////////////////////////////
+inline bool CLog::removeListener(const std::string& _strListener)
+{
+    METHOD_ENTRY("CLog::removeListener")
+    
+    DOM_DEV(
+        auto nRes = m_LogListeners.erase(_strListener);
+        if (nRes == 0)
+        {
+            ERROR_MSG("Log", "Listener <" << _strListener << "> unknown, cannot remove.")
+            return false;
+        }
+        return true;
+    )
+    m_LogListeners.erase(_strListener);
+    return true;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

@@ -65,7 +65,9 @@
 ///			Defines if memory allocation should be logged
 /// \def DOMAIN_MEMORY_FREED
 ///			Defines if memory deallocation should be logged
-/// \def DOMAIN_VAR 
+/// \def DOMAIN_DEV_LOGIC
+///         Defines if development logic should be checked
+/// \def DOMAIN_STATS 
 ///         Defines if statistics should be printed out
 /// \def DOMAIN_VAR	
 ///			Defines if variables should be printed out

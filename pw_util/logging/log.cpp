@@ -50,7 +50,7 @@ CLog::~CLog()
     DTOR_CALL("CLog::~CLog");
     
     #ifdef DOMAIN_MEMORY
-        std::lock_guard<std::mutex> lock(m_Mutex);
+        std::lock_guard<std::recursive_mutex> lock(m_Mutex);
     
         // The memory domain is given by the enclosing macro
         if (m_nMemCounter > 0)
@@ -85,7 +85,7 @@ CLog::~CLog()
                 ++ci;
             }
         }
-        
+
     #endif
 }
 
@@ -155,13 +155,12 @@ LogColourSchemeType CLog::stringToColourScheme(const std::string& _strScheme) co
 /// \param _strMessage Message
 /// \param _Level State of message
 /// \param _Domain Domain the message should be associated with
-///
-/// \bug Domains appear in logfile, even if loglevel is below DEBUG
-/// \todo Added domain to output.
+/// \param _bNoListener Don't call listeners to avoid recursion
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
-                const LogLevelType& _Level, const LogDomainType& _Domain)
+                const LogLevelType& _Level, const LogDomainType& _Domain,
+                const bool _bNoListener)
 {
     // !!! Do not log the logging method, this action will never stop !!!
     // METHOD_ENTRY("CLog::log");
@@ -171,6 +170,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
     if (!m_bLock)
     {
         std::string strDomFlag;
+        bool bAlreadyLogged {false};
     
         // Messages to be displayed
         if (((_Level <= m_LogLevel) && (m_abDomain[_Domain] == true)) ||
@@ -204,6 +204,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                 (m_MsgBufLevel == _Level) && (m_MsgBufDom == _Domain))
             {
                 ++m_nMsgCounter;
+                bAlreadyLogged = true;
             }
             else
             {
@@ -260,8 +261,8 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                     case LOG_LEVEL_NONE:
                         break;
                     case LOG_LEVEL_ERROR:
-                        std::cout << m_strColError << std::left << std::setw(14) <<  "[error]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
+                        std::cerr << m_strColError << std::left << std::setw(14) <<  "[error]";
+                        std::cerr << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cerr << "  ";
@@ -270,13 +271,13 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_WARNING:
-                        std::cout << m_strColWarning << std::left << std::setw(14) <<  "[warning]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
+                        std::cerr << m_strColWarning << std::left << std::setw(14) <<  "[warning]";
+                        std::cerr << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
-                                std::cout << "  ";
+                                std::cerr << "  ";
                         #endif
-                        std::cout << m_strColSender << \
+                        std::cerr << m_strColSender << 
                         _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_NOTICE:
@@ -324,9 +325,12 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
         m_MsgBufLevel = _Level;
         m_MsgBufDom = _Domain;
         
-        for (const auto pListener : m_LogListeners)
+        if (!bAlreadyLogged && !_bNoListener)
         {
-            pListener->logEntry(_strSrc, _strMessage, _Level, _Domain);
+            for (const auto pListener : m_LogListeners)
+            {
+                pListener.second->logEntry(_strSrc, _strMessage, _Level, _Domain);
+            }
         }
     }
 }
@@ -486,7 +490,7 @@ void CLog::setDomain(const LogDomainType& _Domain)
     if (m_bDynSetting)
     {
         m_abDomain[_Domain] = true;
-        DEBUG_MSG("Logging", "Set domain "+convLogDom2Str(_Domain))
+        DEBUG_MSG("Logging", "Set domain "+s_LogDomainTypeToStringMap[_Domain])
     }
 }
 
@@ -510,7 +514,7 @@ void CLog::unsetDomain(const LogDomainType& _Domain)
         }
     
         m_abDomain[_Domain] = false;
-        DEBUG_MSG("Logging", "Unset domain "+convLogDom2Str(_Domain))
+        DEBUG_MSG("Logging", "Unset domain "+s_LogDomainTypeToStringMap[_Domain])
     }
 }
 
@@ -518,7 +522,7 @@ void CLog::unsetDomain(const LogDomainType& _Domain)
 ///
 /// \brief Sets scheme for colouring of output
 ///
-/// \param _bColourScheme Defines how the output is colored.
+/// \param _ColourScheme Defines how the output is colored.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CLog::setColourScheme(const LogColourSchemeType _ColourScheme)
@@ -815,6 +819,11 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
         m_abDomain[LOG_DOMAIN_MEMORY_FREED] = true;
     #else
         m_abDomain[LOG_DOMAIN_MEMORY_FREED] = false;
+    #endif
+    #ifdef DOMAIN_DEV_LOGIC
+        m_abDomain[LOG_DOMAIN_DEV_LOGIC] = true;
+    #else
+        m_abDomain[LOG_DOMAIN_DEV_LOGIC] = false;
     #endif
     #ifdef DOMAIN_STATS
         m_abDomain[LOG_DOMAIN_STATS] = true;

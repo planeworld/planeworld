@@ -329,7 +329,7 @@ class CComInterface : public ILogListener
 ////////////////////////////////////////////////////////////////////////////////
 inline void CComInterface::registerWriterDomain(const std::string& _strWriterDomain)
 {
-    METHOD_ENTRY("CComInterface::registerWriterDomain")
+    METHOD_ENTRY_QUIET("CComInterface::registerWriterDomain")
     m_WriterDomains.emplace(_strWriterDomain);
 }
 
@@ -346,7 +346,7 @@ inline void CComInterface::registerWriterDomain(const std::string& _strWriterDom
 inline void CComInterface::logEntry(const std::string& _strSrc, const std::string& _strMessage,
                                     const LogLevelType& _Level, const LogDomainType& _Domain)
 {
-    METHOD_ENTRY("CComInterface::logEntry")
+    METHOD_ENTRY_QUIET("CComInterface::logEntry")
     
     this->call<void, std::string, std::string, std::string, std::string>("log_entry",
                 _strSrc, _strMessage, s_LogLevelTypeToStringMap[_Level], s_LogDomainTypeToStringMap[_Domain]);
