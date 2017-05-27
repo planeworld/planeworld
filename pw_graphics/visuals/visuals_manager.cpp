@@ -1378,28 +1378,46 @@ void CVisualsManager::updateUI()
     if (m_bMBLeft)
     {
         auto it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
-        while (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rend())
+        bool bDone = false;
+        while (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rend() && !bDone)
         {
             CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(*it);
+            
+            // First, get focus of window
+            if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::WIN))
+            {
+                if (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin())
+                {
+                    m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(*it);
+                    m_pVisualsDataStorage->getWindowUIDsInOrder()->erase(std::prev(it.base()));
+                    it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
+                    pWin = m_pVisualsDataStorage->getWindowByValue(*it);
+                }
+                bDone = true;
+            }
                 
             // Test, if cursor is in the area that closes the window
             if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::CLOSE))
             {
                 m_pVisualsDataStorage->closeWindow(*it);
                 m_bMBLeft = false; // Avoid focussing the underlying window
-                break;
+                bDone = true;
             }
             // Test, if cursor is in the area that resizes the window
             else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::RESIZE))
             {
-                pWin->resize(pWin->getWidth() +m_nCursorX-m_nCursorX0,
-                             pWin->getHeight()+m_nCursorY-m_nCursorY0);
-                break;
+                if (pWin->getHeight()+m_nCursorY-m_nCursorY0 > 50 &&
+                    pWin->getWidth()+m_nCursorX-m_nCursorX0 > 50)
+                {
+                    pWin->resize(pWin->getWidth() +m_nCursorX-m_nCursorX0,
+                                pWin->getHeight()+m_nCursorY-m_nCursorY0);
+                }
+                bDone = true;
             }
-            // Test, if mouse cursor is inside of window. Cursor positon of
+            // Test, if mouse cursor is inside title of window. Cursor positon of
             // the previous frame must be used, since windows are not updated
             // yet.
-            else if (pWin->isInside(m_nCursorX0, m_nCursorY0))
+            else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::TITLE))
             {
                 // Test for offset (position of cursor within windows).
                 // Offset = 0 indicates, that no offset was calculated yet.
@@ -1408,15 +1426,8 @@ void CVisualsManager::updateUI()
                     m_nCursorOffsetX = m_nCursorX0 - pWin->getPositionX();
                     m_nCursorOffsetY = m_nCursorY0 - pWin->getPositionY();
                 }
-                
                 pWin->setPosition(m_nCursorX-m_nCursorOffsetX, m_nCursorY-m_nCursorOffsetY);
-                
-                if (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin())
-                {
-                    m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(*it);
-                    m_pVisualsDataStorage->getWindowUIDsInOrder()->erase(std::prev(it.base()));
-                }
-                break;
+                bDone = true;
             }
             ++it;
         }

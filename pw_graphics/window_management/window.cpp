@@ -50,8 +50,14 @@ CWindow::CWindow() : IUniqueIDUser(),
     CTOR_CALL("CWindow::CWindow");
     
     m_UID.setName("Win_"+m_UID.getName());
-    m_strTitle = m_UID.getName();
+    m_Title.setString(m_UID.getName());
+    m_Title.setFont(*m_pFont);
     m_nFontSize = 20; // Fontsize only affects the title at the moment
+    m_Title.setCharacterSize(m_nFontSize);
+    m_Title.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                   m_FontColor[1]*255.0,
+                                   m_FontColor[2]*255.0,
+                                   m_FontColor[3]*255.0));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,64 +75,6 @@ CWindow::~CWindow()
         delete m_pWidget;
         MEM_FREED("IWidget")
         m_pWidget = nullptr;
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Draw window and its contents
-///
-///////////////////////////////////////////////////////////////////////////////
-void CWindow::draw() const 
-{
-    METHOD_ENTRY("CWindow::draw")
-    
-    if (m_bVisible)
-    {
-        // Draw background area
-        m_Graphics.setColor(m_WinColorBG);
-        m_Graphics.filledRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                              Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
-        // Draw title frame
-        m_Graphics.setColor(m_WinColorFG);
-        int nSpacing = m_pFont->getLineSpacing(m_nFontSize);
-        m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
-                        Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
-        
-        // Draw content frame
-        m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                        Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+nSpacing));
-        
-        m_Graphics.getWindow()->pushGLStates();
-        sf::Text Text;
-
-        Text.setString(m_strTitle);
-        Text.setFont(*m_pFont);
-        Text.setCharacterSize(m_nFontSize);
-        Text.setPosition(m_nFramePosX + m_nFrameWidth/2 - Text.getGlobalBounds().width/2, m_nFramePosY);
-        Text.setFillColor(sf::Color(m_FontColor[0]*255.0,
-                                    m_FontColor[1]*255.0,
-                                    m_FontColor[2]*255.0,
-                                    m_FontColor[3]*255.0));
-        m_Graphics.getWindow()->draw(Text);
-        m_Graphics.getWindow()->popGLStates();        
-        
-        if (m_pWidget != nullptr) m_pWidget->draw();
-        
-        m_Graphics.setColor(0.7, 0.3, 0.3, 1.0);
-
-        // Draw close button area
-        if (m_bClosable)
-        {
-            m_Graphics.filledRect(Vector2d(m_nFramePosX+m_nFrameWidth-m_nSizeClose, m_nFramePosY),
-                                  Vector2d(m_nFramePosX+m_nFrameWidth,m_nFramePosY+m_nSizeClose));
-        }
-        
-        // Draw resize button area
-        m_Graphics.filledRect(Vector2d(m_nFramePosX+m_nFrameWidth-m_nSizeResize,
-                                       m_nFramePosY+m_nFrameHeight-m_nSizeResize),
-                              Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+m_nFrameHeight));
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
 }
 
@@ -166,6 +114,12 @@ bool CWindow::isInside(const int _nX,
                        (_nY >= m_nFramePosY+m_nFrameHeight-m_nSizeResize) & (_nY < m_nFramePosY+m_nFrameHeight));
             break;
         }
+        case WinAreaType::TITLE:
+        {
+            bInside = ((_nX >= m_nFramePosX) & (_nX < m_nFramePosX+m_nFrameWidth) &
+                       (_nY >= m_nFramePosY) & (_nY < m_nFramePosY+m_pFont->getLineSpacing(m_nFontSize)));
+            break;
+        }
         case WinAreaType::WIN:
         {
             bInside = ((_nX >= m_nFramePosX) & (_nX < m_nFramePosX+m_nFrameWidth) &
@@ -189,4 +143,55 @@ void CWindow::center()
                       (m_Graphics.getHeightScr()-m_nFrameHeight) / 2);
     
     m_bCenter = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw window and its contents
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWindow::draw() 
+{
+    METHOD_ENTRY("CWindow::draw")
+    
+    if (m_bVisible)
+    {
+        // Draw background area
+        m_Graphics.setColor(m_WinColorBG);
+        m_Graphics.filledRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                              Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+        // Draw title frame
+        m_Graphics.setColor(m_WinColorFG);
+        int nSpacing = m_pFont->getLineSpacing(m_nFontSize);
+        m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
+                        Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+        
+        // Draw content frame
+        m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                        Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+nSpacing));
+        
+        m_Graphics.getWindow()->pushGLStates();
+
+        m_Title.setPosition(m_nFramePosX + m_nFrameWidth/2 - m_Title.getGlobalBounds().width/2, m_nFramePosY);
+
+        m_Graphics.getWindow()->draw(m_Title);
+        m_Graphics.getWindow()->popGLStates();        
+        
+        if (m_pWidget != nullptr) m_pWidget->draw();
+        
+        m_Graphics.setColor(0.7, 0.3, 0.3, 1.0);
+
+        // Draw close button area
+        if (m_bClosable)
+        {
+            m_Graphics.filledRect(Vector2d(m_nFramePosX+m_nFrameWidth-m_nSizeClose, m_nFramePosY),
+                                  Vector2d(m_nFramePosX+m_nFrameWidth,m_nFramePosY+m_nSizeClose));
+        }
+        
+        // Draw resize button area
+        m_Graphics.filledRect(Vector2d(m_nFramePosX+m_nFrameWidth-m_nSizeResize,
+                                       m_nFramePosY+m_nFrameHeight-m_nSizeResize),
+                              Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+m_nFrameHeight));
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+    }
 }

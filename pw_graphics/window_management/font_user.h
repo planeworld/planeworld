@@ -61,7 +61,9 @@ class IFontUser
         
     protected:
         
-        virtual void mySetFontColor(const ColorTypeRGBA&) {}
+        virtual void mySetFont() {}
+        virtual void mySetFontColor() {}
+        virtual void mySetFontSize() {}
         
         //--- Variables [private] --------------------------------------------//
         sf::Font*       m_pFont;        ///< Font instance to be used
@@ -98,6 +100,8 @@ inline void IFontUser::setFont(sf::Font* const _pFont)
 {
     METHOD_ENTRY("IFontUser::setFont")
     m_pFont = _pFont;
+    
+    this->mySetFont();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +118,7 @@ inline void IFontUser::setFontColor(const ColorTypeRGBA& _RGBA, const bool _bInh
     m_FontColor = _RGBA;
     if (_bInherit)
     {
-        this->mySetFontColor(_RGBA);
+        this->mySetFontColor();
     }
 }
 
@@ -129,6 +133,8 @@ inline void IFontUser::setFontSize(const int _nFontSize)
 {
     METHOD_ENTRY("IFontUser::setFontSize")
     m_nFontSize = _nFontSize;
+    
+    this->mySetFontSize();
 }
 
 #endif // FONT_USER_H

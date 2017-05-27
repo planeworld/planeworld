@@ -46,6 +46,13 @@ CWidgetConsole::CWidgetConsole() : IWidget(),
     m_Type = WidgetTypeType::CONSOLE;
     
     m_UID.setName("Widget_Console_"+m_UID.getName());
+    m_ConsoleText.setString(m_UID.getName());
+    m_ConsoleText.setFont(*m_pFont);
+    m_ConsoleText.setCharacterSize(m_nFontSize);
+    m_ConsoleText.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                         m_FontColor[1]*255.0,
+                                         m_FontColor[2]*255.0,
+                                         m_FontColor[3]*255.0));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,17 +85,10 @@ void CWidgetConsole::draw()
     oss << s_ConsoleModeTypeToStringMap[m_pComConsole->getMode()] << " > " << m_pComConsole->getCurrentCommand() << "_";
     
     m_Graphics.getWindow()->pushGLStates();
-    sf::Text Text;
 
-    Text.setString(oss.str());
-    Text.setFont(*m_pFont);
-    Text.setCharacterSize(m_nFontSize);
-    Text.setPosition(m_nFramePosX, m_nFramePosY);
-    Text.setFillColor(sf::Color(m_FontColor[0]*255.0,
-                                m_FontColor[1]*255.0,
-                                m_FontColor[2]*255.0,
-                                m_FontColor[3]*255.0));
-    m_Graphics.getWindow()->draw(Text);
+    m_ConsoleText.setString(oss.str());
+    m_ConsoleText.setPosition(m_nFramePosX, m_nFramePosY);
+    m_Graphics.getWindow()->draw(m_ConsoleText);
     m_Graphics.getWindow()->popGLStates();        
         
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);

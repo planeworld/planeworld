@@ -344,7 +344,7 @@ bool CLuaManager::init()
                 break;
             }   
             default:
-                NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented.")
+                DOM_DEV(NOTICE_MSG("Lua Manager", "Wrapper for " << Function.first << "'s signature not implemented."))
                 break;
         }
     }

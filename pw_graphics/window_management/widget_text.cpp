@@ -37,8 +37,7 @@
 /// \brief Constructor, initialising members
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CWidgetText::CWidgetText() : IWidget(),
-                             m_strText("")
+CWidgetText::CWidgetText() : IWidget()
 {
     METHOD_ENTRY("CWidgetText::CWidgetText");
     CTOR_CALL("CWidgetText::CWidgetText");
@@ -46,6 +45,13 @@ CWidgetText::CWidgetText() : IWidget(),
     m_Type = WidgetTypeType::TEXT;
     
     m_UID.setName("Widget_Text_"+m_UID.getName());
+    m_Text.setString(m_UID.getName());
+    m_Text.setFont(*m_pFont);
+    m_Text.setCharacterSize(m_nFontSize);
+    m_Text.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                  m_FontColor[1]*255.0,
+                                  m_FontColor[2]*255.0,
+                                  m_FontColor[3]*255.0));
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -59,17 +65,9 @@ void CWidgetText::draw()
     this->drawFrame();
     
     m_Graphics.getWindow()->pushGLStates();
-    sf::Text Text;
 
-    Text.setString(m_strText);
-    Text.setFont(*m_pFont);
-    Text.setCharacterSize(m_nFontSize);
-    Text.setPosition(m_nFramePosX, m_nFramePosY);
-    Text.setFillColor(sf::Color(m_FontColor[0]*255.0,
-                                m_FontColor[1]*255.0,
-                                m_FontColor[2]*255.0,
-                                m_FontColor[3]*255.0));
-    m_Graphics.getWindow()->draw(Text);
+    m_Text.setPosition(m_nFramePosX, m_nFramePosY);
+    m_Graphics.getWindow()->draw(m_Text);
     m_Graphics.getWindow()->popGLStates();
     
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);

@@ -58,12 +58,18 @@ class CWidgetConsole : public IWidget
         void draw() override;
         void setComConsole(CComConsole* const);
         
-    protected:
+    private:
+        
+        //--- Methods [private] ----------------------------------------------//
+        void mySetFont() override;
+        void mySetFontColor() override;
+        void mySetFontSize() override;
         
         //--- Variables [private] --------------------------------------------//
         CComConsole*    m_pComConsole;          ///< Command console used in this widget
         int             m_nComHistoryVisible;   ///< Visible part of command history
 
+        sf::Text        m_ConsoleText;          ///< Text output in com console
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -81,6 +87,40 @@ inline void CWidgetConsole::setComConsole(CComConsole* const _pComConsole)
     m_pComConsole = _pComConsole;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the font
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWidgetConsole::mySetFont()
+{
+    METHOD_ENTRY("CWidgetConsole::mySetFont")
+    m_ConsoleText.setFont(*m_pFont);
+}
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the font colour for inherited widget
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWidgetConsole::mySetFontColor()
+{
+    METHOD_ENTRY("CWidgetConsole::mySetFontColor")
+    m_ConsoleText.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                         m_FontColor[1]*255.0,
+                                         m_FontColor[2]*255.0,
+                                         m_FontColor[3]*255.0));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the fonts size
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWidgetConsole::mySetFontSize()
+{
+    METHOD_ENTRY("CWidgetConsole::mySetFontSize")
+    m_ConsoleText.setCharacterSize(m_nFontSize);
+}
 
 #endif // WIDGET_CONSOLE_H
