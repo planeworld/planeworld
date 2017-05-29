@@ -143,6 +143,8 @@ class CVisualsManager : virtual public CGraphicsBase,
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name and location
         sf::Font                        m_Font;             ///< Font for displayed output
+        
+        CUIDVisuals                     m_UIDVisuals;       ///< Graphical display of UIDs
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -219,7 +221,7 @@ inline WindowHandleType* CVisualsManager::getWindow() const
 ///
 /// \brief Sets font
 ///
-/// \param _strFont
+/// \param _strFont Font for drawing text
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline void CVisualsManager::setFont(const std::string& _strFont)

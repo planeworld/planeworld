@@ -49,9 +49,9 @@ Usage
 | n                        | Show names                      |
 | s                        | Save game state                 |
 | t                        | Show object trajectories        |
-| u                        | Toggle UI mode (WORLD, UI)      |
-| w and RCTRL              | Show all windows                |
-| w and RALT               | Hide all windows                |
+| u and LCTRL              | Toggle UID visuals on/off       |
+| w and LCTRL              | Show all windows                |
+| w and LALT               | Hide all windows                |
 | Home                     | Toggle command console          |
 | TAB                      | Tab completion in console mode  |
 | ESC                      | Quit                            |

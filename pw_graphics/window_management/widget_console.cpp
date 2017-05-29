@@ -84,12 +84,29 @@ void CWidgetConsole::draw()
     }
     oss << s_ConsoleModeTypeToStringMap[m_pComConsole->getMode()] << " > " << m_pComConsole->getCurrentCommand() << "_";
     
+    //--- Begin SFML ---------------------------------------------------------//
     m_Graphics.getWindow()->pushGLStates();
-
+    
     m_ConsoleText.setString(oss.str());
     m_ConsoleText.setPosition(m_nFramePosX, m_nFramePosY);
     m_Graphics.getWindow()->draw(m_ConsoleText);
-    m_Graphics.getWindow()->popGLStates();        
+
+    m_Graphics.getWindow()->popGLStates();
+    //--- End SFML -----------------------------------------------------------//
+    
+    DOM_DEV(
+        static bool bWarned = false;
+        if (m_pUIDVisuals == nullptr)
+        {
+            if (!bWarned)
+            {
+                WARNING_MSG("Console Widget", "UID visuals not set.")
+                bWarned = true;
+            }
+            goto DomDev;
+        })
+        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, m_UID.getValue());
+    DOM_DEV(DomDev:)
         
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
 }

@@ -297,6 +297,7 @@ UIDType CVisualsDataStorage::createWidget(const WidgetTypeType _WidgetType,
         case WidgetTypeType::CONSOLE:
         {
             CWidgetConsole* pConsoleWidget = new CWidgetConsole();
+            pConsoleWidget->setUIDVisuals(m_pUIDVisuals);
             pConsoleWidget->setComConsole(m_pComConsole);
             m_pComConsole->setComInterface(m_pComInterface);
             pWidget = pConsoleWidget;
@@ -305,6 +306,7 @@ UIDType CVisualsDataStorage::createWidget(const WidgetTypeType _WidgetType,
         case WidgetTypeType::TEXT:
         {
             CWidgetText* pTextWidget = new CWidgetText();
+            pTextWidget->setUIDVisuals(m_pUIDVisuals);
             pWidget = pTextWidget;
             break;
         }
@@ -361,6 +363,7 @@ UIDType CVisualsDataStorage::createWindow(const CreationModeType _pMode)
     CWindow* pWin = new CWindow();
     MEM_ALLOC("CWindow")
     
+    pWin->setUIDVisuals(m_pUIDVisuals);
     pWin->setFont(&m_Font);
     if (_pMode == CreationModeType::DIRECT)
     {

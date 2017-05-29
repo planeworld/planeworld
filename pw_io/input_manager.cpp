@@ -129,11 +129,10 @@ void CInputManager::processFrame()
                         }
                         case sf::Keyboard::U:
                         {
+                            
                             if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
                             {
-                                m_UIMode = UIModeType::WORLD;
-                                m_pComInterface->call<void>("mouse_cursor_off");
-                                m_pComInterface->call<void>("com_console_off");
+                                m_pComInterface->call<void>("uid_vis_toggle");
                             }
                             break;
                         }
@@ -277,9 +276,7 @@ void CInputManager::processFrame()
                         {
                             if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
                             {
-                                m_UIMode = UIModeType::UI;
-                                m_pComInterface->call<void>("mouse_cursor_on");
-                                m_pComInterface->call<void>("com_console_on");
+                                m_pComInterface->call<void>("uid_vis_toggle");
                             }
                             break;
                         }

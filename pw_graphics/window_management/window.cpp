@@ -37,8 +37,7 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CWindow::CWindow() : IUniqueIDUser(),
-                     IWinFrameUser(),
+CWindow::CWindow() : IWinFrameUser(),
                      m_pWidget(nullptr),
                      m_bCenter(false),
                      m_bVisible(true),
@@ -157,25 +156,36 @@ void CWindow::draw()
     if (m_bVisible)
     {
         // Draw background area
-        m_Graphics.setColor(m_WinColorBG);
-        m_Graphics.filledRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                              Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+        this->drawFrame();
+        
         // Draw title frame
         m_Graphics.setColor(m_WinColorFG);
         int nSpacing = m_pFont->getLineSpacing(m_nFontSize);
         m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
                         Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
         
-        // Draw content frame
-        m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                        Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+nSpacing));
-        
+        //--- Begin SFML -----------------------------------------------------//
         m_Graphics.getWindow()->pushGLStates();
 
         m_Title.setPosition(m_nFramePosX + m_nFrameWidth/2 - m_Title.getGlobalBounds().width/2, m_nFramePosY);
-
         m_Graphics.getWindow()->draw(m_Title);
-        m_Graphics.getWindow()->popGLStates();        
+
+        m_Graphics.getWindow()->popGLStates();
+        //--- End SFML -------------------------------------------------------//
+        
+        DOM_DEV(
+            static bool bWarned = false;
+            if (m_pUIDVisuals == nullptr)
+            {
+                if (!bWarned)
+                {
+                    WARNING_MSG("Window", "UID visuals not set.")
+                    bWarned = true;
+                }
+                goto DomDev;
+            })
+            m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, m_UID.getValue());
+        DOM_DEV(DomDev:)
         
         if (m_pWidget != nullptr) m_pWidget->draw();
         
@@ -192,6 +202,7 @@ void CWindow::draw()
         m_Graphics.filledRect(Vector2d(m_nFramePosX+m_nFrameWidth-m_nSizeResize,
                                        m_nFramePosY+m_nFrameHeight-m_nSizeResize),
                               Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+m_nFrameHeight));
+        
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
 }

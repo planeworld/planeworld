@@ -39,6 +39,7 @@
 #include "camera.h"
 #include "com_console.h"
 #include "com_interface.h"
+#include "uid_visuals_user.h"
 #include "widget.h"
 #include "window.h"
 
@@ -74,7 +75,8 @@ enum class CreationModeType
 /// \brief Class that stores all visuals data
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CVisualsDataStorage : public IComInterfaceUser
+class CVisualsDataStorage : public IComInterfaceUser,
+                            public IUIDVisualsUser
 {
     
     public:

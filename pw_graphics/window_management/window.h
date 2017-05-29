@@ -36,7 +36,6 @@
 //--- Program header ---------------------------------------------------------//
 #include "font_user.h"
 #include "log.h"
-#include "unique_id_user.h"
 #include "widget.h"
 #include "win_frame_user.h"
 
@@ -57,7 +56,6 @@ enum class WinAreaType
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CWindow : public IFontUser,
-                public IUniqueIDUser,
                 public IWinFrameUser
 {
 
@@ -97,7 +95,6 @@ class CWindow : public IFontUser,
         bool        m_bCenter;      ///< Indicates, if this window is centered
         bool        m_bVisible;     ///< Indicates, if this window is visible
         bool        m_bClosable;    ///< Indicates, if this window may be closed
-        
         int         m_nSizeClose;   ///< Size (both dimensions) of close area
         int         m_nSizeResize;  ///< Size (both dimensions) of resize area
 };

@@ -54,7 +54,7 @@ CWidgetText::CWidgetText() : IWidget()
                                   m_FontColor[3]*255.0));
 }
 
-/////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Draws widget with text included
 ///
@@ -62,13 +62,31 @@ CWidgetText::CWidgetText() : IWidget()
 void CWidgetText::draw()
 {
     METHOD_ENTRY("CWidgetText::draw")
+
     this->drawFrame();
-    
+
+    //--- Begin SFML ---------------------------------------------------------//
     m_Graphics.getWindow()->pushGLStates();
 
     m_Text.setPosition(m_nFramePosX, m_nFramePosY);
     m_Graphics.getWindow()->draw(m_Text);
+    
     m_Graphics.getWindow()->popGLStates();
+    //--- End SFML -----------------------------------------------------------//
+    
+    DOM_DEV(
+        static bool bWarned = false;
+        if (m_pUIDVisuals == nullptr)
+        {
+            if (!bWarned)
+            {
+                WARNING_MSG("Text Widget", "UID visuals not set.")
+                bWarned = true;
+            }
+            goto DomDev;
+        })
+        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, m_UID.getValue());
+    DOM_DEV(DomDev:)
     
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
 }

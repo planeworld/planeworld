@@ -20,120 +20,103 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       font_user.h
-/// \brief      Prototype of interface "IFontUser"
+/// \file       uid_visuals.h
+/// \brief      Prototype of class "CUIDVisuals"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2017-04-09
+/// \date       2017-05-27
 ///
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef FONT_USER_H
-#define FONT_USER_H
+#ifndef UID_VISUALS_H
+#define UID_VISUALS_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "font_user.h"
 #include "graphics.h"
-#include "log.h"
+#include "unique_id.h"
 
 //--- Misc header ------------------------------------------------------------//
 
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Definition of font properties that can be used by the ingeriting class
+/// \brief Visuals of entity UID's
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IFontUser
+class CUIDVisuals : public CGraphicsBase,
+                    public IFontUser
 {
 
     public:
     
         //--- Constructor/Destructor------------------------------------------//
-        IFontUser();
+        CUIDVisuals() : CGraphicsBase(),
+                        IFontUser(),
+                        m_aBGColor({{1.0, 1.0, 1.0, 0.9}}),
+                        m_bShowUID(false) {}
         
         //--- Constant methods -----------------------------------------------//
-
+        
         //--- Methods --------------------------------------------------------//
-        void setFont(sf::Font* const);
-        void setFontColor(const ColorTypeRGBA&, const bool);
-        void setFontSize(const int);
+        void draw(const int, const int, const UIDType);
+        void setBGColor(const ColorTypeRGBA& _aRGBA) {m_aBGColor = _aRGBA;}
         
-    protected:
+        void show() {m_bShowUID = true;}
+        void hide() {m_bShowUID = false;}
+        void toggle() {m_bShowUID ^= true;}
         
-        virtual void mySetFont() {}
-        virtual void mySetFontColor() {}
-        virtual void mySetFontSize() {}
+    private:
+        
+        //--- Methods [private] ----------------------------------------------//
+        void mySetFont() override;
+        void mySetFontColor() override;
+        void mySetFontSize() override;
         
         //--- Variables [private] --------------------------------------------//
-        sf::Font*       m_pFont;        ///< Font instance to be used
-        ColorTypeRGBA   m_FontColor;    ///< Colour of font
-        int             m_nFontSize;    ///< Size of font
-
+        ColorTypeRGBA   m_aBGColor;   ///< Background color
+        sf::Text        m_UIDText;    ///< UID as drawable sf::Text
+        
+        bool            m_bShowUID;   ///< Indicates, if UIDs are shown
+        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Constructor
+/// \brief Sets the font for UID value text
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IFontUser::IFontUser() : m_pFont(nullptr),
-                                m_FontColor({1.0, 1.0, 1.0, 1.0}),
-                                m_nFontSize(16)
+inline void CUIDVisuals::mySetFont()
 {
-    METHOD_ENTRY("IFontUser::IFontUser")
-    CTOR_CALL("IFontUser")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the font used for the inheriting class
-///
-/// \param _pFont Font to be set
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IFontUser::setFont(sf::Font* const _pFont)
-{
-    METHOD_ENTRY("IFontUser::setFont")
-    m_pFont = _pFont;
-    
-    this->mySetFont();
+    METHOD_ENTRY("CUIDVisuals::mySetFont")
+    m_UIDText.setFont(*m_pFont);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Sets the colour of the font
 ///
-/// \param _RGBA Colour as RGBA array (0.0 - 1.0)
-/// \param _bInherit Indicates, if colour setting should be inherited to childs
-///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IFontUser::setFontColor(const ColorTypeRGBA& _RGBA, const bool _bInherit)
+inline void CUIDVisuals::mySetFontColor()
 {
-    METHOD_ENTRY("IFontUser::setFontColor")
-    m_FontColor = _RGBA;
-    if (_bInherit)
-    {
-        this->mySetFontColor();
-    }
+    METHOD_ENTRY("CUIDVisuals::mySetFontColor")
+    m_UIDText.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                     m_FontColor[1]*255.0,
+                                     m_FontColor[2]*255.0,
+                                     m_FontColor[3]*255.0));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Sets the size of the font
 ///
-/// \param _nFontSize Font size to be set
-///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IFontUser::setFontSize(const int _nFontSize)
+inline void CUIDVisuals::mySetFontSize()
 {
-    METHOD_ENTRY("IFontUser::setFontSize")
-    
-    m_nFontSize = _nFontSize;
-    
-    this->mySetFontSize();
+    METHOD_ENTRY("CUIDVisuals::mySetFontSize")
+    m_UIDText.setCharacterSize(m_nFontSize);
 }
 
-#endif // FONT_USER_H
+#endif // UID_VISUALS_H

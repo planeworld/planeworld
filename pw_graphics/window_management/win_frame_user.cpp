@@ -37,8 +37,11 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-IWinFrameUser::IWinFrameUser() : m_WinColorBG({0.1, 0.1, 0.1, 0.75}),
-                                 m_WinColorFG({0.3, 0.3, 0.3, 0.75}),
+IWinFrameUser::IWinFrameUser() : CGraphicsBase(),
+                                 IUIDVisualsUser(),
+                                 IUniqueIDUser(),
+                                 m_WinColorBG({{0.1, 0.1, 0.1, 0.75}}),
+                                 m_WinColorFG({{0.3, 0.3, 0.3, 0.75}}),
                                  m_nFrameBorderX(5),
                                  m_nFrameBorderY(5),
                                  m_nFramePosX(0),
@@ -61,6 +64,7 @@ void IWinFrameUser::drawFrame()
 {
     METHOD_ENTRY("IWinFrameUser::drawFrame")
     
+    // Draw frame
     m_Graphics.setColor(m_WinColorBG);
     m_Graphics.filledRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
                           Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));

@@ -1267,33 +1267,42 @@ void CVisualsManager::cycleCamera()
 bool CVisualsManager::init()
 {
     METHOD_ENTRY("CVisualsManager::init")
+
+    // Setup engine global visuals first
+    m_UIDVisuals.setFont(&m_Font);
+    m_UIDVisuals.setFontColor({{1.0, 1.0, 0.0, 0.8}}, WIN_INHERIT);
+    m_UIDVisuals.setFontSize(10);
+    m_UIDVisuals.setBGColor({{0.1, 0.1, 0.8, 0.8}});
     
     // When calling init, all relevant variables have to be set up. Thus, sub 
     // components like the visuals data storage kann be set up, eventually.
     m_pVisualsDataStorage->setFont(m_Font);
     m_pVisualsDataStorage->setComInterface(m_pComInterface);
+    m_pVisualsDataStorage->setUIDVisuals(&m_UIDVisuals);
     
     m_ConsoleWidgetID = m_pVisualsDataStorage->createWidget(WidgetTypeType::CONSOLE);
     CWidgetConsole* pConsoleWidget = static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID));
+    
     pConsoleWidget->setFont(&m_Font);
     pConsoleWidget->setFontSize(16);
-    pConsoleWidget->setFontColor({0.0, 1.0, 0.0, 1.0}, WIN_INHERIT);
+    pConsoleWidget->setFontColor({{0.0, 1.0, 0.0, 1.0}}, WIN_INHERIT);
     pConsoleWidget->setComConsole(m_pVisualsDataStorage->getComConsole());
     
     m_ConsoleWindowID = m_pVisualsDataStorage->createWindow();
     CWindow* pConsoleWindow  = m_pVisualsDataStorage->getWindowByValue(m_ConsoleWindowID);
+    
     pConsoleWindow->setTitle("Command console");
     pConsoleWindow->setFont(&m_Font);
     pConsoleWindow->setFontSize(20);
-    pConsoleWindow->setFontColor({1.0, 1.0, 1.0, 1.0}, WIN_NO_INHERIT);
+    pConsoleWindow->setFontColor({{1.0, 1.0, 1.0, 1.0}}, WIN_NO_INHERIT);
     pConsoleWindow->setWidget(pConsoleWidget);
-    pConsoleWindow->setColorBG({0.1, 0.1, 0.1, 0.75}, WIN_INHERIT);
-    pConsoleWindow->setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
+    pConsoleWindow->setColorBG({{0.1, 0.1, 0.1, 0.75}}, WIN_INHERIT);
+    pConsoleWindow->setColorFG({{0.3, 0.3, 0.3, 0.75}}, WIN_INHERIT);
     pConsoleWindow->setPosition(10, 10);
     pConsoleWindow->resize(800, 150);
     pConsoleWindow->setVisibilty(false);
     pConsoleWindow->setClosability(false);
-
+    
     return (m_Graphics.init());
 }
 
@@ -1477,13 +1486,15 @@ void CVisualsManager::myInitComInterface()
             {
                 CWidgetText* pWidget = new CWidgetText();
                 MEM_ALLOC("IWidget")
+                pWidget->setUIDVisuals(&m_UIDVisuals);
                 pWidget->setText(_strSrc + ": " + _strMsg);
                 pWidget->setFont(&m_Font);
                 m_pVisualsDataStorage->addWidget(pWidget);
                 
                 CWindow* pWin = new CWindow();
                 MEM_ALLOC("CWindow")
-                
+
+                pWin->setUIDVisuals(&m_UIDVisuals);
                 pWin->setFont(&m_Font);
                 m_pVisualsDataStorage->addWindow(pWin);
                 pWin->setTitle(_strLev);
@@ -1733,6 +1744,24 @@ void CVisualsManager::myInitComInterface()
                                       "Indicates that left mouse button was released.",
                                       {{ParameterType::NONE, "No return value"}},
                                       "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("uid_vis_hide",
+                                      CCommand<void>([&](){m_UIDVisuals.hide();}),
+                                      "Hide UIDs.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("uid_vis_show",
+                                      CCommand<void>([&](){m_UIDVisuals.show();}),
+                                      "Show UIDs.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("uid_vis_toggle",
+                                      CCommand<void>([&](){m_UIDVisuals.toggle();}),
+                                      "Toggle UIDs on/off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
     );
     m_pComInterface->registerFunction("widget_set_font_color",
                                       CCommand<void,int,double,double,double,double>(
