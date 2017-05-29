@@ -39,6 +39,7 @@
 #include "camera.h"
 #include "com_console.h"
 #include "com_interface.h"
+#include "uid_visuals_user.h"
 #include "widget.h"
 #include "window.h"
 
@@ -56,12 +57,26 @@ typedef std::unordered_map<UIDType, CWindow*> WindowsByValueType;
 /// Queue for display order of windows
 typedef std::list<UIDType> WindowOrderType;
 
+/// Concurrent queue of widgets
+typedef moodycamel::ConcurrentQueue<IWidget*> WidgetsQueueType;
+/// Concurrent queue of windows
+typedef moodycamel::ConcurrentQueue<CWindow*> WindowsQueueType;
+
+/// Specifies the type of creation mode. When directly created, entities are
+/// are added to storage directly which should only be done within the same thread
+enum class CreationModeType
+{
+    DIRECT,
+    QUEUED
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class that stores all visuals data
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CVisualsDataStorage : public IComInterfaceUser
+class CVisualsDataStorage : public IComInterfaceUser,
+                            public IUIDVisualsUser
 {
     
     public:
@@ -73,9 +88,9 @@ class CVisualsDataStorage : public IComInterfaceUser
         //--- Constant Methods -----------------------------------------------//
         const CamerasByIndexType&   getCamerasByIndex() const;
         const CamerasByNameType&    getCamerasByName() const;
-        CComConsole* const          getComConsole() const;
-        IWidget* const              getWidgetByValue(const UIDType) const;
-        CWindow* const              getWindowByValue(const UIDType) const;
+        CComConsole*                getComConsole() const;
+        IWidget*                    getWidgetByValue(const UIDType) const;
+        CWindow*                    getWindowByValue(const UIDType) const;
         const WidgetsByValueType*   getWidgetsByValue() const;
         const WindowsByValueType*   getWindowsByValue() const;
         
@@ -83,11 +98,13 @@ class CVisualsDataStorage : public IComInterfaceUser
         void addCamera(CCamera*);
         void addWidget(IWidget*);
         void addWindow(CWindow*);
+        void addWidgetsFromQueue();
+        void addWindowsFromQueue();
         
         bool closeWindow(const UIDType);
         
-        UIDType createWidget(const WidgetTypeType);
-        UIDType createWindow();
+        UIDType createWidget(const WidgetTypeType, const CreationModeType = CreationModeType::DIRECT);
+        UIDType createWindow(const CreationModeType = CreationModeType::DIRECT);
         
         WindowOrderType* getWindowUIDsInOrder() {return &m_WindowsOrder;}
 
@@ -105,6 +122,9 @@ class CVisualsDataStorage : public IComInterfaceUser
         WindowsByValueType          m_WindowsByValue;           ///< Windows, accessed by value
         WinFrameUsersByValueType    m_WinFrameUsersByValue;     ///< Entities using a window frame, accessed by value
         WindowOrderType             m_WindowsOrder;             ///< Display order of windows
+        
+        WidgetsQueueType            m_WidgetsQueue;             ///< Queue of new widgets to be added to storage
+        WindowsQueueType            m_WindowsQueue;             ///< Queue of new windows to be added to storage
         
         CComConsole*                m_pComConsole;              ///< Com console for command input
         sf::Font                    m_Font;                     ///< Currently used font for visuals
@@ -145,60 +165,10 @@ inline const CamerasByNameType& CVisualsDataStorage::getCamerasByName() const
 /// \return Com console
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CComConsole* const CVisualsDataStorage::getComConsole() const
+inline CComConsole* CVisualsDataStorage::getComConsole() const
 {
     METHOD_ENTRY("CVisualsDataStorage::getComConsole")
     return m_pComConsole;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return widget, accessed by given UID value
-///
-/// \param _nUID UID of widget to return
-///
-/// \return Widget with given UID value
-///
-////////////////////////////////////////////////////////////////////////////////
-inline IWidget* const CVisualsDataStorage::getWidgetByValue(const UIDType _nUID) const
-{
-    METHOD_ENTRY("CVisualsDataStorage::getWidgetByValue")
-    
-    const auto ci = m_WidgetsByValue.find(_nUID);
-    if (ci != m_WidgetsByValue.end())
-    {
-        return ci->second;
-    }
-    else
-    {
-        WARNING_MSG("Visuals Data Storage", "Unknown widget with UID <" << _nUID << ">")
-        return nullptr;
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return window, accessed by given UID value
-///
-/// \param _nUID UID of window to return
-///
-/// \return Window with given UID value
-///
-////////////////////////////////////////////////////////////////////////////////
-inline CWindow* const CVisualsDataStorage::getWindowByValue(const UIDType _nUID) const
-{
-    METHOD_ENTRY("CVisualsDataStorage::getWindowByValue")
-    
-    const auto ci = m_WindowsByValue.find(_nUID);
-    if (ci != m_WindowsByValue.end())
-    {
-        return ci->second;
-    }
-    else
-    {
-        WARNING_MSG("Visuals Data Storage", "Unknown window with UID <" << _nUID << ">")
-        return nullptr;
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

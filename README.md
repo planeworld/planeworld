@@ -49,7 +49,9 @@ Usage
 | n                        | Show names                      |
 | s                        | Save game state                 |
 | t                        | Show object trajectories        |
-| v                        | Toggle graphics (on/off)        |
+| u and LCTRL              | Toggle UID visuals on/off       |
+| w and LCTRL              | Show all windows                |
+| w and LALT               | Hide all windows                |
 | Home                     | Toggle command console          |
 | TAB                      | Tab completion in console mode  |
 | ESC                      | Quit                            |

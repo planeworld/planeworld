@@ -235,6 +235,57 @@ void CWorldDataStorage::updateObject(const UIDType _nUID)
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return object, accessed by given UID value
+///
+/// \param _nUID UID of object to return
+///
+/// \return Object with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+CObject* CWorldDataStorage::getObjectByValueBack(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectByValueBack")
+
+    const auto ci = m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
+    if (ci != m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return shape, accessed by given UID value
+///
+/// \param _nUID UID of shape to return
+///
+/// \return Shape with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+IShape* CWorldDataStorage::getShapeByValue(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::getShapeByValue")
+
+    const auto ci = m_ShapesByValue.find(_nUID);
+    if (ci != m_ShapesByValue.end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("World Data Storage", "Unknown shape with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Add a UID user to buffer

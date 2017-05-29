@@ -44,9 +44,16 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
                                      m_pCamera(nullptr),
+                                     m_nCursorX(0),
+                                     m_nCursorY(0),
+                                     m_nCursorX0(0),
+                                     m_nCursorY0(0),
+                                     m_nCursorOffsetX(0),
+                                     m_nCursorOffsetY(0),
+                                     m_bCursor(false),
+                                     m_bMBLeft(false),
                                      m_ConsoleWidgetID(0),
-                                     m_ConsoleWindowID(0),
-                                     m_bConsoleMode(false)
+                                     m_ConsoleWindowID(0)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -1260,30 +1267,41 @@ void CVisualsManager::cycleCamera()
 bool CVisualsManager::init()
 {
     METHOD_ENTRY("CVisualsManager::init")
+
+    // Setup engine global visuals first
+    m_UIDVisuals.setFont(&m_Font);
+    m_UIDVisuals.setFontColor({{1.0, 1.0, 0.0, 0.8}}, WIN_INHERIT);
+    m_UIDVisuals.setFontSize(10);
+    m_UIDVisuals.setBGColor({{0.1, 0.1, 0.8, 0.8}});
     
     // When calling init, all relevant variables have to be set up. Thus, sub 
     // components like the visuals data storage kann be set up, eventually.
     m_pVisualsDataStorage->setFont(m_Font);
     m_pVisualsDataStorage->setComInterface(m_pComInterface);
+    m_pVisualsDataStorage->setUIDVisuals(&m_UIDVisuals);
     
     m_ConsoleWidgetID = m_pVisualsDataStorage->createWidget(WidgetTypeType::CONSOLE);
     CWidgetConsole* pConsoleWidget = static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID));
+    
     pConsoleWidget->setFont(&m_Font);
     pConsoleWidget->setFontSize(16);
-    pConsoleWidget->setFontColor({0.0, 1.0, 0.0, 1.0}, WIN_INHERIT);
+    pConsoleWidget->setFontColor({{0.0, 1.0, 0.0, 1.0}}, WIN_INHERIT);
     pConsoleWidget->setComConsole(m_pVisualsDataStorage->getComConsole());
     
     m_ConsoleWindowID = m_pVisualsDataStorage->createWindow();
     CWindow* pConsoleWindow  = m_pVisualsDataStorage->getWindowByValue(m_ConsoleWindowID);
+    
     pConsoleWindow->setTitle("Command console");
     pConsoleWindow->setFont(&m_Font);
     pConsoleWindow->setFontSize(20);
-    pConsoleWindow->setFontColor({1.0, 1.0, 1.0, 1.0}, WIN_NO_INHERIT);
+    pConsoleWindow->setFontColor({{1.0, 1.0, 1.0, 1.0}}, WIN_NO_INHERIT);
     pConsoleWindow->setWidget(pConsoleWidget);
-    pConsoleWindow->setColorBG({0.1, 0.1, 0.1, 0.75}, WIN_INHERIT);
-    pConsoleWindow->setColorFG({0.3, 0.3, 0.3, 0.75}, WIN_INHERIT);
+    pConsoleWindow->setColorBG({{0.1, 0.1, 0.1, 0.75}}, WIN_INHERIT);
+    pConsoleWindow->setColorFG({{0.3, 0.3, 0.3, 0.75}}, WIN_INHERIT);
     pConsoleWindow->setPosition(10, 10);
     pConsoleWindow->resize(800, 150);
+    pConsoleWindow->setVisibilty(false);
+    pConsoleWindow->setClosability(false);
     
     return (m_Graphics.init());
 }
@@ -1296,10 +1314,11 @@ bool CVisualsManager::init()
 void CVisualsManager::finishFrame()
 {
     METHOD_ENTRY("CVisualsManager::finishFrame")
+    
     m_Graphics.swapBuffers();
-    DEBUG(Log.setLoglevel(LOG_LEVEL_NOTICE);)
+    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
     m_pDataStorage->swapFront();
-    DEBUG(Log.setLoglevel(LOG_LEVEL_DEBUG);)
+    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
 
     // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
     if (m_pCamera->gotRef())
@@ -1315,6 +1334,10 @@ void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
 
+    m_Graphics.switchToWorldSpace();
+    
+    m_pVisualsDataStorage->addWidgetsFromQueue();
+    m_pVisualsDataStorage->addWindowsFromQueue();
     m_pComInterface->callWriters("visuals");
     
     m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
@@ -1326,9 +1349,13 @@ void CVisualsManager::processFrame()
     this->drawKinematicsStates();
     this->drawCOM();
     this->drawBoundingBoxes();
+    
+    m_Graphics.switchToScreenSpace();
+    
     this->drawGridHUD();
     this->drawTimers();
     this->drawWindows();
+    this->updateUI();
     
     this->finishFrame();
 }
@@ -1348,6 +1375,95 @@ void CVisualsManager::drawWindows()
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Updates user interface based on UI mode 
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::updateUI()
+{
+    METHOD_ENTRY("CVisualsManager::updateUI")
+
+    if (m_bMBLeft)
+    {
+        auto it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
+        bool bDone = false;
+        while (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rend() && !bDone)
+        {
+            CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(*it);
+            
+            // First, get focus of window
+            if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::WIN))
+            {
+                if (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin())
+                {
+                    m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(*it);
+                    m_pVisualsDataStorage->getWindowUIDsInOrder()->erase(std::prev(it.base()));
+                    it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
+                    pWin = m_pVisualsDataStorage->getWindowByValue(*it);
+                }
+                bDone = true;
+            }
+                
+            // Test, if cursor is in the area that closes the window
+            if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::CLOSE))
+            {
+                m_pVisualsDataStorage->closeWindow(*it);
+                m_bMBLeft = false; // Avoid focussing the underlying window
+                bDone = true;
+            }
+            // Test, if cursor is in the area that resizes the window
+            else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::RESIZE))
+            {
+                if (pWin->getHeight()+m_nCursorY-m_nCursorY0 > 50 &&
+                    pWin->getWidth()+m_nCursorX-m_nCursorX0 > 50)
+                {
+                    pWin->resize(pWin->getWidth() +m_nCursorX-m_nCursorX0,
+                                pWin->getHeight()+m_nCursorY-m_nCursorY0);
+                }
+                bDone = true;
+            }
+            // Test, if mouse cursor is inside title of window. Cursor positon of
+            // the previous frame must be used, since windows are not updated
+            // yet.
+            else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::TITLE))
+            {
+                // Test for offset (position of cursor within windows).
+                // Offset = 0 indicates, that no offset was calculated yet.
+                if (m_nCursorOffsetX == 0 && m_nCursorOffsetY == 0)
+                {
+                    m_nCursorOffsetX = m_nCursorX0 - pWin->getPositionX();
+                    m_nCursorOffsetY = m_nCursorY0 - pWin->getPositionY();
+                }
+                pWin->setPosition(m_nCursorX-m_nCursorOffsetX, m_nCursorY-m_nCursorOffsetY);
+                bDone = true;
+            }
+            ++it;
+        }
+    }
+    
+    m_nCursorX0 = m_nCursorX;
+    m_nCursorY0 = m_nCursorY;
+    
+    if (m_bCursor)
+    {
+        m_Graphics.setColor(1.0, 1.0, 1.0, 0.8);
+        m_Graphics.beginLine(PolygonType::LINE_SINGLE, -10.0);
+            m_Graphics.addVertex(m_nCursorX-10, m_nCursorY);
+            m_Graphics.addVertex(m_nCursorX-3, m_nCursorY);
+            m_Graphics.addVertex(m_nCursorX, m_nCursorY-10);
+            m_Graphics.addVertex(m_nCursorX, m_nCursorY-3);
+            m_Graphics.addVertex(m_nCursorX+10, m_nCursorY);
+            m_Graphics.addVertex(m_nCursorX+3, m_nCursorY);
+            m_Graphics.addVertex(m_nCursorX, m_nCursorY+10);
+            m_Graphics.addVertex(m_nCursorX, m_nCursorY+3);
+        m_Graphics.endLine();
+        if (m_bMBLeft)
+            m_Graphics.circle(Vector2d(m_nCursorX, m_nCursorY), 5);
+    }
+    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Initialise the command interface
@@ -1362,9 +1478,55 @@ void CVisualsManager::myInitComInterface()
     std::ostringstream ossWidgetType("");
     for (auto WidgetType : STRING_TO_WIDGET_TYPE_MAP) ossWidgetType << " " << WidgetType.first;
     
+    // Callback to log entry
+    std::function<void(std::string, std::string, std::string, std::string)> Func =
+        [&](const std::string& _strSrc, const std::string& _strMsg, const std::string& _strLev, const std::string& _strDom)
+        {
+            if (_strLev == "LOG_LEVEL_ERROR" || _strLev == "LOG_LEVEL_WARNING")
+            {
+                CWidgetText* pWidget = new CWidgetText();
+                MEM_ALLOC("IWidget")
+                pWidget->setUIDVisuals(&m_UIDVisuals);
+                pWidget->setText(_strSrc + ": " + _strMsg);
+                pWidget->setFont(&m_Font);
+                m_pVisualsDataStorage->addWidget(pWidget);
+                
+                CWindow* pWin = new CWindow();
+                MEM_ALLOC("CWindow")
+
+                pWin->setUIDVisuals(&m_UIDVisuals);
+                pWin->setFont(&m_Font);
+                m_pVisualsDataStorage->addWindow(pWin);
+                pWin->setTitle(_strLev);
+                pWin->setWidget(pWidget);
+                pWin->center();
+                pWin->setColorBG({{0.25, 0.0, 0.0, 0.8}}, WIN_INHERIT);
+                pWin->setColorFG({{0.5, 0.0, 0.0, 0.8}}, WIN_INHERIT);
+            }
+        };
+    m_pComInterface->registerCallback("log_entry", Func);
+    
     //----------------------------------------------------------------------
     // System package
     //----------------------------------------------------------------------
+    m_pComInterface->registerFunction("cam_attach_to",
+                                      CCommand<void, int>([&](const int _nUID)
+                                      {
+                                          auto it = m_pDataStorage->getObjectsByValueFront()->find(_nUID);
+                                          if (it != m_pDataStorage->getObjectsByValueFront()->end())
+                                          {
+                                                m_pCamera->attachTo(it->second);
+                                          }
+                                          else
+                                          {
+                                              WARNING_MSG("Visuals Manager", "Unknown object with UID <" << _nUID << ">")
+                                          }
+                                      }),
+                                      "Hook camera on given object.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Object UID"}},
+                                      "system", "visuals"  
+    );
     m_pComInterface->registerFunction("cam_cycle",
                                       CCommand<void>([&](){this->cycleCamera();}),
                                       "Cycle through registered cameras",
@@ -1400,24 +1562,6 @@ void CVisualsManager::myInitComInterface()
                                       "Rotate camera by given angle.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
-                                      "system", "visuals"  
-    );
-    m_pComInterface->registerFunction("cam_hook_on",
-                                      CCommand<void, int>([&](const int _nUID)
-                                      {
-                                          auto it = m_pDataStorage->getObjectsByValueFront()->find(_nUID);
-                                          if (it != m_pDataStorage->getObjectsByValueFront()->end())
-                                          {
-                                                m_pCamera->attachTo(it->second);
-                                          }
-                                          else
-                                          {
-                                              WARNING_MSG("Visuals Manager", "Unknown object with UID <" << _nUID << ">")
-                                          }
-                                      }),
-                                      "Hook camera on given object.",
-                                      {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::INT, "Object UID"}},
                                       "system", "visuals"  
     );
     m_pComInterface->registerFunction("cam_set_position",
@@ -1507,6 +1651,18 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"}},
                                       "system","visuals"
     );
+    m_pComInterface->registerFunction("com_console_on",
+                                      CCommand<void>([&](){m_pVisualsDataStorage->getWindowByValue(m_ConsoleWindowID)->setVisibilty(true);}),
+                                      "Switch command console on.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("com_console_off",
+                                      CCommand<void>([&](){m_pVisualsDataStorage->getWindowByValue(m_ConsoleWindowID)->setVisibilty(false);}),
+                                      "Switch command console off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
     m_pComInterface->registerFunction("com_console_prev",
                                       CCommand<void>([&](){m_pVisualsDataStorage->getComConsole()->prevCommand();}),
                                       "Get the previous command in com console (this is mostly relevant for tab completion).",
@@ -1528,17 +1684,84 @@ void CVisualsManager::myInitComInterface()
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("create_widget",
-                                      CCommand<void, std::string>([&](const std::string& _strS) {m_pVisualsDataStorage->createWidget(mapStringToWidgetType(_strS));}),
+                                      CCommand<int, std::string>([&](const std::string& _strS) -> int
+                                      {
+                                          return m_pVisualsDataStorage->createWidget(mapStringToWidgetType(_strS),
+                                                                                     CreationModeType::QUEUED);
+                                      }),
                                       "Creates a widget of given type.",
                                       {{ParameterType::INT, "Window UID"},
                                        {ParameterType::STRING, "Widget Type (" + ossWidgetType.str() + ")"}},
-                                      "system","visuals"
+                                      "system"
     );
     m_pComInterface->registerFunction("create_window",
-                                      CCommand<void>([&]() {m_pVisualsDataStorage->createWindow();}),
+                                      CCommand<int>([&]() -> int
+                                      {
+                                          return m_pVisualsDataStorage->createWindow(CreationModeType::QUEUED);
+                                      }),
                                       "Creates generic window.",
                                       {{ParameterType::INT, "Window UID"}},
-                                      "system","visuals"
+                                      "system"
+    );
+    m_pComInterface->registerFunction("mouse_cursor_on",
+                                      CCommand<void>([&]() {m_bCursor = true;}),
+                                      "Enables mouse cursor.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("mouse_cursor_off",
+                                      CCommand<void>([&](){m_bCursor = false;}),
+                                      "Disable mouse cursor.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("mouse_set_cursor",
+                                      CCommand<void, int, int>([&](const int _nX,
+                                                                   const int& _nY)
+                                      {
+                                          m_nCursorX = _nX;
+                                          m_nCursorY = _nY;
+                                      }),
+                                      "Set position of the mouse cursor in screen space.",
+                                      {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::INT, "Position X"},
+                                       {ParameterType::INT, "Position Y"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("mouse_mbl_pressed",
+                                      CCommand<void>([&](){m_bMBLeft = true;}),
+                                      "Indicates that left mouse button was pressed.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("mouse_mbl_released",
+                                      CCommand<void>([&]()
+                                      {
+                                          m_bMBLeft = false;
+                                          m_nCursorOffsetX = 0;
+                                          m_nCursorOffsetY = 0;
+                                      }),
+                                      "Indicates that left mouse button was released.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("uid_vis_hide",
+                                      CCommand<void>([&](){m_UIDVisuals.hide();}),
+                                      "Hide UIDs.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("uid_vis_show",
+                                      CCommand<void>([&](){m_UIDVisuals.show();}),
+                                      "Show UIDs.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
+    );
+    m_pComInterface->registerFunction("uid_vis_toggle",
+                                      CCommand<void>([&](){m_UIDVisuals.toggle();}),
+                                      "Toggle UIDs on/off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system", "visuals"
     );
     m_pComInterface->registerFunction("widget_set_font_color",
                                       CCommand<void,int,double,double,double,double>(
@@ -1594,6 +1817,26 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::STRING, "Widget text"}},
                                       "system","visuals"
     );
+    m_pComInterface->registerFunction("win_set_title",
+                                      CCommand<void, int, std::string>(
+                                          [&](const int _nUID, const std::string _strTitle)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    pWin->setTitle(_strTitle);
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Set title of window.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"},
+                                      {ParameterType::STRING, "Window title"}},
+                                      "system","visuals"
+    );
     m_pComInterface->registerFunction("win_set_widget",
                                       CCommand<void, int, int>(
                                           [&](const int _nUIDWin, const int _nUIDWidget)
@@ -1645,7 +1888,7 @@ void CVisualsManager::myInitComInterface()
                                       CCommand<void, int>(
                                           [&](const int _nUID)
                                             {
-                                                if (_nUID != m_ConsoleWindowID)
+                                                if (_nUID != int(m_ConsoleWindowID))
                                                 {
                                                     if (!m_pVisualsDataStorage->closeWindow(_nUID))
                                                     {
@@ -1661,6 +1904,19 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Window UID"}},
                                       "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("win_hide_all",
+                                      CCommand<void>([&]()
+                                        {
+                                            for (auto Win : *m_pVisualsDataStorage->getWindowsByValue())
+                                            {
+                                                if (Win.second->getUID() != m_ConsoleWindowID)
+                                                    Win.second->setVisibilty(false);
+                                            }
+                                        }),
+                                      "Hide all windows.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "system","visuals"
     );
     m_pComInterface->registerFunction("win_main_resize",
                                       CCommand<void, double, double>([=](const double& _fX,
@@ -1808,7 +2064,8 @@ void CVisualsManager::myInitComInterface()
                                         {
                                             for (auto Win : *m_pVisualsDataStorage->getWindowsByValue())
                                             {
-                                                Win.second->setVisibilty(true);
+                                                if (Win.second->getUID() != m_ConsoleWindowID)
+                                                    Win.second->setVisibilty(true);
                                             }
                                         }),
                                       "Shows all windows.",
@@ -1839,12 +2096,6 @@ void CVisualsManager::myInitComInterface()
     m_pComInterface->registerFunction("toggle_com",
                                       CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_COM);}),
                                       "Toggle center of mass (COM) on and off.",
-                                      {{ParameterType::NONE, "No return value"}},
-                                      "visuals", "visuals"
-    );
-    m_pComInterface->registerFunction("toggle_console_mode",
-                                      CCommand<void>([&](){this->toggleConsoleMode();}),
-                                      "Toggle command console on and off.",
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals", "visuals"
     );

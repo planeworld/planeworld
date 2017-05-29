@@ -36,11 +36,19 @@
 //--- Program header ---------------------------------------------------------//
 #include "font_user.h"
 #include "log.h"
-#include "unique_id_user.h"
 #include "widget.h"
 #include "win_frame_user.h"
 
 //--- Misc header ------------------------------------------------------------//
+
+/// Defines areas of action, such as close, resize etc.
+enum class WinAreaType
+{
+    CLOSE,
+    RESIZE,
+    TITLE,
+    WIN
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -48,7 +56,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CWindow : public IFontUser,
-                public IUniqueIDUser,
                 public IWinFrameUser
 {
 
@@ -59,30 +66,37 @@ class CWindow : public IFontUser,
         virtual ~CWindow();
         
         //--- Constant methods -----------------------------------------------//
-        void draw() const; 
+        bool isClosable() const {return m_bClosable;}
+        bool isInside(const int, const int, const WinAreaType = WinAreaType::WIN) const;
         bool isVisible() const;
         
         //--- Methods --------------------------------------------------------//
         void center();
+        void draw();
+        void setClosability(const bool _bClosable) {m_bClosable = _bClosable;}
         void setTitle(const std::string&);
         void setVisibilty(const bool);
         void setWidget(IWidget* const);
-        void toggleVisibility();
         
     private:
         
-        void myResize(const int, const int);
-        void mySetColorBG(const ColorTypeRGBA&);
-        void mySetColorFG(const ColorTypeRGBA&);
-        void mySetFontColor(const ColorTypeRGBA&);
-        void mySetPosition(const int, const int);
+        void myResize(const int, const int) override;
+        void mySetColorBG(const ColorTypeRGBA&) override;
+        void mySetColorFG(const ColorTypeRGBA&) override;
+        void mySetFont() override;
+        void mySetFontColor() override;
+        void mySetFontSize() override;
+        void mySetPosition(const int, const int) override;
         
         //--- Variables [private] --------------------------------------------//
-        std::string m_strTitle; ///< Window title
+        sf::Text    m_Title;        ///< Window title
         
-        IWidget*    m_pWidget;  ///< Widget of this \ref CWindow
-        bool        m_bCenter;  ///< Indicates, if this window is centered
-        bool        m_bVisible; ///< Indicates, if this window is visible
+        IWidget*    m_pWidget;      ///< Widget of this \ref CWindow
+        bool        m_bCenter;      ///< Indicates, if this window is centered
+        bool        m_bVisible;     ///< Indicates, if this window is visible
+        bool        m_bClosable;    ///< Indicates, if this window may be closed
+        int         m_nSizeClose;   ///< Size (both dimensions) of close area
+        int         m_nSizeResize;  ///< Size (both dimensions) of resize area
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -110,7 +124,7 @@ inline bool CWindow::isVisible() const
 inline void CWindow::setTitle(const std::string& _strTitle)
 {
     METHOD_ENTRY("CWindow::setTitle")
-    m_strTitle = _strTitle;
+    m_Title.setString(_strTitle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -149,17 +163,6 @@ inline void CWindow::setWidget(IWidget* const _pWidget)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Toggles the visibility of this window
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::toggleVisibility()
-{
-    METHOD_ENTRY("CWindow::toggleVisibility")
-    m_bVisible ^= true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Resizes inherited widget
 ///
 /// \param _nX Size X, width
@@ -171,7 +174,6 @@ inline void CWindow::myResize(const int _nX, const int _nY)
     METHOD_ENTRY("CWindow::myResize")
     if (m_pWidget != nullptr)
         m_pWidget->resize(_nX-m_nFrameBorderX*2, _nY-m_nFrameBorderY*2-m_pFont->getLineSpacing(m_nFontSize));
-    if (m_bCenter) this->center();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,16 +206,41 @@ inline void CWindow::mySetColorFG(const ColorTypeRGBA& _RGBA)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the font colour for inherited widget
-///
-/// \param _RGBA Colour as RGBA array (0.0 - 1.0)
+/// \brief Sets the font
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::mySetFontColor(const ColorTypeRGBA& _RGBA)
+inline void CWindow::mySetFont()
+{
+    METHOD_ENTRY("CWindow::mySetFont")
+    m_Title.setFont(*m_pFont);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the font colour for inherited widget
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWindow::mySetFontColor()
 {
     METHOD_ENTRY("CWindow::mySetFontColor")
+    
+    m_Title.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                   m_FontColor[1]*255.0,
+                                   m_FontColor[2]*255.0,
+                                   m_FontColor[3]*255.0));
     if (m_pWidget != nullptr)
-        m_pWidget->setFontColor(_RGBA, WIN_INHERIT);
+        m_pWidget->setFontColor(m_FontColor, WIN_INHERIT);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the fonts size
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWindow::mySetFontSize()
+{
+    METHOD_ENTRY("CWindow::mySetFontSize")
+    m_Title.setCharacterSize(m_nFontSize);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -47,7 +47,7 @@ using namespace Eigen;
 ////////////////////////////////////////////////////////////////////////////////
 const std::string CComInterfaceException::getMessage() const
 {
-    METHOD_ENTRY("CComInterfaceException::getMessage")
+    METHOD_ENTRY_QUIET("CComInterfaceException::getMessage")
     
     switch (m_EType)
     {
@@ -67,10 +67,23 @@ const std::string CComInterfaceException::getMessage() const
 /// \brief Constructor, registeres its own functions
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CComInterface::CComInterface()
+CComInterface::CComInterface() 
 {
-    METHOD_ENTRY("CComInterface::CComInterface")
-    CTOR_CALL("CComInterface::CComInterface")
+    METHOD_ENTRY_QUIET("CComInterface::CComInterface")
+    CTOR_CALL_QUIET("CComInterface::CComInterface")
+    
+    Log.addListener("com", this);
+    
+    this->registerEvent<std::string, std::string, std::string, std::string>
+                          ("log_entry", "Indicates that a new log entry was made.",
+                                    {{ParameterType::STRING,"Source of log entry"},
+                                     {ParameterType::STRING,"Log message"},
+                                     {ParameterType::STRING,"Log level"},
+                                     {ParameterType::STRING,"Log domain"}
+                                    },
+                                    "system"
+    );
+    
     this->registerFunction("help",  CCommand<void, int>([&](int nVerboseLevel){this->help(nVerboseLevel);}),
                                     "Show command interface help",
                                     {{ParameterType::NONE,"No return value"},
@@ -86,15 +99,30 @@ CComInterface::CComInterface()
 ///////////////////////////////////////////////////////////////////////////////
 CComInterface::~CComInterface()
 {
-    METHOD_ENTRY("CComInterface::~CComInterface")
-    DTOR_CALL("CComInterface::~CComInterface")
+    METHOD_ENTRY_QUIET("CComInterface::~CComInterface")
+    DTOR_CALL_QUIET("CComInterface::~CComInterface")
+    
+    // Remove the listener, otherwise the already deleted com interface might
+    // be called during destruction
+    Log.removeListener("com");
+    
+    for (auto pCallback : m_RegisteredCallbacks)
+    {
+        if (pCallback.second != nullptr)
+        {
+            delete pCallback.second;
+            pCallback.second = nullptr;
+            MEM_FREED_QUIET("IBaseCommand")
+        }
+    }
+
     for (auto pFunction : m_RegisteredFunctions)
     {
         if (pFunction.second != nullptr)
         {
             delete pFunction.second;
             pFunction.second = nullptr;
-            MEM_FREED("IBaseCommand")
+            MEM_FREED_QUIET("IBaseCommand")
         }
     }
 }
@@ -114,7 +142,7 @@ CComInterface::~CComInterface()
 ///////////////////////////////////////////////////////////////////////////////
 const std::string CComInterface::call(const std::string& _strCommand)
 {
-    METHOD_ENTRY("CComInterface::call")
+    METHOD_ENTRY_QUIET("CComInterface::call")
     
     std::istringstream iss(_strCommand);
     std::ostringstream oss("");
@@ -246,6 +274,24 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 this->call<void,std::string>(strName, strS);
                 break;
             }
+            case SignatureType::NONE_2STRING:
+            {
+                std::string str1{""};
+                std::string str2{""};
+                iss >> str1 >> str2;
+                this->call<void,std::string,std::string>(strName, str1, str2);
+                break;
+            }
+            case SignatureType::NONE_4STRING:
+            {
+                std::string str1{""};
+                std::string str2{""};
+                std::string str3{""};
+                std::string str4{""};
+                iss >> str1 >> str2 >> str3 >> str4;
+                this->call<void,std::string,std::string,std::string,std::string>(strName, str1, str2, str3, str4);
+                break;
+            }
             case SignatureType::NONE_INT_2DOUBLE:
             {
                 int nParam(0);
@@ -262,6 +308,20 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 double fParam[4] = {0.0, 0.0, 0.0, 0.0};
                 iss >> fParam[0] >> fParam[1] >> fParam[2] >> fParam[3];
                 this->call<void, int, double, double, double, double>(strName, nParam, fParam[0], fParam[1], fParam[2], fParam[3]);
+                break;
+            }
+            case SignatureType::NONE_INT_DYN_ARRAY:
+            {
+                int nParam(0);
+                iss >> nParam;
+                double fParam(0);
+                std::vector<double> vecDynArray{};
+                while (!iss.eof())
+                {
+                    iss >> fParam;
+                    vecDynArray.push_back(fParam);
+                }
+                this->call<void, int, std::vector<double>>(strName, nParam, vecDynArray);
                 break;
             }
             case SignatureType::NONE_STRING_DOUBLE:
@@ -354,7 +414,7 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 break;
             }
             default:
-                NOTICE_MSG("Com Interface", "Wrapper for " << strName << "'s signature not implemented.")
+                DOM_DEV(NOTICE_MSG_QUIET("Com Interface", "Wrapper for " << strName << "'s signature not implemented."))
                 break;
         }
     }
@@ -375,7 +435,7 @@ const std::string CComInterface::call(const std::string& _strCommand)
 ///////////////////////////////////////////////////////////////////////////////
 void CComInterface::callWriters(const std::string& _strQueue)
 {
-    METHOD_ENTRY("CComInterface::callWriters")
+    METHOD_ENTRY_QUIET("CComInterface::callWriters")
     
     IBaseCommand* pQueuedFunction = nullptr;
     
@@ -454,6 +514,13 @@ void CComInterface::callWriters(const std::string& _strQueue)
                                               std::get<4>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
+            case SignatureType::NONE_INT_DYN_ARRAY:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, std::vector<double>>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
             case SignatureType::NONE_INT_STRING:
             {
                 auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, int, std::string>*>(pQueuedFunction);
@@ -465,6 +532,22 @@ void CComInterface::callWriters(const std::string& _strQueue)
             {
                 auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string>*>(pQueuedFunction);
                 pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_2STRING:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string, std::string>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()));
+                break;
+            }
+            case SignatureType::NONE_4STRING:
+            {
+                auto pQueuedFunctionConcrete = static_cast<CCommandToQueueWrapper<void, std::string, std::string, std::string, std::string>*>(pQueuedFunction);
+                pQueuedFunctionConcrete->call(std::get<0>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<1>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<2>(pQueuedFunctionConcrete->getParams()),
+                                              std::get<3>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
             case SignatureType::NONE_STRING_DOUBLE:
@@ -503,18 +586,18 @@ void CComInterface::callWriters(const std::string& _strQueue)
             case SignatureType::VEC2DDOUBLE_2STRING:
             case SignatureType::VEC2DINT_INT:
             {
-                WARNING_MSG("Com Interface", "Something went wrong, writing functions shouldn't have a return value.")
+                DOM_DEV(WARNING_MSG("Com Interface", "Something went wrong, writing functions shouldn't have a return value."))
                 break;
             }
             default:
             {
-                NOTICE_MSG("Com Interface", "Queued writer call not implemented.")
+                DOM_DEV(NOTICE_MSG("Com Interface", "Queued writer call not implemented."))
             }
         }
         if (pQueuedFunction != nullptr)
         {
             delete pQueuedFunction;
-            MEM_FREED("IBaseCommand")
+            MEM_FREED_QUIET("IBaseCommand")
             pQueuedFunction = nullptr;
         }
     }
@@ -529,7 +612,7 @@ void CComInterface::callWriters(const std::string& _strQueue)
 ///////////////////////////////////////////////////////////////////////////////
 void CComInterface::help(int nVerboseLevel)
 {
-    METHOD_ENTRY("CComInterface::help")
+    METHOD_ENTRY_QUIET("CComInterface::help")
     switch (nVerboseLevel)
     {
         case 0:
@@ -563,6 +646,6 @@ void CComInterface::help(int nVerboseLevel)
 ///////////////////////////////////////////////////////////////////////////////
 void CComInterface::help()
 {
-    METHOD_ENTRY("CComInterface::help")
+    METHOD_ENTRY_QUIET("CComInterface::help")
     this->help(0);
 }

@@ -107,7 +107,7 @@ const T& CCircularBuffer<T>::operator[](const std::size_t& _nI) const
 {
     METHOD_ENTRY("CCircularBuffer::operator[]")
   
-    DEBUG(
+    DEBUG_BLK(
         if (_nI >= m_nSize)
         {
             ERROR_MSG("Circular Buffer", "Trying to access element out of range.")
@@ -135,7 +135,7 @@ const T& CCircularBuffer<T>::at(const std::size_t& _nI) const
 {
     METHOD_ENTRY("CCircularBuffer::at")
   
-    DEBUG(
+    DEBUG_BLK(
         if (_nI >= m_nSize)
         {
             ERROR_MSG("Circular Buffer", "Trying to access element out of range.")
@@ -180,7 +180,7 @@ T& CCircularBuffer<T>::operator[](const std::size_t& _nI)
 {
     METHOD_ENTRY("CCircularBuffer::operator[]")
   
-    DEBUG(
+    DEBUG_BLK(
         if (_nI >= m_nSize)
         {
             ERROR_MSG("Circular Buffer", "Trying to access element out of range.")
@@ -208,7 +208,7 @@ T& CCircularBuffer<T>::at(const std::size_t& _nI)
 {
     METHOD_ENTRY("CCircularBuffer::at")
   
-    DEBUG(
+    DEBUG_BLK(
         if (_nI >= m_nSize)
         {
             ERROR_MSG("Circular Buffer", "Trying to access element out of range.")

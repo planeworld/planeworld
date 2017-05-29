@@ -98,9 +98,10 @@ class CWorldDataStorage
         ~CWorldDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
-//         const DebrisType&                   getDebris() const;
-        const JointsType&                   getJoints() const;
-        const double&                       getTimeScale() const;
+        const JointsType&           getJoints() const;
+        const double&               getTimeScale() const;
+        
+        IUniqueIDUser*              getUIDUserByValueBack() const;
         
         //--- Methods --------------------------------------------------------//
         bool addDebris(CDebris*);
@@ -110,6 +111,9 @@ class CWorldDataStorage
         bool addUIDUser(IUniqueIDUser*);
         
         void updateObject(const UIDType);
+        
+        CObject*                    getObjectByValueBack(const UIDType);
+        IShape*                     getShapeByValue(const UIDType);
         
         BufferedObjectsByNameType&  getObjectsBuffer();
         DebrisByNameType*           getDebrisByNameBack();

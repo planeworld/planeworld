@@ -102,7 +102,7 @@ class CKinematicsState  : public IUniqueIDUser,
                                                std::array<Vector2d, T>&,
                                          const double& = 1.0) const;
         
-        const bool          gotReference() const;
+        bool                gotReference() const;
         
         //--- Methods --------------------------------------------------------//
         Vector2d& Origin();
@@ -221,7 +221,7 @@ inline const double& CKinematicsState::getLocalAngleVelocity() const
 /// \return Reference given (true/false)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const bool CKinematicsState::gotReference() const
+inline bool CKinematicsState::gotReference() const
 {
     METHOD_ENTRY("CKinematicsState::gotReference")
     return (m_pRef != nullptr);

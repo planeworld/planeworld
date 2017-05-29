@@ -40,6 +40,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "log_listener.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "concurrentqueue.h"
@@ -51,6 +52,7 @@ enum class ParameterType
     NONE,
     BOOL,
     DOUBLE,
+    DYN_ARRAY,
     INT,
     STRING,
     UID,
@@ -79,8 +81,11 @@ enum class SignatureType
     NONE_INT_DOUBLE,
     NONE_INT_2DOUBLE,
     NONE_INT_4DOUBLE,
+    NONE_INT_DYN_ARRAY,
     NONE_INT_STRING,
     NONE_STRING,
+    NONE_2STRING,
+    NONE_4STRING,
     NONE_STRING_DOUBLE,
     NONE_STRING_INT,
     NONE_STRING_2INT,
@@ -208,44 +213,6 @@ class CCommandToQueueWrapper : public IBaseCommand
         
 };
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Specialised callback functions with writable access at com interface
-///
-/// This wrapper is specialised for functions with writable access. It stores
-/// a function that will take the original function \ref CCommand which is
-/// wrapped containing its parameters by \ref CCommandToQueueWrapper) and
-/// puts them in a command queue.
-/// Hence, those functions are not called immediately, but queued and then
-/// executed, externally. Thus, given a thread save queue, commands can be 
-/// excuted over different threads.
-///
-////////////////////////////////////////////////////////////////////////////////
-template <class TRet, class... TArgs>
-class CCommandWritable : public IBaseCommand
-{
-    public:
-        
-        //--- Constructor/Destructor -----------------------------------------//
-        CCommandWritable() = delete;
-        CCommandWritable(const std::function<void(TArgs...)>&);
-        
-        //--- Constant methods -----------------------------------------------//
-        std::function<void(TArgs...)> getFunction() const {return m_Function;}
-        
-        //--- Methods --------------------------------------------------------//
-        TRet call(TArgs...);
-        
-    private:
-        
-        /// --- Methods [private] --------------------------------------------//
-        void dispatchSignature();
-        
-        /// --- Variables [private] ------------------------------------------//
-        std::function<void(TArgs...)> m_Function; ///< Function to be registered at com interface
-        
-};
-
 /// Map of all functions, accessed by name
 typedef std::map<std::string, IBaseCommand*> RegisteredFunctionsType;
 /// Map of descriptions, accessed by name
@@ -254,13 +221,14 @@ typedef std::unordered_map<std::string, std::string> RegisteredFunctionsDescript
 typedef std::vector<std::pair<ParameterType, std::string>> ParameterListType;
 /// Map of parameter lists, accessed by function name
 typedef std::unordered_map<std::string, ParameterListType> RegisteredParameterListsType;
-/// Map of writer flags, accessed by function name
-typedef std::unordered_map<std::string, bool> WriterFlagsType;
 
 /// Domain of function being registered
 typedef std::string DomainType;
 /// Map of domains, accessed by function name
 typedef std::unordered_map<std::string, DomainType> RegisteredDomainsType;
+
+/// Multimap of callback functions, accessed by name
+typedef std::unordered_multimap<std::string, IBaseCommand*> RegisteredCallbacksType;
 
 /// List of writer domains
 typedef std::set<std::string> DomainsType;
@@ -273,6 +241,7 @@ static std::map<ParameterType, std::string> mapParameterToString = {
     {ParameterType::NONE, "<none>"},
     {ParameterType::BOOL, "<bool>"},
     {ParameterType::DOUBLE, "<double>"},
+    {ParameterType::DYN_ARRAY, "<dyn_array>"},
     {ParameterType::INT, "<int>"},
     {ParameterType::STRING, "<string>"},
     {ParameterType::UID, "<uid>"},
@@ -285,7 +254,7 @@ static std::map<ParameterType, std::string> mapParameterToString = {
 /// \brief Class providing an interface to the engine
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CComInterface
+class CComInterface : public ILogListener
 {
     
     public:
@@ -298,7 +267,6 @@ class CComInterface
         DomainsType*                  getDomains() {return &m_RegisteredDomains;} 
         RegisteredDomainsType*        getDomainsByFunction() {return &m_RegisteredFunctionsDomain;}
         RegisteredFunctionsType*      getFunctions()  {return &m_RegisteredFunctions;} 
-        WriterFlagsType*              getWriterFlags() {return &m_WriterFlags;}
         
         //--- Methods --------------------------------------------------------//
         template<class TRet, class... Args>
@@ -307,6 +275,16 @@ class CComInterface
         void                callWriters(const std::string&);
         void                help();
         void                help(int);
+
+        template <class TRet, class... TArgs>
+        bool registerCallback(const std::string&, const std::function<TRet(TArgs...)>&,
+                              const std::string& = "Reader");
+        
+        template <class... TArgs>
+        bool registerEvent(const std::string&,
+                           const std::string&,
+                           const ParameterListType& = {},
+                           const DomainType& = "");
         
         template <class TRet, class... TArgs>
         bool registerFunction(const std::string&, const CCommand<TRet, TArgs...>&,
@@ -315,14 +293,19 @@ class CComInterface
                               const DomainType& = "",
                               const std::string& = "Reader"
         );
-
+        
         void registerWriterDomain(const std::string&);
+        
+        void logEntry(const std::string&, const std::string&,
+                      const LogLevelType&, const LogDomainType&);
         
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CComInterface&);
         friend std::ostream& operator<<(std::ostream&, CComInterface&);
         
     private:
+        
+        RegisteredCallbacksType             m_RegisteredCallbacks;       ///< Callbacks attached to registered functions
         
         RegisteredFunctionsType             m_RegisteredFunctions;       ///< All registered functions provided by modules
         RegisteredFunctionsDescriptionType  m_RegisteredFunctionsDescriptions; ///< Descriptions of registered functions
@@ -331,7 +314,6 @@ class CComInterface
         DomainsType                         m_RegisteredDomains;         ///< All domains registered
         DomainsType                         m_WriterDomains;             ///< Domains for queued functions
         WriterQueuesType                    m_WriterQueues;              ///< Command queues for write access
-        WriterFlagsType                     m_WriterFlags;               ///< Flags for writer functions
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -347,10 +329,28 @@ class CComInterface
 ////////////////////////////////////////////////////////////////////////////////
 inline void CComInterface::registerWriterDomain(const std::string& _strWriterDomain)
 {
-    METHOD_ENTRY("CComInterface::registerWriterDomain")
+    METHOD_ENTRY_QUIET("CComInterface::registerWriterDomain")
     m_WriterDomains.emplace(_strWriterDomain);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Called in case of log entry, creating an event
+///
+/// \param _strSrc Source of log entry
+/// \param _strMessage Log message
+/// \param _Level Log level
+/// \param _Domain Log domain
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CComInterface::logEntry(const std::string& _strSrc, const std::string& _strMessage,
+                                    const LogLevelType& _Level, const LogDomainType& _Domain)
+{
+    METHOD_ENTRY_QUIET("CComInterface::logEntry")
+    
+    this->call<void, std::string, std::string, std::string, std::string>("log_entry",
+                _strSrc, _strMessage, s_LogLevelTypeToStringMap[_Level], s_LogDomainTypeToStringMap[_Domain]);
+}
 
 #include "com_interface.tpp"
 

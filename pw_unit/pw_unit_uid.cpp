@@ -54,7 +54,7 @@
 void outputInternalUIDData(const std::string& _strAction)
 {
     METHOD_ENTRY("outputInternalUIDData")
-    INFO(
+    INFO_BLK(
         std::cout << _strAction << std::endl;
         std::cout << "  Unused UIDs: ";
         for (auto UnusedUIDs : CUniqueID::getUnusedUIDs())

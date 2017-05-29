@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,8 +34,7 @@
 	#include <sys/ioctl.h>
 #endif
 
-std::ostringstream  CLog::s_strStr; ///< Used for streaming functionality in macros
-LogDomainType       CLog::s_Dom = LOG_DOMAIN_NONE;    ///< Used for domain handling in macros
+std::atomic<LogDomainType> CLog::s_Dom{LOG_DOMAIN_NONE}; ///< Used for domain handling in macros
 CLog& Log=CLog::getInstance();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,7 +50,7 @@ CLog::~CLog()
     DTOR_CALL("CLog::~CLog");
     
     #ifdef DOMAIN_MEMORY
-        std::lock_guard<std::mutex> lock(m_Mutex);
+        std::lock_guard<std::recursive_mutex> lock(m_Mutex);
     
         // The memory domain is given by the enclosing macro
         if (m_nMemCounter > 0)
@@ -86,7 +85,7 @@ CLog::~CLog()
                 ++ci;
             }
         }
-        
+
     #endif
 }
 
@@ -156,22 +155,22 @@ LogColourSchemeType CLog::stringToColourScheme(const std::string& _strScheme) co
 /// \param _strMessage Message
 /// \param _Level State of message
 /// \param _Domain Domain the message should be associated with
-///
-/// \bug Domains appear in logfile, even if loglevel is below DEBUG
-/// \todo Added domain to output.
+/// \param _bNoListener Don't call listeners to avoid recursion
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
-                const LogLevelType& _Level, const LogDomainType& _Domain)
+                const LogLevelType& _Level, const LogDomainType& _Domain,
+                const bool _bNoListener)
 {
     // !!! Do not log the logging method, this action will never stop !!!
     // METHOD_ENTRY("CLog::log");
 
-    std::lock_guard<std::mutex> lock(m_Mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_Mutex);
     
     if (!m_bLock)
     {
         std::string strDomFlag;
+        bool bAlreadyLogged {false};
     
         // Messages to be displayed
         if (((_Level <= m_LogLevel) && (m_abDomain[_Domain] == true)) ||
@@ -205,6 +204,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                 (m_MsgBufLevel == _Level) && (m_MsgBufDom == _Domain))
             {
                 ++m_nMsgCounter;
+                bAlreadyLogged = true;
             }
             else
             {
@@ -261,8 +261,8 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                     case LOG_LEVEL_NONE:
                         break;
                     case LOG_LEVEL_ERROR:
-                        std::cout << m_strColError << std::left << std::setw(14) <<  "[error]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cerr << m_strColError << std::left << std::setw(14) <<  "[error]";
+                        std::cerr << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cerr << "  ";
@@ -271,18 +271,18 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_WARNING:
-                        std::cout << m_strColWarning << std::left << std::setw(14) <<  "[warning]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cerr << m_strColWarning << std::left << std::setw(14) <<  "[warning]";
+                        std::cerr << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
-                                std::cout << "  ";
+                                std::cerr << "  ";
                         #endif
-                        std::cout << m_strColSender << \
+                        std::cerr << m_strColSender << 
                         _strSrc << ": " << m_strColDefault << strMessage << std::endl;
                         break;
                     case LOG_LEVEL_NOTICE:
                         std::cout << m_strColNotice << std::left << std::setw(14) <<  "[notice]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << "  ";
@@ -292,7 +292,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_INFO:
                         std::cout << m_strColInfo << std::left << std::setw(14) <<  "[info]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << "  ";
@@ -302,7 +302,7 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
                         break;
                     case LOG_LEVEL_DEBUG:
                         std::cout << m_strColDebug << std::left << std::setw(14) <<  "[debug]";
-                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + convLogDom2Str(_Domain) + "]";
+                        std::cout << m_strColDom << std::left << std::setw(10) << "[" + s_LogDomainTypeToStringMap[_Domain] + "]";
                         #ifdef DOMAIN_METHOD_HIERARCHY
                             for (int i=0; i<m_nHierLevel; ++i)
                                 std::cout << m_strColDefault << "  ";
@@ -324,6 +324,14 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
         m_strMsgBufMsg = _strMessage;
         m_MsgBufLevel = _Level;
         m_MsgBufDom = _Domain;
+        
+        if (!bAlreadyLogged && !_bNoListener)
+        {
+            for (const auto pListener : m_LogListeners)
+            {
+                pListener.second->logEntry(_strSrc, _strMessage, _Level, _Domain);
+            }
+        }
     }
 }
 
@@ -432,8 +440,8 @@ void CLog::setLoglevel(const LogLevelType& _Loglevel)
     {
         if (_Loglevel > m_LogLevelCompiled)
         {
-            NOTICE_MSG("Logging", "Loglevel "+convLogLev2Str(_Loglevel)+
-            " not compiled, using "+convLogLev2Str(m_LogLevelCompiled))
+            NOTICE_MSG("Logging", "Loglevel "+s_LogLevelTypeToStringMap[_Loglevel]+
+            " not compiled, using "+s_LogLevelTypeToStringMap[m_LogLevelCompiled])
             m_LogLevel = m_LogLevelCompiled;
         }
         else
@@ -482,7 +490,7 @@ void CLog::setDomain(const LogDomainType& _Domain)
     if (m_bDynSetting)
     {
         m_abDomain[_Domain] = true;
-        DEBUG_MSG("Logging", "Set domain "+convLogDom2Str(_Domain))
+        DEBUG_MSG("Logging", "Set domain "+s_LogDomainTypeToStringMap[_Domain])
     }
 }
 
@@ -506,7 +514,7 @@ void CLog::unsetDomain(const LogDomainType& _Domain)
         }
     
         m_abDomain[_Domain] = false;
-        DEBUG_MSG("Logging", "Unset domain "+convLogDom2Str(_Domain))
+        DEBUG_MSG("Logging", "Unset domain "+s_LogDomainTypeToStringMap[_Domain])
     }
 }
 
@@ -514,7 +522,7 @@ void CLog::unsetDomain(const LogDomainType& _Domain)
 ///
 /// \brief Sets scheme for colouring of output
 ///
-/// \param _bColourScheme Defines how the output is colored.
+/// \param _ColourScheme Defines how the output is colored.
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CLog::setColourScheme(const LogColourSchemeType _ColourScheme)
@@ -812,6 +820,11 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
     #else
         m_abDomain[LOG_DOMAIN_MEMORY_FREED] = false;
     #endif
+    #ifdef DOMAIN_DEV_LOGIC
+        m_abDomain[LOG_DOMAIN_DEV_LOGIC] = true;
+    #else
+        m_abDomain[LOG_DOMAIN_DEV_LOGIC] = false;
+    #endif
     #ifdef DOMAIN_STATS
         m_abDomain[LOG_DOMAIN_STATS] = true;
     #else
@@ -836,104 +849,16 @@ CLog::CLog():   m_bDynSetting(LOG_DYNSET_ON),
     // Entry appears late, because just now the Logging class is initialized.
     // The entry domain is needed for correct indenting when appropriate
     // domains an debuglevel is used.
-//  METHOD_ENTRY("CLog::CLog");
+    //  METHOD_ENTRY("CLog::CLog");
 
-//  CTOR_CALL("CLog::CLog");
+    //  CTOR_CALL("CLog::CLog");
     
-	#ifdef __linux__
-		// Request the terminal width from the system
-		struct winsize w;
-		ioctl(0, TIOCGWINSZ, &w);
-		m_unColsMax = w.ws_col;
-	#else
-		m_unColsMax = 80u;
-	#endif
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Converts domain to according string.
-///
-/// \param _LogDomain Domain that should be converted
-///
-///////////////////////////////////////////////////////////////////////////////
-std::string CLog::convLogDom2Str(const LogDomainType& _LogDomain)
-{
-    // METHOD_ENTRY("CLog::convLogDom2Str");
-
-    std::string strOut;
-
-    switch(_LogDomain)
-    {
-        case LOG_DOMAIN_NONE:
-            strOut  = "";
-            break;
-        case LOG_DOMAIN_METHOD_ENTRY:
-            strOut  = "calls";
-            break;
-        case LOG_DOMAIN_METHOD_EXIT:
-            strOut  = "calls";
-            break;
-        case LOG_DOMAIN_CONSTRUCTOR:
-            strOut  = "obj";
-            break;
-        case LOG_DOMAIN_DESTRUCTOR:
-            strOut  = "obj";
-            break;
-        case LOG_DOMAIN_MEMORY_ALLOCATED:
-            strOut  = "mem";
-            break;
-        case LOG_DOMAIN_MEMORY_FREED:
-            strOut  = "mem";
-            break;
-        case LOG_DOMAIN_STATS:
-            strOut  = "stats";
-            break;
-        case LOG_DOMAIN_VAR:
-            strOut  = "var";
-            break;
-        case LOG_DOMAIN_FILEIO:
-            strOut  = "file_io";
-            break;
-    }
-
-    return strOut;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Converts loglevel to according string.
-///
-/// \param _Loglevel Loglevel that should be converted
-///
-///////////////////////////////////////////////////////////////////////////////
-std::string CLog::convLogLev2Str(const LogLevelType& _Loglevel)
-{
-    METHOD_ENTRY("CLog::convLogLev2Str");
-
-    std::string strOut;
-
-    switch(_Loglevel)
-    {
-        case LOG_LEVEL_NONE:
-            strOut  = "LOG_LEVEL_NONE";
-            break;
-        case LOG_LEVEL_ERROR:
-            strOut  = "LOG_LEVEL_ERROR";
-            break;
-        case LOG_LEVEL_WARNING:
-            strOut  = "LOG_LEVEL_WARNING";
-            break;
-        case LOG_LEVEL_NOTICE:
-            strOut  = "LOG_LEVEL_NOTICE";
-            break;
-        case LOG_LEVEL_INFO:
-            strOut  = "LOG_LEVEL_INFO";
-            break;
-        case LOG_LEVEL_DEBUG:
-            strOut  = "LOG_LEVEL_DEBUG";
-            break;
-    }
-
-    return strOut;
+    #ifdef __linux__
+        // Request the terminal width from the system
+        struct winsize w;
+        ioctl(0, TIOCGWINSZ, &w);
+        m_unColsMax = w.ws_col;
+    #else
+        m_unColsMax = 80u;
+    #endif
 }

@@ -78,7 +78,7 @@ bool CShader::load(const std::string& _strFilename, const GLenum _Type)
     const char* pchShaderCode = strShaderCode.c_str();
     GLint       nShaderCodeLength = strShaderCode.length();
     
-    DEBUG(
+    DEBUG_BLK(
         DOM_VAR(DEBUG_MSG("Shader", "Shadercode for shader " << _strFilename << ":"))
         std::cout << strShaderCode << std::endl;
     )
@@ -101,7 +101,7 @@ bool CShader::load(const std::string& _strFilename, const GLenum _Type)
         std::vector<GLchar> ErrorLog(nLengthMax);
         glGetShaderInfoLog(m_unID, nLengthMax, &nLengthMax, &ErrorLog[0]);
 
-        ERROR(
+        ERROR_BLK(
         for (auto ci : ErrorLog)
         {
             std::cerr << ci;

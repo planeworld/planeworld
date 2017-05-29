@@ -20,7 +20,7 @@ INCLUDE_DIRECTORIES (
     ${NOISE2D_INCLUDE_DIR}
     ${SFML_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/3rdparty/ConcurrentQueue
-    ${CMAKE_HOME_DIRECTORY}/3rdparty/Selene/include
+    ${CMAKE_HOME_DIRECTORY}/3rdparty/sol2
     ${CMAKE_HOME_DIRECTORY}/pw_io
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core
@@ -45,6 +45,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader_program.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/camera.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/uid_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/window_management/widget_console.cpp

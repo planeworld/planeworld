@@ -115,7 +115,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         // Calculate stellar class of star
         std::uint8_t nStellarClass = static_cast<int>(nNrOfStarTypes*fNumber);
         if (nStellarClass >= nNrOfStarTypes) nStellarClass = nNrOfStarTypes - 1;
-        DOM_STATS(DEBUG(++vecNrOfStars[nStellarClass];))
+        DOM_STATS(DEBUG_BLK(++vecNrOfStars[nStellarClass];))
         
         
             
@@ -147,12 +147,12 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
             
             m_StarSystems.push_back(pStarSystem);
             
-            DOM_STATS(DEBUG(++vecNrOfPlanets[pStarSystem->getNumberOfPlanets()];))
+            DOM_STATS(DEBUG_BLK(++vecNrOfPlanets[pStarSystem->getNumberOfPlanets()];))
     }
     
     DOM_STATS(
     INFO_MSG("Universe generator", "Generated " << m_StarSystems.size() << " Stars.")
-    DEBUG(
+    DEBUG_BLK(
         DEBUG_MSG("Universe generator", "Distribution of spectral classes: ")
         Log.logSeparator();
         
@@ -171,7 +171,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
     )
 
     INFO_MSG("Universe generator", "Generated "<< nNrOfPlanets << " planets.")
-    DEBUG(
+    DEBUG_BLK(
         DEBUG_MSG("Universe generator", "Distribution of number of planets per star system: ")
         Log.logSeparator();
         

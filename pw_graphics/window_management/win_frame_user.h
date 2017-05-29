@@ -35,6 +35,8 @@
 //--- Program header ---------------------------------------------------------//
 #include "graphics.h"
 #include "log.h"
+#include "uid_visuals_user.h"
+#include "unique_id_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -47,7 +49,9 @@ const bool WIN_NO_INHERIT = false;
 /// \brief Defines a window frame and its properties
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IWinFrameUser : virtual public CGraphicsBase
+class IWinFrameUser : virtual public CGraphicsBase,
+                      public IUIDVisualsUser,
+                      public IUniqueIDUser
 {
 
     public:
@@ -56,6 +60,10 @@ class IWinFrameUser : virtual public CGraphicsBase
         IWinFrameUser();
         
         //--- Constant methods -----------------------------------------------//
+        int getPositionX() const {return m_nFramePosX;}
+        int getPositionY() const {return m_nFramePosY;}
+        int getWidth() const {return m_nFrameWidth;}
+        int getHeight() const {return m_nFrameHeight;}
 
         //--- Methods --------------------------------------------------------//
         void resize(const int, const int);
@@ -70,7 +78,7 @@ class IWinFrameUser : virtual public CGraphicsBase
         virtual void mySetColorBG(const ColorTypeRGBA&) {}
         virtual void mySetColorFG(const ColorTypeRGBA&) {}
         virtual void mySetPosition(const int, const int) {}
-        
+                
         //--- Variables [protected] ------------------------------------------//
         ColorTypeRGBA   m_WinColorBG;    ///< Background colour for this window frame
         ColorTypeRGBA   m_WinColorFG;    ///< Foreground colour for this window frame

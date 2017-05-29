@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,61 +20,43 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       shader_program.cpp
-/// \brief      Implementation of class "CShaderProgram"
+/// \file       log_listener.h
+/// \brief      Prototype of interface "ILogListener"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2016-04-10
+/// \date       2017-05-21
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "shader_program.h"
+#ifndef LOG_LISTENER_H
+#define LOG_LISTENER_H
+
+//--- Standard header --------------------------------------------------------//
+#include <string>
+
+//--- Program header ---------------------------------------------------------//
+#include "log_common_types.h"
+
+//--- Misc header ------------------------------------------------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Link GL shader program
+/// \brief Interface for classes track log entries
 ///
 ////////////////////////////////////////////////////////////////////////////////
-bool CShaderProgram::link()
+class ILogListener
 {
-    METHOD_ENTRY("CShaderProgram::link")
-    
-    glLinkProgram(m_unID);
 
-    //--- Check for errors ---//
-    GLint nIsLinked = 0;
-    glGetProgramiv(m_unID, GL_LINK_STATUS, (int *)&nIsLinked);
-    if (nIsLinked == GL_FALSE)
-    {
-        ERROR_MSG("Shader Program", "Failed to link shader program")
-        
-        GLint nLengthMax = 0;
-        glGetProgramiv(m_unID, GL_INFO_LOG_LENGTH, &nLengthMax);
+    public:
+   
+        //--- Constructor/Destructor -----------------------------------------//
 
-        std::vector<GLchar> ErrorLog(nLengthMax);
-        glGetProgramInfoLog(m_unID, nLengthMax, &nLengthMax, &ErrorLog[0]);
+        //--- Methods --------------------------------------------------------//
+        virtual void logEntry(const std::string&, const std::string&,
+                              const LogLevelType&, const LogDomainType&) = 0;
+        
+};
 
-        ERROR_BLK(
-        for (auto ci : ErrorLog)
-        {
-            std::cerr << ci;
-        }
-        std::cerr << std::endl;
-        )
-        glDeleteProgram(m_unID);
-        
-        return false;
-    }
-    else
-    {
-        INFO_MSG("Shader Program", "Successfully linked shader program")
-        
-        // Detach shaders if succesfully linked
-        for (auto it : Shaders)
-        {
-            glDetachShader(m_unID, it);
-        }
-        Shaders.clear();
-    }
-    return true;
-}
+//--- Implementation is done here for inline optimisation --------------------//
+
+#endif // LOG_LISTENER_H

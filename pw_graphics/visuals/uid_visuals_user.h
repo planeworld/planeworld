@@ -20,97 +20,67 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       widget.h
-/// \brief      Prototype of interface "IWidget"
+/// \file       uid_visuals_user.h
+/// \brief      Prototype of class "IUIDVisualsUser"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2017-04-08
+/// \date       2017-05-28
 ///
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef WIDGET_H
-#define WIDGET_H
+#ifndef UID_VISUALS_USER_H
+#define UID_VISUALS_USER_H
 
 //--- Standard header --------------------------------------------------------//
-#include <vector>
 
 //--- Program header ---------------------------------------------------------//
-#include "font_user.h"
-#include "graphics.h"
-#include "win_frame_user.h"
+#include "uid_visuals.h"
 
 //--- Misc header ------------------------------------------------------------//
 
-// Forward declaration
-class IWidget;
-
-/// List type of Widgets
-typedef std::vector<IWidget*> WidgetsType;
-
-/// Specifies the type of the widget
-enum class WidgetTypeType
-{
-    INVALID,
-    CONSOLE,
-    TEXT
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Defines a generic widget interface
+/// \brief User of UID visuals
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IWidget : public IFontUser,
-                public IWinFrameUser
+class IUIDVisualsUser
 {
 
     public:
     
         //--- Constructor/Destructor------------------------------------------//
-        virtual ~IWidget() {}
+        IUIDVisualsUser() : m_pUIDVisuals(nullptr){}
         
         //--- Constant methods -----------------------------------------------//
-        virtual void draw() = 0;
         
-        WidgetTypeType getType() const {return m_Type;}
-
         //--- Methods --------------------------------------------------------//
+        void setUIDVisuals(CUIDVisuals*);
         
     protected:
         
-        //--- Variables [private] --------------------------------------------//
-        WidgetTypeType m_Type{WidgetTypeType::INVALID};
-
+        //--- Variables [protected] ------------------------------------------//
+        CUIDVisuals* m_pUIDVisuals;     ///< UID visuals
+        
 };
-
-//--- Enum parser ------------------------------------------------------------//
-static std::unordered_map<WidgetTypeType, std::string> s_WidgetTypeToStringMap = {
-    {WidgetTypeType::CONSOLE, "console"},
-    {WidgetTypeType::TEXT, "text"}
-}; ///< Map from WidgetTypeType to string
-
-const std::unordered_map<std::string, WidgetTypeType> STRING_TO_WIDGET_TYPE_MAP = {
-    {"console", WidgetTypeType::CONSOLE},
-    {"text", WidgetTypeType::TEXT}
-}; ///< Map from string to WidgetTypeType
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Maps given string to console mode
-///
-/// \return Console mode
-///
-////////////////////////////////////////////////////////////////////////////////
-static WidgetTypeType mapStringToWidgetType(const std::string& _strS)
-{
-    METHOD_ENTRY("mapStringToWidgetType")
-    
-    const auto ci = STRING_TO_WIDGET_TYPE_MAP.find(_strS);
-    if (ci != STRING_TO_WIDGET_TYPE_MAP.end())
-        return ci->second;
-    else
-        return WidgetTypeType::INVALID;
-}
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-#endif // WIDGET_H
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the instance of the worlds data storage.
+///
+/// \param _pDataStorage Instance of worlds data storage.
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IUIDVisualsUser::setUIDVisuals(CUIDVisuals* _pUIDVisuals)
+{
+    METHOD_ENTRY("IUIDVisualsUser::setUIDVisuals")
+    
+    if (m_pUIDVisuals != nullptr)
+    {
+        NOTICE_MSG("UID Visuals User", "Visuals User instance already given, overwriting.")
+    }
+    
+    m_pUIDVisuals = _pUIDVisuals;
+}
+
+#endif // UID_VISUALS_USER_H

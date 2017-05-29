@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2010-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,61 +20,43 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       shader_program.cpp
-/// \brief      Implementation of class "CShaderProgram"
+/// \file       visuals_manager.h
+/// \brief      Implementation of class "CVisualsManager"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2016-04-10
+/// \date       2010-04-06
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "shader_program.h"
+// #include <string>
+
+#include "uid_visuals.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Link GL shader program
+/// \brief Draws a circle using graphics base
+///
+/// \param _nPosX Position X in screen space
+/// \param _nPosY Position Y in screen space
+/// \param _nUID  UID to be displayed
+///
 ///
 ////////////////////////////////////////////////////////////////////////////////
-bool CShaderProgram::link()
+void CUIDVisuals::draw(const int _nPosX, const int _nPosY, const UIDType _nUID)
 {
-    METHOD_ENTRY("CShaderProgram::link")
-    
-    glLinkProgram(m_unID);
-
-    //--- Check for errors ---//
-    GLint nIsLinked = 0;
-    glGetProgramiv(m_unID, GL_LINK_STATUS, (int *)&nIsLinked);
-    if (nIsLinked == GL_FALSE)
+    METHOD_ENTRY("CUIDVisuals::draw")
+    if (m_bShowUID)
     {
-        ERROR_MSG("Shader Program", "Failed to link shader program")
+        m_Graphics.setColor(m_aBGColor);
+        m_Graphics.filledRect(Vector2d(_nPosX, _nPosY),
+                              Vector2d(_nPosX+30, _nPosY+15));
         
-        GLint nLengthMax = 0;
-        glGetProgramiv(m_unID, GL_INFO_LOG_LENGTH, &nLengthMax);
+        m_Graphics.getWindow()->pushGLStates();
 
-        std::vector<GLchar> ErrorLog(nLengthMax);
-        glGetProgramInfoLog(m_unID, nLengthMax, &nLengthMax, &ErrorLog[0]);
-
-        ERROR_BLK(
-        for (auto ci : ErrorLog)
-        {
-            std::cerr << ci;
-        }
-        std::cerr << std::endl;
-        )
-        glDeleteProgram(m_unID);
+        m_UIDText.setString(std::to_string(_nUID));
+        m_UIDText.setPosition(_nPosX, _nPosY);
+        m_Graphics.getWindow()->draw(m_UIDText);
         
-        return false;
+        m_Graphics.getWindow()->popGLStates();
     }
-    else
-    {
-        INFO_MSG("Shader Program", "Successfully linked shader program")
-        
-        // Detach shaders if succesfully linked
-        for (auto it : Shaders)
-        {
-            glDetachShader(m_unID, it);
-        }
-        Shaders.clear();
-    }
-    return true;
 }

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,61 +33,30 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log_defines.h"
+#include "log_listener.h"
 
 //--- Standard header --------------------------------------------------------//
+#include <atomic>
 #include <iostream>
 #include <iomanip>
 #include <map>
 #include <mutex>
-#include <string>
 #include <sstream>
 #include <thread>
+#include <unordered_map>
 
 //--- Misc header ------------------------------------------------------------//
 #include "timer.h"
 
-/// Represents logging level
-typedef enum 
-{
-    LOG_LEVEL_NONE,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_WARNING,
-    LOG_LEVEL_NOTICE,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_DEBUG 
-} LogLevelType;
-
-/// Represents logging domain
-typedef enum 
-{
-    LOG_DOMAIN_NONE,
-    LOG_DOMAIN_METHOD_ENTRY,
-    LOG_DOMAIN_METHOD_EXIT,
-    LOG_DOMAIN_CONSTRUCTOR,
-    LOG_DOMAIN_DESTRUCTOR,
-    LOG_DOMAIN_MEMORY_ALLOCATED,
-    LOG_DOMAIN_MEMORY_FREED,
-    LOG_DOMAIN_STATS,
-    LOG_DOMAIN_VAR,
-    LOG_DOMAIN_FILEIO
-} LogDomainType;
-
-/// Represents logging level
-typedef enum 
-{
-    LOG_COLOUR_SCHEME_DEFAULT,
-    LOG_COLOUR_SCHEME_MONOONBLACK,
-    LOG_COLOUR_SCHEME_MONOONWHITE,
-    LOG_COLOUR_SCHEME_ONBLACK,
-    LOG_COLOUR_SCHEME_ONWHITE
-} LogColourSchemeType;
-
-const unsigned short LOG_NOD = 10u;             ///< Number of Domains
+const unsigned short LOG_NOD = 11u;             ///< Number of Domains
 const unsigned short LOG_COLSMAX_DEFAULT = 80u; ///< Default number for maximum columns
 const bool LOG_COLOR = true;                    ///< Color logging
 const bool LOG_NO_COLOR = false;                ///< Monochrom logging
 const bool LOG_DYNSET_ON = true;                ///< Dynamic changes of loglevel/domain allowed
 const bool LOG_DYNSET_OFF = false;              ///< Dynamic changes of loglevel/domain not allowed
+
+/// Map of Log listeners (callbacks, observers)
+typedef std::map<std::string, ILogListener*> LogListenersType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -100,17 +69,15 @@ const bool LOG_DYNSET_OFF = false;              ///< Dynamic changes of loglevel
 /// instances.
 ///
 /// \todo Greater buffer for looped logentries.
-/// \bug  Method entry/exit somehow doesn't work
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CLog
 {
     
     public:
-
+        
         //--- Static variables -----------------------------------------------//
-        static std::ostringstream   s_strStr;   ///< Used for streaming functionality in macros
-        static LogDomainType        s_Dom;      ///< Used for domain handling in macros
+        static std::atomic<LogDomainType> s_Dom;
 
         //--- Destructor -----------------------------------------------------//
         ~CLog();
@@ -122,10 +89,13 @@ class CLog
         LogColourSchemeType stringToColourScheme(const std::string&) const;
 
         //--- Methods --------------------------------------------------------//
+        void addListener(const std::string& _strListener, ILogListener* const _pListener);
+        bool removeListener(const std::string& _strListener);
+        
         void indent();
         void unindent();
         void log(const std::string&, const std::string&, const LogLevelType&,
-                const LogDomainType& = LOG_DOMAIN_NONE);
+                 const LogDomainType& = LOG_DOMAIN_NONE, const bool = false);
         void logSeparator(LogLevelType = LOG_LEVEL_INFO);
         void setBreak(const unsigned short&);
         void setDynSetting(const bool&);
@@ -135,11 +105,12 @@ class CLog
         void setColourScheme(const LogColourSchemeType);
         void progressBar(const std::string&, const int&, const int&, const int& _nBarSize=60);
         
+        //--- Variables ------------------------------------------------------//
+        std::recursive_mutex    m_Mutex;        ///< Mutex to lock writing to console
+        
     private:
     
         //--- Variables ------------------------------------------------------//
-        std::mutex      m_Mutex;                ///< Mutex to lock writing to console        
-        
         LogLevelType    m_LogLevel;             ///< The loglevel
         LogLevelType    m_LogLevelCompiled;     ///< Info about the loglevel given by macros
                 
@@ -178,7 +149,8 @@ class CLog
         std::string     m_strColError;          ///< Color for error text
         std::string     m_strColDom;            ///< Color for domain text
         std::string     m_strColRepetition;     ///< Color for log repetitions
-
+        
+        LogListenersType    m_LogListeners;     ///< List of listeners informed about log entries
 
         //--- Constructors ---------------------------------------------------//
         CLog();                                 ///< Empty constructor
@@ -186,12 +158,32 @@ class CLog
         
         //--- Operators ------------------------------------------------------//
         CLog& operator=(const CLog&);           ///< Empty operator=
-
-        //--- Methods --------------------------------------------------------//
-        std::string convLogDom2Str(const LogDomainType&);
-        std::string convLogLev2Str(const LogLevelType&);
-
 };
+
+//--- Enum parser ------------------------------------------------------------//
+
+static std::unordered_map<LogDomainType, std::string> s_LogDomainTypeToStringMap = {
+    {LOG_DOMAIN_NONE, ""},
+    {LOG_DOMAIN_METHOD_ENTRY, "calls"},
+    {LOG_DOMAIN_METHOD_EXIT, "calls"},
+    {LOG_DOMAIN_CONSTRUCTOR, "obj"},
+    {LOG_DOMAIN_DESTRUCTOR, "obj"},
+    {LOG_DOMAIN_MEMORY_ALLOCATED, "mem"},
+    {LOG_DOMAIN_MEMORY_FREED, "mem"},
+    {LOG_DOMAIN_DEV_LOGIC, "dev"},
+    {LOG_DOMAIN_STATS, "stats"},
+    {LOG_DOMAIN_VAR, "var"},
+    {LOG_DOMAIN_FILEIO, "file_io"}
+}; ///< Map from LogDomainType to string
+
+static std::unordered_map<LogLevelType, std::string> s_LogLevelTypeToStringMap = {
+    {LOG_LEVEL_NONE, "LOG_LEVEL_NONE"},
+    {LOG_LEVEL_ERROR, "LOG_LEVEL_ERROR"},
+    {LOG_LEVEL_WARNING, "LOG_LEVEL_WARNING"},
+    {LOG_LEVEL_NOTICE, "LOG_LEVEL_NOTICE"},
+    {LOG_LEVEL_INFO, "LOG_LEVEL_INFO"},
+    {LOG_LEVEL_DEBUG, "LOG_LEVEL_DEBUG"}
+}; ///< Map from LogLevelType to string
 
 extern CLog& Log; ///< Global logging instance
 
@@ -208,52 +200,69 @@ extern CLog& Log; ///< Global logging instance
 class CLogMethodHelper
 {
     public:
-      CLogMethodHelper(const std::string &methodname)
-      : m_methodname(methodname)
+        
+      CLogMethodHelper(const std::string& _strMethodname, const bool _bNoListener = false)
       {
-        DOM_MENT( \
-          CLog::s_strStr.str(""); \
-          CLog::s_strStr << m_methodname; \
-          Log.log("Method entry", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+          m_strMethodname = _strMethodname;
+          m_bNoListener = _bNoListener;
+          Log.log("Method entry", m_strMethodname, LOG_LEVEL_DEBUG, LOG_DOMAIN_METHOD_ENTRY, m_bNoListener);
+          CLog::s_Dom = LOG_DOMAIN_NONE;
       }
       
       ~CLogMethodHelper()
       {
-        DOM_MEXT( \
-          CLog::s_strStr.str(""); \
-          CLog::s_strStr << m_methodname; \
-          Log.log("Method exit", CLog::s_strStr.str(), LOG_LEVEL_DEBUG, CLog::s_Dom);)
+          Log.log("Method exit", m_strMethodname, LOG_LEVEL_DEBUG, LOG_DOMAIN_METHOD_EXIT, m_bNoListener);
+          CLog::s_Dom = LOG_DOMAIN_NONE;
       }
     
     private:
-      std::string m_methodname;
+        
+        //--- Variables [private] --------------------------------------------//
+        std::string m_strMethodname; ///< Name of method that was entered
+        bool        m_bNoListener;   ///< Call listeners of logging function?
 };
 
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Base class for logging
-// ///
-// /// This class is the base class for all classes using logging. It just defines
-// /// a constructor that initializes the meyers-singleton for the logging instance.
-// /// 
-// ////////////////////////////////////////////////////////////////////////////////
-// class CLogBase
-// {
-//  public:
-//      virtual ~CLogBase(){};
-// 
-//  protected:
-//      //--- Protected constructor ------------------------------------------//
-//      CLogBase():m_Log(CLog::getInstance())
-//      {
-//          CTOR_CALL(m_Log, "LogBase");
-//      };
-// 
-//      //--- Protected variables --------------------------------------------//
-//      CLog&   m_Log;                  ///< Instance of logging class
-// };
-
 //--- Implementation goes here for inline reasons ----------------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add log listener (callback, observer) to map of listeners
+///
+/// \param _strListener Name of listener to be added
+/// \param _pListener Listener to be added
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CLog::addListener(const std::string& _strListener, ILogListener* const _pListener)
+{
+    METHOD_ENTRY("CLog::addListener")
+    m_LogListeners.insert({_strListener,_pListener});
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Remove log listener (callback, observer) from map of listeners
+///
+/// \param _strListener Name of listener to be removed
+///
+/// \return Success?
+///
+////////////////////////////////////////////////////////////////////////////////
+inline bool CLog::removeListener(const std::string& _strListener)
+{
+    METHOD_ENTRY("CLog::removeListener")
+    
+    DOM_DEV(
+        auto nRes = m_LogListeners.erase(_strListener);
+        if (nRes == 0)
+        {
+            ERROR_MSG("Log", "Listener <" << _strListener << "> unknown, cannot remove.")
+            return false;
+        }
+        return true;
+    )
+    m_LogListeners.erase(_strListener);
+    return true;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -286,7 +295,7 @@ inline void CLog::setBreak(const unsigned short& _unCols)
 ////////////////////////////////////////////////////////////////////////////////
 inline void CLog::indent()
 {
-//     METHOD_ENTRY("CLog::indent")
+    // METHOD_ENTRY("CLog::indent")
     ++m_nHierLevel;
 }
 
@@ -297,7 +306,7 @@ inline void CLog::indent()
 ////////////////////////////////////////////////////////////////////////////////
 inline void CLog::unindent()
 {
-//     METHOD_ENTRY("CLog::unindent")
+    // METHOD_ENTRY("CLog::unindent")
     if (m_nHierLevel > 0)
         --m_nHierLevel;
     else

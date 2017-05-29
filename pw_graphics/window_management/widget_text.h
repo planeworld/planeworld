@@ -57,10 +57,15 @@ class CWidgetText : public IWidget
         void draw() override;
         void setText(const std::string&);
         
-    protected:
+    private:
+        
+        //--- Methods [private] ----------------------------------------------//
+        void mySetFont() override;
+        void mySetFontColor() override;
+        void mySetFontSize() override;
         
         //--- Variables [private] --------------------------------------------//
-        std::string     m_strText; ///< Text displayed in this widget
+        sf::Text    m_Text; ///< Text displayed in this widget
 
 };
 
@@ -76,7 +81,43 @@ class CWidgetText : public IWidget
 inline void CWidgetText::setText(const std::string& _strText)
 {
     METHOD_ENTRY("CWidgetText::setText")
-    m_strText = _strText;
+    m_Text.setString(_strText);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the font
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWidgetText::mySetFont()
+{
+    METHOD_ENTRY("CWidgetText::mySetFont")
+    m_Text.setFont(*m_pFont);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the font colour for inherited widget
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWidgetText::mySetFontColor()
+{
+    METHOD_ENTRY("CWidgetText::mySetFontColor")
+    m_Text.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                  m_FontColor[1]*255.0,
+                                  m_FontColor[2]*255.0,
+                                  m_FontColor[3]*255.0));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the fonts size
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CWidgetText::mySetFontSize()
+{
+    METHOD_ENTRY("CWidgetText::mySetFontSize")
+    m_Text.setCharacterSize(m_nFontSize);
 }
 
 #endif // WIDGET_TEXT_H

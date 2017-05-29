@@ -37,17 +37,26 @@
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CWindow::CWindow() : IUniqueIDUser(),
-                     IWinFrameUser(),
+CWindow::CWindow() : IWinFrameUser(),
                      m_pWidget(nullptr),
                      m_bCenter(false),
-                     m_bVisible(false)
+                     m_bVisible(true),
+                     m_bClosable(true),
+                     m_nSizeClose(10),
+                     m_nSizeResize(10)
 {
     METHOD_ENTRY("CWindow::CWindow");
     CTOR_CALL("CWindow::CWindow");
     
     m_UID.setName("Win_"+m_UID.getName());
-    m_strTitle = m_UID.getName();
+    m_Title.setString(m_UID.getName());
+    m_Title.setFont(*m_pFont);
+    m_nFontSize = 20; // Fontsize only affects the title at the moment
+    m_Title.setCharacterSize(m_nFontSize);
+    m_Title.setFillColor(sf::Color(m_FontColor[0]*255.0,
+                                   m_FontColor[1]*255.0,
+                                   m_FontColor[2]*255.0,
+                                   m_FontColor[3]*255.0));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,44 +77,57 @@ CWindow::~CWindow()
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Draw window and its contents
+/// \brief Returns, if given coordinates are inside of given window area
 ///
-///////////////////////////////////////////////////////////////////////////////
-void CWindow::draw() const 
+/// \param _nX X coordinate (screen space)
+/// \param _nY Y coordinate (screen space)
+/// \param _Area Area to be tested (this distinguishes the different areas for
+///              action such as close, resize or title)
+///
+/// \return Given coordinates inside of window?
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CWindow::isInside(const int _nX,
+                       const int _nY,
+                       const WinAreaType _Area) const
 {
-    METHOD_ENTRY("CWindow::draw")
+    METHOD_ENTRY("CWindow::isInside")
     
-    if (m_bVisible)
+    bool bInside = false;
+    switch (_Area)
     {
-        m_Graphics.setColor(m_WinColorBG);
-        m_Graphics.filledRectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                                Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
-        m_Graphics.setColor(m_WinColorFG);
-        int nSpacing = m_pFont->getLineSpacing(m_nFontSize);
-        m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
-                        Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
-        m_Graphics.rectSS(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                        Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+nSpacing));
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-
-        m_Graphics.getWindow()->pushGLStates();
-        sf::Text Text;
-
-        Text.setString(m_strTitle);
-        Text.setFont(*m_pFont);
-        Text.setCharacterSize(m_nFontSize);
-        Text.setPosition(m_nFramePosX + m_nFrameWidth/2 - Text.getGlobalBounds().width/2, m_nFramePosY);
-        Text.setFillColor(sf::Color(m_FontColor[0]*255.0,
-                                    m_FontColor[1]*255.0,
-                                    m_FontColor[2]*255.0,
-                                    m_FontColor[3]*255.0));
-        m_Graphics.getWindow()->draw(Text);
-        m_Graphics.getWindow()->popGLStates();        
-        
-        if (m_pWidget != nullptr) m_pWidget->draw();
+        case WinAreaType::CLOSE:
+        {
+            if (m_bClosable)
+            {
+                bInside = ((_nX >= m_nFramePosX+m_nFrameWidth-m_nSizeClose) & (_nX < m_nFramePosX+m_nFrameWidth) &
+                           (_nY >= m_nFramePosY) & (_nY < m_nFramePosY+m_nSizeClose));
+            }
+            break;
+        }
+        case WinAreaType::RESIZE:
+        {
+            bInside = ((_nX >= m_nFramePosX+m_nFrameWidth-m_nSizeResize)  & (_nX < m_nFramePosX+m_nFrameWidth) &
+                       (_nY >= m_nFramePosY+m_nFrameHeight-m_nSizeResize) & (_nY < m_nFramePosY+m_nFrameHeight));
+            break;
+        }
+        case WinAreaType::TITLE:
+        {
+            bInside = ((_nX >= m_nFramePosX) & (_nX < m_nFramePosX+m_nFrameWidth) &
+                       (_nY >= m_nFramePosY) & (_nY < m_nFramePosY+m_pFont->getLineSpacing(m_nFontSize)));
+            break;
+        }
+        case WinAreaType::WIN:
+        {
+            bInside = ((_nX >= m_nFramePosX) & (_nX < m_nFramePosX+m_nFrameWidth) &
+                       (_nY >= m_nFramePosY) & (_nY < m_nFramePosY+m_nFrameHeight));
+            break;
+        }
     }
+    
+    return bInside;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,4 +142,67 @@ void CWindow::center()
                       (m_Graphics.getHeightScr()-m_nFrameHeight) / 2);
     
     m_bCenter = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw window and its contents
+///
+///////////////////////////////////////////////////////////////////////////////
+void CWindow::draw() 
+{
+    METHOD_ENTRY("CWindow::draw")
+    
+    if (m_bVisible)
+    {
+        // Draw background area
+        this->drawFrame();
+        
+        // Draw title frame
+        m_Graphics.setColor(m_WinColorFG);
+        int nSpacing = m_pFont->getLineSpacing(m_nFontSize);
+        m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
+                        Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+        
+        //--- Begin SFML -----------------------------------------------------//
+        m_Graphics.getWindow()->pushGLStates();
+
+        m_Title.setPosition(m_nFramePosX + m_nFrameWidth/2 - m_Title.getGlobalBounds().width/2, m_nFramePosY);
+        m_Graphics.getWindow()->draw(m_Title);
+
+        m_Graphics.getWindow()->popGLStates();
+        //--- End SFML -------------------------------------------------------//
+        
+        DOM_DEV(
+            static bool bWarned = false;
+            if (m_pUIDVisuals == nullptr)
+            {
+                if (!bWarned)
+                {
+                    WARNING_MSG("Window", "UID visuals not set.")
+                    bWarned = true;
+                }
+                goto DomDev;
+            })
+            m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, m_UID.getValue());
+        DOM_DEV(DomDev:)
+        
+        if (m_pWidget != nullptr) m_pWidget->draw();
+        
+        m_Graphics.setColor(0.7, 0.3, 0.3, 1.0);
+
+        // Draw close button area
+        if (m_bClosable)
+        {
+            m_Graphics.filledRect(Vector2d(m_nFramePosX+m_nFrameWidth-m_nSizeClose, m_nFramePosY),
+                                  Vector2d(m_nFramePosX+m_nFrameWidth,m_nFramePosY+m_nSizeClose));
+        }
+        
+        // Draw resize button area
+        m_Graphics.filledRect(Vector2d(m_nFramePosX+m_nFrameWidth-m_nSizeResize,
+                                       m_nFramePosY+m_nFrameHeight-m_nSizeResize),
+                              Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY+m_nFrameHeight));
+        
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+    }
 }

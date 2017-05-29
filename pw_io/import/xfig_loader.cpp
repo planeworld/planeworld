@@ -113,7 +113,7 @@ void CXFigLoader::load(const std::string& _strFilename)
         switch (nCase)
         {
             case 1:
-                DOM_VAR(DEBUG(
+                DOM_VAR(DEBUG_BLK(
                     double fTmp;
                     int nTmp;
                     int nDepth;
@@ -168,7 +168,7 @@ void CXFigLoader::load(const std::string& _strFilename)
                 
                 break;
             case 2:
-                DOM_VAR(DEBUG(
+                DOM_VAR(DEBUG_BLK(
                     double fTmp;
                     int nTmp;
                     int nDepth;

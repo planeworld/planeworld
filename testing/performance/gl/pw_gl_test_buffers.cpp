@@ -142,7 +142,7 @@ void outputTestParameters(const std::uint32_t _nNrOfShapes,
 {
     METHOD_ENTRY("outputTestParameters")
     
-    INFO(
+    INFO_BLK(
         std::cout << "Draw mode:        ";
         if (_Mode == GL_TRIANGLES)
             std::cout << "GL_TRIANGLES" << std::endl;
@@ -178,7 +178,7 @@ void outputTestResult(const std::uint32_t _nNrOfFrames,
 {
     METHOD_ENTRY("outputTestResult")
     
-    INFO(
+    INFO_BLK(
         std::cout << "Time [s]:         " << fTime <<  std::endl;
         std::cout << "Frequency [fps]:  " << "\033[1;32m" << _nNrOfFrames/fTime
                                           << "\033[0;37m" << std::endl;

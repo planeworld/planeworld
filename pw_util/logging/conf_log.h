@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 #define CONF_LOG_H
 
 // Version of the configuration
-#define LOGGING_VERSION 1
+#define LOGGING_VERSION 2
 
 //--- Configuration of loglevel: ---------------------------------------------//
 
@@ -65,7 +65,9 @@
 ///			Defines if memory allocation should be logged
 /// \def DOMAIN_MEMORY_FREED
 ///			Defines if memory deallocation should be logged
-/// \def DOMAIN_VAR 
+/// \def DOMAIN_DEV_LOGIC
+///         Defines if development logic should be checked
+/// \def DOMAIN_STATS 
 ///         Defines if statistics should be printed out
 /// \def DOMAIN_VAR	
 ///			Defines if variables should be printed out
@@ -103,6 +105,7 @@
 // #define DOMAIN_DESTRUCTOR
 // #define DOMAIN_MEMORY_ALLOCATED
 // #define DOMAIN_MEMORY_FREED
+#define DOMAIN_DEV_LOGIC
 #define DOMAIN_STATS
 #define DOMAIN_VAR
 #define DOMAIN_FILEIO

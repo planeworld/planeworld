@@ -55,6 +55,7 @@ const double      PHYSICS_DEBRIS_DEFAULT_FREQUENCY = 30.0;  ///< Default physics
 
 /// Type for concurrent object queue 
 typedef moodycamel::ConcurrentQueue<CObject*> ObjectsQueueType;
+/// Type for concurrent shape queue
 typedef moodycamel::ConcurrentQueue<IShape*>  ShapesQueueType;  
 
 ////////////////////////////////////////////////////////////////////////////////

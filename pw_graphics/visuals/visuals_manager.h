@@ -85,16 +85,13 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            finishFrame();
         void            processFrame();
         
-//         void            setComConsole(CComConsole* const);
-        void            setConsoleText(const std::string&);
         void            setFont(const std::string&);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
         void            setWindow(WindowHandleType* const);
-        void            toggleConsoleMode();
         void            toggleVisualisations(const int&);
         void            unsetVisualisations(const int&);
-
+        
     private:
 
         //--- Constant methods [private] -------------------------------------//
@@ -121,6 +118,8 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         //--- Methods [private] ----------------------------------------------//
         void            drawWindows();
+        void            updateUI();
+        
         void            myInitComInterface();
 
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
@@ -129,13 +128,23 @@ class CVisualsManager : virtual public CGraphicsBase,
         std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera
         CCamera*                        m_pCamera;          ///< Camera for player view
         
+        int                             m_nCursorX;         ///< Mouse cursor position x
+        int                             m_nCursorY;         ///< Mouse cursor position y
+        int                             m_nCursorX0;        ///< Mouse cursor position x, previous frame
+        int                             m_nCursorY0;        ///< Mouse cursor position y, previous frame
+        int                             m_nCursorOffsetX;   ///< Position x of cursor when MB left was first pressed
+        int                             m_nCursorOffsetY;   ///< Position y of cursor when MB left was first pressed
+        bool                            m_bCursor;          ///< Indicates if mouse cursor is enabled
+        bool                            m_bMBLeft;          ///< Left mouse button
+        
         UIDType                         m_ConsoleWidgetID;  ///< ID of console widget for later access
         UIDType                         m_ConsoleWindowID;  ///< ID of console window for later access
         
-        bool                            m_bConsoleMode;     ///< Indicates if console mode is active
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name and location
         sf::Font                        m_Font;             ///< Font for displayed output
+        
+        CUIDVisuals                     m_UIDVisuals;       ///< Graphical display of UIDs
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -179,21 +188,21 @@ inline WindowHandleType* CVisualsManager::getWindow() const
     return (m_Graphics.getWindow());
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the console text for this frame if console mode is active
-///
-/// \param _strText Console text for this frame
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setConsoleText(const std::string& _strText)
-{
-    METHOD_ENTRY("CVisualsManager::setConsoleText")
-    if (m_bConsoleMode)
-    {
-        m_strConsoleText = _strText;
-    }
-}
+// ////////////////////////////////////////////////////////////////////////////////
+// ///
+// /// \brief Sets the console text for this frame if console mode is active
+// ///
+// /// \param _strText Console text for this frame
+// ///
+// ////////////////////////////////////////////////////////////////////////////////
+// inline void CVisualsManager::setConsoleText(const std::string& _strText)
+// {
+//     METHOD_ENTRY("CVisualsManager::setConsoleText")
+//     if (m_bConsoleMode)
+//     {
+//         m_strConsoleText = _strText;
+//     }
+// }
 
 // ////////////////////////////////////////////////////////////////////////////////
 // ///
@@ -212,7 +221,7 @@ inline void CVisualsManager::setConsoleText(const std::string& _strText)
 ///
 /// \brief Sets font
 ///
-/// \param _strFont
+/// \param _strFont Font for drawing text
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline void CVisualsManager::setFont(const std::string& _strFont)
@@ -271,17 +280,17 @@ inline void CVisualsManager::setWindow(WindowHandleType* const _pWindow)
     m_Graphics.setWindow(_pWindow);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Toggles a state of console mode
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::toggleConsoleMode()
-{
-    METHOD_ENTRY("CVisualsManager::toggleConsoleMode")
-    m_bConsoleMode ^= true;
-    m_pVisualsDataStorage->getWindowsByValue()->at(m_ConsoleWindowID)->toggleVisibility();
-}
+// ////////////////////////////////////////////////////////////////////////////////
+// ///
+// /// \brief Toggles a state of console mode
+// ///
+// ////////////////////////////////////////////////////////////////////////////////
+// inline void CVisualsManager::toggleConsoleMode()
+// {
+//     METHOD_ENTRY("CVisualsManager::toggleConsoleMode")
+//     m_bConsoleMode ^= true;
+//     m_pVisualsDataStorage->getWindowsByValue()->at(m_ConsoleWindowID)->toggleVisibility();
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

@@ -101,25 +101,28 @@ void CPolygon::transform(const double& _fAngle,
 {
     METHOD_ENTRY("CPolygon::transform");
 
-    Rotation2Dd Rotation(_fAngle);
-
-    VertexListType::const_iterator ci = m_VertList0.begin();
-    VertexListType::iterator it = m_VertList.begin();
-    
-    (*it) = Rotation * ((*ci)-_vecCOM) + _vecCOM + _vecV;
-    
-    m_AABB.setLowerLeft( (*it));
-    m_AABB.setUpperRight((*it));
-
-    ++it; ++ci;
-    while (ci != m_VertList0.end())
+    if (m_VertList0.size() > 0)
     {
-        (*it) = Rotation * ((*ci)-_vecCOM) + _vecCOM + _vecV;
+        Rotation2Dd Rotation(_fAngle);
 
-        // Update bounding box
-        m_AABB.update((*it));
-        ++it;
-        ++ci;
+        VertexListType::const_iterator ci = m_VertList0.begin();
+        VertexListType::iterator it = m_VertList.begin();
+        
+        (*it) = Rotation * ((*ci)-_vecCOM) + _vecCOM + _vecV;
+        
+        m_AABB.setLowerLeft( (*it));
+        m_AABB.setUpperRight((*it));
+
+        ++it; ++ci;
+        while (ci != m_VertList0.end())
+        {
+            (*it) = Rotation * ((*ci)-_vecCOM) + _vecCOM + _vecV;
+
+            // Update bounding box
+            m_AABB.update((*it));
+            ++it;
+            ++ci;
+        }
     }
 }
 
@@ -369,7 +372,7 @@ void CPolygon::myUpdateGeometry()
             }
             else
             {
-                DEBUG(
+                DEBUG_BLK(
                     NOTICE_MSG("Polygon", "Not a valid polygon, area=0. => inertia=0.")
                 )
             }
