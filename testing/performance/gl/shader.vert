@@ -3,9 +3,9 @@
 uniform mat4 matTransform;
 
 layout (location = 0) in vec3 inPosition;
-layout (location = 1) in vec3 inColour;
+layout (location = 1) in vec4 inColour;
 
-out vec3 vertColour;
+out vec4 vertColour;
 
 void main()
 {

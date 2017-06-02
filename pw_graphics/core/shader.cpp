@@ -39,7 +39,7 @@
 /// \brief Loads shader from given file
 ///
 /// \param _strFilename Filename of shader to be loaded
-/// \param _unType Type of shader (vertex, fragment, geometry)
+/// \param _Type Type of shader (vertex, fragment, geometry)
 ///
 /// \return Success?
 ///

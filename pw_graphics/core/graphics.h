@@ -164,9 +164,9 @@ class CGraphics
         double          getResPMY() const;
         unsigned short  getWidthScr() const;
         unsigned short  getHeightScr() const;
-        void setColor(const ColorTypeRGBA&) const;
-        void setColor(const double&, const double&, const double&) const;
-        void setColor(const double&, const double&, const double&, const double&) const;
+        void setColor(const ColorTypeRGBA&);
+        void setColor(const double&, const double&, const double&);
+        void setColor(const double&, const double&, const double&, const double&);
         void setPointSize(const double&) const;
         void setWidth(const double&) const;
         
@@ -210,26 +210,21 @@ class CGraphics
         //
 
         //--- Constant methods -----------------------------------------------//
-        void circle(const Vector2d&, const double&, const int = 12, const bool = false) const;
-        void dot(const Vector2d&) const;
-        void dots(const std::vector<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
-        void filledCircle(const Vector2d&, const double&, const int = 12, const bool = false) const;
-        void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0)) const;
-        void rect(const Vector2d&, const Vector2d&) const;
+        void circle(const Vector2d&, const double&, const int = 12, const bool = false);
         void showVec(const Vector2d&, const Vector2d&) const;
 
         //--- Methods --------------------------------------------------------//
         void addVertex(const Vector2d&);
         void addVertex(const double&, const double&);
+        void dot(const Vector2d&);
         void dots(CCircularBuffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0));
+        void filledCircle(const Vector2d&, const double&, const int = 12, const bool = false);
         void filledRect(const Vector2d&, const Vector2d&);
+        void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0));
+        void rect(const Vector2d&, const Vector2d&);
         void setDepth(const double&);
-        void beginLine(const PolygonType&, const double&);
-        void endLine();
-        
-        void bufferGL(const GLenum, const std::vector<GLfloat>* const,
-                                    const std::vector<GLfloat>* const);
-
+        void beginLine();
+        void endLine(const PolygonType&);
         
     private:
         
@@ -243,25 +238,22 @@ class CGraphics
         glm::mat4           m_matScale;             ///< Scale matrix
 
         GLuint              m_unIndex = 0u;         ///< Pointer to current index in buffer
-        GLuint              m_unIndexStart = 0u;    ///< Index to start next primitive with
+        GLuint              m_unIndexStartV = 0u;   ///< Index to start next primitive with (vertices)
+        GLuint              m_unIndexStartC = 0u;   ///< Index to start next primitive with (colours)
         GLuint              m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
 
         GLuint              m_unIBOLines = 0u;      ///< Index buffer object for lines
-        GLuint              m_unIBOLineLoop = 0u;   ///< Index buffer object for looped lines
-        GLuint              m_unIBOLineStrip = 0u;  ///< Index buffer object for line strips
         GLuint              m_unIBOPoints = 0u;     ///< Index buffer object for points
         GLuint              m_unIBOTriangles = 0u;  ///< Index buffer object for triangles
         GLuint              m_unVAO = 0u;           ///< Vertex array object
         GLuint              m_unVBO = 0u;           ///< Vertex buffer (one for all single lines)
         GLuint              m_unVBOColours = 0u;    ///< Colour buffer (one for all vertex colours)
         
+        ColorTypeRGBA        m_aColour;             ///< Currently set color
+        
         std::vector<GLuint>   m_vecIndicesLines;        ///< Indices for single lines within buffers
-        std::vector<GLuint>   m_vecIndicesLineLoop;     ///< Indices for looped lines within buffers
-        std::vector<GLuint>   m_vecIndicesLineStrip;    ///< Indices for line strips within buffers
         std::vector<GLuint>   m_vecIndicesPoints;       ///< Indices for points within buffers
         std::vector<GLuint>   m_vecIndicesTriangles;    ///< Indices for triangles within buffers
-        
-        std::vector<GLuint>*  m_pvecIndex = nullptr;    ///< Pointer to current index buffer
         
         std::vector<GLfloat>    m_vecColours;           ///< Temporary buffer for colours of vertices
         std::vector<GLfloat>    m_vecVertices;          ///< Temporary buffer for vertices
@@ -421,10 +413,10 @@ inline unsigned short CGraphics::getHeightScr() const
 /// \param _RGBA Colour as RGBA values between 0.0 and 1.0
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void CGraphics::setColor(const ColorTypeRGBA& _RGBA) const
+inline void CGraphics::setColor(const ColorTypeRGBA& _RGBA)
 {
-    METHOD_ENTRY("CGraphics::setColor");
-    glColor4d(_RGBA[0], _RGBA[1], _RGBA[2], _RGBA[3]);
+    METHOD_ENTRY("CGraphics::setColor")
+    m_aColour = _RGBA;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -437,10 +429,10 @@ inline void CGraphics::setColor(const ColorTypeRGBA& _RGBA) const
 ///
 ///////////////////////////////////////////////////////////////////////////////
 inline void CGraphics::setColor(const double& _fR, const double& _fG,
-                                const double& _fB) const
+                                const double& _fB)
 {
-    METHOD_ENTRY("CGraphics::setColor(const double&, const double&, const double&)");
-    glColor3d(_fR, _fG, _fB);
+    METHOD_ENTRY("CGraphics::setColor")
+    m_aColour = {{_fR, _fG, _fB, 1.0}};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -454,10 +446,10 @@ inline void CGraphics::setColor(const double& _fR, const double& _fG,
 ///
 ///////////////////////////////////////////////////////////////////////////////
 inline void CGraphics::setColor(const double& _fR, const double& _fG,
-                                const double& _fB, const double& _fA) const
+                                const double& _fB, const double& _fA)
 {
-    METHOD_ENTRY("CGraphics::setColor(const double&, const double&, const double&, const double&)");
-    glColor4d(_fR, _fG, _fB, _fA);
+    METHOD_ENTRY("CGraphics::setColor")
+    m_aColour = {{_fR, _fG, _fB, _fA}};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
