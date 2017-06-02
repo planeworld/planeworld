@@ -61,12 +61,12 @@ CGraphics::CGraphics() : m_pWindow(nullptr),
     m_vecCamPos.setZero();
     m_CosCache.resize(GRAPHICS_MAX_CACHE_SIZE);
     m_SinCache.resize(GRAPHICS_MAX_CACHE_SIZE);
-    m_vecIndicesLines.reserve(m_unIndexMax);
-    m_vecIndicesPoints.reserve(m_unIndexMax);
-    m_vecIndicesTriangles.reserve(m_unIndexMax);
+    m_vecIndicesLines.resize(m_unIndexMax);
+    m_vecIndicesPoints.resize(m_unIndexMax);
+    m_vecIndicesTriangles.resize(m_unIndexMax);
     
-    m_vecColours.reserve(m_unIndexMax);
-    m_vecVertices.reserve(m_unIndexMax);
+    m_vecColours.resize(m_unIndexMax);
+    m_vecVertices.resize(m_unIndexMax);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -202,16 +202,22 @@ void CGraphics::swapBuffers()
     
     glBindVertexArray(m_unVAO);
     
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexVerts*sizeof(GLfloat), &(m_vecVertices.front()), GL_STREAM_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexCol*sizeof(GLfloat), &(m_vecColours.front()), GL_STREAM_DRAW);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLuint), &m_vecIndicesLines.front(), GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), &m_vecIndicesLines.front(), GL_STREAM_DRAW);
     glDrawElements(GL_LINES, m_vecIndicesLines.size(), GL_UNSIGNED_INT, 0);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesPoints.size()*sizeof(GLuint), &m_vecIndicesPoints.front(), GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), &m_vecIndicesPoints.front(), GL_STREAM_DRAW);
     glDrawElements(GL_POINTS, m_vecIndicesPoints.size(), GL_UNSIGNED_INT, 0);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesTriangles.size()*sizeof(GLuint), &m_vecIndicesTriangles.front(), GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), &m_vecIndicesTriangles.front(), GL_STREAM_DRAW);
     glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
     
     m_pWindow->display();
@@ -232,19 +238,19 @@ void CGraphics::swapBuffers()
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesPoints.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesTriangles.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     
     m_unIndex = 0u;
-    m_unIndexStartV = 0u;
-    m_unIndexStartC = 0u;
-    m_vecIndicesLines.clear();
-    m_vecIndicesPoints.clear();
-    m_vecIndicesTriangles.clear();
-    
+    m_unIndexVerts = 0u;
+    m_unIndexCol = 0u;
+    m_unIndexLines = 0u;
+    m_unIndexPoints = 0u;
+    m_unIndexTriangles = 0u;
+
     // clear offscreen buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 }
@@ -364,17 +370,17 @@ bool CGraphics::init()
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesLines.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     
     #ifdef PW_MULTITHREADING
         m_pWindow->setActive(false);
     #endif
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesPoints.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_vecIndicesTriangles.size()*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
     
     // Clear buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
@@ -577,79 +583,62 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
 
     if (_bCache)
     {
-        m_vecVertices.push_back(_vecC[0]+m_SinCache[0]*_fR);
-        m_vecVertices.push_back(_vecC[1]+m_CosCache[0]*_fR);
-        m_vecVertices.push_back(float(m_fDepth));
-        m_vecColours.push_back(m_aColour[0]);
-        m_vecColours.push_back(m_aColour[1]);
-        m_vecColours.push_back(m_aColour[2]);
-        m_vecColours.push_back(m_aColour[3]);
+        m_vecVertices[m_unIndexVerts++] = _vecC[0]+m_SinCache[0]*_fR;
+        m_vecVertices[m_unIndexVerts++] = _vecC[1]+m_CosCache[0]*_fR;
+        m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+        m_vecColours[m_unIndexCol++] = m_aColour[0];
+        m_vecColours[m_unIndexCol++] = m_aColour[1];
+        m_vecColours[m_unIndexCol++] = m_aColour[2];
+        m_vecColours[m_unIndexCol++] = m_aColour[3];
         
         m_unIndex++;
         
         for (int i=1; i<_nNrOfSeg; ++i)
         {
-            m_vecVertices.push_back(_vecC[0]+m_SinCache[i]*_fR);
-            m_vecVertices.push_back(_vecC[1]+m_CosCache[i]*_fR);
-            m_vecVertices.push_back(float(m_fDepth));
-            m_vecColours.push_back(m_aColour[0]);
-            m_vecColours.push_back(m_aColour[1]);
-            m_vecColours.push_back(m_aColour[2]);
-            m_vecColours.push_back(m_aColour[3]);
-            m_vecIndicesLines.push_back(m_unIndex-1);
-            m_vecIndicesLines.push_back(m_unIndex++);
+            m_vecVertices[m_unIndexVerts++] = _vecC[0]+m_SinCache[i]*_fR;
+            m_vecVertices[m_unIndexVerts++] = _vecC[1]+m_CosCache[i]*_fR;
+            m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+            m_vecColours[m_unIndexCol++] = m_aColour[0];
+            m_vecColours[m_unIndexCol++] = m_aColour[1];
+            m_vecColours[m_unIndexCol++] = m_aColour[2];
+            m_vecColours[m_unIndexCol++] = m_aColour[3];
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex-1;
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
         }
         
-        m_vecIndicesLines.push_back(m_unIndex-1);
-        m_vecIndicesLines.push_back(m_unIndex-_nNrOfSeg);
+        m_vecIndicesLines[m_unIndexLines++] = m_unIndex-1;
+        m_vecIndicesLines[m_unIndexLines++] = m_unIndex-_nNrOfSeg;
     }
     else
     {
         double fAng = 0.0;
         double fFac = MATH_2PI /_nNrOfSeg;
  
-        m_vecVertices.push_back(_vecC[0]+std::sin(fAng)*_fR);
-        m_vecVertices.push_back(_vecC[1]+std::cos(fAng)*_fR);
-        m_vecVertices.push_back(float(m_fDepth));
-        m_vecColours.push_back(m_aColour[0]);
-        m_vecColours.push_back(m_aColour[1]);
-        m_vecColours.push_back(m_aColour[2]);
-        m_vecColours.push_back(m_aColour[3]);
+        m_vecVertices[m_unIndexVerts++] = _vecC[0]+std::sin(fAng)*_fR;
+        m_vecVertices[m_unIndexVerts++] = _vecC[1]+std::cos(fAng)*_fR;
+        m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+        m_vecColours[m_unIndexCol++] = m_aColour[0];
+        m_vecColours[m_unIndexCol++] = m_aColour[1];
+        m_vecColours[m_unIndexCol++] = m_aColour[2];
+        m_vecColours[m_unIndexCol++] = m_aColour[3];
         
         m_unIndex++;
         fAng *= fFac;
         
         while (fAng < MATH_2PI)
         {
-            m_vecVertices.push_back(_vecC[0]+std::sin(fAng)*_fR);
-            m_vecVertices.push_back(_vecC[1]+std::cos(fAng)*_fR);
-            m_vecVertices.push_back(float(m_fDepth));
-            m_vecColours.push_back(m_aColour[0]);
-            m_vecColours.push_back(m_aColour[1]);
-            m_vecColours.push_back(m_aColour[2]);
-            m_vecColours.push_back(m_aColour[3]);
-            m_vecIndicesLines.push_back(m_unIndex-1);
-            m_vecIndicesLines.push_back(m_unIndex++);
+            m_vecVertices[m_unIndexVerts++] = _vecC[0]+std::sin(fAng)*_fR;
+            m_vecVertices[m_unIndexVerts++] = _vecC[1]+std::cos(fAng)*_fR;
+            m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+            m_vecColours[m_unIndexCol++] = m_aColour[0];
+            m_vecColours[m_unIndexCol++] = m_aColour[1];
+            m_vecColours[m_unIndexCol++] = m_aColour[2];
+            m_vecColours[m_unIndexCol++] = m_aColour[3];
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex-1;
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
             fAng += fFac;
         }
     }
-    
-    glBindVertexArray(m_unVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartV*sizeof(float),
-                                    m_vecVertices.size()*sizeof(float),
-                                    &(m_vecVertices.front()));
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartC*sizeof(float),
-                                    m_vecColours.size()*sizeof(float),
-                                    &(m_vecColours.front()));
-    
-    m_unIndexStartV += m_vecVertices.size();
-    m_unIndexStartC += m_vecColours.size();
-    
-    m_vecColours.clear();
-    m_vecVertices.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -701,13 +690,14 @@ void CGraphics::addVertex(const Vector2d& _vecV)
 {
     METHOD_ENTRY("CGraphics::addVertex(const Vector2d&)");
 
-    m_vecVertices.push_back(_vecV[0]);
-    m_vecVertices.push_back(_vecV[1]);
-    m_vecVertices.push_back(m_fDepth);
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
+    m_vecVertices[m_unIndexVerts++] = _vecV[0];
+    m_vecVertices[m_unIndexVerts++] = _vecV[1];
+    m_vecVertices[m_unIndexVerts++] = m_fDepth;
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_nLineNrOfVerts++;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -725,13 +715,14 @@ void CGraphics::addVertex(const double& _fX, const double& _fY)
 {
     METHOD_ENTRY("CGraphics::addVertex(const double&, const double&)");
 
-    m_vecVertices.push_back(_fX);
-    m_vecVertices.push_back(_fY);
-    m_vecVertices.push_back(m_fDepth);
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
+    m_vecVertices[m_unIndexVerts++] = _fX;
+    m_vecVertices[m_unIndexVerts++] = _fY;
+    m_vecVertices[m_unIndexVerts++] = m_fDepth;
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_nLineNrOfVerts++;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -745,31 +736,14 @@ void CGraphics::dot(const Vector2d& _vecV)
 {
     METHOD_ENTRY("CGraphics::dot")
 
-    m_vecVertices.push_back(_vecV[0]);
-    m_vecVertices.push_back(_vecV[1]);
-    m_vecVertices.push_back(float(m_fDepth));
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
-    m_vecIndicesPoints.push_back(m_unIndex++);
-
-    glBindVertexArray(m_unVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartV*sizeof(float),
-                                     m_vecVertices.size()*sizeof(float),
-                                     &(m_vecVertices.front()));
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartC*sizeof(float),
-                                     m_vecColours.size()*sizeof(float),
-                                     &(m_vecColours.front()));
-    
-    m_unIndexStartV += m_vecVertices.size();
-    m_unIndexStartC += m_vecColours.size();
-    
-    m_vecColours.clear();
-    m_vecVertices.clear();
+    m_vecVertices[m_unIndexVerts++] = _vecV[0];
+    m_vecVertices[m_unIndexVerts++] = _vecV[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -788,32 +762,15 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
     
     for (auto i=0u; i<_Dots.size(); ++i)
     {
-        m_vecVertices.push_back(_Dots[i][0]+_vecOffset[0]);
-        m_vecVertices.push_back(_Dots[i][1]+_vecOffset[1]);
-        m_vecVertices.push_back(float(m_fDepth));
-        m_vecColours.push_back(m_aColour[0]);
-        m_vecColours.push_back(m_aColour[1]);
-        m_vecColours.push_back(m_aColour[2]);
-        m_vecColours.push_back(m_aColour[3]);
-        m_vecIndicesPoints.push_back(m_unIndex++);
+        m_vecVertices[m_unIndexVerts++] = _Dots[i][0]+_vecOffset[0];
+        m_vecVertices[m_unIndexVerts++] = _Dots[i][1]+_vecOffset[1];
+        m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+        m_vecColours[m_unIndexCol++] = m_aColour[0];
+        m_vecColours[m_unIndexCol++] = m_aColour[1];
+        m_vecColours[m_unIndexCol++] = m_aColour[2];
+        m_vecColours[m_unIndexCol++] = m_aColour[3];
+        m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
     }
-
-    glBindVertexArray(m_unVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartV*sizeof(float),
-                                     m_vecVertices.size()*sizeof(float),
-                                     &(m_vecVertices.front()));
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartC*sizeof(float),
-                                     m_vecColours.size()*sizeof(float),
-                                     &(m_vecColours.front()));
-    
-    m_unIndexStartV += m_vecVertices.size();
-    m_unIndexStartC += m_vecColours.size();
-    
-    m_vecColours.clear();
-    m_vecVertices.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -835,102 +792,85 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
 
     if (_bCache)
     {
-        m_vecVertices.push_back(_vecC[0]);
-        m_vecVertices.push_back(_vecC[1]);
-        m_vecVertices.push_back(float(m_fDepth));
-        m_vecColours.push_back(m_aColour[0]);
-        m_vecColours.push_back(m_aColour[1]);
-        m_vecColours.push_back(m_aColour[2]);
-        m_vecColours.push_back(m_aColour[3]);
+        m_vecVertices[m_unIndexVerts++] = _vecC[0];
+        m_vecVertices[m_unIndexVerts++] = _vecC[1];
+        m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+        m_vecColours[m_unIndexCol++] = m_aColour[0];
+        m_vecColours[m_unIndexCol++] = m_aColour[1];
+        m_vecColours[m_unIndexCol++] = m_aColour[2];
+        m_vecColours[m_unIndexCol++] = m_aColour[3];
         
         auto m_unCenterIndex = m_unIndex;
         
-        m_vecVertices.push_back(_vecC[0]+m_SinCache[0]*_fR);
-        m_vecVertices.push_back(_vecC[1]+m_CosCache[0]*_fR);
-        m_vecVertices.push_back(float(m_fDepth));
-        m_vecColours.push_back(m_aColour[0]);
-        m_vecColours.push_back(m_aColour[1]);
-        m_vecColours.push_back(m_aColour[2]);
-        m_vecColours.push_back(m_aColour[3]);
+        m_vecVertices[m_unIndexVerts++] = _vecC[0]+m_SinCache[0]*_fR;
+        m_vecVertices[m_unIndexVerts++] = _vecC[1]+m_CosCache[0]*_fR;
+        m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+        m_vecColours[m_unIndexCol++] = m_aColour[0];
+        m_vecColours[m_unIndexCol++] = m_aColour[1];
+        m_vecColours[m_unIndexCol++] = m_aColour[2];
+        m_vecColours[m_unIndexCol++] = m_aColour[3];
         
         m_unIndex += 2u;
         
         for (int i=1; i<_nNrOfSeg; ++i)
         {
-            m_vecVertices.push_back(_vecC[0]+m_SinCache[i]*_fR);
-            m_vecVertices.push_back(_vecC[1]+m_CosCache[i]*_fR);
-            m_vecVertices.push_back(float(m_fDepth));
-            m_vecColours.push_back(m_aColour[0]);
-            m_vecColours.push_back(m_aColour[1]);
-            m_vecColours.push_back(m_aColour[2]);
-            m_vecColours.push_back(m_aColour[3]);
-            m_vecIndicesTriangles.push_back(m_unCenterIndex);
-            m_vecIndicesTriangles.push_back(m_unIndex-1);
-            m_vecIndicesTriangles.push_back(m_unIndex++);
+            m_vecVertices[m_unIndexVerts++] = _vecC[0]+m_SinCache[i]*_fR;
+            m_vecVertices[m_unIndexVerts++] = _vecC[1]+m_CosCache[i]*_fR;
+            m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+            m_vecColours[m_unIndexCol++] = m_aColour[0];
+            m_vecColours[m_unIndexCol++] = m_aColour[1];
+            m_vecColours[m_unIndexCol++] = m_aColour[2];
+            m_vecColours[m_unIndexCol++] = m_aColour[3];
+            m_vecIndicesTriangles[m_unIndexTriangles++] = m_unCenterIndex;
+            m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1;
+            m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;
         }
         
-        m_vecIndicesTriangles.push_back(m_unCenterIndex);
-        m_vecIndicesTriangles.push_back(m_unIndex-1);
-        m_vecIndicesTriangles.push_back(m_unIndex-_nNrOfSeg);
+        m_vecIndicesTriangles[m_unIndexTriangles++] = m_unCenterIndex;
+        m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1;
+        m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-_nNrOfSeg;
     }
     else
     {
         double fAng = 0.0;
         double fFac = MATH_2PI /_nNrOfSeg;
         
-        m_vecVertices.push_back(_vecC[0]);
-        m_vecVertices.push_back(_vecC[1]);
-        m_vecVertices.push_back(float(m_fDepth));
-        m_vecColours.push_back(m_aColour[0]);
-        m_vecColours.push_back(m_aColour[1]);
-        m_vecColours.push_back(m_aColour[2]);
-        m_vecColours.push_back(m_aColour[3]);
+        m_vecVertices[m_unIndexVerts++] = _vecC[0];
+        m_vecVertices[m_unIndexVerts++] = _vecC[1];
+        m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+        m_vecColours[m_unIndexCol++] = m_aColour[0];
+        m_vecColours[m_unIndexCol++] = m_aColour[1];
+        m_vecColours[m_unIndexCol++] = m_aColour[2];
+        m_vecColours[m_unIndexCol++] = m_aColour[3];
         
         auto m_unCenterIndex = m_unIndex;
         
-        m_vecVertices.push_back(_vecC[0]+std::sin(fAng)*_fR);
-        m_vecVertices.push_back(_vecC[1]+std::cos(fAng)*_fR);
-        m_vecVertices.push_back(float(m_fDepth));
-        m_vecColours.push_back(m_aColour[0]);
-        m_vecColours.push_back(m_aColour[1]);
-        m_vecColours.push_back(m_aColour[2]);
-        m_vecColours.push_back(m_aColour[3]);
+        m_vecVertices[m_unIndexVerts++] = _vecC[0]+std::sin(fAng)*_fR;
+        m_vecVertices[m_unIndexVerts++] = _vecC[1]+std::cos(fAng)*_fR;
+        m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+        m_vecColours[m_unIndexCol++] = m_aColour[0];
+        m_vecColours[m_unIndexCol++] = m_aColour[1];
+        m_vecColours[m_unIndexCol++] = m_aColour[2];
+        m_vecColours[m_unIndexCol++] = m_aColour[3];
         
         m_unIndex += 2u;
         fAng *= fFac;
 
         while (fAng < MATH_2PI)
         {
-            m_vecVertices.push_back(_vecC[0]+std::sin(fAng)*_fR);
-            m_vecVertices.push_back(_vecC[1]+std::cos(fAng)*_fR);
-            m_vecVertices.push_back(float(m_fDepth));
-            m_vecColours.push_back(m_aColour[0]);
-            m_vecColours.push_back(m_aColour[1]);
-            m_vecColours.push_back(m_aColour[2]);
-            m_vecColours.push_back(m_aColour[3]);
-            m_vecIndicesTriangles.push_back(m_unCenterIndex);
-            m_vecIndicesTriangles.push_back(m_unIndex-1);
-            m_vecIndicesTriangles.push_back(m_unIndex++);
+            m_vecVertices[m_unIndexVerts++] = _vecC[0]+std::sin(fAng)*_fR;
+            m_vecVertices[m_unIndexVerts++] = _vecC[1]+std::cos(fAng)*_fR;
+            m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+            m_vecColours[m_unIndexCol++] = m_aColour[0];
+            m_vecColours[m_unIndexCol++] = m_aColour[1];
+            m_vecColours[m_unIndexCol++] = m_aColour[2];
+            m_vecColours[m_unIndexCol++] = m_aColour[3];
+            m_vecIndicesTriangles[m_unIndexTriangles++] = m_unCenterIndex;
+            m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1;
+            m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;
             fAng += fFac;
         }
     }
-    
-    glBindVertexArray(m_unVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartV*sizeof(float),
-                                    m_vecVertices.size()*sizeof(float),
-                                    &(m_vecVertices.front()));
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartC*sizeof(float),
-                                    m_vecColours.size()*sizeof(float),
-                                    &(m_vecColours.front()));
-    
-    m_unIndexStartV += m_vecVertices.size();
-    m_unIndexStartC += m_vecColours.size();
-    
-    m_vecColours.clear();
-    m_vecVertices.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -945,58 +885,41 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR)
 {
     METHOD_ENTRY("CGraphics::filledRect")
 
-    m_vecVertices.push_back(_vecLL[0]);
-    m_vecVertices.push_back(_vecLL[1]);
-    m_vecVertices.push_back(float(m_fDepth));
-    m_vecVertices.push_back(_vecUR[0]);
-    m_vecVertices.push_back(_vecLL[1]);
-    m_vecVertices.push_back(float(m_fDepth));
-    m_vecVertices.push_back(_vecLL[0]);
-    m_vecVertices.push_back(_vecUR[1]);
-    m_vecVertices.push_back(float(m_fDepth));
-    m_vecVertices.push_back(_vecUR[0]);
-    m_vecVertices.push_back(_vecUR[1]);
-    m_vecVertices.push_back(float(m_fDepth));
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
-    m_vecIndicesTriangles.push_back(m_unIndex++);   // 1
-    m_vecIndicesTriangles.push_back(m_unIndex++);   // 2
-    m_vecIndicesTriangles.push_back(m_unIndex);     // 3
-    m_vecIndicesTriangles.push_back(m_unIndex);     // 3
-    m_vecIndicesTriangles.push_back(m_unIndex-1u);  // 2
-    m_vecIndicesTriangles.push_back(m_unIndex+1u);  // 4
+    m_vecVertices[m_unIndexVerts++] = _vecLL[0];
+    m_vecVertices[m_unIndexVerts++] = _vecLL[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecUR[0];
+    m_vecVertices[m_unIndexVerts++] = _vecLL[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecLL[0];
+    m_vecVertices[m_unIndexVerts++] = _vecUR[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecUR[0];
+    m_vecVertices[m_unIndexVerts++] = _vecUR[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 1
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 2
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex;     // 3
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex;     // 3
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1u;  // 2
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex+1u;  // 4
     m_unIndex += 2u;
-    
-    glBindVertexArray(m_unVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartV*sizeof(float),
-                                     m_vecVertices.size()*sizeof(float),
-                                     &(m_vecVertices.front()));
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartC*sizeof(float),
-                                     m_vecColours.size()*sizeof(float),
-                                     &(m_vecColours.front()));
-
-    m_unIndexStartV += m_vecVertices.size();
-    m_unIndexStartC += m_vecColours.size();
-    
-    m_vecColours.clear();
-    m_vecVertices.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1010,43 +933,39 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR)
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CGraphics::polygon(const VertexListType& _Vertices,
-                         const PolygonType& _PolygonType,
-                         const Vector2d& _vecOffset)
+                        const PolygonType& _PolygonType,
+                        const Vector2d& _vecOffset)
 {
     METHOD_ENTRY("CGraphics::polygon")
 
-//     switch(_PolygonType)
-//     {
-//         case PolygonType::FILLED:
-//             glBegin(GL_LINE_LOOP);  
-//             break;
-//         case PolygonType::LINE_SINGLE:
-//             glBegin(GL_LINES);  
-//             break;
-//         case PolygonType::LINE_LOOP:
-//             glBegin(GL_LINE_LOOP);
-//             break;
-//         case PolygonType::LINE_STRIP:
-//             glBegin(GL_LINE_STRIP);
-//             break;
-//     }
     this->beginLine();
     if (_vecOffset.isZero())
     {
-        for (VertexListType::const_iterator ci = _Vertices.begin();
-            ci != _Vertices.end(); ++ci)
+        for (const auto Vertex : _Vertices)
         {
-            this->addVertex((*ci)[0], (*ci)[1]);
+            m_vecVertices[m_unIndexVerts++] = Vertex[0];
+            m_vecVertices[m_unIndexVerts++] = Vertex[1];
+            m_vecVertices[m_unIndexVerts++] = m_fDepth;
         }
     }
     else
     {
-        for (VertexListType::const_iterator ci = _Vertices.begin();
-            ci != _Vertices.end(); ++ci)
+        for (const auto Vertex : _Vertices)
         {
-            this->addVertex((*ci)[0]+_vecOffset[0], (*ci)[1]+_vecOffset[1]);
+            m_vecVertices[m_unIndexVerts++] = Vertex[0]+_vecOffset[0];
+            m_vecVertices[m_unIndexVerts++] = Vertex[1]+_vecOffset[1];;
+            m_vecVertices[m_unIndexVerts++] = m_fDepth;
         }
     }
+    for (auto i=0u; i < _Vertices.size(); ++i)
+    {
+        m_vecColours[m_unIndexCol++] = m_aColour[0];
+        m_vecColours[m_unIndexCol++] = m_aColour[1];
+        m_vecColours[m_unIndexCol++] = m_aColour[2];
+        m_vecColours[m_unIndexCol++] = m_aColour[3];
+    }
+    
+    m_nLineNrOfVerts += _Vertices.size();
     this->endLine(_PolygonType);
 }
 
@@ -1062,60 +981,43 @@ void CGraphics::rect(const Vector2d& _vecLL, const Vector2d& _vecUR)
 {
     METHOD_ENTRY("CGraphics::rect")
     
-    m_vecVertices.push_back(_vecLL[0]);
-    m_vecVertices.push_back(_vecLL[1]);
-    m_vecVertices.push_back(float(m_fDepth));
-    m_vecVertices.push_back(_vecUR[0]);
-    m_vecVertices.push_back(_vecLL[1]);
-    m_vecVertices.push_back(float(m_fDepth));
-    m_vecVertices.push_back(_vecUR[0]);
-    m_vecVertices.push_back(_vecUR[1]);
-    m_vecVertices.push_back(float(m_fDepth));
-    m_vecVertices.push_back(_vecLL[0]);
-    m_vecVertices.push_back(_vecUR[1]);
-    m_vecVertices.push_back(float(m_fDepth));
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
-    m_vecColours.push_back(m_aColour[0]);
-    m_vecColours.push_back(m_aColour[1]);
-    m_vecColours.push_back(m_aColour[2]);
-    m_vecColours.push_back(m_aColour[3]);
-    m_vecIndicesLines.push_back(m_unIndex++);   // 1
-    m_vecIndicesLines.push_back(m_unIndex);     // 2
-    m_vecIndicesLines.push_back(m_unIndex++);   // 2
-    m_vecIndicesLines.push_back(m_unIndex);     // 3
-    m_vecIndicesLines.push_back(m_unIndex++);   // 3
-    m_vecIndicesLines.push_back(m_unIndex);     // 4
-    m_vecIndicesLines.push_back(m_unIndex);     // 4
-    m_vecIndicesLines.push_back(m_unIndex-3);   // 1
+    m_vecVertices[m_unIndexVerts++] = _vecLL[0];
+    m_vecVertices[m_unIndexVerts++] = _vecLL[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecUR[0];
+    m_vecVertices[m_unIndexVerts++] = _vecLL[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecUR[0];
+    m_vecVertices[m_unIndexVerts++] = _vecUR[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecLL[0];
+    m_vecVertices[m_unIndexVerts++] = _vecUR[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;   // 1
+    m_vecIndicesLines[m_unIndexLines++] = m_unIndex;     // 2
+    m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;   // 2
+    m_vecIndicesLines[m_unIndexLines++] = m_unIndex;     // 3
+    m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;   // 3
+    m_vecIndicesLines[m_unIndexLines++] = m_unIndex;     // 4
+    m_vecIndicesLines[m_unIndexLines++] = m_unIndex;     // 4
+    m_vecIndicesLines[m_unIndexLines++] = m_unIndex-3;   // 1
     m_unIndex++;
-    
-    glBindVertexArray(m_unVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartV*sizeof(float),
-                                     m_vecVertices.size()*sizeof(float),
-                                     &(m_vecVertices.front()));
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartC*sizeof(float),
-                                     m_vecColours.size()*sizeof(float),
-                                     &(m_vecColours.front()));
-
-    m_unIndexStartV += m_vecVertices.size();
-    m_unIndexStartC += m_vecColours.size();
-    
-    m_vecColours.clear();
-    m_vecVertices.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1130,6 +1032,7 @@ void CGraphics::rect(const Vector2d& _vecLL, const Vector2d& _vecUR)
 void CGraphics::beginLine()
 {
     METHOD_ENTRY("CGraphics::beginLine")
+    m_nLineNrOfVerts = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1146,33 +1049,16 @@ void CGraphics::endLine(const PolygonType& _PType)
 {
     METHOD_ENTRY("CGraphics::endLine")
     
-    for (auto i=0u; i<m_vecVertices.size()-3; i+=3)
+    for (auto i=0u; i<m_nLineNrOfVerts-1; ++i)
     {
-        m_vecIndicesLines.push_back(m_unIndex++);
-        m_vecIndicesLines.push_back(m_unIndex);
+        m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
+        m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
     }
     
     if (_PType == PolygonType::LINE_LOOP || _PType == PolygonType::FILLED)
     {
-            m_vecIndicesLines.push_back(m_unIndex);
-            m_vecIndicesLines.push_back(m_unIndex+1-m_vecVertices.size()/3);
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex+1-m_nLineNrOfVerts;
     }
     m_unIndex++;
-    
-    glBindVertexArray(m_unVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartV*sizeof(float),
-                                     m_vecVertices.size()*sizeof(float),
-                                     &(m_vecVertices.front()));
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferSubData(GL_ARRAY_BUFFER, m_unIndexStartC*sizeof(float),
-                                     m_vecColours.size()*sizeof(float),
-                                     &(m_vecColours.front()));
-    
-    m_unIndexStartV += m_vecVertices.size();
-    m_unIndexStartC += m_vecColours.size();
-
-    m_vecColours.clear();
-    m_vecVertices.clear();
 }

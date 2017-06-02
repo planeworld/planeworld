@@ -229,27 +229,31 @@ class CGraphics
     private:
         
         //--- Variables [private] --------------------------------------------//
-        WindowHandleType*   m_pWindow;              ///< Pointer to main window
+        WindowHandleType*   m_pWindow;                  ///< Pointer to main window
         
-        ViewPort            m_ViewPort;             ///< Viewport for graphics
-        glm::mat4           m_matTransform;         ///< Final transformation matrix
-        glm::mat4           m_matProjection;        ///< Projection matrix
-        glm::mat4           m_matRotate;            ///< Rotation matrix
-        glm::mat4           m_matScale;             ///< Scale matrix
+        ViewPort            m_ViewPort;                 ///< Viewport for graphics
+        glm::mat4           m_matTransform;             ///< Final transformation matrix
+        glm::mat4           m_matProjection;            ///< Projection matrix
+        glm::mat4           m_matRotate;                ///< Rotation matrix
+        glm::mat4           m_matScale;                 ///< Scale matrix
 
-        GLuint              m_unIndex = 0u;         ///< Pointer to current index in buffer
-        GLuint              m_unIndexStartV = 0u;   ///< Index to start next primitive with (vertices)
-        GLuint              m_unIndexStartC = 0u;   ///< Index to start next primitive with (colours)
+        GLuint              m_unIndex = 0u;             ///< Pointer to current index in buffer
         GLuint              m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
+        GLuint              m_unIndexVerts = 0u;        ///< Index of current vertex in buffer
+        GLuint              m_unIndexCol = 0u;          ///< Index of current colour in buffer
+        GLuint              m_unIndexLines = 0u;        ///< Index of current element in line index buffer
+        GLuint              m_unIndexPoints = 0u;       ///< Index of current element in point index buffer
+        GLuint              m_unIndexTriangles = 0u;    ///< Index of current element in triangle index buffer
+        int                 m_nLineNrOfVerts = 0;       ///< Number of vertices for current line
 
-        GLuint              m_unIBOLines = 0u;      ///< Index buffer object for lines
-        GLuint              m_unIBOPoints = 0u;     ///< Index buffer object for points
-        GLuint              m_unIBOTriangles = 0u;  ///< Index buffer object for triangles
-        GLuint              m_unVAO = 0u;           ///< Vertex array object
-        GLuint              m_unVBO = 0u;           ///< Vertex buffer (one for all single lines)
-        GLuint              m_unVBOColours = 0u;    ///< Colour buffer (one for all vertex colours)
+        GLuint              m_unIBOLines = 0u;          ///< Index buffer object for lines
+        GLuint              m_unIBOPoints = 0u;         ///< Index buffer object for points
+        GLuint              m_unIBOTriangles = 0u;      ///< Index buffer object for triangles
+        GLuint              m_unVAO = 0u;               ///< Vertex array object
+        GLuint              m_unVBO = 0u;               ///< Vertex buffer (one for all single lines)
+        GLuint              m_unVBOColours = 0u;        ///< Colour buffer (one for all vertex colours)
         
-        ColorTypeRGBA        m_aColour;             ///< Currently set color
+        ColorTypeRGBA        m_aColour;                 ///< Currently set color
         
         std::vector<GLuint>   m_vecIndicesLines;        ///< Indices for single lines within buffers
         std::vector<GLuint>   m_vecIndicesPoints;       ///< Indices for points within buffers
@@ -258,23 +262,24 @@ class CGraphics
         std::vector<GLfloat>    m_vecColours;           ///< Temporary buffer for colours of vertices
         std::vector<GLfloat>    m_vecVertices;          ///< Temporary buffer for vertices
         
-        CShaderProgram      m_ShaderProgram;    ///< Basic shader program
+        CShaderProgram      m_ShaderProgram;            ///< Basic shader program
         
-        Vector3d            m_vecCamPos;            ///< camera position
-        double              m_fCamAng;              ///< camera angle
-        double              m_fCamZoom;             ///< camera zoom
-        double              m_fDepth;               ///< depth of lines in list
-        double              m_fDepthMax;            ///< maximum depth of levels
-        double              m_fDepthMin;            ///< minimum depth of levels
+        Vector3d            m_vecCamPos;                ///< camera position
+        double              m_fCamAng;                  ///< camera angle
+        double              m_fCamZoom;                 ///< camera zoom
+        double              m_fDepth;                   ///< depth of lines in list
+        double              m_fDepthMax;                ///< maximum depth of levels
+        double              m_fDepthMin;                ///< minimum depth of levels
 
-        double              m_fDynPelSize;          ///< pel-size for dynamically sized shapes
+        double              m_fDynPelSize;              ///< pel-size for dynamically sized shapes
         
-        int                 m_nVideoFlags;          ///< videoflags like fullscreen, resolution
-        unsigned short      m_unWidthScr;           ///< Screen width
-        unsigned short      m_unHeightScr;          ///< Screen height
+        int                 m_nVideoFlags;              ///< videoflags like fullscreen, resolution
+        unsigned short      m_unWidthScr;               ///< Screen width
+        unsigned short      m_unHeightScr;              ///< Screen height
 
-        std::vector<double>     m_CosCache;     ///< Cache for cosine values
-        std::vector<double>     m_SinCache;     ///< Cache of sine values
+        std::vector<double>     m_CosCache;             ///< Cache for cosine values
+        std::vector<double>     m_SinCache;             ///< Cache of sine values
+        
         //--- Constructor/destructor [private] -------------------------------//
         CGraphics();
         ~CGraphics();
