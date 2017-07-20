@@ -54,7 +54,12 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_bMBLeft(false),
                                      m_ConsoleWidgetID(0),
                                      m_ConsoleWindowID(0),
-                                     m_UIDVisuals(&m_FontManager)
+                                     m_UIDVisuals(&m_FontManager),
+                                     m_TextDebris(&m_FontManager),
+                                     m_TextObjects(&m_FontManager),
+                                     m_TextScale(&m_FontManager),
+                                     m_TextTimers(&m_FontManager),
+                                     m_TextStarSystems(&m_FontManager)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -895,6 +900,20 @@ bool CVisualsManager::init()
     pConsoleWindow->setVisibilty(false);
     pConsoleWindow->setClosability(false);
     
+    // Initialise UI text objects
+    m_TextDebris.setFont(m_strFont);
+    m_TextDebris.setSize(12.0f);
+    m_TextObjects.setFont(m_strFont);
+    m_TextObjects.setSize(12.0f);
+    m_TextScale.setFont(m_strFont);
+    m_TextScale.setPosition(m_Graphics.getWidthScr()/2, 32.0f, TEXT_POSITION_CENTERED);
+    m_TextScale.setSize(16.0f);
+    m_TextStarSystems.setFont(m_strFont);
+    m_TextStarSystems.setSize(12.0f);
+    m_TextTimers.setFont(m_strFont);
+    m_TextTimers.setPosition(10.0f, 10.0f);
+    m_TextTimers.setSize(12.0f);
+    
     return (m_Graphics.init());
 }
 
@@ -1150,13 +1169,8 @@ void CVisualsManager::drawGridHUD()
         else
             oss << "Grid Resolution: " << fGrid * 0.001 << "km";
         
-        CText TextScale(&m_FontManager);
-        TextScale.setText(oss.str());
-        TextScale.setFont(m_strFont);
-        TextScale.setColor({{1.0, 1.0, 1.0, 1.0}});
-        TextScale.setSize(16.0f);
-        TextScale.setPosition(m_Graphics.getWidthScr()/2, 32.0f);
-        TextScale.display();
+        m_TextScale.setText(oss.str());
+        m_TextScale.display();
         
         m_Graphics.endRenderBatch();
     }
@@ -1296,22 +1310,17 @@ void CVisualsManager::drawTimers()
                     << m_pComInterface->call<int,int>("get_time_seconds_part", i) << "s" << std::endl;
             }
             
-            CText TextTimers(&m_FontManager);
-            
-            TextTimers.setFont("anka_c87_r");
-            TextTimers.setSize(12.0f);
             if (m_pDataStorage->getTimeScale() > 1.0)
             {
-                TextTimers.setColor({{1.0, 0.0, 0.0, 1.0}});
+                m_TextTimers.setColor({{1.0, 0.0, 0.0, 1.0}});
                 oss << "\nWarning: Decreasing accuracy." << std::endl;
             }
             else
             { 
-                TextTimers.setColor({{1.0, 1.0, 1.0, 1.0}});
+                m_TextTimers.setColor({{1.0, 1.0, 1.0, 1.0}});
             }
-            TextTimers.setText(oss.str());
-            TextTimers.setPosition(10.0f, 10.0f);
-            TextTimers.display();
+            m_TextTimers.setText(oss.str());
+            m_TextTimers.display();
         
         m_Graphics.endRenderBatch();
     }
@@ -1461,11 +1470,6 @@ void CVisualsManager::drawWorld()
         m_Graphics.setupScreenSpace();
         m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
 
-        CText TextObjectName(&m_FontManager);
-        
-        TextObjectName.setFont("anka_c87_r");
-        TextObjectName.setSize(12.0f);
-        
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
             if (m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() > 1.0)
@@ -1481,17 +1485,12 @@ void CVisualsManager::drawWorld()
                 double fColor = m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() - 1.0;
                 if (fColor > 1.0) fColor = 1.0;
                 
-                TextObjectName.setColor({{1.0, 1.0, 1.0, fColor}});
-                TextObjectName.setText(pObj.second->getName());
-                TextObjectName.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
-                TextObjectName.display();
+                m_TextObjects.setColor({{1.0, 1.0, 1.0, fColor}});
+                m_TextObjects.setText(pObj.second->getName());
+                m_TextObjects.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+                m_TextObjects.display();
             }
         }
-        CText TextDebrisName(&m_FontManager);
-            
-        TextDebrisName.setFont("anka_c87_r");
-        TextDebrisName.setSize(12.0f);
-        
         for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
         {
             if (m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() > 1.0)
@@ -1507,19 +1506,14 @@ void CVisualsManager::drawWorld()
                 double fColor = m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() - 1.0;
                 if (fColor > 1.0) fColor = 1.0;
                 
-                TextDebrisName.setColor({{1.0, 1.0, 1.0, fColor}});
-                TextDebrisName.setText(Debris.second->getName());
-                TextDebrisName.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
-                TextDebrisName.display();
+                m_TextDebris.setColor({{1.0, 1.0, 1.0, fColor}});
+                m_TextDebris.setText(Debris.second->getName());
+                m_TextDebris.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+                m_TextDebris.display();
             }
         }
         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
-            CText TextStarSystemName(&m_FontManager);
-            
-            TextStarSystemName.setFont("anka_c87_r");
-            TextStarSystemName.setSize(12.0f);
-            
             for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
             {
                 Vector2d vecPos = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
@@ -1535,11 +1529,11 @@ void CVisualsManager::drawWorld()
                     // Now draw the text
                     
                     double fColor=0.1*m_pUniverse->getStarSystems()[i]->Star().getStarType()+0.3;
-                    TextStarSystemName.setColor({{0.8, fColor, 0.3, 0.5}});
-                    TextStarSystemName.setText(m_pUniverse->getStarSystems()[i]->Star().getName() + /*"\n" +*/
+                    m_TextStarSystems.setColor({{0.8, fColor, 0.3, 0.5}});
+                    m_TextStarSystems.setText(m_pUniverse->getStarSystems()[i]->Star().getName() + /*"\n" +*/
                                                std::to_string(m_pUniverse->getStarSystems()[i]->Star().getRadius()));
-                    TextStarSystemName.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
-                    TextStarSystemName.display();
+                    m_TextStarSystems.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
+                    m_TextStarSystems.display();
                 }
             }
         }

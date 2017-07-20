@@ -163,6 +163,12 @@ class CVisualsManager : virtual public CGraphicsBase,
 
         CFontManager                    m_FontManager;      ///< Font manager for displaying UI text
         CUIDVisuals                     m_UIDVisuals;       ///< Graphical display of UIDs
+        CText                           m_TextDebris;       ///< Text object for debris names
+        CText                           m_TextObjects;      ///< Text object for object names
+        CText                           m_TextScale;        ///< Text object for universe scale
+        CText                           m_TextTimers;       ///< Text object for timers
+        CText                           m_TextStarSystems;  ///< Text object for Star Systems
+        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

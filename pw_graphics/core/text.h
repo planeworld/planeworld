@@ -39,6 +39,9 @@
 
 //--- Misc header ------------------------------------------------------------//
 
+// Constants
+const bool TEXT_POSITION_CENTERED = true;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class representing a graphical text
