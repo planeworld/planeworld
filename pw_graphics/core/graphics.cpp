@@ -46,7 +46,10 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CGraphics::CGraphics() : m_pWindow(nullptr),
+                        m_bScreenSpace(false),
+                        m_nDrawCalls(0),
                         m_aColour({{1.0, 1.0, 1.0, 1.0}}),
+                        m_nRenderBatchLvl(0),
                         m_fCamAng(0.0),
                         m_fCamZoom(1.0),
                         m_fDepth(GRAPHICS_DEPTH_DEFAULT),
@@ -67,6 +70,7 @@ CGraphics::CGraphics() : m_pWindow(nullptr),
     
     m_vecColours.resize(m_unIndexMax);
     m_vecVertices.resize(m_unIndexMax);
+    m_vecUVs.resize(m_unIndexMax);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,6 +195,35 @@ void CGraphics::cacheSinCos(const int _nSeg)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Sets projection matrix to screen space 
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::setupScreenSpace() 
+{
+    METHOD_ENTRY("CGraphics::setupScreenSpace")
+
+    m_bScreenSpace = true;
+    m_matProjection = glm::ortho<float>(0, m_unWidthScr, m_unHeightScr, 0, 
+                                        m_ViewPort.nearplane, m_ViewPort.farplane);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets projection matrix to screen space 
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::setupWorldSpace() 
+{
+    METHOD_ENTRY("CGraphics::setupWorldSpace")
+
+    m_bScreenSpace = false;
+    m_matProjection = glm::ortho<float>(m_ViewPort.leftplane, m_ViewPort.rightplane,
+                                        m_ViewPort.bottomplane, m_ViewPort.topplane,
+                                        m_ViewPort.nearplane, m_ViewPort.farplane);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Clear and swap videobuffers
 ///
 /// This method swaps videobuffers and clears offscreen buffers afterwards.
@@ -200,90 +233,198 @@ void CGraphics::swapBuffers()
 {
     METHOD_ENTRY("CGraphics::swapBuffers")
     
-    glBindVertexArray(m_unVAO);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexVerts*sizeof(GLfloat), &(m_vecVertices.front()), GL_STREAM_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexCol*sizeof(GLfloat), &(m_vecColours.front()), GL_STREAM_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), &m_vecIndicesLines.front(), GL_STREAM_DRAW);
-    glDrawElements(GL_LINES, m_vecIndicesLines.size(), GL_UNSIGNED_INT, 0);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), &m_vecIndicesPoints.front(), GL_STREAM_DRAW);
-    glDrawElements(GL_POINTS, m_vecIndicesPoints.size(), GL_UNSIGNED_INT, 0);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), &m_vecIndicesTriangles.front(), GL_STREAM_DRAW);
-    glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
-    
     m_pWindow->display();
-
-    // Reserve gpu memory for all relevant buffers
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVAO);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    m_nDrawCalls = 0;
     
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-    
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
-    
-    m_unIndex = 0u;
-    m_unIndexVerts = 0u;
-    m_unIndexCol = 0u;
-    m_unIndexLines = 0u;
-    m_unIndexPoints = 0u;
-    m_unIndexTriangles = 0u;
-
     // clear offscreen buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets projection matrix to screen space 
+/// \brief Begin processing of one batch of GL objects
+///
+/// This methods clears all buffers in order to begin with a new batch that
+/// might use a different configuration, e.g. buffers, shaders, attributes.
+///
+/// \param _bUseUVs Use textures?
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::switchToScreenSpace() 
+void CGraphics::beginRenderBatch(const bool _bUseUVs)
 {
-    METHOD_ENTRY("CGraphics::switchToScreenSpace")
+    METHOD_ENTRY("CGraphics::beginRenderBatch")
     
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, m_unWidthScr, m_unHeightScr, 0,
-            m_ViewPort.nearplane, m_ViewPort.farplane);
+    bool bBegin = false;
+    
+    // First, check stack for current state.
+    // Begin if stack is empty
+    if (m_RenderBatchStack.empty())
+    {
+        bBegin = true;
+    }
+    // Or begin, if render mode changed
+    else if (m_RenderBatchStack.top() != _bUseUVs)
+    {
+        // In this case, stop current batch first
+        this->endRenderBatch(GRAPHICS_INTERNAL_RENDER_BATCH_CALL);
+        bBegin = true;
+    }
+    
+    m_bUseUVs = _bUseUVs;
+    m_RenderBatchStack.push(_bUseUVs);
+
+    if (bBegin)
+    {
+        if (m_bUseUVs)
+        {
+            m_ShaderProgramFont.use();
+            GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgramFont.getID(), "matTransform");
+            glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
+            GLuint unTexLoc = glGetUniformLocation(m_ShaderProgramFont.getID(), "FontTexture");
+        }
+        else
+        {
+            m_ShaderProgram.use();
+            GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matTransform");
+            glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
+        }
+        
+        this->applyCamMovement();
+        
+        // Reserve gpu memory for all relevant buffers
+        glBindBuffer(GL_ARRAY_BUFFER, m_unVAO);
+        
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(0);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(1);
+        
+        if (m_bUseUVs)
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUVs);
+            glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+            glEnableVertexAttribArray(2);
+        }
+        else
+        {
+            glDisableVertexAttribArray(2);
+        }
+            
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+        
+        m_unIndex = 0u;
+        m_unIndexVerts = 0u;
+        m_unIndexCol = 0u;
+        m_unIndexUV = 0u;
+        m_unIndexLines = 0u;
+        m_unIndexPoints = 0u;
+        m_unIndexTriangles = 0u;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets projection matrix to screen space 
+/// \brief End processing of one batch of GL objects
+///
+/// This method ends the processing of one batch started with \ref beginRenderBatch.
+/// A draw call will be done here.
+///
+/// \param _bIntern Indicates that the end command has been called internally
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::switchToWorldSpace() 
+void CGraphics::endRenderBatch(const bool _bIntern)
 {
-    METHOD_ENTRY("CGraphics::switchToWorldSpace")
+    METHOD_ENTRY("CGraphics::endRenderBatch")
     
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(m_ViewPort.leftplane, m_ViewPort.rightplane,
-            m_ViewPort.bottomplane, m_ViewPort.topplane,
-            m_ViewPort.nearplane, m_ViewPort.farplane);
+    bool bEnd = false;
+    bool bBegin = false;
+    
+    // First, test if call is internally
+    if (_bIntern)
+    {
+        bEnd = true;
+    }
+    else
+    {
+        if (!m_RenderBatchStack.empty())
+        {
+            // Pop current state. If there is no more operation on the stack, execute
+            // draw call. Otherwise, test for mode change and execute draw call 
+            // accordingly
+            m_RenderBatchStack.pop();
+            if (m_RenderBatchStack.empty())
+            {
+                bEnd = true;
+            }
+            else if (m_RenderBatchStack.top() != m_bUseUVs)
+            {
+                bEnd = true;
+                bBegin = true;
+            }
+        }
+        else
+        {
+            DOM_DEV(WARNING_MSG("Graphics", "Something is wrong with the render stack. Did you forget to call <beginRenderBatch>?"))
+        }
+    }
+        
+    if (bEnd)
+    {
+        glBindVertexArray(m_unVAO);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexVerts*sizeof(GLfloat), m_vecVertices.data(), GL_STREAM_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexCol*sizeof(GLfloat), m_vecColours.data(), GL_STREAM_DRAW);
+        
+        if (m_bUseUVs)
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUVs);
+            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+            
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
+            
+            ++m_nDrawCalls;
+        }
+        else
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), m_vecIndicesLines.data(), GL_STREAM_DRAW);
+            glDrawElements(GL_LINES, m_vecIndicesLines.size(), GL_UNSIGNED_INT, 0);
+            
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), m_vecIndicesPoints.data(), GL_STREAM_DRAW);
+            glDrawElements(GL_POINTS, m_vecIndicesPoints.size(), GL_UNSIGNED_INT, 0);
+            
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
+            
+            m_nDrawCalls += 3;
+        }
+        // If render mode changed, beginRenderBatch wrt top of stack
+        if (bBegin)
+        {
+            bool bTmp = m_RenderBatchStack.top();
+            m_RenderBatchStack.pop();
+            this->beginRenderBatch(bTmp);
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -302,6 +443,10 @@ bool CGraphics::init()
     //--------------------------------------------------------------------------
     // Initialize window and graphics
     //--------------------------------------------------------------------------
+    #ifdef PW_MULTITHREADING
+        m_pWindow->setActive(true);
+    #endif
+    
     m_pWindow->setMouseCursorVisible(false);
     m_pWindow->setVerticalSyncEnabled(false);
     DOM_VAR(INFO_MSG("Graphics", "Found OpenGL version: " << m_pWindow->getSettings().majorVersion << "." << m_pWindow->getSettings().minorVersion))
@@ -311,24 +456,26 @@ bool CGraphics::init()
     DOM_VAR(INFO_MSG("Graphics", "Core Profile (1): " << m_pWindow->getSettings().attributeFlags))
 
     //--------------------------------------------------------------------------
-    // Setup OpenGL
+    // Setup shaders
     //--------------------------------------------------------------------------
     CShader VertexShader;
+    CShader VertexShaderFont;
     CShader FragmentShader;
+    CShader FragmentShaderFont;
+    
     VertexShader.load("shader.vert", GL_VERTEX_SHADER);
     FragmentShader.load("shader.frag", GL_FRAGMENT_SHADER);
+    VertexShaderFont.load("font.vert", GL_VERTEX_SHADER);
+    FragmentShaderFont.load("font.frag", GL_FRAGMENT_SHADER);
     
-    m_ShaderProgram.create();
-    m_ShaderProgram.addShader(VertexShader);
-    m_ShaderProgram.addShader(FragmentShader);
-    m_ShaderProgram.link();
+    m_ShaderProgram.create(VertexShader, FragmentShader);
+    m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
+    
     m_ShaderProgram.use();
     
-    m_matProjection = glm::ortho<float>(m_ViewPort.leftplane, m_ViewPort.rightplane,
-            m_ViewPort.bottomplane, m_ViewPort.topplane,
-            m_ViewPort.nearplane, m_ViewPort.farplane);
-    GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
-    glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
+    //--------------------------------------------------------------------------
+    // Setup OpenGL variables
+    //--------------------------------------------------------------------------
     
     // Enable blending
     glEnable(GL_BLEND);
@@ -356,34 +503,15 @@ bool CGraphics::init()
     //--------------------------------------------------------------------------
     glGenBuffers(1, &m_unVBO);
     glGenBuffers(1, &m_unVBOColours);
+    glGenBuffers(1, &m_unVBOUVs);
     glGenBuffers(1, &m_unIBOLines);
     glGenBuffers(1, &m_unIBOPoints);
     glGenBuffers(1, &m_unIBOTriangles);
     glGenVertexArrays(1, &m_unVAO);
+
+    this->resetBufferObjects();
+    this->setupWorldSpace();
     
-    // Reserve GPU memory for all relevant buffers
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVAO);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
-    
-    #ifdef PW_MULTITHREADING
-        m_pWindow->setActive(false);
-    #endif
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
-    
-    // Clear buffers
-    glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
     return (true);
 }
 
@@ -403,6 +531,10 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
 {
     METHOD_ENTRY("CGraphics::resizeWindow")
     
+    // Store resolution
+    m_unWidthScr = _unWidthScr;
+    m_unHeightScr = _unHeightScr;
+    
     sf::FloatRect View(0,0,_unWidthScr,_unHeightScr);
     m_pWindow->setView(sf::View(View));
     m_pWindow->setSize(sf::Vector2u(_unWidthScr, _unHeightScr));
@@ -412,15 +544,12 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     m_ViewPort.leftplane   = -m_ViewPort.rightplane;
     m_ViewPort.bottomplane = -m_ViewPort.topplane;
     
-    m_matProjection = glm::ortho<float>(m_ViewPort.leftplane, m_ViewPort.rightplane,
-            m_ViewPort.bottomplane, m_ViewPort.topplane,
-            m_ViewPort.nearplane, m_ViewPort.farplane);
-    GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matProjection");
-    glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
-    
-    // Store resolution
-    m_unWidthScr = _unWidthScr;
-    m_unHeightScr = _unHeightScr;
+//     m_matProjection = glm::ortho<float>(m_ViewPort.leftplane, m_ViewPort.rightplane,
+//                                         m_ViewPort.bottomplane, m_ViewPort.topplane,
+//                                         m_ViewPort.nearplane, m_ViewPort.farplane);
+//     GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matTransform");
+//     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
+    this->setupWorldSpace();
     
     INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.rightplane - m_ViewPort.leftplane << "m x " <<
                                                    m_ViewPort.topplane   - m_ViewPort.bottomplane << "m (" <<
@@ -444,9 +573,16 @@ void CGraphics::applyCamMovement()
 {
     METHOD_ENTRY("CGraphics::applyCamMovement")
 
-    m_matScale = glm::scale(glm::vec3(GLfloat(m_fCamZoom), GLfloat(m_fCamZoom), 1.0f));
-    m_matRotate = glm::rotate(float(-m_fCamAng), glm::vec3(0.0f, 0.0f, 1.0f));
-    m_matTransform = m_matProjection * m_matScale * m_matRotate;
+    if (m_bScreenSpace)
+    {
+        m_matTransform = m_matProjection;
+    }
+    else
+    {
+        m_matScale = glm::scale(glm::vec3(GLfloat(m_fCamZoom), GLfloat(m_fCamZoom), 1.0f));
+        m_matRotate = glm::rotate(float(-m_fCamAng), glm::vec3(0.0f, 0.0f, 1.0f));
+        m_matTransform = m_matProjection * m_matScale * m_matRotate;
+    }
 
     GLint nTransMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matTransform");
     glUniformMatrix4fv(nTransMatLoc, 1, GL_FALSE, glm::value_ptr(m_matTransform));
@@ -593,7 +729,7 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
         
         m_unIndex++;
         
-        for (int i=1; i<_nNrOfSeg; ++i)
+        for (int i=1; i<_nNrOfSeg+1; ++i)
         {
             m_vecVertices[m_unIndexVerts++] = _vecC[0]+m_SinCache[i]*_fR;
             m_vecVertices[m_unIndexVerts++] = _vecC[1]+m_CosCache[i]*_fR;
@@ -625,7 +761,7 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
         m_unIndex++;
         fAng *= fFac;
         
-        while (fAng < MATH_2PI)
+        while (fAng < MATH_2PI+fFac)
         {
             m_vecVertices[m_unIndexVerts++] = _vecC[0]+std::sin(fAng)*_fR;
             m_vecVertices[m_unIndexVerts++] = _vecC[1]+std::cos(fAng)*_fR;
@@ -638,6 +774,12 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
             m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
             fAng += fFac;
         }
+    }
+    
+    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    {
+        this->endRenderBatch();
+        this->beginRenderBatch(m_bUseUVs);
     }
 }
 
@@ -771,6 +913,11 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
         m_vecColours[m_unIndexCol++] = m_aColour[3];
         m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
     }
+    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    {
+        this->endRenderBatch();
+        this->beginRenderBatch(m_bUseUVs);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -871,6 +1018,11 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
             fAng += fFac;
         }
     }
+    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    {
+        this->endRenderBatch();
+        this->beginRenderBatch(m_bUseUVs);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -920,6 +1072,12 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR)
     m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1u;  // 2
     m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex+1u;  // 4
     m_unIndex += 2u;
+    
+    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    {
+        this->endRenderBatch();
+        this->beginRenderBatch(m_bUseUVs);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1018,6 +1176,73 @@ void CGraphics::rect(const Vector2d& _vecLL, const Vector2d& _vecUR)
     m_vecIndicesLines[m_unIndexLines++] = m_unIndex;     // 4
     m_vecIndicesLines[m_unIndexLines++] = m_unIndex-3;   // 1
     m_unIndex++;
+    
+    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    {
+        this->endRenderBatch();
+        this->beginRenderBatch(m_bUseUVs);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw a textured rectangle
+///
+/// \param _vecLL   Lower left corner
+/// \param _vecUR   Upper right corner
+/// \param _pUVs    List of texture coordinates (x0, y0, ... xN, yN)
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::texturedRect(const Vector2d& _vecLL, const Vector2d& _vecUR,
+                             const std::vector<GLfloat>* _pUVs)
+{
+    METHOD_ENTRY("CGraphics::texturedRect")
+
+    m_vecVertices[m_unIndexVerts++] = _vecLL[0];
+    m_vecVertices[m_unIndexVerts++] = _vecLL[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecUR[0];
+    m_vecVertices[m_unIndexVerts++] = _vecLL[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecLL[0];
+    m_vecVertices[m_unIndexVerts++] = _vecUR[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecUR[0];
+    m_vecVertices[m_unIndexVerts++] = _vecUR[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    for (const auto UV : *_pUVs)
+    {
+        m_vecUVs[m_unIndexUV++] = UV;
+    }
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 1
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 2
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex;     // 3
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex;     // 3
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1u;  // 2
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex+1u;  // 4
+    m_unIndex += 2u;
+    
+    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    {
+        this->endRenderBatch();
+        this->beginRenderBatch(m_bUseUVs);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1049,16 +1274,65 @@ void CGraphics::endLine(const PolygonType& _PType)
 {
     METHOD_ENTRY("CGraphics::endLine")
     
-    for (auto i=0u; i<m_nLineNrOfVerts-1; ++i)
+    if (_PType == PolygonType::LINE_SINGLE)
     {
-        m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
-        m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
+        for (auto i=0u; i<m_nLineNrOfVerts-1; i+=2)
+        {
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
+        }
+    }
+    else
+    {
+        for (auto i=0u; i<m_nLineNrOfVerts-1; ++i)
+        {
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
+            m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
+        }
+        
+        if (_PType == PolygonType::LINE_LOOP || _PType == PolygonType::FILLED)
+        {
+                m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
+                m_vecIndicesLines[m_unIndexLines++] = m_unIndex+1-m_nLineNrOfVerts;
+        }
+        m_unIndex++;
     }
     
-    if (_PType == PolygonType::LINE_LOOP || _PType == PolygonType::FILLED)
+    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
     {
-            m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
-            m_vecIndicesLines[m_unIndexLines++] = m_unIndex+1-m_nLineNrOfVerts;
+        this->endRenderBatch();
+        this->beginRenderBatch(m_bUseUVs);
     }
-    m_unIndex++;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Resets all GL buffer objects, such as VAOs, VBOs, IBOs, etc.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::resetBufferObjects()
+{
+    METHOD_ENTRY("CGraphics::resetBufferObjects")
+    
+    // Reserve GPU memory for all relevant buffers
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVAO);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUVs);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    
+    // Clear buffers
+    glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 }

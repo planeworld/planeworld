@@ -51,7 +51,7 @@ bool CRenderTarget::init(const uint16_t _unResX, const uint16_t _unResY)
     // Texture
     glGenTextures(1, &m_unIDTex);
     glBindTexture(GL_TEXTURE_2D, m_unIDTex);
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, _unResX, _unResY, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _unResX, _unResY, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

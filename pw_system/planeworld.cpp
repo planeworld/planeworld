@@ -304,7 +304,6 @@ int main(int argc, char *argv[])
         if (bGraphics)
         {
             pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
-            pVisualsManager->setFont(XMLImporter.getFont());
         }
         Universe.clone(XMLImporter.getUniverse());
     }
@@ -376,6 +375,7 @@ int main(int argc, char *argv[])
         
         pVisualsManager->setWindow(pWindow);
         pVisualsManager->init();
+        pWindow->setActive(false);
         
         #ifdef PW_MULTITHREADING    
             pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);

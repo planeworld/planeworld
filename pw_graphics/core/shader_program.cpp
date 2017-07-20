@@ -32,6 +32,25 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Creates GL shader program consisting of vertex and fragment shader
+///
+/// \param _VertexShader Vertex shader of this program
+/// \param _FragmentShader Fragment shader of this program
+///
+////////////////////////////////////////////////////////////////////////////////
+void CShaderProgram::create(const CShader& _VertexShader,
+                            const CShader& _FragmentShader)
+{
+    METHOD_ENTRY("CShaderProgram::create")
+    m_unID = glCreateProgram();
+    
+    this->addShader(_VertexShader);
+    this->addShader(_FragmentShader);
+    this->link();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Link GL shader program
 ///
 ////////////////////////////////////////////////////////////////////////////////

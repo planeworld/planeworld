@@ -53,7 +53,8 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_bCursor(false),
                                      m_bMBLeft(false),
                                      m_ConsoleWidgetID(0),
-                                     m_ConsoleWindowID(0)
+                                     m_ConsoleWindowID(0),
+                                     m_UIDVisuals(&m_FontManager)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -516,40 +517,42 @@ void CVisualsManager::drawCOM() const
 
     if (m_nVisualisations & VISUALS_OBJECT_COM)
     {
-        for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
-        {
-            
-            if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(m_pCamera->getBoundingBox()))
+        m_Graphics.beginRenderBatch();
+            for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
             {
-                if (m_Graphics.getResPMX() > 0.5)
+                
+                if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(m_pCamera->getBoundingBox()))
                 {
-                    m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
-                    m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.5, 36.0);
-                    m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
-                    m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.3, 36.0);
-                    
-                    m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
-                    // Draw shapes centroids
-                    for (auto Shp : Obj.second->getGeometry()->getShapes())
+                    if (m_Graphics.getResPMX() > 0.5)
                     {
-                        m_Graphics.filledCircle(
-                            Obj.second->getKinematicsState().getPosition(
-                                Shp->getCentroid()
-                            ) - m_pCamera->getCenter(), 0.3, 36.0);
+                        m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
+                        m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.5, 36.0);
+                        m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
+                        m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.3, 36.0);
+                        
+                        m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
+                        // Draw shapes centroids
+                        for (auto Shp : Obj.second->getGeometry()->getShapes())
+                        {
+                            m_Graphics.filledCircle(
+                                Obj.second->getKinematicsState().getPosition(
+                                    Shp->getCentroid()
+                                ) - m_pCamera->getCenter(), 0.3, 36.0);
+                        }
+                        m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
+                        // Draw shapes centroids
+                        for (auto Shp : Obj.second->getGeometry()->getShapes())
+                        {
+                            m_Graphics.filledCircle(
+                                Obj.second->getKinematicsState().getPosition(
+                                    Shp->getCentroid()
+                                ) - m_pCamera->getCenter(), 0.2, 36.0);
+                        }
+                        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
                     }
-                    m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
-                    // Draw shapes centroids
-                    for (auto Shp : Obj.second->getGeometry()->getShapes())
-                    {
-                        m_Graphics.filledCircle(
-                            Obj.second->getKinematicsState().getPosition(
-                                Shp->getCentroid()
-                            ) - m_pCamera->getCenter(), 0.2, 36.0);
-                    }
-                    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
                 }
             }
-        }
+        m_Graphics.endRenderBatch();
     }
 }
 
@@ -564,71 +567,73 @@ void CVisualsManager::drawBoundingBoxes() const
 
     if (m_nVisualisations & VISUALS_OBJECT_BBOXES)
     {
-        m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
-        m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
-                        m_pCamera->getCenter(),
-                        m_pCamera->getBoundingBox().getUpperRight()-
-                        m_pCamera->getCenter());
-        m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
-//         m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
-//                               m_pCamera->getCenter(),
-//                               m_pCamera->getBoundingBox().getUpperRight()-
-//                               m_pCamera->getCenter());
-        m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
-        m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
-                          m_pCamera->getBoundingCircleRadius(),100.0);
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-        m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
-        
-        for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
-        {
-            // Object bounding boxes
-            // Multiframe
-            m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-            m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                            IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                            pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                            IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
-            m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-            m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                  IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                                  pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                  IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
-            // Singleframe
-            m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-            m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
-                            IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                            pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
-                            IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
-            m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-            m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
-                                  IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                                  pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
-                                  IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
-             // Shape bounding boxes
-            for (const auto pShp : pObj.second->getGeometry()->getShapes())
+        m_Graphics.beginRenderBatch();
+            m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
+            m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
+                            m_pCamera->getCenter(),
+                            m_pCamera->getBoundingBox().getUpperRight()-
+                            m_pCamera->getCenter());
+            m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
+    //         m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
+    //                               m_pCamera->getCenter(),
+    //                               m_pCamera->getBoundingBox().getUpperRight()-
+    //                               m_pCamera->getCenter());
+            m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
+            m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
+                            m_pCamera->getBoundingCircleRadius(),100.0);
+            m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+            m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
+            
+            for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
             {
-                m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
-                m_Graphics.rect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
-                                pShp->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
-                m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
-                m_Graphics.filledRect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() +
+                // Object bounding boxes
+                // Multiframe
+                m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+                m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                                IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+                m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                                    IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                    pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                    IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                // Singleframe
+                m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+                m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
+                                IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
+                                IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+                m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
+                                    IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                    pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
+                                    IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                // Shape bounding boxes
+                for (const auto pShp : pObj.second->getGeometry()->getShapes())
+                {
+                    m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
+                    m_Graphics.rect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
                                     IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
-                                    pShp->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
+                                    pShp->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
                                     IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
+                    m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
+                    m_Graphics.filledRect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() +
+                                        IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
+                                        pShp->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
+                                        IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
+                }
             }
-        }
-        for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
-        {
-            m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-            m_Graphics.rect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
-                            Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
-            m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-            m_Graphics.filledRect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
-                                  Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
-        }
+            for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
+            {
+                m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+                m_Graphics.rect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
+                                Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
+                m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+                m_Graphics.filledRect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
+                                    Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
+            }
+        m_Graphics.endRenderBatch();
     }
 
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
@@ -766,190 +771,6 @@ void CVisualsManager::drawGrid() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Draws the universe grid HUD displaying the zoom level
-///
-/// Zoom level is displayed as lines where the number of lines represents the
-/// power of the zoom level. Thus, three lines is 1.0e3 m. There are also
-/// negative powers if lines are increasing to the left instead of right.
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawGridHUD() const
-{
-    METHOD_ENTRY("CVisualsManager::drawGridHU")
-
-    if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
-    {
-//         m_Graphics.setColor(1.0,1.0,1.0,0.6);
-// 
-        double fGrid = 1.0;
-        
-        // Automatically scale grid depending on zoom level
-        while ((m_pCamera->getBoundingCircleRadius() / fGrid) > 100.0)
-            fGrid*=10.0;
-        while ((m_pCamera->getBoundingCircleRadius() / fGrid) < 10.0)
-            fGrid*=0.1;
-        
-        // Now draw the text
-        std::stringstream oss;
-
-        if (fGrid < 1000.0)
-            oss << "Grid Resolution: " << fGrid << "m";
-        else
-            oss << "Grid Resolution: " << fGrid * 0.001 << "km";
-        
-        m_Graphics.getWindow()->pushGLStates();
-        sf::Text Text;
-        Text.setString(oss.str());
-        Text.setFont(m_Font);
-        Text.setCharacterSize(12);
-        Text.setPosition(m_Graphics.getWidthScr()/2, 0.0f);
-        m_Graphics.getWindow()->draw(Text);
-        m_Graphics.getWindow()->popGLStates();
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Draws information from a kinematics state
-///
-/// This method draws information from a kinematics state e.g. the local
-/// coordinate system and references.
-///
-/// \param _KinematicsState kinematics State to be drawn
-/// \param _fSize Size of coordinate system that is drawn
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsState,
-                                          const double& _fSize) const
-{
-    METHOD_ENTRY("CVisualsManager::drawKinematicsState")
-    
-    if (_fSize * m_pCamera->getZoom() > 10.0)
-    {
-        double fTransparency = 0.5;
-      
-        m_Graphics.setColor(1.0, 1.0, 1.0, fTransparency);
-        m_Graphics.showVec(
-            _KinematicsState.getPosition(Vector2d(_fSize, 0.0))-
-            _KinematicsState.getOrigin(),
-            _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
-        );
-        m_Graphics.showVec(
-            _KinematicsState.getPosition(Vector2d(0.0, _fSize))-
-            _KinematicsState.getOrigin(),
-            _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
-        );
-        
-        // Now draw the text
-        std::stringstream oss;
-        
-        sf::Text text;
-        sf::Color color(255.0, 255.0, 255.0, 255.0 * fTransparency);
-        oss << "Local angle:    " <<  _KinematicsState.getLocalAngle() << "\n";
-        oss << "Local origin:   " <<  _KinematicsState.getLocalOrigin()[0] << ", "
-                                  <<  _KinematicsState.getLocalOrigin()[1] << "\n";
-        oss << "Angle:          " <<  _KinematicsState.getAngle() << "\n";
-        oss << "Origin:         " <<  _KinematicsState.getOrigin()[0] << ", "
-                                  <<  _KinematicsState.getOrigin()[1] << "\n";
-        text.setString(oss.str());
-        text.setFont(m_Font);
-        text.setCharacterSize(12.0);
-        text.setFillColor(color);
-        text.setPosition(m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[0],
-                        m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[1]);
-
-        m_Graphics.getWindow()->pushGLStates();
-        m_Graphics.getWindow()->draw(text);
-        m_Graphics.getWindow()->popGLStates();
-        
-        if (_KinematicsState.gotReference())
-        {
-            Vector2d vecRef = _KinematicsState.getRef()->getOrigin() - _KinematicsState.getOrigin();
-            m_Graphics.showVec(
-                vecRef,
-                _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
-            );
-        }
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Draws information from the kinematics states
-///
-/// This method draws information from the kinematics states e.g. the local
-/// coordinate system and references.
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawKinematicsStates() const
-{
-    METHOD_ENTRY("CVisualsManager::drawKinematicsStates")
-    
-    if (m_nVisualisations & VISUALS_KINEMATICS_STATES)
-    {
-        for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
-        {
-            this->drawKinematicsState(
-                pObj.second->getKinematicsState(),
-                pObj.second->getGeometry()->getBoundingBox().getHeight() +
-                pObj.second->getGeometry()->getBoundingBox().getWidth() * 0.5 * 0.33
-            );
-        }
-        this->drawKinematicsState(m_pCamera->getKinematicsState(),m_pCamera->getBoundingCircleRadius() * 0.1);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Draws global and local simulation timers
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawTimers() const
-{
-    METHOD_ENTRY("CVisualsManager::drawTimers")
-    
-    if (m_nVisualisations & VISUALS_TIMERS)
-    {
-        // Now draw the text
-        std::stringstream oss;
-        
-        oss << "Simulation time: "
-            << m_pComInterface->call<int,int>("get_time_years", 0) << "y "
-            << m_pComInterface->call<int,int>("get_time_days_part", 0) << "d "
-            << m_pComInterface->call<int,int>("get_time_hours_part", 0) << "h "
-            << m_pComInterface->call<int,int>("get_time_minutes_part", 0) << "m "
-            << m_pComInterface->call<int,int>("get_time_seconds_part", 0) << "s" << std::endl;
-        for (auto i=1; i<m_pComInterface->call<int>("get_nrof_timers"); ++i)
-        {
-            oss << "Local timer " << i << ":   "
-                << m_pComInterface->call<int,int>("get_time_years", i) << "y "
-                << m_pComInterface->call<int,int>("get_time_days_part", i) << "d "
-                << m_pComInterface->call<int,int>("get_time_hours_part", i) << "h "
-                << m_pComInterface->call<int,int>("get_time_minutes_part", i) << "m "
-                << m_pComInterface->call<int,int>("get_time_seconds_part", i) << "s" << std::endl;
-        }
-        
-        /// \todo Check: Somehow showing text increases framerate when activating the first time
-        
-        m_Graphics.getWindow()->pushGLStates();
-        sf::Text Text;
-        if (m_pDataStorage->getTimeScale() > 1.0)
-        {
-            Text.setFillColor(sf::Color(255.0, 0.0, 0.0, 255.0));
-            oss << "\nWarning: Decreasing accuracy." << std::endl;
-        }
-        Text.setString(oss.str());
-        Text.setFont(m_Font);
-        Text.setCharacterSize(12);
-        Text.setPosition(0.0f, 0.0f);
-        m_Graphics.getWindow()->draw(Text);
-        m_Graphics.getWindow()->popGLStates();
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Returns if given visualisation is set
 ///
 /// \param _nVis Visualisation (flag) that is tested for state
@@ -1010,10 +831,513 @@ void CVisualsManager::drawTrajectories() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Cycle through cameras, using index
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::cycleCamera()
+{
+    METHOD_ENTRY("CVisualsManager::cycleCamera")
+    ++m_unCameraIndex;
+    if (m_unCameraIndex == m_pVisualsDataStorage->getCamerasByIndex().size())
+        m_unCameraIndex = 0u;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Initialises the Graphics
+///
+/// \return Success
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CVisualsManager::init()
+{
+    METHOD_ENTRY("CVisualsManager::init")
+
+    m_FontManager.addFont("anka_c87_r", "fonts/AnkaCoder-C87-r.ttf");
+    m_FontManager.addFont("anka_c87_i", "fonts/AnkaCoder-C87-i.ttf");
+    m_FontManager.addFont("anka_c87_b", "fonts/AnkaCoder-C87-b.ttf");
+    m_FontManager.addFont("anka_c87_bi", "fonts/AnkaCoder-C87-bi.ttf");
+
+    m_strFont = "anka_c87_r";
+    
+    // Setup engine global visuals first
+    m_UIDVisuals.UIDText.setFont(m_strFont);
+    m_UIDVisuals.UIDText.setColor({{1.0, 1.0, 0.0, 0.8}});
+    m_UIDVisuals.UIDText.setSize(10);
+    m_UIDVisuals.setBGColor({{0.1, 0.1, 0.8, 0.8}});
+    
+    // When calling init, all relevant variables have to be set up. Thus, sub 
+    // components like the visuals data storage kann be set up, eventually.
+    m_pVisualsDataStorage->setFontManager(&m_FontManager);
+    m_pVisualsDataStorage->setComInterface(m_pComInterface);
+    m_pVisualsDataStorage->setUIDVisuals(&m_UIDVisuals);
+    
+    m_ConsoleWidgetID = this->createWidget(WidgetTypeType::CONSOLE);
+    CWidgetConsole* pConsoleWidget = static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID));
+    
+    pConsoleWidget->ConsoleText.setFont(m_strFont);
+    pConsoleWidget->ConsoleText.setSize(16);
+    pConsoleWidget->ConsoleText.setColor({{0.0, 1.0, 0.0, 1.0}});
+    pConsoleWidget->setComConsole(m_pVisualsDataStorage->getComConsole());
+    
+    m_ConsoleWindowID = this->createWindow();
+    CWindow* pConsoleWindow  = m_pVisualsDataStorage->getWindowByValue(m_ConsoleWindowID);
+    
+    pConsoleWindow->Title.setText("Command console");
+    pConsoleWindow->Title.setFont(m_strFont);
+    pConsoleWindow->Title.setSize(20);
+    pConsoleWindow->Title.setColor({{1.0, 1.0, 1.0, 1.0}});
+    pConsoleWindow->setWidget(pConsoleWidget);
+    pConsoleWindow->setColorBG({{0.1, 0.1, 0.1, 0.75}}, WIN_INHERIT);
+    pConsoleWindow->setColorFG({{0.3, 0.3, 0.3, 0.75}}, WIN_INHERIT);
+    pConsoleWindow->setPosition(10, 10);
+    pConsoleWindow->resize(800, 150);
+    pConsoleWindow->setVisibilty(false);
+    pConsoleWindow->setClosability(false);
+    
+    return (m_Graphics.init());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates a widget of the given type
+///
+/// This method creates a widget and adds it to storage. In
+/// \ref CreationModeType::QUEUED, it will be moved to a waiter queue and later
+/// be added to storage. The reason for this lies in multithreading and return
+/// value retrieval. When a widget is created, the UID has to be returned.
+/// Hence, it is defined as a reader command (see \ref CComInterface). The
+/// newly created widget is stored temporary in a concurrent queue and later
+/// added to storage by the appropriate thread.
+///
+/// \param _WidgetType Type of widget to be created
+/// \param _pMode Mode of creation (direct to storage or threading queue)
+///
+/// \return UID of newly created window
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CVisualsManager::createWidget(const WidgetTypeType _WidgetType,
+                                      const CreationModeType _pMode)
+{
+    METHOD_ENTRY("CVisualsManager::createWidget")
+    
+    IWidget* pWidget = nullptr;
+    
+    switch (_WidgetType)
+    {
+        case WidgetTypeType::CONSOLE:
+        {
+            CWidgetConsole* pConsoleWidget = new CWidgetConsole(&m_FontManager);
+            pConsoleWidget->setUIDVisuals(&m_UIDVisuals);
+            pConsoleWidget->setComConsole(m_pVisualsDataStorage->getComConsole());
+            pConsoleWidget->ConsoleText.setFont(m_strFont);
+            m_pVisualsDataStorage->getComConsole()->setComInterface(m_pComInterface);
+            pWidget = pConsoleWidget;
+            break;
+        }
+        case WidgetTypeType::TEXT:
+        {
+            CWidgetText* pTextWidget = new CWidgetText(&m_FontManager);
+            pTextWidget->setUIDVisuals(&m_UIDVisuals);
+            pTextWidget->Text.setFont(m_strFont);
+            pWidget = pTextWidget;
+            break;
+        }
+        default:
+        {
+            WARNING_MSG("Visuals Data Storage", "Unknown widget type.")
+            break;
+        }
+    }
+    MEM_ALLOC("IWidget")
+
+    if (pWidget != nullptr)
+    {
+        if (_pMode == CreationModeType::DIRECT)
+        {
+            m_pVisualsDataStorage->addWidget(pWidget);
+        }
+        else
+        {
+            m_WidgetsQueue.try_enqueue(pWidget);
+        }
+    
+        return pWidget->getUID();
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates a generic window
+///
+/// This method creates a window and adds it to storage. In
+/// \ref CreationModeType::QUEUED, it will be moved to a waiter queue and later
+/// be added to storage. The reason for this lies in multithreading and return
+/// value retrieval. When a window is created, the UID has to be returned.
+/// Hence, it is defined as a reader command (see \ref CComInterface). The
+/// newly created window is stored temporary in a concurrent queue and later
+/// added to storage by the appropriate thread.
+///
+/// \param _pMode Mode of creation (direct to storage or threading queue)
+///
+/// \return UID of newly created window
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CVisualsManager::createWindow(const CreationModeType _pMode)
+{
+    METHOD_ENTRY("CVisualsManager::addWidget")
+    
+    CWindow* pWin = new CWindow(&m_FontManager);
+    MEM_ALLOC("CWindow")
+    
+    pWin->setUIDVisuals(&m_UIDVisuals);
+    pWin->Title.setFont(m_strFont);
+    if (_pMode == CreationModeType::DIRECT)
+    {
+        m_pVisualsDataStorage->addWindow(pWin);
+    }
+    else
+    {
+        m_WindowsQueue.try_enqueue(pWin);
+    }
+    
+    return pWin->getUID();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Drawing finished, now swap buffers
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::finishFrame()
+{
+    METHOD_ENTRY("CVisualsManager::finishFrame")
+    
+//     CText TextDrawCalls(&m_FontManager);
+//     TextDrawCalls.setFont(m_strFont);
+//     TextDrawCalls.setSize(16);
+//     TextDrawCalls.setPosition(20, 20);
+//     TextDrawCalls.setColor({{1.0, 0.0, 1.0, 0.8}});
+//     
+//     TextDrawCalls.setText("Drawcalls: " + std::to_string(m_Graphics.getDrawCalls()+1));
+//     
+//     m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+//         TextDrawCalls.display();
+//     m_Graphics.endRenderBatch();
+    
+    m_Graphics.swapBuffers();
+    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
+    m_pDataStorage->swapFront();
+    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
+
+    // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
+    if (m_pCamera->gotRef())
+        m_pCamera->attachTo(m_pDataStorage->getObjectsByValueFront()->at(m_pCamera->getUIDRef()));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Processes one visual frame
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::processFrame()
+{
+    METHOD_ENTRY("CVisualsManager::processFrame")
+
+    m_Graphics.setupWorldSpace();
+
+    this->addWidgetsFromQueue();
+    this->addWindowsFromQueue();
+    m_pComInterface->callWriters("visuals");
+
+    m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
+        
+    m_Graphics.beginRenderBatch();
+        m_pCamera->update();
+        this->drawGrid();
+        this->drawTrajectories();
+    m_Graphics.endRenderBatch();
+    
+    m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
+    this->drawWorld();
+    
+    this->drawKinematicsStates();
+    this->drawCOM();
+    this->drawBoundingBoxes();
+    
+    m_Graphics.setupScreenSpace();
+    
+    this->drawGridHUD();
+    this->drawTimers();
+    this->drawWindows();
+    this->updateUI();
+    
+    this->finishFrame();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add widgets from queue to storage
+///
+/// This method will add the widgets from queue (see
+/// \ref CVisualsDataStorage::addWidget) to storage.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::addWidgetsFromQueue()
+{
+    METHOD_ENTRY("CVisualsManager::addWidgetsFromQueue")
+    
+    IWidget* pWidget = nullptr;
+    while (m_WidgetsQueue.try_dequeue(pWidget))
+    {
+        m_pVisualsDataStorage->addWidget(pWidget);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add windows from queue to storage
+///
+/// This method will add the windows from queue (see
+/// \ref CVisualsDataStorage::addWindow) to storage.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::addWindowsFromQueue()
+{
+    METHOD_ENTRY("CVisualsManager::addWindowsFromQueue")
+    
+    CWindow* pWindow = nullptr;
+    while (m_WindowsQueue.try_dequeue(pWindow))
+    {
+        m_pVisualsDataStorage->addWindow(pWindow);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws the universe grid HUD displaying the zoom level
+///
+/// Zoom level is displayed as lines where the number of lines represents the
+/// power of the zoom level. Thus, three lines is 1.0e3 m. There are also
+/// negative powers if lines are increasing to the left instead of right.
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawGridHUD()
+{
+    METHOD_ENTRY("CVisualsManager::drawGridHU")
+
+    if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
+    {
+        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        
+        double fGrid = 1.0;
+        
+        // Automatically scale grid depending on zoom level
+        while ((m_pCamera->getBoundingCircleRadius() / fGrid) > 100.0)
+            fGrid*=10.0;
+        while ((m_pCamera->getBoundingCircleRadius() / fGrid) < 10.0)
+            fGrid*=0.1;
+        
+        // Now draw the text
+        std::stringstream oss;
+
+        if (fGrid < 1000.0)
+            oss << "Grid Resolution: " << fGrid << "m";
+        else
+            oss << "Grid Resolution: " << fGrid * 0.001 << "km";
+        
+        CText TextScale(&m_FontManager);
+        TextScale.setText(oss.str());
+        TextScale.setFont(m_strFont);
+        TextScale.setColor({{1.0, 1.0, 1.0, 1.0}});
+        TextScale.setSize(16.0f);
+        TextScale.setPosition(m_Graphics.getWidthScr()/2, 32.0f);
+        TextScale.display();
+        
+        m_Graphics.endRenderBatch();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws information from a kinematics state
+///
+/// This method draws information from a kinematics state e.g. the local
+/// coordinate system and references.
+///
+/// \param _KinematicsState kinematics State to be drawn
+/// \param _fSize Size of coordinate system that is drawn
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsState,
+                                          const double& _fSize)
+{
+    METHOD_ENTRY("CVisualsManager::drawKinematicsState")
+    
+    if (_fSize * m_pCamera->getZoom() > 10.0)
+    {
+//         m_Graphics.beginRenderBatch();
+//         
+            double fTransparency = 0.5;
+//         
+//             m_Graphics.setColor(1.0, 1.0, 1.0, fTransparency);
+//             m_Graphics.showVec(
+//                 _KinematicsState.getPosition(Vector2d(_fSize, 0.0))-
+//                 _KinematicsState.getOrigin(),
+//                 _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+//             );
+//             m_Graphics.showVec(
+//                 _KinematicsState.getPosition(Vector2d(0.0, _fSize))-
+//                 _KinematicsState.getOrigin(),
+//                 _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+//             );
+//             
+//             
+//             
+//             if (_KinematicsState.gotReference())
+//             {
+//                 Vector2d vecRef = _KinematicsState.getRef()->getOrigin() - _KinematicsState.getOrigin();
+//                 m_Graphics.showVec(
+//                     vecRef,
+//                     _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+//                 );
+//             }
+//             
+//         m_Graphics.endRenderBatch();
+        
+        // Now draw the text
+        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        
+            std::stringstream oss;
+            
+            CText TextKState(&m_FontManager);
+            oss << "Local angle:    " <<  _KinematicsState.getLocalAngle() << "\n";
+            oss << "Local origin:   " <<  _KinematicsState.getLocalOrigin()[0] << ", "
+                                      <<  _KinematicsState.getLocalOrigin()[1] << "\n";
+            oss << "Angle:          " <<  _KinematicsState.getAngle() << "\n";
+            oss << "Origin:         " <<  _KinematicsState.getOrigin()[0] << ", "
+                                      <<  _KinematicsState.getOrigin()[1] << "\n";
+            TextKState.setText(oss.str());
+            TextKState.setFont(m_strFont);
+            TextKState.setSize(12.0);
+            TextKState.setColor({{1.0, 1.0, 1.0, fTransparency}});
+            TextKState.setPosition(m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[0],
+                                   m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[1]);
+
+        
+            TextKState.display();
+            std::cout << oss.str() << std::endl;
+            
+        m_Graphics.endRenderBatch();
+        
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws information from the kinematics states
+///
+/// This method draws information from the kinematics states e.g. the local
+/// coordinate system and references.
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawKinematicsStates()
+{
+    METHOD_ENTRY("CVisualsManager::drawKinematicsStates")
+    
+    if (m_nVisualisations & VISUALS_KINEMATICS_STATES)
+    {
+        for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
+        {
+            this->drawKinematicsState(
+                pObj.second->getKinematicsState(),
+                pObj.second->getGeometry()->getBoundingBox().getHeight() +
+                pObj.second->getGeometry()->getBoundingBox().getWidth() * 0.5 * 0.33
+            );
+        }
+        this->drawKinematicsState(m_pCamera->getKinematicsState(),m_pCamera->getBoundingCircleRadius() * 0.1);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws global and local simulation timers
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawTimers()
+{
+    METHOD_ENTRY("CVisualsManager::drawTimers")
+    
+    if (m_nVisualisations & VISUALS_TIMERS)
+    {
+        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        
+            // Now draw the text
+            std::stringstream oss;
+            
+            oss << "Simulation time: "
+                << m_pComInterface->call<int,int>("get_time_years", 0) << "y "
+                << m_pComInterface->call<int,int>("get_time_days_part", 0) << "d "
+                << m_pComInterface->call<int,int>("get_time_hours_part", 0) << "h "
+                << m_pComInterface->call<int,int>("get_time_minutes_part", 0) << "m "
+                << m_pComInterface->call<int,int>("get_time_seconds_part", 0) << "s" << std::endl;
+            for (auto i=1; i<m_pComInterface->call<int>("get_nrof_timers"); ++i)
+            {
+                oss << "Local timer " << i << ":   "
+                    << m_pComInterface->call<int,int>("get_time_years", i) << "y "
+                    << m_pComInterface->call<int,int>("get_time_days_part", i) << "d "
+                    << m_pComInterface->call<int,int>("get_time_hours_part", i) << "h "
+                    << m_pComInterface->call<int,int>("get_time_minutes_part", i) << "m "
+                    << m_pComInterface->call<int,int>("get_time_seconds_part", i) << "s" << std::endl;
+            }
+            
+            CText TextTimers(&m_FontManager);
+            
+            TextTimers.setFont("anka_c87_r");
+            TextTimers.setSize(12.0f);
+            if (m_pDataStorage->getTimeScale() > 1.0)
+            {
+                TextTimers.setColor({{1.0, 0.0, 0.0, 1.0}});
+                oss << "\nWarning: Decreasing accuracy." << std::endl;
+            }
+            else
+            { 
+                TextTimers.setColor({{1.0, 1.0, 1.0, 1.0}});
+            }
+            TextTimers.setText(oss.str());
+            TextTimers.setPosition(10.0f, 10.0f);
+            TextTimers.display();
+        
+        m_Graphics.endRenderBatch();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws windows if visible
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawWindows()
+{
+    METHOD_ENTRY("CVisualsManager::drawWindows")
+    
+    for (const auto WinUID : *m_pVisualsDataStorage->getWindowUIDsInOrder())
+    {
+        m_pVisualsDataStorage->getWindowsByValue()->at(WinUID)->draw();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draws all visuals from list
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawWorld() const
+void CVisualsManager::drawWorld()
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
@@ -1034,6 +1358,7 @@ void CVisualsManager::drawWorld() const
 //     m_pCamera->zoomTo(fMaxZoom);
     
 //     if (1.0e13 * m_Graphics.getResPMX() < 1.0)
+    m_Graphics.beginRenderBatch();
     {
         for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
         {
@@ -1122,15 +1447,25 @@ void CVisualsManager::drawWorld() const
 //             }
 //         }
 //     }
-    m_Graphics.setPointSize(1.0);
+//     m_Graphics.setPointSize(1.0);
+
+    this->drawObjects(m_pCamera);
+    this->drawDebris(m_pCamera);
+
+    m_Graphics.endRenderBatch();
     
     //--- Draw names (this is quite hacked and just a proof of concept) ------//
     
     if (m_nVisualisations & VISUALS_NAMES)
     {
-        int nTextSize = 16;
-                
-        m_Graphics.getWindow()->pushGLStates();    
+        m_Graphics.setupScreenSpace();
+        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+
+        CText TextObjectName(&m_FontManager);
+        
+        TextObjectName.setFont("anka_c87_r");
+        TextObjectName.setSize(12.0f);
+        
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
             if (m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() > 1.0)
@@ -1143,20 +1478,20 @@ void CVisualsManager::drawWorld() const
                                     m_pCamera->getCell()));
                 
                 // Now draw the text
-                sf::Text text;
-                double fColor = (m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() - 1.0) * 255.0;
-                if (fColor > 255.0) fColor = 255.0;
-                sf::Color color(255.0,255.0,255.0, fColor);
+                double fColor = m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() - 1.0;
+                if (fColor > 1.0) fColor = 1.0;
                 
-                text.setString(pObj.second->getName());
-                text.setFont(m_Font);
-                text.setCharacterSize(nTextSize);
-                text.setFillColor(color);
-                text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
-
-                m_Graphics.getWindow()->draw(text);
+                TextObjectName.setColor({{1.0, 1.0, 1.0, fColor}});
+                TextObjectName.setText(pObj.second->getName());
+                TextObjectName.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+                TextObjectName.display();
             }
         }
+        CText TextDebrisName(&m_FontManager);
+            
+        TextDebrisName.setFont("anka_c87_r");
+        TextDebrisName.setSize(12.0f);
+        
         for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
         {
             if (m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() > 1.0)
@@ -1169,22 +1504,22 @@ void CVisualsManager::drawWorld() const
                                     m_pCamera->getCell()));
                 
                 // Now draw the text
-                sf::Text text;
-                double fColor = (m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() - 1.0) * 255.0;
-                if (fColor > 255.0) fColor = 255.0;
-                sf::Color color(255.0,255.0,255.0, fColor);
+                double fColor = m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() - 1.0;
+                if (fColor > 1.0) fColor = 1.0;
                 
-                text.setString(Debris.second->getName());
-                text.setFont(m_Font);
-                text.setCharacterSize(nTextSize);
-                text.setFillColor(color);
-                text.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
-
-                m_Graphics.getWindow()->draw(text);
+                TextDebrisName.setColor({{1.0, 1.0, 1.0, fColor}});
+                TextDebrisName.setText(Debris.second->getName());
+                TextDebrisName.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+                TextDebrisName.display();
             }
         }
         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
+            CText TextStarSystemName(&m_FontManager);
+            
+            TextStarSystemName.setFont("anka_c87_r");
+            TextStarSystemName.setSize(12.0f);
+            
             for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
             {
                 Vector2d vecPos = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
@@ -1198,181 +1533,43 @@ void CVisualsManager::drawWorld() const
                                           m_pCamera->getCell()));
                     
                     // Now draw the text
-                    sf::Text text;
-                    double fColor=0.1*m_pUniverse->getStarSystems()[i]->Star().getStarType()+0.3;
-                    sf::Color color(0.8*255, fColor*255, 0.3*255);
                     
-                    text.setString(m_pUniverse->getStarSystems()[i]->Star().getName() + "\n" +
-                                   std::to_string(m_pUniverse->getStarSystems()[i]->Star().getRadius()));
-                    text.setFont(m_Font);
-                    text.setCharacterSize(nTextSize);
-                    text.setFillColor(color);
-                    text.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
-
-                    m_Graphics.getWindow()->draw(text);
+                    double fColor=0.1*m_pUniverse->getStarSystems()[i]->Star().getStarType()+0.3;
+                    TextStarSystemName.setColor({{0.8, fColor, 0.3, 0.5}});
+                    TextStarSystemName.setText(m_pUniverse->getStarSystems()[i]->Star().getName() + /*"\n" +*/
+                                               std::to_string(m_pUniverse->getStarSystems()[i]->Star().getRadius()));
+                    TextStarSystemName.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
+                    TextStarSystemName.display();
                 }
             }
         }
         
-        m_Graphics.getWindow()->popGLStates();
+        m_Graphics.endRenderBatch();
+        m_Graphics.setupWorldSpace();
     }
-    
-    this->drawObjects(m_pCamera);
-    this->drawDebris(m_pCamera);
 
-    for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
-    {
-        if (m_nStarIndex == i)
-        {
-            std::mt19937 LocalGenerator;
-            std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
-            
-            LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
-            
-            for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
-            {
-                m_Graphics.setColor(0.2,0.2,0.5);
-                m_Graphics.circle(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-m_pCamera->getCenter()+
-                                    IGridUser::cellToDouble(
-                                        m_pUniverse->getStarSystems()[i]->getCell()-
-                                        m_pCamera->getCell()),
-                                    std::fabs(OrbitDistribution(LocalGenerator))
-                                    );
-                         std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
-            }
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Cycle through cameras, using index
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::cycleCamera()
-{
-    METHOD_ENTRY("CVisualsManager::cycleCamera")
-    ++m_unCameraIndex;
-    if (m_unCameraIndex == m_pVisualsDataStorage->getCamerasByIndex().size())
-        m_unCameraIndex = 0u;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Initialises the Graphics
-///
-/// \return Success
-///
-////////////////////////////////////////////////////////////////////////////////
-bool CVisualsManager::init()
-{
-    METHOD_ENTRY("CVisualsManager::init")
-
-    // Setup engine global visuals first
-    m_UIDVisuals.setFont(&m_Font);
-    m_UIDVisuals.setFontColor({{1.0, 1.0, 0.0, 0.8}}, WIN_INHERIT);
-    m_UIDVisuals.setFontSize(10);
-    m_UIDVisuals.setBGColor({{0.1, 0.1, 0.8, 0.8}});
-    
-    // When calling init, all relevant variables have to be set up. Thus, sub 
-    // components like the visuals data storage kann be set up, eventually.
-    m_pVisualsDataStorage->setFont(m_Font);
-    m_pVisualsDataStorage->setComInterface(m_pComInterface);
-    m_pVisualsDataStorage->setUIDVisuals(&m_UIDVisuals);
-    
-    m_ConsoleWidgetID = m_pVisualsDataStorage->createWidget(WidgetTypeType::CONSOLE);
-    CWidgetConsole* pConsoleWidget = static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID));
-    
-    pConsoleWidget->setFont(&m_Font);
-    pConsoleWidget->setFontSize(16);
-    pConsoleWidget->setFontColor({{0.0, 1.0, 0.0, 1.0}}, WIN_INHERIT);
-    pConsoleWidget->setComConsole(m_pVisualsDataStorage->getComConsole());
-    
-    m_ConsoleWindowID = m_pVisualsDataStorage->createWindow();
-    CWindow* pConsoleWindow  = m_pVisualsDataStorage->getWindowByValue(m_ConsoleWindowID);
-    
-    pConsoleWindow->setTitle("Command console");
-    pConsoleWindow->setFont(&m_Font);
-    pConsoleWindow->setFontSize(20);
-    pConsoleWindow->setFontColor({{1.0, 1.0, 1.0, 1.0}}, WIN_NO_INHERIT);
-    pConsoleWindow->setWidget(pConsoleWidget);
-    pConsoleWindow->setColorBG({{0.1, 0.1, 0.1, 0.75}}, WIN_INHERIT);
-    pConsoleWindow->setColorFG({{0.3, 0.3, 0.3, 0.75}}, WIN_INHERIT);
-    pConsoleWindow->setPosition(10, 10);
-    pConsoleWindow->resize(800, 150);
-    pConsoleWindow->setVisibilty(false);
-    pConsoleWindow->setClosability(false);
-    
-    return (m_Graphics.init());
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Drawing finished, now swap buffers
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::finishFrame()
-{
-    METHOD_ENTRY("CVisualsManager::finishFrame")
-    
-    m_Graphics.swapBuffers();
-    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
-    m_pDataStorage->swapFront();
-    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
-
-    // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
-    if (m_pCamera->gotRef())
-        m_pCamera->attachTo(m_pDataStorage->getObjectsByValueFront()->at(m_pCamera->getUIDRef()));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Processes one visual frame
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::processFrame()
-{
-    METHOD_ENTRY("CVisualsManager::processFrame")
-
-    m_Graphics.switchToWorldSpace();
-    
-    m_pVisualsDataStorage->addWidgetsFromQueue();
-    m_pVisualsDataStorage->addWindowsFromQueue();
-    m_pComInterface->callWriters("visuals");
-    
-    m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
-    m_pCamera->update();
-    
-    this->drawGrid();
-    this->drawTrajectories();
-    this->drawWorld();
-    this->drawKinematicsStates();
-    this->drawCOM();
-    this->drawBoundingBoxes();
-    
-    m_Graphics.switchToScreenSpace();
-    
-    this->drawGridHUD();
-    this->drawTimers();
-    this->drawWindows();
-    this->updateUI();
-    
-    this->finishFrame();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Draws windows if visible
-///
-////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawWindows()
-{
-    METHOD_ENTRY("CVisualsManager::drawWindows")
-    
-    for (const auto WinUID : *m_pVisualsDataStorage->getWindowUIDsInOrder())
-    {
-        m_pVisualsDataStorage->getWindowsByValue()->at(WinUID)->draw();
-    }
+//     for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
+//     {
+//         if (m_nStarIndex == i)
+//         {
+//             std::mt19937 LocalGenerator;
+//             std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
+//             
+//             LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
+//             
+//             for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
+//             {
+//                 m_Graphics.setColor(0.2,0.2,0.5);
+//                 m_Graphics.circle(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-m_pCamera->getCenter()+
+//                                     IGridUser::cellToDouble(
+//                                         m_pUniverse->getStarSystems()[i]->getCell()-
+//                                         m_pCamera->getCell()),
+//                                     std::fabs(OrbitDistribution(LocalGenerator))
+//                                     );
+//                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
+//             }
+//         }
+//     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1383,85 +1580,89 @@ void CVisualsManager::drawWindows()
 void CVisualsManager::updateUI()
 {
     METHOD_ENTRY("CVisualsManager::updateUI")
+    
+    m_Graphics.beginRenderBatch();
 
-    if (m_bMBLeft)
-    {
-        auto it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
-        bool bDone = false;
-        while (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rend() && !bDone)
-        {
-            CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(*it);
-            
-            // First, get focus of window
-            if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::WIN))
-            {
-                if (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin())
-                {
-                    m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(*it);
-                    m_pVisualsDataStorage->getWindowUIDsInOrder()->erase(std::prev(it.base()));
-                    it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
-                    pWin = m_pVisualsDataStorage->getWindowByValue(*it);
-                }
-                bDone = true;
-            }
-                
-            // Test, if cursor is in the area that closes the window
-            if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::CLOSE))
-            {
-                m_pVisualsDataStorage->closeWindow(*it);
-                m_bMBLeft = false; // Avoid focussing the underlying window
-                bDone = true;
-            }
-            // Test, if cursor is in the area that resizes the window
-            else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::RESIZE))
-            {
-                if (pWin->getHeight()+m_nCursorY-m_nCursorY0 > 50 &&
-                    pWin->getWidth()+m_nCursorX-m_nCursorX0 > 50)
-                {
-                    pWin->resize(pWin->getWidth() +m_nCursorX-m_nCursorX0,
-                                pWin->getHeight()+m_nCursorY-m_nCursorY0);
-                }
-                bDone = true;
-            }
-            // Test, if mouse cursor is inside title of window. Cursor positon of
-            // the previous frame must be used, since windows are not updated
-            // yet.
-            else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::TITLE))
-            {
-                // Test for offset (position of cursor within windows).
-                // Offset = 0 indicates, that no offset was calculated yet.
-                if (m_nCursorOffsetX == 0 && m_nCursorOffsetY == 0)
-                {
-                    m_nCursorOffsetX = m_nCursorX0 - pWin->getPositionX();
-                    m_nCursorOffsetY = m_nCursorY0 - pWin->getPositionY();
-                }
-                pWin->setPosition(m_nCursorX-m_nCursorOffsetX, m_nCursorY-m_nCursorOffsetY);
-                bDone = true;
-            }
-            ++it;
-        }
-    }
-    
-    m_nCursorX0 = m_nCursorX;
-    m_nCursorY0 = m_nCursorY;
-    
-    if (m_bCursor)
-    {
-        m_Graphics.setColor(1.0, 1.0, 1.0, 0.8);
-        m_Graphics.beginLine();
-            m_Graphics.addVertex(m_nCursorX-10, m_nCursorY);
-            m_Graphics.addVertex(m_nCursorX-3, m_nCursorY);
-            m_Graphics.addVertex(m_nCursorX, m_nCursorY-10);
-            m_Graphics.addVertex(m_nCursorX, m_nCursorY-3);
-            m_Graphics.addVertex(m_nCursorX+10, m_nCursorY);
-            m_Graphics.addVertex(m_nCursorX+3, m_nCursorY);
-            m_Graphics.addVertex(m_nCursorX, m_nCursorY+10);
-            m_Graphics.addVertex(m_nCursorX, m_nCursorY+3);
-        m_Graphics.endLine(PolygonType::LINE_SINGLE);
         if (m_bMBLeft)
-            m_Graphics.circle(Vector2d(m_nCursorX, m_nCursorY), 5);
-    }
-    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        {
+            auto it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
+            bool bDone = false;
+            while (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rend() && !bDone)
+            {
+                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(*it);
+                
+                // First, get focus of window
+                if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::WIN))
+                {
+                    if (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin())
+                    {
+                        m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(*it);
+                        m_pVisualsDataStorage->getWindowUIDsInOrder()->erase(std::prev(it.base()));
+                        it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
+                        pWin = m_pVisualsDataStorage->getWindowByValue(*it);
+                    }
+                    bDone = true;
+                }
+                    
+                // Test, if cursor is in the area that closes the window
+                if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::CLOSE))
+                {
+                    m_pVisualsDataStorage->closeWindow(*it);
+                    m_bMBLeft = false; // Avoid focussing the underlying window
+                    bDone = true;
+                }
+                // Test, if cursor is in the area that resizes the window
+                else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::RESIZE))
+                {
+                    if (pWin->getHeight()+m_nCursorY-m_nCursorY0 > 50 &&
+                        pWin->getWidth()+m_nCursorX-m_nCursorX0 > 50)
+                    {
+                        pWin->resize(pWin->getWidth() +m_nCursorX-m_nCursorX0,
+                                    pWin->getHeight()+m_nCursorY-m_nCursorY0);
+                    }
+                    bDone = true;
+                }
+                // Test, if mouse cursor is inside title of window. Cursor positon of
+                // the previous frame must be used, since windows are not updated
+                // yet.
+                else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::TITLE))
+                {
+                    // Test for offset (position of cursor within windows).
+                    // Offset = 0 indicates, that no offset was calculated yet.
+                    if (m_nCursorOffsetX == 0 && m_nCursorOffsetY == 0)
+                    {
+                        m_nCursorOffsetX = m_nCursorX0 - pWin->getPositionX();
+                        m_nCursorOffsetY = m_nCursorY0 - pWin->getPositionY();
+                    }
+                    pWin->setPosition(m_nCursorX-m_nCursorOffsetX, m_nCursorY-m_nCursorOffsetY);
+                    bDone = true;
+                }
+                ++it;
+            }
+        }
+        
+        m_nCursorX0 = m_nCursorX;
+        m_nCursorY0 = m_nCursorY;
+        
+        if (m_bCursor)
+        {
+            m_Graphics.setColor(1.0, 1.0, 1.0, 0.8);
+            m_Graphics.beginLine();
+                m_Graphics.addVertex(m_nCursorX-10, m_nCursorY);
+                m_Graphics.addVertex(m_nCursorX-3, m_nCursorY);
+                m_Graphics.addVertex(m_nCursorX, m_nCursorY-10);
+                m_Graphics.addVertex(m_nCursorX, m_nCursorY-3);
+                m_Graphics.addVertex(m_nCursorX+10, m_nCursorY);
+                m_Graphics.addVertex(m_nCursorX+3, m_nCursorY);
+                m_Graphics.addVertex(m_nCursorX, m_nCursorY+10);
+                m_Graphics.addVertex(m_nCursorX, m_nCursorY+3);
+            m_Graphics.endLine(PolygonType::LINE_SINGLE);
+            if (m_bMBLeft)
+                m_Graphics.circle(Vector2d(m_nCursorX, m_nCursorY), 5);
+        }
+        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+    
+    m_Graphics.endRenderBatch();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1478,30 +1679,37 @@ void CVisualsManager::myInitComInterface()
     std::ostringstream ossWidgetType("");
     for (auto WidgetType : STRING_TO_WIDGET_TYPE_MAP) ossWidgetType << " " << WidgetType.first;
     
+    m_strFont = "anka_c87_r";
+    
     // Callback to log entry
     std::function<void(std::string, std::string, std::string, std::string)> Func =
         [&](const std::string& _strSrc, const std::string& _strMsg, const std::string& _strLev, const std::string& _strDom)
         {
-            if (_strLev == "LOG_LEVEL_ERROR" || _strLev == "LOG_LEVEL_WARNING")
+            // Prevent recursive calls
+            if (_strSrc != "Text" && _strSrc != "Font Manager")
             {
-                CWidgetText* pWidget = new CWidgetText();
-                MEM_ALLOC("IWidget")
-                pWidget->setUIDVisuals(&m_UIDVisuals);
-                pWidget->setText(_strSrc + ": " + _strMsg);
-                pWidget->setFont(&m_Font);
-                m_pVisualsDataStorage->addWidget(pWidget);
-                
-                CWindow* pWin = new CWindow();
-                MEM_ALLOC("CWindow")
+                // Create log window for warnings and errors
+                if (_strLev == "LOG_LEVEL_ERROR" || _strLev == "LOG_LEVEL_WARNING") 
+                {
+                    CWidgetText* pWidget = new CWidgetText(&m_FontManager);
+                    MEM_ALLOC("IWidget")
+                    pWidget->setUIDVisuals(&m_UIDVisuals);
+                    pWidget->Text.setText(_strSrc + ": " + _strMsg);
+                    pWidget->Text.setFont(m_strFont);
+                    m_pVisualsDataStorage->addWidget(pWidget);
+                    
+                    CWindow* pWin = new CWindow(&m_FontManager);
+                    MEM_ALLOC("CWindow")
 
-                pWin->setUIDVisuals(&m_UIDVisuals);
-                pWin->setFont(&m_Font);
-                m_pVisualsDataStorage->addWindow(pWin);
-                pWin->setTitle(_strLev);
-                pWin->setWidget(pWidget);
-                pWin->center();
-                pWin->setColorBG({{0.25, 0.0, 0.0, 0.8}}, WIN_INHERIT);
-                pWin->setColorFG({{0.5, 0.0, 0.0, 0.8}}, WIN_INHERIT);
+                    pWin->setUIDVisuals(&m_UIDVisuals);
+                    m_pVisualsDataStorage->addWindow(pWin);
+                    pWin->Title.setFont(m_strFont);
+                    pWin->Title.setText(_strLev + " [" + _strDom + "]");
+                    pWin->setWidget(pWidget);
+                    pWin->center();
+                    pWin->setColorBG({{0.25, 0.0, 0.0, 0.8}}, WIN_INHERIT);
+                    pWin->setColorFG({{0.5, 0.0, 0.0, 0.8}}, WIN_INHERIT);
+                }
             }
         };
     m_pComInterface->registerCallback("log_entry", Func);
@@ -1677,17 +1885,17 @@ void CVisualsManager::myInitComInterface()
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("com_set_font_size",
-                                      CCommand<void,int>([&](const int _nSize){static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID))->setFontSize(_nSize);}),
+                                      CCommand<void,double>([&](const double& _fSize){static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID))->ConsoleText.setSize(_fSize);}),
                                       "Sets font size for command console.",
                                       {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::INT, "Font size"}},
+                                      {ParameterType::DOUBLE, "Font size"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("create_widget",
                                       CCommand<int, std::string>([&](const std::string& _strS) -> int
                                       {
-                                          return m_pVisualsDataStorage->createWidget(mapStringToWidgetType(_strS),
-                                                                                     CreationModeType::QUEUED);
+                                          return this->createWidget(mapStringToWidgetType(_strS),
+                                                                    CreationModeType::QUEUED);
                                       }),
                                       "Creates a widget of given type.",
                                       {{ParameterType::INT, "Window UID"},
@@ -1697,7 +1905,7 @@ void CVisualsManager::myInitComInterface()
     m_pComInterface->registerFunction("create_window",
                                       CCommand<int>([&]() -> int
                                       {
-                                          return m_pVisualsDataStorage->createWindow(CreationModeType::QUEUED);
+                                          return this->createWindow(CreationModeType::QUEUED);
                                       }),
                                       "Creates generic window.",
                                       {{ParameterType::INT, "Window UID"}},
@@ -1774,7 +1982,7 @@ void CVisualsManager::myInitComInterface()
                                                 IWidget* pWidget = m_pVisualsDataStorage->getWidgetByValue(_nUID);
                                                 if (pWidget != nullptr)
                                                 {
-                                                    pWidget->setFontColor({_fR, _fG, _fB, _fA}, WIN_INHERIT);
+//                                                     pWidget->setFontColor({_fR, _fG, _fB, _fA}, WIN_INHERIT);
                                                 }
                                                 else
                                                 {
@@ -1799,7 +2007,7 @@ void CVisualsManager::myInitComInterface()
                                                 {
                                                     if (pWidget->getType() == WidgetTypeType::TEXT)
                                                     {
-                                                        static_cast<CWidgetText*>(pWidget)->setText(_strText);
+                                                        static_cast<CWidgetText*>(pWidget)->Text.setText(_strText);
                                                     }
                                                     else
                                                     {
@@ -1824,7 +2032,7 @@ void CVisualsManager::myInitComInterface()
                                                 CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
                                                 if (pWin != nullptr)
                                                 {
-                                                    pWin->setTitle(_strTitle);
+                                                    pWin->Title.setText(_strTitle);
                                                 }
                                                 else
                                                 {
@@ -2022,7 +2230,7 @@ void CVisualsManager::myInitComInterface()
                                                 CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
                                                 if (pWin != nullptr)
                                                 {
-                                                    pWin->setFontColor({_fR, _fG, _fB, _fA}, WIN_INHERIT);
+                                                    pWin->Title.setColor({{_fR, _fG, _fB, _fA}});
                                                 }
                                                 else
                                                 {

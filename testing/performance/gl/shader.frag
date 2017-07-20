@@ -2,7 +2,7 @@
 
 in vec4 vertColour;
 
-layout(location = 0) out vec4 outColour;
+out vec4 outColour;
 
 void main()
 {

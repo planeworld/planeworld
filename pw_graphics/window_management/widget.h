@@ -66,6 +66,8 @@ class IWidget : public IFontUser,
     public:
     
         //--- Constructor/Destructor------------------------------------------//
+        IWidget() = delete;
+        IWidget(CFontManager* const _pFontManager) : IFontUser(_pFontManager), IWinFrameUser() {}
         virtual ~IWidget() {}
         
         //--- Constant methods -----------------------------------------------//

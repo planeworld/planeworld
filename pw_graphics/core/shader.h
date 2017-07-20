@@ -35,7 +35,6 @@
 
 //--- Standard header --------------------------------------------------------//
 #include <cstdint>
-#include <string>
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
@@ -58,7 +57,7 @@ class CShader
         ~CShader();
 
         //--- Constant Methods -----------------------------------------------//
-        const GLuint getID() const;
+        GLuint getID() const;
         
         //--- Methods --------------------------------------------------------//
         bool load(const std::string&, const GLenum);
@@ -84,7 +83,7 @@ class CShader
 ////////////////////////////////////////////////////////////////////////////////
 inline CShader::~CShader()
 {
-    METHOD_ENTRY("CShader::getID")
+    METHOD_ENTRY("CShader::~CShader")
     DTOR_CALL("CShader::~CShader")
     this->destroy();
 }
@@ -96,7 +95,7 @@ inline CShader::~CShader()
 /// \return ID of shader
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const GLuint CShader::getID() const
+inline GLuint CShader::getID() const
 {
     METHOD_ENTRY("CShader::getID")
     return m_unID;

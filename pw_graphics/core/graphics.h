@@ -33,6 +33,7 @@
 //--- Standard header --------------------------------------------------------//
 #include <array>
 #include <list>
+#include <stack>
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
@@ -87,6 +88,13 @@ const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn
 const double GRAPHICS_MAX_CACHE_SIZE = 1024;            ///< Maximum size of cache
 
 const bool GRAPHICS_CIRCLE_USE_CACHE = true;            ///< Flag for using sine/cosine cache
+
+const bool GRAPHICS_SHADER_MODE_DEFAULT = false;        ///< Use default shaders and no uv coordinates
+const bool GRAPHICS_SHADER_MODE_FONT = true;            ///< Use font shaders and accordant uv coordinates
+
+const bool GRAPHICS_INTERNAL_RENDER_BATCH_CALL = true;  ///< Indicates the default external call to render batch methods
+const bool GRAPHICS_EXTERNAL_RENDER_BATCH_CALL = false; ///< Indicates an internal render batch call
+
 /// Specifies the type of polygon to be drawn
 enum class PolygonType
 {
@@ -157,6 +165,7 @@ class CGraphics
         Vector2d        screen2World(const Vector2d&) const;
         Vector2d        screen2World(const double&, const double&) const;
         Vector2d        world2Screen(const Vector2d&) const;
+        int             getDrawCalls() const {return m_nDrawCalls;}
         double          getDynPelSize() const;
         double          getResMPX() const;
         double          getResMPY() const;
@@ -173,13 +182,15 @@ class CGraphics
         WindowHandleType* getWindow() const;
 
         //--- Methods --------------------------------------------------------//
+        void beginRenderBatch(const bool = GRAPHICS_SHADER_MODE_DEFAULT);
+        void endRenderBatch(const bool = GRAPHICS_EXTERNAL_RENDER_BATCH_CALL);
         bool init();
         bool resizeWindow(unsigned short, unsigned short);
         void setWidthScr(const unsigned short&);
         void setHeightScr(const unsigned short&);
+        void setupScreenSpace();
+        void setupWorldSpace();
         void swapBuffers();
-        void switchToScreenSpace();
-        void switchToWorldSpace();
         
         void setWindow(WindowHandleType* const);
 
@@ -223,6 +234,7 @@ class CGraphics
         void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0));
         void rect(const Vector2d&, const Vector2d&);
         void setDepth(const double&);
+        void texturedRect(const Vector2d&, const Vector2d&, const std::vector<GLfloat>* const);
         void beginLine();
         void endLine(const PolygonType&);
         
@@ -236,11 +248,13 @@ class CGraphics
         glm::mat4           m_matProjection;            ///< Projection matrix
         glm::mat4           m_matRotate;                ///< Rotation matrix
         glm::mat4           m_matScale;                 ///< Scale matrix
+        bool                m_bScreenSpace;             ///< Indicates if coordinates are screen space related
 
         GLuint              m_unIndex = 0u;             ///< Pointer to current index in buffer
         GLuint              m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
         GLuint              m_unIndexVerts = 0u;        ///< Index of current vertex in buffer
         GLuint              m_unIndexCol = 0u;          ///< Index of current colour in buffer
+        GLuint              m_unIndexUV = 0u;           ///< Index of current texture coordinates in buffer
         GLuint              m_unIndexLines = 0u;        ///< Index of current element in line index buffer
         GLuint              m_unIndexPoints = 0u;       ///< Index of current element in point index buffer
         GLuint              m_unIndexTriangles = 0u;    ///< Index of current element in triangle index buffer
@@ -250,10 +264,14 @@ class CGraphics
         GLuint              m_unIBOPoints = 0u;         ///< Index buffer object for points
         GLuint              m_unIBOTriangles = 0u;      ///< Index buffer object for triangles
         GLuint              m_unVAO = 0u;               ///< Vertex array object
-        GLuint              m_unVBO = 0u;               ///< Vertex buffer (one for all single lines)
-        GLuint              m_unVBOColours = 0u;        ///< Colour buffer (one for all vertex colours)
+        GLuint              m_unVBO = 0u;               ///< Vertex buffer
+        GLuint              m_unVBOColours = 0u;        ///< Colour buffer
+        GLuint              m_unVBOUVs = 0u;            ///< Texture coordinate buffer
+        bool                m_bUseUVs = false;          ///< Indicates if textures are used in one render batch
         
-        ColorTypeRGBA        m_aColour;                 ///< Currently set color
+        int                 m_nDrawCalls;               ///< Basic draw call counter
+        
+        ColorTypeRGBA       m_aColour;                  ///< Currently set color
         
         std::vector<GLuint>   m_vecIndicesLines;        ///< Indices for single lines within buffers
         std::vector<GLuint>   m_vecIndicesPoints;       ///< Indices for points within buffers
@@ -261,8 +279,13 @@ class CGraphics
         
         std::vector<GLfloat>    m_vecColours;           ///< Temporary buffer for colours of vertices
         std::vector<GLfloat>    m_vecVertices;          ///< Temporary buffer for vertices
+        std::vector<GLfloat>    m_vecUVs;               ///< Temporary buffer for texture coordinates
         
         CShaderProgram      m_ShaderProgram;            ///< Basic shader program
+        CShaderProgram      m_ShaderProgramFont;        ///< Shader program for font rendering
+        
+        std::stack<bool>    m_RenderBatchStack;         ///< Temporarily saves render batcj information
+        int                 m_nRenderBatchLvl;          ///< Counts begin and end hierarchy levels 
         
         Vector3d            m_vecCamPos;                ///< camera position
         double              m_fCamAng;                  ///< camera angle
@@ -286,6 +309,8 @@ class CGraphics
 
         //--- Operators [private] --------------------------------------------//
         CGraphics& operator=(const CGraphics&); ///< empty private operator=
+        
+        void resetBufferObjects();              ///< Clear all VAOs, VBOs, IBOs...
 
 };
 

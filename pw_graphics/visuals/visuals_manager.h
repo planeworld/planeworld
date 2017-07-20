@@ -37,6 +37,7 @@
 #include "circle.h"
 #include "com_console.h"
 #include "com_interface_provider.h"
+#include "font_manager.h"
 #include "planet.h"
 #include "polygon.h"
 #include "thread_module.h"
@@ -51,6 +52,14 @@ const double CIRCLE_DEFAULT_RESOLUTION =  5.0;               ///< Default resolu
 const double CIRCLE_MINIMUM_SEGMENTS = 10.0;                 ///< Minimum number of circle segments
 const double PLANET_VISUALS_DEFAULT_RESOLUTION=3.0;          ///< Default resolution for visual sampling px/vertex
 const double PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE=M_PI*0.01; ///< Default minium of 200 segments if above resolution limit
+
+/// Specifies the type of creation mode. When directly created, entities are
+/// are added to storage directly which should only be done within the same thread
+enum class CreationModeType
+{
+    DIRECT,
+    QUEUED
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -80,6 +89,9 @@ class CVisualsManager : virtual public CGraphicsBase,
         //--- Methods --------------------------------------------------------//
         bool            init();
         
+        UIDType         createWidget(const WidgetTypeType, const CreationModeType = CreationModeType::DIRECT);
+        UIDType         createWindow(const CreationModeType = CreationModeType::DIRECT);
+        
         void            cycleCamera();
 
         void            finishFrame();
@@ -105,19 +117,22 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            drawBoundingBoxes() const;
         void            drawCOM() const;
         void            drawGrid() const;
-        void            drawGridHUD() const;
-        void            drawKinematicsState(const CKinematicsState&, const double&) const;
-        void            drawKinematicsStates() const;
-        void            drawTimers() const;
         void            drawTrajectories() const;
-        void            drawWorld() const;
         
         #ifdef PW_MULTITHREADING
             void        preRun();
         #endif
         
         //--- Methods [private] ----------------------------------------------//
+        void            addWidgetsFromQueue();
+        void            addWindowsFromQueue();
+            
+        void            drawGridHUD();
+        void            drawKinematicsState(const CKinematicsState&, const double&);
+        void            drawKinematicsStates();
+        void            drawTimers();
         void            drawWindows();
+        void            drawWorld();
         void            updateUI();
         
         void            myInitComInterface();
@@ -137,13 +152,16 @@ class CVisualsManager : virtual public CGraphicsBase,
         bool                            m_bCursor;          ///< Indicates if mouse cursor is enabled
         bool                            m_bMBLeft;          ///< Left mouse button
         
+        WidgetsQueueType                m_WidgetsQueue;     ///< Queue of new widgets to be added to storage
+        WindowsQueueType                m_WindowsQueue;     ///< Queue of new windows to be added to storage
+        
         UIDType                         m_ConsoleWidgetID;  ///< ID of console widget for later access
         UIDType                         m_ConsoleWindowID;  ///< ID of console window for later access
         
         std::string                     m_strConsoleText;   ///< Console text to be displayed
-        std::string                     m_strFont;          ///< Font name and location
-        sf::Font                        m_Font;             ///< Font for displayed output
-        
+        std::string                     m_strFont;          ///< Font name
+
+        CFontManager                    m_FontManager;      ///< Font manager for displaying UI text
         CUIDVisuals                     m_UIDVisuals;       ///< Graphical display of UIDs
 };
 
@@ -228,17 +246,6 @@ inline void CVisualsManager::setFont(const std::string& _strFont)
 {
     METHOD_ENTRY("CVisualsManager::setFont")
     m_strFont = _strFont;
-    
-    if (!m_Font.loadFromFile(m_strFont))
-    {
-        WARNING_MSG("Visuals Manager", "Couldn't find font file " << m_strFont <<
-                                       ".")
-    }
-    else
-    {
-        DOM_FIO(INFO_MSG("Visuals Manager", "Font " << m_strFont << 
-                                            " successfully loaded."))
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

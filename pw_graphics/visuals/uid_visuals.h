@@ -35,6 +35,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "font_user.h"
 #include "graphics.h"
+#include "text.h"
 #include "unique_id.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -51,8 +52,10 @@ class CUIDVisuals : public CGraphicsBase,
     public:
     
         //--- Constructor/Destructor------------------------------------------//
-        CUIDVisuals() : CGraphicsBase(),
-                        IFontUser(),
+        CUIDVisuals() = delete;
+        CUIDVisuals(CFontManager* const _pFontManager) : CGraphicsBase(),
+                        IFontUser(_pFontManager),
+                        UIDText(_pFontManager),
                         m_aBGColor({{1.0, 1.0, 1.0, 0.9}}),
                         m_bShowUID(false) {}
         
@@ -66,57 +69,20 @@ class CUIDVisuals : public CGraphicsBase,
         void hide() {m_bShowUID = false;}
         void toggle() {m_bShowUID ^= true;}
         
+        //--- Variables ------------------------------------------------------//
+        CText           UIDText;        ///< UID as drawable text
+        
     private:
         
         //--- Methods [private] ----------------------------------------------//
-        void mySetFont() override;
-        void mySetFontColor() override;
-        void mySetFontSize() override;
         
         //--- Variables [private] --------------------------------------------//
         ColorTypeRGBA   m_aBGColor;   ///< Background color
-        sf::Text        m_UIDText;    ///< UID as drawable sf::Text
         
         bool            m_bShowUID;   ///< Indicates, if UIDs are shown
         
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the font for UID value text
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CUIDVisuals::mySetFont()
-{
-    METHOD_ENTRY("CUIDVisuals::mySetFont")
-    m_UIDText.setFont(*m_pFont);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the colour of the font
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CUIDVisuals::mySetFontColor()
-{
-    METHOD_ENTRY("CUIDVisuals::mySetFontColor")
-    m_UIDText.setFillColor(sf::Color(m_FontColor[0]*255.0,
-                                     m_FontColor[1]*255.0,
-                                     m_FontColor[2]*255.0,
-                                     m_FontColor[3]*255.0));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the size of the font
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CUIDVisuals::mySetFontSize()
-{
-    METHOD_ENTRY("CUIDVisuals::mySetFontSize")
-    m_UIDText.setCharacterSize(m_nFontSize);
-}
 
 #endif // UID_VISUALS_H

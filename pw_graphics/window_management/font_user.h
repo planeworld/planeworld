@@ -33,6 +33,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
+#include "font_manager.h"
 #include "graphics.h"
 #include "log.h"
 
@@ -50,26 +51,17 @@ class IFontUser
     public:
     
         //--- Constructor/Destructor------------------------------------------//
-        IFontUser();
+        IFontUser() = delete;
+        IFontUser(CFontManager* const);
         
         //--- Constant methods -----------------------------------------------//
 
         //--- Methods --------------------------------------------------------//
-        void setFont(sf::Font* const);
-        void setFontColor(const ColorTypeRGBA&, const bool);
-        void setFontSize(const int);
         
     protected:
         
-        virtual void mySetFont() {}
-        virtual void mySetFontColor() {}
-        virtual void mySetFontSize() {}
-        
         //--- Variables [private] --------------------------------------------//
-        sf::Font*       m_pFont;        ///< Font instance to be used
-        ColorTypeRGBA   m_FontColor;    ///< Colour of font
-        int             m_nFontSize;    ///< Size of font
-
+        CFontManager*   m_pFontManager; ///< Font manager instance to use
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -79,61 +71,10 @@ class IFontUser
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline IFontUser::IFontUser() : m_pFont(nullptr),
-                                m_FontColor({1.0, 1.0, 1.0, 1.0}),
-                                m_nFontSize(16)
+inline IFontUser::IFontUser(CFontManager* const _pFontManager) : m_pFontManager(_pFontManager)
 {
     METHOD_ENTRY("IFontUser::IFontUser")
     CTOR_CALL("IFontUser")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the font used for the inheriting class
-///
-/// \param _pFont Font to be set
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IFontUser::setFont(sf::Font* const _pFont)
-{
-    METHOD_ENTRY("IFontUser::setFont")
-    m_pFont = _pFont;
-    
-    this->mySetFont();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the colour of the font
-///
-/// \param _RGBA Colour as RGBA array (0.0 - 1.0)
-/// \param _bInherit Indicates, if colour setting should be inherited to childs
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IFontUser::setFontColor(const ColorTypeRGBA& _RGBA, const bool _bInherit)
-{
-    METHOD_ENTRY("IFontUser::setFontColor")
-    m_FontColor = _RGBA;
-    if (_bInherit)
-    {
-        this->mySetFontColor();
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the size of the font
-///
-/// \param _nFontSize Font size to be set
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IFontUser::setFontSize(const int _nFontSize)
-{
-    METHOD_ENTRY("IFontUser::setFontSize")
-    
-    m_nFontSize = _nFontSize;
-    
-    this->mySetFontSize();
 }
 
 #endif // FONT_USER_H

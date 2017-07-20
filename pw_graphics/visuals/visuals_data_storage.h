@@ -62,14 +62,6 @@ typedef moodycamel::ConcurrentQueue<IWidget*> WidgetsQueueType;
 /// Concurrent queue of windows
 typedef moodycamel::ConcurrentQueue<CWindow*> WindowsQueueType;
 
-/// Specifies the type of creation mode. When directly created, entities are
-/// are added to storage directly which should only be done within the same thread
-enum class CreationModeType
-{
-    DIRECT,
-    QUEUED
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class that stores all visuals data
@@ -98,17 +90,12 @@ class CVisualsDataStorage : public IComInterfaceUser,
         void addCamera(CCamera*);
         void addWidget(IWidget*);
         void addWindow(CWindow*);
-        void addWidgetsFromQueue();
-        void addWindowsFromQueue();
         
         bool closeWindow(const UIDType);
         
-        UIDType createWidget(const WidgetTypeType, const CreationModeType = CreationModeType::DIRECT);
-        UIDType createWindow(const CreationModeType = CreationModeType::DIRECT);
-        
         WindowOrderType* getWindowUIDsInOrder() {return &m_WindowsOrder;}
 
-        void setFont(const sf::Font& _Font) {m_Font = _Font;}
+        void setFontManager(CFontManager* const _pFontManager) {m_pFontManager = _pFontManager;}
 
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CVisualsDataStorage&);
@@ -123,11 +110,8 @@ class CVisualsDataStorage : public IComInterfaceUser,
         WinFrameUsersByValueType    m_WinFrameUsersByValue;     ///< Entities using a window frame, accessed by value
         WindowOrderType             m_WindowsOrder;             ///< Display order of windows
         
-        WidgetsQueueType            m_WidgetsQueue;             ///< Queue of new widgets to be added to storage
-        WindowsQueueType            m_WindowsQueue;             ///< Queue of new windows to be added to storage
-        
         CComConsole*                m_pComConsole;              ///< Com console for command input
-        sf::Font                    m_Font;                     ///< Currently used font for visuals
+        CFontManager*               m_pFontManager;             ///< Font handling instance
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

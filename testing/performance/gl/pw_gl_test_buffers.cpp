@@ -792,7 +792,7 @@ int main(int argc, char *argv[])
     CGraphics& Graphics = CGraphics::getInstance();
     
     WindowHandleType* pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
-                                                    "Planeworld", sf::Style::Default,
+                                                    "Planeworld - GL Buffers Test", sf::Style::Default,
                                                     sf::ContextSettings(24,8,4,3,3,sf::ContextSettings::Core));
     MEM_ALLOC("WindowHandleType")
     

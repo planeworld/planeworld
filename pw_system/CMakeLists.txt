@@ -21,6 +21,7 @@ INCLUDE_DIRECTORIES (
     ${SFML_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/3rdparty/ConcurrentQueue
     ${CMAKE_HOME_DIRECTORY}/3rdparty/sol2
+    ${CMAKE_HOME_DIRECTORY}/3rdparty/stb_truetype
     ${CMAKE_HOME_DIRECTORY}/pw_io
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core
@@ -41,6 +42,7 @@ INCLUDE_DIRECTORIES (
 )
 
 SET(SRCS
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/font_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader_program.cpp

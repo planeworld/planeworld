@@ -35,7 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "font_user.h"
-#include "log.h"
+#include "text.h"
 #include "widget.h"
 #include "win_frame_user.h"
 
@@ -60,9 +60,10 @@ class CWindow : public IFontUser,
 {
 
     public:
-    
+        
         //--- Constructor/Destructor------------------------------------------//
-        CWindow();
+        CWindow() = delete;
+        CWindow(CFontManager* const);
         virtual ~CWindow();
         
         //--- Constant methods -----------------------------------------------//
@@ -74,23 +75,20 @@ class CWindow : public IFontUser,
         void center();
         void draw();
         void setClosability(const bool _bClosable) {m_bClosable = _bClosable;}
-        void setTitle(const std::string&);
         void setVisibilty(const bool);
         void setWidget(IWidget* const);
+        
+        //--- Variables ------------------------------------------------------//
+        CText   Title;              ///< Window title
         
     private:
         
         void myResize(const int, const int) override;
         void mySetColorBG(const ColorTypeRGBA&) override;
         void mySetColorFG(const ColorTypeRGBA&) override;
-        void mySetFont() override;
-        void mySetFontColor() override;
-        void mySetFontSize() override;
-        void mySetPosition(const int, const int) override;
+        void mySetPosition(const int ,const int) override;
         
         //--- Variables [private] --------------------------------------------//
-        sf::Text    m_Title;        ///< Window title
-        
         IWidget*    m_pWidget;      ///< Widget of this \ref CWindow
         bool        m_bCenter;      ///< Indicates, if this window is centered
         bool        m_bVisible;     ///< Indicates, if this window is visible
@@ -112,19 +110,6 @@ inline bool CWindow::isVisible() const
 {
     METHOD_ENTRY("CWindow::isVisible")
     return m_bVisible;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the title of this window
-///
-/// \param _strTitle Title to be set
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::setTitle(const std::string& _strTitle)
-{
-    METHOD_ENTRY("CWindow::setTitle")
-    m_Title.setString(_strTitle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +158,7 @@ inline void CWindow::myResize(const int _nX, const int _nY)
 {
     METHOD_ENTRY("CWindow::myResize")
     if (m_pWidget != nullptr)
-        m_pWidget->resize(_nX-m_nFrameBorderX*2, _nY-m_nFrameBorderY*2-m_pFont->getLineSpacing(m_nFontSize));
+        m_pWidget->resize(_nX-m_nFrameBorderX*2, _nY-m_nFrameBorderY*2-Title.getFontSize());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -206,57 +191,17 @@ inline void CWindow::mySetColorFG(const ColorTypeRGBA& _RGBA)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the font
+/// \brief Sets the position of the window
+///
+/// \param _nX Position X
+/// \param _nY Position Y
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::mySetFont()
-{
-    METHOD_ENTRY("CWindow::mySetFont")
-    m_Title.setFont(*m_pFont);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the font colour for inherited widget
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::mySetFontColor()
-{
-    METHOD_ENTRY("CWindow::mySetFontColor")
-    
-    m_Title.setFillColor(sf::Color(m_FontColor[0]*255.0,
-                                   m_FontColor[1]*255.0,
-                                   m_FontColor[2]*255.0,
-                                   m_FontColor[3]*255.0));
-    if (m_pWidget != nullptr)
-        m_pWidget->setFontColor(m_FontColor, WIN_INHERIT);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the fonts size
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::mySetFontSize()
-{
-    METHOD_ENTRY("CWindow::mySetFontSize")
-    m_Title.setCharacterSize(m_nFontSize);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the position for inherited widget
-///
-/// \param _nPosX Position X
-/// \param _nPosY Position Y
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CWindow::mySetPosition(const int _nPosX, const int _nPosY)
+inline void CWindow::mySetPosition(const int _nX, const int _nY)
 {
     METHOD_ENTRY("CWindow::mySetPosition")
-    m_bCenter = false;
     if (m_pWidget != nullptr)
-        m_pWidget->setPosition(_nPosX + m_nFrameBorderX, _nPosY+m_nFrameBorderY+m_pFont->getLineSpacing(m_nFontSize));
+        m_pWidget->setPosition(_nX+m_nFrameBorderX, _nY+Title.getFontSize()+m_nFrameBorderY);
 }
 
 #endif // WINDOW_H

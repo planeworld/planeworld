@@ -64,7 +64,7 @@ class CRenderTarget
         );
 
         //--- Constant Methods -----------------------------------------------//
-        const GLuint                getIDTex() const;
+              GLuint                getIDTex() const;
         const std::vector<GLfloat>& getQuad() const;
         const std::vector<GLfloat>& getTexUV() const;
         void bind() const;
@@ -104,7 +104,7 @@ class CRenderTarget
 /// \return ID of texture to use as render target
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const GLuint CRenderTarget::getIDTex() const
+inline GLuint CRenderTarget::getIDTex() const
 {
     METHOD_ENTRY("CRenderTarget::getIDTex")
     return m_unIDTex;

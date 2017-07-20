@@ -59,12 +59,13 @@ class CShaderProgram
         //--- Constructor/Destructor -----------------------------------------//
 
         //--- Constant Methods -----------------------------------------------//
-        const GLuint getID() const;
-        void         use() const;
+        GLuint getID() const;
+        void   use() const;
         
         //--- Methods --------------------------------------------------------//
         void addShader(const CShader&);
         void create();
+        void create(const CShader&, const CShader&);
         bool link();
                 
         //--- friends --------------------------------------------------------//
@@ -85,7 +86,7 @@ class CShaderProgram
 /// \return ID of shader
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const GLuint CShaderProgram::getID() const
+inline GLuint CShaderProgram::getID() const
 {
     METHOD_ENTRY("CShaderProgram::getID")
     return m_unID;

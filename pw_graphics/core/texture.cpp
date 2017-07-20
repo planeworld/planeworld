@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2017 Torsten Büschenfeld
+// Copyright (C) 2016 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,40 +20,41 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       visuals_manager.h
-/// \brief      Implementation of class "CVisualsManager"
+/// \file       texture.cpp
+/// \brief      Implementation of class "CTexture"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2010-04-06
+/// \date       2017-06-05
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "uid_visuals.h"
+#include "texture.h"
+
+//--- Standard header --------------------------------------------------------//
+#include <fstream>
+#include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Draws a circle using graphics base
+/// \brief Initialise texture
 ///
-/// \param _nPosX Position X in screen space
-/// \param _nPosY Position Y in screen space
-/// \param _nUID  UID to be displayed
-///
+/// \return Success?
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CUIDVisuals::draw(const int _nPosX, const int _nPosY, const UIDType _nUID)
+bool CTexture::init()
 {
-    METHOD_ENTRY("CUIDVisuals::draw")
-    if (m_bShowUID)
-    {
-        m_Graphics.beginRenderBatch();
-            m_Graphics.setColor(m_aBGColor);
-            m_Graphics.filledRect(Vector2d(_nPosX, _nPosY),
-                                  Vector2d(_nPosX+30, _nPosY+15));
-        m_Graphics.endRenderBatch();
-        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
-            UIDText.setText(std::to_string(_nUID));
-            UIDText.setPosition(_nPosX, _nPosY);
-            UIDText.display();
-        m_Graphics.endRenderBatch();
-    }
+    METHOD_ENTRY("CTexture::init")
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Deletes shader
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CTexture::destroy()
+{
+    METHOD_ENTRY("CTexture::destroy")
+    glDeleteShader(m_unID);
+    return true;
 }

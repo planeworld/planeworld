@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2016 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,70 +20,81 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       widget_console.h
-/// \brief      Prototype of "CWidgetConsole"
+/// \file       texture.h
+/// \brief      Prototype of class "CTexture"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2017-04-09
+/// \date       2017-06-05
 ///
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef WIDGET_CONSOLE_H
-#define WIDGET_CONSOLE_H
+
+#ifndef TEXTURE_H
+#define TEXTURE_H
+
+#define GL_GLEXT_PROTOTYPES
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "com_console.h"
-#include "widget.h"
+#include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
+#include "GL/gl.h"
+#include "GL/glext.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Defines a command console widget
+/// \brief Class representing a texture
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CWidgetConsole : public IWidget
+class CTexture
 {
 
     public:
-    
-        //--- Constructor/Destructor------------------------------------------//
-        CWidgetConsole() = delete;
-        CWidgetConsole(CFontManager* const);
-        ~CWidgetConsole() override {}
-        
-        //--- Constant methods -----------------------------------------------//
+
+        //--- Constructor/Destructor -----------------------------------------//
+        ~CTexture();
+
+        //--- Constant Methods -----------------------------------------------//
+        GLuint getID() const;
         
         //--- Methods --------------------------------------------------------//
-        void draw() override;
-        void setComConsole(CComConsole* const);
-        
-        //--- Variables ------------------------------------------------------//
-        CText           ConsoleText;            ///< Text output in com console
-        
+        bool destroy();
+        bool init();
+                
+        //--- friends --------------------------------------------------------//
+
     private:
         
-        //--- Methods [private] ----------------------------------------------//
-        
         //--- Variables [private] --------------------------------------------//
-        CComConsole*    m_pComConsole;          ///< Command console used in this widget
-        int             m_nComHistoryVisible;   ///< Visible part of command history
+        GLuint m_unID = 0; // ID of texture
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the command console used in this widget
-///
-/// \param _pComConsole Command console to be set
+/// \brief Destructor, deletes texture
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CWidgetConsole::setComConsole(CComConsole* const _pComConsole)
+inline CTexture::~CTexture()
 {
-    METHOD_ENTRY("CWidgetConsole::setComConsole")
-    m_pComConsole = _pComConsole;
+    METHOD_ENTRY("CTexture::~CTexture")
+    DTOR_CALL("CTexture::~CTexture")
+    this->destroy();
 }
 
-#endif // WIDGET_CONSOLE_H
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns ID of texture
+///
+/// \return ID of texture
+///
+////////////////////////////////////////////////////////////////////////////////
+inline GLuint GLuint CTexture::getID() const
+{
+    METHOD_ENTRY("CTexture::getID")
+    return m_unID;
+}
+
+#endif // TEXTURE_H

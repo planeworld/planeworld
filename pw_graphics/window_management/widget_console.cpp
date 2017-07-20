@@ -36,9 +36,13 @@
 ///
 /// \brief Constructor, initialising members
 ///
+/// \param _pFontManager Font manager to use for drawing text
+///
 ////////////////////////////////////////////////////////////////////////////////
-CWidgetConsole::CWidgetConsole() : IWidget(),
-                                   m_nComHistoryVisible(10)
+CWidgetConsole::CWidgetConsole(CFontManager* const _pFontManager) :
+                                    IWidget(_pFontManager),
+                                    m_nComHistoryVisible(10),
+                                    ConsoleText(_pFontManager)
 {
     METHOD_ENTRY("CWidgetConsole::CWidgetConsole");
     CTOR_CALL("CWidgetConsole::CWidgetConsole");
@@ -46,13 +50,13 @@ CWidgetConsole::CWidgetConsole() : IWidget(),
     m_Type = WidgetTypeType::CONSOLE;
     
     m_UID.setName("Widget_Console_"+m_UID.getName());
-    m_ConsoleText.setString(m_UID.getName());
-    m_ConsoleText.setFont(*m_pFont);
-    m_ConsoleText.setCharacterSize(m_nFontSize);
-    m_ConsoleText.setFillColor(sf::Color(m_FontColor[0]*255.0,
-                                         m_FontColor[1]*255.0,
-                                         m_FontColor[2]*255.0,
-                                         m_FontColor[3]*255.0));
+    ConsoleText.setText(m_UID.getName());
+//     ConsoleText.setFont(*m_pFont);
+//     ConsoleText.setCharacterSize(m_nFontSize);
+//     ConsoleText.setFillColor(sf::Color(m_FontColor[0]*255.0,
+//                                          m_FontColor[1]*255.0,
+//                                          m_FontColor[2]*255.0,
+//                                          m_FontColor[3]*255.0));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,9 +68,11 @@ void CWidgetConsole::draw()
 {
     METHOD_ENTRY("CWidgetConsole::draw")
 
-    this->drawFrame();
+    m_Graphics.beginRenderBatch();
+        this->drawFrame();
+    m_Graphics.endRenderBatch();
     
-    m_nComHistoryVisible = m_nFrameHeight / m_pFont->getLineSpacing(m_nFontSize) - 1;
+    m_nComHistoryVisible = m_nFrameHeight / ConsoleText.getFontSize() - 1;
 
     std::stringstream oss;
     auto i = m_pComConsole->getCommands().size() - m_nComHistoryVisible;
@@ -84,15 +90,12 @@ void CWidgetConsole::draw()
     }
     oss << s_ConsoleModeTypeToStringMap[m_pComConsole->getMode()] << " > " << m_pComConsole->getCurrentCommand() << "_";
     
-    //--- Begin SFML ---------------------------------------------------------//
-    m_Graphics.getWindow()->pushGLStates();
+    ConsoleText.setText(oss.str());
+    ConsoleText.setPosition(m_nFramePosX, m_nFramePosY);
     
-    m_ConsoleText.setString(oss.str());
-    m_ConsoleText.setPosition(m_nFramePosX, m_nFramePosY);
-    m_Graphics.getWindow()->draw(m_ConsoleText);
-
-    m_Graphics.getWindow()->popGLStates();
-    //--- End SFML -----------------------------------------------------------//
+    m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        ConsoleText.display();
+    m_Graphics.endRenderBatch();
     
     DOM_DEV(
         static bool bWarned = false;

@@ -118,20 +118,23 @@ void CDebris::dynamics(const double& _fStep)
 {
     METHOD_ENTRY("CDebris::dynamics")
     
-    m_BBox.setLowerLeft(m_PosList[0]);
-    m_BBox.setUpperRight(m_PosList[0]);
-    
-    Vector2d vecStep = m_vecForce * _fStep * m_fTimeFac;
-    for (auto i=0u; i<m_PosList.size(); ++i)
+    if (m_PosList.size() > 0)
     {
-        // Only if state is active
-        if (m_StateList[i] == DEBRIS_STATE_ACTIVE)
+        m_BBox.setLowerLeft(m_PosList[0]);
+        m_BBox.setUpperRight(m_PosList[0]);
+        
+        Vector2d vecStep = m_vecForce * _fStep * m_fTimeFac;
+        for (auto i=0u; i<m_PosList.size(); ++i)
         {
-            m_BBox.update(m_PosList[i]);
-            m_PosListPrev[i] = m_PosList[i];
-            m_VelList[i] += vecStep;
-            m_PosList[i] += m_VelList[i] * _fStep;
-            m_BBox.update(m_PosList[i]);
+            // Only if state is active
+            if (m_StateList[i] == DEBRIS_STATE_ACTIVE)
+            {
+                m_BBox.update(m_PosList[i]);
+                m_PosListPrev[i] = m_PosList[i];
+                m_VelList[i] += vecStep;
+                m_PosList[i] += m_VelList[i] * _fStep;
+                m_BBox.update(m_PosList[i]);
+            }
         }
     }
 }
