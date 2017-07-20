@@ -46,6 +46,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader_program.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/text.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/camera.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/uid_visuals.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/visuals/visuals_data_storage.cpp

@@ -51,62 +51,19 @@ class CText : virtual public CGraphicsBase
 
         //--- Constructor/Destructor -----------------------------------------//
         CText() = delete;
-        CText(CFontManager* const _pFontManager) : CGraphicsBase(),
-                  m_Color({{1.0, 1.0, 1.0, 1.0}}),
-                  m_fSize(16.0f),
-                  m_fPosX(0.0f),
-                  m_fPosY(0.0f),
-                  m_nWordWrap(FONT_MGR_NO_WORD_WRAP),
-                  m_bCentered(false),
-                  m_strFont(""),
-                  m_strText("CText"),
-                  m_pFontManager(_pFontManager) 
-        {
-            METHOD_ENTRY("CText::CText")
-            CTOR_CALL("CText::CText")
-        }
+        CText(CFontManager* const _pFontManager);
 
         //--- Constant Methods -----------------------------------------------//
         float getFontSize() const {return m_fSize;}
         
         //--- Methods --------------------------------------------------------//
-        void display()
-        {
-            METHOD_ENTRY("CText::display")
-            
-            DOM_DEV
-            (
-                if (m_strFont == "")
-                {
-                    WARNING_MSG("Text", "Font not set. Text would have been: " << m_strText)
-                    goto LabelDomDevNoFontManager;
-                }
-                if (m_pFontManager == nullptr)
-                {
-                    WARNING_MSG("Text", "Font manager not set.")
-                    goto LabelDomDevNoFontManager;
-                }
-            )
-            
-            m_Graphics.setColor(m_Color);
-            m_pFontManager->setFont(m_strFont);
-            m_pFontManager->setSize(m_fSize);
-            
-            m_pFontManager->drawText(m_strText, m_fPosX, m_fPosY, m_bCentered, m_nWordWrap);
-
-            DOM_DEV(LabelDomDevNoFontManager:)
-        }
+        void display();
         
         void setColor(const ColorTypeRGBA& _Color) {m_Color = _Color;}
         void setFont(const std::string& _strFont) {m_strFont = _strFont;}
         void setFontManager(CFontManager* _pFontManager) {m_pFontManager = _pFontManager;}
         void setSize(const float& _fSize) {m_fSize = _fSize;}
-        void setPosition(const float& _fPosX, const float& _fPosY, const bool _bCentered = false)
-        {
-            m_fPosX = _fPosX;
-            m_fPosY = _fPosY + m_fSize;
-            m_bCentered = _bCentered;
-        }
+        void setPosition(const float& _fPosX, const float& _fPosY, const bool _bCentered = false);
         void setText(const std::string _strText) {m_strText = _strText;}
         void setWordWrap(const int _nWordWrap) {m_nWordWrap = _nWordWrap;}
                 
