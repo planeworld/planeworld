@@ -535,20 +535,14 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     m_unWidthScr = _unWidthScr;
     m_unHeightScr = _unHeightScr;
     
-    sf::FloatRect View(0,0,_unWidthScr,_unHeightScr);
-    m_pWindow->setView(sf::View(View));
     m_pWindow->setSize(sf::Vector2u(_unWidthScr, _unHeightScr));
-
+    glViewport(0, 0, _unWidthScr, _unHeightScr);
+    
     m_ViewPort.rightplane = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
     m_ViewPort.topplane   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
     m_ViewPort.leftplane   = -m_ViewPort.rightplane;
     m_ViewPort.bottomplane = -m_ViewPort.topplane;
     
-//     m_matProjection = glm::ortho<float>(m_ViewPort.leftplane, m_ViewPort.rightplane,
-//                                         m_ViewPort.bottomplane, m_ViewPort.topplane,
-//                                         m_ViewPort.nearplane, m_ViewPort.farplane);
-//     GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matTransform");
-//     glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
     this->setupWorldSpace();
     
     INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.rightplane - m_ViewPort.leftplane << "m x " <<

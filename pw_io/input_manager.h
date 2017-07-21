@@ -68,7 +68,7 @@ class CInputManager : public IComInterfaceProvider,
                 
         //--- Methods --------------------------------------------------------//
         void processFrame();
-        void setWindow(sf::RenderWindow* const _pWindow);
+        void setWindow(sf::Window* const _pWindow);
         
     private:
 
@@ -78,7 +78,7 @@ class CInputManager : public IComInterfaceProvider,
         void myInitComInterface();
         
         //--- Variables [private] --------------------------------------------//
-        sf::RenderWindow*   m_pWindow;          ///< Window with input focus
+        sf::Window*     m_pWindow;          ///< Window with input focus
         
         sf::Vector2i    m_vecMouse;             ///< Current mouse position
         sf::Vector2i    m_vecMouseCenter;       ///< Mouse position at window center
@@ -94,7 +94,7 @@ class CInputManager : public IComInterfaceProvider,
 /// \param _pWindow Window with input focus
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CInputManager::setWindow(sf::RenderWindow* const _pWindow)
+inline void CInputManager::setWindow(sf::Window* const _pWindow)
 {
     METHOD_ENTRY("CInputManager::setWindow")
     m_pWindow = _pWindow;

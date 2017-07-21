@@ -51,14 +51,13 @@
 #include <glm/mat4x4.hpp>
 
 #include <SFML/OpenGL.hpp>
-// #include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 
 using namespace Eigen;
 
 
 /// Type definition for window handle to enable easy changes
-typedef sf::RenderWindow WindowHandleType;
+typedef sf::Window WindowHandleType;
 
 // Constants
 const std::uint16_t GRAPHICS_WIDTH_DEFAULT = 1440u;     ///< Default x-resolution
