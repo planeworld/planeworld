@@ -51,12 +51,6 @@ CWidgetConsole::CWidgetConsole(CFontManager* const _pFontManager) :
     
     m_UID.setName("Widget_Console_"+m_UID.getName());
     ConsoleText.setText(m_UID.getName());
-//     ConsoleText.setFont(*m_pFont);
-//     ConsoleText.setCharacterSize(m_nFontSize);
-//     ConsoleText.setFillColor(sf::Color(m_FontColor[0]*255.0,
-//                                          m_FontColor[1]*255.0,
-//                                          m_FontColor[2]*255.0,
-//                                          m_FontColor[3]*255.0));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

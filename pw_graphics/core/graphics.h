@@ -165,6 +165,10 @@ class CGraphics
         Vector2d        screen2World(const double&, const double&) const;
         Vector2d        world2Screen(const Vector2d&) const;
         int             getDrawCalls() const {return m_nDrawCalls;}
+        int             getLinesPerFrame() const {return m_nLines;}
+        int             getPointsPerFrame() const {return m_nPoints;}
+        int             getTrianglesPerFrame() const {return m_nTriangles;}
+        int             getVerticesPerFrame() const {return m_nVerts;}
         double          getDynPelSize() const;
         double          getResMPX() const;
         double          getResMPY() const;
@@ -183,6 +187,8 @@ class CGraphics
         //--- Methods --------------------------------------------------------//
         void beginRenderBatch(const bool = GRAPHICS_SHADER_MODE_DEFAULT);
         void endRenderBatch(const bool = GRAPHICS_EXTERNAL_RENDER_BATCH_CALL);
+        void restartRenderBatch(const bool = GRAPHICS_SHADER_MODE_DEFAULT);
+        
         bool init();
         bool resizeWindow(unsigned short, unsigned short);
         void setWidthScr(const unsigned short&);
@@ -268,7 +274,12 @@ class CGraphics
         GLuint              m_unVBOUVs = 0u;            ///< Texture coordinate buffer
         bool                m_bUseUVs = false;          ///< Indicates if textures are used in one render batch
         
+        // Basic Debug information:
         int                 m_nDrawCalls;               ///< Basic draw call counter
+        int                 m_nLines;                   ///< Number of lines per frame
+        int                 m_nPoints;                  ///< Number of points per frame
+        int                 m_nTriangles;               ///< Number of triangles per frame
+        int                 m_nVerts;                   ///< Number of vertices per frame
         
         ColorTypeRGBA       m_aColour;                  ///< Currently set color
         

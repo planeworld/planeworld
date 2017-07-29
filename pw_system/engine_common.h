@@ -58,7 +58,8 @@ enum Visuals
     VISUALS_NAMES = 8,
     VISUALS_KINEMATICS_STATES = 16,
     VISUALS_TIMERS = 32,
-    VISUALS_OBJECT_COM = 64
+    VISUALS_OBJECT_COM = 64,
+    VISUALS_DEBUG_INFO =128
 };
 
 /// Specifies depthlayer bitcodes

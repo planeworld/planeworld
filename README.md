@@ -54,6 +54,7 @@ Usage
 | w and LALT               | Hide all windows                |
 | Home                     | Toggle command console          |
 | TAB                      | Tab completion in console mode  |
+| F1                       | Toggle debug info               |
 | ESC                      | Quit                            |
 | + / a                    | Accelerate time (only key-pad +)|
 | + / a  and CTRL          | ... and allow timestep increment|

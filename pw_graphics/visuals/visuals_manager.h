@@ -127,6 +127,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            addWidgetsFromQueue();
         void            addWindowsFromQueue();
             
+        void            drawDebugInfo();
         void            drawGridHUD();
         void            drawKinematicsState(const CKinematicsState&, const double&);
         void            drawKinematicsStates();

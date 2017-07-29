@@ -55,9 +55,7 @@ CWindow::CWindow(CFontManager* const _pFontManager) :
     
     m_UID.setName("Win_"+m_UID.getName());
     Title.setText(m_UID.getName());
-//     m_Title.setFont(*m_pFont);
-//     m_nFontSize = 20; // Fontsize only affects the title at the moment
-//     m_Title.setCharacterSize(m_nFontSize);
+    Title.setSize(20);
 //     m_Title.setFillColor(sf::Color(m_FontColor[0]*255.0,
 //                                    m_FontColor[1]*255.0,
 //                                    m_FontColor[2]*255.0,

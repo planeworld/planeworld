@@ -53,6 +53,7 @@ const int FONT_MGR_SIZE_DEFAULT = 16;
 const float FONT_MGR_SCALE = 1.33f;
 
 const int FONT_MGR_NO_WORD_WRAP = -1;
+const std::string FONT_MGR_FONT_DEFAULT = "anka_c87_r";
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -73,11 +74,16 @@ class CFontManager : public CGraphicsBase
         ~CFontManager();
 
         //--- Constant Methods -----------------------------------------------//
+        std::unordered_map<std::string, GLuint>& getFontsAvailable()
+        {
+            return m_FontsByName;
+        }
         
         //--- Methods --------------------------------------------------------//
         bool    addFont(const std::string&, const std::string&, const int = FONT_MGR_SIZE_DEFAULT);
         void    drawText(const std::string&, const float&, const float&, const bool = false, const int = FONT_MGR_NO_WORD_WRAP);
         GLuint  getIDTex(const std::string&);
+        float   getTextLength(const std::string&, const std::string&, const int);
         bool    setFont(const std::string&);
         void    setSize(const int);
                 

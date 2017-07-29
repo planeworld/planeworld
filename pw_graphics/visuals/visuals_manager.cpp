@@ -660,117 +660,120 @@ void CVisualsManager::drawGrid() const
     
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
-        // Default sub grid size every 1m
-        double fGrid = 1.0;
-        double fGridLeft;
-        double fGridTop;
-        double fGridLeftCell;
-        double fGridTopCell;
+        m_Graphics.beginRenderBatch();
         
-        // Automatically scale grid depending on zoom level
-        while ((m_pCamera->getBoundingCircleRadius() / fGrid) > 100.0)
-            fGrid*=10.0;
-        while ((m_pCamera->getBoundingCircleRadius() / fGrid) < 10.0)
-            fGrid*=0.1;
-        
-        // If zoomed out to larger grids then universe cell, the bounding box
-        // cell of the camera has to be considered.
-        if (fGrid < 1.0e12)
-        {
-            fGridLeftCell = 0.0;
-            fGridTopCell = 0.0;
-        }
-        else
-        {
-            fGridLeftCell = IGridUser::cellToDouble(m_pCamera->getCell())[0];
-            fGridTopCell  = IGridUser::cellToDouble(m_pCamera->getCell())[1];
-        }
+            // Default sub grid size every 1m
+            double fGrid = 1.0;
+            double fGridLeft;
+            double fGridTop;
+            double fGridLeftCell;
+            double fGridTopCell;
+            
+            // Automatically scale grid depending on zoom level
+            while ((m_pCamera->getBoundingCircleRadius() / fGrid) > 100.0)
+                fGrid*=10.0;
+            while ((m_pCamera->getBoundingCircleRadius() / fGrid) < 10.0)
+                fGrid*=0.1;
+            
+            // If zoomed out to larger grids then universe cell, the bounding box
+            // cell of the camera has to be considered.
+            if (fGrid < 1.0e12)
+            {
+                fGridLeftCell = 0.0;
+                fGridTopCell = 0.0;
+            }
+            else
+            {
+                fGridLeftCell = IGridUser::cellToDouble(m_pCamera->getCell())[0];
+                fGridTopCell  = IGridUser::cellToDouble(m_pCamera->getCell())[1];
+            }
 
-        // Snap sub grid to sub grid size
-        fGridLeft=(std::floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
-                          fGridLeftCell)/fGrid)+1.0)*fGrid-fGridLeftCell;
-        fGridTop =(std::floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
-                          fGridTopCell )/fGrid)+1.0)*fGrid-fGridTopCell;
+            // Snap sub grid to sub grid size
+            fGridLeft=(std::floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
+                            fGridLeftCell)/fGrid)+1.0)*fGrid-fGridLeftCell;
+            fGridTop =(std::floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
+                            fGridTopCell )/fGrid)+1.0)*fGrid-fGridTopCell;
+            
+            // Change colour if on cell grid
+            if (fGrid == DEFAULT_CELL_SIZE)
+                m_Graphics.setColor(0.3, 0.0, 0.0);
+            else
+                m_Graphics.setColor(0.1, 0.1, 0.1);
         
-        // Change colour if on cell grid
-        if (fGrid == DEFAULT_CELL_SIZE)
-            m_Graphics.setColor(0.3, 0.0, 0.0);
-        else
-            m_Graphics.setColor(0.1, 0.1, 0.1);
-     
-        // Vertical sub grid lines
-        while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
-        {
-            m_Graphics.beginLine();
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
-                                               m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                               m_pCamera->getCenter()[1]);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
-                                               m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                               m_pCamera->getCenter()[1]);
-            m_Graphics.endLine(PolygonType::LINE_SINGLE);
-            fGridLeft += fGrid;
-        }
-        // Horizontal sub grid lines
-        while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
-        {
-            m_Graphics.beginLine();
-                m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                    m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]);
-                m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                    m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]);
-            m_Graphics.endLine(PolygonType::LINE_SINGLE);
-            fGridTop += fGrid;
-        }
-        
-        // Second grid is more coarse
-        fGrid *= 10.0;
-        
-        // Snap grid to grid size
-        fGridLeft=(floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
-                          fGridLeftCell)/fGrid)+1.0)*fGrid - fGridLeftCell;
-        fGridTop =(floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
-                          fGridTopCell)/fGrid)+1.0)*fGrid - fGridTopCell;
-        
-        // Change colour if on cell grid
-        if (fGrid == DEFAULT_CELL_SIZE)
-            m_Graphics.setColor(0.3, 0.0, 0.0);
-        else
-            m_Graphics.setColor(0.2, 0.2, 0.2);
-        
-        m_Graphics.setWidth(2.0);
-        
-        // Vertical grid lines
-        while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
-        {
-            m_Graphics.beginLine();
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
+            // Vertical sub grid lines
+            while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
+            {
+                m_Graphics.beginLine();
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                 m_pCamera->getBoundingBox().getLowerLeft()[1]-
                                                 m_pCamera->getCenter()[1]);
-                m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                 m_pCamera->getBoundingBox().getUpperRight()[1]-
                                                 m_pCamera->getCenter()[1]);
-            m_Graphics.endLine(PolygonType::LINE_SINGLE);
-            fGridLeft += fGrid;
-        }
-        // Horizontal grid lines
-        while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
-        {
-            m_Graphics.beginLine();
-                m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                    m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]);
-                m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                    m_pCamera->getCenter()[0],
-                                    fGridTop-m_pCamera->getCenter()[1]);
-            m_Graphics.endLine(PolygonType::LINE_SINGLE);
-            fGridTop += fGrid;
-        }
-        
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-        m_Graphics.setWidth(1.0);
+                m_Graphics.endLine(PolygonType::LINE_SINGLE);
+                fGridLeft += fGrid;
+            }
+            // Horizontal sub grid lines
+            while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
+            {
+                m_Graphics.beginLine();
+                    m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
+                                        m_pCamera->getCenter()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]);
+                    m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
+                                        m_pCamera->getCenter()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]);
+                m_Graphics.endLine(PolygonType::LINE_SINGLE);
+                fGridTop += fGrid;
+            }
+            
+            // Second grid is more coarse
+            fGrid *= 10.0;
+            
+            // Snap grid to grid size
+            fGridLeft=(floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
+                            fGridLeftCell)/fGrid)+1.0)*fGrid - fGridLeftCell;
+            fGridTop =(floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
+                            fGridTopCell)/fGrid)+1.0)*fGrid - fGridTopCell;
+            
+            // Change colour if on cell grid
+            if (fGrid == DEFAULT_CELL_SIZE)
+                m_Graphics.setColor(0.3, 0.0, 0.0);
+            else
+                m_Graphics.setColor(0.2, 0.2, 0.2);
+            
+            m_Graphics.setWidth(2.0);
+            
+            // Vertical grid lines
+            while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
+            {
+                m_Graphics.beginLine();
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
+                                                    m_pCamera->getBoundingBox().getLowerLeft()[1]-
+                                                    m_pCamera->getCenter()[1]);
+                    m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
+                                                    m_pCamera->getBoundingBox().getUpperRight()[1]-
+                                                    m_pCamera->getCenter()[1]);
+                m_Graphics.endLine(PolygonType::LINE_SINGLE);
+                fGridLeft += fGrid;
+            }
+            // Horizontal grid lines
+            while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
+            {
+                m_Graphics.beginLine();
+                    m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
+                                        m_pCamera->getCenter()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]);
+                    m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
+                                        m_pCamera->getCenter()[0],
+                                        fGridTop-m_pCamera->getCenter()[1]);
+                m_Graphics.endLine(PolygonType::LINE_SINGLE);
+                fGridTop += fGrid;
+            }
+            
+            m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+            m_Graphics.setWidth(1.0);
+        m_Graphics.endRenderBatch();
     }
 }
 
@@ -857,13 +860,13 @@ void CVisualsManager::cycleCamera()
 bool CVisualsManager::init()
 {
     METHOD_ENTRY("CVisualsManager::init")
-
+    
     m_FontManager.addFont("anka_c87_r", "fonts/AnkaCoder-C87-r.ttf");
     m_FontManager.addFont("anka_c87_i", "fonts/AnkaCoder-C87-i.ttf");
     m_FontManager.addFont("anka_c87_b", "fonts/AnkaCoder-C87-b.ttf");
     m_FontManager.addFont("anka_c87_bi", "fonts/AnkaCoder-C87-bi.ttf");
-
-    m_strFont = "anka_c87_r";
+    
+    m_strFont = FONT_MGR_FONT_DEFAULT;
     
     // Setup engine global visuals first
     m_UIDVisuals.UIDText.setFont(m_strFont);
@@ -902,18 +905,18 @@ bool CVisualsManager::init()
     
     // Initialise UI text objects
     m_TextDebris.setFont(m_strFont);
-    m_TextDebris.setSize(12.0f);
+    m_TextDebris.setSize(12);
     m_TextObjects.setFont(m_strFont);
-    m_TextObjects.setSize(12.0f);
+    m_TextObjects.setSize(12);
     m_TextScale.setFont(m_strFont);
-    m_TextScale.setPosition(m_Graphics.getWidthScr()/2, 32.0f, TEXT_POSITION_CENTERED);
-    m_TextScale.setSize(16.0f);
+    m_TextScale.setPosition(m_Graphics.getWidthScr()/2, 32.0f, TEXT_POSITION_CENTERED_X);
+    m_TextScale.setSize(16);
     m_TextStarSystems.setFont(m_strFont);
-    m_TextStarSystems.setSize(12.0f);
+    m_TextStarSystems.setSize(12);
     m_TextTimers.setFont(m_strFont);
     m_TextTimers.setPosition(10.0f, 10.0f);
-    m_TextTimers.setSize(12.0f);
-    
+    m_TextTimers.setSize(12);
+
     return (m_Graphics.init());
 }
 
@@ -1036,18 +1039,6 @@ void CVisualsManager::finishFrame()
 {
     METHOD_ENTRY("CVisualsManager::finishFrame")
     
-//     CText TextDrawCalls(&m_FontManager);
-//     TextDrawCalls.setFont(m_strFont);
-//     TextDrawCalls.setSize(16);
-//     TextDrawCalls.setPosition(20, 20);
-//     TextDrawCalls.setColor({{1.0, 0.0, 1.0, 0.8}});
-//     
-//     TextDrawCalls.setText("Drawcalls: " + std::to_string(m_Graphics.getDrawCalls()+1));
-//     
-//     m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
-//         TextDrawCalls.display();
-//     m_Graphics.endRenderBatch();
-    
     m_Graphics.swapBuffers();
     DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
     m_pDataStorage->swapFront();
@@ -1074,27 +1065,26 @@ void CVisualsManager::processFrame()
     m_pComInterface->callWriters("visuals");
 
     m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
-        
-    m_Graphics.beginRenderBatch();
-        m_pCamera->update();
-        this->drawGrid();
-        this->drawTrajectories();
-    m_Graphics.endRenderBatch();
-    
+
+    m_pCamera->update();
+    this->drawGrid();
+    // this->drawTrajectories();
+
     m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
     this->drawWorld();
-    
-    this->drawKinematicsStates();
+
     this->drawCOM();
     this->drawBoundingBoxes();
-    
+
     m_Graphics.setupScreenSpace();
-    
+
+    this->drawKinematicsStates();    
     this->drawGridHUD();
     this->drawTimers();
     this->drawWindows();
     this->updateUI();
-    
+
+    this->drawDebugInfo();
     this->finishFrame();
 }
 
@@ -1133,6 +1123,46 @@ void CVisualsManager::addWindowsFromQueue()
     while (m_WindowsQueue.try_dequeue(pWindow))
     {
         m_pVisualsDataStorage->addWindow(pWindow);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws graphics debug information, such as the number of draw calls.
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawDebugInfo()
+{
+    METHOD_ENTRY("CVisualsManager::drawDebugInfo")
+
+    if (m_nVisualisations & VISUALS_DEBUG_INFO)
+    {
+        CText TextDrawCalls(&m_FontManager);
+        TextDrawCalls.setFont(m_strFont);
+        TextDrawCalls.setSize(16);
+        TextDrawCalls.setPosition(200, 200);
+        TextDrawCalls.setColor({{1.0, 0.0, 1.0, 0.8}});
+        
+        std::ostringstream oss;
+        oss << "GRAPHICS\n\n  Drawcalls: " << m_Graphics.getDrawCalls()+1 << "\n";
+        oss << "  Lines: " << m_Graphics.getLinesPerFrame() << "\n";
+        oss << "  Points: " << m_Graphics.getPointsPerFrame() << "\n";
+        oss << "  Triangles: " << m_Graphics.getTrianglesPerFrame() << "\n";
+        oss << "  Vertices: " << m_Graphics.getVerticesPerFrame() << "\n";
+        
+        oss << "\n";
+        
+        oss << "FONT RENDERER\n\n  Available fonts:\n";
+        for (auto strFont : m_FontManager.getFontsAvailable())
+        {
+            oss << "   * " << strFont.first << "\n";
+        }
+        
+        TextDrawCalls.setText(oss.str());
+        
+        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+            TextDrawCalls.display();
+        m_Graphics.endRenderBatch();
     }
 }
 
@@ -1237,14 +1267,13 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsSta
                                       <<  _KinematicsState.getOrigin()[1] << "\n";
             TextKState.setText(oss.str());
             TextKState.setFont(m_strFont);
-            TextKState.setSize(12.0);
+            TextKState.setSize(12);
             TextKState.setColor({{1.0, 1.0, 1.0, fTransparency}});
             TextKState.setPosition(m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[0],
                                    m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[1]);
 
         
             TextKState.display();
-            std::cout << oss.str() << std::endl;
             
         m_Graphics.endRenderBatch();
         
@@ -1879,10 +1908,10 @@ void CVisualsManager::myInitComInterface()
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("com_set_font_size",
-                                      CCommand<void,double>([&](const double& _fSize){static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID))->ConsoleText.setSize(_fSize);}),
+                                      CCommand<void,int>([&](const int _nSize){static_cast<CWidgetConsole*>(m_pVisualsDataStorage->getWidgetByValue(m_ConsoleWidgetID))->ConsoleText.setSize(_nSize);}),
                                       "Sets font size for command console.",
                                       {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::DOUBLE, "Font size"}},
+                                      {ParameterType::INT, "Font size"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("create_widget",
@@ -2298,6 +2327,12 @@ void CVisualsManager::myInitComInterface()
     m_pComInterface->registerFunction("toggle_com",
                                       CCommand<void>([&](){this->toggleVisualisations(VISUALS_OBJECT_COM);}),
                                       "Toggle center of mass (COM) on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_debug",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_DEBUG_INFO);}),
+                                      "Toggle debug information (e.g. drawcalls) on and off.",
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals", "visuals"
     );

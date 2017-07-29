@@ -50,12 +50,6 @@ CWidgetText::CWidgetText(CFontManager* const _pFontManager) :
     
     m_UID.setName("Widget_Text_"+m_UID.getName());
     Text.setText(m_UID.getName());
-//     m_Text.setFont(*m_pFont);
-//     m_Text.setCharacterSize(m_nFontSize);
-//     m_Text.setFillColor(sf::Color(m_FontColor[0]*255.0,
-//                                   m_FontColor[1]*255.0,
-//                                   m_FontColor[2]*255.0,
-//                                   m_FontColor[3]*255.0));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,19 +65,19 @@ void CWidgetText::draw()
         this->drawFrame();
     m_Graphics.endRenderBatch();
    
-//     DOM_DEV(
-//         static bool bWarned = false;
-//         if (m_pUIDVisuals == nullptr)
-//         {
-//             if (!bWarned)
-//             {
-//                 WARNING_MSG("Text Widget", "UID visuals not set.")
-//                 bWarned = true;
-//             }
-//             goto DomDev;
-//         })
-//         m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, m_UID.getValue());
-//     DOM_DEV(DomDev:)
+    DOM_DEV(
+        static bool bWarned = false;
+        if (m_pUIDVisuals == nullptr)
+        {
+            if (!bWarned)
+            {
+                WARNING_MSG("Text Widget", "UID visuals not set.")
+                bWarned = true;
+            }
+            goto DomDev;
+        })
+        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, m_UID.getValue());
+    DOM_DEV(DomDev:)
     
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     

@@ -95,6 +95,11 @@ void CInputManager::processFrame()
                 {
                     switch (Event.key.code)
                     {
+                        case sf::Keyboard::F1:
+                        {
+                            m_pComInterface->call<void>("toggle_debug");
+                            break;
+                        }
                         case sf::Keyboard::BackSpace:
                         {
                             m_pComInterface->call<void>("com_console_backspace");
@@ -186,6 +191,11 @@ void CInputManager::processFrame()
                         case sf::Keyboard::Num3:
                         {
                             m_pComInterface->call<void,int>("toggle_timer", 3);
+                            break;
+                        }
+                        case sf::Keyboard::F1:
+                        {
+                            m_pComInterface->call<void>("toggle_debug");
                             break;
                         }
                         case sf::Keyboard::Add:

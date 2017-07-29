@@ -204,6 +204,59 @@ void CFontManager::drawText(const std::string& _strText,
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns the length (px) of a given text for given font and size
+///
+/// \param _strText Text to be measured in length
+/// \param _strFont Font of text to be measured
+/// \param _nSize   Size of text to be measured
+///
+/// \return Measured length of given Text \ref _strText.
+///
+////////////////////////////////////////////////////////////////////////////////
+float CFontManager::getTextLength(const std::string& _strText, 
+                                 const std::string& _strFont,
+                                 const int _nSize)
+{
+    METHOD_ENTRY("CFontManager::getTextLength")
+    
+    if (m_bChanged) this->changeFont();
+    
+    const auto ci = m_FontsMemByName.find(_strFont);
+    if (ci != m_FontsMemByName.end())
+    {
+        std::string strFontDesignator = std::to_string(_nSize)+_strFont;
+        
+        auto nID = 0u;
+
+        const auto ci = m_FontsByName.find(strFontDesignator);
+        if (ci != m_FontsByName.end())
+        {
+            nID = ci->second;
+            
+            float fLength = 0.0f;
+            const stbtt_packedchar* b;
+            for (const auto Ch : _strText)
+            {
+                b = m_FontsCharInfo[nID] + Ch-ASCII_FIRST;
+                fLength += b->xadvance;
+            }
+            return fLength;
+        }
+        else
+        {
+            WARNING_MSG("Font Manager", "Font " << _strFont << " of size <" << _nSize << "> not rasterised.")
+            return 0.0f;
+        }
+    }
+    else
+    {
+        WARNING_MSG("Font Manager", "Font <" << m_strFont << "> unknown.")
+        return 0.0f;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Set the given font for usage
 ///
 /// \param _strFontName Name of font to use
@@ -251,9 +304,6 @@ void CFontManager::changeFont()
     const auto ci = m_FontsMemByName.find(m_strFont);
     if (ci != m_FontsMemByName.end())
     {
-        m_Graphics.endRenderBatch();
-        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
-        
         std::string strFontDesignator = std::to_string(m_nSize)+m_strFont;
         
         auto nID = 0u;
@@ -269,6 +319,9 @@ void CFontManager::changeFont()
             nID = m_FontsByName[strFontDesignator];
         }
 
+        // End current render batch since it is bound to the font texture
+        m_Graphics.restartRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        
         m_pFontCharInfo = m_FontsCharInfo[nID];
         m_nAtlasSize    = m_AtlasSizes[nID];
     

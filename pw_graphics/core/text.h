@@ -40,7 +40,7 @@
 //--- Misc header ------------------------------------------------------------//
 
 // Constants
-const bool TEXT_POSITION_CENTERED = true;
+const bool TEXT_POSITION_CENTERED_X = true;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -57,17 +57,19 @@ class CText : virtual public CGraphicsBase
         CText(CFontManager* const _pFontManager);
 
         //--- Constant Methods -----------------------------------------------//
-        float getFontSize() const {return m_fSize;}
+        int                 getFontSize() const {return m_nSize;}
+        float               getLength() const {return m_fLength;}
+        const std::string&  str() const {return m_strText;}
         
         //--- Methods --------------------------------------------------------//
         void display();
         
         void setColor(const ColorTypeRGBA& _Color) {m_Color = _Color;}
-        void setFont(const std::string& _strFont) {m_strFont = _strFont;}
+        void setFont(const std::string&);
         void setFontManager(CFontManager* _pFontManager) {m_pFontManager = _pFontManager;}
-        void setSize(const float& _fSize) {m_fSize = _fSize;}
+        void setSize(const int);
         void setPosition(const float& _fPosX, const float& _fPosY, const bool _bCentered = false);
-        void setText(const std::string _strText) {m_strText = _strText;}
+        void setText(const std::string&);
         void setWordWrap(const int _nWordWrap) {m_nWordWrap = _nWordWrap;}
                 
         //--- friends --------------------------------------------------------//
@@ -76,7 +78,8 @@ class CText : virtual public CGraphicsBase
         
         //--- Variables [private] --------------------------------------------//
         ColorTypeRGBA   m_Color;        ///< Text color
-        float           m_fSize;        ///< Text size
+        int             m_nSize;        ///< Text size
+        float           m_fLength;      ///< Text length (px)
         float           m_fPosX;        ///< X position
         float           m_fPosY;        ///< Y position
         int             m_nWordWrap;    ///< Word wrap (px)

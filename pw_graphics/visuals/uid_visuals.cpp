@@ -45,14 +45,15 @@ void CUIDVisuals::draw(const int _nPosX, const int _nPosY, const UIDType _nUID)
     METHOD_ENTRY("CUIDVisuals::draw")
     if (m_bShowUID)
     {
+        UIDText.setText(std::to_string(_nUID));
+        double fSizeX = UIDText.getLength()+5.0;
         m_Graphics.beginRenderBatch();
             m_Graphics.setColor(m_aBGColor);
             m_Graphics.filledRect(Vector2d(_nPosX, _nPosY),
-                                  Vector2d(_nPosX+30, _nPosY+15));
+                                  Vector2d(_nPosX + fSizeX, _nPosY+UIDText.getFontSize()));
         m_Graphics.endRenderBatch();
         m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
-            UIDText.setText(std::to_string(_nUID));
-            UIDText.setPosition(_nPosX, _nPosY);
+            UIDText.setPosition(_nPosX+fSizeX*0.5, _nPosY, TEXT_POSITION_CENTERED_X);
             UIDText.display();
         m_Graphics.endRenderBatch();
     }

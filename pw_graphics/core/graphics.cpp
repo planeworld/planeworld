@@ -48,6 +48,10 @@
 CGraphics::CGraphics() : m_pWindow(nullptr),
                         m_bScreenSpace(false),
                         m_nDrawCalls(0),
+                        m_nLines(0),
+                        m_nPoints(0),
+                        m_nTriangles(0),
+                        m_nVerts(0),
                         m_aColour({{1.0, 1.0, 1.0, 1.0}}),
                         m_nRenderBatchLvl(0),
                         m_fCamAng(0.0),
@@ -234,7 +238,13 @@ void CGraphics::swapBuffers()
     METHOD_ENTRY("CGraphics::swapBuffers")
     
     m_pWindow->display();
+    
+    // Reset debug information of this frame
     m_nDrawCalls = 0;
+    m_nLines = 0;
+    m_nPoints = 0;
+    m_nTriangles = 0;
+    m_nVerts = 0;
     
     // clear offscreen buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
@@ -417,6 +427,13 @@ void CGraphics::endRenderBatch(const bool _bIntern)
             
             m_nDrawCalls += 3;
         }
+        
+        // Collect some debug information
+        m_nLines     += m_unIndexLines;
+        m_nPoints    += m_unIndexPoints;
+        m_nTriangles += m_unIndexTriangles;
+        m_nVerts     += m_unIndexVerts;
+        
         // If render mode changed, beginRenderBatch wrt top of stack
         if (bBegin)
         {
@@ -424,6 +441,33 @@ void CGraphics::endRenderBatch(const bool _bIntern)
             m_RenderBatchStack.pop();
             this->beginRenderBatch(bTmp);
         }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Begin new render batch if given mode is currently in use
+///
+/// \param _bMode Mode for which the rendering should be restarted, if currently
+///               in use.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::restartRenderBatch(const bool _bMode)
+{
+    METHOD_ENTRY("CGraphics::restartRenderBatch")
+
+    // Restart render batch if
+    // * A batch was already started
+    // * The mode of the current batch is the one that should be restarted 
+    //   (This is important not to restart other active batches)
+    // * Something has been drawn alreay (otherwise, it is most probable
+    //   that a new render batch was already started manually)
+    if (!m_RenderBatchStack.empty() &&
+         m_bUseUVs == _bMode &&
+         m_unIndex != 0u)
+    {
+        this->endRenderBatch();
+        this->beginRenderBatch(_bMode);
     }
 }
 
