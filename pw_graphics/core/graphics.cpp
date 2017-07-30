@@ -46,6 +46,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CGraphics::CGraphics() : m_pWindow(nullptr),
+                        m_strDataPath(""),
                         m_bScreenSpace(false),
                         m_nDrawCalls(0),
                         m_nLines(0),
@@ -507,10 +508,10 @@ bool CGraphics::init()
     CShader FragmentShader;
     CShader FragmentShaderFont;
     
-    VertexShader.load("shader.vert", GL_VERTEX_SHADER);
-    FragmentShader.load("shader.frag", GL_FRAGMENT_SHADER);
-    VertexShaderFont.load("font.vert", GL_VERTEX_SHADER);
-    FragmentShaderFont.load("font.frag", GL_FRAGMENT_SHADER);
+    VertexShader.load(m_strDataPath+"/shader/shader.vert", GL_VERTEX_SHADER);
+    FragmentShader.load(m_strDataPath+"/shader/shader.frag", GL_FRAGMENT_SHADER);
+    VertexShaderFont.load(m_strDataPath+"/shader/font.vert", GL_VERTEX_SHADER);
+    FragmentShaderFont.load(m_strDataPath+"/shader/font.frag", GL_FRAGMENT_SHADER);
     
     m_ShaderProgram.create(VertexShader, FragmentShader);
     m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);

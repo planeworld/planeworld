@@ -304,6 +304,7 @@ int main(int argc, char *argv[])
         if (bGraphics)
         {
             pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
+            pVisualsManager->setDataPath(XMLImporter.getGraphicsDataPath());
         }
         Universe.clone(XMLImporter.getUniverse());
     }

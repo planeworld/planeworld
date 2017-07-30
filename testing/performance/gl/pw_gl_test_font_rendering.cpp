@@ -100,6 +100,8 @@ int main(int argc, char *argv[])
     Graphics.setWindow(pWindow);
     
     //--- Init Font ----------------------------------------------------------//
+    Graphics.setDataPath(".");
+    
     CFontManager FontManager;
         
     FontManager.addFont("anka_c87_r", "fonts/AnkaCoder-C87-r.ttf");

@@ -54,6 +54,7 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_bMBLeft(false),
                                      m_ConsoleWidgetID(0),
                                      m_ConsoleWindowID(0),
+                                     m_strDataPath(""),
                                      m_UIDVisuals(&m_FontManager),
                                      m_TextDebris(&m_FontManager),
                                      m_TextObjects(&m_FontManager),
@@ -861,10 +862,10 @@ bool CVisualsManager::init()
 {
     METHOD_ENTRY("CVisualsManager::init")
     
-    m_FontManager.addFont("anka_c87_r", "fonts/AnkaCoder-C87-r.ttf");
-    m_FontManager.addFont("anka_c87_i", "fonts/AnkaCoder-C87-i.ttf");
-    m_FontManager.addFont("anka_c87_b", "fonts/AnkaCoder-C87-b.ttf");
-    m_FontManager.addFont("anka_c87_bi", "fonts/AnkaCoder-C87-bi.ttf");
+    m_FontManager.addFont("anka_c87_r", m_strDataPath + "/fonts/AnkaCoder-C87-r.ttf");
+    m_FontManager.addFont("anka_c87_i", m_strDataPath + "/fonts/AnkaCoder-C87-i.ttf");
+    m_FontManager.addFont("anka_c87_b", m_strDataPath + "/fonts/AnkaCoder-C87-b.ttf");
+    m_FontManager.addFont("anka_c87_bi", m_strDataPath + "/fonts/AnkaCoder-C87-bi.ttf");
     
     m_strFont = FONT_MGR_FONT_DEFAULT;
     
@@ -875,7 +876,7 @@ bool CVisualsManager::init()
     m_UIDVisuals.setBGColor({{0.1, 0.1, 0.8, 0.8}});
     
     // When calling init, all relevant variables have to be set up. Thus, sub 
-    // components like the visuals data storage kann be set up, eventually.
+    // components like the visuals data storage can be set up, eventually.
     m_pVisualsDataStorage->setFontManager(&m_FontManager);
     m_pVisualsDataStorage->setComInterface(m_pComInterface);
     m_pVisualsDataStorage->setUIDVisuals(&m_UIDVisuals);
@@ -917,7 +918,8 @@ bool CVisualsManager::init()
     m_TextTimers.setPosition(10.0f, 10.0f);
     m_TextTimers.setSize(12);
 
-    return (m_Graphics.init());
+    m_Graphics.setDataPath(m_strDataPath);
+    return m_Graphics.init();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

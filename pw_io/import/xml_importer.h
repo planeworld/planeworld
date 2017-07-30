@@ -71,9 +71,9 @@ class CXMLImporter : public IVisualsDataStorageUser,
         Vector2d                        getGravity() const;
         const ComponentsType&           getComponents() const;
         const EmittersType&             getEmitters() const;
-        const std::string&              getFont() const;
         const double&                   getFrequencyDebris() const;
         const double&                   getFrequencyLua() const;
+        const std::string&              getGraphicsDataPath() const;
         const double&                   getPhysicsFrequency() const;
         const std::string&              getPhysicsInterface() const;
         const CUniverse&                getUniverse() const;
@@ -131,7 +131,7 @@ class CXMLImporter : public IVisualsDataStorageUser,
         ComponentsType                  m_Components;           ///< List of components
         EmittersType                    m_Emitters;             ///< List of emitters
         std::string                     m_strPath;              ///< Path to read data from
-        std::string                     m_strFont;              ///< Font to load
+        std::string                     m_strGraphicsDataPath;              ///< Font to load
         std::string                     m_strLuaPhysicsInterface; ///< Lua file for physics access
         double                          m_fDebrisFrequency;     ///< Frequency for debris processing
         double                          m_fLuaFrequency;        ///< Frequency for lua interface
@@ -187,19 +187,6 @@ inline const EmittersType& CXMLImporter::getEmitters() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return name and location of font
-///
-/// \return Name and location of font
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const std::string& CXMLImporter::getFont() const
-{
-    METHOD_ENTRY("CXMLImporter::getFont")
-    return m_strFont;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Return frequency for debris physics processing
 ///
 /// \return Frequency for debris physics processing
@@ -222,6 +209,19 @@ inline const double& CXMLImporter::getFrequencyLua() const
 {
     METHOD_ENTRY("CXMLImporter::getFrequencyLua")
     return m_fLuaFrequency;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return path for graphics data such as fonts and shaders
+///
+/// \return Name and location of font
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::string& CXMLImporter::getGraphicsDataPath() const
+{
+    METHOD_ENTRY("CXMLImporter::getGraphicsDataPath")
+    return m_strGraphicsDataPath;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

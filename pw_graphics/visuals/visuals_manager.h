@@ -97,7 +97,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            finishFrame();
         void            processFrame();
         
-        void            setFont(const std::string&);
+        void            setDataPath(const std::string&);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
         void            setWindow(WindowHandleType* const);
@@ -162,6 +162,8 @@ class CVisualsManager : virtual public CGraphicsBase,
         std::string                     m_strConsoleText;   ///< Console text to be displayed
         std::string                     m_strFont;          ///< Font name
 
+        std::string                     m_strDataPath;      ///< Path for data such as fonts and shaders
+        
         CFontManager                    m_FontManager;      ///< Font manager for displaying UI text
         CUIDVisuals                     m_UIDVisuals;       ///< Graphical display of UIDs
         CText                           m_TextDebris;       ///< Text object for debris names
@@ -244,15 +246,15 @@ inline WindowHandleType* CVisualsManager::getWindow() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets font
+/// \brief Sets data path for graphical data such as fonts and shaders
 ///
-/// \param _strFont Font for drawing text
+/// \param _strDataPath Base path for graphical data such as fonts and shaders
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setFont(const std::string& _strFont)
+inline void CVisualsManager::setDataPath(const std::string& _strDataPath)
 {
-    METHOD_ENTRY("CVisualsManager::setFont")
-    m_strFont = _strFont;
+    METHOD_ENTRY("CVisualsManager::setDataPath")
+    m_strDataPath = _strDataPath;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

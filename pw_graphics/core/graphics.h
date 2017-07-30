@@ -191,6 +191,7 @@ class CGraphics
         
         bool init();
         bool resizeWindow(unsigned short, unsigned short);
+        void setDataPath(const std::string& _strDataPath) {m_strDataPath = _strDataPath;}
         void setWidthScr(const unsigned short&);
         void setHeightScr(const unsigned short&);
         void setupScreenSpace();
@@ -247,6 +248,8 @@ class CGraphics
         
         //--- Variables [private] --------------------------------------------//
         WindowHandleType*   m_pWindow;                  ///< Pointer to main window
+        
+        std::string         m_strDataPath;              ///< Path for graphics data such as shaders and fonts
         
         ViewPort            m_ViewPort;                 ///< Viewport for graphics
         glm::mat4           m_matTransform;             ///< Final transformation matrix
