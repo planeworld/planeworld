@@ -363,6 +363,7 @@ void CInputManager::processFrame()
                     m_pComInterface->call<void,double>("cam_zoom_to",1.0e-18);
                 else if (fZoom > 1.0e3)
                     m_pComInterface->call<void,double>("cam_zoom_to",1.0e3);
+                break;
             }
             case sf::Event::TextEntered:
             {

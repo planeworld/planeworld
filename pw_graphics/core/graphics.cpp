@@ -290,7 +290,7 @@ void CGraphics::beginRenderBatch(const bool _bUseUVs)
             m_ShaderProgramFont.use();
             GLint nProjMatLoc=glGetUniformLocation(m_ShaderProgramFont.getID(), "matTransform");
             glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
-            GLuint unTexLoc = glGetUniformLocation(m_ShaderProgramFont.getID(), "FontTexture");
+            // GLuint unTexLoc = glGetUniformLocation(m_ShaderProgramFont.getID(), "FontTexture");
         }
         else
         {
@@ -1314,7 +1314,7 @@ void CGraphics::endLine(const PolygonType& _PType)
     
     if (_PType == PolygonType::LINE_SINGLE)
     {
-        for (auto i=0u; i<m_nLineNrOfVerts-1; i+=2)
+        for (auto i=0; i<m_nLineNrOfVerts-1; i+=2)
         {
             m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
             m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
@@ -1322,7 +1322,7 @@ void CGraphics::endLine(const PolygonType& _PType)
     }
     else
     {
-        for (auto i=0u; i<m_nLineNrOfVerts-1; ++i)
+        for (auto i=0; i<m_nLineNrOfVerts-1; ++i)
         {
             m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
             m_vecIndicesLines[m_unIndexLines++] = m_unIndex;

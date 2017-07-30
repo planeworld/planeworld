@@ -1994,33 +1994,33 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"}},
                                       "system", "visuals"
     );
-    m_pComInterface->registerFunction("widget_set_font_color",
-                                      CCommand<void,int,double,double,double,double>(
-                                          [&](const int _nUID,
-                                              const double _fR,
-                                              const double _fG,
-                                              const double _fB,
-                                              const double _fA)
-                                            {
-                                                IWidget* pWidget = m_pVisualsDataStorage->getWidgetByValue(_nUID);
-                                                if (pWidget != nullptr)
-                                                {
+//     m_pComInterface->registerFunction("widget_set_font_color",
+//                                       CCommand<void,int,double,double,double,double>(
+//                                           [&](const int _nUID,
+//                                               const double _fR,
+//                                               const double _fG,
+//                                               const double _fB,
+//                                               const double _fA)
+//                                             {
+//                                                 IWidget* pWidget = m_pVisualsDataStorage->getWidgetByValue(_nUID);
+//                                                 if (pWidget != nullptr)
+//                                                 {
 //                                                     pWidget->setFontColor({_fR, _fG, _fB, _fA}, WIN_INHERIT);
-                                                }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
-                                            }),
-                                      "Sets color of widget text.",
-                                      {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::INT, "Widget UID"},
-                                      {ParameterType::DOUBLE, "Color red (0.0-1.0)"},
-                                      {ParameterType::DOUBLE, "Color green (0.0-1.0)"},
-                                      {ParameterType::DOUBLE, "Color blue (0.0-1.0)"},
-                                      {ParameterType::DOUBLE, "Alpha (0.0-1.0)"}},
-                                      "system","visuals"
-    );
+//                                                 }
+//                                                 else
+//                                                 {
+//                                                     throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+//                                                 }
+//                                             }),
+//                                       "Sets color of widget text.",
+//                                       {{ParameterType::NONE, "No return value"},
+//                                       {ParameterType::INT, "Widget UID"},
+//                                       {ParameterType::DOUBLE, "Color red (0.0-1.0)"},
+//                                       {ParameterType::DOUBLE, "Color green (0.0-1.0)"},
+//                                       {ParameterType::DOUBLE, "Color blue (0.0-1.0)"},
+//                                       {ParameterType::DOUBLE, "Alpha (0.0-1.0)"}},
+//                                       "system","visuals"
+//     );
     m_pComInterface->registerFunction("widget_set_text",
                                       CCommand<void, int, std::string>(
                                           [&](const int _nUID, const std::string _strText)
@@ -2199,7 +2199,7 @@ void CVisualsManager::myInitComInterface()
                                                 CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
                                                 if (pWin != nullptr)
                                                 {
-                                                    pWin->setColorBG({_fR, _fG, _fB, _fA}, WIN_INHERIT);
+                                                    pWin->setColorBG({{_fR, _fG, _fB, _fA}}, WIN_INHERIT);
                                                 }
                                                 else
                                                 {
@@ -2226,7 +2226,7 @@ void CVisualsManager::myInitComInterface()
                                                 CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
                                                 if (pWin != nullptr)
                                                 {
-                                                    pWin->setColorFG({_fR, _fG, _fB, _fA}, WIN_INHERIT);
+                                                    pWin->setColorFG({{_fR, _fG, _fB, _fA}}, WIN_INHERIT);
                                                 }
                                                 else
                                                 {

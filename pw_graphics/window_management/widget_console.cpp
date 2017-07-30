@@ -40,9 +40,9 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 CWidgetConsole::CWidgetConsole(CFontManager* const _pFontManager) :
-                                    IWidget(_pFontManager),
-                                    m_nComHistoryVisible(10),
-                                    ConsoleText(_pFontManager)
+                               IWidget(_pFontManager),
+                               ConsoleText(_pFontManager),
+                               m_nComHistoryVisible(10)
 {
     METHOD_ENTRY("CWidgetConsole::CWidgetConsole");
     CTOR_CALL("CWidgetConsole::CWidgetConsole");

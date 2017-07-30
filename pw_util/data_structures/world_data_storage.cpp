@@ -130,10 +130,10 @@ bool CWorldDataStorage::addDebris(CDebris* _pDebris)
     METHOD_ENTRY("CWorldDataStorage::addDebris")
     
     std::array<CDebris*, BUFFER_QUADRUPLE> aDebris =
-    {_pDebris->clone(),_pDebris->clone(),_pDebris->clone(),_pDebris};
+    {{_pDebris->clone(),_pDebris->clone(),_pDebris->clone(),_pDebris}};
     
     std::array<IUniqueIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
-    {aDebris[0],aDebris[1],aDebris[2],aDebris[3]};
+    {{aDebris[0],aDebris[1],aDebris[2],aDebris[3]}};
     
     m_DebrisByName.add(_pDebris->getName(), aDebris);
     m_DebrisByValue.add(_pDebris->getUID(), aDebris);
@@ -174,9 +174,9 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
     METHOD_ENTRY("CWorldDataStorage::addObject")
 
     std::array<CObject*, BUFFER_QUADRUPLE> aObjects =
-    {_pObject->clone(),_pObject->clone(),_pObject->clone(),_pObject};
+    {{_pObject->clone(),_pObject->clone(),_pObject->clone(),_pObject}};
     std::array<IUniqueIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
-    {aObjects[0], aObjects[1], aObjects[2], aObjects[3]};
+    {{aObjects[0], aObjects[1], aObjects[2], aObjects[3]}};
     
     // Initialise new objects
     for (auto pObj : aObjects) pObj->init();

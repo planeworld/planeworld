@@ -199,12 +199,11 @@ void outputTestResult(const std::uint32_t _nNrOfFrames,
 /// \return Time in seconds for this test
 ///
 ///////////////////////////////////////////////////////////////////////////////
-const double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
-                                         const std::uint32_t _nNrOfShapesPerGroup,
-                                         const std::uint32_t _nNrOfFrames,
-                                         const GLenum        _BufferUsage,
-                                         const GLenum        _Mode
-                                        )
+double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
+                                   const std::uint32_t _nNrOfShapesPerGroup,
+                                   const std::uint32_t _nNrOfFrames,
+                                   const GLenum        _BufferUsage,
+                                   const GLenum        _Mode)
 {
     METHOD_ENTRY("testOneVBOPerMultipleShapes")
     
