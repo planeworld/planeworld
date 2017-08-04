@@ -32,7 +32,7 @@ SET(FONT_RENDERING_SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader_program.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/render_target.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/render_mode.cpp
     pw_gl_test_font_rendering.cpp
 )
 

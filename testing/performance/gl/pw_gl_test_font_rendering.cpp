@@ -48,7 +48,7 @@
 #include "graphics.h"
 #include "log.h"
 #include "timer.h"
-#include "render_target.h"
+#include "render_mode.h"
 
 //--- Misc-Header ------------------------------------------------------------//
 #include <eigen3/Eigen/Core>
@@ -67,7 +67,7 @@
 void usage()
 {
     METHOD_ENTRY("usage")
-    std::cout << "Usage: pw_gl_test_font_rendering" << std::endl;
+    std::cout << "Usage: pw_gl_test_font_rendering <data path>" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,11 +83,13 @@ void usage()
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
-    if (argc != 1)
+    if (argc != 2)
     {
         usage();
         return EXIT_FAILURE;
     }
+    std::string strDataPath = argv[1];
+    
     Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
     
     //--- Init Graphics ------------------------------------------------------//
@@ -99,13 +101,26 @@ int main(int argc, char *argv[])
     
     Graphics.setWindow(pWindow);
     
-    //--- Init Font ----------------------------------------------------------//
+    //--- Init ---------------------------------------------------------------//
+    CShader VertexShaderFont;
+    CShader FragmentShaderFont;
+    CShaderProgram ShaderProgramFont;
+    CRenderMode RenderModeFont;
+    
+    VertexShaderFont.load(strDataPath+"/shader/font.vert", GL_VERTEX_SHADER);
+    FragmentShaderFont.load(strDataPath+"/shader/font.frag", GL_FRAGMENT_SHADER);
+    
+    ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
+    RenderModeFont.setShaderProgram(&ShaderProgramFont);
+    RenderModeFont.setRenderModeType(RenderModeType::VERT3COL4TEX2);
+    
+    Graphics.registerRenderMode("font", &RenderModeFont);
+    
+    RenderModeFont.use();
+
     CFontManager FontManager;
         
-    FontManager.addFont("anka_c87_r", "fonts/AnkaCoder-C87-r.ttf");
-    FontManager.addFont("anka_r", "fonts/AnkaCoder-r.ttf");
-    FontManager.addFont("anka_c87_bi", "fonts/AnkaCoder-C87-bi.ttf");
-    FontManager.addFont("anka_bi", "fonts/AnkaCoder-bi.ttf");
+    FontManager.addFont("anka_c87_r", strDataPath+"/fonts/AnkaCoder-C87-r.ttf");
     FontManager.setFont("anka_c87_r");
     
     Graphics.init();
@@ -147,13 +162,14 @@ int main(int argc, char *argv[])
         }
         
         Graphics.beginRenderBatch("font");
-            FontManager.setFont("anka_c87_bi");
-            Graphics.setColor({{0.0, 0.0, 1.0, 0.75}});
+            FontManager.setFont("anka_c87_r");
+            Graphics.setColor({{0.0, 0.0, 1.0, 1.0}});
             Graphics.texturedRect(Vector2d(0.0, FONT_MGR_ATLAS_SIZE_DEFAULT*FONT_MGR_SCALE),
                                     Vector2d(FONT_MGR_ATLAS_SIZE_DEFAULT*FONT_MGR_SCALE, 0.0),
                                     &vecUVs);
-            Graphics.setColor({{0.0, 1.0, 0.0, 0.5}});
-            FontManager.drawText("Testing font rendering", 300.0f, 200.0f);
+            Graphics.setColor({{0.0, 1.0, 0.0, 1.0}});
+            FontManager.drawText("You should see a blue texture atlas above (ASCII characters).", 300.0f, 200.0f);
+            FontManager.drawText("This notice is green, also regular font face.", 300.0f, 220.0f);
         Graphics.endRenderBatch();
         
         Graphics.swapBuffers();
