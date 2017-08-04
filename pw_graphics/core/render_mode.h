@@ -66,7 +66,7 @@ class CRenderMode
         
         //--- Constant methods -----------------------------------------------//
         RenderModeType              getRenderModeType() const {return m_RenderModeType;}
-        const CShaderProgram* const getShaderProgram() const {return m_pShaderProgram;}
+        const CShaderProgram*       getShaderProgram() const {return m_pShaderProgram;}
               
         //--- Methods --------------------------------------------------------//
         void setRenderModeType(const RenderModeType _RenderModeType) {m_RenderModeType = _RenderModeType;}

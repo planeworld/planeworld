@@ -100,8 +100,6 @@ int main(int argc, char *argv[])
     Graphics.setWindow(pWindow);
     
     //--- Init Font ----------------------------------------------------------//
-    Graphics.setDataPath(".");
-    
     CFontManager FontManager;
         
     FontManager.addFont("anka_c87_r", "fonts/AnkaCoder-C87-r.ttf");
@@ -148,7 +146,7 @@ int main(int argc, char *argv[])
             }
         }
         
-        Graphics.beginRenderBatch(2);
+        Graphics.beginRenderBatch("font");
             FontManager.setFont("anka_c87_bi");
             Graphics.setColor({{0.0, 0.0, 1.0, 0.75}});
             Graphics.texturedRect(Vector2d(0.0, FONT_MGR_ATLAS_SIZE_DEFAULT*FONT_MGR_SCALE),

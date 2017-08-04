@@ -46,7 +46,6 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CGraphics::CGraphics() : m_pWindow(nullptr),
-                        m_strDataPath(""),
                         m_bScreenSpace(false),
                         m_nDrawCalls(0),
                         m_nLines(0),
@@ -354,6 +353,32 @@ void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Start registered render batch
+///
+/// \param _strRenderModeName Name of render mode to use
+///
+/// \return Success?
+///
+///////////////////////////////////////////////////////////////////////////////
+bool CGraphics::beginRenderBatch(const std::string& _strRenderModeName)
+{
+    METHOD_ENTRY("CGraphics::beginRenderBatch")
+    
+    auto ci = m_RenderModesByName.find(_strRenderModeName);
+    if (ci != m_RenderModesByName.end())
+    {
+        this->beginRenderBatch(ci->second);
+        return true;
+    }
+    else
+    {
+        WARNING_MSG("Graphics", "Render mode \"" << _strRenderModeName << "\" not registered")
+        return false;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief End processing of one batch of GL objects
 ///
 /// This method ends the processing of one batch started with \ref beginRenderBatch.
@@ -488,6 +513,32 @@ void CGraphics::restartRenderBatch(CRenderMode* const _pRenderMode)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Restart registered render batch
+///
+/// \param _strRenderModeName Name of render mode to use
+///
+/// \return Success?
+///
+///////////////////////////////////////////////////////////////////////////////
+bool CGraphics::restartRenderBatch(const std::string& _strRenderModeName)
+{
+    METHOD_ENTRY("CGraphics::restartRenderBatch")
+    
+    auto ci = m_RenderModesByName.find(_strRenderModeName);
+    if (ci != m_RenderModesByName.end())
+    {
+        this->restartRenderBatch(ci->second);
+        return true;
+    }
+    else
+    {
+        WARNING_MSG("Graphics", "Render mode \"" << _strRenderModeName << "\" not registered")
+        return false;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Initializes graphics
 ///
 /// This method initialises the graphics by calling some OpenGL-routines
@@ -513,35 +564,6 @@ bool CGraphics::init()
     DOM_VAR(INFO_MSG("Graphics", "Depth Buffer Bits: " << m_pWindow->getSettings().depthBits))
     DOM_VAR(INFO_MSG("Graphics", "Stencil Buffer Bits: " << m_pWindow->getSettings().stencilBits))
     DOM_VAR(INFO_MSG("Graphics", "Core Profile (1): " << m_pWindow->getSettings().attributeFlags))
-
-    m_RenderTargetScreen.init(m_unWidthScr, m_unHeightScr);
-    m_RenderTargetScreen.setTarget(m_ViewPort.leftplane,  m_ViewPort.bottomplane,
-                                   m_ViewPort.rightplane, m_ViewPort.bottomplane,
-                                   m_ViewPort.rightplane, m_ViewPort.topplane,
-                                   m_ViewPort.leftplane,  m_ViewPort.topplane);
-    
-    //--------------------------------------------------------------------------
-    // Setup shaders
-    //--------------------------------------------------------------------------
-    CShader VertexShader;
-    CShader VertexShaderFont;
-    CShader FragmentShader;
-    CShader FragmentShaderFont;
-    
-    VertexShader.load(m_strDataPath+"/shader/shader.vert", GL_VERTEX_SHADER);
-    FragmentShader.load(m_strDataPath+"/shader/shader.frag", GL_FRAGMENT_SHADER);
-    VertexShaderFont.load(m_strDataPath+"/shader/font.vert", GL_VERTEX_SHADER);
-    FragmentShaderFont.load(m_strDataPath+"/shader/font.frag", GL_FRAGMENT_SHADER);
-    
-    m_ShaderProgram.create(VertexShader, FragmentShader);
-    m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
-    
-    m_RenderModeWorld.setShaderProgram(&m_ShaderProgram);
-    m_RenderModeWorld.setRenderModeType(RenderModeType::VERT3COL4);
-    m_RenderModeWorld.use();
-    
-    m_RenderModeFont.setShaderProgram(&m_ShaderProgramFont);
-    m_RenderModeFont.setRenderModeType(RenderModeType::VERT3COL4TEX2);
     
     //--------------------------------------------------------------------------
     // Setup OpenGL variables
@@ -582,6 +604,15 @@ bool CGraphics::init()
     this->resetBufferObjects();
     this->setupWorldSpace();
     
+    if (!m_RenderModesByName.empty())
+    {
+        m_pRenderMode = m_RenderModesByName.cbegin()->second;
+    }
+    else
+    {
+        NOTICE_MSG("Graphics", "No render modes registered, be sure to do so before continuing.")
+    }
+    
     return (true);
 }
 
@@ -618,7 +649,6 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
     INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.rightplane - m_ViewPort.leftplane << "m x " <<
                                                    m_ViewPort.topplane   - m_ViewPort.bottomplane << "m (" <<
                                                    _unWidthScr << "x" << _unHeightScr << ").")
-    
     return (true);
 }
 
@@ -648,8 +678,11 @@ void CGraphics::applyCamMovement()
         m_matTransform = m_matProjection * m_matScale * m_matRotate;
     }
 
-    GLint nTransMatLoc=glGetUniformLocation(m_ShaderProgram.getID(), "matTransform");
-    glUniformMatrix4fv(nTransMatLoc, 1, GL_FALSE, glm::value_ptr(m_matTransform));
+    if (m_pRenderMode)
+    {
+        GLint nTransMatLoc=glGetUniformLocation(m_pRenderMode->getShaderProgram()->getID(), "matTransform");
+        glUniformMatrix4fv(nTransMatLoc, 1, GL_FALSE, glm::value_ptr(m_matTransform));
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -523,7 +523,7 @@ void CVisualsManager::drawCOM() const
 
     if (m_nVisualisations & VISUALS_OBJECT_COM)
     {
-        m_Graphics.beginRenderBatch(1);
+        m_Graphics.beginRenderBatch("world");
             for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
             {
                 
@@ -573,7 +573,7 @@ void CVisualsManager::drawBoundingBoxes() const
 
     if (m_nVisualisations & VISUALS_OBJECT_BBOXES)
     {
-        m_Graphics.beginRenderBatch(1);
+        m_Graphics.beginRenderBatch("world");
             m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
             m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
                             m_pCamera->getCenter(),
@@ -661,7 +661,7 @@ void CVisualsManager::drawGrid() const
     
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
-        m_Graphics.beginRenderBatch(1);
+        m_Graphics.beginRenderBatch("world");
         
             // Default sub grid size every 1m
             double fGrid = 1.0;
@@ -862,12 +862,47 @@ bool CVisualsManager::init()
 {
     METHOD_ENTRY("CVisualsManager::init")
     
+    //--------------------------------------------------------------------------
+    // Setup shaders and render modes
+    //--------------------------------------------------------------------------
+    
+    CShader VertexShaderWorld;
+    CShader VertexShaderFont;
+    CShader FragmentShaderWorld;
+    CShader FragmentShaderFont;
+    
+    VertexShaderWorld.load(m_strDataPath+"/shader/shader.vert", GL_VERTEX_SHADER);
+    FragmentShaderWorld.load(m_strDataPath+"/shader/shader.frag", GL_FRAGMENT_SHADER);
+    VertexShaderFont.load(m_strDataPath+"/shader/font.vert", GL_VERTEX_SHADER);
+    FragmentShaderFont.load(m_strDataPath+"/shader/font.frag", GL_FRAGMENT_SHADER);
+    
+    m_ShaderProgramWorld.create(VertexShaderWorld, FragmentShaderWorld);
+    m_RenderModeWorld.setShaderProgram(&m_ShaderProgramWorld);
+    m_RenderModeWorld.setRenderModeType(RenderModeType::VERT3COL4);
+    
+    m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
+    m_RenderModeFont.setShaderProgram(&m_ShaderProgramFont);
+    m_RenderModeFont.setRenderModeType(RenderModeType::VERT3COL4TEX2);
+    
+    m_Graphics.registerRenderMode("world", &m_RenderModeWorld);
+    m_Graphics.registerRenderMode("font", &m_RenderModeFont);
+    
+    m_RenderModeWorld.use();
+    
+    //--------------------------------------------------------------------------
+    // Setup fonts
+    //--------------------------------------------------------------------------
+    
     m_FontManager.addFont("anka_c87_r", m_strDataPath + "/fonts/AnkaCoder-C87-r.ttf");
     m_FontManager.addFont("anka_c87_i", m_strDataPath + "/fonts/AnkaCoder-C87-i.ttf");
     m_FontManager.addFont("anka_c87_b", m_strDataPath + "/fonts/AnkaCoder-C87-b.ttf");
     m_FontManager.addFont("anka_c87_bi", m_strDataPath + "/fonts/AnkaCoder-C87-bi.ttf");
     
     m_strFont = FONT_MGR_FONT_DEFAULT;
+    
+    //--------------------------------------------------------------------------
+    // Setup visuals and windows
+    //--------------------------------------------------------------------------
     
     // Setup engine global visuals first
     m_UIDVisuals.UIDText.setFont(m_strFont);
@@ -918,7 +953,14 @@ bool CVisualsManager::init()
     m_TextTimers.setPosition(10.0f, 10.0f);
     m_TextTimers.setSize(12);
 
-    m_Graphics.setDataPath(m_strDataPath);
+//     m_Graphics.setDataPath(m_strDataPath);
+/*    
+     m_RenderTargetScreen.init(m_unWidthScr, m_unHeightScr);
+    m_RenderTargetScreen.setTarget(m_ViewPort.leftplane,  m_ViewPort.bottomplane,
+                                   m_ViewPort.rightplane, m_ViewPort.bottomplane,
+                                   m_ViewPort.rightplane, m_ViewPort.topplane,
+                                   m_ViewPort.leftplane,  m_ViewPort.topplane);*/
+    
     return m_Graphics.init();
 }
 
@@ -1067,8 +1109,8 @@ void CVisualsManager::processFrame()
     m_pComInterface->callWriters("visuals");
 
     m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
-
     m_pCamera->update();
+
     this->drawGrid();
     // this->drawTrajectories();
 
@@ -1162,7 +1204,7 @@ void CVisualsManager::drawDebugInfo()
         
         TextDrawCalls.setText(oss.str());
         
-        m_Graphics.beginRenderBatch(2);
+        m_Graphics.beginRenderBatch("font");
             TextDrawCalls.display();
         m_Graphics.endRenderBatch();
     }
@@ -1183,7 +1225,7 @@ void CVisualsManager::drawGridHUD()
 
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
-        m_Graphics.beginRenderBatch(2);
+        m_Graphics.beginRenderBatch("font");
         
         double fGrid = 1.0;
         
@@ -1256,7 +1298,7 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsSta
 //         m_Graphics.endRenderBatch();
         
         // Now draw the text
-        m_Graphics.beginRenderBatch(2);
+        m_Graphics.beginRenderBatch("font");
         
             std::stringstream oss;
             
@@ -1320,7 +1362,7 @@ void CVisualsManager::drawTimers()
     
     if (m_nVisualisations & VISUALS_TIMERS)
     {
-        m_Graphics.beginRenderBatch(2);
+        m_Graphics.beginRenderBatch("font");
         
             // Now draw the text
             std::stringstream oss;
@@ -1398,7 +1440,7 @@ void CVisualsManager::drawWorld()
 //     m_pCamera->zoomTo(fMaxZoom);
     
 //     if (1.0e13 * m_Graphics.getResPMX() < 1.0)
-    m_Graphics.beginRenderBatch(1);
+    m_Graphics.beginRenderBatch("world");
     {
         for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
         {
@@ -1499,7 +1541,7 @@ void CVisualsManager::drawWorld()
     if (m_nVisualisations & VISUALS_NAMES)
     {
         m_Graphics.setupScreenSpace();
-        m_Graphics.beginRenderBatch(2);
+        m_Graphics.beginRenderBatch("font");
 
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
@@ -1606,7 +1648,7 @@ void CVisualsManager::updateUI()
 {
     METHOD_ENTRY("CVisualsManager::updateUI")
     
-    m_Graphics.beginRenderBatch(1);
+    m_Graphics.beginRenderBatch("world");
 
         if (m_bMBLeft)
         {

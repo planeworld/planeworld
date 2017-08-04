@@ -47,12 +47,12 @@ void CUIDVisuals::draw(const int _nPosX, const int _nPosY, const UIDType _nUID)
     {
         UIDText.setText(std::to_string(_nUID));
         double fSizeX = UIDText.getLength()+5.0;
-        m_Graphics.beginRenderBatch(1);
+        m_Graphics.beginRenderBatch("world");
             m_Graphics.setColor(m_aBGColor);
             m_Graphics.filledRect(Vector2d(_nPosX, _nPosY),
                                   Vector2d(_nPosX + fSizeX, _nPosY+UIDText.getFontSize()));
         m_Graphics.endRenderBatch();
-        m_Graphics.beginRenderBatch(2);
+        m_Graphics.beginRenderBatch("font");
             UIDText.setPosition(_nPosX+fSizeX*0.5, _nPosY, TEXT_POSITION_CENTERED_X);
             UIDText.display();
         m_Graphics.endRenderBatch();

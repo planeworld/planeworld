@@ -320,7 +320,7 @@ void CFontManager::changeFont()
         }
 
         // End current render batch since it is bound to the font texture
-        m_Graphics.restartRenderBatch(2);
+        m_Graphics.restartRenderBatch("font");
         
         m_pFontCharInfo = m_FontsCharInfo[nID];
         m_nAtlasSize    = m_AtlasSizes[nID];

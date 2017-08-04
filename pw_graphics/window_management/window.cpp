@@ -158,7 +158,7 @@ void CWindow::draw()
     
     if (m_bVisible)
     {
-        m_Graphics.beginRenderBatch(1);
+        m_Graphics.beginRenderBatch("world");
             // Draw background area
             this->drawFrame();
             
@@ -200,7 +200,7 @@ void CWindow::draw()
             m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
         m_Graphics.endRenderBatch();
         
-        m_Graphics.beginRenderBatch(2);
+        m_Graphics.beginRenderBatch("font");
             Title.setPosition(m_nFramePosX + m_nFrameWidth/2, m_nFramePosY, true);
             Title.display();
         m_Graphics.endRenderBatch();

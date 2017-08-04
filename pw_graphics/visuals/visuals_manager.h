@@ -138,6 +138,14 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         void            myInitComInterface();
 
+        CRenderMode         m_RenderModeWorld;              ///< Default render mode
+        CRenderMode         m_RenderModeFont;               ///< Mode for font rendering
+        CShaderProgram      m_ShaderProgramWorld;           ///< Basic shader program
+        CShaderProgram      m_ShaderProgramFont;            ///< Shader program for font rendering
+        CShaderProgram      m_ShaderProgramTextureToScreen; ///< Shader program to put image to screen buffer
+        
+        CRenderTarget       m_RenderTargetScreen;           ///< Render target of screen (final image)
+        
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         int                             m_nVisualisations;  ///< Additional graphical output
         std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star

@@ -114,6 +114,9 @@ typedef std::array<double, 3> ColorTypeRGB;
 /// Type definition for RGBA colours
 typedef std::array<double, 4> ColorTypeRGBA;
 
+/// Type definition of a render modes, accessed by name
+typedef std::unordered_map<std::string, CRenderMode*> RenderModesByNameType;
+
 /// Type definition for vertex list
 typedef std::vector<Vector2d> VertexListType;
 
@@ -184,35 +187,15 @@ class CGraphics
         WindowHandleType* getWindow() const;
 
         //--- Methods --------------------------------------------------------//
-        void beginRenderBatch(int _nMode)
-        {
-            if (_nMode == 1)
-            {
-                this->beginRenderBatch(&m_RenderModeWorld);
-            }
-            else
-            {
-                this->beginRenderBatch(&m_RenderModeFont);
-            }
-        }
         void beginRenderBatch(CRenderMode* const);
+        bool beginRenderBatch(const std::string&);
         void endRenderBatch(const bool = GRAPHICS_EXTERNAL_RENDER_BATCH_CALL);
+        bool restartRenderBatch(const std::string&);
         void restartRenderBatch(CRenderMode* const);
-        void restartRenderBatch(int _nMode)
-        {
-            if (_nMode == 1)
-            {
-                this->restartRenderBatch(&m_RenderModeWorld);
-            }
-            else
-            {
-                this->restartRenderBatch(&m_RenderModeFont);
-            }
-        }
+        void registerRenderMode(const std::string& _strName, CRenderMode* const);
         
         bool init();
         bool resizeWindow(unsigned short, unsigned short);
-        void setDataPath(const std::string& _strDataPath) {m_strDataPath = _strDataPath;}
         void setWidthScr(const unsigned short&);
         void setHeightScr(const unsigned short&);
         void setupScreenSpace();
@@ -270,8 +253,6 @@ class CGraphics
         //--- Variables [private] --------------------------------------------//
         WindowHandleType*   m_pWindow;                  ///< Pointer to main window
         
-        std::string         m_strDataPath;              ///< Path for graphics data such as shaders and fonts
-        
         ViewPort            m_ViewPort;                 ///< Viewport for graphics
         glm::mat4           m_matTransform;             ///< Final transformation matrix
         glm::mat4           m_matProjection;            ///< Projection matrix
@@ -314,17 +295,10 @@ class CGraphics
         std::vector<GLfloat>    m_vecVertices;          ///< Temporary buffer for vertices
         std::vector<GLfloat>    m_vecUVs;               ///< Temporary buffer for texture coordinates
         
-        CRenderMode         m_RenderModeWorld;          ///< Default render mode
-        CRenderMode         m_RenderModeFont;           ///< Mode for font rendering
-        CRenderMode*        m_pRenderMode;              ///< Currently selected render mode
-        RenderModeType      m_RenderModeType;           ///< Currently used render mode
+        RenderModesByNameType   m_RenderModesByName;    ///< Map of render modes, accessed by name
+        CRenderMode*            m_pRenderMode;          ///< Currently selected render mode
+        RenderModeType          m_RenderModeType;       ///< Currently used render mode
         std::stack<CRenderMode*> m_RenderModeStack;     ///< Temporarily saves render batch information
-        
-        CShaderProgram      m_ShaderProgram;            ///< Basic shader program
-        CShaderProgram      m_ShaderProgramFont;        ///< Shader program for font rendering
-        CShaderProgram      m_ShaderTextureToScreen;    ///< Shader program to put image to screen buffer
-        
-        CRenderTarget       m_RenderTargetScreen;       ///< Render target of screen (final image)
         
         Vector3d            m_vecCamPos;                ///< camera position
         double              m_fCamAng;                  ///< camera angle
@@ -570,6 +544,20 @@ inline WindowHandleType* CGraphics::getWindow() const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Registeres a render mode to call by name later using \ref beginRenderBatch
+///
+/// \param _strName Name of render mode to be registered
+/// \param _pRenderMode Render mode to register
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CGraphics::registerRenderMode(const std::string& _strName, CRenderMode* const _pRenderMode)
+{
+    METHOD_ENTRY("CGraphics::registerRenderMode")
+    m_RenderModesByName.insert({_strName, _pRenderMode});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Set the screen width
 ///
 /// Actually, this method does not resize the screen, it just modifies the
@@ -580,7 +568,7 @@ inline WindowHandleType* CGraphics::getWindow() const
 ///////////////////////////////////////////////////////////////////////////////
 inline void CGraphics::setWidthScr(const unsigned short& _unWidthScr)
 {
-    METHOD_ENTRY("CGraphics::setWidthScr(const unsigned short&)");
+    METHOD_ENTRY("CGraphics::setWidthScr");
     m_unWidthScr = _unWidthScr;
 }
 
@@ -596,7 +584,7 @@ inline void CGraphics::setWidthScr(const unsigned short& _unWidthScr)
 ///////////////////////////////////////////////////////////////////////////////
 inline void CGraphics::setHeightScr(const unsigned short& _unHeightScr)
 {
-    METHOD_ENTRY("CGraphics::setHeightScr(const unsigned short&)");
+    METHOD_ENTRY("CGraphics::setHeightScr");
     m_unHeightScr = _unHeightScr;
 }
 

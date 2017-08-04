@@ -62,7 +62,7 @@ void CWidgetConsole::draw()
 {
     METHOD_ENTRY("CWidgetConsole::draw")
 
-    m_Graphics.beginRenderBatch(1);
+    m_Graphics.beginRenderBatch("world");
         this->drawFrame();
     m_Graphics.endRenderBatch();
     
@@ -87,7 +87,7 @@ void CWidgetConsole::draw()
     ConsoleText.setText(oss.str());
     ConsoleText.setPosition(m_nFramePosX, m_nFramePosY);
     
-    m_Graphics.beginRenderBatch(2);
+    m_Graphics.beginRenderBatch("font");
         ConsoleText.display();
     m_Graphics.endRenderBatch();
     
