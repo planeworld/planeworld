@@ -523,7 +523,7 @@ void CVisualsManager::drawCOM() const
 
     if (m_nVisualisations & VISUALS_OBJECT_COM)
     {
-        m_Graphics.beginRenderBatch();
+        m_Graphics.beginRenderBatch(1);
             for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
             {
                 
@@ -573,7 +573,7 @@ void CVisualsManager::drawBoundingBoxes() const
 
     if (m_nVisualisations & VISUALS_OBJECT_BBOXES)
     {
-        m_Graphics.beginRenderBatch();
+        m_Graphics.beginRenderBatch(1);
             m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
             m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
                             m_pCamera->getCenter(),
@@ -661,7 +661,7 @@ void CVisualsManager::drawGrid() const
     
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
-        m_Graphics.beginRenderBatch();
+        m_Graphics.beginRenderBatch(1);
         
             // Default sub grid size every 1m
             double fGrid = 1.0;
@@ -1073,8 +1073,8 @@ void CVisualsManager::processFrame()
     // this->drawTrajectories();
 
     m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
+    
     this->drawWorld();
-
     this->drawCOM();
     this->drawBoundingBoxes();
 
@@ -1162,7 +1162,7 @@ void CVisualsManager::drawDebugInfo()
         
         TextDrawCalls.setText(oss.str());
         
-        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        m_Graphics.beginRenderBatch(2);
             TextDrawCalls.display();
         m_Graphics.endRenderBatch();
     }
@@ -1183,7 +1183,7 @@ void CVisualsManager::drawGridHUD()
 
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
-        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        m_Graphics.beginRenderBatch(2);
         
         double fGrid = 1.0;
         
@@ -1256,7 +1256,7 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsSta
 //         m_Graphics.endRenderBatch();
         
         // Now draw the text
-        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        m_Graphics.beginRenderBatch(2);
         
             std::stringstream oss;
             
@@ -1320,7 +1320,7 @@ void CVisualsManager::drawTimers()
     
     if (m_nVisualisations & VISUALS_TIMERS)
     {
-        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        m_Graphics.beginRenderBatch(2);
         
             // Now draw the text
             std::stringstream oss;
@@ -1398,7 +1398,7 @@ void CVisualsManager::drawWorld()
 //     m_pCamera->zoomTo(fMaxZoom);
     
 //     if (1.0e13 * m_Graphics.getResPMX() < 1.0)
-    m_Graphics.beginRenderBatch();
+    m_Graphics.beginRenderBatch(1);
     {
         for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
         {
@@ -1499,7 +1499,7 @@ void CVisualsManager::drawWorld()
     if (m_nVisualisations & VISUALS_NAMES)
     {
         m_Graphics.setupScreenSpace();
-        m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        m_Graphics.beginRenderBatch(2);
 
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
@@ -1606,7 +1606,7 @@ void CVisualsManager::updateUI()
 {
     METHOD_ENTRY("CVisualsManager::updateUI")
     
-    m_Graphics.beginRenderBatch();
+    m_Graphics.beginRenderBatch(1);
 
         if (m_bMBLeft)
         {

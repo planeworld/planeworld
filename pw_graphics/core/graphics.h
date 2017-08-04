@@ -40,6 +40,8 @@
 #include "circular_buffer.h"
 #include "log.h"
 #include "shader_program.h"
+#include "render_mode.h"
+#include "render_target.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include <eigen3/Eigen/Core>
@@ -87,9 +89,6 @@ const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn
 const double GRAPHICS_MAX_CACHE_SIZE = 1024;            ///< Maximum size of cache
 
 const bool GRAPHICS_CIRCLE_USE_CACHE = true;            ///< Flag for using sine/cosine cache
-
-const bool GRAPHICS_SHADER_MODE_DEFAULT = false;        ///< Use default shaders and no uv coordinates
-const bool GRAPHICS_SHADER_MODE_FONT = true;            ///< Use font shaders and accordant uv coordinates
 
 const bool GRAPHICS_INTERNAL_RENDER_BATCH_CALL = true;  ///< Indicates the default external call to render batch methods
 const bool GRAPHICS_EXTERNAL_RENDER_BATCH_CALL = false; ///< Indicates an internal render batch call
@@ -185,9 +184,31 @@ class CGraphics
         WindowHandleType* getWindow() const;
 
         //--- Methods --------------------------------------------------------//
-        void beginRenderBatch(const bool = GRAPHICS_SHADER_MODE_DEFAULT);
+        void beginRenderBatch(int _nMode)
+        {
+            if (_nMode == 1)
+            {
+                this->beginRenderBatch(&m_RenderModeWorld);
+            }
+            else
+            {
+                this->beginRenderBatch(&m_RenderModeFont);
+            }
+        }
+        void beginRenderBatch(CRenderMode* const);
         void endRenderBatch(const bool = GRAPHICS_EXTERNAL_RENDER_BATCH_CALL);
-        void restartRenderBatch(const bool = GRAPHICS_SHADER_MODE_DEFAULT);
+        void restartRenderBatch(CRenderMode* const);
+        void restartRenderBatch(int _nMode)
+        {
+            if (_nMode == 1)
+            {
+                this->restartRenderBatch(&m_RenderModeWorld);
+            }
+            else
+            {
+                this->restartRenderBatch(&m_RenderModeFont);
+            }
+        }
         
         bool init();
         bool resizeWindow(unsigned short, unsigned short);
@@ -275,8 +296,7 @@ class CGraphics
         GLuint              m_unVBO = 0u;               ///< Vertex buffer
         GLuint              m_unVBOColours = 0u;        ///< Colour buffer
         GLuint              m_unVBOUVs = 0u;            ///< Texture coordinate buffer
-        bool                m_bUseUVs = false;          ///< Indicates if textures are used in one render batch
-        
+               
         // Basic Debug information:
         int                 m_nDrawCalls;               ///< Basic draw call counter
         int                 m_nLines;                   ///< Number of lines per frame
@@ -294,11 +314,17 @@ class CGraphics
         std::vector<GLfloat>    m_vecVertices;          ///< Temporary buffer for vertices
         std::vector<GLfloat>    m_vecUVs;               ///< Temporary buffer for texture coordinates
         
+        CRenderMode         m_RenderModeWorld;          ///< Default render mode
+        CRenderMode         m_RenderModeFont;           ///< Mode for font rendering
+        CRenderMode*        m_pRenderMode;              ///< Currently selected render mode
+        RenderModeType      m_RenderModeType;           ///< Currently used render mode
+        std::stack<CRenderMode*> m_RenderModeStack;     ///< Temporarily saves render batch information
+        
         CShaderProgram      m_ShaderProgram;            ///< Basic shader program
         CShaderProgram      m_ShaderProgramFont;        ///< Shader program for font rendering
+        CShaderProgram      m_ShaderTextureToScreen;    ///< Shader program to put image to screen buffer
         
-        std::stack<bool>    m_RenderBatchStack;         ///< Temporarily saves render batcj information
-        int                 m_nRenderBatchLvl;          ///< Counts begin and end hierarchy levels 
+        CRenderTarget       m_RenderTargetScreen;       ///< Render target of screen (final image)
         
         Vector3d            m_vecCamPos;                ///< camera position
         double              m_fCamAng;                  ///< camera angle

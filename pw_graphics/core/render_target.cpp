@@ -103,9 +103,9 @@ void CRenderTarget::setTarget(const float _fX0, const float _fY0,
     METHOD_ENTRY("CRenderTarget::setTarget")
 
     m_vecTarget[0]  = _fX0; m_vecTarget[1]  =_fY0; m_vecTarget[2]  = -10.0;
-    m_vecTarget[3]  = _fX1; m_vecTarget[4]  =_fY1; m_vecTarget[5]  = -100.0;
+    m_vecTarget[3]  = _fX1; m_vecTarget[4]  =_fY1; m_vecTarget[5]  = -10.0;
     m_vecTarget[6]  = _fX3; m_vecTarget[7]  =_fY3; m_vecTarget[8]  = -10.0;
     m_vecTarget[9]  = _fX3; m_vecTarget[10] =_fY3; m_vecTarget[11] = -10.0;
-    m_vecTarget[12] = _fX1; m_vecTarget[13] =_fY1; m_vecTarget[14] = -100.0;
-    m_vecTarget[15] = _fX2; m_vecTarget[16] =_fY2; m_vecTarget[17] = -100.0;
+    m_vecTarget[12] = _fX1; m_vecTarget[13] =_fY1; m_vecTarget[14] = -10.0;
+    m_vecTarget[15] = _fX2; m_vecTarget[16] =_fY2; m_vecTarget[17] = -10.0;
 }

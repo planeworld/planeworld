@@ -44,6 +44,7 @@ INCLUDE_DIRECTORIES (
 SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/font_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/render_target.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader_program.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/text.cpp

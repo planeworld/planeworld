@@ -61,7 +61,7 @@ void CWidgetText::draw()
 {
     METHOD_ENTRY("CWidgetText::draw")
 
-    m_Graphics.beginRenderBatch();
+    m_Graphics.beginRenderBatch(1);
         this->drawFrame();
     m_Graphics.endRenderBatch();
    
@@ -81,7 +81,7 @@ void CWidgetText::draw()
     
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     
-    m_Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+    m_Graphics.beginRenderBatch(2);
         Text.setPosition(m_nFramePosX, m_nFramePosY);
         Text.setWordWrap(m_nFrameWidth);
         Text.display();

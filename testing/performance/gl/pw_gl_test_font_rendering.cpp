@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
             }
         }
         
-        Graphics.beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
+        Graphics.beginRenderBatch(2);
             FontManager.setFont("anka_c87_bi");
             Graphics.setColor({{0.0, 0.0, 1.0, 0.75}});
             Graphics.texturedRect(Vector2d(0.0, FONT_MGR_ATLAS_SIZE_DEFAULT*FONT_MGR_SCALE),

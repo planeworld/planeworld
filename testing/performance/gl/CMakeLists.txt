@@ -21,6 +21,7 @@ SET(BUFFERS_SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/graphics.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/shader_program.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_graphics/core/render_target.cpp
     pw_gl_test_buffers.cpp
 )
 
