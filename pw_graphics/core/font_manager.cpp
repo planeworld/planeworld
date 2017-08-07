@@ -78,6 +78,10 @@ CFontManager::~CFontManager()
             CharInfo.second = nullptr;
         }    
     }
+    for (auto FontID : m_FontsByName)
+    {
+        glDeleteTextures(1, &FontID.second);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,6 +156,9 @@ void CFontManager::drawText(const std::string& _strText,
     
     if (m_bChanged) this->changeFont();
     
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_unTexID);
+    
     stbtt_aligned_quad GlyphQuad;
     float fOffsetX = 0.0f;
     float fOffsetY = 0.0f;
@@ -191,9 +198,9 @@ void CFontManager::drawText(const std::string& _strText,
             }
             
             vecUVs = {GlyphQuad.s0, GlyphQuad.t0, 
-                    GlyphQuad.s1, GlyphQuad.t0,
-                    GlyphQuad.s0, GlyphQuad.t1,
-                    GlyphQuad.s1, GlyphQuad.t1};
+                      GlyphQuad.s1, GlyphQuad.t0,
+                      GlyphQuad.s0, GlyphQuad.t1,
+                      GlyphQuad.s1, GlyphQuad.t1};
                     
             m_Graphics.texturedRect(Vector2d(GlyphQuad.x0, GlyphQuad.y0)+Vector2d(_fPosX-fSize/2, _fPosY),
                                     Vector2d(GlyphQuad.x1, GlyphQuad.y1)+Vector2d(_fPosX-fSize/2, _fPosY),
@@ -306,27 +313,25 @@ void CFontManager::changeFont()
     {
         std::string strFontDesignator = std::to_string(m_nSize)+m_strFont;
         
-        auto nID = 0u;
-        
         const auto ci = m_FontsByName.find(strFontDesignator);
         if (ci != m_FontsByName.end())
         {
-            nID = ci->second;
+            m_unTexID = ci->second;
         }
         else
         {
             this->rasterize(m_strFont, m_nSize);
-            nID = m_FontsByName[strFontDesignator];
+            m_unTexID = m_FontsByName[strFontDesignator];
         }
 
         // End current render batch since it is bound to the font texture
-        m_Graphics.restartRenderBatch("font");
+        m_Graphics.restartRenderBatch(m_strRenderModeName);
         
-        m_pFontCharInfo = m_FontsCharInfo[nID];
-        m_nAtlasSize    = m_AtlasSizes[nID];
+        m_pFontCharInfo = m_FontsCharInfo[m_unTexID];
+        m_nAtlasSize    = m_AtlasSizes[m_unTexID];
     
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, nID);
+        glBindTexture(GL_TEXTURE_2D, m_unTexID);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

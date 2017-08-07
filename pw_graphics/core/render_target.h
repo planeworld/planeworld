@@ -44,6 +44,8 @@
 #include "GL/gl.h"
 #include "GL/glext.h"
 
+const bool RENDER_TARGET_CLEAR = true;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class to define a render target, using a frame buffer object
@@ -55,6 +57,9 @@ class CRenderTarget
 
     public:
       
+        //--- Constructor/Destructor -----------------------------------------//
+        ~CRenderTarget();
+        
         //--- Methods --------------------------------------------------------//
         bool init(const std::uint16_t, const std::uint16_t);
         void setTarget(const float, const float,
@@ -67,13 +72,12 @@ class CRenderTarget
               GLuint                getIDTex() const;
         const std::vector<GLfloat>& getQuad() const;
         const std::vector<GLfloat>& getTexUV() const;
-        void bind() const;
+        void bind(const bool _bClear = false) const;
         void unbind() const;
         
     private:
         
         //--- Variables [protected] ------------------------------------------//
-        GLuint m_unIDDeB = 0;   ///< ID of depth buffer
         GLuint m_unIDFBO = 0;   ///< ID of framebuffer object
         GLuint m_unIDTex = 0;   ///< ID of texture
         
@@ -81,17 +85,13 @@ class CRenderTarget
                                     -1.0f, -1.0f, -10.0f,
                                     1.0f, -1.0f,  -10.0f,
                                     -1.0f,  1.0f, -10.0f,
-                                    -1.0f,  1.0f, -10.0f,
-                                    1.0f, -1.0f,  -10.0f,
-                                    1.0f,  1.0f,  -10.0f,
+                                    1.0f,  1.0f,  -10.0f
                                   }; ///< Target quad to map texture to
         std::vector<GLfloat> m_vecTexUV = {
                                     0.0f, 0.0f,
                                     1.0f, 0.0f,
                                     0.0f, 1.0f,
-                                    0.0f, 1.0f,
-                                    1.0f, 0.0f,
-                                    1.0f, 1.0f,
+                                    1.0f, 1.0f
                                   }; ///< Texture coordinates
 };
 
@@ -140,12 +140,14 @@ inline const std::vector<GLfloat>& CRenderTarget::getTexUV() const
 ///
 /// \brief Bind the framebuffer object
 ///
+/// \param _bClear Clear frame buffer?
+///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CRenderTarget::bind() const
+inline void CRenderTarget::bind(const bool _bClear) const
 {
     METHOD_ENTRY("CRenderTarget::bind")
     glBindFramebuffer(GL_FRAMEBUFFER, m_unIDFBO);
-    glViewport(0, 0, 1440, 900);
+    if (_bClear) glClear(GL_COLOR_BUFFER_BIT);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

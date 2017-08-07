@@ -41,7 +41,6 @@
 #include "log.h"
 #include "shader_program.h"
 #include "render_mode.h"
-#include "render_target.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include <eigen3/Eigen/Core>

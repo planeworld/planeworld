@@ -102,7 +102,6 @@ TARGET_LINK_LIBRARIES (planeworld
     pugixml
     sfml-system
     sfml-window
-    sfml-graphics
     Threads::Threads
 )
 IF (UNIX)

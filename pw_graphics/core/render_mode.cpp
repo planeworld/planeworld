@@ -145,7 +145,6 @@ inline void CRenderTarget::bind() const
 {
     METHOD_ENTRY("CRenderTarget::bind")
     glBindFramebuffer(GL_FRAMEBUFFER, m_unIDFBO);
-    glViewport(0, 0, 1440, 900);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

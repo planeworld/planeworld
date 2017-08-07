@@ -238,18 +238,8 @@ void CGraphics::swapBuffers()
 {
     METHOD_ENTRY("CGraphics::swapBuffers")
     
-//     m_RenderTargetScreen.unbind();
-//     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//     this->beginRenderBatch(GRAPHICS_SHADER_MODE_FONT);
-// //     m_ShaderTextureToScreen.use();
-//     this->texturedRect(Vector2d(0.0, 0.0), Vector2d(m_unWidthScr, m_unHeightScr),
-//                        &m_RenderTargetScreen.getTexUV());
-//    
-//     this->endRenderBatch();
     m_pWindow->display();
-    
-//     m_RenderTargetScreen.bind();
-    
+   
     // Reset debug information of this frame
     m_nDrawCalls = 0;
     m_nLines = 0;

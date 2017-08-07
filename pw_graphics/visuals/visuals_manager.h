@@ -40,6 +40,7 @@
 #include "font_manager.h"
 #include "planet.h"
 #include "polygon.h"
+#include "render_target.h"
 #include "thread_module.h"
 #include "universe.h"
 #include "visuals_data_storage_user.h"
@@ -138,12 +139,12 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         void            myInitComInterface();
 
-        CRenderMode         m_RenderModeWorld;              ///< Default render mode
-        CRenderMode         m_RenderModeFont;               ///< Mode for font rendering
-        CShaderProgram      m_ShaderProgramWorld;           ///< Basic shader program
         CShaderProgram      m_ShaderProgramFont;            ///< Shader program for font rendering
-        CShaderProgram      m_ShaderProgramTextureToScreen; ///< Shader program to put image to screen buffer
-        
+        CShaderProgram      m_ShaderProgramMainScreen;      ///< Shader program to put image to screen buffer
+        CShaderProgram      m_ShaderProgramWorld;           ///< Basic shader program
+        CRenderMode         m_RenderModeFont;               ///< Mode for font rendering
+        CRenderMode         m_RenderModeMainScreen;         ///< Mode for rendering texture to screen
+        CRenderMode         m_RenderModeWorld;              ///< Default render mode
         CRenderTarget       m_RenderTargetScreen;           ///< Render target of screen (final image)
         
         CUniverse*                      m_pUniverse;        ///< Procedurally generated universe

@@ -71,18 +71,15 @@ class CRenderMode
         //--- Methods --------------------------------------------------------//
         void setRenderModeType(const RenderModeType _RenderModeType) {m_RenderModeType = _RenderModeType;}
         void setShaderProgram(CShaderProgram* const _pShaderProgram) {m_pShaderProgram = _pShaderProgram;}
-        void use()
-        {
-            METHOD_ENTRY("CRenderMode::use")
-            
-            m_pShaderProgram->use();
-        }
+        void setTexture(const GLuint _nTexID) {m_nTexID = _nTexID;}
+        void use() {m_pShaderProgram->use();}
         
     private:
         
         //--- Variables [private] --------------------------------------------//
         RenderModeType   m_RenderModeType = RenderModeType::VERT3COL4;  ///< Type of this render mode
         CShaderProgram*  m_pShaderProgram{nullptr};                     ///< Referred shader program, active for this mode
+        GLuint           m_nTexID = 0;
         
 };
 

@@ -863,32 +863,49 @@ bool CVisualsManager::init()
     METHOD_ENTRY("CVisualsManager::init")
     
     //--------------------------------------------------------------------------
-    // Setup shaders and render modes
+    // Setup rendering
     //--------------------------------------------------------------------------
     
-    CShader VertexShaderWorld;
     CShader VertexShaderFont;
-    CShader FragmentShaderWorld;
+    CShader VertexShaderMainScreen;
+    CShader VertexShaderWorld;
     CShader FragmentShaderFont;
+    CShader FragmentShaderMainScreen;
+    CShader FragmentShaderWorld;
     
+    m_RenderTargetScreen.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
+    m_RenderTargetScreen.setTarget(m_Graphics.getViewPort().leftplane,  m_Graphics.getViewPort().bottomplane,
+                                   m_Graphics.getViewPort().rightplane, m_Graphics.getViewPort().bottomplane,
+                                   m_Graphics.getViewPort().rightplane, m_Graphics.getViewPort().topplane,
+                                   m_Graphics.getViewPort().leftplane,  m_Graphics.getViewPort().topplane);
+
+    VertexShaderFont.load(m_strDataPath+"/shader/font.vert", GL_VERTEX_SHADER);    
+    VertexShaderMainScreen.load(m_strDataPath+"/shader/main_screen.vert", GL_VERTEX_SHADER);
     VertexShaderWorld.load(m_strDataPath+"/shader/shader.vert", GL_VERTEX_SHADER);
-    FragmentShaderWorld.load(m_strDataPath+"/shader/shader.frag", GL_FRAGMENT_SHADER);
-    VertexShaderFont.load(m_strDataPath+"/shader/font.vert", GL_VERTEX_SHADER);
+
     FragmentShaderFont.load(m_strDataPath+"/shader/font.frag", GL_FRAGMENT_SHADER);
+    FragmentShaderMainScreen.load(m_strDataPath+"/shader/main_screen.frag", GL_FRAGMENT_SHADER);
+    FragmentShaderWorld.load(m_strDataPath+"/shader/shader.frag", GL_FRAGMENT_SHADER);
+    
+    m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
+    m_RenderModeFont.setShaderProgram(&m_ShaderProgramFont);
+    m_RenderModeFont.setRenderModeType(RenderModeType::VERT3COL4TEX2);
+
+    m_ShaderProgramMainScreen.create(VertexShaderMainScreen, FragmentShaderMainScreen);
+    m_RenderModeMainScreen.setShaderProgram(&m_ShaderProgramMainScreen);
+    m_RenderModeMainScreen.setRenderModeType(RenderModeType::VERT3COL4TEX2);
+    m_RenderModeMainScreen.setTexture(m_RenderTargetScreen.getIDTex());
     
     m_ShaderProgramWorld.create(VertexShaderWorld, FragmentShaderWorld);
     m_RenderModeWorld.setShaderProgram(&m_ShaderProgramWorld);
     m_RenderModeWorld.setRenderModeType(RenderModeType::VERT3COL4);
     
-    m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
-    m_RenderModeFont.setShaderProgram(&m_ShaderProgramFont);
-    m_RenderModeFont.setRenderModeType(RenderModeType::VERT3COL4TEX2);
-    
-    m_Graphics.registerRenderMode("world", &m_RenderModeWorld);
     m_Graphics.registerRenderMode("font", &m_RenderModeFont);
+    m_Graphics.registerRenderMode("main_screen", &m_RenderModeMainScreen);
+    m_Graphics.registerRenderMode("world", &m_RenderModeWorld);
     
     m_RenderModeWorld.use();
-    
+
     //--------------------------------------------------------------------------
     // Setup fonts
     //--------------------------------------------------------------------------
@@ -897,6 +914,7 @@ bool CVisualsManager::init()
     m_FontManager.addFont("anka_c87_i", m_strDataPath + "/fonts/AnkaCoder-C87-i.ttf");
     m_FontManager.addFont("anka_c87_b", m_strDataPath + "/fonts/AnkaCoder-C87-b.ttf");
     m_FontManager.addFont("anka_c87_bi", m_strDataPath + "/fonts/AnkaCoder-C87-bi.ttf");
+    m_FontManager.setRenderModeName("font");
     
     m_strFont = FONT_MGR_FONT_DEFAULT;
     
@@ -952,14 +970,6 @@ bool CVisualsManager::init()
     m_TextTimers.setFont(m_strFont);
     m_TextTimers.setPosition(10.0f, 10.0f);
     m_TextTimers.setSize(12);
-
-//     m_Graphics.setDataPath(m_strDataPath);
-/*    
-     m_RenderTargetScreen.init(m_unWidthScr, m_unHeightScr);
-    m_RenderTargetScreen.setTarget(m_ViewPort.leftplane,  m_ViewPort.bottomplane,
-                                   m_ViewPort.rightplane, m_ViewPort.bottomplane,
-                                   m_ViewPort.rightplane, m_ViewPort.topplane,
-                                   m_ViewPort.leftplane,  m_ViewPort.topplane);*/
     
     return m_Graphics.init();
 }
@@ -1102,6 +1112,8 @@ void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
 
+    m_RenderTargetScreen.bind(RENDER_TARGET_CLEAR);
+    
     m_Graphics.setupWorldSpace();
 
     this->addWidgetsFromQueue();
@@ -1120,14 +1132,23 @@ void CVisualsManager::processFrame()
     this->drawCOM();
     this->drawBoundingBoxes();
 
+    m_RenderTargetScreen.unbind();
+    
     m_Graphics.setupScreenSpace();
+    
+    glBindTexture(GL_TEXTURE_2D, m_RenderTargetScreen.getIDTex());
+    
+    m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
+    m_Graphics.beginRenderBatch("main_screen");
+        m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScreen.getTexUV());
+    m_Graphics.endRenderBatch();
+    
 
     this->drawKinematicsStates();    
     this->drawGridHUD();
     this->drawTimers();
     this->drawWindows();
     this->updateUI();
-
     this->drawDebugInfo();
     this->finishFrame();
 }
@@ -2197,6 +2218,7 @@ void CVisualsManager::myInitComInterface()
                                       CCommand<void, double, double>([=](const double& _fX,
                                                                          const double& _fY)
                                       {
+                                          m_RenderTargetScreen.init(std::uint16_t(_fX), std::uint16_t(_fY));
                                           m_Graphics.resizeWindow(int(_fX), int(_fY));
                                           if (m_pCamera != nullptr)
                                           {
