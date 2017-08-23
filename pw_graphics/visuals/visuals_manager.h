@@ -90,6 +90,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         //--- Methods --------------------------------------------------------//
         bool            init();
         
+        UIDType         createCamera(const CreationModeType = CreationModeType::DIRECT);
         UIDType         createWidget(const WidgetTypeType, const CreationModeType = CreationModeType::DIRECT);
         UIDType         createWindow(const CreationModeType = CreationModeType::DIRECT);
         
@@ -125,6 +126,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         #endif
         
         //--- Methods [private] ----------------------------------------------//
+        void            addCamerasFromQueue();
         void            addWidgetsFromQueue();
         void            addWindowsFromQueue();
             
@@ -162,6 +164,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         bool                            m_bCursor;          ///< Indicates if mouse cursor is enabled
         bool                            m_bMBLeft;          ///< Left mouse button
         
+        CamerasQueueType                m_CamerasQueue;     ///< Queue of new cameras to be added to storage
         WidgetsQueueType                m_WidgetsQueue;     ///< Queue of new widgets to be added to storage
         WindowsQueueType                m_WindowsQueue;     ///< Queue of new windows to be added to storage
         
@@ -176,6 +179,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         CFontManager                    m_FontManager;      ///< Font manager for displaying UI text
         CUIDVisuals                     m_UIDVisuals;       ///< Graphical display of UIDs
         CText                           m_TextDebris;       ///< Text object for debris names
+        CText                           m_TextDebugInfo;    ///< Text object for debug information
         CText                           m_TextObjects;      ///< Text object for object names
         CText                           m_TextScale;        ///< Text object for universe scale
         CText                           m_TextTimers;       ///< Text object for timers
@@ -223,35 +227,6 @@ inline WindowHandleType* CVisualsManager::getWindow() const
     METHOD_ENTRY("CVisualsManager::getWindow")
     return (m_Graphics.getWindow());
 }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Sets the console text for this frame if console mode is active
-// ///
-// /// \param _strText Console text for this frame
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// inline void CVisualsManager::setConsoleText(const std::string& _strText)
-// {
-//     METHOD_ENTRY("CVisualsManager::setConsoleText")
-//     if (m_bConsoleMode)
-//     {
-//         m_strConsoleText = _strText;
-//     }
-// }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Sets the active com console for visualisation
-// ///
-// /// \param _pComConsole Active console to be set for visualisation
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// inline void CVisualsManager::setComConsole(CComConsole* const _pComConsole)
-// {
-//     METHOD_ENTRY("CVisualsManager::setComConsole")
-//     m_pComConsole = _pComConsole;
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

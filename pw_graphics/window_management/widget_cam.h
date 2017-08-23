@@ -20,75 +20,64 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       render_mode.h
-/// \brief      Prototype of class "CRenderMode"
+/// \file       widget_cam.h
+/// \brief      Prototype of "CWidgetCam"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2017-08-02
+/// \date       2017-08-11
 ///
 ////////////////////////////////////////////////////////////////////////////////
-
-#ifndef RENDER_MODE_H
-#define RENDER_MODE_H
-
-#define GL_GLEXT_PROTOTYPES
+#ifndef WIDGET_CAM_H
+#define WIDGET_CAM_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "log.h"
-#include "shader_program.h"
+#include "camera.h"
+#include "render_mode.h"
+#include "render_target.h"
+#include "unique_id_referrer.h"
+#include "visuals_data_storage_user.h"
+#include "widget.h"
 
 //--- Misc header ------------------------------------------------------------//
-#include "GL/gl.h"
-#include "GL/glext.h"
-
-/// Specifies the type render mode
-enum class RenderModeType
-{
-    VERT3COL4,
-    VERT3COL4TEX2
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class to define the state of one specific render mode
-///
-/// A render mode is composed of information needed to render one batch of 
-/// primitives with the same preconditions. This includes shader program, 
-/// texture information, attributes such es vertices and colours etc.
+/// \brief Defines a camera widget, using render to texture to display a scene
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CRenderMode
+class CWidgetCam : public IWidget,
+                   public IUniqueIDReferrer<CCamera>,
+                   public IVisualsDataStorageUser
 {
 
     public:
+    
+        //--- Constructor/Destructor------------------------------------------//
+        CWidgetCam() = delete;
+        CWidgetCam(CFontManager* const);
+        ~CWidgetCam() override;
         
         //--- Constant methods -----------------------------------------------//
-        RenderModeType              getRenderModeType() const {return m_RenderModeType;}
-        const CShaderProgram*       getShaderProgram() const {return m_pShaderProgram;}
-        GLuint                      getTexture() const {return m_unTexID;}
-              
+        const CRenderTarget* getRenderTarget() const {return &m_TargetCam;}
+        
         //--- Methods --------------------------------------------------------//
-        void setRenderModeType(const RenderModeType _RenderModeType) {m_RenderModeType = _RenderModeType;}
-        void setShaderProgram(CShaderProgram* const _pShaderProgram) {m_pShaderProgram = _pShaderProgram;}
-        void setTexture(const GLuint _unTexID) {m_unTexID = _unTexID;}
-        void use()
-        {
-            m_pShaderProgram->use();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, m_unTexID);
-        }
+        void draw() override;
+        
+        void setShaderProgram(CShaderProgram* const _pShaderProgram) {m_RenderMode.setShaderProgram(_pShaderProgram);}
         
     private:
         
+        //--- Methods [private] ----------------------------------------------//
+        void myResize(const int, const int) override;
+        
         //--- Variables [private] --------------------------------------------//
-        RenderModeType   m_RenderModeType = RenderModeType::VERT3COL4;  ///< Type of this render mode
-        CShaderProgram*  m_pShaderProgram{nullptr};                     ///< Referred shader program, active for this mode
-        GLuint           m_unTexID = 0;
+        CRenderMode   m_RenderMode;     ///< Render mode to use for rendering
+        CRenderTarget m_TargetCam;      ///< Rendertarget for virtual camera
         
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-#endif // RENDER_TARGET_H
+#endif // WIDGET_CAM_H

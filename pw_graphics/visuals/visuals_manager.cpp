@@ -33,6 +33,7 @@
 #include <random>
 
 #include "debris.h"
+#include "widget_cam.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -57,6 +58,7 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_strDataPath(""),
                                      m_UIDVisuals(&m_FontManager),
                                      m_TextDebris(&m_FontManager),
+                                     m_TextDebugInfo(&m_FontManager),
                                      m_TextObjects(&m_FontManager),
                                      m_TextScale(&m_FontManager),
                                      m_TextTimers(&m_FontManager),
@@ -437,7 +439,8 @@ void CVisualsManager::drawDebris(CCamera* const _pCamera) const
                     {
                         if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
                         {
-                            m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.05);
+                            m_Graphics.setColor(fSizeR * i, fSizeR * i, fSizeR * i, 0.05);
+//                             m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.5);
                             m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
                                             IGridUser::cellToDouble(Debris.second->getCell() - _pCamera->getCell()),
                                             (double(Debris.second->getPositions()->size()-i) * 0.01 + 3.0),
@@ -874,10 +877,6 @@ bool CVisualsManager::init()
     CShader FragmentShaderWorld;
     
     m_RenderTargetScreen.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
-    m_RenderTargetScreen.setTarget(m_Graphics.getViewPort().leftplane,  m_Graphics.getViewPort().bottomplane,
-                                   m_Graphics.getViewPort().rightplane, m_Graphics.getViewPort().bottomplane,
-                                   m_Graphics.getViewPort().rightplane, m_Graphics.getViewPort().topplane,
-                                   m_Graphics.getViewPort().leftplane,  m_Graphics.getViewPort().topplane);
 
     VertexShaderFont.load(m_strDataPath+"/shader/font.vert", GL_VERTEX_SHADER);    
     VertexShaderMainScreen.load(m_strDataPath+"/shader/main_screen.vert", GL_VERTEX_SHADER);
@@ -924,9 +923,9 @@ bool CVisualsManager::init()
     
     // Setup engine global visuals first
     m_UIDVisuals.UIDText.setFont(m_strFont);
-    m_UIDVisuals.UIDText.setColor({{1.0, 1.0, 0.0, 0.8}});
-    m_UIDVisuals.UIDText.setSize(10);
-    m_UIDVisuals.setBGColor({{0.1, 0.1, 0.8, 0.8}});
+    m_UIDVisuals.UIDText.setColor({{1.0, 0.0, 1.0, 1.0}});
+    m_UIDVisuals.UIDText.setSize(12);
+    m_UIDVisuals.setBGColor({{0.1, 0.0, 0.1, 1.0}});
     
     // When calling init, all relevant variables have to be set up. Thus, sub 
     // components like the visuals data storage can be set up, eventually.
@@ -957,9 +956,37 @@ bool CVisualsManager::init()
     pConsoleWindow->setVisibilty(false);
     pConsoleWindow->setClosability(false);
     
+    // Testing a camera widget
+    auto CameraID = this->createCamera();
+    
+    auto CamWidgetID = this->createWidget(WidgetTypeType::CAMERA);
+    CWidgetCam* pCameraWidget = static_cast<CWidgetCam*>(m_pVisualsDataStorage->getWidgetByValue(CamWidgetID));
+    pCameraWidget->setShaderProgram(&m_ShaderProgramMainScreen);
+    
+    pCameraWidget->attachTo(m_pVisualsDataStorage->getCamerasByValue().at(CameraID));
+    
+    auto CamWindowID = this->createWindow();
+    CWindow* pCamWindow  = m_pVisualsDataStorage->getWindowByValue(CamWindowID);
+    
+    pCamWindow->Title.setText("Camera 1");
+    pCamWindow->Title.setFont(m_strFont);
+    pCamWindow->Title.setSize(20);
+    pCamWindow->Title.setColor({{1.0, 1.0, 1.0, 1.0}});
+    pCamWindow->setWidget(pCameraWidget);
+    pCamWindow->setColorBG({{0.1, 0.1, 0.1, 0.75}}, WIN_INHERIT);
+    pCamWindow->setColorFG({{0.3, 0.3, 0.3, 0.75}}, WIN_INHERIT);
+    pCamWindow->setPosition(10, 500);
+    pCamWindow->resize(200, 200);
+    pCamWindow->setVisibilty(true);
+    pCamWindow->setClosability(true);    
+    
     // Initialise UI text objects
     m_TextDebris.setFont(m_strFont);
     m_TextDebris.setSize(12);
+    m_TextDebugInfo.setColor({{1.0, 0.0, 1.0, 0.8}});
+    m_TextDebugInfo.setFont(m_strFont);
+    m_TextDebugInfo.setPosition(10, 10);
+    m_TextDebugInfo.setSize(16);
     m_TextObjects.setFont(m_strFont);
     m_TextObjects.setSize(12);
     m_TextScale.setFont(m_strFont);
@@ -972,6 +999,41 @@ bool CVisualsManager::init()
     m_TextTimers.setSize(12);
     
     return m_Graphics.init();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates a generic camera
+///
+/// This method creates a camera and adds it to storage. In
+/// \ref CreationModeType::QUEUED, it will be moved to a waiter queue and later
+/// be added to storage. The reason for this lies in multithreading and return
+/// value retrieval. When a camera is created, the UID has to be returned.
+/// Hence, it is defined as a reader command (see \ref CComInterface). The
+/// newly created camera is stored temporary in a concurrent queue and later
+/// added to storage by the appropriate thread.
+///
+/// \param _pMode Mode of creation (direct to storage or threading queue)
+///
+/// \return UID of newly created camera
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CVisualsManager::createCamera(const CreationModeType _pMode)
+{
+    METHOD_ENTRY("CVisualsManager::createCamera")
+    
+    CCamera* pCam = new CCamera();
+    MEM_ALLOC("CCamera")
+    
+    if (_pMode == CreationModeType::DIRECT)
+    {
+        m_pVisualsDataStorage->addCamera(pCam);
+    }
+    else
+    {
+        m_CamerasQueue.try_enqueue(pCam);
+    }
+    return pCam->getUID();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1001,6 +1063,14 @@ UIDType CVisualsManager::createWidget(const WidgetTypeType _WidgetType,
     
     switch (_WidgetType)
     {
+        case WidgetTypeType::CAMERA:
+        {
+            CWidgetCam* pCameraWidget = new CWidgetCam(&m_FontManager);
+            pCameraWidget->setUIDVisuals(&m_UIDVisuals);
+            pCameraWidget->setShaderProgram(&m_ShaderProgramMainScreen);
+            pWidget = pCameraWidget;
+            break;
+        }
         case WidgetTypeType::CONSOLE:
         {
             CWidgetConsole* pConsoleWidget = new CWidgetConsole(&m_FontManager);
@@ -1065,7 +1135,7 @@ UIDType CVisualsManager::createWidget(const WidgetTypeType _WidgetType,
 ///////////////////////////////////////////////////////////////////////////////
 UIDType CVisualsManager::createWindow(const CreationModeType _pMode)
 {
-    METHOD_ENTRY("CVisualsManager::addWidget")
+    METHOD_ENTRY("CVisualsManager::createWindow")
     
     CWindow* pWin = new CWindow(&m_FontManager);
     MEM_ALLOC("CWindow")
@@ -1112,13 +1182,28 @@ void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
 
-    m_RenderTargetScreen.bind(RENDER_TARGET_CLEAR);
-    
-    m_Graphics.setupWorldSpace();
-
+    this->addCamerasFromQueue();
     this->addWidgetsFromQueue();
     this->addWindowsFromQueue();
     m_pComInterface->callWriters("visuals");
+
+    for (auto CamWidget : m_pVisualsDataStorage->getCameraWidgets())
+    {
+        CamWidget.second->getRenderTarget()->bind(RENDER_TARGET_CLEAR);
+        //
+            m_Graphics.setupWorldSpace();
+            
+            m_pCamera = CamWidget.second->getRef();
+            m_pCamera->zoomTo(0.5e-5);
+            m_pCamera->update();
+            this->drawWorld();
+        //
+        CamWidget.second->getRenderTarget()->unbind();
+    }
+    
+    m_RenderTargetScreen.bind(RENDER_TARGET_CLEAR);
+    
+    m_Graphics.setupWorldSpace();
 
     m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
     m_pCamera->update();
@@ -1136,21 +1221,38 @@ void CVisualsManager::processFrame()
     
     m_Graphics.setupScreenSpace();
     
-    glBindTexture(GL_TEXTURE_2D, m_RenderTargetScreen.getIDTex());
-    
     m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
     m_Graphics.beginRenderBatch("main_screen");
         m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScreen.getTexUV());
     m_Graphics.endRenderBatch();
     
-
     this->drawKinematicsStates();    
     this->drawGridHUD();
     this->drawTimers();
     this->drawWindows();
     this->updateUI();
     this->drawDebugInfo();
+    
     this->finishFrame();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add cameras from queue to storage
+///
+/// This method will add the cameras from queue (see
+/// \ref CVisualsDataStorage::addCamera) to storage.
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::addCamerasFromQueue()
+{
+    METHOD_ENTRY("CVisualsManager::addCamerasFromQueue")
+    
+    CCamera* pCam = nullptr;
+    while (m_CamerasQueue.try_dequeue(pCam))
+    {
+        m_pVisualsDataStorage->addCamera(pCam);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1202,12 +1304,6 @@ void CVisualsManager::drawDebugInfo()
 
     if (m_nVisualisations & VISUALS_DEBUG_INFO)
     {
-        CText TextDrawCalls(&m_FontManager);
-        TextDrawCalls.setFont(m_strFont);
-        TextDrawCalls.setSize(16);
-        TextDrawCalls.setPosition(200, 200);
-        TextDrawCalls.setColor({{1.0, 0.0, 1.0, 0.8}});
-        
         std::ostringstream oss;
         oss << "GRAPHICS\n\n  Drawcalls: " << m_Graphics.getDrawCalls()+1 << "\n";
         oss << "  Lines: " << m_Graphics.getLinesPerFrame() << "\n";
@@ -1223,10 +1319,10 @@ void CVisualsManager::drawDebugInfo()
             oss << "   * " << strFont.first << "\n";
         }
         
-        TextDrawCalls.setText(oss.str());
+        m_TextDebugInfo.setText(oss.str());
         
         m_Graphics.beginRenderBatch("font");
-            TextDrawCalls.display();
+            m_TextDebugInfo.display();
         m_Graphics.endRenderBatch();
     }
 }
@@ -1669,71 +1765,71 @@ void CVisualsManager::updateUI()
 {
     METHOD_ENTRY("CVisualsManager::updateUI")
     
-    m_Graphics.beginRenderBatch("world");
-
-        if (m_bMBLeft)
+    if (m_bMBLeft)
+    {
+        auto it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
+        bool bDone = false;
+        while (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rend() && !bDone)
         {
-            auto it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
-            bool bDone = false;
-            while (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rend() && !bDone)
+            CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(*it);
+            
+            // First, get focus of window
+            if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::WIN))
             {
-                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(*it);
-                
-                // First, get focus of window
-                if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::WIN))
+                if (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin())
                 {
-                    if (it != m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin())
-                    {
-                        m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(*it);
-                        m_pVisualsDataStorage->getWindowUIDsInOrder()->erase(std::prev(it.base()));
-                        it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
-                        pWin = m_pVisualsDataStorage->getWindowByValue(*it);
-                    }
-                    bDone = true;
+                    m_pVisualsDataStorage->getWindowUIDsInOrder()->push_back(*it);
+                    m_pVisualsDataStorage->getWindowUIDsInOrder()->erase(std::prev(it.base()));
+                    it = m_pVisualsDataStorage->getWindowUIDsInOrder()->rbegin();
+                    pWin = m_pVisualsDataStorage->getWindowByValue(*it);
                 }
-                    
-                // Test, if cursor is in the area that closes the window
-                if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::CLOSE))
-                {
-                    m_pVisualsDataStorage->closeWindow(*it);
-                    m_bMBLeft = false; // Avoid focussing the underlying window
-                    bDone = true;
-                }
-                // Test, if cursor is in the area that resizes the window
-                else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::RESIZE))
-                {
-                    if (pWin->getHeight()+m_nCursorY-m_nCursorY0 > 50 &&
-                        pWin->getWidth()+m_nCursorX-m_nCursorX0 > 50)
-                    {
-                        pWin->resize(pWin->getWidth() +m_nCursorX-m_nCursorX0,
-                                    pWin->getHeight()+m_nCursorY-m_nCursorY0);
-                    }
-                    bDone = true;
-                }
-                // Test, if mouse cursor is inside title of window. Cursor positon of
-                // the previous frame must be used, since windows are not updated
-                // yet.
-                else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::TITLE))
-                {
-                    // Test for offset (position of cursor within windows).
-                    // Offset = 0 indicates, that no offset was calculated yet.
-                    if (m_nCursorOffsetX == 0 && m_nCursorOffsetY == 0)
-                    {
-                        m_nCursorOffsetX = m_nCursorX0 - pWin->getPositionX();
-                        m_nCursorOffsetY = m_nCursorY0 - pWin->getPositionY();
-                    }
-                    pWin->setPosition(m_nCursorX-m_nCursorOffsetX, m_nCursorY-m_nCursorOffsetY);
-                    bDone = true;
-                }
-                ++it;
+                bDone = true;
             }
+                
+            // Test, if cursor is in the area that closes the window
+            if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::CLOSE))
+            {
+                m_pVisualsDataStorage->closeWindow(*it);
+                m_bMBLeft = false; // Avoid focussing the underlying window
+                bDone = true;
+            }
+            // Test, if cursor is in the area that resizes the window
+            else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::RESIZE))
+            {
+                if (pWin->getHeight()+m_nCursorY-m_nCursorY0 > 50 &&
+                    pWin->getWidth()+m_nCursorX-m_nCursorX0 > 50)
+                {
+                    pWin->resize(pWin->getWidth() +m_nCursorX-m_nCursorX0,
+                                pWin->getHeight()+m_nCursorY-m_nCursorY0);
+                }
+                bDone = true;
+            }
+            // Test, if mouse cursor is inside title of window. Cursor positon of
+            // the previous frame must be used, since windows are not updated
+            // yet.
+            else if (pWin->isInside(m_nCursorX0, m_nCursorY0, WinAreaType::TITLE))
+            {
+                // Test for offset (position of cursor within windows).
+                // Offset = 0 indicates, that no offset was calculated yet.
+                if (m_nCursorOffsetX == 0 && m_nCursorOffsetY == 0)
+                {
+                    m_nCursorOffsetX = m_nCursorX0 - pWin->getPositionX();
+                    m_nCursorOffsetY = m_nCursorY0 - pWin->getPositionY();
+                }
+                pWin->setPosition(m_nCursorX-m_nCursorOffsetX, m_nCursorY-m_nCursorOffsetY);
+                bDone = true;
+            }
+            ++it;
         }
-        
-        m_nCursorX0 = m_nCursorX;
-        m_nCursorY0 = m_nCursorY;
-        
-        if (m_bCursor)
-        {
+    }
+    
+    m_nCursorX0 = m_nCursorX;
+    m_nCursorY0 = m_nCursorY;
+    
+    if (m_bCursor)
+    {
+        m_Graphics.beginRenderBatch("world");
+        // 
             m_Graphics.setColor(1.0, 1.0, 1.0, 0.8);
             m_Graphics.beginLine();
                 m_Graphics.addVertex(m_nCursorX-10, m_nCursorY);
@@ -1747,10 +1843,11 @@ void CVisualsManager::updateUI()
             m_Graphics.endLine(PolygonType::LINE_SINGLE);
             if (m_bMBLeft)
                 m_Graphics.circle(Vector2d(m_nCursorX, m_nCursorY), 5);
-        }
-        m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-    
-    m_Graphics.endRenderBatch();
+        
+            m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+        //
+        m_Graphics.endRenderBatch();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1848,7 +1945,7 @@ void CVisualsManager::myInitComInterface()
                                       "system"
     );
     m_pComInterface->registerFunction("cam_get_zoom",
-                                      CCommand<double>([&](){return m_pCamera->getZoom();}),
+                                      CCommand<double>([&](){return m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex)->getZoom();}),
                                       "Returns zoom level of active camera",
                                       {{ParameterType::DOUBLE, "Zoom level of active camera"}},
                                       "system"

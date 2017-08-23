@@ -65,6 +65,14 @@ void CWidgetText::draw()
         this->drawFrame();
     m_Graphics.endRenderBatch();
    
+    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+    
+    m_Graphics.beginRenderBatch("font");
+        Text.setPosition(m_nFramePosX, m_nFramePosY);
+        Text.setWordWrap(m_nFrameWidth);
+        Text.display();
+    m_Graphics.endRenderBatch();
+    
     DOM_DEV(
         static bool bWarned = false;
         if (m_pUIDVisuals == nullptr)
@@ -76,14 +84,6 @@ void CWidgetText::draw()
             }
             goto DomDev;
         })
-        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, m_UID.getValue());
+    m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, "Widget Text", m_UID.getValue());
     DOM_DEV(DomDev:)
-    
-    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-    
-    m_Graphics.beginRenderBatch("font");
-        Text.setPosition(m_nFramePosX, m_nFramePosY);
-        Text.setWordWrap(m_nFrameWidth);
-        Text.display();
-    m_Graphics.endRenderBatch();
 }

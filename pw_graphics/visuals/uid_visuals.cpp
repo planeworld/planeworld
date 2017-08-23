@@ -34,23 +34,25 @@
 ///
 /// \brief Draws a circle using graphics base
 ///
-/// \param _nPosX Position X in screen space
-/// \param _nPosY Position Y in screen space
-/// \param _nUID  UID to be displayed
+/// \param _nPosX  Position X in screen space
+/// \param _nPosY  Position Y in screen space
+/// \param _strUsr User of UID
+/// \param _nUID   UID to be displayed
 ///
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CUIDVisuals::draw(const int _nPosX, const int _nPosY, const UIDType _nUID)
+void CUIDVisuals::draw(const int _nPosX, const int _nPosY,
+                       const std::string& _strUsr, const UIDType _nUID)
 {
     METHOD_ENTRY("CUIDVisuals::draw")
     if (m_bShowUID)
     {
-        UIDText.setText(std::to_string(_nUID));
+        UIDText.setText(_strUsr + ": " + std::to_string(_nUID));
         double fSizeX = UIDText.getLength()+5.0;
         m_Graphics.beginRenderBatch("world");
             m_Graphics.setColor(m_aBGColor);
             m_Graphics.filledRect(Vector2d(_nPosX, _nPosY),
-                                  Vector2d(_nPosX + fSizeX, _nPosY+UIDText.getFontSize()));
+                                  Vector2d(_nPosX + fSizeX, _nPosY+UIDText.getFontSize()*UID_VISUALS_FONT_SCALE));
         m_Graphics.endRenderBatch();
         m_Graphics.beginRenderBatch("font");
             UIDText.setPosition(_nPosX+fSizeX*0.5, _nPosY, TEXT_POSITION_CENTERED_X);

@@ -50,6 +50,7 @@ typedef std::vector<IWidget*> WidgetsType;
 enum class WidgetTypeType
 {
     INVALID,
+    CAMERA,
     CONSOLE,
     TEXT
 };
@@ -86,11 +87,13 @@ class IWidget : public IFontUser,
 
 //--- Enum parser ------------------------------------------------------------//
 static std::unordered_map<WidgetTypeType, std::string> s_WidgetTypeToStringMap = {
+    {WidgetTypeType::CAMERA, "camera"},
     {WidgetTypeType::CONSOLE, "console"},
     {WidgetTypeType::TEXT, "text"}
 }; ///< Map from WidgetTypeType to string
 
 const std::unordered_map<std::string, WidgetTypeType> STRING_TO_WIDGET_TYPE_MAP = {
+    {"camera", WidgetTypeType::CAMERA},
     {"console", WidgetTypeType::CONSOLE},
     {"text", WidgetTypeType::TEXT}
 }; ///< Map from string to WidgetTypeType

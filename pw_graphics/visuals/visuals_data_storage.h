@@ -43,8 +43,12 @@
 #include "widget.h"
 #include "window.h"
 
+class CWidgetCam;
+
 /// Map of cameras, accessed by name
 typedef std::unordered_map<std::string, CCamera*> CamerasByNameType;
+/// Map of cameras, accessed by UID value
+typedef std::unordered_map<UIDType, CCamera*> CamerasByValueType;
 /// Vector of cameras, accessed by index to cycle through cameras
 typedef std::vector<CCamera*> CamerasByIndexType;
 
@@ -54,9 +58,13 @@ typedef std::unordered_map<UIDType, IWinFrameUser*> WinFrameUsersByValueType;
 typedef std::unordered_map<UIDType, IWidget*> WidgetsByValueType;
 /// Map of windows, accessed by UID value
 typedef std::unordered_map<UIDType, CWindow*> WindowsByValueType;
+/// Vector of camera widgets, accessed by index to cycle through active cameras
+typedef std::unordered_map<UIDType, CWidgetCam*> CameraWidgetsByValueType;
 /// Queue for display order of windows
 typedef std::list<UIDType> WindowOrderType;
 
+/// Concurrent queue of widgets
+typedef moodycamel::ConcurrentQueue<CCamera*> CamerasQueueType;
 /// Concurrent queue of widgets
 typedef moodycamel::ConcurrentQueue<IWidget*> WidgetsQueueType;
 /// Concurrent queue of windows
@@ -78,13 +86,15 @@ class CVisualsDataStorage : public IComInterfaceUser,
         ~CVisualsDataStorage();
         
         //--- Constant Methods -----------------------------------------------//
-        const CamerasByIndexType&   getCamerasByIndex() const;
-        const CamerasByNameType&    getCamerasByName() const;
-        CComConsole*                getComConsole() const;
-        IWidget*                    getWidgetByValue(const UIDType) const;
-        CWindow*                    getWindowByValue(const UIDType) const;
-        const WidgetsByValueType*   getWidgetsByValue() const;
-        const WindowsByValueType*   getWindowsByValue() const;
+        const CamerasByIndexType&       getCamerasByIndex() const;
+        const CamerasByNameType&        getCamerasByName() const;
+        const CamerasByValueType&       getCamerasByValue() const;
+        const CameraWidgetsByValueType& getCameraWidgets() const {return m_CameraWidgetsByValue;}
+        CComConsole*                    getComConsole() const;
+        IWidget*                        getWidgetByValue(const UIDType) const;
+        CWindow*                        getWindowByValue(const UIDType) const;
+        const WidgetsByValueType*       getWidgetsByValue() const;
+        const WindowsByValueType*       getWindowsByValue() const;
         
         //--- Methods --------------------------------------------------------//
         void addCamera(CCamera*);
@@ -105,6 +115,8 @@ class CVisualsDataStorage : public IComInterfaceUser,
       
         CamerasByIndexType          m_CamerasByIndex;           ///< Cameras, accessed by index
         CamerasByNameType           m_CamerasByName;            ///< Cameras, accessed by name
+        CamerasByValueType          m_CamerasByValue;           ///< Cameras, accessed by value
+        CameraWidgetsByValueType    m_CameraWidgetsByValue;     ///< Camera widgets, accessed by value
         WidgetsByValueType          m_WidgetsByValue;           ///< Widgets, accessed by value
         WindowsByValueType          m_WindowsByValue;           ///< Windows, accessed by value
         WinFrameUsersByValueType    m_WinFrameUsersByValue;     ///< Entities using a window frame, accessed by value
@@ -118,7 +130,7 @@ class CVisualsDataStorage : public IComInterfaceUser,
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns cameras.
+/// \brief Returns cameras, accessed by linear index
 ///
 /// \return Cameras
 ///
@@ -131,7 +143,7 @@ inline const CamerasByIndexType& CVisualsDataStorage::getCamerasByIndex() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns cameras.
+/// \brief Returns cameras, accessed by name
 ///
 /// \return Cameras
 ///
@@ -140,6 +152,19 @@ inline const CamerasByNameType& CVisualsDataStorage::getCamerasByName() const
 {
     METHOD_ENTRY("CVisualsDataStorage::getCamerasByName")
     return m_CamerasByName;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns cameras, accessed by UID value
+///
+/// \return Cameras
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const CamerasByValueType& CVisualsDataStorage::getCamerasByValue() const
+{
+    METHOD_ENTRY("CVisualsDataStorage::getCamerasByValue")
+    return m_CamerasByValue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

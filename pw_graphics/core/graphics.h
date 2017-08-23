@@ -64,7 +64,7 @@ typedef sf::Window WindowHandleType;
 const std::uint16_t GRAPHICS_WIDTH_DEFAULT = 1440u;     ///< Default x-resolution
 const std::uint16_t GRAPHICS_HEIGHT_DEFAULT = 900u;     ///< Default y-resolution
 
-const GLuint GRAPHICS_SIZE_OF_INDEX_BUFFER = 1000000u;  ///< Size of VBOs/VAOs/IBOs to keep all data
+const GLuint GRAPHICS_SIZE_OF_INDEX_BUFFER = 10000u;    ///< Size of VBOs/VAOs/IBOs to keep all data
 
 const double GRAPHICS_PX_PER_METER = 2.0;               ///< Default resolution, pixel per meter
 const double GRAPHICS_FOV_DEFAULT = 45.0;               ///< Default fov
@@ -197,6 +197,13 @@ class CGraphics
         bool resizeWindow(unsigned short, unsigned short);
         void setWidthScr(const unsigned short&);
         void setHeightScr(const unsigned short&);
+        void setViewPort(const double& _fLeft, const double& _fRight, const double& _fBottom, const double& _fTop)
+        {
+            m_ViewPort.leftplane = _fLeft;
+            m_ViewPort.rightplane = _fRight;
+            m_ViewPort.bottomplane = _fBottom;
+            m_ViewPort.topplane = _fTop;
+        }
         void setupScreenSpace();
         void setupWorldSpace();
         void swapBuffers();
@@ -259,6 +266,7 @@ class CGraphics
         glm::mat4           m_matScale;                 ///< Scale matrix
         bool                m_bScreenSpace;             ///< Indicates if coordinates are screen space related
 
+        std::uint32_t       m_uncI = 0u;                ///< Index counter
         GLuint              m_unIndex = 0u;             ///< Pointer to current index in buffer
         GLuint              m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
         GLuint              m_unIndexVerts = 0u;        ///< Index of current vertex in buffer

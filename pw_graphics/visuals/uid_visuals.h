@@ -40,6 +40,9 @@
 
 //--- Misc header ------------------------------------------------------------//
 
+//--- Constants --------------------------------------------------------------//
+const double UID_VISUALS_FONT_SCALE = 1.33;
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Visuals of entity UID's
@@ -62,7 +65,7 @@ class CUIDVisuals : public CGraphicsBase,
         //--- Constant methods -----------------------------------------------//
         
         //--- Methods --------------------------------------------------------//
-        void draw(const int, const int, const UIDType);
+        void draw(const int, const int, const std::string&, const UIDType);
         void setBGColor(const ColorTypeRGBA& _aRGBA) {m_aBGColor = _aRGBA;}
         
         void show() {m_bShowUID = true;}

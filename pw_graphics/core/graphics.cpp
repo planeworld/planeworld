@@ -287,7 +287,7 @@ void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode)
 
     if (bBegin)
     {
-        m_pRenderMode->getShaderProgram()->use();
+        m_pRenderMode->use();
         GLint nProjMatLoc=glGetUniformLocation(m_pRenderMode->getShaderProgram()->getID(), "matTransform");
         glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
         
@@ -331,6 +331,7 @@ void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
         
+        m_uncI = 0u;
         m_unIndex = 0u;
         m_unIndexVerts = 0u;
         m_unIndexCol = 0u;
@@ -831,6 +832,8 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
         
         m_vecIndicesLines[m_unIndexLines++] = m_unIndex-1;
         m_vecIndicesLines[m_unIndexLines++] = m_unIndex-_nNrOfSeg;
+        
+        m_uncI += (_nNrOfSeg+1) * 4;
     }
     else
     {
@@ -846,6 +849,8 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
         m_vecColours[m_unIndexCol++] = m_aColour[3];
         
         m_unIndex++;
+        m_uncI += 4;
+        
         fAng *= fFac;
         
         while (fAng < MATH_2PI+fFac)
@@ -859,11 +864,14 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
             m_vecColours[m_unIndexCol++] = m_aColour[3];
             m_vecIndicesLines[m_unIndexLines++] = m_unIndex-1;
             m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
+            
+            m_uncI += 4;
+            
             fAng += fFac;
         }
     }
     
-    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
         this->endRenderBatch();
         this->beginRenderBatch(m_pRenderMode);
@@ -927,6 +935,14 @@ void CGraphics::addVertex(const Vector2d& _vecV)
     m_vecColours[m_unIndexCol++] = m_aColour[2];
     m_vecColours[m_unIndexCol++] = m_aColour[3];
     m_nLineNrOfVerts++;
+    m_uncI += 4;
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
+    {
+        this->endLine(PolygonType::LINE_STRIP);
+        this->endRenderBatch();
+        this->beginRenderBatch(m_pRenderMode);
+        this->beginLine();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -952,6 +968,14 @@ void CGraphics::addVertex(const double& _fX, const double& _fY)
     m_vecColours[m_unIndexCol++] = m_aColour[2];
     m_vecColours[m_unIndexCol++] = m_aColour[3];
     m_nLineNrOfVerts++;
+    m_uncI += 4;
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
+    {
+        this->endLine(PolygonType::LINE_STRIP);
+        this->endRenderBatch();
+        this->beginRenderBatch(m_pRenderMode);
+        this->beginLine();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -973,6 +997,13 @@ void CGraphics::dot(const Vector2d& _vecV)
     m_vecColours[m_unIndexCol++] = m_aColour[2];
     m_vecColours[m_unIndexCol++] = m_aColour[3];
     m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
+    m_uncI += 4;
+    
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
+    {
+        this->endRenderBatch();
+        this->beginRenderBatch(m_pRenderMode);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1000,7 +1031,8 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
         m_vecColours[m_unIndexCol++] = m_aColour[3];
         m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
     }
-    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    m_uncI += 4*_Dots.size();
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
         this->endRenderBatch();
         this->beginRenderBatch(m_pRenderMode);
@@ -1063,6 +1095,8 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
         m_vecIndicesTriangles[m_unIndexTriangles++] = m_unCenterIndex;
         m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1;
         m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-_nNrOfSeg;
+        
+        m_uncI += 8 + 4*(_nNrOfSeg-1);
     }
     else
     {
@@ -1088,6 +1122,7 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
         m_vecColours[m_unIndexCol++] = m_aColour[3];
         
         m_unIndex += 2u;
+        m_uncI += 8;
         fAng *= fFac;
 
         while (fAng < MATH_2PI)
@@ -1102,10 +1137,11 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
             m_vecIndicesTriangles[m_unIndexTriangles++] = m_unCenterIndex;
             m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1;
             m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;
+            m_uncI += 8;
             fAng += fFac;
         }
     }
-    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
         this->endRenderBatch();
         this->beginRenderBatch(m_pRenderMode);
@@ -1159,8 +1195,9 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR)
     m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1u;  // 2
     m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex+1u;  // 4
     m_unIndex += 2u;
+    m_uncI += 12;
     
-    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
         this->endRenderBatch();
         this->beginRenderBatch(m_pRenderMode);
@@ -1209,6 +1246,8 @@ void CGraphics::polygon(const VertexListType& _Vertices,
         m_vecColours[m_unIndexCol++] = m_aColour[2];
         m_vecColours[m_unIndexCol++] = m_aColour[3];
     }
+    
+    m_uncI += 4*_Vertices.size();
     
     m_nLineNrOfVerts += _Vertices.size();
     this->endLine(_PolygonType);
@@ -1264,7 +1303,9 @@ void CGraphics::rect(const Vector2d& _vecLL, const Vector2d& _vecUR)
     m_vecIndicesLines[m_unIndexLines++] = m_unIndex-3;   // 1
     m_unIndex++;
     
-    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    m_uncI += 12;
+    
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
         this->endRenderBatch();
         this->beginRenderBatch(m_pRenderMode);
@@ -1325,7 +1366,9 @@ void CGraphics::texturedRect(const Vector2d& _vecLL, const Vector2d& _vecUR,
     m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex+1u;  // 4
     m_unIndex += 2u;
     
-    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    m_uncI += 12;
+    
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
         this->endRenderBatch();
         this->beginRenderBatch(m_pRenderMode);
@@ -1385,7 +1428,7 @@ void CGraphics::endLine(const PolygonType& _PType)
         m_unIndex++;
     }
     
-    if (m_unIndex > GRAPHICS_SIZE_OF_INDEX_BUFFER/4)
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
         this->endRenderBatch();
         this->beginRenderBatch(m_pRenderMode);

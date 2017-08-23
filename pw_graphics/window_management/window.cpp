@@ -168,22 +168,6 @@ void CWindow::draw()
             m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
                             Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
             
-            DOM_DEV(
-                static bool bWarned = false;
-                if (m_pUIDVisuals == nullptr)
-                {
-                    if (!bWarned)
-                    {
-                        WARNING_MSG("Window", "UID visuals not set.")
-                        bWarned = true;
-                    }
-                    goto DomDev;
-                })
-                
-            m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, m_UID.getValue());
-            
-            DOM_DEV(DomDev:)
-            
             m_Graphics.setColor(0.7, 0.3, 0.3, 1.0);
             // Draw close button area
             if (m_bClosable)
@@ -204,6 +188,22 @@ void CWindow::draw()
             Title.setPosition(m_nFramePosX + m_nFrameWidth/2, m_nFramePosY, true);
             Title.display();
         m_Graphics.endRenderBatch();
+        
+        DOM_DEV(
+            static bool bWarned = false;
+            if (m_pUIDVisuals == nullptr)
+            {
+                if (!bWarned)
+                {
+                    WARNING_MSG("Window", "UID visuals not set.")
+                    bWarned = true;
+                }
+                goto DomDev;
+            })
+            
+        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, "Window", m_UID.getValue());
+        
+        DOM_DEV(DomDev:)
         
         if (m_pWidget != nullptr) m_pWidget->draw();
     }

@@ -38,6 +38,7 @@
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
+#include "graphics.h"
 #include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -52,7 +53,7 @@ const bool RENDER_TARGET_CLEAR = true;
 ///        (render to texture).
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CRenderTarget
+class CRenderTarget : virtual public CGraphicsBase
 {
 
     public:
@@ -62,15 +63,9 @@ class CRenderTarget
         
         //--- Methods --------------------------------------------------------//
         bool init(const std::uint16_t, const std::uint16_t);
-        void setTarget(const float, const float,
-                       const float, const float,
-                       const float, const float,
-                       const float, const float
-        );
 
         //--- Constant Methods -----------------------------------------------//
               GLuint                getIDTex() const;
-        const std::vector<GLfloat>& getQuad() const;
         const std::vector<GLfloat>& getTexUV() const;
         void bind(const bool _bClear = false) const;
         void unbind() const;
@@ -81,12 +76,9 @@ class CRenderTarget
         GLuint m_unIDFBO = 0;   ///< ID of framebuffer object
         GLuint m_unIDTex = 0;   ///< ID of texture
         
-        std::vector<GLfloat> m_vecTarget = {
-                                    -1.0f, -1.0f, -10.0f,
-                                    1.0f, -1.0f,  -10.0f,
-                                    -1.0f,  1.0f, -10.0f,
-                                    1.0f,  1.0f,  -10.0f
-                                  }; ///< Target quad to map texture to
+        std::uint16_t m_unResX = 100u; ///< Resolution x
+        std::uint16_t m_unResY = 100u; ///< Resolution y
+
         std::vector<GLfloat> m_vecTexUV = {
                                     0.0f, 0.0f,
                                     1.0f, 0.0f,
@@ -108,19 +100,6 @@ inline GLuint CRenderTarget::getIDTex() const
 {
     METHOD_ENTRY("CRenderTarget::getIDTex")
     return m_unIDTex;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return the quad the texture is rendered on
-///
-/// \return The quad the texture is rendered on
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const std::vector<GLfloat>& CRenderTarget::getQuad() const
-{
-    METHOD_ENTRY("CRenderTarget::getQuad")
-    return m_vecTarget;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,6 +127,9 @@ inline void CRenderTarget::bind(const bool _bClear) const
     METHOD_ENTRY("CRenderTarget::bind")
     glBindFramebuffer(GL_FRAMEBUFFER, m_unIDFBO);
     if (_bClear) glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, m_unResX, m_unResY);
+    m_Graphics.setViewPort((-m_unResX >> 1) / GRAPHICS_PX_PER_METER, (m_unResX >> 1) / GRAPHICS_PX_PER_METER,
+                           (-m_unResY >> 1) / GRAPHICS_PX_PER_METER, (m_unResY >> 1) / GRAPHICS_PX_PER_METER);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

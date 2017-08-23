@@ -40,7 +40,7 @@ CRenderTarget::~CRenderTarget()
     METHOD_ENTRY("CRenderTarget::~CRenderTarget")
     DTOR_CALL("CRenderTarget::~CRenderTarget")
     
-    glDeleteBuffers(1, &m_unIDFBO);
+    glDeleteFramebuffers(1, &m_unIDFBO);
     glDeleteTextures(1, &m_unIDTex);
 }
 
@@ -91,32 +91,9 @@ bool CRenderTarget::init(const uint16_t _unResX, const uint16_t _unResY)
     // Unbind
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
+    // Store size
+    m_unResX = _unResX;
+    m_unResY = _unResY;
+    
     return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Set coordinates for quad to map render target texture on
-///
-/// \param _fX0 X coordinate vertex 0
-/// \param _fY0 Y coordinate vertex 0
-/// \param _fX1 X coordinate vertex 1
-/// \param _fY1 Y coordinate vertex 1
-/// \param _fX2 X coordinate vertex 2
-/// \param _fY2 Y coordinate vertex 2
-/// \param _fX3 X coordinate vertex 3
-/// \param _fY3 Y coordinate vertex 3
-///
-////////////////////////////////////////////////////////////////////////////////
-void CRenderTarget::setTarget(const float _fX0, const float _fY0,
-                              const float _fX1, const float _fY1,
-                              const float _fX2, const float _fY2,
-                              const float _fX3, const float _fY3)
-{
-    METHOD_ENTRY("CRenderTarget::setTarget")
-
-    m_vecTarget[0]  = _fX0; m_vecTarget[1]  =_fY0; m_vecTarget[2]  = -10.0;
-    m_vecTarget[3]  = _fX1; m_vecTarget[4]  =_fY1; m_vecTarget[5]  = -10.0;
-    m_vecTarget[6]  = _fX3; m_vecTarget[7]  =_fY3; m_vecTarget[8]  = -10.0;
-    m_vecTarget[9]  = _fX2; m_vecTarget[10] =_fY2; m_vecTarget[11] = -10.0;
 }

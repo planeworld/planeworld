@@ -293,10 +293,15 @@ double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
     
     CRenderTarget RenderTarget;
     RenderTarget.init(Graphics.getWidthScr(), Graphics.getHeightScr());
-    RenderTarget.setTarget(Graphics.getViewPort().leftplane,  Graphics.getViewPort().bottomplane,
-                           Graphics.getViewPort().rightplane, Graphics.getViewPort().bottomplane,
-                           Graphics.getViewPort().rightplane, Graphics.getViewPort().topplane,
-                           Graphics.getViewPort().leftplane,  Graphics.getViewPort().topplane);
+    
+    std::vector<GLfloat> vecRenderTarget{{float(Graphics.getViewPort().leftplane),  float(Graphics.getViewPort().bottomplane),
+                                        float(Graphics.getViewPort().rightplane), float(Graphics.getViewPort().bottomplane),
+                                        float(Graphics.getViewPort().rightplane), float(Graphics.getViewPort().topplane),
+                                        float(Graphics.getViewPort().leftplane),  float(Graphics.getViewPort().topplane)}};
+//     RenderTarget.setTarget(Graphics.getViewPort().leftplane,  Graphics.getViewPort().bottomplane,
+//                            Graphics.getViewPort().rightplane, Graphics.getViewPort().bottomplane,
+//                            Graphics.getViewPort().rightplane, Graphics.getViewPort().topplane,
+//                            Graphics.getViewPort().leftplane,  Graphics.getViewPort().topplane);
     
     GLuint unUVBuffer;
     glGenBuffers(1, &unUVBuffer);
@@ -306,7 +311,7 @@ double testOneVBOPerMultipleShapes(const std::uint32_t _nNrOfShapes,
     GLuint unVBOScreenQuad;
     glGenBuffers(1, &unVBOScreenQuad);
     glBindBuffer(GL_ARRAY_BUFFER, unVBOScreenQuad);
-    glBufferData(GL_ARRAY_BUFFER, RenderTarget.getQuad().size()*sizeof(GLfloat), &(RenderTarget.getQuad().front()), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vecRenderTarget.size()*sizeof(GLfloat), &(vecRenderTarget.front()), GL_STATIC_DRAW);
     
     Timer.start();
     for (auto i=0u; i<_nNrOfFrames; ++i)

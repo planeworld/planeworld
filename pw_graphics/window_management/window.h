@@ -67,6 +67,8 @@ class CWindow : public IFontUser,
         virtual ~CWindow();
         
         //--- Constant methods -----------------------------------------------//
+        IWidget* const getWidget() const {return m_pWidget;}
+        
         bool isClosable() const {return m_bClosable;}
         bool isInside(const int, const int, const WinAreaType = WinAreaType::WIN) const;
         bool isVisible() const;

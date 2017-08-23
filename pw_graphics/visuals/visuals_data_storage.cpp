@@ -30,6 +30,7 @@
 
 #include "visuals_data_storage.h"
 
+#include "widget_cam.h"
 #include "widget_console.h"
 #include "widget_text.h"
 
@@ -151,6 +152,7 @@ void CVisualsDataStorage::addCamera(CCamera* _pCamera)
     METHOD_ENTRY("CVisualsDataStorage::addCamera")
     
     m_CamerasByName.insert({_pCamera->getName(), _pCamera});
+    m_CamerasByValue.insert({_pCamera->getUID(), _pCamera});
     m_CamerasByIndex.push_back(_pCamera);
 }
 
@@ -189,6 +191,11 @@ void CVisualsDataStorage::addWidget(IWidget* _pWidget)
     METHOD_ENTRY("CVisualsDataStorage::addWidget")
     m_WidgetsByValue.insert({_pWidget->getUID(), _pWidget});
     m_WinFrameUsersByValue.insert({_pWidget->getUID(), _pWidget});
+    
+    if (_pWidget->getType() == WidgetTypeType::CAMERA)
+    {
+        m_CameraWidgetsByValue.insert({_pWidget->getUID(), static_cast<CWidgetCam*>(_pWidget)});
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -217,6 +224,36 @@ bool CVisualsDataStorage::closeWindow(const UIDType _nUID)
     auto it = m_WindowsByValue.find(_nUID);
     if (it != m_WindowsByValue.end())
     {
+        IWidget* pWidget = it->second->getWidget();
+        if (pWidget != nullptr)
+        {
+            if (pWidget->getType() == WidgetTypeType::CAMERA)
+            {
+                DOM_DEV(
+                    if (m_CameraWidgetsByValue.find(pWidget->getUID()) ==
+                        m_CameraWidgetsByValue.end())
+                    {
+                        WARNING_MSG("Visuals Data Storage", "Unknown camera widget with UID <" << pWidget->getUID() << ">")
+                        goto DomDevCameraWidgets;
+                    }
+                    m_CameraWidgetsByValue.erase(pWidget->getUID());
+                )
+                DOM_DEV(DomDevCameraWidgets:)
+            }
+            DOM_DEV(
+                if (m_WidgetsByValue.find(pWidget->getUID()) ==
+                    m_WidgetsByValue.end())
+                {
+                    WARNING_MSG("Visuals Data Storage", "Unknown widget with UID <" << pWidget->getUID() << ">")
+                    goto DomDevWidgets;
+                }
+                m_WidgetsByValue.erase(pWidget->getUID());
+            )
+            DOM_DEV(DomDevWidgets:)
+
+            // Remove widgets pointers from list. Widget deletion is handeled by
+            // window/widget destructors
+        }
         delete it->second;
         MEM_FREED("CWindow")
         m_WindowsByValue.erase(_nUID);
