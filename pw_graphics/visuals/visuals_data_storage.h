@@ -91,6 +91,7 @@ class CVisualsDataStorage : public IComInterfaceUser,
         const CamerasByValueType&       getCamerasByValue() const;
         const CameraWidgetsByValueType& getCameraWidgets() const {return m_CameraWidgetsByValue;}
         CComConsole*                    getComConsole() const;
+        CCamera*                        getCameraByValue(const UIDType) const;
         IWidget*                        getWidgetByValue(const UIDType) const;
         CWindow*                        getWindowByValue(const UIDType) const;
         const WidgetsByValueType*       getWidgetsByValue() const;

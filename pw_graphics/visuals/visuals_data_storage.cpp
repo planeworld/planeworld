@@ -90,6 +90,31 @@ CVisualsDataStorage::~CVisualsDataStorage()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Return camera, accessed by given UID value
+///
+/// \param _nUID UID of camera to return
+///
+/// \return Camera with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+CCamera* CVisualsDataStorage::getCameraByValue(const UIDType _nUID) const
+{
+    METHOD_ENTRY("CVisualsDataStorage::getCameraByValue")
+
+    const auto ci = m_CamerasByValue.find(_nUID);
+    if (ci != m_CamerasByValue.end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("Visuals Data Storage", "Unknown camera with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Return widget, accessed by given UID value
 ///
 /// \param _nUID UID of widget to return

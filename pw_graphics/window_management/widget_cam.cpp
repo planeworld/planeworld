@@ -116,5 +116,8 @@ void CWidgetCam::myResize(const int _nX, const int _nY)
 
     m_TargetCam.init(_nX, _nY);
     m_RenderMode.setTexture(m_TargetCam.getIDTex());
-    static_cast<CCamera*>(m_pRef)->setViewport(double(_nX) / GRAPHICS_PX_PER_METER, double(_nY) / GRAPHICS_PX_PER_METER);
+    if (m_pRef != nullptr)
+    {
+        static_cast<CCamera*>(m_pRef)->setViewport(double(_nX) / GRAPHICS_PX_PER_METER, double(_nY) / GRAPHICS_PX_PER_METER);
+    }
 }

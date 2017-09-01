@@ -1189,16 +1189,19 @@ void CVisualsManager::processFrame()
 
     for (auto CamWidget : m_pVisualsDataStorage->getCameraWidgets())
     {
-        CamWidget.second->getRenderTarget()->bind(RENDER_TARGET_CLEAR);
-        //
-            m_Graphics.setupWorldSpace();
-            
-            m_pCamera = CamWidget.second->getRef();
-            m_pCamera->zoomTo(0.5e-5);
-            m_pCamera->update();
-            this->drawWorld();
-        //
-        CamWidget.second->getRenderTarget()->unbind();
+        if (CamWidget.second->gotRef())
+        {
+            CamWidget.second->getRenderTarget()->bind(RENDER_TARGET_CLEAR);
+            //
+                m_Graphics.setupWorldSpace();
+                
+                m_pCamera = CamWidget.second->getRef();
+                m_pCamera->zoomTo(0.5e-5);
+                m_pCamera->update();
+                this->drawWorld();
+            //
+            CamWidget.second->getRenderTarget()->unbind();
+        }
     }
     
     m_RenderTargetScreen.bind(RENDER_TARGET_CLEAR);
@@ -1320,6 +1323,13 @@ void CVisualsManager::drawDebugInfo()
         }
         
         m_TextDebugInfo.setText(oss.str());
+        m_Graphics.setColor({{0.1, 0.0, 0.1, 1.0}});
+        
+        m_Graphics.beginRenderBatch("world");
+            double fSizeX = m_TextDebugInfo.getLength()+5.0;
+            m_Graphics.filledRect(Vector2d(10, 10),
+                                  Vector2d(10 + fSizeX, 10+m_TextDebugInfo.getFontSize()));
+        m_Graphics.endRenderBatch();
         
         m_Graphics.beginRenderBatch("font");
             m_TextDebugInfo.display();
@@ -2076,6 +2086,15 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::INT, "Font size"}},
                                       "system","visuals"
     );
+    m_pComInterface->registerFunction("create_camera",
+                                      CCommand<int>([&]() -> int
+                                      {
+                                          return this->createCamera(CreationModeType::QUEUED);
+                                      }),
+                                      "Creates a default camera.",
+                                      {{ParameterType::INT, "Camera UID"}},
+                                      "system"
+    );
     m_pComInterface->registerFunction("create_widget",
                                       CCommand<int, std::string>([&](const std::string& _strS) -> int
                                       {
@@ -2083,7 +2102,7 @@ void CVisualsManager::myInitComInterface()
                                                                     CreationModeType::QUEUED);
                                       }),
                                       "Creates a widget of given type.",
-                                      {{ParameterType::INT, "Window UID"},
+                                      {{ParameterType::INT, "Widget UID"},
                                        {ParameterType::STRING, "Widget Type (" + ossWidgetType.str() + ")"}},
                                       "system"
     );
@@ -2183,6 +2202,41 @@ void CVisualsManager::myInitComInterface()
 //                                       {ParameterType::DOUBLE, "Alpha (0.0-1.0)"}},
 //                                       "system","visuals"
 //     );
+    m_pComInterface->registerFunction("widget_set_cam",
+                                      CCommand<void, int, int>(
+                                          [&](const int _nUID, const int _nUIDCam)
+                                            {
+                                                IWidget* pWidget = m_pVisualsDataStorage->getWidgetByValue(_nUID);
+                                                if (pWidget != nullptr)
+                                                {
+                                                    if (pWidget->getType() == WidgetTypeType::CAMERA)
+                                                    {
+                                                        CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(_nUIDCam);
+                                                        if (pCam != nullptr)
+                                                        {
+                                                            static_cast<CWidgetCam*>(pWidget)->attachTo(pCam);
+                                                        }
+                                                        else
+                                                        {
+                                                            throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        WARNING_MSG("Visuals Manager", "Wrong widget type, unknown method <setText>.")
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Attach camera to camera widget.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Widget UID"},
+                                      {ParameterType::INT, "Camera UID"}},
+                                      "system","visuals"
+    );
     m_pComInterface->registerFunction("widget_set_text",
                                       CCommand<void, int, std::string>(
                                           [&](const int _nUID, const std::string _strText)

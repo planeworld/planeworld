@@ -241,13 +241,26 @@ float CFontManager::getTextLength(const std::string& _strText,
             nID = ci->second;
             
             float fLength = 0.0f;
+            float fLengthMax = 0.0f;
             const stbtt_packedchar* b;
             for (const auto Ch : _strText)
             {
+                if (Ch == 10) // Line feed
+                {
+                    if (fLength > fLengthMax)
+                    {
+                        fLengthMax = fLength;
+                    }
+                    fLength = 0.0;
+                }
                 b = m_FontsCharInfo[nID] + Ch-ASCII_FIRST;
                 fLength += b->xadvance;
             }
-            return fLength;
+            if (fLength > fLengthMax)
+            {
+                fLengthMax = fLength;
+            }
+            return fLengthMax;
         }
         else
         {
