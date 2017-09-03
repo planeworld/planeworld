@@ -449,6 +449,15 @@ void CLuaManager::myInitComInterface()
                                            {ParameterType::STRING, "Name of function to attach callback to"},
                                            {ParameterType::STRING, "Name of callback function"}},
                                            "system", "lua");
+        m_pComInterface->registerFunction("set_frequency_lua",
+                                          CCommand<void, double>([&](const double& _fFrequency)
+                                          {
+                                              this->setFrequency(_fFrequency);
+                                          }),
+                                          "Sets the frequency of the Lua thread.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::DOUBLE, "Frequency"}},
+                                           "system", "lua");
     }
     else
     {

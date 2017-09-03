@@ -54,6 +54,8 @@ const double      PHYSICS_DEBRIS_DEFAULT_FREQUENCY = 30.0;  ///< Default physics
 //--- Type definitions -------------------------------------------------------//
 
 /// Type for concurrent object queue 
+typedef moodycamel::ConcurrentQueue<IEmitter*> EmittersQueueType;
+/// Type for concurrent object queue 
 typedef moodycamel::ConcurrentQueue<CObject*> ObjectsQueueType;
 /// Type for concurrent shape queue
 typedef moodycamel::ConcurrentQueue<IShape*>  ShapesQueueType;  
@@ -81,13 +83,14 @@ class CPhysicsManager : public IComInterfaceProvider,
         CUniverse*                        getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
+        UIDType createEmitter(const EmitterType);
+        UIDType createEmitter(const std::string&);
         UIDType createObject();
         UIDType createShape(const ShapeType);
         UIDType createShape(const std::string&);
         
         void setConstantGravity(const Vector2d&);
         void setFrequencyDebris(const double&);
-        void setUniverse(CUniverse* const);
         
         void addComponent(CThruster* const);
         void addComponents(const ComponentsType&);
@@ -122,6 +125,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         void myInitComInterface();
         void updateCells();
         
+        EmittersQueueType   m_EmittersToBeAddedToWorld;         ///< Emitters already created to be added to world
         ObjectsQueueType    m_ObjectsToBeAddedToWorld;          ///< Objects already created to be added to world
         ShapesQueueType     m_ShapesToBeAddedToWorld;           ///< Shapes already created to be added to world
       
@@ -198,19 +202,6 @@ inline void CPhysicsManager::setFrequencyDebris(const double& _fFrequency)
 {
     METHOD_ENTRY("CPhysicsManager::setFrequencyDebris")
     m_fFrequencyDebris = _fFrequency;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Set the procedurally generated universe
-///
-/// \param _pUniverse The procedurally generated universe
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::setUniverse(CUniverse* const _pUniverse)
-{
-    METHOD_ENTRY("CPhysicsManager::setUniverse")
-    m_pUniverse = _pUniverse;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

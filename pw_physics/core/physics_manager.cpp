@@ -32,6 +32,7 @@
 
 #include "debris_emitter.h"
 #include "joint.h"
+#include "objects_emitter.h"
 #include "shape.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,7 +40,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CPhysicsManager::CPhysicsManager() : m_pUniverse(0),
+CPhysicsManager::CPhysicsManager() : m_pUniverse(nullptr),
                                      m_fG(6.67408e-11),
                                      m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
                                      m_strCellUpdateLast(""),
@@ -74,6 +75,13 @@ CPhysicsManager::~CPhysicsManager()
     // Stop global timer (index 0)
     m_SimTimer[0].stop();
     
+    if (m_pUniverse != nullptr)
+    {
+        delete m_pUniverse;
+        MEM_FREED("CUniverse")
+        m_pUniverse = nullptr;
+    }
+    
     for (auto it = m_Emitters.begin();
         it != m_Emitters.end(); ++it)
     {
@@ -104,6 +112,67 @@ CPhysicsManager::~CPhysicsManager()
             DOM_MEMF(DEBUG_MSG("CThruster", "Memory already freed."))
         }
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates an emitter and inserts it to world data storage
+///
+/// \param _EmitterType Type of emitter to be created
+///
+/// \return UID value of emitter
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createEmitter(const EmitterType _EmitterType)
+{
+    METHOD_ENTRY("CPhysicsManager::createEmitter")
+    
+    UIDType nUID=0u;
+    
+    switch (_EmitterType)
+    {
+        case EmitterType::EMITTER_DEBRIS:
+        {
+            CDebrisEmitter* pDebrisEmitter = new CDebrisEmitter();
+            MEM_ALLOC("IEmitter")
+            nUID = pDebrisEmitter->getUID();
+            m_EmittersToBeAddedToWorld.enqueue(pDebrisEmitter);
+            
+            pDebrisEmitter->init();
+            break;
+        }
+        case EmitterType::EMITTER_OBJECT:
+        {
+            CObjectEmitter* pObjectEmitter = new CObjectEmitter();
+            MEM_ALLOC("IEmitter")
+            nUID = pObjectEmitter->getUID();
+            m_EmittersToBeAddedToWorld.enqueue(pObjectEmitter);
+            
+            pObjectEmitter->init();
+            break;
+        }
+        default:
+        {
+            WARNING_MSG("Physics Manager", "Unknown emitter type. Cannot create emitter")
+        }
+    }
+    
+    return nUID;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create an emitter of given type
+///
+/// \param _strEmitterType Type of emitter to be created as string
+///
+/// \return UID value of emitter
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createEmitter(const std::string& _strEmitterType)
+{
+    METHOD_ENTRY("CPhysicsManager::createEmitter")
+    return this->createEmitter(mapStringToEmitterType(_strEmitterType));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -335,6 +404,10 @@ void CPhysicsManager::initObjects()
 
     //--- Init objects -------------------------------------------------------//
     INFO_MSG("Physics Manager", "Initialising objects.")
+    
+    #ifndef PW_MULTITHREADING
+        m_pComInterface->callWriters("physics");
+    #endif
 
 //     for (auto i=0u; i<m_pDataStorage->getObjectsBuffer().getBufferSize(); ++i)
 //     {
@@ -441,7 +514,12 @@ void CPhysicsManager::processFrame()
     for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
         Obj.second->clearForces();
 
-    // Add new objects and new shapes to world
+    // Add new emitters, objects, and shapes to world
+    IEmitter* pEmitter = nullptr;
+    while (m_EmittersToBeAddedToWorld.try_dequeue(pEmitter))
+    {
+        this->addEmitter(pEmitter);
+    }
     CObject* pObj = nullptr;
     while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
     {
@@ -621,6 +699,8 @@ void CPhysicsManager::myInitComInterface()
         // Helpers
         std::ostringstream ossDebrisType("");
         for (auto DebrisType : STRING_TO_DEBRIS_TYPE_MAP) ossDebrisType << " " << DebrisType.first;
+//         std::ostringstream ossEmitterType("");
+//         for (auto EmitterType : STRING_TO_EMITTER_TYPE_MAP) ossEmitterType << " " << EmitterType.first;
         std::ostringstream ossShapeType("");
         for (auto ShpType : STRING_TO_SHAPE_TYPE_MAP) ossShapeType << " " << ShpType.first;
 
@@ -634,6 +714,13 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::BOOL, "Flag if time scaling by increasing time step is allowed (reduces accuracy)"}},
                                           "system", "physics"
                                          );
+        m_pComInterface->registerFunction("create_emitter",
+                                          CCommand<int, std::string>([&](const std::string& _strEmitterType) -> int {return this->createEmitter(_strEmitterType);}),
+                                          "Creates an emitter.",
+                                          {{ParameterType::INT, "UID of emitter"},
+                                           {ParameterType::STRING, "Emitter type"}},
+                                          "system"
+                                         );
         m_pComInterface->registerFunction("create_obj",
                                           CCommand<int>([&]() -> int {return this->createObject();}),
                                           "Creates a default object.",
@@ -646,6 +733,24 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::INT, "UID of shape"},
                                            {ParameterType::STRING, "Shape type ("+ossShapeType.str()+" )"}},
                                           "system"
+                                         );
+        m_pComInterface->registerFunction("create_universe",
+                                          CCommand<void, int, int>([&](const int& _nSeed, const int& _nNrOfStars)
+                                          {
+                                                if (m_pUniverse != nullptr)
+                                                {
+                                                    delete m_pUniverse;
+                                                    MEM_FREED("CUniverse")
+                                                }
+                                                m_pUniverse = new CUniverse();
+                                                MEM_ALLOC("CUniverse")
+                                                m_pUniverse->generate(_nSeed, _nNrOfStars);
+                                          }),
+                                          "Creates a procedurally generated universe.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Seed for procdural generation"},
+                                           {ParameterType::INT, "Number of star systems"}},
+                                          "system", "physics"
                                          );
         m_pComInterface->registerFunction("debris_set_type",
                                           CCommand<void, int, std::string>(
@@ -747,6 +852,16 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"}},
                                            "system", "physics"
                                          );
+        m_pComInterface->registerFunction("set_frequency_physics",
+                                          CCommand<void, double>([&](const double& _fFrequency)
+                                          {
+                                              this->setFrequency(_fFrequency);
+                                              this->setFrequencyDebris(_fFrequency);
+                                          }),
+                                          "Sets the frequency of the physics thread.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::DOUBLE, "Frequency"}},
+                                           "system", "physics");
         m_pComInterface->registerFunction("toggle_pause",
                                           CCommand<void>([&](){this->togglePause();}),
                                           "Pauses or unpauses physics simulation.",
@@ -1101,6 +1216,18 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Object UID"},
                                            {ParameterType::DOUBLE, "Velocity X"},
                                            {ParameterType::DOUBLE, "Velocity Y"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("set_gravity_vector",
+                                          CCommand<void, double, double>(
+                                                [&](const double& _fGX, const double& _fGY)
+                                                {
+                                                    this->setConstantGravity(Vector2d(_fGX, _fGY));
+                                                }),
+                                          "Set a constant gravity vector that acts on all objects.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::DOUBLE, "Gravity vector X"},
+                                           {ParameterType::DOUBLE, "Gravity vector Y"}},
                                            "physics", "physics"
                                          );
         m_pComInterface->registerFunction("shp_set_mass",

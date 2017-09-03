@@ -160,7 +160,7 @@ const std::map<EmitterType, std::string> mapEmitterToString = {
     {EMITTER_OBJECT, "object_emitter"}
 }; ///< Map from EmitterType to string
 
-const std::map<std::string, EmitterType> mapStringToEmitter = {
+const std::map<std::string, EmitterType> STRING_TO_EMITTER_TYPE_MAP = {
     {"debris_emitter", EMITTER_DEBRIS},
     {"object_emitter", EMITTER_OBJECT}
 }; ///< Map from string to Emitter
@@ -187,6 +187,23 @@ const std::map<std::string, EmitterModeType> mapStringToEmitterMode = {
     {"timed", EMITTER_MODE_TIMED}
 }; ///< Map from string to EmitterMode
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Maps given string to emitter type
+///
+/// \return Emitter type
+///
+////////////////////////////////////////////////////////////////////////////////
+static EmitterType mapStringToEmitterType(const std::string& _strS)
+{
+    METHOD_ENTRY("mapStringToEmitterType")
+    
+    const auto ci = STRING_TO_EMITTER_TYPE_MAP.find(_strS);
+    if (ci != STRING_TO_EMITTER_TYPE_MAP.end())
+        return ci->second;
+    else
+        return EmitterType::EMITTER_NONE;
+}
 
 //--- Implementation is done here for inline optimisation --------------------//
 

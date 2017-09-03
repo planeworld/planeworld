@@ -865,6 +865,10 @@ bool CVisualsManager::init()
 {
     METHOD_ENTRY("CVisualsManager::init")
     
+    // Execute calls here, since processFrame hasn't been called yet. This 
+    // is needed for calls, such as the setting up the data path.
+    m_pComInterface->callWriters("visuals");
+    
     //--------------------------------------------------------------------------
     // Setup rendering
     //--------------------------------------------------------------------------
@@ -1569,17 +1573,22 @@ void CVisualsManager::drawWorld()
 //     if (1.0e13 * m_Graphics.getResPMX() < 1.0)
     m_Graphics.beginRenderBatch("world");
     {
-        for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
+        #ifdef PW_MULTITHREADING
+            while (m_pUniverse->isAccessed.test_and_set()) {}
+        #endif
+        for (auto i=0u; i<m_pUniverse->getStarSystems()->size(); ++i)
         {
+            CStarSystem* pStarSystem = m_pUniverse->getStarSystems()->at(i);
+            CStar&       Star(pStarSystem->Star());
             Vector2d vecPos = CKinematicsState::clipToWorldLimit(
-                                m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
-                                IGridUser::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell())
-                              );
+                                Star.getOrigin() +
+                                IGridUser::cellToDouble(pStarSystem->getCell()-m_pCamera->getCell())
+                            );
             Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(
-                                    m_pUniverse->getStarSystems()[i]->Star().getOrigin() - m_pCamera->getCenter() +
-                                     IGridUser::cellToDouble
-                                     (m_pUniverse->getStarSystems()[i]->getCell() -
-                                      m_pCamera->getCell())
+                                    Star.getOrigin() - m_pCamera->getCenter() +
+                                    IGridUser::cellToDouble
+                                    (pStarSystem->getCell() -
+                                    m_pCamera->getCell())
                                 );
             
 
@@ -1587,15 +1596,15 @@ void CVisualsManager::drawWorld()
             if (m_pCamera->getBoundingBox().isInside(vecPos))
             {
                 
-                double fColor = 0.1*m_pUniverse->getStarSystems()[i]->Star().getStarType()+0.3;
+                double fColor = 0.1*Star.getStarType()+0.3;
                 m_Graphics.setColor(0.8,fColor,0.3);
                 
-                double fDrawSize = (m_pUniverse->getStarSystems()[i]->Star().getStarType()*0.3+1) * m_Graphics.getResMPX();
-                double fRadius   = m_pUniverse->getStarSystems()[i]->Star().getRadius();
+                double fDrawSize = (Star.getStarType()*0.3+1) * m_Graphics.getResMPX();
+                double fRadius   =  Star.getRadius();
                 if (fDrawSize > fRadius)
                     m_Graphics.filledCircle(vecPosRel, fDrawSize, 7.0);
                 else
-                    m_Graphics.filledCircle(vecPosRel, (m_pUniverse->getStarSystems()[i]->Star().getRadius()), 100.0);
+                    m_Graphics.filledCircle(vecPosRel, (Star.getRadius()), 100.0);
             }
 //             // Draw stars in reduced scale for background
 //             if (m_pCamera->getBoundingBox().isInside(1.0/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)) + m_pCamera->getCenter()+IGridUser::cellToDouble(m_pCamera->getCell())))
@@ -1610,6 +1619,9 @@ void CVisualsManager::drawWorld()
 //             }
 //             
         }
+        #ifdef PW_MULTITHREADING
+            m_pUniverse->isAccessed.clear();
+        #endif
     }
 //     else
 //     {
@@ -1714,28 +1726,37 @@ void CVisualsManager::drawWorld()
         }
         if (1.0e9 * m_Graphics.getResPMX() < 1.0)
         {
-            for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
+            #ifdef PW_MULTITHREADING
+                while (m_pUniverse->isAccessed.test_and_set()) {}
+            #endif
+            
+            for (auto i=0u; i<m_pUniverse->getStarSystems()->size(); ++i)
             {
-                Vector2d vecPos = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin() +
-                                  IGridUser::cellToDouble(m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()));
+                CStarSystem* pStarSystem = m_pUniverse->getStarSystems()->at(i);
+                CStar&       Star(pStarSystem->Star());
+                
+                Vector2d vecPos = CKinematicsState::clipToWorldLimit(Star.getOrigin() +
+                                  IGridUser::cellToDouble(pStarSystem->getCell()-m_pCamera->getCell()));
                 if (m_pCamera->getBoundingBox().isInside(vecPos))
                 {
-                    Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-
+                    Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(Star.getOrigin()-
                                         m_pCamera->getCenter()+
                                         IGridUser::cellToDouble
-                                        (m_pUniverse->getStarSystems()[i]->getCell()-
+                                        (pStarSystem->getCell()-
                                           m_pCamera->getCell()));
                     
                     // Now draw the text
-                    
-                    double fColor=0.1*m_pUniverse->getStarSystems()[i]->Star().getStarType()+0.3;
+                    double fColor=0.1*Star.getStarType()+0.3;
                     m_TextStarSystems.setColor({{0.8, fColor, 0.3, 0.5}});
-                    m_TextStarSystems.setText(m_pUniverse->getStarSystems()[i]->Star().getName() + /*"\n" +*/
-                                               std::to_string(m_pUniverse->getStarSystems()[i]->Star().getRadius()));
+                    m_TextStarSystems.setText(Star.getName() + /*"\n" +*/
+                                              std::to_string(Star.getRadius()));
                     m_TextStarSystems.setPosition(m_Graphics.world2Screen(vecPosRel)[0],m_Graphics.world2Screen(vecPosRel)[1]);
                     m_TextStarSystems.display();
                 }
             }
+            #ifdef PW_MULTITHREADING
+                m_pUniverse->isAccessed.clear();
+            #endif
         }
         
         m_Graphics.endRenderBatch();
@@ -2157,6 +2178,24 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"}},
                                       "system", "visuals"  
     );
+    m_pComInterface->registerFunction("set_data_path_visuals",
+                                          CCommand<void, std::string>([&](const std::string& _strDataPath)
+                                          {
+                                              this->setDataPath(_strDataPath);
+                                          }),
+                                          "Sets the path where visuals data is located.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::DOUBLE, "Location of visuals data (path)"}},
+                                           "system", "visuals");
+    m_pComInterface->registerFunction("set_frequency_visuals",
+                                          CCommand<void, double>([&](const double& _fFrequency)
+                                          {
+                                              this->setFrequency(_fFrequency);
+                                          }),
+                                          "Sets the frequency of the visuals thread.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::DOUBLE, "Frequency"}},
+                                           "system", "visuals");
     m_pComInterface->registerFunction("uid_vis_hide",
                                       CCommand<void>([&](){m_UIDVisuals.hide();}),
                                       "Hide UIDs.",

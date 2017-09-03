@@ -32,12 +32,12 @@
 #define UNIVERSE_H
 
 //--- Standard header --------------------------------------------------------//
+#include <atomic>
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
-#include "circle.h"
+#include "conf_pw.h"
 #include "star_system.h"
-#include "world_data_storage_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -58,34 +58,32 @@ const double UNIVERSE_CELL_SIZE=1.0e12;
 /// Sigma = m_nNrOfStars*30.857e15/(3*0.4)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CUniverse : public IWorldDataStorageUser
+class CUniverse
 {
     
     public:
-        CObject*                    m_pStar;
-        CCircle*                    m_pStarShape;
     
         //--- Constructor/Destructor -----------------------------------------//
         CUniverse();
-        virtual ~CUniverse();
+        ~CUniverse();
         
         //--- Constant Methods -----------------------------------------------//
-        const std::vector<CObject*>&          getObjects() const;
-        const std::vector<CStarSystem*>&      getStarSystems() const;
 
         //--- Methods --------------------------------------------------------//
-        void generate(const int&, const int&);
-        void clone(const CUniverse&);
+        void                             generate(const int&, const int&);
+        const std::vector<CStarSystem*>* getStarSystems();
         
+        //--- Variables ------------------------------------------------------//
+        #ifdef PW_MULTITHREADING
+            std::atomic_flag isAccessed = ATOMIC_FLAG_INIT;    ///< Indicates access, important for multithreading
+        #endif
+            
     private:
-        
-        CUniverse(const CUniverse&);                ///< Private, prevent copy-construction, use clone instead
-        CUniverse& operator=(const CUniverse&);     ///< Private, prevent assignment, use clone instead
         
         //--- Constant Methods [private] -------------------------------------//
         const std::string starClassToString(const int&) const;
         
-        std::vector<CObject*>           m_Objects;          ///< Objects of the universe
+        //--- Variables [private] --------------------------------------------//
         std::vector<CStarSystem*>       m_StarSystems;      ///< Star system in this universe
         int                             m_nNrOfPlanetsMax;  ///< Maximum number of planets
 
@@ -95,28 +93,15 @@ class CUniverse : public IWorldDataStorageUser
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return generated objects
-///
-/// \return List of generated objects
-///
-////////////////////////////////////////////////////////////////////////////////
-inline const std::vector<CObject*>& CUniverse::getObjects() const
-{
-    METHOD_ENTRY("CUniverse::getObjects")
-    return m_Objects;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Returns the list of all star systems.
 ///
 /// \return Vector (list), which holds the star systems
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::vector< CStarSystem* >& CUniverse::getStarSystems() const
+inline const std::vector<CStarSystem*>* CUniverse::getStarSystems()
 {
     METHOD_ENTRY("CUniverse::getStarSystems")
-    return m_StarSystems;
+    return &m_StarSystems;
 }
 
 #endif // UNIVERSE_H

@@ -294,25 +294,20 @@ int main(int argc, char *argv[])
         if (!XMLImporter.import(strArgData)) {CLEAN_UP; return EXIT_FAILURE;}
         
         pLuaManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
-        pLuaManager->setFrequency(XMLImporter.getFrequencyLua());
+        ComInterface.call<void, double>("set_frequency_lua", XMLImporter.getFrequencyLua());
         
-        pPhysicsManager->setConstantGravity(XMLImporter.getGravity());
+        Vector2d vecG(XMLImporter.getGravity());
+        ComInterface.call<void, double, double>("set_gravity_vector", vecG[0], vecG[1]);
         pPhysicsManager->addComponents(XMLImporter.getComponents());
         pPhysicsManager->addEmitters(XMLImporter.getEmitters());
-        pPhysicsManager->setFrequency(XMLImporter.getPhysicsFrequency());
-        pPhysicsManager->setFrequencyDebris(XMLImporter.getFrequencyDebris());
+        ComInterface.call<void, double>("set_frequency_physics", XMLImporter.getPhysicsFrequency());
         if (bGraphics)
         {
-            pVisualsManager->setFrequency(XMLImporter.getVisualsFrequency());
-            pVisualsManager->setDataPath(XMLImporter.getGraphicsDataPath());
+            ComInterface.call<void, double>("set_frequency_lua", XMLImporter.getVisualsFrequency());
+            ComInterface.call<void, std::string>("set_data_path_visuals", XMLImporter.getGraphicsDataPath());
         }
-        Universe.clone(XMLImporter.getUniverse());
+        ComInterface.call<void, int, int>("create_universe", 23479, 10000);
     }
-    if (bGraphics)
-    {
-        pVisualsManager->setUniverse(&Universe);
-    }
-    pPhysicsManager->setUniverse(&Universe);
 
     //////////////////////////////////////////////////////////////////////////// 
     //
@@ -373,7 +368,8 @@ int main(int argc, char *argv[])
                                        sf::ContextSettings(24,8,4,3,3,sf::ContextSettings::Core)
                                       );
         MEM_ALLOC("WindowHandleType")
-        
+
+        pVisualsManager->setUniverse(pPhysicsManager->getUniverse());
         pVisualsManager->setWindow(pWindow);
         pVisualsManager->init();
         pWindow->setActive(false);
@@ -388,7 +384,7 @@ int main(int argc, char *argv[])
         // 9. Start input
         //
         ////////////////////////////////////////////////////////////////////////
-        pInputManager->setFrequency(PLANEWORLD_INPUT_FREQUENCY);
+        ComInterface.call<void, double>("set_frequency_input", PLANEWORLD_INPUT_FREQUENCY);
         pInputManager->setWindow(pWindow);
 
         while (!g_bDone)

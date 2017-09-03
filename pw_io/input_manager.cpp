@@ -407,6 +407,15 @@ void CInputManager::myInitComInterface()
                                           "Provides processing frequency of Input module.",
                                           {{ParameterType::DOUBLE, "Processing frequency of Input module"}},
                                            "system");
+        m_pComInterface->registerFunction("set_frequency_input",
+                                          CCommand<void, double>([&](const double& _fFrequency)
+                                          {
+                                              this->setFrequency(_fFrequency);
+                                          }),
+                                          "Sets the frequency of the input thread.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::DOUBLE, "Frequency"}},
+                                           "system", "input");
         m_pComInterface->registerFunction("toggle_ui_mode",
                                           CCommand<void>([&]()
                                           {

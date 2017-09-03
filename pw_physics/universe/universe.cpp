@@ -32,6 +32,7 @@
 #include <random>
 
 #include "engine_common.h"
+#include "kinematics_state.h"
 #include "namegenerator.h"
 #include "universe.h"
 
@@ -40,9 +41,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CUniverse::CUniverse() : m_pStar(0),
-                         m_pStarShape(0),
-                         m_nNrOfPlanetsMax(0)
+CUniverse::CUniverse() : m_nNrOfPlanetsMax(0)
 {
     METHOD_ENTRY("CUniverse::CUniverse");
     CTOR_CALL("CUniverse::CUniverse");
@@ -58,13 +57,24 @@ CUniverse::~CUniverse()
     METHOD_ENTRY("CUniverse::~CUniverse");
     DTOR_CALL("CUniverse::~CUniverse");
     
-    for (auto i=0u; i<m_StarSystems.size(); ++i)
+    #ifdef PW_MULTITHREADING
+        while (isAccessed.test_and_set()) {}
+    #endif
+    
+    for (auto pStarSystem : m_StarSystems)
     {
-        delete m_StarSystems[i];
-        m_StarSystems[i] = 0;
-        MEM_FREED("CStarSystem");
+        if (pStarSystem != nullptr)
+        {
+            delete pStarSystem;
+            MEM_FREED("CStarSystem");
+            pStarSystem = nullptr;
+        }
     }
     m_StarSystems.clear();
+    
+    #ifdef PW_MULTITHREADING
+        isAccessed.clear();
+    #endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,6 +88,10 @@ CUniverse::~CUniverse()
 void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 {
     METHOD_ENTRY("CUniverse::generate")
+    
+    #ifdef PW_MULTITHREADING
+        while (isAccessed.test_and_set()) {}
+    #endif
     
     CNameGenerator StarNameGenerator(_nSeed);
     const int nNrOfStarTypes=7;
@@ -116,9 +130,6 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         std::uint8_t nStellarClass = static_cast<int>(nNrOfStarTypes*fNumber);
         if (nStellarClass >= nNrOfStarTypes) nStellarClass = nNrOfStarTypes - 1;
         DOM_STATS(DEBUG_BLK(++vecNrOfStars[nStellarClass];))
-        
-        
-            
             
             CStarSystem* pStarSystem = new CStarSystem();
             MEM_ALLOC("CStarSystem");
@@ -184,6 +195,10 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         Log.logSeparator();
     ))
     
+    #ifdef PW_MULTITHREADING
+        isAccessed.clear();
+    #endif
+    
     // Reserve memory for star object
 //     m_pStar = new CRigidBody;
 //     m_pStar->setName("Procedurally_Generated_Star_Dummy");
@@ -211,38 +226,6 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 // 
 //     m_Objects.push_back(m_pStar);
 //     m_Visuals.push_back(m_pStarObjectVisuals);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Copies the full content of a given universe
-///
-/// \param _Universe The universe to be copied
-///
-///////////////////////////////////////////////////////////////////////////////
-void CUniverse::clone(const CUniverse& _Universe)
-{
-    m_nNrOfPlanetsMax = _Universe.m_nNrOfPlanetsMax;
-    
-    if (_Universe.getStarSystems().size() > 0)
-    {
-        for (std::vector<CStarSystem*>::const_iterator ci=_Universe.getStarSystems().begin();
-                                                    ci!=_Universe.getStarSystems().end(); ++ci)
-        {
-            CStarSystem* pStarSystem = new CStarSystem();
-            MEM_ALLOC("CStarSystem");
-            
-            *pStarSystem = *(*ci);
-            m_StarSystems.push_back((pStarSystem));
-        }
-
-        // Hand over object information. Important: The original objects are kept,
-        // the pointers are copied. This class passes responsibility of dynamically
-        // allocated objects!
-        m_pStar = _Universe.m_pStar;
-        m_pStarShape = _Universe.m_pStarShape;
-        m_Objects.push_back(_Universe.m_pStar);
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
