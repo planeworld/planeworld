@@ -84,12 +84,12 @@ void CInputManager::processFrame()
             {
                 // Adjust the viewport when the window is resized
                 m_vecMouseCenter = sf::Vector2i(m_pWindow->getSize().x >> 1, m_pWindow->getSize().y >> 1);
-                m_pComInterface->call<void,double,double>("win_main_resize", Event.size.width, Event.size.height);
+                m_pComInterface->call<void,double,double>("e_resize", Event.size.width, Event.size.height);
                 break;
             }
             case sf::Event::KeyPressed:
             {
-                m_pComInterface->call<void>("key_pressed");
+                m_pComInterface->call<void>("e_key_press");
                 
                 if (m_UIMode == UIModeType::UI)
                 {
@@ -396,9 +396,15 @@ void CInputManager::myInitComInterface()
     if (m_pComInterface != nullptr)
     {
         // Events
-        m_pComInterface->registerEvent("key_pressed",
+        m_pComInterface->registerEvent("e_key_press",
                                         "Event, indicating that a key was pressed.",
                                         {{ParameterType::NONE, "No return value"}},
+                                        "system");
+        m_pComInterface->registerEvent<double,double>("e_resize",
+                                        "Event, indicating that the main window was resized.",
+                                        {{ParameterType::NONE, "No return value"},
+                                         {ParameterType::DOUBLE, "Size X"},
+                                         {ParameterType::DOUBLE, "SIZE_Y"}},
                                         "system");
         
         // System package

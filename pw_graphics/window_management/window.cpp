@@ -44,7 +44,6 @@ CWindow::CWindow(CFontManager* const _pFontManager) :
                      IWinFrameUser(),
                      Title(_pFontManager),
                      m_pWidget(nullptr),
-                     m_bCenter(false),
                      m_bVisible(true),
                      m_bClosable(true),
                      m_nSizeClose(10),
@@ -143,8 +142,6 @@ void CWindow::center()
     METHOD_ENTRY("CWindow::center")
     this->setPosition((m_Graphics.getWidthScr()-m_nFrameWidth) / 2,
                       (m_Graphics.getHeightScr()-m_nFrameHeight) / 2);
-    
-    m_bCenter = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

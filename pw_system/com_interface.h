@@ -348,7 +348,7 @@ inline void CComInterface::logEntry(const std::string& _strSrc, const std::strin
 {
     METHOD_ENTRY_QUIET("CComInterface::logEntry")
     
-    this->call<void, std::string, std::string, std::string, std::string>("log_entry",
+    this->call<void, std::string, std::string, std::string, std::string>("e_log_entry",
                 _strSrc, _strMessage, s_LogLevelTypeToStringMap[_Level], s_LogDomainTypeToStringMap[_Domain]);
 }
 

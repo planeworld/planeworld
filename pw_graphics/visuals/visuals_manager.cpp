@@ -867,7 +867,7 @@ bool CVisualsManager::init()
     
     // Execute calls here, since processFrame hasn't been called yet. This 
     // is needed for calls, such as the setting up the data path.
-    m_pComInterface->callWriters("visuals");
+    m_pComInterface->callWriters("visuals_init");
     
     //--------------------------------------------------------------------------
     // Setup rendering
@@ -961,28 +961,28 @@ bool CVisualsManager::init()
     pConsoleWindow->setClosability(false);
     
     // Testing a camera widget
-    auto CameraID = this->createCamera();
+//     auto CameraID = this->createCamera();
     
-    auto CamWidgetID = this->createWidget(WidgetTypeType::CAMERA);
-    CWidgetCam* pCameraWidget = static_cast<CWidgetCam*>(m_pVisualsDataStorage->getWidgetByValue(CamWidgetID));
-    pCameraWidget->setShaderProgram(&m_ShaderProgramMainScreen);
-    
-    pCameraWidget->attachTo(m_pVisualsDataStorage->getCamerasByValue().at(CameraID));
-    
-    auto CamWindowID = this->createWindow();
-    CWindow* pCamWindow  = m_pVisualsDataStorage->getWindowByValue(CamWindowID);
-    
-    pCamWindow->Title.setText("Camera 1");
-    pCamWindow->Title.setFont(m_strFont);
-    pCamWindow->Title.setSize(20);
-    pCamWindow->Title.setColor({{1.0, 1.0, 1.0, 1.0}});
-    pCamWindow->setWidget(pCameraWidget);
-    pCamWindow->setColorBG({{0.1, 0.1, 0.1, 0.75}}, WIN_INHERIT);
-    pCamWindow->setColorFG({{0.3, 0.3, 0.3, 0.75}}, WIN_INHERIT);
-    pCamWindow->setPosition(10, 500);
-    pCamWindow->resize(200, 200);
-    pCamWindow->setVisibilty(true);
-    pCamWindow->setClosability(true);    
+//     auto CamWidgetID = this->createWidget(WidgetTypeType::CAMERA);
+//     CWidgetCam* pCameraWidget = static_cast<CWidgetCam*>(m_pVisualsDataStorage->getWidgetByValue(CamWidgetID));
+//     pCameraWidget->setShaderProgram(&m_ShaderProgramMainScreen);
+//     
+//     pCameraWidget->attachTo(m_pVisualsDataStorage->getCamerasByValue().at(CameraID));
+//     
+//     auto CamWindowID = this->createWindow();
+//     CWindow* pCamWindow  = m_pVisualsDataStorage->getWindowByValue(CamWindowID);
+//     
+//     pCamWindow->Title.setText("Camera 1");
+//     pCamWindow->Title.setFont(m_strFont);
+//     pCamWindow->Title.setSize(20);
+//     pCamWindow->Title.setColor({{1.0, 1.0, 1.0, 1.0}});
+//     pCamWindow->setWidget(pCameraWidget);
+//     pCamWindow->setColorBG({{0.1, 0.1, 0.1, 0.75}}, WIN_INHERIT);
+//     pCamWindow->setColorFG({{0.3, 0.3, 0.3, 0.75}}, WIN_INHERIT);
+//     pCamWindow->setPosition(10, 500);
+//     pCamWindow->resize(200, 200);
+//     pCamWindow->setVisibilty(true);
+//     pCamWindow->setClosability(true);    
     
     // Initialise UI text objects
     m_TextDebris.setFont(m_strFont);
@@ -1892,6 +1892,9 @@ void CVisualsManager::myInitComInterface()
 
     INFO_MSG("Visuals Manager", "Initialising com interace.")
     
+    // Register additional domain for initialisation
+    m_pComInterface->registerWriterDomain("visuals_init");
+    
     std::ostringstream ossWidgetType("");
     for (auto WidgetType : STRING_TO_WIDGET_TYPE_MAP) ossWidgetType << " " << WidgetType.first;
     
@@ -1922,13 +1925,35 @@ void CVisualsManager::myInitComInterface()
                     pWin->Title.setFont(m_strFont);
                     pWin->Title.setText(_strLev + " [" + _strDom + "]");
                     pWin->setWidget(pWidget);
-                    pWin->center();
                     pWin->setColorBG({{0.25, 0.0, 0.0, 0.8}}, WIN_INHERIT);
                     pWin->setColorFG({{0.5, 0.0, 0.0, 0.8}}, WIN_INHERIT);
+                    pWin->center();
+                    
+                    m_pVisualsDataStorage->centerWindow(pWin);
                 }
             }
         };
-    m_pComInterface->registerCallback("log_entry", Func);
+    m_pComInterface->registerCallback("e_log_entry", Func, "visuals");
+    
+    // Callback to window resize
+    std::function<void(double, double)> FuncResize =
+        [&](const double& _fX, const double& _fY)
+        {
+            m_Graphics.resizeWindow(int(_fX), int(_fY));
+            m_RenderTargetScreen.init(std::uint16_t(_fX), std::uint16_t(_fY));
+            if (m_pCamera != nullptr)
+            {
+                m_pCamera->setViewport(m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane - 20.0,
+                                       m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane - 20.0);
+            }
+            // Reposition all centered elements
+            m_TextScale.setPosition(m_Graphics.getWidthScr()/2, 32.0f, TEXT_POSITION_CENTERED_X);
+            for (auto pWin : *m_pVisualsDataStorage->getWindowsCenteredByValue())
+            {
+                pWin.second->center();
+            }
+        };
+    m_pComInterface->registerCallback("e_resize", FuncResize, "visuals");
     
     //----------------------------------------------------------------------
     // System package
@@ -1956,12 +1981,6 @@ void CVisualsManager::myInitComInterface()
                                       "Cycle through registered cameras",
                                       {{ParameterType::NONE,"No return value"}},
                                       "system", "visuals"
-    );
-    m_pComInterface->registerFunction("cam_get_current",
-                                      CCommand<CCamera*>([&](){return this->getCurrentCamera();}),
-                                      "Returns pointer to active camera",
-                                      {{ParameterType::UNDEFINED, "CCamera*, Currently active camera"}},
-                                      "system"
     );
     m_pComInterface->registerFunction("cam_get_position",
                                       CCommand<Vector2d>([&]() -> Vector2d{return m_pCamera->getCenter();}),
@@ -2062,12 +2081,6 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"},
                                        {ParameterType::STRING, "String (char) for command expansion"}},
                                       "system","visuals"
-    );
-    m_pComInterface->registerFunction("com_console_get_current",
-                                      CCommand<std::string>([&]() -> std::string {return m_pVisualsDataStorage->getComConsole()->getCurrentCommand();}),
-                                      "Returns current command in com console.",
-                                      {{ParameterType::STRING, "Current command in console"}},
-                                      "system"
     );
     m_pComInterface->registerFunction("com_console_next",
                                       CCommand<void>([&](){m_pVisualsDataStorage->getComConsole()->nextCommand();}),
@@ -2186,7 +2199,7 @@ void CVisualsManager::myInitComInterface()
                                           "Sets the path where visuals data is located.",
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::DOUBLE, "Location of visuals data (path)"}},
-                                           "system", "visuals");
+                                           "system", "visuals_init");
     m_pComInterface->registerFunction("set_frequency_visuals",
                                           CCommand<void, double>([&](const double& _fFrequency)
                                           {
@@ -2358,7 +2371,7 @@ void CVisualsManager::myInitComInterface()
                                                 CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
                                                 if (pWin != nullptr)
                                                 {
-                                                    pWin->center();
+                                                    m_pVisualsDataStorage->centerWindow(pWin);
                                                 }
                                                 else
                                                 {
@@ -2405,23 +2418,21 @@ void CVisualsManager::myInitComInterface()
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("win_main_resize",
-                                      CCommand<void, double, double>([=](const double& _fX,
+                                      CCommand<void, double, double>([&](const double& _fX,
                                                                          const double& _fY)
                                       {
-                                          m_RenderTargetScreen.init(std::uint16_t(_fX), std::uint16_t(_fY));
-                                          m_Graphics.resizeWindow(int(_fX), int(_fY));
-                                          if (m_pCamera != nullptr)
-                                          {
-                                                m_pCamera->setViewport(m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane - 20.0,
-                                                                       m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane - 20.0);
-                                          }
+                                          // Since resizing the window triggers an additional e_resize event
+                                          // it is important to call in the correct order. Therefore,
+                                          // the queue is flushed to avoid events with alternating parameters.
+                                          m_pComInterface->callWriters("visuals");
+                                          m_pComInterface->call<void,double,double>("e_resize", _fX, _fY);
                                       }),
                                       "Resize window to given size.",
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::DOUBLE, "Window width (x)"},
                                       {ParameterType::DOUBLE, "Window height (y)"}
                                       },
-                                      "system", "visuals"  
+                                      "system", "visuals"
     );
     m_pComInterface->registerFunction("win_resize",
                                       CCommand<void,int,int,int>(

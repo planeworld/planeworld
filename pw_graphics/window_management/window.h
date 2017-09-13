@@ -92,7 +92,6 @@ class CWindow : public IFontUser,
         
         //--- Variables [private] --------------------------------------------//
         IWidget*    m_pWidget;      ///< Widget of this \ref CWindow
-        bool        m_bCenter;      ///< Indicates, if this window is centered
         bool        m_bVisible;     ///< Indicates, if this window is visible
         bool        m_bClosable;    ///< Indicates, if this window may be closed
         int         m_nSizeClose;   ///< Size (both dimensions) of close area

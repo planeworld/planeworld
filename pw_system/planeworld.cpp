@@ -52,8 +52,6 @@
 #include "physics_manager.h"
 #include "objects_emitter.h"
 #include "thruster.h"
-#include "xfig_loader.h"
-#include "xml_importer.h"
 #include "visuals_manager.h"
 
 //--- Misc-Header ------------------------------------------------------------//
@@ -124,12 +122,12 @@ bool g_bDone = false;
 void usage()
 {
     METHOD_ENTRY("usage")
-    std::cout << "Usage: planeworld <OPTIONS> <UNIVERSE_DATA_FILE>" << std::endl;
+    std::cout << "Usage: planeworld <OPTIONS> <LUA_FILE>" << std::endl;
     std::cout << "\nOptions: " << std::endl;
     std::cout << "--no graphics: Start simulation without graphical output." << std::endl;
     std::cout << "\nExamples: " << std::endl;
-    std::cout << "planeworld path/to/scene.xml" << std::endl;
-    std::cout << "planeworld --no-graphics path/to/scene.xml" << std::endl;
+    std::cout << "planeworld path/to/scene.lua" << std::endl;
+    std::cout << "planeworld --no-graphics path/to/scene.lua" << std::endl;
     
 }
 
@@ -203,7 +201,6 @@ int main(int argc, char *argv[])
     ////////////////////////////////////////////////////////////////////////////
     CGraphics&          Graphics = CGraphics::getInstance();
     CGameStateManager   GameStateManager;
-    CXFigLoader         XFigLoader;
     CUniverse           Universe;
     CVisualsDataStorage VisualsDataStorage;
     CWorldDataStorage   WorldDataStorage;
@@ -278,54 +275,23 @@ int main(int argc, char *argv[])
         pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
     }
     
-    //////////////////////////////////////////////////////////////////////////// 
-    //
-    // 5. Import simulation data
-    //
-    ////////////////////////////////////////////////////////////////////////////
-    {
-        // XML-Importer is initialised in its own scope to free memory after
-        // objects are handed over to managers. However, this only applies for
-        // the list structure of pointers.
-        CXMLImporter        XMLImporter;
-        
-        XMLImporter.setWorldDataStorage(&WorldDataStorage);
-        XMLImporter.setVisualsDataStorage(&VisualsDataStorage);
-        if (!XMLImporter.import(strArgData)) {CLEAN_UP; return EXIT_FAILURE;}
-        
-        pLuaManager->setPhysicsInterface(XMLImporter.getPhysicsInterface());
-        ComInterface.call<void, double>("set_frequency_lua", XMLImporter.getFrequencyLua());
-        
-        Vector2d vecG(XMLImporter.getGravity());
-        ComInterface.call<void, double, double>("set_gravity_vector", vecG[0], vecG[1]);
-        pPhysicsManager->addComponents(XMLImporter.getComponents());
-        pPhysicsManager->addEmitters(XMLImporter.getEmitters());
-        ComInterface.call<void, double>("set_frequency_physics", XMLImporter.getPhysicsFrequency());
-        if (bGraphics)
-        {
-            ComInterface.call<void, double>("set_frequency_lua", XMLImporter.getVisualsFrequency());
-            ComInterface.call<void, std::string>("set_data_path_visuals", XMLImporter.getGraphicsDataPath());
-        }
-        ComInterface.call<void, int, int>("create_universe", 23479, 10000);
-    }
+    pLuaManager->setPhysicsInterface(strArgData);
 
     //////////////////////////////////////////////////////////////////////////// 
     //
-    // 6. Start physics
+    // 5. Start physics
     //
     ////////////////////////////////////////////////////////////////////////////
     pPhysicsManager->initObjects();
     pPhysicsManager->initEmitters();
     pPhysicsManager->initComponents();
-    
     #ifdef PW_MULTITHREADING    
         pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
         MEM_ALLOC("std::thread")
     #endif
-        
     //////////////////////////////////////////////////////////////////////////// 
     //
-    // 7. Start lua
+    // 6. Start lua
     //
     ////////////////////////////////////////////////////////////////////////////
     if (!pLuaManager->init())
@@ -336,7 +302,6 @@ int main(int argc, char *argv[])
         #endif
         CLEAN_UP; return EXIT_FAILURE;
     }
-    
     #ifdef PW_MULTITHREADING    
         pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);
         MEM_ALLOC("std::thread")
@@ -344,7 +309,7 @@ int main(int argc, char *argv[])
     
     //////////////////////////////////////////////////////////////////////////// 
     //
-    // 8. Start graphcis
+    // 7. Start graphcis
     //
     ////////////////////////////////////////////////////////////////////////////
     #ifndef PW_MULTITHREADING

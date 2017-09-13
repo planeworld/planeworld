@@ -58,11 +58,22 @@ class CText : virtual public CGraphicsBase
 
         //--- Constant Methods -----------------------------------------------//
         int                 getFontSize() const {return m_nSize;}
-        float               getLength() const {return m_fLength;}
+        
         const std::string&  str() const {return m_strText;}
         
         //--- Methods --------------------------------------------------------//
         void display();
+        
+        float getLength()
+        {
+            // Calculate length of text
+            if (m_bNewState)
+            {
+                m_fLength = m_pFontManager->getTextLength(m_strText, m_strFont, m_nSize);
+                m_bNewState = false;
+            }
+            return m_fLength;
+        }
         
         void setColor(const ColorTypeRGBA& _Color) {m_Color = _Color;}
         void setFont(const std::string&);
@@ -84,6 +95,7 @@ class CText : virtual public CGraphicsBase
         float           m_fPosY;        ///< Y position
         int             m_nWordWrap;    ///< Word wrap (px)
         bool            m_bCentered;    ///< Center Text to position
+        bool            m_bNewState;    ///< Indicates, if there's a parameter change
         std::string     m_strFont;      ///< Name of font to use
         std::string     m_strText;      ///< Text to display
         

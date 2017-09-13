@@ -47,6 +47,7 @@ CText::CText(CFontManager* const _pFontManager) : CGraphicsBase(),
                   m_fPosY(0.0f),
                   m_nWordWrap(FONT_MGR_NO_WORD_WRAP),
                   m_bCentered(false),
+                  m_bNewState(true),
                   m_strFont(FONT_MGR_FONT_DEFAULT),
                   m_strText("CText"),
                   m_pFontManager(_pFontManager) 
@@ -98,6 +99,7 @@ void CText::setFont(const std::string& _strFont)
 {
     METHOD_ENTRY("CText::setFont")
     m_strFont = _strFont;
+    m_bNewState = true;
     
     // Set font in font manager. This is usually done before rendering, but 
     // here, it ensures that the font manager rasterises a new font if not
@@ -117,6 +119,7 @@ void CText::setSize(const int _nSize)
 {
     METHOD_ENTRY("CText::setSize")
     m_nSize = _nSize;
+    m_bNewState = true;
     
     // Set font size in font manager. This is usually done before rendering, but 
     // here, it ensures that the font manager rasterises a new font size if not
@@ -166,8 +169,7 @@ void CText::setText(const std::string& _strText)
             goto DomDevTextNoFont;
         }
     )
-    // Calculate length of text
-    m_fLength = m_pFontManager->getTextLength(_strText, m_strFont, m_nSize);
+    m_bNewState = true;
     
     DOM_DEV(DomDevTextNoFont:)
 }

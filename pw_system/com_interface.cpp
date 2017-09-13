@@ -75,7 +75,7 @@ CComInterface::CComInterface()
     Log.addListener("com", this);
     
     this->registerEvent<std::string, std::string, std::string, std::string>
-                          ("log_entry", "Indicates that a new log entry was made.",
+                          ("e_log_entry", "Indicates that a new log entry was made.",
                                     {{ParameterType::STRING,"Source of log entry"},
                                      {ParameterType::STRING,"Log message"},
                                      {ParameterType::STRING,"Log level"},

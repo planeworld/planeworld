@@ -202,6 +202,19 @@ void CVisualsDataStorage::addWindow(CWindow* _pWindow)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Add a window to list of centered windows
+///
+/// \param _pWindow Window to be added to list of centered windows
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsDataStorage::centerWindow(CWindow* _pWindow)
+{
+    METHOD_ENTRY("CVisualsDataStorage::centerWindow")
+    m_WindowsCenteredByValue.insert({_pWindow->getUID(), _pWindow});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Add a widget to data storage
 ///
 /// \note Use this method to add a widget to the storage that has already been
@@ -278,6 +291,12 @@ bool CVisualsDataStorage::closeWindow(const UIDType _nUID)
 
             // Remove widgets pointers from list. Widget deletion is handeled by
             // window/widget destructors
+            
+            if (m_WindowsCenteredByValue.find(_nUID) !=
+                m_WindowsCenteredByValue.end())
+            {
+                m_WindowsCenteredByValue.erase(_nUID);
+            }
         }
         delete it->second;
         MEM_FREED("CWindow")

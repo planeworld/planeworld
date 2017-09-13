@@ -96,11 +96,14 @@ class CVisualsDataStorage : public IComInterfaceUser,
         CWindow*                        getWindowByValue(const UIDType) const;
         const WidgetsByValueType*       getWidgetsByValue() const;
         const WindowsByValueType*       getWindowsByValue() const;
+        const WindowsByValueType*       getWindowsCenteredByValue() const;
         
         //--- Methods --------------------------------------------------------//
         void addCamera(CCamera*);
         void addWidget(IWidget*);
         void addWindow(CWindow*);
+        
+        void centerWindow(CWindow*);
         
         bool closeWindow(const UIDType);
         
@@ -120,6 +123,7 @@ class CVisualsDataStorage : public IComInterfaceUser,
         CameraWidgetsByValueType    m_CameraWidgetsByValue;     ///< Camera widgets, accessed by value
         WidgetsByValueType          m_WidgetsByValue;           ///< Widgets, accessed by value
         WindowsByValueType          m_WindowsByValue;           ///< Windows, accessed by value
+        WindowsByValueType          m_WindowsCenteredByValue;   ///< Windows, that are centered on screen
         WinFrameUsersByValueType    m_WinFrameUsersByValue;     ///< Entities using a window frame, accessed by value
         WindowOrderType             m_WindowsOrder;             ///< Display order of windows
         
@@ -207,5 +211,17 @@ inline const WindowsByValueType* CVisualsDataStorage::getWindowsByValue() const
     return &m_WindowsByValue;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns windows that are centered on screen, accessable by value
+///
+/// \return Windows centered on screen
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const WindowsByValueType* CVisualsDataStorage::getWindowsCenteredByValue() const
+{
+    METHOD_ENTRY("CVisualsDataStorage::getWindowsCenteredByValue")
+    return &m_WindowsCenteredByValue;
+}
 
 #endif // VISUALS_DATA_STORAGE_H
