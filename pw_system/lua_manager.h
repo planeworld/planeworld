@@ -85,6 +85,7 @@ class CLuaManager : public IComInterfaceProvider,
         sol::state      m_LuaState;             ///< Current lua state
         
         std::string     m_strPhysicsInterface;  ///< Path and filename of physics interface
+        bool            m_bPaused;              ///< Indicates if processing is paused, depends on physics
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

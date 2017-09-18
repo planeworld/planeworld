@@ -45,7 +45,8 @@ using namespace Eigen;
 ///////////////////////////////////////////////////////////////////////////////
 CLuaManager::CLuaManager() : IComInterfaceProvider(),
                              IThreadModule(),
-                             m_strPhysicsInterface("")
+                             m_strPhysicsInterface(""),
+                             m_bPaused(false)
 {
     METHOD_ENTRY("CLuaManager::CLuaManager")
     CTOR_CALL("CLuaManager::CLuaManager")
@@ -399,7 +400,10 @@ void CLuaManager::processFrame()
 
     if (!m_strPhysicsInterface.empty())
     {
-        m_LuaState["physics_interface"]();
+        if (!m_bPaused)
+        {
+            m_LuaState["physics_interface"]();
+        }
         m_pComInterface->callWriters("lua");
     }
 }
@@ -416,6 +420,30 @@ void CLuaManager::myInitComInterface()
     INFO_MSG("Lua Manager", "Initialising com interace.")
     if (m_pComInterface != nullptr)
     {
+        // Callback to physics pause
+        std::function<void(void)> FuncPause =
+        [&]()
+        {
+            m_bPaused = true;
+        };
+        m_pComInterface->registerCallback("pause", FuncPause, "lua");
+        
+        // Callback to physics resume
+        std::function<void(void)> FuncResume =
+        [&]()
+        {
+            m_bPaused = false;
+        };
+        m_pComInterface->registerCallback("resume", FuncResume, "lua");
+        
+        // Callback to physics toggle pause
+        std::function<void(void)> FuncTogglePause =
+        [&]()
+        {
+            m_bPaused ^= 1;
+        };
+        m_pComInterface->registerCallback("toggle_pause", FuncTogglePause, "lua");
+        
         // System package
         m_pComInterface->registerFunction("get_lua_frequency",
                                           CCommand<double>([&]() -> double {return this->m_fFrequency;}),
