@@ -6,18 +6,19 @@
 
 -- KNOWN ISSUES
 ---------------
--- Objects not created when paused
--- Segfault when no camera/universe present
+-- Segfault when no camera present
 -- shp_set_vertices should be in domain pw.system
+-- cam_attach_to doesn't work correctly
+-- - No bbox, no grid, flickering
 
 pw.system.set_frequency_input(100)
 pw.system.set_frequency_lua(30)
 pw.system.set_frequency_physics(200)
 pw.system.set_frequency_visuals(60)
 pw.system.set_data_path_visuals("../")
-pw.system.create_universe(23479, 10000)
+-- pw.system.create_universe(23479, 10000)
 pw.physics.set_gravity_vector(0.0, -9.81)
-pw.system.win_main_resize(1000, 500)
+pw.system.win_main_resize(1800, 900)
 idCam01 = pw.system.create_camera()
 
 idObj01 = pw.system.create_obj()
@@ -35,15 +36,24 @@ pw.system.obj_add_shp(idObj01, idShp01)
 pw.system.obj_add_shp(idObj01, idShp02)
 
 pw.visuals.toggle_bboxes()
--- pw.visuals.toggle_com()
 pw.visuals.toggle_grid()
-pw.visuals.toggle_names()
 
+-- Create a text window
 idWin01=pw.system.create_window()
 idWdg01=pw.system.create_widget("text")
 pw.system.widget_set_text(idWdg01, "Welcome to planeworld, press p to start")
 pw.system.win_set_widget(idWin01, idWdg01)
 pw.system.win_center(idWin01)
+
+-- Create camera view in new window
+idWin02=pw.system.create_window()
+idWdg02=pw.system.create_widget("camera")
+idCam02=pw.system.create_camera()
+-- pw.system.cam_attach_to(idCam02, idObj01)
+pw.system.win_set_title(idWin02, "Camera 01")
+pw.system.widget_set_cam(idWdg02, idCam02)
+pw.system.win_set_widget(idWin02, idWdg02)
+pw.system.win_set_position(idWin02, 500, 100)
 
 pw.system.pause()
 

@@ -189,6 +189,7 @@ UIDType CPhysicsManager::createObject()
     CObject* pObject = new CObject();
     MEM_ALLOC("CObject")
     
+    pObject->init();
     m_ObjectsToBeAddedToWorld.enqueue(pObject);
     
     return pObject->getUID();
@@ -405,15 +406,13 @@ void CPhysicsManager::initObjects()
     //--- Init objects -------------------------------------------------------//
     INFO_MSG("Physics Manager", "Initialising objects.")
     
-    #ifndef PW_MULTITHREADING
-        m_pComInterface->callWriters("physics");
-    #endif
-
 //     for (auto i=0u; i<m_pDataStorage->getObjectsBuffer().getBufferSize(); ++i)
 //     {
+//         std::cout << "BUF" << std::endl;
 //         for (auto Obj : *m_pDataStorage->getObjectsBuffer().getBuffer(i))
 //         {
 //             Obj.second->init();
+//             std::cout << "OBJ" << std::endl;
 //         }
 //     }
 }
@@ -547,13 +546,11 @@ void CPhysicsManager::processFrame()
         this->collisionDetection();
         this->updateCells();
         
-        DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
-        m_pDataStorage->swapBack();
-        DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
         m_bProcessOneFrame = false;
-        
-        
     }
+    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
+    m_pDataStorage->swapBack();
+    DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
     if (++nFrame == 10000) nFrame = 0;    
 }
 
@@ -822,6 +819,7 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr && pShp != nullptr)
                                                 {
                                                     pObj->getGeometry()->addShape(pShp);
+                                                    pObj->init();
                                                 }
                                                 else
                                                 {
@@ -864,7 +862,7 @@ void CPhysicsManager::myInitComInterface()
                                            "system", "physics");
         m_pComInterface->registerFunction("toggle_pause",
                                           CCommand<void>([&](){this->togglePause();}),
-                                          "Pauses or unpauses physics simulation.",
+                                          "Pauses or resumes physics simulation.",
                                           {{ParameterType::NONE, "No return value"}},
                                            "system", "physics"
                                          );

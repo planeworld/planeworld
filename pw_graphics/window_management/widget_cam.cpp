@@ -79,6 +79,14 @@ void CWidgetCam::draw()
         this->drawFrame();
     m_Graphics.endRenderBatch();
    
+    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
+    
+    m_Graphics.beginRenderBatch(m_UID.getName());
+        m_Graphics.texturedRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                                Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY),
+                                &m_TargetCam.getTexUV());
+    m_Graphics.endRenderBatch();
+    
     DOM_DEV(
         static bool bWarned = false;
         if (m_pUIDVisuals == nullptr)
@@ -90,16 +98,14 @@ void CWidgetCam::draw()
             }
             goto DomDev;
         })
-        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, "Widget Camera", m_UID.getValue());
+    
+    m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, "Widget Camera", m_UID.getValue());
+    if (m_pRef != nullptr)
+    {
+        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY + m_pUIDVisuals->UIDText.getFontSize(), "Camera", m_pRef->getUID());
+    }
+    
     DOM_DEV(DomDev:)
-    
-    m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-    
-    m_Graphics.beginRenderBatch(m_UID.getName());
-        m_Graphics.texturedRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                                Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY),
-                                &m_TargetCam.getTexUV());
-    m_Graphics.endRenderBatch();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

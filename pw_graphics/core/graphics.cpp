@@ -623,25 +623,22 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
 {
     METHOD_ENTRY("CGraphics::resizeWindow")
 
-    if (_unWidthScr != m_unWidthScr && _unHeightScr != m_unHeightScr)
-    {
-        // Store resolution
-        m_unWidthScr = _unWidthScr;
-        m_unHeightScr = _unHeightScr;
-        
-        m_ViewPort.rightplane = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
-        m_ViewPort.topplane   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
-        m_ViewPort.leftplane   = -m_ViewPort.rightplane;
-        m_ViewPort.bottomplane = -m_ViewPort.topplane;
-        
-        this->setupWorldSpace();
-        
-        m_pWindow->setSize(sf::Vector2u(_unWidthScr, _unHeightScr));
-        
-        INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.rightplane - m_ViewPort.leftplane << "m x " <<
-                                                    m_ViewPort.topplane   - m_ViewPort.bottomplane << "m (" <<
-                                                    _unWidthScr << "x" << _unHeightScr << ").")
-    }
+    // Store resolution
+    m_unWidthScr = _unWidthScr;
+    m_unHeightScr = _unHeightScr;
+    
+    m_ViewPort.rightplane = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.topplane   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.leftplane   = -m_ViewPort.rightplane;
+    m_ViewPort.bottomplane = -m_ViewPort.topplane;
+    
+    this->setupWorldSpace();
+    
+    m_pWindow->setSize(sf::Vector2u(_unWidthScr, _unHeightScr));
+    
+    INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.rightplane - m_ViewPort.leftplane << "m x " <<
+                                                m_ViewPort.topplane   - m_ViewPort.bottomplane << "m (" <<
+                                                _unWidthScr << "x" << _unHeightScr << ").")
     return (true);
 }
 

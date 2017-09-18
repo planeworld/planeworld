@@ -1171,10 +1171,6 @@ void CVisualsManager::finishFrame()
     DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
     m_pDataStorage->swapFront();
     DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
-
-    // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
-    if (m_pCamera->gotRef())
-        m_pCamera->attachTo(m_pDataStorage->getObjectsByValueFront()->at(m_pCamera->getUIDRef()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1185,44 +1181,50 @@ void CVisualsManager::finishFrame()
 void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
+    
+    bool bGotCam = m_pVisualsDataStorage->getCamerasByIndex().size() > 0;
 
     this->addCamerasFromQueue();
     this->addWidgetsFromQueue();
     this->addWindowsFromQueue();
     m_pComInterface->callWriters("visuals");
 
-    for (auto CamWidget : m_pVisualsDataStorage->getCameraWidgets())
+    if (bGotCam)
     {
-        if (CamWidget.second->gotRef())
+        for (auto CamWidget : m_pVisualsDataStorage->getCameraWidgets())
         {
-            CamWidget.second->getRenderTarget()->bind(RENDER_TARGET_CLEAR);
-            //
-                m_Graphics.setupWorldSpace();
-                
-                m_pCamera = CamWidget.second->getRef();
-                m_pCamera->zoomTo(0.5e-5);
-                m_pCamera->update();
-                this->drawWorld();
-            //
-            CamWidget.second->getRenderTarget()->unbind();
+            if (CamWidget.second->gotRef())
+            {
+                CamWidget.second->getRenderTarget()->bind(RENDER_TARGET_CLEAR);
+                //
+                    m_Graphics.setupWorldSpace();
+                    
+                    m_pCamera = CamWidget.second->getRef();
+                    m_pCamera->update();
+                    this->drawWorld();
+                //
+                CamWidget.second->getRenderTarget()->unbind();
+            }
         }
     }
-    
     m_RenderTargetScreen.bind(RENDER_TARGET_CLEAR);
     
     m_Graphics.setupWorldSpace();
 
-    m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
-    m_pCamera->update();
+    if (bGotCam)
+    {
+        m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
+        m_pCamera->update();
 
-    this->drawGrid();
-    // this->drawTrajectories();
+        this->drawGrid();
+        // this->drawTrajectories();
 
-    m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
-    
-    this->drawWorld();
-    this->drawCOM();
-    this->drawBoundingBoxes();
+        m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
+        
+        this->drawWorld();
+        this->drawCOM();
+        this->drawBoundingBoxes();
+    }
 
     m_RenderTargetScreen.unbind();
     
@@ -1233,14 +1235,21 @@ void CVisualsManager::processFrame()
         m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScreen.getTexUV());
     m_Graphics.endRenderBatch();
     
-    this->drawKinematicsStates();    
-    this->drawGridHUD();
+    this->drawKinematicsStates();
+    if (bGotCam) this->drawGridHUD();
     this->drawTimers();
     this->drawWindows();
     this->updateUI();
     this->drawDebugInfo();
     
     this->finishFrame();
+    
+    if (bGotCam)
+    {
+        // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
+        if (m_pCamera->gotRef())
+            m_pCamera->attachTo(m_pDataStorage->getObjectsByValueFront()->at(m_pCamera->getUIDRef()));
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1352,7 +1361,7 @@ void CVisualsManager::drawDebugInfo()
 ////////////////////////////////////////////////////////////////////////////////
 void CVisualsManager::drawGridHUD()
 {
-    METHOD_ENTRY("CVisualsManager::drawGridHU")
+    METHOD_ENTRY("CVisualsManager::drawGridHUD")
 
     if (m_nVisualisations & VISUALS_UNIVERSE_GRID)
     {
@@ -1571,7 +1580,9 @@ void CVisualsManager::drawWorld()
 //     m_pCamera->zoomTo(fMaxZoom);
     
 //     if (1.0e13 * m_Graphics.getResPMX() < 1.0)
+    
     m_Graphics.beginRenderBatch("world");
+    if (m_pUniverse != nullptr)
     {
         #ifdef PW_MULTITHREADING
             while (m_pUniverse->isAccessed.test_and_set()) {}
@@ -1724,7 +1735,8 @@ void CVisualsManager::drawWorld()
                 m_TextDebris.display();
             }
         }
-        if (1.0e9 * m_Graphics.getResPMX() < 1.0)
+        if ((1.0e9 * m_Graphics.getResPMX() < 1.0) &&
+            (m_pUniverse != nullptr))
         {
             #ifdef PW_MULTITHREADING
                 while (m_pUniverse->isAccessed.test_and_set()) {}
@@ -1943,8 +1955,8 @@ void CVisualsManager::myInitComInterface()
             m_RenderTargetScreen.init(std::uint16_t(_fX), std::uint16_t(_fY));
             if (m_pCamera != nullptr)
             {
-                m_pCamera->setViewport(m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane - 20.0,
-                                       m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane - 20.0);
+                m_pCamera->setViewport(m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane,
+                                       m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane);
             }
             // Reposition all centered elements
             m_TextScale.setPosition(m_Graphics.getWidthScr()/2, 32.0f, TEXT_POSITION_CENTERED_X);
@@ -1959,20 +1971,29 @@ void CVisualsManager::myInitComInterface()
     // System package
     //----------------------------------------------------------------------
     m_pComInterface->registerFunction("cam_attach_to",
-                                      CCommand<void, int>([&](const int _nUID)
+                                      CCommand<void, int, int>([&](const int _nUIDCam, const int _nUIDObj)
                                       {
-                                          auto it = m_pDataStorage->getObjectsByValueFront()->find(_nUID);
-                                          if (it != m_pDataStorage->getObjectsByValueFront()->end())
+                                          CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(_nUIDCam);
+                                          if (pCam != nullptr)
                                           {
-                                                m_pCamera->attachTo(it->second);
+                                            auto it = m_pDataStorage->getObjectsByValueFront()->find(_nUIDObj);
+                                            if (it != m_pDataStorage->getObjectsByValueFront()->end())
+                                            {
+                                                pCam->attachTo(it->second);
+                                            }
+                                            else
+                                            {
+                                                WARNING_MSG("Visuals Manager", "Unknown object with UID <" << _nUIDObj << ">")
+                                            }
                                           }
                                           else
                                           {
-                                              WARNING_MSG("Visuals Manager", "Unknown object with UID <" << _nUID << ">")
+                                            WARNING_MSG("Visuals Manager", "Unknown camera with UID <" << _nUIDCam << ">")
                                           }
                                       }),
                                       "Hook camera on given object.",
                                       {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Camera UID"},
                                       {ParameterType::INT, "Object UID"}},
                                       "system", "visuals"  
     );
@@ -2030,6 +2051,25 @@ void CVisualsManager::myInitComInterface()
                                       {m_pCamera->zoomTo(_fR / m_Graphics.getResPMX() * m_pCamera->getZoom());}),
                                       "Set resolution of currently active camera (px/m).",
                                       {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::DOUBLE, "Resolution in px/m"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("cam_set_resolution_pxm_uid",
+                                      CCommand<void, int, double>([&](const int _nUID, const double& _fR)
+                                      {
+                                          auto pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);
+                                          if (pCam != nullptr)
+                                          {
+                                            pCam->zoomTo(_fR / m_Graphics.getResPMX());
+                                          }
+                                          else
+                                          {
+                                            WARNING_MSG("Visuals Manager", "Unknown camera with UID <" << _nUID << ">")
+                                          }
+                                      }),
+                                      "Set resolution of camera (px/m) with given UID.",
+                                      {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::INT, "Camera UID"},
                                        {ParameterType::DOUBLE, "Resolution in px/m"}},
                                       "system", "visuals"  
     );

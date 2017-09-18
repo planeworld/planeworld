@@ -289,6 +289,7 @@ int main(int argc, char *argv[])
         pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
         MEM_ALLOC("std::thread")
     #endif
+    
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 6. Start lua
@@ -306,7 +307,7 @@ int main(int argc, char *argv[])
         pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);
         MEM_ALLOC("std::thread")
     #endif
-    
+        
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 7. Start graphcis
