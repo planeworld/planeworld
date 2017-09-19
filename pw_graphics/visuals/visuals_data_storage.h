@@ -103,7 +103,8 @@ class CVisualsDataStorage : public IComInterfaceUser,
         void addWidget(IWidget*);
         void addWindow(CWindow*);
         
-        void centerWindow(CWindow*);
+        void centerWindow(CWindow*, const bool = false);
+        void releaseCenteredWindow(const UIDType);
         
         bool closeWindow(const UIDType);
         

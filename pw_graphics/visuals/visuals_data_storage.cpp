@@ -205,12 +205,38 @@ void CVisualsDataStorage::addWindow(CWindow* _pWindow)
 /// \brief Add a window to list of centered windows
 ///
 /// \param _pWindow Window to be added to list of centered windows
+/// \param _bKeep Keep window centered if main screen is resized
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CVisualsDataStorage::centerWindow(CWindow* _pWindow)
+void CVisualsDataStorage::centerWindow(CWindow* _pWindow, const bool _bKeep)
 {
     METHOD_ENTRY("CVisualsDataStorage::centerWindow")
-    m_WindowsCenteredByValue.insert({_pWindow->getUID(), _pWindow});
+    _pWindow->center();
+    if (_bKeep)
+    {
+        m_WindowsCenteredByValue.insert({_pWindow->getUID(), _pWindow});
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Remove a window from list of centered windows
+///
+/// \param _nUID UID of window to be removed from list of centered windows
+///
+///////////////////////////////////////////////////////////////////////////////
+void CVisualsDataStorage::releaseCenteredWindow(const UIDType _nUID)
+{
+    METHOD_ENTRY("CVisualsDataStorage::releaseCenteredWindow")
+    auto it = m_WindowsCenteredByValue.find(_nUID);
+    if (it != m_WindowsCenteredByValue.end())
+    {
+        m_WindowsCenteredByValue.erase(it);
+    }
+    else
+    {
+        WARNING_MSG("Visuals Data Storage", "Unknown window with UID <" << _nUID << ">")
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

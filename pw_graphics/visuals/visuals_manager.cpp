@@ -2423,6 +2423,36 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::INT, "Window UID"}},
                                       "system", "visuals"  
     );
+    m_pComInterface->registerFunction("win_center_keep",
+                                      CCommand<void, int>(
+                                          [&](const int _nUID)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    m_pVisualsDataStorage->centerWindow(pWin, true);
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Center window referring to the main application and keep centered if resized.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"}},
+                                      "system", "visuals"  
+    );
+    m_pComInterface->registerFunction("win_center_release",
+                                      CCommand<void, int>(
+                                          [&](const int _nUID)
+                                            {
+                                                m_pVisualsDataStorage->releaseCenteredWindow(_nUID);
+                                            }),
+                                      "Release window from automatic centering.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"}},
+                                      "system", "visuals"  
+    );
     m_pComInterface->registerFunction("win_close",
                                       CCommand<void, int>(
                                           [&](const int _nUID)

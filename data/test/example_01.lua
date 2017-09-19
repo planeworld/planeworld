@@ -43,7 +43,7 @@ idWin01=pw.system.create_window()
 idWdg01=pw.system.create_widget("text")
 pw.system.widget_set_text(idWdg01, "Welcome to planeworld, press p to start")
 pw.system.win_set_widget(idWin01, idWdg01)
-pw.system.win_center(idWin01)
+pw.system.win_center_keep(idWin01)
 
 -- Create camera view in new window
 idWin02=pw.system.create_window()
