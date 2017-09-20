@@ -1941,7 +1941,7 @@ void CVisualsManager::myInitComInterface()
                     pWin->setColorFG({{0.5, 0.0, 0.0, 0.8}}, WIN_INHERIT);
                     pWin->center();
                     
-                    m_pVisualsDataStorage->centerWindow(pWin);
+                    m_pVisualsDataStorage->centerWindow(pWin, WIN_KEEP_CENTERED);
                 }
             }
         };
@@ -1986,10 +1986,6 @@ void CVisualsManager::myInitComInterface()
                                                 WARNING_MSG("Visuals Manager", "Unknown object with UID <" << _nUIDObj << ">")
                                             }
                                           }
-                                          else
-                                          {
-                                            WARNING_MSG("Visuals Manager", "Unknown camera with UID <" << _nUIDCam << ">")
-                                          }
                                       }),
                                       "Hook camera on given object.",
                                       {{ParameterType::NONE, "No return value"},
@@ -2010,30 +2006,66 @@ void CVisualsManager::myInitComInterface()
                                       "system"
     );
     m_pComInterface->registerFunction("cam_get_resolution",
-                                      CCommand<double>([&](){return m_Graphics.getResMPX();}),
-                                      "Get the resolution of currently active camera",
-                                      {{ParameterType::DOUBLE, "Resolution in m/px"}},
+                                      CCommand<double, int>([&](const int _nUID) -> double
+                                      {
+                                          return m_Graphics.getResMPX();
+                                          
+                                      }),
+                                      "Get the resolution of camera with given UID",
+                                      {{ParameterType::INT, "Camera UID"},
+                                       {ParameterType::DOUBLE, "Resolution in m/px"}},
                                       "system"
     );
     m_pComInterface->registerFunction("cam_get_zoom",
-                                      CCommand<double>([&](){return m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex)->getZoom();}),
-                                      "Returns zoom level of active camera",
-                                      {{ParameterType::DOUBLE, "Zoom level of active camera"}},
+                                      CCommand<double, int>([&](const int _nUID) -> double
+                                      {
+                                          if (_nUID != 0)
+                                          {
+                                            CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);
+                                            if (pCam != nullptr)
+                                            {
+                                                return pCam->getZoom();
+                                            }
+                                            else
+                                            {
+                                                return 1.0;
+                                            }
+                                          }
+                                      }),
+                                      "Returns zoom level of camera with given UID",
+                                      {{ParameterType::INT, "Camera UID"},
+                                       {ParameterType::DOUBLE, "Zoom level of camera"}},
                                       "system"
     );
     m_pComInterface->registerFunction("cam_rotate_by",
-                                      CCommand<void, double>([&](const double& _fAngle){m_pCamera->rotateBy(_fAngle);}),
+                                      CCommand<void, int, double>([&](const int _nUID, const double& _fAngle)
+                                      {
+                                          auto pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);
+                                          if (pCam != nullptr)
+                                          {
+                                            pCam->rotateBy(_fAngle);
+                                          }
+                                      }),
                                       "Rotate camera by given angle.",
                                       {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::INT, "Camera UID"},
                                       {ParameterType::DOUBLE, "Angle to rotate the camera by"}},
                                       "system", "visuals"  
     );
     m_pComInterface->registerFunction("cam_set_position",
-                                      CCommand<void, double, double>([&](const double& _fX,
-                                                                         const double& _fY)
-                                      {m_pCamera->setPosition(_fX,_fY);}),
+                                      CCommand<void, int, double, double>([&](const int _nUID,
+                                                                              const double& _fX,
+                                                                              const double& _fY)
+                                      {
+                                          auto pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);
+                                          if (pCam != nullptr)
+                                          {
+                                            pCam->setPosition(_fX,_fY);
+                                          }
+                                      }),
                                       "Set position of currently active camera to given coordinates.",
                                       {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::INT, "Camera UID"},
                                        {ParameterType::DOUBLE, "Position X"},
                                        {ParameterType::DOUBLE, "Position Y"}},
                                       "system", "visuals"  
@@ -2047,24 +2079,12 @@ void CVisualsManager::myInitComInterface()
                                       "system", "visuals"  
     );
     m_pComInterface->registerFunction("cam_set_resolution_pxm",
-                                      CCommand<void, double>([&](const double& _fR)
-                                      {m_pCamera->zoomTo(_fR / m_Graphics.getResPMX() * m_pCamera->getZoom());}),
-                                      "Set resolution of currently active camera (px/m).",
-                                      {{ParameterType::NONE, "No return value"},
-                                       {ParameterType::DOUBLE, "Resolution in px/m"}},
-                                      "system", "visuals"  
-    );
-    m_pComInterface->registerFunction("cam_set_resolution_pxm_uid",
                                       CCommand<void, int, double>([&](const int _nUID, const double& _fR)
                                       {
                                           auto pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);
                                           if (pCam != nullptr)
                                           {
                                             pCam->zoomTo(_fR / m_Graphics.getResPMX());
-                                          }
-                                          else
-                                          {
-                                            WARNING_MSG("Visuals Manager", "Unknown camera with UID <" << _nUID << ">")
                                           }
                                       }),
                                       "Set resolution of camera (px/m) with given UID.",
@@ -2074,27 +2094,51 @@ void CVisualsManager::myInitComInterface()
                                       "system", "visuals"  
     );
     m_pComInterface->registerFunction("cam_translate_by",
-                                      CCommand<void, double, double>([&](const double& _fX,
-                                                                         const double& _fY)
-                                      {m_pCamera->translateBy(Vector2d(_fX,_fY));}),
+                                      CCommand<void, int, double, double>([&](const int _nUID,
+                                                                              const double& _fX,
+                                                                              const double& _fY)
+                                      {
+                                          auto pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);
+                                          if (pCam != nullptr)
+                                          {
+                                            pCam->translateBy(Vector2d(_fX,_fY));
+                                          }
+                                      }),
                                       "Translate camera by given vector.",
                                       {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::INT, "Camera UID"},
                                        {ParameterType::DOUBLE, "X component to translate the camera by"},
                                        {ParameterType::DOUBLE, "Y component to translate the camera by"}},
                                       "system", "visuals"  
     );
     m_pComInterface->registerFunction("cam_zoom_by",
-                                      CCommand<void,double>([&](const double& _fZoom){m_pCamera->zoomBy(_fZoom);}),
-                                      "Zooms active camera by given level.",
+                                      CCommand<void, int, double>([&](const int _nUID, const double& _fZoom)
+                                      {
+                                          auto pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);
+                                          if (pCam != nullptr)
+                                          {
+                                            pCam->zoomBy(_fZoom);
+                                          }
+                                      }),
+                                      "Zooms camera with given UID by given level.",
                                       {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::DOUBLE, "Level to zoom active camera by"}},
+                                       {ParameterType::INT, "Camera UID"},
+                                       {ParameterType::DOUBLE, "Level to zoom camera by"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("cam_zoom_to",
-                                      CCommand<void,double>([&](const double& _fZoom){m_pCamera->zoomTo(_fZoom);}),
-                                      "Zooms active camera to given level.",
+                                      CCommand<void, int, double>([&](const int _nUID, const double& _fZoom)
+                                      {
+                                          auto pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);
+                                          if (pCam != nullptr)
+                                          {
+                                            pCam->zoomTo(_fZoom);
+                                          }
+                                      }),
+                                      "Zooms camera with given UID to given value.",
                                       {{ParameterType::NONE, "No return value"},
-                                      {ParameterType::DOUBLE, "Level to zoom active camera to"}},
+                                       {ParameterType::INT, "Camera UID"},
+                                       {ParameterType::DOUBLE, "Value to zoom camera to"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("com_console_backspace",
@@ -2187,6 +2231,22 @@ void CVisualsManager::myInitComInterface()
                                       }),
                                       "Creates generic window.",
                                       {{ParameterType::INT, "Window UID"}},
+                                      "system"
+    );
+    m_pComInterface->registerFunction("get_main_camera",
+                                      CCommand<int>([&]() -> int
+                                      {
+                                          if (m_pVisualsDataStorage->getCamerasByIndex().size() != 0)
+                                          {
+                                              return (m_pVisualsDataStorage->getCamerasByIndex()[m_unCameraIndex])->getUID();
+                                          }
+                                          else
+                                          {
+                                              return 0;
+                                          }
+                                      }),
+                                      "Return UID of currently active camera on main screen.",
+                                      {{ParameterType::INT, "Camera UID"}},
                                       "system"
     );
     m_pComInterface->registerFunction("mouse_cursor_on",

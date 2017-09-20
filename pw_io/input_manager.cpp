@@ -72,6 +72,8 @@ void CInputManager::processFrame()
     sf::Event Event;
     while (m_pWindow->pollEvent(Event))
     {
+        int nCamMainUID = m_pComInterface->call<int>("get_main_camera");
+        
         switch (Event.type)
         {
             case sf::Event::Closed:
@@ -337,32 +339,32 @@ void CInputManager::processFrame()
                 {
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
-                        double fZoom = m_pComInterface->call<double>("cam_get_zoom");
-                        m_pComInterface->call<void,double,double>("cam_translate_by",
+                        double fZoom = m_pComInterface->call<double, int>("cam_get_zoom", nCamMainUID);
+                        m_pComInterface->call<void, int, double, double>("cam_translate_by", nCamMainUID,
                                         0.2/2.0*double(m_vecMouse.x)/fZoom,
                                         0.2/2.0*double(m_vecMouse.y)/fZoom);
                     }
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                     {
-                        m_pComInterface->call<void, double>("cam_rotate_by", -double(m_vecMouse.x)*0.001);
-                        m_pComInterface->call<void, double>("cam_zoom_by",1.0+double(m_vecMouse.y)*0.001);
-                        double fZoom = m_pComInterface->call<double>("cam_get_zoom");
+                        m_pComInterface->call<void, int, double>("cam_rotate_by", nCamMainUID, -double(m_vecMouse.x)*0.001);
+                        m_pComInterface->call<void, int, double>("cam_zoom_by", nCamMainUID, 1.0+double(m_vecMouse.y)*0.001);
+                        double fZoom = m_pComInterface->call<double, int>("cam_get_zoom", nCamMainUID);
                         if (fZoom < 1.0e-18)
-                            m_pComInterface->call<void,double>("cam_zoom_to",1.0e-18);
+                            m_pComInterface->call<void, int, double>("cam_zoom_to", nCamMainUID, 1.0e-18);
                         else if (fZoom > 1.0e3)
-                            m_pComInterface->call<void,double>("cam_zoom_to",1.0e3);
+                            m_pComInterface->call<void, int, double>("cam_zoom_to", nCamMainUID, 1.0e3);
                     }
                 }
                 break;
             }
             case sf::Event::MouseWheelMoved:
             {
-                m_pComInterface->call<void, double>("cam_zoom_by",1.0+double(Event.mouseWheel.delta)*0.1);
-                double fZoom = m_pComInterface->call<double>("cam_get_zoom");
+                m_pComInterface->call<void, int, double>("cam_zoom_by", nCamMainUID, 1.0+double(Event.mouseWheel.delta)*0.1);
+                double fZoom = m_pComInterface->call<double, int>("cam_get_zoom", nCamMainUID);
                 if (fZoom < 1.0e-18)
-                    m_pComInterface->call<void,double>("cam_zoom_to",1.0e-18);
+                    m_pComInterface->call<void, int, double>("cam_zoom_to", nCamMainUID, 1.0e-18);
                 else if (fZoom > 1.0e3)
-                    m_pComInterface->call<void,double>("cam_zoom_to",1.0e3);
+                    m_pComInterface->call<void, int, double>("cam_zoom_to", nCamMainUID, 1.0e3);
                 break;
             }
             case sf::Event::TextEntered:

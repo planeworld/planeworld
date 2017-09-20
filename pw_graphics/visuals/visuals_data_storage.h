@@ -70,6 +70,8 @@ typedef moodycamel::ConcurrentQueue<IWidget*> WidgetsQueueType;
 /// Concurrent queue of windows
 typedef moodycamel::ConcurrentQueue<CWindow*> WindowsQueueType;
 
+const bool WIN_KEEP_CENTERED = true; ///< Indicates that a window should be kept centered when resizing the window
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class that stores all visuals data
