@@ -156,10 +156,10 @@ inline CKinematicsState::CKinematicsState() : IUniqueIDUser(),
 {
     METHOD_ENTRY("CKinematicsState::CKinematicsState")
     CTOR_CALL("CKinematicsState::CKinematicsState")
-    m_matRot.setZero();
+    m_matRot.setIdentity();
     m_vecOrigin.setZero();
     m_vecVelocity.setZero();
-    m_matRotRef.setZero();
+    m_matRotRef.setIdentity();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -255,8 +255,8 @@ void CCamera::update()
     m_BoundingBox.update(vecFrame[2]-IGridUser::cellToDouble(m_vecCell));
     m_BoundingBox.update(vecFrame[3]-IGridUser::cellToDouble(m_vecCell));
     
-    m_fBoundingCircleRadius = sqrt(m_fViewportWidth*m_fViewportWidth + 
-                                   m_fViewportHeight*m_fViewportHeight)/m_fZoom;
+    m_fBoundingCircleRadius = std::sqrt(m_fViewportWidth*m_fViewportWidth + 
+                                        m_fViewportHeight*m_fViewportHeight)/m_fZoom;
     
     m_BoundingBox.setCell(m_vecCell);
     

@@ -1244,11 +1244,14 @@ void CVisualsManager::processFrame()
     
     this->finishFrame();
     
+    // Attach cameras to current front buffer (at the moment, this is needed for the kinematics state)
     if (bGotCam)
     {
-        // Attach camera to current front buffer (at the moment, this is needed for the kinematics state)
-        if (m_pCamera->gotRef())
-            m_pCamera->attachTo(m_pDataStorage->getObjectsByValueFront()->at(m_pCamera->getUIDRef()));
+        for (auto pCam : m_pVisualsDataStorage->getCamerasByIndex())
+        {
+            if (pCam->gotRef())
+                pCam->attachTo(m_pDataStorage->getObjectsByValueFront()->at(pCam->getUIDRef()));
+        }
     }
 }
 

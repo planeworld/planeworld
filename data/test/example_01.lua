@@ -6,10 +6,7 @@
 
 -- KNOWN ISSUES
 ---------------
--- Segfault when no camera present
 -- shp_set_vertices should be in domain pw.system
--- cam_attach_to doesn't work correctly
--- - No bbox, no grid, flickering
 
 pw.system.set_frequency_input(100)
 pw.system.set_frequency_lua(30)
@@ -49,7 +46,7 @@ pw.system.win_center_keep(idWin01)
 idWin02=pw.system.create_window()
 idWdg02=pw.system.create_widget("camera")
 idCam02=pw.system.create_camera()
--- pw.system.cam_attach_to(idCam02, idObj01)
+pw.system.cam_attach_to(idCam02, idObj01)
 pw.system.win_set_title(idWin02, "Camera 01")
 pw.system.widget_set_cam(idWdg02, idCam02)
 pw.system.win_set_widget(idWin02, idWdg02)
