@@ -68,7 +68,7 @@ CObjectEmitter::~CObjectEmitter()
 /// This calls one emitation. If a timed emitation is aimed at, the method is
 /// called with a positive frequency defining the engines frequency of
 /// emitation. Since the actual frequency set for this emitter might be higher
-/// than the frequency the method is called at, the number of debris per emit
+/// than the frequency the method is called at, the number of particle per emit
 /// is chosen accordingly.
 ///
 /// \param _fF Engine emitation frequency.

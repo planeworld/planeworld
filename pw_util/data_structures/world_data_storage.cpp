@@ -31,7 +31,7 @@
 #include "world_data_storage.h"
 
 #include "camera.h"
-#include "debris.h"
+#include "particle.h"
 #include "object.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,20 +80,20 @@ CWorldDataStorage::~CWorldDataStorage()
         }
     }
     
-    for (auto i=0u; i<m_DebrisByValue.getBufferSize(); ++i)
+    for (auto i=0u; i<m_ParticlesByValue.getBufferSize(); ++i)
     {
-        for (auto pDebris : *m_DebrisByValue.getBuffer(i))
+        for (auto pParticle : *m_ParticlesByValue.getBuffer(i))
         {
             // Free memory if pointer is still existent
-            if (pDebris.second != nullptr)
+            if (pParticle.second != nullptr)
             {
-                delete pDebris.second;
-                pDebris.second = nullptr;
-                MEM_FREED("CDebris")
+                delete pParticle.second;
+                pParticle.second = nullptr;
+                MEM_FREED("CParticle")
             }
             else
             {
-                DOM_MEMF(DEBUG_MSG("CDebris", "Memory already freed."))
+                DOM_MEMF(DEBUG_MSG("CParticle", "Memory already freed."))
             }
         }
     }
@@ -116,27 +116,27 @@ CWorldDataStorage::~CWorldDataStorage()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Add a debris to list
+/// \brief Add a particle to list
 ///
-/// This method adds the given debris object to the list of debris.
+/// This method adds the given particle object to the list of particle.
 ///
-/// \param _pDebris Debris that should be added to list
+/// \param _pParticle Particle that should be added to list
 ///
 /// \return Success?
 ///
 ///////////////////////////////////////////////////////////////////////////////
-bool CWorldDataStorage::addDebris(CDebris* _pDebris)
+bool CWorldDataStorage::addParticle(CParticle* _pParticle)
 {
-    METHOD_ENTRY("CWorldDataStorage::addDebris")
+    METHOD_ENTRY("CWorldDataStorage::addParticle")
     
-    std::array<CDebris*, BUFFER_QUADRUPLE> aDebris =
-    {{_pDebris->clone(),_pDebris->clone(),_pDebris->clone(),_pDebris}};
+    std::array<CParticle*, BUFFER_QUADRUPLE> aParticle =
+    {{_pParticle->clone(),_pParticle->clone(),_pParticle->clone(),_pParticle}};
     
     std::array<IUniqueIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
-    {{aDebris[0],aDebris[1],aDebris[2],aDebris[3]}};
+    {{aParticle[0],aParticle[1],aParticle[2],aParticle[3]}};
     
-    m_DebrisByName.add(_pDebris->getName(), aDebris);
-    m_DebrisByValue.add(_pDebris->getUID(), aDebris);
+    m_ParticlesByName.add(_pParticle->getName(), aParticle);
+    m_ParticlesByValue.add(_pParticle->getUID(), aParticle);
     
     if (!this->addUIDUser(aUIDUsers)) return false;
     return true;
@@ -325,10 +325,10 @@ void CWorldDataStorage::swapBack()
 
     std::lock_guard<std::mutex> lock(m_MutexFrontNew);
 
-    m_DebrisByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
-    m_DebrisByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
+    m_ParticlesByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
+    m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     
-    m_DebrisByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
+    m_ParticlesByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
 //     m_EmittersByValue.copyDeep(BUFFER_TRIPLE_BACK, BUFFER_TRIPLE_MIDDLE);
     m_ObjectsByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
@@ -352,8 +352,8 @@ void CWorldDataStorage::swapFront()
     
     if (m_bFrontNew)
     {
-        m_DebrisByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
-        m_DebrisByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
+        m_ParticlesByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
+        m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
 //         m_EmittersByValue.swap(BUFFER_TRIPLE_MIDDLE, BUFFER_TRIPLE_FRONT);
         m_ObjectsByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
@@ -402,26 +402,26 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 //         }
 //     }
 //     _WDS.m_ObjectVisuals.clear();
-//     for (auto it : _WDS.m_Debris)
+//     for (auto it : _WDS.m_Particle)
 //     {
 //         if (it != nullptr)
 //         {
 //             delete it;
 //             it = nullptr;
-//             MEM_FREED("CDebris")
+//             MEM_FREED("CParticle")
 //         }
 //     }
-//     _WDS.m_Debris.clear();
-//     for (auto it : _WDS.m_DebrisVisuals)
+//     _WDS.m_Particle.clear();
+//     for (auto it : _WDS.m_ParticleVisuals)
 //     {
 //         if (it != nullptr)
 //         {
 //             delete it;
 //             it = nullptr;
-//             MEM_FREED("CDebrisVisuals")
+//             MEM_FREED("CParticleVisuals")
 //         }
 //     }
-//     _WDS.m_DebrisVisuals.clear();
+//     _WDS.m_ParticleVisuals.clear();
     
     _WDS.m_UIDUserRef.clear();
     
@@ -477,47 +477,47 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 //     }
     
 //     //-------------------------------------------------------------------------
-//     // Stream in all debris
+//     // Stream in all particle
 //     //-------------------------------------------------------------------------
 //     {
-//         DebrisType::size_type nSize;
+//         ParticleType::size_type nSize;
 //         _is >> nSize;    
-//         DOM_VAR(INFO_MSG("World data storage", "Number of debris to load: " << nSize))
+//         DOM_VAR(INFO_MSG("World data storage", "Number of particle to load: " << nSize))
 //         for (auto i=0u; i<nSize; ++i)
 //         {
-//             CDebris* pDebris = new CDebris;
-//             MEM_ALLOC("CDebris")
-//             _is >> pDebris;
+//             CParticle* pParticle = new CParticle;
+//             MEM_ALLOC("CParticle")
+//             _is >> pParticle;
 //             
-//             _WDS.addDebris(pDebris);
+//             _WDS.addParticle(pParticle);
 //             
-//             Log.progressBar("Loading debris", i, nSize);
+//             Log.progressBar("Loading particle", i, nSize);
 //         }
 //     }
 //     
 //     //-------------------------------------------------------------------------
-//     // Stream in debris visuals
+//     // Stream in particle visuals
 //     //-------------------------------------------------------------------------
 //     {
-//         DebrisVisualsType::size_type nSize;
+//         ParticleVisualsType::size_type nSize;
 //         _is >> nSize;    
-//         DOM_VAR(INFO_MSG("World data storage", "Number of debris visuals to load: " << nSize))
+//         DOM_VAR(INFO_MSG("World data storage", "Number of particle visuals to load: " << nSize))
 //         for (auto i=0u; i<nSize; ++i)
 //         {
-//             CDebrisVisuals* pDebVis = new CDebrisVisuals;
-//             MEM_ALLOC("CDebrisVisuals")
+//             CParticleVisuals* pDebVis = new CParticleVisuals;
+//             MEM_ALLOC("CParticleVisuals")
 //             _is >> pDebVis;
 //             
 //             UIDType UID = pDebVis->getUIDRef();
 //             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
-//             pDebVis->attachTo(static_cast<CDebris*>(pUIDUser));
-//             _WDS.addDebrisVisuals(pDebVis);
+//             pDebVis->attachTo(static_cast<CParticle*>(pUIDUser));
+//             _WDS.addParticleVisuals(pDebVis);
 //             
-//             Log.progressBar("Loading debris visuals", i, nSize);
+//             Log.progressBar("Loading particle visuals", i, nSize);
 //         }
 //     }
 
-    /// \todo Implement DebrisEmitter serialisation to make debris work
+    /// \todo Implement ParticleEmitter serialisation to make particle work
     
     _is >> _WDS.m_fTimeScale;
         
@@ -556,17 +556,17 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
 
 //     _os << _WDS.m_pCamera << std::endl;
     
-//     _os << _WDS.m_Debris.size() << std::endl;
-//     for (const auto ci : _WDS.m_Debris)
+//     _os << _WDS.m_Particle.size() << std::endl;
+//     for (const auto ci : _WDS.m_Particle)
 //     {
 //         _os << ci << std::endl;
 //     }
-//     _os << _WDS.m_DebrisVisuals.size() << std::endl;
-//     for (const auto ci : _WDS.m_DebrisVisuals)
+//     _os << _WDS.m_ParticleVisuals.size() << std::endl;
+//     for (const auto ci : _WDS.m_ParticleVisuals)
 //     {
 //         _os << ci << std::endl;
 //     }
-    /// \todo Implement DebrisEmitter serialisation to make debris work
+    /// \todo Implement ParticleEmitter serialisation to make particle work
     
     _os << _WDS.m_fTimeScale << std::endl;
     

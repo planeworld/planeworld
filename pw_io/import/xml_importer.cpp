@@ -62,7 +62,7 @@ CXMLImporter::CXMLImporter() : m_pCurrentEmitter(nullptr),
                                m_strPath(""),
                                m_strGraphicsDataPath(""),
                                m_strLuaPhysicsInterface(""),
-                               m_fDebrisFrequency(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
+                               m_fParticleFrequency(PHYSICS_PARTICLE_DEFAULT_FREQUENCY),
                                m_fLuaFrequency(30.0),
                                m_fPhysicsFrequency(PHYSICS_DEFAULT_FREQUENCY),
                                m_fVisualsFrequency(60.0)
@@ -177,7 +177,7 @@ bool CXMLImporter::import(const std::string& _strFilename,
                 else m_strLuaPhysicsInterface = m_strPath+"/"+strLuaPhysicsInterface;
                 m_strGraphicsDataPath = m_strPath+"/"+checkAttributeString(N, "relative_graphics_data_path", m_strGraphicsDataPath);
                 m_fLuaFrequency  = checkAttributeDouble(N, "lua_frequency", m_fLuaFrequency);
-                m_fDebrisFrequency  = checkAttributeDouble(N, "debris_frequency", m_fDebrisFrequency);
+                m_fParticleFrequency  = checkAttributeDouble(N, "particle_frequency", m_fParticleFrequency);
                 m_fPhysicsFrequency = checkAttributeDouble(N, "physics_frequency", m_fPhysicsFrequency);
                 m_fVisualsFrequency = checkAttributeDouble(N, "visuals_frequency", m_fVisualsFrequency);
                 
@@ -187,10 +187,10 @@ bool CXMLImporter::import(const std::string& _strFilename,
                         m_fLuaFrequency=m_fPhysicsFrequency;
                         NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fLuaFrequency << "Hz.")
                     }
-                    if (m_fDebrisFrequency > m_fPhysicsFrequency)
+                    if (m_fParticleFrequency > m_fPhysicsFrequency)
                     {
-                        m_fDebrisFrequency=m_fPhysicsFrequency;
-                        NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fDebrisFrequency << "Hz.")
+                        m_fParticleFrequency=m_fPhysicsFrequency;
+                        NOTICE_MSG("XML Importer", "Lua frequency to high. Resetting to " << m_fParticleFrequency << "Hz.")
                     }
                     if (m_fVisualsFrequency > m_fPhysicsFrequency)
                     {
@@ -666,29 +666,29 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 m_Emitters.insert(std::pair<std::string,IEmitter*>(pObjEmitter->getName(), pObjEmitter));
                 m_pDataStorage->addUIDUser(m_pCurrentEmitter);
             }
-            else if (strType == "debris_emitter")
+            else if (strType == "particle_emitter")
             {
-                INFO_MSG("XML Importer", "Creating debris emitter.")
+                INFO_MSG("XML Importer", "Creating particle emitter.")
                 
-                CDebrisEmitter* pDebrisEmitter = new CDebrisEmitter;
+                CParticleEmitter* pParticleEmitter = new CParticleEmitter;
                 MEM_ALLOC("IEmitter")
                 
-                pDebrisEmitter->setName(checkAttributeString(_Node, "name", pDebrisEmitter->getName()));
-                pDebrisEmitter->setVisualsDataStorage(m_pVisualsDataStorage);
-                pDebrisEmitter->setWorldDataStorage(m_pDataStorage);
+                pParticleEmitter->setName(checkAttributeString(_Node, "name", pParticleEmitter->getName()));
+                pParticleEmitter->setVisualsDataStorage(m_pVisualsDataStorage);
+                pParticleEmitter->setWorldDataStorage(m_pDataStorage);
                 
-                std::string strDebrisType = checkAttributeString(_Node, "debris_type", s_DebrisTypeToStringMap.at(pDebrisEmitter->getDebrisType()));
-                pDebrisEmitter->setDebrisType(mapStringToDebrisType(strDebrisType));
+                std::string strParticleType = checkAttributeString(_Node, "particle_type", s_ParticleTypeToStringMap.at(pParticleEmitter->getParticleType()));
+                pParticleEmitter->setParticleType(mapStringToParticleType(strParticleType));
                 
                 std::string strMode = checkAttributeString(_Node, "mode", mapEmitterModeToString.at(EMITTER_DEFAULT_MODE));
                 if (strMode == "emit_once")
                 {
-                    pDebrisEmitter->setMode(EMITTER_MODE_EMIT_ONCE);
+                    pParticleEmitter->setMode(EMITTER_MODE_EMIT_ONCE);
                 }
                 else if (strMode == "timed")
                 {
-                    pDebrisEmitter->setMode(EMITTER_MODE_TIMED);
-                    pDebrisEmitter->setFrequency(checkAttributeDouble(_Node, "frequency", EMITTER_DEFAULT_FREQUENCY));
+                    pParticleEmitter->setMode(EMITTER_MODE_TIMED);
+                    pParticleEmitter->setFrequency(checkAttributeDouble(_Node, "frequency", EMITTER_DEFAULT_FREQUENCY));
                 }
                 else
                 {
@@ -707,31 +707,31 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 if (strDist == "circular_field")
                 {
                     NOTICE_MSG("XML Importer", "Circular distribution not yet implemented.")
-                    pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_CIRCULAR_FIELD);
+                    pParticleEmitter->setDistribution(EMITTER_DISTRIBUTION_CIRCULAR_FIELD);
                 }
                 else if (strDist == "point_source")
                 {
-                    pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
-                    pDebrisEmitter->setOrigin(Vector2d(
+                    pParticleEmitter->setDistribution(EMITTER_DISTRIBUTION_POINT_SOURCE);
+                    pParticleEmitter->setOrigin(Vector2d(
                                               checkAttributeDouble(_Node, "origin_x", 0.0),
                                               checkAttributeDouble(_Node, "origin_y", 0.0)));
-                    pDebrisEmitter->setVelocity(checkAttributeDouble(_Node, "velocity", EMITTER_DEFAULT_VELOCITY));
-                    pDebrisEmitter->setVelocityStd(checkAttributeDouble(_Node, "velocity_std", EMITTER_DEFAULT_VELOCITY_STD));
-                    pDebrisEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE)));
-                    pDebrisEmitter->setAngleStd((checkAttributeDouble(_Node, "angle_std", EMITTER_DEFAULT_ANGLE_STD)));
-                    pDebrisEmitter->setNumber(checkAttributeInt(_Node, "number", DEBRIS_DEFAULT_NUMBER));
+                    pParticleEmitter->setVelocity(checkAttributeDouble(_Node, "velocity", EMITTER_DEFAULT_VELOCITY));
+                    pParticleEmitter->setVelocityStd(checkAttributeDouble(_Node, "velocity_std", EMITTER_DEFAULT_VELOCITY_STD));
+                    pParticleEmitter->setAngle((checkAttributeDouble(_Node, "angle", EMITTER_DEFAULT_ANGLE)));
+                    pParticleEmitter->setAngleStd((checkAttributeDouble(_Node, "angle_std", EMITTER_DEFAULT_ANGLE_STD)));
+                    pParticleEmitter->setNumber(checkAttributeInt(_Node, "number", PARTICLE_DEFAULT_NUMBER));
                 }
                 else if (strDist == "rectangular_field")
                 {
-                    pDebrisEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
-                    pDebrisEmitter->setOrigin(Vector2d(
+                    pParticleEmitter->setDistribution(EMITTER_DISTRIBUTION_RECTANGULAR_FIELD);
+                    pParticleEmitter->setOrigin(Vector2d(
                                               checkAttributeDouble(_Node, "origin_x", 0.0),
                                               checkAttributeDouble(_Node, "origin_y", 0.0)));
-                    pDebrisEmitter->setLimits(checkAttributeDouble(_Node, "limit_x_min", EMITTER_DEFAULT_LIMIT_MIN_X),
+                    pParticleEmitter->setLimits(checkAttributeDouble(_Node, "limit_x_min", EMITTER_DEFAULT_LIMIT_MIN_X),
                                           checkAttributeDouble(_Node, "limit_x_max", EMITTER_DEFAULT_LIMIT_MAX_X),
                                           checkAttributeDouble(_Node, "limit_y_min", EMITTER_DEFAULT_LIMIT_MIN_Y),
                                           checkAttributeDouble(_Node, "limit_y_max", EMITTER_DEFAULT_LIMIT_MAX_Y));
-                    pDebrisEmitter->setNumber(checkAttributeInt(_Node, "number", DEBRIS_DEFAULT_NUMBER));
+                    pParticleEmitter->setNumber(checkAttributeInt(_Node, "number", PARTICLE_DEFAULT_NUMBER));
                 }
                 else
                 {
@@ -747,10 +747,10 @@ void CXMLImporter::createEmitter(const pugi::xml_node& _Node)
                 }
                 m_Hooks.insert(std::pair<std::string,IKinematicsStateUser*>(
                     checkAttributeString(_Node, "hook", "no_hook", XML_IMPORTER_DO_NOT_NOTICE),
-                    pDebrisEmitter
+                    pParticleEmitter
                 ));
-                m_pCurrentEmitter = pDebrisEmitter;
-                m_Emitters.insert(std::pair<std::string,IEmitter*>(pDebrisEmitter->getName(), pDebrisEmitter));
+                m_pCurrentEmitter = pParticleEmitter;
+                m_Emitters.insert(std::pair<std::string,IEmitter*>(pParticleEmitter->getName(), pParticleEmitter));
                 m_pDataStorage->addUIDUser(m_pCurrentEmitter);
             }
             else

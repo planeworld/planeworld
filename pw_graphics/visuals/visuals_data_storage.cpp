@@ -354,16 +354,16 @@ std::istream& operator>>(std::istream& _is, CVisualsDataStorage& _WDS)
 //     // after sequentually loading shapes and then visuals.
 //     std::unordered_map<UIDType, IShape*> UIDShapeRef;
     
-//     for (auto it : _WDS.m_DebrisVisuals)
+//     for (auto it : _WDS.m_ParticleVisuals)
 //     {
 //         if (it != nullptr)
 //         {
 //             delete it;
 //             it = nullptr;
-//             MEM_FREED("CDebrisVisuals")
+//             MEM_FREED("CParticleVisuals")
 //         }
 //     }
-//     _WDS.m_DebrisVisuals.clear();
+//     _WDS.m_ParticleVisuals.clear();
     
     // Thruster Visuals!!!
     
@@ -394,28 +394,28 @@ std::istream& operator>>(std::istream& _is, CVisualsDataStorage& _WDS)
     
 
 //     //-------------------------------------------------------------------------
-//     // Stream in debris visuals
+//     // Stream in particle visuals
 //     //-------------------------------------------------------------------------
 //     {
-//         DebrisVisualsType::size_type nSize;
+//         ParticleVisualsType::size_type nSize;
 //         _is >> nSize;    
-//         DOM_VAR(INFO_MSG("World data storage", "Number of debris visuals to load: " << nSize))
+//         DOM_VAR(INFO_MSG("World data storage", "Number of particle visuals to load: " << nSize))
 //         for (auto i=0u; i<nSize; ++i)
 //         {
-//             CDebrisVisuals* pDebVis = new CDebrisVisuals;
-//             MEM_ALLOC("CDebrisVisuals")
+//             CParticleVisuals* pDebVis = new CParticleVisuals;
+//             MEM_ALLOC("CParticleVisuals")
 //             _is >> pDebVis;
 //             
 //             UIDType UID = pDebVis->getUIDRef();
 //             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
-//             pDebVis->attachTo(static_cast<CDebris*>(pUIDUser));
-//             _WDS.addDebrisVisuals(pDebVis);
+//             pDebVis->attachTo(static_cast<CParticle*>(pUIDUser));
+//             _WDS.addParticleVisuals(pDebVis);
 //             
-//             Log.progressBar("Loading debris visuals", i, nSize);
+//             Log.progressBar("Loading particle visuals", i, nSize);
 //         }
 //     }
 
-    /// \todo Implement DebrisEmitter serialisation to make debris work
+    /// \todo Implement ParticleEmitter serialisation to make particle work
     return _is;
 }
 
@@ -433,6 +433,6 @@ std::ostream& operator<<(std::ostream& _os, CVisualsDataStorage& _WDS)
 {
     METHOD_ENTRY("CVisualsDataStorage::operator<<")
 
-    /// \todo Implement DebrisEmitter serialisation to make debris work
+    /// \todo Implement ParticleEmitter serialisation to make particle work
     return _os;
 }

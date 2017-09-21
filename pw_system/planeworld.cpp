@@ -45,7 +45,7 @@
 
 #include "conf_pw.h"
 #include "circular_buffer.h"
-#include "debris_emitter.h"
+#include "particle_emitter.h"
 #include "game_state_manager.h"
 #include "input_manager.h"
 #include "lua_manager.h"

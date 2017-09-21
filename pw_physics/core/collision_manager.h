@@ -35,7 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "circle.h"
-#include "debris.h"
+#include "particle.h"
 #include "object.h"
 #include "planet.h"
 #include "polygon.h"
@@ -60,7 +60,7 @@ class CCollisionManager : public IWorldDataStorageUser
                 
         //--- Methods --------------------------------------------------------//
         void detectCollisions();
-        void setDebris(const DebrisType&);
+        void setParticle(const ParticleType&);
         void setDynamicObjects(const ObjectsByNameType&);
         void setStaticObjects(const ObjectsByNameType&);
         
@@ -75,11 +75,11 @@ class CCollisionManager : public IWorldDataStorageUser
         void getSurfaceOfInterest();
         
         void    test(CObject*, CObject*);
-        void    test(CObject*, CDebris*);
-        void    test(CCircle*, CCircle*, CObject*, CDebris*);
-        void    test(CPlanet*, CPlanet*, CObject*, CDebris*);
-        void    test(CPolygon*, CPolygon*, CObject*, CDebris*);
-        void    test(CTerrain*, CDebris*);
+        void    test(CObject*, CParticle*);
+        void    test(CCircle*, CCircle*, CObject*, CParticle*);
+        void    test(CPlanet*, CPlanet*, CObject*, CParticle*);
+        void    test(CPolygon*, CPolygon*, CObject*, CParticle*);
+        void    test(CTerrain*, CParticle*);
         void    test(CCircle*, CCircle*, CCircle*, CCircle*, CObject*, CObject*);
         void    test(CCircle*, CCircle*, CPolygon*, CPolygon*, CObject*, CObject*);
         void    test(CPolygon*, CPolygon*, CPolygon*, CPolygon*, CObject*, CObject*);
@@ -91,7 +91,7 @@ class CCollisionManager : public IWorldDataStorageUser
         PointLineContact    testPointLine(const Vector2d&, const Vector2d&, const Vector2d&,
                                           const Vector2d&, const Vector2d&, const Vector2d&);
         
-        DebrisType              m_Debris;           ///< List of debris
+        ParticleType              m_Particle;           ///< List of particle
         ObjectsByNameType       m_DynamicObjects;   ///< List of dynamic objects
         ObjectsByNameType       m_StaticObjects;    ///< List of static objects
 };
@@ -100,16 +100,16 @@ class CCollisionManager : public IWorldDataStorageUser
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Pass list of debris, which are always dynamic
+/// \brief Pass list of particle, which are always dynamic
 ///
-/// \param _DebrisList List of debris
+/// \param _ParticleList List of particle
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setDebris(const DebrisType& _DebrisList)
+inline void CCollisionManager::setParticle(const ParticleType& _ParticleList)
 {
-    METHOD_ENTRY("CCollisionManager::setDebris")
+    METHOD_ENTRY("CCollisionManager::setParticle")
 
-    m_Debris = _DebrisList;
+    m_Particle = _ParticleList;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

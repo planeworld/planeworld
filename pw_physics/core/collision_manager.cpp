@@ -69,8 +69,8 @@ void CCollisionManager::detectCollisions()
             }
             ++cj;
         }
-//         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
-//             cj != m_Debris.end(); ++cj)
+//         for (std::list< CParticle* >::const_iterator cj = m_Particle.begin();
+//             cj != m_Particle.end(); ++cj)
 //         {
 //             switch((*ci)->getObjectType())
 //             {
@@ -84,13 +84,13 @@ void CCollisionManager::detectCollisions()
     }
     
 //     //--------------------------------------------------------------------------
-//     // Test static objects against debris
+//     // Test static objects against particle
 //     //--------------------------------------------------------------------------
 //     for (ObjectsByNameType::const_iterator ci = m_StaticObjects.begin();
 //         ci != m_StaticObjects.end(); ++ci)
 //     {
-//         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
-//             cj != m_Debris.end(); ++cj)
+//         for (std::list< CParticle* >::const_iterator cj = m_Particle.begin();
+//             cj != m_Particle.end(); ++cj)
 //         {
 //             switch(ci->second->getObjectType())
 //             {
@@ -102,13 +102,13 @@ void CCollisionManager::detectCollisions()
 //     }
 //     
 //     //--------------------------------------------------------------------------
-//     // Test dynamic objects against debris
+//     // Test dynamic objects against particle
 //     //--------------------------------------------------------------------------
 //     for (ObjectsByNameType::const_iterator ci = m_DynamicObjects.begin();
 //         ci != m_DynamicObjects.end(); ++ci)
 //     {
-//         for (std::list< CDebris* >::const_iterator cj = m_Debris.begin();
-//             cj != m_Debris.end(); ++cj)
+//         for (std::list< CParticle* >::const_iterator cj = m_Particle.begin();
+//             cj != m_Particle.end(); ++cj)
 //         {
 //             switch(ci->second->getObjectType())
 //             {
@@ -125,13 +125,13 @@ void CCollisionManager::detectCollisions()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Tests object against debris
+/// \brief Tests object against particle
 ///
 /// \param _p1 Object
-/// \param _p2 Debris
+/// \param _p2 Particle
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CObject* _p1, CDebris* _p2)
+void CCollisionManager::test(CObject* _p1, CParticle* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -162,15 +162,15 @@ void CCollisionManager::test(CObject* _p1, CDebris* _p2)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Tests circle shape against debris
+/// \brief Tests circle shape against particle
 ///
 /// \param _pC1 Circle shape, time t1
 /// \param _pC0 Circle shape, time t0
 /// \param _p1 Object 1
-/// \param _p2 Debris
+/// \param _p2 Particle
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CObject* _p1, CDebris* _p2)
+void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CObject* _p1, CParticle* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -219,7 +219,7 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CObject* _p1, CDebris
                 if (fT<=1.0)
                 {
                     vecPOC = pPosP->at(i) + fT * (pPos->at(i) - pPosP->at(i));
-                    double fDebrisAngle = std::atan2(pPos->at(i)[1]-pPosP->at(i)[1], pPos->at(i)[0]-pPosP->at(i)[0]);
+                    double fParticleAngle = std::atan2(pPos->at(i)[1]-pPosP->at(i)[1], pPos->at(i)[0]-pPosP->at(i)[0]);
                     
                     Vector2d vecC = vecC0 + fT * ((vecC1 - vecC0));
                     
@@ -233,8 +233,8 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CObject* _p1, CDebris
                     vecNewVelOrth = Vector2d(std::cos(fCircleAngle+M_PI*0.5),
                                              std::sin(fCircleAngle+M_PI*0.5));
                     
-                    double fTang = std::cos(fCircleAngle-fDebrisAngle)*1.0;
-                    double fOrth = std::sin(fCircleAngle-fDebrisAngle)*0.5;
+                    double fTang = std::cos(fCircleAngle-fParticleAngle)*1.0;
+                    double fOrth = std::sin(fCircleAngle-fParticleAngle)*0.5;
                     double fDamping = sqrt(fTang*fTang+fOrth*fOrth)*0.7071;
 
                     
@@ -242,12 +242,12 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CObject* _p1, CDebris
                     pVel->at(i)[0] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[0];
                     pVel->at(i)[1] = ((fOrth*vecNewVelOrth+fTang*vecNewVelTang).normalized() * fDamping * fNorm)[1];
                     
-                    // Add the velocity of the object because debris' are virtually weightless.
+                    // Add the velocity of the object because particle' are virtually weightless.
                     // Otherwise, they would be passed in the next step
                     pVel->at(i) += _p1->getVelocity();
                     
                     // pPos->at(i)= vecPOC+(vecNewVelOrth)/(vecNewVelOrth).norm()*0.001;
-                    // Cannot use POC here, because debris' are virtually weightless. Thus, the
+                    // Cannot use POC here, because particle' are virtually weightless. Thus, the
                     // object moves on and does not care about POC position.
                     pPos->at(i)= vecC1+(vecNewVelOrth)/(vecNewVelOrth).norm()*(fR0+0.001);
                 }
@@ -258,15 +258,15 @@ void CCollisionManager::test(CCircle* _pC1, CCircle* _pC0, CObject* _p1, CDebris
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Tests planet shape against debris
+/// \brief Tests planet shape against particle
 ///
 /// \param _pP1 Planet shape, time t1
 /// \param _pP0 Planet shape, time t0
 /// \param _p1 Object 1
-/// \param _p2 Debris
+/// \param _p2 Particle
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CObject* _p1, CDebris* _p2)
+void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CObject* _p1, CParticle* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -279,15 +279,15 @@ void CCollisionManager::test(CPlanet* _pP1, CPlanet* _pP0, CObject* _p1, CDebris
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Tests polygon shape against debris
+/// \brief Tests polygon shape against particle
 ///
 /// \param _pP1 Polygon shape, time t1
 /// \param _pP0 Polygon shape, time t0
 /// \param _p1 Object 1
-/// \param _p2 Debris
+/// \param _p2 Particle
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CPolygon* _pP1, CPolygon* _pP0, CObject* _p1, CDebris* _p2)
+void CCollisionManager::test(CPolygon* _pP1, CPolygon* _pP0, CObject* _p1, CParticle* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -370,12 +370,12 @@ void CCollisionManager::test(CPolygon* _pP1, CPolygon* _pP0, CObject* _p1, CDebr
                 
                 pVel->at(i) = (vecNewVelOrth * fDampOrth + vecNewVelTang * fDampTang) * 0.7071;
 
-                // Add the velocity of the object because debris' are virtually weightless.
+                // Add the velocity of the object because particle' are virtually weightless.
                 // Otherwise, they would be passed in the next step
                 pVel->at(i) += _p1->getVelocity();
                 
                 // pPos->at(i)= vecPOC+(vecNewVelOrth)/(vecNewVelOrth).norm()*0.001;
-                // Cannot use POC here, because debris' are virtually weightless. Thus, the
+                // Cannot use POC here, because particle' are virtually weightless. Thus, the
                 // object moves on and does not care about POC position.
                 pPos->at(i)  = (*ciPS0) + fAlpha * ((*ciPS1)-(*ciPS0)) + vecNewVelOrth.normalized()*0.001;
             } 
@@ -385,20 +385,20 @@ void CCollisionManager::test(CPolygon* _pP1, CPolygon* _pP0, CObject* _p1, CDebr
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Tests terrain shape against debris
+/// \brief Tests terrain shape against particle
 ///
-/// The test of current debris position with the object's bounding box does not
-/// prevent tunneling. Debris is meant to be a less accurate but fast and
+/// The test of current particle position with the object's bounding box does not
+/// prevent tunneling. Particle is meant to be a less accurate but fast and
 /// physically plausible particle class.
 ///
-/// \todo Build temporary bounding box for moving debris to have a correct
+/// \todo Build temporary bounding box for moving particle to have a correct
 ///       broad phase detection.
 ///
 /// \param _p1 Terrain shape
-/// \param _p2 Debris
+/// \param _p2 Particle
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
+void CCollisionManager::test(CTerrain* _p1, CParticle* _p2)
 {
     METHOD_ENTRY("CCollisionManager::test")
     
@@ -420,23 +420,23 @@ void CCollisionManager::test(CTerrain* _p1, CDebris* _p2)
             double fTerrainLeft  =  _p1->getCenter()[0]-_p1->getWidth()*0.5;
             double fTerrainRight =  _p1->getCenter()[0]+_p1->getWidth()*0.5;
             
-            double fDebrisLeft;
-            double fDebrisRight;
+            double fParticleLeft;
+            double fParticleRight;
             if (pPos->at(i)[0] < (pPosP->at(i)[0]))
             {
-                fDebrisLeft  = pPos->at(i)[0];
-                fDebrisRight = pPosP->at(i)[0];
+                fParticleLeft  = pPos->at(i)[0];
+                fParticleRight = pPosP->at(i)[0];
             }
             else
             {
-                fDebrisLeft  = pPosP->at(i)[0];
-                fDebrisRight = pPos->at(i)[0];
+                fParticleLeft  = pPosP->at(i)[0];
+                fParticleRight = pPos->at(i)[0];
             }
             
-            if (fDebrisLeft > fTerrainLeft)
-                fTerrainLeft = fDebrisLeft;
-            if (fDebrisRight < fTerrainRight)
-                fTerrainRight = fDebrisRight;
+            if (fParticleLeft > fTerrainLeft)
+                fTerrainLeft = fParticleLeft;
+            if (fParticleRight < fTerrainRight)
+                fTerrainRight = fParticleRight;
                 
             double fX0 = _p1->snapToTerrainGrid(fTerrainLeft); 
             double fX1 = fX0+fInc;

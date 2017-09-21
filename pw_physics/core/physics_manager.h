@@ -49,7 +49,7 @@
 const bool        PHYSICS_ALLOW_STEP_SIZE_INC   = true;     ///< Increasing step size when accelerating is allowed
 const bool        PHYSICS_FORBID_STEP_SIZE_INC  = false;    ///< Increasing step size when accelerating is forbidden
 const double      PHYSICS_DEFAULT_FREQUENCY     = 200.0;    ///< Default physics frequency
-const double      PHYSICS_DEBRIS_DEFAULT_FREQUENCY = 30.0;  ///< Default physics frequency for debris
+const double      PHYSICS_PARTICLE_DEFAULT_FREQUENCY = 30.0;  ///< Default physics frequency for particle
 
 //--- Type definitions -------------------------------------------------------//
 
@@ -90,7 +90,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         UIDType createShape(const std::string&);
         
         void setConstantGravity(const Vector2d&);
-        void setFrequencyDebris(const double&);
+        void setFrequencyParticle(const double&);
         
         void addComponent(CThruster* const);
         void addComponents(const ComponentsType&);
@@ -133,7 +133,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         CCollisionManager   m_CollisionManager;                 ///< Instance for collision handling
 
         double              m_fG;                               ///< Gravitational constant
-        double              m_fFrequencyDebris;                 ///< Frequency of debris physics processing
+        double              m_fFrequencyParticle;                 ///< Frequency of particle physics processing
         
         Vector2d                    m_vecConstantGravitation;   ///< Vector for constant gravitation
 
@@ -193,15 +193,15 @@ inline void CPhysicsManager::setConstantGravity(const Vector2d& _vecG)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set frequency for debris physics processing
+/// \brief Set frequency for particle physics processing
 ///
-/// \param _fFrequency Frequency for debris physics processing
+/// \param _fFrequency Frequency for particle physics processing
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CPhysicsManager::setFrequencyDebris(const double& _fFrequency)
+inline void CPhysicsManager::setFrequencyParticle(const double& _fFrequency)
 {
-    METHOD_ENTRY("CPhysicsManager::setFrequencyDebris")
-    m_fFrequencyDebris = _fFrequency;
+    METHOD_ENTRY("CPhysicsManager::setFrequencyParticle")
+    m_fFrequencyParticle = _fFrequency;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

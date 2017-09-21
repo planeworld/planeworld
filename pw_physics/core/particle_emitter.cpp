@@ -20,35 +20,35 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       debris_emitter.cpp
-/// \brief      Implementation of class "CDebrisEmitter"
+/// \file       particle_emitter.cpp
+/// \brief      Implementation of class "CParticleEmitter"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2014-02-18
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "debris_emitter.h"
+#include "particle_emitter.h"
 
-uint32_t CDebrisEmitter::m_unNrOfEmitters = 0;
+uint32_t CParticleEmitter::m_unNrOfEmitters = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebrisEmitter::CDebrisEmitter() : m_DebrisType(DEBRIS_TYPE_DOT)
+CParticleEmitter::CParticleEmitter() : m_ParticleType(PARTICLE_TYPE_DOT)
 {
-    METHOD_ENTRY("CDebrisEmitter::CDebrisEmitter")
-    CTOR_CALL("CDebrisEmitter::CDebrisEmitter")
+    METHOD_ENTRY("CParticleEmitter::CParticleEmitter")
+    CTOR_CALL("CParticleEmitter::CParticleEmitter")
     
-    m_pRef = new CDebris;
-    MEM_ALLOC("CDebris")
+    m_pRef = new CParticle;
+    MEM_ALLOC("CParticle")
     m_pRef->setNumber(1);
     this->attachTo(m_pRef);
     
     m_Generator.seed(m_unNrOfEmitters++);
-//     IHooker::m_strName += ": Debris_"+ std::to_string(m_unNrOfEmitters++);
+//     IHooker::m_strName += ": Particle_"+ std::to_string(m_unNrOfEmitters++);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,10 +56,10 @@ CDebrisEmitter::CDebrisEmitter() : m_DebrisType(DEBRIS_TYPE_DOT)
 /// \brief Destructor, deletes objects
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebrisEmitter::~CDebrisEmitter()
+CParticleEmitter::~CParticleEmitter()
 {
-    METHOD_ENTRY("CDebrisEmitter::~CDebrisEmitter")
-    DTOR_CALL("CDebrisEmitter::~CDebrisEmitter")
+    METHOD_ENTRY("CParticleEmitter::~CParticleEmitter")
+    DTOR_CALL("CParticleEmitter::~CParticleEmitter")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,21 +67,21 @@ CDebrisEmitter::~CDebrisEmitter()
 /// \brief Initialises the emitter
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CDebrisEmitter::init()
+void CParticleEmitter::init()
 {
-    METHOD_ENTRY("CDebrisEmitter::init")
+    METHOD_ENTRY("CParticleEmitter::init")
     
-    // Add debris
-    if (m_DebrisType == DEBRIS_TYPE_DOT)
+    // Add particle
+    if (m_ParticleType == PARTICLE_TYPE_DOT)
     {
-        m_pRef->setDebrisType(DEBRIS_TYPE_DOT);
+        m_pRef->setParticleType(PARTICLE_TYPE_DOT);
     }
     else
     {
-        m_pRef->setDebrisType(DEBRIS_TYPE_THRUST);
+        m_pRef->setParticleType(PARTICLE_TYPE_THRUST);
     }
     
-    m_pDataStorage->addDebris(m_pRef);
+    m_pDataStorage->addParticle(m_pRef);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,31 +91,31 @@ void CDebrisEmitter::init()
 /// This calls one emitation. If a timed emitation is aimed at, the method is
 /// called with a positive frequency defining the engines frequency of
 /// emitation. Since the actual frequency set for this emitter might be higher
-/// than the frequency the method is called at, the number of debris per emit
+/// than the frequency the method is called at, the number of particle per emit
 /// is chosen accordingly.
 ///
 /// \param _fF Engine emitation frequency.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CDebrisEmitter::emit(const double& _fF)
+void CParticleEmitter::emit(const double& _fF)
 {
-    METHOD_ENTRY("CDebrisEmitter::emit")
+    METHOD_ENTRY("CParticleEmitter::emit")
     
     /// \todo Activation could be checked in interface class IEmitter, calling
     ///       a myEmit method if activated
     if (m_bActive)
     {
-        uint32_t nNrOfDebris;
+        uint32_t nNrOfParticle;
         
         if (_fF < 0.0)
         {
-            nNrOfDebris=m_nNr;
+            nNrOfParticle=m_nNr;
         }
         else
         {
-            double fNrOfDebris = m_fFrequency * _fF + m_fResidual;
-            nNrOfDebris = static_cast<int>(fNrOfDebris);
-            m_fResidual = fNrOfDebris - nNrOfDebris;
+            double fNrOfParticle = m_fFrequency * _fF + m_fResidual;
+            nNrOfParticle = static_cast<int>(fNrOfParticle);
+            m_fResidual = fNrOfParticle - nNrOfParticle;
         }
         
         switch (m_EmitterDistribution)
@@ -123,7 +123,7 @@ void CDebrisEmitter::emit(const double& _fF)
             case EMITTER_DISTRIBUTION_CIRCULAR_FIELD:
                 break;
             case EMITTER_DISTRIBUTION_RECTANGULAR_FIELD:
-                for (auto i=0u; i<nNrOfDebris; ++i)
+                for (auto i=0u; i<nNrOfParticle; ++i)
                 {
                     double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
                     double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
@@ -131,13 +131,13 @@ void CDebrisEmitter::emit(const double& _fF)
                 }
                 break;
             case EMITTER_DISTRIBUTION_POINT_SOURCE:
-                for (auto i=0u; i<nNrOfDebris; ++i)
+                for (auto i=0u; i<nNrOfParticle; ++i)
                 {
                     double      fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_KinematicsState.getAngle();
                     double      fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
                     Rotation2Dd Rotation(fAngle);
 
-                    (m_pDataStorage->getDebrisByValueBack()->operator[](m_UIDRef))->generate(m_KinematicsState.getOrigin(),
+                    (m_pDataStorage->getParticlesByValueBack()->operator[](m_UIDRef))->generate(m_KinematicsState.getOrigin(),
                                                    fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());
                 }
         }

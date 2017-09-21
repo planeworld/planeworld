@@ -48,7 +48,7 @@
 typedef enum 
 {
     EMITTER_NONE,
-    EMITTER_DEBRIS,
+    EMITTER_PARTICLE,
     EMITTER_OBJECT
 } EmitterType;
 
@@ -85,7 +85,7 @@ const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter ty
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Interface for a source that emits world objects like bodies or
-///        debris.
+///        particle.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class IEmitter : public IKinematicsStateUser,
@@ -156,12 +156,12 @@ typedef std::unordered_multimap<std::string, IEmitter*> EmittersType;
 
 //--- Enum parser ------------------------------------------------------------//
 const std::map<EmitterType, std::string> mapEmitterToString = {
-    {EMITTER_DEBRIS, "debris_emitter"},
+    {EMITTER_PARTICLE, "particle_emitter"},
     {EMITTER_OBJECT, "object_emitter"}
 }; ///< Map from EmitterType to string
 
 const std::map<std::string, EmitterType> STRING_TO_EMITTER_TYPE_MAP = {
-    {"debris_emitter", EMITTER_DEBRIS},
+    {"particle_emitter", EMITTER_PARTICLE},
     {"object_emitter", EMITTER_OBJECT}
 }; ///< Map from string to Emitter
 

@@ -113,7 +113,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void drawPlanet(CObject*, CPlanet*, CCamera*) const;
         void drawPolygon(CObject*, CPolygon*, CCamera*) const;
 
-        void drawDebris(CCamera* const) const;
+        void drawParticle(CCamera* const) const;
         void drawObjects(CCamera* const) const;
         
         void            drawBoundingBoxes() const;
@@ -178,7 +178,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         CFontManager                    m_FontManager;      ///< Font manager for displaying UI text
         CUIDVisuals                     m_UIDVisuals;       ///< Graphical display of UIDs
-        CText                           m_TextDebris;       ///< Text object for debris names
+        CText                           m_TextParticle;       ///< Text object for particle names
         CText                           m_TextDebugInfo;    ///< Text object for debug information
         CText                           m_TextObjects;      ///< Text object for object names
         CText                           m_TextScale;        ///< Text object for universe scale

@@ -32,7 +32,7 @@
 
 #include <random>
 
-#include "debris.h"
+#include "particle.h"
 #include "widget_cam.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
                                      m_ConsoleWindowID(0),
                                      m_strDataPath(""),
                                      m_UIDVisuals(&m_FontManager),
-                                     m_TextDebris(&m_FontManager),
+                                     m_TextParticle(&m_FontManager),
                                      m_TextDebugInfo(&m_FontManager),
                                      m_TextObjects(&m_FontManager),
                                      m_TextScale(&m_FontManager),
@@ -409,41 +409,41 @@ void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, CCamer
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Draw all debris
+/// \brief Draw all particle
 ///
 /// \param _pCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawDebris(CCamera* const _pCamera) const
+void CVisualsManager::drawParticle(CCamera* const _pCamera) const
 {
-    METHOD_ENTRY("CVisualsManager::drawDebris")
+    METHOD_ENTRY("CVisualsManager::drawParticle")
     
-    for (auto Debris : *m_pDataStorage->getDebrisByValueFront())
+    for (auto Particle : *m_pDataStorage->getParticlesByValueFront())
     {
-        switch (Debris.second->getDebrisType())
+        switch (Particle.second->getParticleType())
         {
-            case DEBRIS_TYPE_DOT:
+            case PARTICLE_TYPE_DOT:
             {
-                m_Graphics.dots((*Debris.second->getPositions()),-_pCamera->getCenter()+
-                      IGridUser::cellToDouble(Debris.second->getCell() - _pCamera->getCell()));
+                m_Graphics.dots((*Particle.second->getPositions()),-_pCamera->getCenter()+
+                      IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()));
                 break;
             }
-            case DEBRIS_TYPE_THRUST:
+            case PARTICLE_TYPE_THRUST:
             {
-                double fSizeR = 1.0 / Debris.second->getPositions()->size();
+                double fSizeR = 1.0 / Particle.second->getPositions()->size();
         
                 if (m_Graphics.getResPMX() > 0.02)
                 {
                     m_Graphics.cacheSinCos(12);
-                    for (auto i=0u; i<Debris.second->getPositions()->size(); ++i)
+                    for (auto i=0u; i<Particle.second->getPositions()->size(); ++i)
                     {
-                        if (_pCamera->getBoundingBox().isInside(Debris.second->getPositions()->at(i)))
+                        if (_pCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
                         {
                             m_Graphics.setColor(fSizeR * i, fSizeR * i, fSizeR * i, 0.05);
 //                             m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.5);
-                            m_Graphics.filledCircle(Debris.second->getPositions()->at(i) - _pCamera->getCenter()+
-                                            IGridUser::cellToDouble(Debris.second->getCell() - _pCamera->getCell()),
-                                            (double(Debris.second->getPositions()->size()-i) * 0.01 + 3.0),
+                            m_Graphics.filledCircle(Particle.second->getPositions()->at(i) - _pCamera->getCenter()+
+                                            IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()),
+                                            (double(Particle.second->getPositions()->size()-i) * 0.01 + 3.0),
                                             12, GRAPHICS_CIRCLE_USE_CACHE
                             );
                         }
@@ -454,7 +454,7 @@ void CVisualsManager::drawDebris(CCamera* const _pCamera) const
             }
             default:
             {
-                WARNING_MSG("Visuals Manager", "Wrong debris type, visualisation not implemented.")
+                WARNING_MSG("Visuals Manager", "Wrong particle type, visualisation not implemented.")
                 break;
             }
         }
@@ -633,14 +633,14 @@ void CVisualsManager::drawBoundingBoxes() const
                                         IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
                 }
             }
-            for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
+            for (const auto Particle : *m_pDataStorage->getParticlesByValueFront())
             {
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-                m_Graphics.rect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
-                                Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
+                m_Graphics.rect(Particle.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
+                                Particle.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-                m_Graphics.filledRect(Debris.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
-                                    Debris.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
+                m_Graphics.filledRect(Particle.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
+                                    Particle.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
             }
         m_Graphics.endRenderBatch();
     }
@@ -985,8 +985,8 @@ bool CVisualsManager::init()
 //     pCamWindow->setClosability(true);    
     
     // Initialise UI text objects
-    m_TextDebris.setFont(m_strFont);
-    m_TextDebris.setSize(12);
+    m_TextParticle.setFont(m_strFont);
+    m_TextParticle.setSize(12);
     m_TextDebugInfo.setColor({{1.0, 0.0, 1.0, 0.8}});
     m_TextDebugInfo.setFont(m_strFont);
     m_TextDebugInfo.setPosition(10, 10);
@@ -1685,7 +1685,7 @@ void CVisualsManager::drawWorld()
 //     m_Graphics.setPointSize(1.0);
 
     this->drawObjects(m_pCamera);
-    this->drawDebris(m_pCamera);
+    this->drawParticle(m_pCamera);
 
     m_Graphics.endRenderBatch();
     
@@ -1717,25 +1717,25 @@ void CVisualsManager::drawWorld()
                 m_TextObjects.display();
             }
         }
-        for (const auto Debris : *m_pDataStorage->getDebrisByValueFront())
+        for (const auto Particle : *m_pDataStorage->getParticlesByValueFront())
         {
-            if (m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() > 1.0)
+            if (m_pCamera->getZoom() * Particle.second->getBoundingBox().getWidth() > 1.0)
             {
                 Vector2d vecPosRel = CKinematicsState::clipToWorldLimit( 
-                                    Debris.second->getBoundingBox().getUpperRight()-
+                                    Particle.second->getBoundingBox().getUpperRight()-
                                     m_pCamera->getCenter()+
                                     IGridUser::cellToDouble
-                                    (Debris.second->getCell()-
+                                    (Particle.second->getCell()-
                                     m_pCamera->getCell()));
                 
                 // Now draw the text
-                double fColor = m_pCamera->getZoom() * Debris.second->getBoundingBox().getWidth() - 1.0;
+                double fColor = m_pCamera->getZoom() * Particle.second->getBoundingBox().getWidth() - 1.0;
                 if (fColor > 1.0) fColor = 1.0;
                 
-                m_TextDebris.setColor({{1.0, 1.0, 1.0, fColor}});
-                m_TextDebris.setText(Debris.second->getName());
-                m_TextDebris.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
-                m_TextDebris.display();
+                m_TextParticle.setColor({{1.0, 1.0, 1.0, fColor}});
+                m_TextParticle.setText(Particle.second->getName());
+                m_TextParticle.setPosition(m_Graphics.world2Screen(vecPosRel)[0], m_Graphics.world2Screen(vecPosRel)[1]);
+                m_TextParticle.display();
             }
         }
         if ((1.0e9 * m_Graphics.getResPMX() < 1.0) &&

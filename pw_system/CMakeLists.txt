@@ -63,9 +63,9 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/collision_manager.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_physics/core/debris_emitter.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/kinematics_state.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/objects_emitter.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/core/particle_emitter.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/physics_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/sim_timer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/components/thruster.cpp
@@ -77,8 +77,8 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/shape.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/terrain.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/debris.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/object.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/particle.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/universe/star_system.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/universe/universe.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/com_console.cpp

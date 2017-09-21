@@ -20,69 +20,69 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       debris.cpp
-/// \brief      Implementation of class "CDebris"
+/// \file       particle.cpp
+/// \brief      Implementation of class "CParticle"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2011-05-05
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "debris.h"
+#include "particle.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor, initialising members
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebris::CDebris() : IGridUser(),
+CParticle::CParticle() : IGridUser(),
                      IUniqueIDUser(),
-                     m_DebrisType(DEBRIS_TYPE_DOT),
+                     m_ParticleType(PARTICLE_TYPE_DOT),
                      m_fTimeFac(1.0)
 {
-    METHOD_ENTRY("CDebris::CDebris")
-    CTOR_CALL("CDebris::CDebris")
+    METHOD_ENTRY("CParticle::CParticle")
+    CTOR_CALL("CParticle::CParticle")
     
-    m_PosList.reserve(DEBRIS_DEFAULT_NUMBER);
-    m_VelList.reserve(DEBRIS_DEFAULT_NUMBER);
-    m_PosListPrev.reserve(DEBRIS_DEFAULT_NUMBER);
-    m_StateList.reserve(DEBRIS_DEFAULT_NUMBER);
+    m_PosList.reserve(PARTICLE_DEFAULT_NUMBER);
+    m_VelList.reserve(PARTICLE_DEFAULT_NUMBER);
+    m_PosListPrev.reserve(PARTICLE_DEFAULT_NUMBER);
+    m_StateList.reserve(PARTICLE_DEFAULT_NUMBER);
     
     m_vecForce.setZero();
     
-    m_UID.setName("Debris_"+m_UID.getName());
+    m_UID.setName("Particle_"+m_UID.getName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Copy constructor
 ///
-/// \param _Debris Debris to be copied
+/// \param _Particle Particle to be copied
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CDebris::CDebris(const CDebris& _Debris) : IGridUser(_Debris),
-                                           IUniqueIDUser(_Debris)
+CParticle::CParticle(const CParticle& _Particle) : IGridUser(_Particle),
+                                           IUniqueIDUser(_Particle)
                                            
 {
-    METHOD_ENTRY("CDebris::CDebris")
-    CTOR_CALL("CDebris::CDebris")
+    METHOD_ENTRY("CParticle::CParticle")
+    CTOR_CALL("CParticle::CParticle")
     
-    this->copy(_Debris);
+    this->copy(_Particle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Clones debris
+/// \brief Clones particle
 ///
-/// \return Pointer to cloned debris
+/// \return Pointer to cloned particle
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CDebris* CDebris::clone() const
+CParticle* CParticle::clone() const
 {
-    METHOD_ENTRY("CDebris::clone")
+    METHOD_ENTRY("CParticle::clone")
     
-    CDebris* pClone = new CDebris(*this);
-    MEM_ALLOC("CDebris")
+    CParticle* pClone = new CParticle(*this);
+    MEM_ALLOC("CParticle")
 
     return pClone;
 }
@@ -91,32 +91,32 @@ CDebris* CDebris::clone() const
 ///
 /// \brief Copy assignment operator
 ///
-/// \param _Debris Debris to be copied and assigned
+/// \param _Particle Particle to be copied and assigned
 ///
-/// \return Copied debris to be assigned
+/// \return Copied particle to be assigned
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CDebris& CDebris::operator=(const CDebris& _Debris)
+CParticle& CParticle::operator=(const CParticle& _Particle)
 {
-    METHOD_ENTRY("CDebris::operator=")
-    IUniqueIDUser::operator=(_Debris);
-    IGridUser::operator=(_Debris);
-    this->copy(_Debris);
+    METHOD_ENTRY("CParticle::operator=")
+    IUniqueIDUser::operator=(_Particle);
+    IGridUser::operator=(_Particle);
+    this->copy(_Particle);
     
     return *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Calculates dynamics of the debris
+/// \brief Calculates dynamics of the particle
 ///
 /// This method calculates the dynamics -- acceleration, velocity, position --
-/// of all debris in the list
+/// of all particle in the list
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CDebris::dynamics(const double& _fStep)
+void CParticle::dynamics(const double& _fStep)
 {
-    METHOD_ENTRY("CDebris::dynamics")
+    METHOD_ENTRY("CParticle::dynamics")
     
     if (m_PosList.size() > 0)
     {
@@ -127,7 +127,7 @@ void CDebris::dynamics(const double& _fStep)
         for (auto i=0u; i<m_PosList.size(); ++i)
         {
             // Only if state is active
-            if (m_StateList[i] == DEBRIS_STATE_ACTIVE)
+            if (m_StateList[i] == PARTICLE_STATE_ACTIVE)
             {
                 m_BBox.update(m_PosList[i]);
                 m_PosListPrev[i] = m_PosList[i];
@@ -141,43 +141,43 @@ void CDebris::dynamics(const double& _fStep)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Generate a new debris
+/// \brief Generate a new particle
 ///
-/// This method generates a new debris. Because of using a circular buffer, a
-/// new debris might overwrite the oldest one if the maximum number of debris
+/// This method generates a new particle. Because of using a circular buffer, a
+/// new particle might overwrite the oldest one if the maximum number of particle
 /// is reached.
 ///
-/// \param _vecP Position of the new debris
-/// \param _vecV Velocity of the new debris
+/// \param _vecP Position of the new particle
+/// \param _vecV Velocity of the new particle
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CDebris::generate(const Vector2d& _vecP, const Vector2d& _vecV)
+void CParticle::generate(const Vector2d& _vecP, const Vector2d& _vecV)
 {
-    METHOD_ENTRY("CDebris::generate")
+    METHOD_ENTRY("CParticle::generate")
     
     m_PosList.push_back(_vecP);
     m_PosListPrev.push_back(_vecP);
     m_VelList.push_back(_vecV);
-    m_StateList.push_back(DEBRIS_STATE_ACTIVE);
+    m_StateList.push_back(PARTICLE_STATE_ACTIVE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set number of debris
+/// \brief Set number of particle
 ///
-/// \param _nN Number of debris
+/// \param _nN Number of particle
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CDebris::setNumber(const int& _nN)
+void CParticle::setNumber(const int& _nN)
 {
-    METHOD_ENTRY("CDebris::setNumber")
+    METHOD_ENTRY("CParticle::setNumber")
 
     m_PosList.reserve(_nN);
     m_StateList.reserve(_nN);
     m_PosListPrev.reserve(_nN);
     for (auto i=0u; i<m_PosList.capacity();++i)
     {
-        m_StateList.push_back(DEBRIS_STATE_ACTIVE);
+        m_StateList.push_back(PARTICLE_STATE_ACTIVE);
     }
     m_VelList.reserve(_nN);
 }
@@ -187,14 +187,14 @@ void CDebris::setNumber(const int& _nN)
 /// \brief Input stream for game state information
 ///
 /// \param _is  Source stream
-/// \param _pDebris CDebris instance to stream
+/// \param _pParticle CParticle instance to stream
 ///
 /// \return Remaining stream with game state information
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::istream& operator>>(std::istream& _is, CDebris* const _pDebris)
+std::istream& operator>>(std::istream& _is, CParticle* const _pParticle)
 {
-    METHOD_ENTRY("CDebris::operator>>")
+    METHOD_ENTRY("CParticle::operator>>")
     
     std::string strTmp;
     _is >> strTmp;
@@ -202,24 +202,24 @@ std::istream& operator>>(std::istream& _is, CDebris* const _pDebris)
     /// \todo Stream data from IGridUser
     
     // From IUniqueIDUser
-    _is >> _pDebris->m_UID;
+    _is >> _pParticle->m_UID;
     
     strTmp="";
-    _is >> strTmp; _pDebris->m_DebrisType = mapStringToDebrisType(strTmp);
+    _is >> strTmp; _pParticle->m_ParticleType = mapStringToParticleType(strTmp);
     
-    _is >> _pDebris->m_Lifetime;
-    _is >> _pDebris->m_fTimeFac;
+    _is >> _pParticle->m_Lifetime;
+    _is >> _pParticle->m_fTimeFac;
     
-    _is >> _pDebris->m_PosList;
-    _is >> _pDebris->m_PosListPrev;
-    _is >> _pDebris->m_VelList;
-    _is >> _pDebris->m_StateList;
+    _is >> _pParticle->m_PosList;
+    _is >> _pParticle->m_PosListPrev;
+    _is >> _pParticle->m_VelList;
+    _is >> _pParticle->m_StateList;
     
-    _is >> _pDebris->m_BBox;
+    _is >> _pParticle->m_BBox;
     
-    _is >> _pDebris->m_fDamping;
-    _is >> _pDebris->m_nDepthlayers;
-    _is >> _pDebris->m_vecForce[0] >> _pDebris->m_vecForce[1];
+    _is >> _pParticle->m_fDamping;
+    _is >> _pParticle->m_nDepthlayers;
+    _is >> _pParticle->m_vecForce[0] >> _pParticle->m_vecForce[1];
     
     
     return _is;
@@ -230,63 +230,63 @@ std::istream& operator>>(std::istream& _is, CDebris* const _pDebris)
 /// \brief Output stream for game state information
 ///
 /// \param _os Source stream
-/// \param _pDebris CDebris instance to stream
+/// \param _pParticle CParticle instance to stream
 ///
-/// \return Stream with game state information of CDebris instance
+/// \return Stream with game state information of CParticle instance
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream& _os, CDebris* const _pDebris)
+std::ostream& operator<<(std::ostream& _os, CParticle* const _pParticle)
 {
-    METHOD_ENTRY("CDebris::operator<<")
+    METHOD_ENTRY("CParticle::operator<<")
     
-    _os << "Debris:" << std::endl;
+    _os << "Particle:" << std::endl;
     
     /// \todo Stream data from IGridUser
     
     // From IUniqueIDUser
-    _os << _pDebris->m_UID << std::endl;
+    _os << _pParticle->m_UID << std::endl;
     
-    _os << s_DebrisTypeToStringMap.at(_pDebris->getDebrisType()) << std::endl;
+    _os << s_ParticleTypeToStringMap.at(_pParticle->getParticleType()) << std::endl;
     
-    _os << _pDebris->m_Lifetime << std::endl;
-    _os << _pDebris->m_fTimeFac << std::endl;
+    _os << _pParticle->m_Lifetime << std::endl;
+    _os << _pParticle->m_fTimeFac << std::endl;
     
-    _os << _pDebris->m_PosList << std::endl;
-    _os << _pDebris->m_PosListPrev << std::endl;
-    _os << _pDebris->m_VelList << std::endl;
-    _os << _pDebris->m_StateList << std::endl;
+    _os << _pParticle->m_PosList << std::endl;
+    _os << _pParticle->m_PosListPrev << std::endl;
+    _os << _pParticle->m_VelList << std::endl;
+    _os << _pParticle->m_StateList << std::endl;
     
-    _os << _pDebris->m_StateList << std::endl;
+    _os << _pParticle->m_StateList << std::endl;
     
-    _os << _pDebris->m_fDamping << std::endl;
-    _os << _pDebris->m_nDepthlayers << std::endl;
-    _os << _pDebris->m_vecForce[0] << " " << _pDebris->m_vecForce[1] << std::endl;
+    _os << _pParticle->m_fDamping << std::endl;
+    _os << _pParticle->m_nDepthlayers << std::endl;
+    _os << _pParticle->m_vecForce[0] << " " << _pParticle->m_vecForce[1] << std::endl;
     
     return _os;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Copies debris
+/// \brief Copies particle
 ///
-/// \param _Debris Debris to be copied
+/// \param _Particle Particle to be copied
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CDebris::copy(const CDebris& _Debris) 
+void CParticle::copy(const CParticle& _Particle) 
 {
-    METHOD_ENTRY("CDebris::copy")
+    METHOD_ENTRY("CParticle::copy")
     
-    //--- Variables of CDebris -----------------------------------------------//
-    m_PosList = _Debris.m_PosList;
-    m_PosListPrev = _Debris.m_PosListPrev;
-    m_VelList = _Debris.m_VelList;
-    m_StateList = _Debris.m_StateList;
-    m_BBox = _Debris.m_BBox;
+    //--- Variables of CParticle -----------------------------------------------//
+    m_PosList = _Particle.m_PosList;
+    m_PosListPrev = _Particle.m_PosListPrev;
+    m_VelList = _Particle.m_VelList;
+    m_StateList = _Particle.m_StateList;
+    m_BBox = _Particle.m_BBox;
     
     // m_Lifetime: New individual object
-    m_DebrisType = _Debris.m_DebrisType;
-    m_fTimeFac = _Debris.m_fTimeFac;
-    m_fDamping = _Debris.m_fDamping;
-    m_nDepthlayers = _Debris.m_nDepthlayers;
-    m_vecForce = _Debris.m_vecForce;
+    m_ParticleType = _Particle.m_ParticleType;
+    m_fTimeFac = _Particle.m_fTimeFac;
+    m_fDamping = _Particle.m_fDamping;
+    m_nDepthlayers = _Particle.m_nDepthlayers;
+    m_vecForce = _Particle.m_vecForce;
 }

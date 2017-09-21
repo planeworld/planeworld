@@ -35,7 +35,7 @@
 #include <map>
 
 //--- Program header ---------------------------------------------------------//
-#include "debris_emitter.h"
+#include "particle_emitter.h"
 #include "objects_emitter.h"
 #include "thruster.h"
 #include "universe.h"
@@ -71,7 +71,7 @@ class CXMLImporter : public IVisualsDataStorageUser,
         Vector2d                        getGravity() const;
         const ComponentsType&           getComponents() const;
         const EmittersType&             getEmitters() const;
-        const double&                   getFrequencyDebris() const;
+        const double&                   getFrequencyParticle() const;
         const double&                   getFrequencyLua() const;
         const std::string&              getGraphicsDataPath() const;
         const double&                   getPhysicsFrequency() const;
@@ -133,7 +133,7 @@ class CXMLImporter : public IVisualsDataStorageUser,
         std::string                     m_strPath;              ///< Path to read data from
         std::string                     m_strGraphicsDataPath;              ///< Font to load
         std::string                     m_strLuaPhysicsInterface; ///< Lua file for physics access
-        double                          m_fDebrisFrequency;     ///< Frequency for debris processing
+        double                          m_fParticleFrequency;     ///< Frequency for particle processing
         double                          m_fLuaFrequency;        ///< Frequency for lua interface
         double                          m_fPhysicsFrequency;    ///< Frequency for physics processing
         double                          m_fVisualsFrequency;    ///< Frequency for visual update
@@ -187,15 +187,15 @@ inline const EmittersType& CXMLImporter::getEmitters() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return frequency for debris physics processing
+/// \brief Return frequency for particle physics processing
 ///
-/// \return Frequency for debris physics processing
+/// \return Frequency for particle physics processing
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const double& CXMLImporter::getFrequencyDebris() const
+inline const double& CXMLImporter::getFrequencyParticle() const
 {
-    METHOD_ENTRY("CXMLImporter::getFrequencyDebris")
-    return m_fDebrisFrequency;
+    METHOD_ENTRY("CXMLImporter::getFrequencyParticle")
+    return m_fParticleFrequency;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

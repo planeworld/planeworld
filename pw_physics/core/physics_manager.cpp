@@ -30,7 +30,7 @@
 
 #include "physics_manager.h"
 
-#include "debris_emitter.h"
+#include "particle_emitter.h"
 #include "joint.h"
 #include "objects_emitter.h"
 #include "shape.h"
@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 CPhysicsManager::CPhysicsManager() : m_pUniverse(nullptr),
                                      m_fG(6.67408e-11),
-                                     m_fFrequencyDebris(PHYSICS_DEBRIS_DEFAULT_FREQUENCY),
+                                     m_fFrequencyParticle(PHYSICS_PARTICLE_DEFAULT_FREQUENCY),
                                      m_strCellUpdateLast(""),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
@@ -131,14 +131,14 @@ UIDType CPhysicsManager::createEmitter(const EmitterType _EmitterType)
     
     switch (_EmitterType)
     {
-        case EmitterType::EMITTER_DEBRIS:
+        case EmitterType::EMITTER_PARTICLE:
         {
-            CDebrisEmitter* pDebrisEmitter = new CDebrisEmitter();
+            CParticleEmitter* pParticleEmitter = new CParticleEmitter();
             MEM_ALLOC("IEmitter")
-            nUID = pDebrisEmitter->getUID();
-            m_EmittersToBeAddedToWorld.enqueue(pDebrisEmitter);
+            nUID = pParticleEmitter->getUID();
+            m_EmittersToBeAddedToWorld.enqueue(pParticleEmitter);
             
-            pDebrisEmitter->init();
+            pParticleEmitter->init();
             break;
         }
         case EmitterType::EMITTER_OBJECT:
@@ -351,7 +351,7 @@ void CPhysicsManager::initComponents()
 ///
 /// \brief Initialise all emitters
 ///
-/// Emitters create objects or debris. Some emitters do just emit objects once,
+/// Emitters create objects or particle. Some emitters do just emit objects once,
 /// e.g. if they spatially distribute objects. Others emit on a timely basis.
 /// All emitted objects must be added to the list of objects that is handeled
 /// by the physics manager, so especially emitters that emit only once should
@@ -578,21 +578,21 @@ void CPhysicsManager::moveMasses(int nTest) const
         Obj.second->dynamics(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
         Obj.second->transform();
     }
-//     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyDebris) == 0)
+//     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyParticle) == 0)
     {
-        CTimer FrameTimeDebris;
-        FrameTimeDebris.start();
+        CTimer FrameTimeParticle;
+        FrameTimeParticle.start();
         
-        for (const auto Debris : *m_pDataStorage->getDebrisByValueBack())
+        for (const auto Particle : *m_pDataStorage->getParticlesByValueBack())
         {
-            Debris.second->dynamics(1.0/m_fFrequencyDebris*m_pDataStorage->getTimeScale());
+            Particle.second->dynamics(1.0/m_fFrequencyParticle*m_pDataStorage->getTimeScale());
         }
         
-        FrameTimeDebris.stop();
-        if (FrameTimeDebris.getTime() > 1.0/m_fFrequencyDebris)
+        FrameTimeParticle.stop();
+        if (FrameTimeParticle.getTime() > 1.0/m_fFrequencyParticle)
         {
-          NOTICE_MSG("Physics Manager", "Execution time of debris code is too large: " << FrameTimeDebris.getTime() << 
-                                        "s of " << 1.0/m_fFrequencyDebris << "s max.")
+          NOTICE_MSG("Physics Manager", "Execution time of particle code is too large: " << FrameTimeParticle.getTime() << 
+                                        "s of " << 1.0/m_fFrequencyParticle << "s max.")
         }
     }
     
@@ -651,8 +651,8 @@ void CPhysicsManager::addGlobalForces()
         (*ci).second->addAcceleration(m_vecConstantGravitation);
     };
     
-//     for (auto ci = m_pDataStorage->getDebris().cbegin();
-//         ci != m_pDataStorage->getDebris().cend(); ++ci)
+//     for (auto ci = m_pDataStorage->getParticle().cbegin();
+//         ci != m_pDataStorage->getParticle().cend(); ++ci)
 //     {
 // //         (*ci)->setForce(Vector2d(0.0, -1.81));
 //     }
@@ -668,7 +668,7 @@ void CPhysicsManager::collisionDetection()
     METHOD_ENTRY("CPhysicsManager::collisionDetection")
 
 //     m_ContactList.clear();
-//     m_CollisionManager.setDebris(m_pDataStorage->getDebris());
+//     m_CollisionManager.setParticle(m_pDataStorage->getParticle());
 //     m_CollisionManager.setDynamicObjects(m_pDataStorage->getObjectsByValueBack());
 //     m_CollisionManager.setStaticObjects(m_pDataStorage->getObjectsByValueBack());
 //     m_CollisionManager.detectCollisions();
@@ -694,8 +694,8 @@ void CPhysicsManager::myInitComInterface()
     if (m_pComInterface != nullptr)
     {
         // Helpers
-        std::ostringstream ossDebrisType("");
-        for (auto DebrisType : STRING_TO_DEBRIS_TYPE_MAP) ossDebrisType << " " << DebrisType.first;
+        std::ostringstream ossParticleType("");
+        for (auto ParticleType : STRING_TO_PARTICLE_TYPE_MAP) ossParticleType << " " << ParticleType.first;
 //         std::ostringstream ossEmitterType("");
 //         for (auto EmitterType : STRING_TO_EMITTER_TYPE_MAP) ossEmitterType << " " << EmitterType.first;
         std::ostringstream ossShapeType("");
@@ -749,25 +749,25 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Number of star systems"}},
                                           "system", "physics"
                                          );
-        m_pComInterface->registerFunction("debris_set_type",
+        m_pComInterface->registerFunction("particle_set_type",
                                           CCommand<void, int, std::string>(
                                             [&](const int _nUID, const std::string& _strType)
                                             {
-                                                const auto ci = m_pDataStorage->getDebrisByValueBack()->find(_nUID);
-                                                if (ci != m_pDataStorage->getDebrisByValueBack()->end())
+                                                const auto ci = m_pDataStorage->getParticlesByValueBack()->find(_nUID);
+                                                if (ci != m_pDataStorage->getParticlesByValueBack()->end())
                                                 {
-                                                    ci->second->setDebrisType(mapStringToDebrisType(_strType));
+                                                    ci->second->setParticleType(mapStringToParticleType(_strType));
                                                 }
                                                 else
                                                 {
-                                                    WARNING_MSG("World Data Storage", "Unknown debris with UID <" << _nUID << ">")
+                                                    WARNING_MSG("World Data Storage", "Unknown particle with UID <" << _nUID << ">")
                                                     throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                             }),
-                                          "Sets type of given debris.",
+                                          "Sets type of given particle.",
                                           {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::INT, "Debris UID"},
-                                           {ParameterType::STRING, "Debris type (" + ossDebrisType.str() + " )"}},
+                                           {ParameterType::INT, "Particle UID"},
+                                           {ParameterType::STRING, "Particle type (" + ossParticleType.str() + " )"}},
                                            "system", "physics"
                                          );
         m_pComInterface->registerFunction("decelerate_time",
@@ -854,7 +854,7 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<void, double>([&](const double& _fFrequency)
                                           {
                                               this->setFrequency(_fFrequency);
-                                              this->setFrequencyDebris(_fFrequency);
+                                              this->setFrequencyParticle(_fFrequency);
                                           }),
                                           "Sets the frequency of the physics thread.",
                                           {{ParameterType::NONE, "No return value"},

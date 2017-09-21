@@ -20,53 +20,53 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       debris_emitter.h
-/// \brief      Prototype of class "CDebrisEmitter"
+/// \file       particle_emitter.h
+/// \brief      Prototype of class "CParticleEmitter"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2014-02-16
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEBRIS_EMITTER_H
-#define DEBRIS_EMITTER_H
+#ifndef PARTICLE_EMITTER_H
+#define PARTICLE_EMITTER_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "debris.h"
+#include "particle.h"
 #include "emitter.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class for a source that emits debris.
+/// \brief Class for a source that emits particle.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CDebrisEmitter : public IEmitter,
-                       public IUniqueIDReferrer<CDebris>
+class CParticleEmitter : public IEmitter,
+                         public IUniqueIDReferrer<CParticle>
 {
     
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
-        CDebrisEmitter();
-        ~CDebrisEmitter();
+        CParticleEmitter();
+        ~CParticleEmitter();
         
         //--- Constant Methods -----------------------------------------------//
         void emit(const double&);
         
-        const DebrisTypeType& getDebrisType()  const;
+        const ParticleTypeType& getParticleType()  const;
               EmitterType getEmitterType() const;
         
         //--- Methods --------------------------------------------------------//
         void        init();
-        void        setDebrisType(const DebrisTypeType&);
+        void        setParticleType(const ParticleTypeType&);
         void        setNumber(const std::uint32_t&);
 
     private:
         
         //--- Variables [private] --------------------------------------------//
-        DebrisTypeType      m_DebrisType;       ///< Type of debris
+        ParticleTypeType      m_ParticleType;       ///< Type of particle
         static uint32_t     m_unNrOfEmitters;   ///< Static counter for name initialisation and tracking
 };
 
@@ -74,53 +74,53 @@ class CDebrisEmitter : public IEmitter,
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Get the type of debris
+/// \brief Get the type of particle
 ///
-/// \return Type of debris
+/// \return Type of particle
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const DebrisTypeType& CDebrisEmitter::getDebrisType() const
+inline const ParticleTypeType& CParticleEmitter::getParticleType() const
 {
-    METHOD_ENTRY("CDebrisEmitter::getDebrisTypeType")
-    return m_DebrisType;
+    METHOD_ENTRY("CParticleEmitter::getParticleTypeType")
+    return m_ParticleType;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Get the emitters type - RTTI
 ///
-/// \return Type: debris emitter
+/// \return Type: particle emitter
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline EmitterType CDebrisEmitter::getEmitterType() const
+inline EmitterType CParticleEmitter::getEmitterType() const
 {
-    METHOD_ENTRY("CDebrisEmitter::getEmitterType")
-    return EMITTER_DEBRIS;
+    METHOD_ENTRY("CParticleEmitter::getEmitterType")
+    return EMITTER_PARTICLE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the type of debris
+/// \brief Sets the type of particle
 ///
-/// \param _DebrisType Type of debris
+/// \param _ParticleType Type of particle
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void CDebrisEmitter::setDebrisType(const DebrisTypeType& _DebrisType)
+inline void CParticleEmitter::setParticleType(const ParticleTypeType& _ParticleType)
 {
-    METHOD_ENTRY("CDebrisEmitter::setDebrisTypeType")
-    m_DebrisType = _DebrisType;
+    METHOD_ENTRY("CParticleEmitter::setParticleTypeType")
+    m_ParticleType = _ParticleType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the maximum number of debris for this emitter
+/// \brief Sets the maximum number of particle for this emitter
 ///
-/// \param _nNrMax Maximum number of debris.
+/// \param _nNrMax Maximum number of particle.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-inline void CDebrisEmitter::setNumber(const std::uint32_t& _nNrMax)
+inline void CParticleEmitter::setNumber(const std::uint32_t& _nNrMax)
 {
-    METHOD_ENTRY("CDebrisEmitter::setMode")
+    METHOD_ENTRY("CParticleEmitter::setMode")
     m_nNr = _nNrMax;
     m_pRef->setNumber(_nNrMax);
 }

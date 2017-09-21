@@ -43,7 +43,7 @@
 /// Command queue
 typedef CCircularBuffer<std::string> CommandBufferType;
 
-/// Specifies the type of debris
+/// Specifies the type of particle
 enum class ConsoleModeType
 {
     INVALID,

@@ -42,25 +42,25 @@
 #include "multi_buffer.h"
 #include "unique_id_user.h"
 
-class CDebris;
+class CParticle;
 class IEmitter;
 class CObject;
 class IShape;
 
 typedef std::list<IJoint*>                      JointsType;                 ///< Specifies a list of joints
 
-/// Map of debris, accessed by name
-typedef std::unordered_map<std::string, CDebris*> DebrisByNameType;
-/// Buffered debris, accessed by name
-typedef CMultiBuffer<BUFFER_QUADRUPLE, DebrisByNameType, std::string, CDebris*> BufferedDebrisByNameType;
-/// Map of debris, accessed by UID value
-typedef std::unordered_map<UIDType, CDebris*> DebrisByValueType;
-/// Map of buffered debris, accessed by UID value
-typedef CMultiBuffer<BUFFER_QUADRUPLE, DebrisByValueType, UIDType, CDebris*> BufferedDebrisByValueType;
+/// Map of particles, accessed by name
+typedef std::unordered_map<std::string, CParticle*> ParticlesByNameType;
+/// Buffered particles, accessed by name
+typedef CMultiBuffer<BUFFER_QUADRUPLE, ParticlesByNameType, std::string, CParticle*> BufferedParticlesByNameType;
+/// Map of particles, accessed by UID value
+typedef std::unordered_map<UIDType, CParticle*> ParticlesByValueType;
+/// Map of buffered particles, accessed by UID value
+typedef CMultiBuffer<BUFFER_QUADRUPLE, ParticlesByValueType, UIDType, CParticle*> BufferedParticlesByValueType;
 
-/// Map of debris, accessed by UID value
+/// Map of emitters, accessed by UID value
 typedef std::unordered_map<UIDType, IEmitter*> EmittersByValueType;
-/// Map of buffered debris, accessed by UID value
+/// Map of buffered emitters, accessed by UID value
 typedef CMultiBuffer<BUFFER_TRIPLE, EmittersByValueType, UIDType, IEmitter*> BufferedEmittersByValueType;
 
 /// Map of objects, accessed by name
@@ -104,7 +104,7 @@ class CWorldDataStorage
         IUniqueIDUser*              getUIDUserByValueBack() const;
         
         //--- Methods --------------------------------------------------------//
-        bool addDebris(CDebris*);
+        bool addParticle(CParticle*);
         void addJoint(IJoint*);
         bool addObject(CObject*);
         void addShape(IShape*);
@@ -116,10 +116,10 @@ class CWorldDataStorage
         IShape*                     getShapeByValue(const UIDType);
         
         BufferedObjectsByNameType&  getObjectsBuffer();
-        DebrisByNameType*           getDebrisByNameBack();
-        DebrisByNameType*           getDebrisByNameFront();
-        DebrisByValueType*          getDebrisByValueFront();
-        DebrisByValueType*          getDebrisByValueBack();
+        ParticlesByNameType*        getParticlesByNameBack();
+        ParticlesByNameType*        getParticlesByNameFront();
+        ParticlesByValueType*       getParticlesByValueFront();
+        ParticlesByValueType*       getParticlesByValueBack();
         ObjectsByNameType*          getObjectsByNameBack();
         ObjectsByValueType*         getObjectsByValueBack();
         ObjectsByValueType*         getObjectsByValueFront();
@@ -143,12 +143,12 @@ class CWorldDataStorage
         //--- Methods [private] ----------------------------------------------//
         bool addUIDUser(const std::array<IUniqueIDUser*,BUFFER_QUADRUPLE>&);
       
-        BufferedDebrisByNameType    m_DebrisByName;             ///< Buffered debris, accessed by name
-        BufferedDebrisByValueType   m_DebrisByValue;            ///< Buffered debris, accessed by value
-        BufferedEmittersByValueType m_EmittersByValue;          ///< Buffered emitters, accessed by value
-        BufferedObjectsByNameType   m_ObjectsByName;            ///< Buffered objects, accessed by name
-        BufferedObjectsByValueType  m_ObjectsByValue;           ///< Buffered objects, accessed by UID value
-        BufferedUIDUsersByValueType m_UIDUsersByValue;          ///< Buffered UID users, accessed by value
+        BufferedParticlesByNameType     m_ParticlesByName;      ///< Buffered particles, accessed by name
+        BufferedParticlesByValueType    m_ParticlesByValue;     ///< Buffered particles, accessed by value
+        BufferedEmittersByValueType     m_EmittersByValue;      ///< Buffered emitters, accessed by value
+        BufferedObjectsByNameType       m_ObjectsByName;        ///< Buffered objects, accessed by name
+        BufferedObjectsByValueType      m_ObjectsByValue;       ///< Buffered objects, accessed by UID value
+        BufferedUIDUsersByValueType     m_UIDUsersByValue;      ///< Buffered UID users, accessed by value
         
         ShapesByValueType           m_ShapesByValue;            ///< Shapes, accessed by UID value
         UIDsByNameType              m_UIDsByName;               ///< UIDs of entities, accessed by name
@@ -172,7 +172,7 @@ class CWorldDataStorage
 ////////////////////////////////////////////////////////////////////////////////
 inline const JointsType& CWorldDataStorage::getJoints() const
 {
-    METHOD_ENTRY("CWorldDataStorage::getDebris")
+    METHOD_ENTRY("CWorldDataStorage::getParticle")
     return m_Joints;
 }
 
@@ -191,54 +191,54 @@ inline const double& CWorldDataStorage::getTimeScale() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns front buffer of debris, accessed by name
+/// \brief Returns front buffer of particles, accessed by name
 ///
-/// \return Debris front buffer, accessed by name
+/// \return Particles front buffer, accessed by name
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline DebrisByNameType* CWorldDataStorage::getDebrisByNameFront()
+inline ParticlesByNameType* CWorldDataStorage::getParticlesByNameFront()
 {
-    METHOD_ENTRY("CWorldDataStorage::getDebrisByNameFront")
-    return m_DebrisByName.getBuffer(BUFFER_QUADRUPLE_FRONT);
+    METHOD_ENTRY("CWorldDataStorage::getParticlesByNameFront")
+    return m_ParticlesByName.getBuffer(BUFFER_QUADRUPLE_FRONT);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns back buffer of debris, accessed by name
+/// \brief Returns back buffer of particles, accessed by name
 ///
-/// \return Debris back buffer, accessed by name
+/// \return Particles back buffer, accessed by name
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline DebrisByNameType* CWorldDataStorage::getDebrisByNameBack()
+inline ParticlesByNameType* CWorldDataStorage::getParticlesByNameBack()
 {
-    METHOD_ENTRY("CWorldDataStorage::getDebrisByNameBack")
-    return m_DebrisByName.getBuffer(BUFFER_QUADRUPLE_BACK);
+    METHOD_ENTRY("CWorldDataStorage::getParticlesByNameBack")
+    return m_ParticlesByName.getBuffer(BUFFER_QUADRUPLE_BACK);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns back buffer of debris, accessed by value
+/// \brief Returns back buffer of particles, accessed by value
 ///
-/// \return Debris back buffer, accessed by value
+/// \return Particles back buffer, accessed by value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline DebrisByValueType* CWorldDataStorage::getDebrisByValueBack()
+inline ParticlesByValueType* CWorldDataStorage::getParticlesByValueBack()
 {
-    METHOD_ENTRY("CWorldDataStorage::getDebrisByValueBack")
-    return m_DebrisByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+    METHOD_ENTRY("CWorldDataStorage::getParticlesByValueBack")
+    return m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns front buffer of debris, accessed by value
+/// \brief Returns front buffer of particles, accessed by value
 ///
-/// \return Debris front buffer, accessed by value
+/// \return Particles front buffer, accessed by value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline DebrisByValueType* CWorldDataStorage::getDebrisByValueFront()
+inline ParticlesByValueType* CWorldDataStorage::getParticlesByValueFront()
 {
-    METHOD_ENTRY("CWorldDataStorage::getDebrisByValueFront")
-    return m_DebrisByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
+    METHOD_ENTRY("CWorldDataStorage::getParticlesByValueFront")
+    return m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
 }
 
 
