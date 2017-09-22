@@ -226,8 +226,6 @@ float CFontManager::getTextLength(const std::string& _strText,
 {
     METHOD_ENTRY("CFontManager::getTextLength")
     
-    if (m_bChanged) this->changeFont();
-    
     const auto ci = m_FontsMemByName.find(_strFont);
     if (ci != m_FontsMemByName.end())
     {
@@ -235,38 +233,36 @@ float CFontManager::getTextLength(const std::string& _strText,
         
         auto nID = 0u;
 
-        const auto ci = m_FontsByName.find(strFontDesignator);
-        if (ci != m_FontsByName.end())
+        auto it = m_FontsByName.find(strFontDesignator);
+        if (it == m_FontsByName.end())
         {
-            nID = ci->second;
-            
-            float fLength = 0.0f;
-            float fLengthMax = 0.0f;
-            const stbtt_packedchar* b;
-            for (const auto Ch : _strText)
+            this->rasterize(_strFont, _nSize);
+            it = m_FontsByName.find(strFontDesignator);
+        }
+        
+        nID = it->second;
+        
+        float fLength = 0.0f;
+        float fLengthMax = 0.0f;
+        const stbtt_packedchar* b;
+        for (const auto Ch : _strText)
+        {
+            if (Ch == 10) // Line feed
             {
-                if (Ch == 10) // Line feed
+                if (fLength > fLengthMax)
                 {
-                    if (fLength > fLengthMax)
-                    {
-                        fLengthMax = fLength;
-                    }
-                    fLength = 0.0;
+                    fLengthMax = fLength;
                 }
-                b = m_FontsCharInfo[nID] + Ch-ASCII_FIRST;
-                fLength += b->xadvance;
+                fLength = 0.0;
             }
-            if (fLength > fLengthMax)
-            {
-                fLengthMax = fLength;
-            }
-            return fLengthMax;
+            b = m_FontsCharInfo[nID] + Ch-ASCII_FIRST;
+            fLength += b->xadvance;
         }
-        else
+        if (fLength > fLengthMax)
         {
-            WARNING_MSG("Font Manager", "Font " << _strFont << " of size <" << _nSize << "> not rasterised.")
-            return 0.0f;
+            fLengthMax = fLength;
         }
+        return fLengthMax;
     }
     else
     {
