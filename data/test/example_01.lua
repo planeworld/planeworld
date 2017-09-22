@@ -22,7 +22,7 @@ idObj01 = pw.system.create_obj()
 idShp01 = pw.system.create_shp("shp_circle")
 idShp02 = pw.system.create_shp("shp_polygon")
 
-pw.physics.shp_set_vertices(idShp02,
+pw.system.shp_set_vertices(idShp02,
     {-1.0, -1.0,
       1.0, -1.0,
       2.0,  1.0,

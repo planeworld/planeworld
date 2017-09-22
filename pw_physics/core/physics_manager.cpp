@@ -1313,7 +1313,7 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::INT, "Shapes UID"},
                                            {ParameterType::DYN_ARRAY, "Vertices (x0, y0, x1, y1, ... xN, yN)"}},
-                                           "physics", "physics"
+                                           "system", "physics"
                                          );
         m_pComInterface->registerFunction("get_time",
                                           CCommand<double>([&]() -> double {return this->m_SimTimer[0].getSecondsRaw();}),
