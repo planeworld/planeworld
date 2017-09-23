@@ -134,6 +134,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            drawGridHUD();
         void            drawKinematicsState(const CKinematicsState&, const double&);
         void            drawKinematicsStates();
+        void            drawStars();
         void            drawTimers();
         void            drawWindows();
         void            drawWorld();
@@ -143,9 +144,11 @@ class CVisualsManager : virtual public CGraphicsBase,
 
         CShaderProgram      m_ShaderProgramFont;            ///< Shader program for font rendering
         CShaderProgram      m_ShaderProgramMainScreen;      ///< Shader program to put image to screen buffer
+        CShaderProgram      m_ShaderProgramStars;           ///< Shader program to render stars
         CShaderProgram      m_ShaderProgramWorld;           ///< Basic shader program
         CRenderMode         m_RenderModeFont;               ///< Mode for font rendering
         CRenderMode         m_RenderModeMainScreen;         ///< Mode for rendering texture to screen
+        CRenderMode         m_RenderModeStars;              ///< Mode for rendering stars
         CRenderMode         m_RenderModeWorld;              ///< Default render mode
         CRenderTarget       m_RenderTargetScreen;           ///< Render target of screen (final image)
         
