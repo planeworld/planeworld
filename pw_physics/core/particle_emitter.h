@@ -66,7 +66,7 @@ class CParticleEmitter : public IEmitter,
     private:
         
         //--- Variables [private] --------------------------------------------//
-        ParticleTypeType      m_ParticleType;       ///< Type of particle
+        ParticleTypeType    m_ParticleType;     ///< Type of particle
         static uint32_t     m_unNrOfEmitters;   ///< Static counter for name initialisation and tracking
 };
 

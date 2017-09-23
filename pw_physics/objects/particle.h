@@ -61,7 +61,7 @@ typedef enum
 ///
 /// \brief Class for particle
 ///
-/// Particle have a very limited physical accuracy. They are mainly for visual
+/// Particles have a very limited physical accuracy. They are mainly for visual
 /// purposes, do not have any real mass and thus, do not influence other objects.
 ///
 /// \Note The state is represented by a uint8_t, since bool specilisation for
@@ -69,7 +69,7 @@ typedef enum
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CParticle : public IGridUser,
-                public IUniqueIDUser
+                  public IUniqueIDUser
 {
     
     public:
@@ -81,9 +81,9 @@ class CParticle : public IGridUser,
         CParticle* clone() const;
 
         //--- Constant methods -----------------------------------------------//
-        CBoundingBox&         getBoundingBox();
+        CBoundingBox&           getBoundingBox();
         const ParticleTypeType& getParticleType()  const;
-        int                   getDepths() const;
+        int                     getDepths() const;
 
         //--- Methods --------------------------------------------------------//
         CCircularBuffer<Vector2d>* getPositions();
@@ -118,7 +118,7 @@ class CParticle : public IGridUser,
         
         CBoundingBox            m_BBox;                      ///< Bounding box of all particle
         
-        ParticleTypeType          m_ParticleType;                ///< Type of particle
+        ParticleTypeType        m_ParticleType;              ///< Type of particle
         CTimer                  m_Lifetime;                  ///< Lifetime counter
         double                  m_fTimeFac;                  ///< Factor of realtime
         double                  m_fDamping;                  ///< Damping of particle
