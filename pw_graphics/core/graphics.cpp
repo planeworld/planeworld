@@ -850,7 +850,7 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
         m_unIndex++;
         m_uncI += 4;
         
-        fAng *= fFac;
+        fAng += fFac;
         
         while (fAng < MATH_2PI+fFac)
         {
@@ -1122,9 +1122,9 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
         
         m_unIndex += 2u;
         m_uncI += 8;
-        fAng *= fFac;
+        fAng += fFac;
 
-        while (fAng < MATH_2PI)
+        while (fAng < MATH_2PI+fFac)
         {
             m_vecVertices[m_unIndexVerts++] = _vecC[0]+std::sin(fAng)*_fR;
             m_vecVertices[m_unIndexVerts++] = _vecC[1]+std::cos(fAng)*_fR;

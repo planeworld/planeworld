@@ -875,19 +875,23 @@ bool CVisualsManager::init()
     
     CShader VertexShaderFont;
     CShader VertexShaderMainScreen;
+    CShader VertexShaderStars;
     CShader VertexShaderWorld;
     CShader FragmentShaderFont;
     CShader FragmentShaderMainScreen;
+    CShader FragmentShaderStars;
     CShader FragmentShaderWorld;
     
     m_RenderTargetScreen.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
 
     VertexShaderFont.load(m_strDataPath+"/shader/font.vert", GL_VERTEX_SHADER);    
     VertexShaderMainScreen.load(m_strDataPath+"/shader/main_screen.vert", GL_VERTEX_SHADER);
+    VertexShaderStars.load(m_strDataPath+"/shader/stars.vert", GL_VERTEX_SHADER);
     VertexShaderWorld.load(m_strDataPath+"/shader/shader.vert", GL_VERTEX_SHADER);
 
     FragmentShaderFont.load(m_strDataPath+"/shader/font.frag", GL_FRAGMENT_SHADER);
     FragmentShaderMainScreen.load(m_strDataPath+"/shader/main_screen.frag", GL_FRAGMENT_SHADER);
+    FragmentShaderStars.load(m_strDataPath+"/shader/stars.frag", GL_FRAGMENT_SHADER);
     FragmentShaderWorld.load(m_strDataPath+"/shader/shader.frag", GL_FRAGMENT_SHADER);
     
     m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
@@ -899,12 +903,17 @@ bool CVisualsManager::init()
     m_RenderModeMainScreen.setRenderModeType(RenderModeType::VERT3COL4TEX2);
     m_RenderModeMainScreen.setTexture(m_RenderTargetScreen.getIDTex());
     
+    m_ShaderProgramStars.create(VertexShaderStars, FragmentShaderStars);
+    m_RenderModeStars.setShaderProgram(&m_ShaderProgramStars);
+    m_RenderModeStars.setRenderModeType(RenderModeType::VERT3COL4);
+    
     m_ShaderProgramWorld.create(VertexShaderWorld, FragmentShaderWorld);
     m_RenderModeWorld.setShaderProgram(&m_ShaderProgramWorld);
     m_RenderModeWorld.setRenderModeType(RenderModeType::VERT3COL4);
     
     m_Graphics.registerRenderMode("font", &m_RenderModeFont);
     m_Graphics.registerRenderMode("main_screen", &m_RenderModeMainScreen);
+    m_Graphics.registerRenderMode("stars", &m_RenderModeStars);
     m_Graphics.registerRenderMode("world", &m_RenderModeWorld);
     
     m_RenderModeWorld.use();
@@ -1201,6 +1210,7 @@ void CVisualsManager::processFrame()
                     
                     m_pCamera = CamWidget.second->getRef();
                     m_pCamera->update();
+                this->drawStars();
                     this->drawWorld();
                 //
                 CamWidget.second->getRenderTarget()->unbind();
@@ -1221,6 +1231,7 @@ void CVisualsManager::processFrame()
 
         m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
         
+    this->drawStars();
         this->drawWorld();
         this->drawCOM();
         this->drawBoundingBoxes();
@@ -1496,6 +1507,58 @@ void CVisualsManager::drawKinematicsStates()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draws stars
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawStars()
+{
+    METHOD_ENTRY("CVisualsManager::drawWorld")
+    
+    m_Graphics.beginRenderBatch("stars");
+    {
+        #ifdef PW_MULTITHREADING
+            while (m_pUniverse->isAccessed.test_and_set()) {}
+        #endif
+        for (auto i=0u; i<m_pUniverse->getStarSystems()->size(); ++i)
+        {
+            CStarSystem* pStarSystem = m_pUniverse->getStarSystems()->at(i);
+            CStar&       Star(pStarSystem->Star());
+            Vector2d vecPos = CKinematicsState::clipToWorldLimit(
+                                Star.getOrigin() +
+                                IGridUser::cellToDouble(pStarSystem->getCell()-m_pCamera->getCell())
+                            );
+            Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(
+                                    Star.getOrigin() - m_pCamera->getCenter() +
+                                    IGridUser::cellToDouble
+                                    (pStarSystem->getCell() -
+                                    m_pCamera->getCell())
+                                );
+            
+
+            // Draw stars in original scale
+            if (m_pCamera->getBoundingBox().isInside(vecPos))
+            {
+                
+                double fColor = 0.1*Star.getStarType()+0.3;
+                m_Graphics.setColor(0.8,fColor,0.3);
+                
+                double fDrawSize = (Star.getStarType()*0.3+1) * m_Graphics.getResMPX();
+                double fRadius   =  Star.getRadius();
+                if (fDrawSize > fRadius)
+                    m_Graphics.filledCircle(vecPosRel, fDrawSize, 7.0);
+                else
+                    m_Graphics.filledCircle(vecPosRel, (Star.getRadius()), 100.0);
+            }
+        }
+        #ifdef PW_MULTITHREADING
+            m_pUniverse->isAccessed.clear();
+        #endif
+    }
+    m_Graphics.endRenderBatch();
+}    
+    
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draws global and local simulation timers
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -1565,125 +1628,11 @@ void CVisualsManager::drawWindows()
 void CVisualsManager::drawWorld()
 {
     METHOD_ENTRY("CVisualsManager::drawWorld")
-    
-    //const double fRmax = 3.6e20;
-    //const double fBGDensityFactor = 1.0e18; 
-    
-    //const double fStarfieldSizeX = 3.0e19; // * 2
-    //const double fStarfieldSizeY = 3.0e19; // * 2
-    
-    //const double fStarfieldBackgroundSizeX = 0.5 * fStarfieldSizeX;
-    //const double fStarfieldBackgroundSizeY = 0.5 * fStarfieldSizeY;
-    
-    //const double fScreenWidthAtZoomZeroInM  = m_Graphics.getWidthScr()/GRAPHICS_PX_PER_METER;
-    //const double fScreenHeightAtZoomZeroInM = m_Graphics.getHeightScr()/GRAPHICS_PX_PER_METER;
-    
-//     const double fDefaultUnitSize = GRAPHICS_RIGHT_DEFAULT - GRAPHICS_LEFT_DEFAULT;
-//     const double fMaxZoom = fDefaultUnitSize / (2.0*fStarfieldSizeX);
-//     m_pCamera->zoomTo(fMaxZoom);
-    
-//     if (1.0e13 * m_Graphics.getResPMX() < 1.0)
+
     
     m_Graphics.beginRenderBatch("world");
     if (m_pUniverse != nullptr)
-    {
-        #ifdef PW_MULTITHREADING
-            while (m_pUniverse->isAccessed.test_and_set()) {}
-        #endif
-        for (auto i=0u; i<m_pUniverse->getStarSystems()->size(); ++i)
-        {
-            CStarSystem* pStarSystem = m_pUniverse->getStarSystems()->at(i);
-            CStar&       Star(pStarSystem->Star());
-            Vector2d vecPos = CKinematicsState::clipToWorldLimit(
-                                Star.getOrigin() +
-                                IGridUser::cellToDouble(pStarSystem->getCell()-m_pCamera->getCell())
-                            );
-            Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(
-                                    Star.getOrigin() - m_pCamera->getCenter() +
-                                    IGridUser::cellToDouble
-                                    (pStarSystem->getCell() -
-                                    m_pCamera->getCell())
-                                );
-            
-
-            // Draw stars in original scale
-            if (m_pCamera->getBoundingBox().isInside(vecPos))
-            {
-                
-                double fColor = 0.1*Star.getStarType()+0.3;
-                m_Graphics.setColor(0.8,fColor,0.3);
-                
-                double fDrawSize = (Star.getStarType()*0.3+1) * m_Graphics.getResMPX();
-                double fRadius   =  Star.getRadius();
-                if (fDrawSize > fRadius)
-                    m_Graphics.filledCircle(vecPosRel, fDrawSize, 7.0);
-                else
-                    m_Graphics.filledCircle(vecPosRel, (Star.getRadius()), 100.0);
-            }
-//             // Draw stars in reduced scale for background
-//             if (m_pCamera->getBoundingBox().isInside(1.0/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)) + m_pCamera->getCenter()+IGridUser::cellToDouble(m_pCamera->getCell())))
-//             {
-//                 
-//                 double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
-//                 m_Graphics.setColor(0.3,0.3,fColor);
-//                 m_Graphics.setPointSize(m_pUniverse->getStarSystems()[i]->getStarType());
-//                 
-//                 m_Graphics.dot(1.0/m_pCamera->getZoom()/fBGDensityFactor*(vecPosRel-Vector2d(fStarfieldSizeX*0.5, fStarfieldSizeY*0.5)));
-// 
-//             }
-//             
-        }
-        #ifdef PW_MULTITHREADING
-            m_pUniverse->isAccessed.clear();
-        #endif
-    }
-//     else
-//     {
-//         for (int i=0; i<m_pUniverse->getStarSystems().size(); ++i)
-//         {
-//             if (m_nStarIndex != i)
-//             {
-//                 if ((m_pUniverse->getStarSystems()[i]->getCell()-m_pCamera->getCell()).cast<double>().norm() < 200.1)
-//                 {
-//                     double fColor = 0.1*m_pUniverse->getStarSystems()[i]->getStarType()+0.3;
-//                     m_pUniverse->m_pStar->setName(m_pUniverse->getStarSystems()[i]->getName());
-//                     m_pUniverse->m_pStar->setCell(m_pUniverse->getStarSystems()[i]->getCell());
-//                     m_pUniverse->m_pStar->setOrigin(m_pUniverse->getStarSystems()[i]->getCenter());
-//                     static_cast<CCircle*>(m_pUniverse->m_pStar->getGeometry()->getShapes()->front()->getShapeCur())->setRadius(
-//                         double(m_pUniverse->getStarSystems()[i]->getStarType()+1)*1.0e9
-//                     );
-//                     m_pUniverse->m_pStar->getGeometry()->getShapes()->front()->updateBuffer();
-//                     m_pUniverse->m_pStar->init();
-//                     m_pUniverse->m_pStar->setVelocity(Vector2d(3.0e9,0.0));
-//                     m_nStarIndex = i;
-//                     
-//                     std::mt19937 LocalGenerator;
-//                     std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
-// 
-//                     LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
-//                     
-//                     std::cout << m_pUniverse->m_pStar->getName() << std::endl;
-//                     for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
-//                     {
-//                         m_Graphics.circle(m_pUniverse->getStarSystems()[i]->getCenter()-m_pCamera->getCenter()+
-//                                           IGridUser::cellToDouble(
-//                                               m_pUniverse->getStarSystems()[i]->getCell()-
-//                                               m_pCamera->getCell()),
-//                                           std::fabs(OrbitDistribution(LocalGenerator))
-//                                          );
-// //                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
-//                     }
-//                 }
-//             }
-//             else
-//             {
-//                 m_pUniverse->getStarSystems()[i]->setCell(m_pUniverse->m_pStar->getCell());
-//                 m_pUniverse->getStarSystems()[i]->setCenter(m_pUniverse->m_pStar->getCOM());
-//             }
-//         }
-//     }
-//     m_Graphics.setPointSize(1.0);
-
+    
     this->drawObjects(m_pCamera);
     this->drawParticle(m_pCamera);
 
