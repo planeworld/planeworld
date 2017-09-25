@@ -54,8 +54,10 @@ pw.system.win_set_position(idWin02, 500, 100)
 
 pw.system.pause()
 
+pw.system.register_lua_callback("e_lua_update", "update")
+
 Force = 1.0
-function physics_interface()
+function update()
     pw.physics.obj_apply_force(idObj01, 0.0, Force, 0.0, 0.0)
     Force = Force+1.0;
 end

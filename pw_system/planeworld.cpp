@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
         pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
     }
     
-    pLuaManager->setPhysicsInterface(strArgData);
+    pLuaManager->setScript(strArgData);
 
     //////////////////////////////////////////////////////////////////////////// 
     //

@@ -1210,7 +1210,7 @@ void CVisualsManager::processFrame()
                     
                     m_pCamera = CamWidget.second->getRef();
                     m_pCamera->update();
-                this->drawStars();
+                    this->drawStars();
                     this->drawWorld();
                 //
                 CamWidget.second->getRenderTarget()->unbind();
@@ -1231,7 +1231,7 @@ void CVisualsManager::processFrame()
 
         m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
         
-    this->drawStars();
+        this->drawStars();
         this->drawWorld();
         this->drawCOM();
         this->drawBoundingBoxes();

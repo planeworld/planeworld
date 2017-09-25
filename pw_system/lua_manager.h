@@ -67,7 +67,7 @@ class CLuaManager : public IComInterfaceProvider,
         //--- Methods --------------------------------------------------------//
         bool init();
         void processFrame();
-        void setPhysicsInterface(const std::string&);
+        void setScript(const std::string&);
         
         //--- friends --------------------------------------------------------//
         friend std::istream&    operator>>(std::istream&, CLuaManager&);
@@ -84,7 +84,7 @@ class CLuaManager : public IComInterfaceProvider,
         //--- Variables [private] --------------------------------------------//
         sol::state      m_LuaState;             ///< Current lua state
         
-        std::string     m_strPhysicsInterface;  ///< Path and filename of physics interface
+        std::string     m_strScript;            ///< Path and filename of main script
         bool            m_bPaused;              ///< Indicates if processing is paused, depends on physics
 };
 
@@ -92,15 +92,15 @@ class CLuaManager : public IComInterfaceProvider,
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Set path and filename for Lua physics interface
+/// \brief Set path and filename for Lua main script
 ///
-/// \param _strPhysicsInterface Path and filename for Lua physics interface
+/// \param _strScript Path and filename for Lua main script
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CLuaManager::setPhysicsInterface(const std::string& _strPhysicsInterface)
+inline void CLuaManager::setScript(const std::string& _strScript)
 {
-    METHOD_ENTRY("CLuaManager::setPhysicsInterface")
-    m_strPhysicsInterface = _strPhysicsInterface;
+    METHOD_ENTRY("CLuaManager::setScript")
+    m_strScript = _strScript;
 }
 
 #endif // LUA_MANAGER_H

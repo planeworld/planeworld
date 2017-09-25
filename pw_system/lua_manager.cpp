@@ -45,7 +45,7 @@ using namespace Eigen;
 ///////////////////////////////////////////////////////////////////////////////
 CLuaManager::CLuaManager() : IComInterfaceProvider(),
                              IThreadModule(),
-                             m_strPhysicsInterface(""),
+                             m_strScript(""),
                              m_bPaused(false)
 {
     METHOD_ENTRY("CLuaManager::CLuaManager")
@@ -373,11 +373,11 @@ bool CLuaManager::init()
                               //sol::lib::jit
     );
 
-    if (!m_strPhysicsInterface.empty())
+    if (!m_strScript.empty())
     {
         try
         {
-            m_LuaState.script_file(m_strPhysicsInterface);
+            m_LuaState.script_file(m_strScript);
         }
         catch (const std::exception& _E)
         {
@@ -398,14 +398,11 @@ void CLuaManager::processFrame()
 {
     METHOD_ENTRY("CLuaManager::processFrame")
 
-    if (!m_strPhysicsInterface.empty())
+    if (!m_bPaused)
     {
-        if (!m_bPaused)
-        {
-            m_LuaState["physics_interface"]();
-        }
-        m_pComInterface->callWriters("lua");
+        m_pComInterface->call<void>("e_lua_update");
     }
+    m_pComInterface->callWriters("lua");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -420,6 +417,12 @@ void CLuaManager::myInitComInterface()
     INFO_MSG("Lua Manager", "Initialising com interace.")
     if (m_pComInterface != nullptr)
     {
+        // Events
+        m_pComInterface->registerEvent("e_lua_update",
+                                       "Update event of the lua main loop",
+                                       {{ParameterType::NONE, "No return value"}},
+                                       "system");
+        
         // Callback to physics pause
         std::function<void(void)> FuncPause =
         [&]()
