@@ -415,6 +415,23 @@ void CPhysicsManager::initObjects()
 //             std::cout << "OBJ" << std::endl;
 //         }
 //     }
+//     // Add new emitters, objects, and shapes to world
+//     IEmitter* pEmitter = nullptr;
+//     while (m_EmittersToBeAddedToWorld.try_dequeue(pEmitter))
+//     {
+//         this->addEmitter(pEmitter);
+//     }
+//     CObject* pObj = nullptr;
+//     while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
+//     {
+//         m_pDataStorage->addObject(pObj);
+//     }
+//     IShape* pShp = nullptr;
+//     while (m_ShapesToBeAddedToWorld.try_dequeue(pShp))
+//     {
+//         m_pDataStorage->addShape(pShp);
+//     }
+//     m_pComInterface->callWriters("physics");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1121,6 +1138,7 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr)
                                                 {
                                                     pObj->setAngle(_fAngle);
+                                                    pObj->init();
                                                 }
                                                 else
                                                 {
@@ -1161,6 +1179,7 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr)
                                                 {
                                                     pObj->setCell(_nX, _nY);
+                                                    pObj->init();
                                                 }
                                                 else
                                                 {
@@ -1182,6 +1201,7 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr)
                                                 {
                                                     pObj->setOrigin(_fX, _fY);
+                                                    pObj->init();
                                                 }
                                                 else
                                                 {

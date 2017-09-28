@@ -279,20 +279,7 @@ int main(int argc, char *argv[])
 
     //////////////////////////////////////////////////////////////////////////// 
     //
-    // 5. Start physics
-    //
-    ////////////////////////////////////////////////////////////////////////////
-    pPhysicsManager->initObjects();
-    pPhysicsManager->initEmitters();
-    pPhysicsManager->initComponents();
-    #ifdef PW_MULTITHREADING    
-        pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
-        MEM_ALLOC("std::thread")
-    #endif
-    
-    //////////////////////////////////////////////////////////////////////////// 
-    //
-    // 6. Start lua
+    // 5. Start lua
     //
     ////////////////////////////////////////////////////////////////////////////
     if (!pLuaManager->init())
@@ -305,6 +292,19 @@ int main(int argc, char *argv[])
     }
     #ifdef PW_MULTITHREADING    
         pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);
+        MEM_ALLOC("std::thread")
+    #endif
+        
+    //////////////////////////////////////////////////////////////////////////// 
+    //
+    // 6. Start physics
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    pPhysicsManager->initObjects();
+    pPhysicsManager->initEmitters();
+    pPhysicsManager->initComponents();
+    #ifdef PW_MULTITHREADING    
+        pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
         MEM_ALLOC("std::thread")
     #endif
         
