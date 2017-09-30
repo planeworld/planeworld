@@ -57,6 +57,8 @@ const double      PHYSICS_PARTICLE_DEFAULT_FREQUENCY = 30.0;  ///< Default physi
 typedef moodycamel::ConcurrentQueue<IEmitter*> EmittersQueueType;
 /// Type for concurrent object queue 
 typedef moodycamel::ConcurrentQueue<CObject*> ObjectsQueueType;
+/// Type for concurrent particles queue 
+typedef moodycamel::ConcurrentQueue<CParticle*> ParticlesQueueType;
 /// Type for concurrent shape queue
 typedef moodycamel::ConcurrentQueue<IShape*>  ShapesQueueType;  
 
@@ -86,6 +88,8 @@ class CPhysicsManager : public IComInterfaceProvider,
         UIDType createEmitter(const EmitterType);
         UIDType createEmitter(const std::string&);
         UIDType createObject();
+        UIDType createParticles(const ParticleTypeType);
+        UIDType createParticles(const std::string&);
         UIDType createShape(const ShapeType);
         UIDType createShape(const std::string&);
         
@@ -94,8 +98,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         
         void addComponent(CThruster* const);
         void addComponents(const ComponentsType&);
-        void addEmitter(IEmitter* const);
-        void addEmitters(const EmittersType&);
         void initComponents();
         void initEmitters();
         void initObjects();
@@ -123,10 +125,12 @@ class CPhysicsManager : public IComInterfaceProvider,
         void addGlobalForces();
         void collisionDetection();
         void myInitComInterface();
+        void processQueues();
         void updateCells();
         
         EmittersQueueType   m_EmittersToBeAddedToWorld;         ///< Emitters already created to be added to world
         ObjectsQueueType    m_ObjectsToBeAddedToWorld;          ///< Objects already created to be added to world
+        ParticlesQueueType  m_ParticlesToBeAddedToWorld;        ///< Particles already created to be added to world
         ShapesQueueType     m_ShapesToBeAddedToWorld;           ///< Shapes already created to be added to world
       
         CUniverse*          m_pUniverse;                        ///< The procedurally generated universe
@@ -138,7 +142,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         Vector2d                    m_vecConstantGravitation;   ///< Vector for constant gravitation
 
         ComponentsType              m_Components;               ///< List of components
-        EmittersType                m_Emitters;                 ///< List of emitters
         
         std::string                 m_strCellUpdateLast;        ///< Last updated object concerning grid cells
         double                      m_fCellUpdateResidual;      ///< Residual for calculation of cell update

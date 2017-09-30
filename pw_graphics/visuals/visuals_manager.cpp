@@ -422,13 +422,13 @@ void CVisualsManager::drawParticle(CCamera* const _pCamera) const
     {
         switch (Particle.second->getParticleType())
         {
-            case PARTICLE_TYPE_DOT:
+            case ParticleTypeType::DOT:
             {
                 m_Graphics.dots((*Particle.second->getPositions()),-_pCamera->getCenter()+
                       IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()));
                 break;
             }
-            case PARTICLE_TYPE_THRUST:
+            case ParticleTypeType::THRUST:
             {
                 double fSizeR = 1.0 / Particle.second->getPositions()->size();
         
@@ -2327,7 +2327,7 @@ void CVisualsManager::myInitComInterface()
                                                     }
                                                     else
                                                     {
-                                                        WARNING_MSG("Visuals Manager", "Wrong widget type, unknown method <setText>.")
+                                                        WARNING_MSG("Visuals Manager", "Wrong widget type, unknown method <attachTo>.")
                                                     }
                                                 }
                                                 else

@@ -60,8 +60,8 @@ typedef CMultiBuffer<BUFFER_QUADRUPLE, ParticlesByValueType, UIDType, CParticle*
 
 /// Map of emitters, accessed by UID value
 typedef std::unordered_map<UIDType, IEmitter*> EmittersByValueType;
-/// Map of buffered emitters, accessed by UID value
-typedef CMultiBuffer<BUFFER_TRIPLE, EmittersByValueType, UIDType, IEmitter*> BufferedEmittersByValueType;
+// /// Map of buffered emitters, accessed by UID value
+// typedef CMultiBuffer<BUFFER_TRIPLE, EmittersByValueType, UIDType, IEmitter*> BufferedEmittersByValueType;
 
 /// Map of objects, accessed by name
 typedef std::map<std::string, CObject*> ObjectsByNameType;
@@ -104,6 +104,7 @@ class CWorldDataStorage
         IUniqueIDUser*              getUIDUserByValueBack() const;
         
         //--- Methods --------------------------------------------------------//
+        bool addEmitter(IEmitter*);
         bool addParticle(CParticle*);
         void addJoint(IJoint*);
         bool addObject(CObject*);
@@ -112,9 +113,12 @@ class CWorldDataStorage
         
         void updateObject(const UIDType);
         
+        IEmitter*                   getEmitterByValue(const UIDType);
         CObject*                    getObjectByValueBack(const UIDType);
+        CParticle*                  getParticleByValueBack(const UIDType);
         IShape*                     getShapeByValue(const UIDType);
         
+        EmittersByValueType*        getEmittersByValue();
         BufferedObjectsByNameType&  getObjectsBuffer();
         ParticlesByNameType*        getParticlesByNameBack();
         ParticlesByNameType*        getParticlesByNameFront();
@@ -145,11 +149,11 @@ class CWorldDataStorage
       
         BufferedParticlesByNameType     m_ParticlesByName;      ///< Buffered particles, accessed by name
         BufferedParticlesByValueType    m_ParticlesByValue;     ///< Buffered particles, accessed by value
-        BufferedEmittersByValueType     m_EmittersByValue;      ///< Buffered emitters, accessed by value
         BufferedObjectsByNameType       m_ObjectsByName;        ///< Buffered objects, accessed by name
         BufferedObjectsByValueType      m_ObjectsByValue;       ///< Buffered objects, accessed by UID value
         BufferedUIDUsersByValueType     m_UIDUsersByValue;      ///< Buffered UID users, accessed by value
-        
+
+        EmittersByValueType         m_EmittersByValue;          ///< Emitters, accessed by value
         ShapesByValueType           m_ShapesByValue;            ///< Shapes, accessed by UID value
         UIDsByNameType              m_UIDsByName;               ///< UIDs of entities, accessed by name
         
@@ -187,6 +191,19 @@ inline const double& CWorldDataStorage::getTimeScale() const
 {
     METHOD_ENTRY("CWorldDataStorage::getTimeScale")
     return m_fTimeScale;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns emitters, accessed by value
+///
+/// \return Emitters, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline EmittersByValueType* CWorldDataStorage::getEmittersByValue()
+{
+    METHOD_ENTRY("CWorldDataStorage::getEmittersByValue")
+    return &m_EmittersByValue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

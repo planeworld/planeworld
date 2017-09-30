@@ -50,12 +50,12 @@ const uint8_t PARTICLE_STATE_INACTIVE = 1;
 using namespace Eigen;
 
 /// Specifies the type of particle
-typedef enum
+enum class ParticleTypeType
 {
-    PARTICLE_TYPE_NONE,
-    PARTICLE_TYPE_DOT,
-    PARTICLE_TYPE_THRUST
-} ParticleTypeType;
+    NONE,
+    DOT,
+    THRUST
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -132,13 +132,13 @@ typedef std::vector<CParticle*>   ParticleType;                  ///< Specifies 
 
 //--- Enum parser ------------------------------------------------------------//
 static std::map<ParticleTypeType, std::string> s_ParticleTypeToStringMap = {
-    {PARTICLE_TYPE_DOT, "particle_dot"},
-    {PARTICLE_TYPE_THRUST, "particle_thrust"}
+    {ParticleTypeType::DOT, "dot"},
+    {ParticleTypeType::THRUST, "thrust"}
 }; ///< Map from ParticleTypeType to string
 
 const std::map<std::string, ParticleTypeType> STRING_TO_PARTICLE_TYPE_MAP    = {
-    {"particle_dot", PARTICLE_TYPE_DOT},
-    {"particle_thrust", PARTICLE_TYPE_THRUST}
+    {"dot", ParticleTypeType::DOT},
+    {"thrust", ParticleTypeType::THRUST}
 }; ///< Map from string to ParticleTypeType
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ static ParticleTypeType mapStringToParticleType(const std::string& _strS)
     if (ci != STRING_TO_PARTICLE_TYPE_MAP.end())
         return ci->second;
     else
-        return PARTICLE_TYPE_NONE;
+        return ParticleTypeType::NONE;
 }
 
 //--- Implementation is done here for inline optimisation --------------------//

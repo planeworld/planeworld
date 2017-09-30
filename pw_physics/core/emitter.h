@@ -45,27 +45,27 @@
 
 //--- Enumerations -----------------------------------------------------------//
 /// Specifies the type of the emitter
-typedef enum 
+enum class EmitterType
 {
-    EMITTER_NONE,
-    EMITTER_PARTICLE,
-    EMITTER_OBJECT
-} EmitterType;
+    NONE,
+    PARTICLE,
+    OBJECT
+};
 
 /// Specifies the type of possible distributions
-typedef enum 
+enum class EmitterDistributionType
 {
-    EMITTER_DISTRIBUTION_CIRCULAR_FIELD,
-    EMITTER_DISTRIBUTION_POINT_SOURCE,
-    EMITTER_DISTRIBUTION_RECTANGULAR_FIELD
-} EmitterDistributionType;
+    CIRCULAR_FIELD,
+    POINT_SOURCE,
+    RECTANGULAR_FIELD
+};
 
 /// Specifies the mode for emitting world entities
-typedef enum
+enum class EmitterModeType
 {
-    EMITTER_MODE_EMIT_ONCE,
-    EMITTER_MODE_TIMED
-} EmitterModeType;
+    ONCE,
+    TIMED
+};
 
 //--- Constants --------------------------------------------------------------//
 const double EMITTER_DEFAULT_ANGLE = 0.0; ///< Default angle of emitted objects
@@ -78,9 +78,9 @@ const double EMITTER_DEFAULT_FREQUENCY = 1.0; ///< Default frequency of emitter
 const double EMITTER_DEFAULT_VELOCITY = 10.0; ///< Default velocity of emitted objects
 const double EMITTER_DEFAULT_VELOCITY_STD = 1.0; ///< Default standard deviation of velocity of emitted objects
 
-const EmitterDistributionType EMITTER_DEFAULT_DISTRIBUTION = EMITTER_DISTRIBUTION_RECTANGULAR_FIELD; ///< Default emitter distribution
-const EmitterModeType EMITTER_DEFAULT_MODE = EMITTER_MODE_EMIT_ONCE; ///<  Default emitter mode
-const EmitterType EMITTER_DEFAULT_TYPE = EMITTER_OBJECT; ///< Default emitter type
+const EmitterDistributionType EMITTER_DEFAULT_DISTRIBUTION = EmitterDistributionType::RECTANGULAR_FIELD; ///< Default emitter distribution
+const EmitterModeType EMITTER_DEFAULT_MODE = EmitterModeType::ONCE;                                      ///<  Default emitter mode
+const EmitterType EMITTER_DEFAULT_TYPE = EmitterType::PARTICLE;                                          ///< Default emitter type
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -156,35 +156,35 @@ typedef std::unordered_multimap<std::string, IEmitter*> EmittersType;
 
 //--- Enum parser ------------------------------------------------------------//
 const std::map<EmitterType, std::string> mapEmitterToString = {
-    {EMITTER_PARTICLE, "particle_emitter"},
-    {EMITTER_OBJECT, "object_emitter"}
+    {EmitterType::PARTICLE, "particle"},
+    {EmitterType::OBJECT, "object"}
 }; ///< Map from EmitterType to string
 
 const std::map<std::string, EmitterType> STRING_TO_EMITTER_TYPE_MAP = {
-    {"particle_emitter", EMITTER_PARTICLE},
-    {"object_emitter", EMITTER_OBJECT}
+    {"particle", EmitterType::PARTICLE},
+    {"object", EmitterType::OBJECT}
 }; ///< Map from string to Emitter
 
 const std::map<EmitterDistributionType, std::string> mapEmitterDistributionToString = {
-    {EMITTER_DISTRIBUTION_CIRCULAR_FIELD, "circular_field"},
-    {EMITTER_DISTRIBUTION_POINT_SOURCE, "point_source"},
-    {EMITTER_DISTRIBUTION_RECTANGULAR_FIELD, "rectangular_field"}
+    {EmitterDistributionType::CIRCULAR_FIELD, "circular_field"},
+    {EmitterDistributionType::POINT_SOURCE, "point_source"},
+    {EmitterDistributionType::RECTANGULAR_FIELD, "rectangular_field"}
 }; ///< Map from EmitterDistributionType to string
 
 const std::map<std::string, EmitterDistributionType> mapStringToEmitterDistribution = {
-    {"circular_field", EMITTER_DISTRIBUTION_CIRCULAR_FIELD},
-    {"point_source", EMITTER_DISTRIBUTION_POINT_SOURCE},
-    {"rectangular_field", EMITTER_DISTRIBUTION_RECTANGULAR_FIELD}
+    {"circular_field", EmitterDistributionType::CIRCULAR_FIELD},
+    {"point_source", EmitterDistributionType::POINT_SOURCE},
+    {"rectangular_field", EmitterDistributionType::RECTANGULAR_FIELD}
 }; ///< Map from string to EmitterDistributionType
 
 const std::map<EmitterModeType, std::string> mapEmitterModeToString = {
-    {EMITTER_MODE_EMIT_ONCE, "emit_once"},
-    {EMITTER_MODE_TIMED, "timed"}
+    {EmitterModeType::ONCE, "once"},
+    {EmitterModeType::TIMED, "timed"}
 }; ///< Map from EmitterModeType to string
 
 const std::map<std::string, EmitterModeType> mapStringToEmitterMode = {
-    {"emit_once", EMITTER_MODE_EMIT_ONCE},
-    {"timed", EMITTER_MODE_TIMED}
+    {"once", EmitterModeType::ONCE},
+    {"timed", EmitterModeType::TIMED}
 }; ///< Map from string to EmitterMode
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +202,7 @@ static EmitterType mapStringToEmitterType(const std::string& _strS)
     if (ci != STRING_TO_EMITTER_TYPE_MAP.end())
         return ci->second;
     else
-        return EmitterType::EMITTER_NONE;
+        return EmitterType::NONE;
 }
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -218,7 +218,6 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
                               m_UniformDist(0.0,1.0),
                               m_nNr(10),
                               m_bActive(true),
-//                               m_fAngle(EMITTER_DEFAULT_ANGLE),
                               m_fAngleStd(EMITTER_DEFAULT_ANGLE_STD),
                               m_fFrequency(EMITTER_DEFAULT_FREQUENCY),
                               m_fMinX(EMITTER_DEFAULT_LIMIT_MIN_X),
@@ -231,10 +230,6 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
 {
     METHOD_ENTRY("IEmitter::IEmitter")
     CTOR_CALL("IEmitter::IEmitter")
-    
-//     m_vecOrigin.setZero();
-    
-//     IHooker::m_strName += ": Emitter";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +242,7 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
 inline EmitterType IEmitter::getEmitterType() const
 {
     METHOD_ENTRY("IEmitter::getEmitterType")
-    return EMITTER_NONE;
+    return EmitterType::NONE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -348,7 +343,7 @@ inline void IEmitter::setAngle(const double& _fA)
 {
     METHOD_ENTRY("IEmitter::setAngle")
     
-    if (m_EmitterDistribution != EMITTER_DISTRIBUTION_POINT_SOURCE)
+    if (m_EmitterDistribution != EmitterDistributionType::POINT_SOURCE)
     {
         NOTICE_MSG("Emitter Interface", "Setting angle although distribution " 
                    "mode is not point_source. This does not have any effect.")
@@ -356,7 +351,6 @@ inline void IEmitter::setAngle(const double& _fA)
     else
     {
         m_KinematicsState.setAngle(_fA);
-//         m_fAngle = _fA;
     }
 }
 
@@ -371,7 +365,7 @@ inline void IEmitter::setAngleStd(const double& _fAV)
 {
     METHOD_ENTRY("IEmitter::setAngleStd")
     
-    if (m_EmitterDistribution != EMITTER_DISTRIBUTION_POINT_SOURCE)
+    if (m_EmitterDistribution != EmitterDistributionType::POINT_SOURCE)
     {
         NOTICE_MSG("Emitter Interface", "Setting angle standard deviation although distribution " 
                    "mode is not point_source. This does not have any effect.")
@@ -406,7 +400,7 @@ inline void IEmitter::setFrequency(const double& _fF)
 {
     METHOD_ENTRY("IEmitter::setFrequency")
        
-    if (m_EmitterMode == EMITTER_MODE_EMIT_ONCE)
+    if (m_EmitterMode == EmitterModeType::ONCE)
     {
         NOTICE_MSG("Emitter Interface", "Setting frequency for mode that emits " 
                    "only once. This does not have any effect.")
@@ -432,7 +426,7 @@ inline void IEmitter::setLimits(const double& _fMinX, const double& _fMaxX,
 {
     METHOD_ENTRY("IEmitter::setLimits")
        
-    if (m_EmitterDistribution != EMITTER_DISTRIBUTION_RECTANGULAR_FIELD)
+    if (m_EmitterDistribution != EmitterDistributionType::RECTANGULAR_FIELD)
     {
         NOTICE_MSG("Emitter Interface", "Setting limits for rectangular field doesn't " 
                    "take any effect here.")
@@ -482,7 +476,6 @@ inline void IEmitter::setNumber(const std::uint32_t& _nNr)
 inline void IEmitter::setOrigin(const Vector2d& _vecOrigin)
 {
     METHOD_ENTRY("IEmitter::setOrigin")
-//     m_vecOrigin = _vecOrigin;
     m_KinematicsState.setOrigin(_vecOrigin);
 }
 
@@ -497,7 +490,7 @@ inline void IEmitter::setVelocity(const double& _fV)
 {
     METHOD_ENTRY("IEmitter::setVelocity")
     
-    if (m_EmitterDistribution != EMITTER_DISTRIBUTION_POINT_SOURCE)
+    if (m_EmitterDistribution != EmitterDistributionType::POINT_SOURCE)
     {
         NOTICE_MSG("Emitter Interface", "Setting velocity although distribution " 
                    "mode is not point_source. This does not have any effect.")
@@ -519,7 +512,7 @@ inline void IEmitter::setVelocityStd(const double& _fVStd)
 {
     METHOD_ENTRY("IEmitter::setVelocityStd")
     
-    if (m_EmitterDistribution != EMITTER_DISTRIBUTION_POINT_SOURCE)
+    if (m_EmitterDistribution != EmitterDistributionType::POINT_SOURCE)
     {
         NOTICE_MSG("Emitter Interface", "Setting velocity standard deviation although distribution " 
                    "mode is not point_source. This does not have any effect.")

@@ -95,7 +95,7 @@ inline const ParticleTypeType& CParticleEmitter::getParticleType() const
 inline EmitterType CParticleEmitter::getEmitterType() const
 {
     METHOD_ENTRY("CParticleEmitter::getEmitterType")
-    return EMITTER_PARTICLE;
+    return EmitterType::PARTICLE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

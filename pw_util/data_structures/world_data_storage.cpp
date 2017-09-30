@@ -31,6 +31,7 @@
 #include "world_data_storage.h"
 
 #include "camera.h"
+#include "emitter.h"
 #include "particle.h"
 #include "object.h"
 
@@ -61,6 +62,22 @@ CWorldDataStorage::~CWorldDataStorage()
 {
     METHOD_ENTRY("CWorldDataStorage::~CWorldDataStorage")
     DTOR_CALL("CWorldDataStorage::~CWorldDataStorage")
+    
+    for (auto pEmitter : m_EmittersByValue)
+    {
+        
+        // Free memory if pointer is still existent
+        if (pEmitter.second != nullptr)
+        {
+            delete pEmitter.second;
+            pEmitter.second = nullptr;
+            MEM_FREED("IEmitter")
+        }
+        else
+        {
+            DOM_MEMF(DEBUG_MSG("IEmitter", "Memory already freed."))
+        }
+    }
     
     for (auto i=0u; i<m_ObjectsByValue.getBufferSize(); ++i)
     {
@@ -116,9 +133,30 @@ CWorldDataStorage::~CWorldDataStorage()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Add an emitter to list
+///
+/// This method adds the given emitter to the list of emitters.
+///
+/// \param _pEmitter Emitter that should be added to list
+///
+/// \return Success?
+///
+///////////////////////////////////////////////////////////////////////////////
+bool CWorldDataStorage::addEmitter(IEmitter* _pEmitter)
+{
+    METHOD_ENTRY("CWorldDataStorage::addEmitter")
+    
+    m_EmittersByValue.insert({_pEmitter->getUID(), _pEmitter});
+    
+    if (!this->addUIDUser(_pEmitter)) return false;
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Add a particle to list
 ///
-/// This method adds the given particle object to the list of particle.
+/// This method adds the given particle object to the list of particles.
 ///
 /// \param _pParticle Particle that should be added to list
 ///
@@ -238,6 +276,31 @@ void CWorldDataStorage::updateObject(const UIDType _nUID)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Return emitter, accessed by given UID value
+///
+/// \param _nUID UID of emitter to return
+///
+/// \return Emitter with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+IEmitter* CWorldDataStorage::getEmitterByValue(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::getEmitterByValue")
+
+    const auto ci = m_EmittersByValue.find(_nUID);
+    if (ci != m_EmittersByValue.end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("World Data Storage", "Unknown emitter with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Return object, accessed by given UID value
 ///
 /// \param _nUID UID of object to return
@@ -257,6 +320,31 @@ CObject* CWorldDataStorage::getObjectByValueBack(const UIDType _nUID)
     else
     {
         WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return particle, accessed by given UID value
+///
+/// \param _nUID UID of particle to return
+///
+/// \return Particle with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+CParticle* CWorldDataStorage::getParticleByValueBack(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::getParticleByValueBack")
+
+    const auto ci = m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
+    if (ci != m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("World Data Storage", "Unknown particle with UID <" << _nUID << ">")
         return nullptr;
     }
 }

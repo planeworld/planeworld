@@ -37,7 +37,7 @@ uint32_t CParticleEmitter::m_unNrOfEmitters = 0;
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CParticleEmitter::CParticleEmitter() : m_ParticleType(PARTICLE_TYPE_DOT)
+CParticleEmitter::CParticleEmitter() : m_ParticleType(ParticleTypeType::DOT)
 {
     METHOD_ENTRY("CParticleEmitter::CParticleEmitter")
     CTOR_CALL("CParticleEmitter::CParticleEmitter")
@@ -71,17 +71,18 @@ void CParticleEmitter::init()
 {
     METHOD_ENTRY("CParticleEmitter::init")
     
-    // Add particle
-    if (m_ParticleType == PARTICLE_TYPE_DOT)
-    {
-        m_pRef->setParticleType(PARTICLE_TYPE_DOT);
-    }
-    else
-    {
-        m_pRef->setParticleType(PARTICLE_TYPE_THRUST);
-    }
-    
-    m_pDataStorage->addParticle(m_pRef);
+//     if (m_pRef)
+//     // Add particle
+//     if (m_ParticleType == PARTICLE_TYPE_DOT)
+//     {
+//         m_pRef->setParticleType(PARTICLE_TYPE_DOT);
+//     }
+//     else
+//     {
+//         m_pRef->setParticleType(PARTICLE_TYPE_THRUST);
+//     }
+//     
+//     m_pDataStorage->addParticle(m_pRef);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,9 +121,9 @@ void CParticleEmitter::emit(const double& _fF)
         
         switch (m_EmitterDistribution)
         {
-            case EMITTER_DISTRIBUTION_CIRCULAR_FIELD:
+            case EmitterDistributionType::CIRCULAR_FIELD:
                 break;
-            case EMITTER_DISTRIBUTION_RECTANGULAR_FIELD:
+            case EmitterDistributionType::RECTANGULAR_FIELD:
                 for (auto i=0u; i<nNrOfParticle; ++i)
                 {
                     double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
@@ -130,7 +131,7 @@ void CParticleEmitter::emit(const double& _fF)
                     m_pRef->generate(Vector2d(fX, fY)+ m_KinematicsState.getOrigin(), Vector2d(0.0, 0.0));
                 }
                 break;
-            case EMITTER_DISTRIBUTION_POINT_SOURCE:
+            case EmitterDistributionType::POINT_SOURCE:
                 for (auto i=0u; i<nNrOfParticle; ++i)
                 {
                     double      fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_KinematicsState.getAngle();

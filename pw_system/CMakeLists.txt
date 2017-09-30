@@ -61,7 +61,6 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_io/input_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/parzival.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_io/import/xfig_loader.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_io/import/xml_importer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/collision_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/kinematics_state.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/objects_emitter.cpp

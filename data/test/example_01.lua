@@ -53,6 +53,11 @@ pw.system.widget_set_cam(idWdg02, idCam02)
 pw.system.win_set_widget(idWin02, idWdg02)
 pw.system.win_set_position(idWin02, 500, 100)
 
+-- Create a particle emitter
+idEm01 = pw.system.create_emitter("particle")
+idPa01 = pw.system.create_particles("dot")
+pw.system.emitter_set_particles(idEm01, idPa01)
+
 pw.system.pause()
 
 pw.system.register_lua_callback("e_lua_update", "update")

@@ -37,7 +37,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 CParticle::CParticle() : IGridUser(),
                      IUniqueIDUser(),
-                     m_ParticleType(PARTICLE_TYPE_DOT),
+                     m_ParticleType(ParticleTypeType::DOT),
                      m_fTimeFac(1.0)
 {
     METHOD_ENTRY("CParticle::CParticle")
@@ -61,7 +61,7 @@ CParticle::CParticle() : IGridUser(),
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CParticle::CParticle(const CParticle& _Particle) : IGridUser(_Particle),
-                                           IUniqueIDUser(_Particle)
+                                                   IUniqueIDUser(_Particle)
                                            
 {
     METHOD_ENTRY("CParticle::CParticle")

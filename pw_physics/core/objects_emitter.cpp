@@ -97,9 +97,9 @@ void CObjectEmitter::emit(const double& _fF)
         
         switch (m_EmitterDistribution)
         {
-            case EMITTER_DISTRIBUTION_CIRCULAR_FIELD:
+            case EmitterDistributionType::CIRCULAR_FIELD:
                 break;
-            case EMITTER_DISTRIBUTION_RECTANGULAR_FIELD:
+            case EmitterDistributionType::RECTANGULAR_FIELD:
                 for (int i=0; i<nNrOfObjects; ++i)
                 {
                     double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
@@ -113,7 +113,7 @@ void CObjectEmitter::emit(const double& _fF)
                     m_pDataStorage->addObject(pObject);
                 }
                 break;
-            case EMITTER_DISTRIBUTION_POINT_SOURCE:
+            case EmitterDistributionType::POINT_SOURCE:
                 for (int i=0; i<nNrOfObjects; ++i)
                 {
                     double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_KinematicsState.getAngle();;

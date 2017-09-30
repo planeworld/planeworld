@@ -76,7 +76,7 @@ class CObjectEmitter : public IEmitter
 inline EmitterType CObjectEmitter::getEmitterType() const
 {
     METHOD_ENTRY("CObjectEmitter::getEmitterType")
-    return EMITTER_OBJECT;
+    return EmitterType::OBJECT;
 }
 
 

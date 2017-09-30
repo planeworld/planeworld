@@ -82,21 +82,6 @@ CPhysicsManager::~CPhysicsManager()
         m_pUniverse = nullptr;
     }
     
-    for (auto it = m_Emitters.begin();
-        it != m_Emitters.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it).second != nullptr)
-        {
-            delete (*it).second;
-            (*it).second = nullptr;
-            MEM_FREED("IEmitter")
-        }
-        else
-        {
-            DOM_MEMF(DEBUG_MSG("IEmitter", "Memory already freed."))
-        }
-    }
     for (auto it = m_Components.begin();
         it != m_Components.end(); ++it)
     {
@@ -131,7 +116,7 @@ UIDType CPhysicsManager::createEmitter(const EmitterType _EmitterType)
     
     switch (_EmitterType)
     {
-        case EmitterType::EMITTER_PARTICLE:
+        case EmitterType::PARTICLE:
         {
             CParticleEmitter* pParticleEmitter = new CParticleEmitter();
             MEM_ALLOC("IEmitter")
@@ -141,7 +126,7 @@ UIDType CPhysicsManager::createEmitter(const EmitterType _EmitterType)
             pParticleEmitter->init();
             break;
         }
-        case EmitterType::EMITTER_OBJECT:
+        case EmitterType::OBJECT:
         {
             CObjectEmitter* pObjectEmitter = new CObjectEmitter();
             MEM_ALLOC("IEmitter")
@@ -193,6 +178,47 @@ UIDType CPhysicsManager::createObject()
     m_ObjectsToBeAddedToWorld.enqueue(pObject);
     
     return pObject->getUID();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Creates a particle group and inserts it to world data storage
+///
+/// \param _ParticleType Type of particles to be created
+///
+/// \return UID value of particle group
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createParticles(const ParticleTypeType _ParticleType)
+{
+    METHOD_ENTRY("CPhysicsManager::createParticles")
+    
+    UIDType nUID=0u;
+    
+    CParticle* pParticle = new CParticle();
+    MEM_ALLOC("CParticle")
+    
+    pParticle->setParticleType(_ParticleType);
+    nUID = pParticle->getUID();
+    
+    m_ParticlesToBeAddedToWorld.enqueue(pParticle);
+    
+    return nUID;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Create a particle group of given type
+///
+/// \param _strParticleType Type of particle to be created as string
+///
+/// \return UID value of particle
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createParticles(const std::string& _strParticleType)
+{
+    METHOD_ENTRY("CPhysicsManager::createParticles")
+    return this->createParticles(mapStringToParticleType(_strParticleType));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -296,40 +322,6 @@ void CPhysicsManager::addComponents(const ComponentsType& _Components)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Add an emitter to internal list of emitters
-///
-/// \param _pEmitter Emitter that should be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addEmitter(IEmitter* const _pEmitter)
-{
-    METHOD_ENTRY("CPhysicsManager::addEmitter")
-    m_Emitters.insert(std::pair<std::string,IEmitter*>(_pEmitter->getName(), _pEmitter));
-    m_pDataStorage->addUIDUser(_pEmitter);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add a list of emitters to internal list of emitters
-///
-/// \param _Emitters Emitters that should be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addEmitters(const EmittersType& _Emitters)
-{
-    METHOD_ENTRY("CPhysicsManager::addEmitters")
-
-    auto ci = _Emitters.cbegin();
-  
-    while (ci != _Emitters.cend())
-    {
-        this->addEmitter((*ci).second);
-        ++ci;
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Initialise all components
 ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -367,27 +359,27 @@ void CPhysicsManager::initEmitters()
 
     INFO_MSG("Physics Manager", "Initialising emitters.")
 
-    auto it = m_Emitters.begin();
-    while (it != m_Emitters.end())
-    {
-        (*it).second->setWorldDataStorage(m_pDataStorage);
-        (*it).second->init();
-        if ((*it).second->getMode() == EMITTER_MODE_EMIT_ONCE)
-        {
-            (*it).second->emit();
-            
-            delete (*it).second;
-            (*it).second = nullptr;
-            MEM_FREED("IEmitter")
-            
-            it = m_Emitters.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
-        
-    }
+//     auto it = m_Emitters.begin();
+//     while (it != m_Emitters.end())
+//     {
+//         (*it).second->setWorldDataStorage(m_pDataStorage);
+//         (*it).second->init();
+//         if ((*it).second->getMode() == EMITTER_MODE_EMIT_ONCE)
+//         {
+//             (*it).second->emit();
+//             
+//             delete (*it).second;
+//             (*it).second = nullptr;
+//             MEM_FREED("IEmitter")
+//             
+//             it = m_Emitters.erase(it);
+//         }
+//         else
+//         {
+//             ++it;
+//         }
+//         
+//     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -405,33 +397,6 @@ void CPhysicsManager::initObjects()
 
     //--- Init objects -------------------------------------------------------//
     INFO_MSG("Physics Manager", "Initialising objects.")
-    
-//     for (auto i=0u; i<m_pDataStorage->getObjectsBuffer().getBufferSize(); ++i)
-//     {
-//         std::cout << "BUF" << std::endl;
-//         for (auto Obj : *m_pDataStorage->getObjectsBuffer().getBuffer(i))
-//         {
-//             Obj.second->init();
-//             std::cout << "OBJ" << std::endl;
-//         }
-//     }
-//     // Add new emitters, objects, and shapes to world
-//     IEmitter* pEmitter = nullptr;
-//     while (m_EmittersToBeAddedToWorld.try_dequeue(pEmitter))
-//     {
-//         this->addEmitter(pEmitter);
-//     }
-//     CObject* pObj = nullptr;
-//     while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
-//     {
-//         m_pDataStorage->addObject(pObj);
-//     }
-//     IShape* pShp = nullptr;
-//     while (m_ShapesToBeAddedToWorld.try_dequeue(pShp))
-//     {
-//         m_pDataStorage->addShape(pShp);
-//     }
-//     m_pComInterface->callWriters("physics");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -530,23 +495,7 @@ void CPhysicsManager::processFrame()
     for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
         Obj.second->clearForces();
 
-    // Add new emitters, objects, and shapes to world
-    IEmitter* pEmitter = nullptr;
-    while (m_EmittersToBeAddedToWorld.try_dequeue(pEmitter))
-    {
-        this->addEmitter(pEmitter);
-    }
-    CObject* pObj = nullptr;
-    while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
-    {
-        m_pDataStorage->addObject(pObj);
-    }
-    IShape* pShp = nullptr;
-    while (m_ShapesToBeAddedToWorld.try_dequeue(pShp))
-    {
-        m_pDataStorage->addShape(pShp);
-    }
-    m_pComInterface->callWriters("physics");
+    this->processQueues();
     
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {
@@ -585,10 +534,9 @@ void CPhysicsManager::moveMasses(int nTest) const
     {
         (*ci).second->execute();
     }
-    for (auto ci = m_Emitters.cbegin();
-        ci != m_Emitters.cend(); ++ci)
+    for (const auto pEmitter : *m_pDataStorage->getEmittersByValue())
     {
-        (*ci).second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        pEmitter.second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
     }
     for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
     {
@@ -713,8 +661,8 @@ void CPhysicsManager::myInitComInterface()
         // Helpers
         std::ostringstream ossParticleType("");
         for (auto ParticleType : STRING_TO_PARTICLE_TYPE_MAP) ossParticleType << " " << ParticleType.first;
-//         std::ostringstream ossEmitterType("");
-//         for (auto EmitterType : STRING_TO_EMITTER_TYPE_MAP) ossEmitterType << " " << EmitterType.first;
+        std::ostringstream ossEmitterType("");
+        for (auto EmitterType : STRING_TO_EMITTER_TYPE_MAP) ossEmitterType << " " << EmitterType.first;
         std::ostringstream ossShapeType("");
         for (auto ShpType : STRING_TO_SHAPE_TYPE_MAP) ossShapeType << " " << ShpType.first;
 
@@ -732,13 +680,20 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<int, std::string>([&](const std::string& _strEmitterType) -> int {return this->createEmitter(_strEmitterType);}),
                                           "Creates an emitter.",
                                           {{ParameterType::INT, "UID of emitter"},
-                                           {ParameterType::STRING, "Emitter type"}},
+                                           {ParameterType::STRING, "Emitter type ("+ossEmitterType.str()+" )"}},
                                           "system"
                                          );
         m_pComInterface->registerFunction("create_obj",
                                           CCommand<int>([&]() -> int {return this->createObject();}),
                                           "Creates a default object.",
                                           {{ParameterType::INT, "UID of object"}},
+                                          "system"
+                                         );
+        m_pComInterface->registerFunction("create_particles",
+                                          CCommand<int, std::string>([&](const std::string& _strParticleType) -> int {return this->createParticles(_strParticleType);}),
+                                          "Creates a group of particles.",
+                                          {{ParameterType::INT, "UID of particles"},
+                                           {ParameterType::STRING, "Particle type ("+ossParticleType.str()+" )"}},
                                           "system"
                                          );
         m_pComInterface->registerFunction("create_shp",
@@ -766,6 +721,40 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Number of star systems"}},
                                           "system", "physics"
                                          );
+        m_pComInterface->registerFunction("emitter_set_particles",
+                                          CCommand<void, int, int>([&](const int _nUIDEm, const int _nUIDPa)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUIDEm);
+                                            if (pEmitter != nullptr)
+                                            {
+                                               if (pEmitter->getEmitterType() == EmitterType::PARTICLE)
+                                                {
+                                                    CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUIDPa);
+                                                    if (pParticle != nullptr)
+                                                    {
+                                                        static_cast<CParticleEmitter*>(pEmitter)->attachTo(pParticle);
+                                                    }
+                                                    else
+                                                    {
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    WARNING_MSG("Physics Manager", "Wrong emitter type, unknown method <attachTo>.")
+                                                }
+                                            }
+                                            else
+                                            {
+                                                throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                            }
+                                          }),
+                                          "Attach particle group to emitter.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::INT, "Particle UID"}},
+                                          "system", "physics"
+                                          );
         m_pComInterface->registerFunction("particle_set_type",
                                           CCommand<void, int, std::string>(
                                             [&](const int _nUID, const std::string& _strType)
@@ -1486,6 +1475,39 @@ void CPhysicsManager::myInitComInterface()
     {
         WARNING_MSG("Physics Manager", "Com interface not set, cannot register functions.")
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Method that processes all entity and command queues
+///
+///////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::processQueues()
+{
+    METHOD_ENTRY("CPhysicsManager::processQueues")
+    
+    // Add new entities to world
+    IEmitter* pEmitter = nullptr;
+    while (m_EmittersToBeAddedToWorld.try_dequeue(pEmitter))
+    {
+        m_pDataStorage->addEmitter(pEmitter);
+    }
+    CObject* pObj = nullptr;
+    while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
+    {
+        m_pDataStorage->addObject(pObj);
+    }
+    CParticle* pParticle = nullptr;
+    while (m_ParticlesToBeAddedToWorld.try_dequeue(pParticle))
+    {
+        m_pDataStorage->addParticle(pParticle);
+    }
+    IShape* pShp = nullptr;
+    while (m_ShapesToBeAddedToWorld.try_dequeue(pShp))
+    {
+        m_pDataStorage->addShape(pShp);
+    }
+    m_pComInterface->callWriters("physics");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
