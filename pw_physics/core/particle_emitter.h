@@ -53,15 +53,16 @@ class CParticleEmitter : public IEmitter,
         ~CParticleEmitter();
         
         //--- Constant Methods -----------------------------------------------//
-        void emit(const double&);
+        EmitterType getEmitterType() const override;
         
         const ParticleTypeType& getParticleType()  const;
-              EmitterType getEmitterType() const;
         
         //--- Methods --------------------------------------------------------//
-        void        init();
+        void        emit(const double&) override;
+        void        init() override;
+        void        setNumber(const std::uint32_t&) override;
+              
         void        setParticleType(const ParticleTypeType&);
-        void        setNumber(const std::uint32_t&);
 
     private:
         
@@ -100,19 +101,6 @@ inline EmitterType CParticleEmitter::getEmitterType() const
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets the type of particle
-///
-/// \param _ParticleType Type of particle
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CParticleEmitter::setParticleType(const ParticleTypeType& _ParticleType)
-{
-    METHOD_ENTRY("CParticleEmitter::setParticleTypeType")
-    m_ParticleType = _ParticleType;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Sets the maximum number of particle for this emitter
 ///
 /// \param _nNrMax Maximum number of particle.
@@ -123,6 +111,19 @@ inline void CParticleEmitter::setNumber(const std::uint32_t& _nNrMax)
     METHOD_ENTRY("CParticleEmitter::setMode")
     m_nNr = _nNrMax;
     m_pRef->setNumber(_nNrMax);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the type of particle
+///
+/// \param _ParticleType Type of particle
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CParticleEmitter::setParticleType(const ParticleTypeType& _ParticleType)
+{
+    METHOD_ENTRY("CParticleEmitter::setParticleTypeType")
+    m_ParticleType = _ParticleType;
 }
 
 #endif

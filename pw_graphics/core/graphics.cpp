@@ -1019,7 +1019,38 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
 {
     METHOD_ENTRY("CGraphics::dots")
     
-    for (auto i=0u; i<_Dots.size(); ++i)
+    auto nBatches = 0;
+    auto nBatchSize = GRAPHICS_SIZE_OF_INDEX_BUFFER / 8;
+    
+    // Draw smaller batches if larger than buffer size    
+    if (m_uncI + 4*_Dots.size() > GRAPHICS_SIZE_OF_INDEX_BUFFER / 2)
+    {
+        this->endRenderBatch();
+        this->beginRenderBatch(m_pRenderMode);
+        
+        nBatches = 4*_Dots.size() / GRAPHICS_SIZE_OF_INDEX_BUFFER * 2;
+        
+        for (auto j=0; j<nBatches; ++j)
+        {
+            for (auto i=j*nBatchSize; i<(j+1)*nBatchSize; ++i)
+            {
+                m_vecVertices[m_unIndexVerts++] = _Dots[i][0]+_vecOffset[0];
+                m_vecVertices[m_unIndexVerts++] = _Dots[i][1]+_vecOffset[1];
+                m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+                m_vecColours[m_unIndexCol++] = m_aColour[0];
+                m_vecColours[m_unIndexCol++] = m_aColour[1];
+                m_vecColours[m_unIndexCol++] = m_aColour[2];
+                m_vecColours[m_unIndexCol++] = m_aColour[3];
+                m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
+            }
+            this->endRenderBatch();
+            this->beginRenderBatch(m_pRenderMode);
+            
+        }
+    }
+
+    // Draw residuum
+    for (auto i=nBatches*nBatchSize; i<_Dots.size(); ++i)
     {
         m_vecVertices[m_unIndexVerts++] = _Dots[i][0]+_vecOffset[0];
         m_vecVertices[m_unIndexVerts++] = _Dots[i][1]+_vecOffset[1];
@@ -1030,6 +1061,7 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
         m_vecColours[m_unIndexCol++] = m_aColour[3];
         m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
     }
+
     m_uncI += 4*_Dots.size();
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {

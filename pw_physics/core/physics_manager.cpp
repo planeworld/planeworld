@@ -123,6 +123,7 @@ UIDType CPhysicsManager::createEmitter(const EmitterType _EmitterType)
             nUID = pParticleEmitter->getUID();
             m_EmittersToBeAddedToWorld.enqueue(pParticleEmitter);
             
+            pParticleEmitter->setWorldDataStorage(m_pDataStorage);
             pParticleEmitter->init();
             break;
         }
@@ -133,6 +134,7 @@ UIDType CPhysicsManager::createEmitter(const EmitterType _EmitterType)
             nUID = pObjectEmitter->getUID();
             m_EmittersToBeAddedToWorld.enqueue(pObjectEmitter);
             
+            pObjectEmitter->setWorldDataStorage(m_pDataStorage);
             pObjectEmitter->init();
             break;
         }
@@ -534,9 +536,27 @@ void CPhysicsManager::moveMasses(int nTest) const
     {
         (*ci).second->execute();
     }
-    for (const auto pEmitter : *m_pDataStorage->getEmittersByValue())
+    
+    std::vector<UIDType> vecToBeDeleted;
+    for (auto pEmitter : *m_pDataStorage->getEmittersByValue())
     {
-        pEmitter.second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        if (pEmitter.second->getMode() == EmitterModeType::ONCE)
+        {
+            pEmitter.second->emit();
+            vecToBeDeleted.push_back(pEmitter.second->getUID());
+            
+            delete pEmitter.second;
+            pEmitter.second = nullptr;
+            MEM_FREED("IEmitter")
+        }
+        else
+        {
+            pEmitter.second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        }
+    }
+    for (auto EmDel : vecToBeDeleted)
+    {
+        m_pDataStorage->getEmittersByValue()->erase(EmDel);
     }
     for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
     {
@@ -663,6 +683,10 @@ void CPhysicsManager::myInitComInterface()
         for (auto ParticleType : STRING_TO_PARTICLE_TYPE_MAP) ossParticleType << " " << ParticleType.first;
         std::ostringstream ossEmitterType("");
         for (auto EmitterType : STRING_TO_EMITTER_TYPE_MAP) ossEmitterType << " " << EmitterType.first;
+        std::ostringstream ossEmitterDistributionType("");
+        for (auto EmitterDistributionType : STRING_TO_EMITTER_DISTRIBUTION_TYPE_MAP) ossEmitterDistributionType << " " << EmitterDistributionType.first;
+        std::ostringstream ossEmitterModeType("");
+        for (auto EmitterModeType : STRING_TO_EMITTER_MODE_TYPE_MAP) ossEmitterModeType << " " << EmitterModeType.first;
         std::ostringstream ossShapeType("");
         for (auto ShpType : STRING_TO_SHAPE_TYPE_MAP) ossShapeType << " " << ShpType.first;
 
@@ -721,6 +745,96 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Number of star systems"}},
                                           "system", "physics"
                                          );
+        m_pComInterface->registerFunction("emitter_set_angle",
+                                          CCommand<void, int, double>([&](const int _nUID, const double& _fAngle)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                pEmitter->setAngle(_fAngle);
+                                            }
+                                          }),
+                                          "Set angle of entity emitation.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::DOUBLE, "Angle of entity emitation"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("emitter_set_angle_std",
+                                          CCommand<void, int, double>([&](const int _nUID, const double& _fAngStd)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                pEmitter->setAngleStd(_fAngStd);
+                                            }
+                                          }),
+                                          "Set standard deviation of angle of entity emitation.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::DOUBLE, "Standard deviation of angle of entity emitation"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("emitter_set_distribution",
+                                          CCommand<void, int, std::string>([&](const int _nUID, const std::string& _strDist)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                pEmitter->setDistribution(mapStringToEmitterDistributionType(_strDist));
+                                            }
+                                          }),
+                                          "Set distribution type of emitter.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::STRING, "Distribution ("+ossEmitterDistributionType.str()+" )"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("emitter_set_frequency",
+                                          CCommand<void, int, double>([&](const int _nUID, const double& _fFrequency)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                pEmitter->setFrequency(_fFrequency);
+                                            }
+                                          }),
+                                          "Set frequency of entity emitation.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::DOUBLE, "Frequency of entity emitation"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("emitter_set_mode",
+                                          CCommand<void, int, std::string>([&](const int _nUID, const std::string& _strMode)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                pEmitter->setMode(mapStringToEmitterModeType(_strMode));
+                                            }
+                                          }),
+                                          "Set mode of emitter.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::STRING, "Mode ("+ossEmitterModeType.str()+" )"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("emitter_set_number",
+                                          CCommand<void, int, int>([&](const int _nUID, const int _nNr)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                pEmitter->setNumber(_nNr);
+                                            }
+                                          }),
+                                          "Set number of emitted entities.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::INT, "Number of emitted entities"}},
+                                          "system", "physics"
+                                          );
         m_pComInterface->registerFunction("emitter_set_particles",
                                           CCommand<void, int, int>([&](const int _nUIDEm, const int _nUIDPa)
                                           {
@@ -734,25 +848,47 @@ void CPhysicsManager::myInitComInterface()
                                                     {
                                                         static_cast<CParticleEmitter*>(pEmitter)->attachTo(pParticle);
                                                     }
-                                                    else
-                                                    {
-                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                    }
                                                 }
                                                 else
                                                 {
                                                     WARNING_MSG("Physics Manager", "Wrong emitter type, unknown method <attachTo>.")
                                                 }
                                             }
-                                            else
-                                            {
-                                                throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                            }
                                           }),
                                           "Attach particle group to emitter.",
                                           {{ParameterType::NONE, "No return value"},
                                           {ParameterType::INT, "Emittter UID"},
                                           {ParameterType::INT, "Particle UID"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("emitter_set_velocity",
+                                          CCommand<void, int, double>([&](const int _nUID, const double& _fVelocity)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                pEmitter->setVelocity(_fVelocity);
+                                            }
+                                          }),
+                                          "Set velocity of entity emitation.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::DOUBLE, "Velocity of entity emitation"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("emitter_set_velocity_std",
+                                          CCommand<void, int, double>([&](const int _nUID, const double& _fVelStd)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                pEmitter->setVelocityStd(_fVelStd);
+                                            }
+                                          }),
+                                          "Set standard deviation of velocity of entity emitation.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::DOUBLE, "Standard deviation of velocity of entity emitation"}},
                                           "system", "physics"
                                           );
         m_pComInterface->registerFunction("particle_set_type",
@@ -767,7 +903,6 @@ void CPhysicsManager::myInitComInterface()
                                                 else
                                                 {
                                                     WARNING_MSG("World Data Storage", "Unknown particle with UID <" << _nUID << ">")
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                             }),
                                           "Sets type of given particle.",

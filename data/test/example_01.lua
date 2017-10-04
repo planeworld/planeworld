@@ -7,17 +7,19 @@
 -- KNOWN ISSUES
 ---------------
 
+-- Setup engine
 pw.system.set_frequency_input(100)
 pw.system.set_frequency_lua(30)
 pw.system.set_frequency_physics(200)
 pw.system.set_frequency_visuals(60)
 pw.system.set_data_path_visuals("../")
 pw.system.create_universe(23479, 10000)
-pw.physics.set_gravity_vector(0.0, -9.81)
+-- pw.physics.set_gravity_vector(0.0, -9.81)
 pw.system.win_main_resize(1800, 900)
 idCam01 = pw.system.create_camera()
 pw.visuals.toggle_grid()
 
+-- Create an object
 idObj01 = pw.system.create_obj()
 idShp01 = pw.system.create_shp("shp_circle")
 idShp02 = pw.system.create_shp("shp_polygon")
@@ -57,9 +59,19 @@ pw.system.win_set_position(idWin02, 500, 100)
 idEm01 = pw.system.create_emitter("particle")
 idPa01 = pw.system.create_particles("dot")
 pw.system.emitter_set_particles(idEm01, idPa01)
+pw.system.emitter_set_distribution(idEm01, "point_source")
+pw.system.emitter_set_mode(idEm01, "once")
+pw.system.emitter_set_frequency(idEm01, 100)
+pw.system.emitter_set_number(idEm01, 2000)
+pw.system.emitter_set_angle(idEm01, 1.57)
+pw.system.emitter_set_angle_std(idEm01, 0.2)
+pw.system.emitter_set_velocity(idEm01, 10.0)
+pw.system.emitter_set_velocity_std(idEm01, 1.0)
 
+-- Pause simulation
 pw.system.pause()
 
+-- Setup callback functions
 pw.system.register_lua_callback("e_lua_update", "update")
 pw.system.register_lua_callback("e_lua_update", "update_earth")
 
@@ -70,5 +82,5 @@ function update()
 end
 
 function update_earth()
-    pw.physics.obj_apply_force(idObjEarth, 0.0, Force, 0.0, 0.0)
+    pw.physics.obj_apply_force(idObjEarth, 0.0, -Force, 0.0, 0.0)
 end

@@ -40,7 +40,6 @@
 #include "kinematics_state_user.h"
 #include "unique_id_user.h"
 #include "unique_id_referrer.h"
-#include "visuals_data_storage_user.h"
 #include "world_data_storage_user.h"
 
 //--- Enumerations -----------------------------------------------------------//
@@ -55,6 +54,7 @@ enum class EmitterType
 /// Specifies the type of possible distributions
 enum class EmitterDistributionType
 {
+    NONE,
     CIRCULAR_FIELD,
     POINT_SOURCE,
     RECTANGULAR_FIELD
@@ -63,6 +63,7 @@ enum class EmitterDistributionType
 /// Specifies the mode for emitting world entities
 enum class EmitterModeType
 {
+    NONE,
     ONCE,
     TIMED
 };
@@ -90,7 +91,6 @@ const EmitterType EMITTER_DEFAULT_TYPE = EmitterType::PARTICLE;                 
 ////////////////////////////////////////////////////////////////////////////////
 class IEmitter : public IKinematicsStateUser,
                  public IUniqueIDUser,
-                 public IVisualsDataStorageUser,
                  public IWorldDataStorageUser
 {
     
@@ -103,7 +103,7 @@ class IEmitter : public IKinematicsStateUser,
         //--- Constant Methods -----------------------------------------------//
         virtual EmitterType         getEmitterType() const;
         
-              EmitterModeType       getMode() const;
+        EmitterModeType             getMode() const;
         const double&               getVelocity() const;
         const double&               getVelocityStd() const;
         const bool&                 isActive() const;
@@ -111,6 +111,8 @@ class IEmitter : public IKinematicsStateUser,
         //--- Methods --------------------------------------------------------//
         virtual void emit(const double& = -1.0) = 0;
         virtual void init() = 0;
+        
+        virtual void setNumber(const std::uint32_t&);
         
         void activate();
         void deactivate();
@@ -121,7 +123,6 @@ class IEmitter : public IKinematicsStateUser,
         void setFrequency(const double&);
         void setLimits(const double&, const double&, const double&, const double&);
         void setMode(const EmitterModeType&);
-        void setNumber(const std::uint32_t&);
         void setOrigin(const Vector2d&);
         void setVelocity(const double&);
         void setVelocityStd(const double&);
@@ -171,7 +172,7 @@ const std::map<EmitterDistributionType, std::string> mapEmitterDistributionToStr
     {EmitterDistributionType::RECTANGULAR_FIELD, "rectangular_field"}
 }; ///< Map from EmitterDistributionType to string
 
-const std::map<std::string, EmitterDistributionType> mapStringToEmitterDistribution = {
+const std::map<std::string, EmitterDistributionType> STRING_TO_EMITTER_DISTRIBUTION_TYPE_MAP = {
     {"circular_field", EmitterDistributionType::CIRCULAR_FIELD},
     {"point_source", EmitterDistributionType::POINT_SOURCE},
     {"rectangular_field", EmitterDistributionType::RECTANGULAR_FIELD}
@@ -182,7 +183,7 @@ const std::map<EmitterModeType, std::string> mapEmitterModeToString = {
     {EmitterModeType::TIMED, "timed"}
 }; ///< Map from EmitterModeType to string
 
-const std::map<std::string, EmitterModeType> mapStringToEmitterMode = {
+const std::map<std::string, EmitterModeType> STRING_TO_EMITTER_MODE_TYPE_MAP = {
     {"once", EmitterModeType::ONCE},
     {"timed", EmitterModeType::TIMED}
 }; ///< Map from string to EmitterMode
@@ -203,6 +204,42 @@ static EmitterType mapStringToEmitterType(const std::string& _strS)
         return ci->second;
     else
         return EmitterType::NONE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Maps given string to emitter distribution type
+///
+/// \return Emitter distribution type
+///
+////////////////////////////////////////////////////////////////////////////////
+static EmitterDistributionType mapStringToEmitterDistributionType(const std::string& _strS)
+{
+    METHOD_ENTRY("mapStringToEmitterDistributionType")
+    
+    const auto ci = STRING_TO_EMITTER_DISTRIBUTION_TYPE_MAP.find(_strS);
+    if (ci != STRING_TO_EMITTER_DISTRIBUTION_TYPE_MAP.end())
+        return ci->second;
+    else
+        return EmitterDistributionType::NONE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Maps given string to emitter mode type
+///
+/// \return Emitter mode type
+///
+////////////////////////////////////////////////////////////////////////////////
+static EmitterModeType mapStringToEmitterModeType(const std::string& _strS)
+{
+    METHOD_ENTRY("mapStringToEmitterModeType")
+    
+    const auto ci = STRING_TO_EMITTER_MODE_TYPE_MAP.find(_strS);
+    if (ci != STRING_TO_EMITTER_MODE_TYPE_MAP.end())
+        return ci->second;
+    else
+        return EmitterModeType::NONE;
 }
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -306,6 +343,19 @@ inline const bool& IEmitter::isActive() const
 {
     METHOD_ENTRY("IEmitter::isActive")
     return m_bActive;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the number of emitted entities
+///
+/// \param _nNr Number of entities.
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void IEmitter::setNumber(const std::uint32_t& _nNr)
+{
+    METHOD_ENTRY("IEmitter::setNumber")
+    m_nNr = _nNr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -451,19 +501,6 @@ inline void IEmitter::setMode(const EmitterModeType& _EmM)
 {
     METHOD_ENTRY("IEmitter::setMode")
     m_EmitterMode = _EmM;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets the number of emitted entities
-///
-/// \param _nNr Number of entities.
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void IEmitter::setNumber(const std::uint32_t& _nNr)
-{
-    METHOD_ENTRY("IEmitter::setNumber")
-    m_nNr = _nNr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
