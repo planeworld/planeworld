@@ -409,56 +409,58 @@ void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, CCamer
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Draw all particle
+/// \brief Draw all particles
 ///
 /// \param _pCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawParticle(CCamera* const _pCamera) const
+void CVisualsManager::drawParticles(CCamera* const _pCamera) const
 {
-    METHOD_ENTRY("CVisualsManager::drawParticle")
+    METHOD_ENTRY("CVisualsManager::drawParticles")
     
     for (auto Particle : *m_pDataStorage->getParticlesByValueFront())
     {
-        switch (Particle.second->getParticleType())
+        if (Particle.second->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
         {
-            case ParticleTypeType::DOT:
+            switch (Particle.second->getParticleType())
             {
-                m_Graphics.dots((*Particle.second->getPositions()),-_pCamera->getCenter()+
-                      IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()));
-                break;
-            }
-            case ParticleTypeType::THRUST:
-            {
-                double fSizeR = 1.0 / Particle.second->getPositions()->size();
-        
-                if (m_Graphics.getResPMX() > 0.02)
+                case ParticleTypeType::DOT:
                 {
-                    m_Graphics.cacheSinCos(12);
-                    for (auto i=0u; i<Particle.second->getPositions()->size(); ++i)
-                    {
-                        if (_pCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
-                        {
-                            m_Graphics.setColor(fSizeR * i, fSizeR * i, fSizeR * i, 0.05);
-//                             m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.5);
-                            m_Graphics.filledCircle(Particle.second->getPositions()->at(i) - _pCamera->getCenter()+
-                                            IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()),
-                                            (double(Particle.second->getPositions()->size()-i) * 0.01 + 3.0),
-                                            12, GRAPHICS_CIRCLE_USE_CACHE
-                            );
-                        }
-                    }
-                    m_Graphics.setColor(1.0,1.0,1.0);
+                    m_Graphics.dots((*Particle.second->getPositions()),-_pCamera->getCenter()+
+                        IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()));
+                    break;
                 }
-                break;
-            }
-            default:
-            {
-                WARNING_MSG("Visuals Manager", "Wrong particle type, visualisation not implemented.")
-                break;
+                case ParticleTypeType::THRUST:
+                {
+                    double fSizeR = 1.0 / Particle.second->getPositions()->size();
+            
+                    if (m_Graphics.getResPMX() > 0.02)
+                    {
+                        m_Graphics.cacheSinCos(12);
+                        for (auto i=0u; i<Particle.second->getPositions()->size(); ++i)
+                        {
+                            if (_pCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
+                            {
+                                m_Graphics.setColor(fSizeR * i, fSizeR * i, fSizeR * i, 0.05);
+    //                             m_Graphics.setColor(std::sqrt(fSizeR * i), fSizeR * i, fSizeR * i * 0.2, 0.5);
+                                m_Graphics.filledCircle(Particle.second->getPositions()->at(i) - _pCamera->getCenter()+
+                                                IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()),
+                                                (double(Particle.second->getPositions()->size()-i) * 0.01 + 3.0),
+                                                12, GRAPHICS_CIRCLE_USE_CACHE
+                                );
+                            }
+                        }
+                        m_Graphics.setColor(1.0,1.0,1.0);
+                    }
+                    break;
+                }
+                default:
+                {
+                    WARNING_MSG("Visuals Manager", "Wrong particle type, visualisation not implemented.")
+                    break;
+                }
             }
         }
-        
     }
 }
 
@@ -1634,7 +1636,7 @@ void CVisualsManager::drawWorld()
     if (m_pUniverse != nullptr)
     
     this->drawObjects(m_pCamera);
-    this->drawParticle(m_pCamera);
+    this->drawParticles(m_pCamera);
 
     m_Graphics.endRenderBatch();
     

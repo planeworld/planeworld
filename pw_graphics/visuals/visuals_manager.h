@@ -113,7 +113,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void drawPlanet(CObject*, CPlanet*, CCamera*) const;
         void drawPolygon(CObject*, CPolygon*, CCamera*) const;
 
-        void drawParticle(CCamera* const) const;
+        void drawParticles(CCamera* const) const;
         void drawObjects(CCamera* const) const;
         
         void            drawBoundingBoxes() const;
