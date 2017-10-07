@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,21 +20,21 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       unique_id_referrer.h
-/// \brief      Prototype of interface "IUniqueIDReferrer"
+/// \file       uid_referrer.h
+/// \brief      Prototype of interface "IUIDReferrer"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2016-03-01
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef UNIQUE_ID_REFERRER_H
-#define UNIQUE_ID_REFERRER_H
+#ifndef UID_REFERRER_H
+#define UID_REFERRER_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "unique_id.h"
+#include "uid.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -44,7 +44,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-class IUniqueIDReferrer
+class IUIDReferrer
 {
 
     public:
@@ -53,10 +53,10 @@ class IUniqueIDReferrer
         const std::string&  getNameRef() const;
         T*                  getRef() const;
         UIDType             getUIDRef() const;
-        bool                gotRef() const;
+        bool                hasRef() const;
         
         //--- Methods --------------------------------------------------------//
-        void attachTo(T* const);
+        void setRef(T* const);
         
     protected:
         
@@ -66,27 +66,27 @@ class IUniqueIDReferrer
         T*              m_pRef = nullptr;        ///< Pointer reference to UID user
         
         //--- Methods [protected] --------------------------------------------//
-        virtual void myAttachTo();
+        virtual void mySetRef();
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Attaches to UID user
+/// \brief Refers to UID user
 ///
-/// \param _pRef UID user to attach to
+/// \param _pRef UID user to refer to
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-inline void IUniqueIDReferrer<T>::attachTo(T* const _pRef)
+inline void IUIDReferrer<T>::setRef(T* const _pRef)
 {
-    METHOD_ENTRY("IUniqueIDReferrer::attachTo")
+    METHOD_ENTRY("IUIDReferrer::setRef")
     m_strUIDName = _pRef->getName();
     m_pRef   = _pRef;
     m_UIDRef = _pRef->getUID();
     
-    this->myAttachTo();
+    this->mySetRef();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,9 +97,9 @@ inline void IUniqueIDReferrer<T>::attachTo(T* const _pRef)
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-inline const std::string& IUniqueIDReferrer<T>::getNameRef() const
+inline const std::string& IUIDReferrer<T>::getNameRef() const
 {
-    METHOD_ENTRY("IUniqueIDReferrer::getNameRef")
+    METHOD_ENTRY("IUIDReferrer::getNameRef")
     return m_strUIDName;
 }
 
@@ -111,9 +111,9 @@ inline const std::string& IUniqueIDReferrer<T>::getNameRef() const
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-inline T* IUniqueIDReferrer<T>::getRef() const
+inline T* IUIDReferrer<T>::getRef() const
 {
-    METHOD_ENTRY("IUniqueIDReferrer::getRef")
+    METHOD_ENTRY("IUIDReferrer::getRef")
     return m_pRef;
 }
 
@@ -125,9 +125,9 @@ inline T* IUniqueIDReferrer<T>::getRef() const
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-inline UIDType IUniqueIDReferrer<T>::getUIDRef() const
+inline UIDType IUIDReferrer<T>::getUIDRef() const
 {
-    METHOD_ENTRY("IUniqueIDReferrer::getUIDRef")
+    METHOD_ENTRY("IUIDReferrer::getUIDRef")
     return m_UIDRef;
 }
 
@@ -139,9 +139,9 @@ inline UIDType IUniqueIDReferrer<T>::getUIDRef() const
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-inline bool IUniqueIDReferrer<T>::gotRef() const
+inline bool IUIDReferrer<T>::hasRef() const
 {
-    METHOD_ENTRY("IUniqueIDReferrer::gotRef")
+    METHOD_ENTRY("IUIDReferrer::hasRef")
     if (m_UIDRef == 0u) return false;
     else return true;
 }
@@ -153,9 +153,9 @@ inline bool IUniqueIDReferrer<T>::gotRef() const
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-inline void IUniqueIDReferrer<T>::myAttachTo()
+inline void IUIDReferrer<T>::mySetRef()
 {
-    METHOD_ENTRY("IUniqueIDReferrer::myAttachTo")
+    METHOD_ENTRY("IUIDReferrer::mySetRef")
 }
 
-#endif // UNIQUE_ID_REFERRER_H
+#endif // UID_REFERRER_H

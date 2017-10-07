@@ -85,7 +85,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_system/lua_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/planeworld.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/thread_module.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/uid.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/world_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp

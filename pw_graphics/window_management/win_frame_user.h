@@ -36,7 +36,7 @@
 #include "graphics.h"
 #include "log.h"
 #include "uid_visuals_user.h"
-#include "unique_id_user.h"
+#include "uid_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -51,7 +51,7 @@ const bool WIN_NO_INHERIT = false;
 ////////////////////////////////////////////////////////////////////////////////
 class IWinFrameUser : virtual public CGraphicsBase,
                       public IUIDVisualsUser,
-                      public IUniqueIDUser
+                      public IUIDUser
 {
 
     public:

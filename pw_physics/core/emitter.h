@@ -38,8 +38,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state_user.h"
-#include "unique_id_user.h"
-#include "unique_id_referrer.h"
+#include "uid_user.h"
+#include "uid_referrer.h"
 #include "world_data_storage_user.h"
 
 //--- Enumerations -----------------------------------------------------------//
@@ -90,7 +90,7 @@ const EmitterType EMITTER_DEFAULT_TYPE = EmitterType::PARTICLE;                 
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class IEmitter : public IKinematicsStateUser,
-                 public IUniqueIDUser,
+                 public IUIDUser,
                  public IWorldDataStorageUser
 {
     

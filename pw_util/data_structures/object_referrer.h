@@ -33,9 +33,9 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "object.h"
-#include "unique_id_referrer.h"
+#include "uid_referrer.h"
 
 /// Type definition for specialised interface referring to objects
-typedef IUniqueIDReferrer<CObject> IObjectReferrer;
+typedef IUIDReferrer<CObject> IObjectReferrer;
 
 #endif // OBJECT_REFERRER_H

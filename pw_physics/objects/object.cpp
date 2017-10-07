@@ -37,7 +37,7 @@ uint32_t CObject::m_unNrOfObjects = 0;
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IGridUser(),
+CObject::CObject(): IUIDUser(), IKinematicsStateUser(), IGridUser(),
                 m_bGravitation(true),
                 m_bDynamics(true),
                 m_fTimeFac(1.0),
@@ -72,7 +72,7 @@ CObject::CObject(): IUniqueIDUser(), IKinematicsStateUser(), IGridUser(),
 ///
 ////////////////////////////////////////////////////////////////////////////////
 CObject::CObject(const CObject& _Obj) : 
-                IUniqueIDUser(_Obj),
+                IUIDUser(_Obj),
                 IKinematicsStateUser(_Obj),
                 IGridUser(_Obj)
 {
@@ -148,7 +148,7 @@ CObject& CObject::operator=(const CObject& _Obj)
     
     if (this != &_Obj)
     {
-        IUniqueIDUser::operator=(_Obj);
+        IUIDUser::operator=(_Obj);
         IKinematicsStateUser::operator=(_Obj);
         IGridUser::operator=(_Obj);
         this->copy(_Obj);
@@ -516,7 +516,7 @@ std::istream& operator>>(std::istream& _is, CObject* const _pObj)
     // From IKinematicsStateUser
     _is >> _pObj->m_KinematicsState;
     
-    // From IUniqueIDUser
+    // From IUIDUser
     _is >> _pObj->m_UID;
     
     _is >> _pObj->m_bGravitation;
@@ -559,7 +559,7 @@ std::ostream& operator<<(std::ostream& _os, CObject* const _pObj)
     // From IKinematicsStateUser
     _os << _pObj->m_KinematicsState << std::endl;
     
-    // From IUniqueIDUser
+    // From IUIDUser
     _os << _pObj->m_UID << std::endl;
     
     _os << _pObj->m_bGravitation << std::endl;

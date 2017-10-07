@@ -20,27 +20,27 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       unique_id.cpp
-/// \brief      Implementation of class "CUniqueID"
+/// \file       uid.cpp
+/// \brief      Implementation of class "CUID"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2016-01-24
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "unique_id.h"
+#include "uid.h"
 
 /// Global counter for unique IDs. Reserve 0 for no reference
-UIDType CUniqueID::s_nUID = 1;
+UIDType CUID::s_nUID = 1;
 
 /// Global list for unused unique IDs
-std::deque<UIDType> CUniqueID::s_UnusedUIDs;
+std::deque<UIDType> CUID::s_UnusedUIDs;
 
 /// Global list for reference counting of uids
-std::unordered_map<UIDType, std::uint32_t> CUniqueID::s_ReferencedUIDs;
+std::unordered_map<UIDType, std::uint32_t> CUID::s_ReferencedUIDs;
 
 /// Global mutex
-std::mutex CUniqueID::m_Mtx;
+std::mutex CUID::m_Mtx;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -50,10 +50,10 @@ std::mutex CUniqueID::m_Mtx;
 /// any unused IDs, these will be used first.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CUniqueID::CUniqueID()
+CUID::CUID()
 {
-    METHOD_ENTRY("CUniqueID::CUniqueID")
-    DTOR_CALL("CUniqueID::CUniqueID")
+    METHOD_ENTRY("CUID::CUID")
+    DTOR_CALL("CUID::CUID")
     
     std::lock_guard<std::mutex> lock(m_Mtx);
     
@@ -80,10 +80,10 @@ CUniqueID::CUniqueID()
 /// \param _UID UID (won't be copied to ensure unique ids)
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CUniqueID::CUniqueID(const CUniqueID& _UID)
+CUID::CUID(const CUID& _UID)
 {
-    METHOD_ENTRY("CUniqueID::CUniqueID")
-    DTOR_CALL("CUniqueID::CUniqueID")
+    METHOD_ENTRY("CUID::CUID")
+    DTOR_CALL("CUID::CUID")
     
     std::lock_guard<std::mutex> lock(m_Mtx);
     
@@ -99,10 +99,10 @@ CUniqueID::CUniqueID(const CUniqueID& _UID)
 /// constructed.
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CUniqueID::~CUniqueID()
+CUID::~CUID()
 {
-    METHOD_ENTRY("CUniqueID::~CUniqueID")
-    DTOR_CALL("CUniqueID::~CUniqueID")
+    METHOD_ENTRY("CUID::~CUID")
+    DTOR_CALL("CUID::~CUID")
     
     std::lock_guard<std::mutex> lock(m_Mtx);
     
@@ -121,9 +121,9 @@ CUniqueID::~CUniqueID()
 /// \param _UID UID to be copied and assigned data from
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CUniqueID& CUniqueID::operator=(const CUniqueID& _UID)
+CUID& CUID::operator=(const CUID& _UID)
 {
-    METHOD_ENTRY("CUniqueID::operator=")
+    METHOD_ENTRY("CUID::operator=")
     
     if (this != &_UID)
     {
@@ -146,9 +146,9 @@ CUniqueID& CUniqueID::operator=(const CUniqueID& _UID)
 /// \brief Sets a new value for this ID
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CUniqueID::setNewID()
+void CUID::setNewID()
 {
-    METHOD_ENTRY("CUniqueID::setNewID")
+    METHOD_ENTRY("CUID::setNewID")
     
     std::lock_guard<std::mutex> lock(m_Mtx);
     
@@ -178,14 +178,14 @@ void CUniqueID::setNewID()
 /// \brief Input stream for game state information
 ///
 /// \param _is  Source stream
-/// \param _UID CUniqueID instance to stream
+/// \param _UID CUID instance to stream
 ///
 /// \return Remaining stream with game state information
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::istream& operator>>(std::istream& _is, CUniqueID& _UID)
+std::istream& operator>>(std::istream& _is, CUID& _UID)
 {
-    METHOD_ENTRY("CUniqueID::operator>>")
+    METHOD_ENTRY("CUID::operator>>")
     
     std::string strTmp;
     _is >> strTmp;
@@ -203,14 +203,14 @@ std::istream& operator>>(std::istream& _is, CUniqueID& _UID)
 /// \brief Output stream for game state information
 ///
 /// \param _os  Source stream
-/// \param _UID CUniqueID instance to stream
+/// \param _UID CUID instance to stream
 ///
-/// \return Stream with game state information of CUniqueID instance
+/// \return Stream with game state information of CUID instance
 ///
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream& _os, CUniqueID& _UID)
+std::ostream& operator<<(std::ostream& _os, CUID& _UID)
 {
-    METHOD_ENTRY("CUniqueID::operator<<")
+    METHOD_ENTRY("CUID::operator<<")
     
     _os << "UID:" << std::endl;
     
@@ -229,9 +229,9 @@ std::ostream& operator<<(std::ostream& _os, CUniqueID& _UID)
 /// \param _UID UID to copy data from
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CUniqueID::copy(const CUniqueID& _UID)
+void CUID::copy(const CUID& _UID)
 {
-    METHOD_ENTRY("CUniqueID::copy")
+    METHOD_ENTRY("CUID::copy")
     
     m_nUID = _UID.m_nUID;
     m_strName = _UID.m_strName;

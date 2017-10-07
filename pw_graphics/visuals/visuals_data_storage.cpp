@@ -384,10 +384,10 @@ std::istream& operator>>(std::istream& _is, CVisualsDataStorage& _WDS)
 //         _is >> _WDS.m_pCamera;
 // 
 //         /// \todo Clean up camera hooks via kinematics states and uids.
-//         if (_WDS.m_pCamera->getKinematicsState().gotReference())
+//         if (_WDS.m_pCamera->getKinematicsState().hasReference())
 //         {
 //             UIDType UID = _WDS.m_pCamera->getKinematicsState().getUIDRef();
-//             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
+//             IUIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
 //             _WDS.m_pCamera->hook(static_cast<IKinematicsStateUser*>(static_cast<CObject*>(pUIDUser)));
 //         }
 //     }
@@ -407,8 +407,8 @@ std::istream& operator>>(std::istream& _is, CVisualsDataStorage& _WDS)
 //             _is >> pDebVis;
 //             
 //             UIDType UID = pDebVis->getUIDRef();
-//             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
-//             pDebVis->attachTo(static_cast<CParticle*>(pUIDUser));
+//             IUIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
+//             pDebVis->setRef(static_cast<CParticle*>(pUIDUser));
 //             _WDS.addParticleVisuals(pDebVis);
 //             
 //             Log.progressBar("Loading particle visuals", i, nSize);

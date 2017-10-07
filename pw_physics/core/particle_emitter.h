@@ -43,7 +43,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CParticleEmitter : public IEmitter,
-                         public IUniqueIDReferrer<CParticle>
+                         public IUIDReferrer<CParticle>
 {
     
     public:

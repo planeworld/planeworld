@@ -43,7 +43,7 @@
 /// \brief Interface for classes that use a kinematic state
 ///
 /// \todo Get rid of hooking by using a proper implementation of uid user and
-///       its virtual myAttachTo method if applicable
+///       its virtual mySetRef method if applicable
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class IKinematicsStateUser
@@ -57,7 +57,6 @@ class IKinematicsStateUser
         CKinematicsState&   getKinematicsState();
         
         //--- Methods --------------------------------------------------------//
-        bool hook(IKinematicsStateUser* const);
                 
     protected:
         
@@ -77,21 +76,6 @@ inline CKinematicsState& IKinematicsStateUser::getKinematicsState()
 {
     METHOD_ENTRY("IKinematicsStateUser::getKinematicsState")
     return m_KinematicsState;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Hooks to another user of kinematics state
-///
-/// \param _KinematicsStateUser User of kinematics state to hook to
-///
-///////////////////////////////////////////////////////////////////////////////
-inline bool IKinematicsStateUser::hook(IKinematicsStateUser* const _pKinematicsStateUser)
-{
-    METHOD_ENTRY("IKinematicsStateUser::hook")
-
-    m_KinematicsState.attachTo(&(_pKinematicsStateUser->getKinematicsState()));
-    return true;
 }
 
 #endif // KINEMATICS_STATE_USER_H

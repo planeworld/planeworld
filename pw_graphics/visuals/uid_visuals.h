@@ -36,7 +36,7 @@
 #include "font_user.h"
 #include "graphics.h"
 #include "text.h"
-#include "unique_id.h"
+#include "uid.h"
 
 //--- Misc header ------------------------------------------------------------//
 

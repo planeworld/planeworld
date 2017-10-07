@@ -427,10 +427,10 @@ std::istream& operator>>(std::istream& _is, CKinematicsState& _KS)
     std::string strTmp;
     _is >> strTmp;
     
-    // From IUniqueIDUser
+    // From IUIDUser
     _is >> _KS.m_UID;
     
-    // From IUniqueIDReferrer
+    // From IUIDReferrer
     _is >> _KS.m_UIDRef;
     
     _is >> _KS.s_fWorldLimitX;
@@ -464,10 +464,10 @@ std::ostream& operator<<(std::ostream& _os, CKinematicsState& _KS)
     
     _os << "KinematicsState:" << std::endl;
     
-    // From IUniqueIDUser
+    // From IUIDUser
     _os << _KS.m_UID << std::endl;
     
-    // From IUniqueIDReferrer
+    // From IUIDReferrer
     _os << _KS.m_UIDRef << std::endl;
     
     

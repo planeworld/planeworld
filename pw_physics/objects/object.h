@@ -52,7 +52,7 @@ typedef std::uint16_t AnchorIDType;
 /// \todo Implement copy constructor and operator=
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CObject : public IUniqueIDUser,
+class CObject : public IUIDUser,
                 public IKinematicsStateUser,
                 public IGridUser
 {

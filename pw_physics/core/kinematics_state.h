@@ -33,8 +33,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
-#include "unique_id_referrer.h"
-#include "unique_id_user.h"
+#include "uid_referrer.h"
+#include "uid_user.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <array>
@@ -59,8 +59,8 @@ using namespace Eigen;
 /// planet.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CKinematicsState  : public IUniqueIDUser,
-                          public IUniqueIDReferrer<CKinematicsState>
+class CKinematicsState  : public IUIDUser,
+                          public IUIDReferrer<CKinematicsState>
 {
     
     public:
@@ -102,8 +102,6 @@ class CKinematicsState  : public IUniqueIDUser,
                                                std::array<Vector2d, T>&,
                                          const double& = 1.0) const;
         
-        bool                gotReference() const;
-        
         //--- Methods --------------------------------------------------------//
         Vector2d& Origin();
         
@@ -136,9 +134,6 @@ class CKinematicsState  : public IUniqueIDUser,
 
         mutable Matrix2d    m_matRotRef;     ///< Rotation of reference
         mutable double      m_fAngleRef;     ///< Angle of reference if attached
-        
-        /// \todo Implement myAttachTo in a proper method
-        void myAttachTo() {}
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -148,8 +143,8 @@ class CKinematicsState  : public IUniqueIDUser,
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline CKinematicsState::CKinematicsState() : IUniqueIDUser(),
-                                              IUniqueIDReferrer< CKinematicsState >(),
+inline CKinematicsState::CKinematicsState() : IUIDUser(),
+                                              IUIDReferrer< CKinematicsState >(),
                                               m_fAngle(0.0),
                                               m_fAngleVelocity(0.0),
                                               m_fAngleRef(0.0)
@@ -212,19 +207,6 @@ inline const double& CKinematicsState::getLocalAngleVelocity() const
 {
     METHOD_ENTRY("CKinematicsState::getAngleVelocity")
     return m_fAngleVelocity;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns flag to indicate if reference is given
-///
-/// \return Reference given (true/false)
-///
-////////////////////////////////////////////////////////////////////////////////
-inline bool CKinematicsState::gotReference() const
-{
-    METHOD_ENTRY("CKinematicsState::gotReference")
-    return (m_pRef != nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

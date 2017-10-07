@@ -45,7 +45,7 @@ CParticleEmitter::CParticleEmitter() : m_ParticleType(ParticleTypeType::DOT)
     m_pRef = new CParticle;
     MEM_ALLOC("CParticle")
     m_pRef->setNumber(1);
-    this->attachTo(m_pRef);
+    this->setRef(m_pRef);
     
     m_Generator.seed(m_unNrOfEmitters++);
 //     IHooker::m_strName += ": Particle_"+ std::to_string(m_unNrOfEmitters++);

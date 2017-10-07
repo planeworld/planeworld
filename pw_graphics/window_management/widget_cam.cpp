@@ -41,7 +41,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 CWidgetCam::CWidgetCam(CFontManager* const _pFontManager) :
                        IWidget(_pFontManager),
-                       IUniqueIDReferrer<CCamera>(),
+                       IUIDReferrer<CCamera>(),
                        IVisualsDataStorageUser()
 {
     METHOD_ENTRY("CWidgetCam::CWidgetCam");

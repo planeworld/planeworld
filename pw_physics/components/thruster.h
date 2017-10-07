@@ -47,7 +47,7 @@
 class CThruster : public IKinematicsStateUser,
                   public IEmitterReferrer,
                   public IObjectReferrer,
-                  public IUniqueIDUser,
+                  public IUIDUser,
                   public IWorldDataStorageUser
 {
     
@@ -80,7 +80,7 @@ class CThruster : public IKinematicsStateUser,
         
                 
         //--- Methods [protected ---------------------------------------------//
-        virtual void myAttachTo();
+        virtual void mySetRef();
         
         
         //--- Variables ------------------------------------------------------//
@@ -232,13 +232,13 @@ inline double CThruster::getThrust() const
 /// \brief Attaches thruster to UID user
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CThruster::myAttachTo()
+inline void CThruster::mySetRef()
 {
-    METHOD_ENTRY("CThruster::myAttachTo")
-    if (IEmitterReferrer::gotRef())
-        m_KinematicsState.attachTo(&(IEmitterReferrer::m_pRef->getKinematicsState()));
-    if (IObjectReferrer::gotRef())
-        m_KinematicsState.attachTo(&(IObjectReferrer::m_pRef->getKinematicsState()));
+    METHOD_ENTRY("CThruster::mySetRef")
+    if (IEmitterReferrer::m_pRef != nullptr)
+        m_KinematicsState.setRef(&(IEmitterReferrer::m_pRef->getKinematicsState()));
+    if (IObjectReferrer::m_pRef != nullptr)
+        m_KinematicsState.setRef(&(IObjectReferrer::m_pRef->getKinematicsState()));
 }
 
 #endif // THRUSTER_H

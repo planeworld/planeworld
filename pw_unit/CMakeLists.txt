@@ -36,14 +36,14 @@ SET(SRCS_MULTITHREADING
 )
 
 SET(SRCS_MULTI_BUFFER
-    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/uid.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
     pw_unit_multi_buffer.cpp
 )
 
 SET(SRCS_UID
-    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/unique_id.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/uid.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
     pw_unit_uid.cpp

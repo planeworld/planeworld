@@ -36,7 +36,7 @@
 #include "camera.h"
 #include "render_mode.h"
 #include "render_target.h"
-#include "unique_id_referrer.h"
+#include "uid_referrer.h"
 #include "visuals_data_storage_user.h"
 #include "widget.h"
 
@@ -48,7 +48,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CWidgetCam : public IWidget,
-                   public IUniqueIDReferrer<CCamera>,
+                   public IUIDReferrer<CCamera>,
                    public IVisualsDataStorageUser
 {
 

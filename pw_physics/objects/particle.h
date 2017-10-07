@@ -35,7 +35,7 @@
 #include "bounding_box.h"
 #include "circular_buffer.h"
 #include "grid_user.h"
-#include "unique_id_user.h"
+#include "uid_user.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <vector>
@@ -69,7 +69,7 @@ enum class ParticleTypeType
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CParticle : public IGridUser,
-                  public IUniqueIDUser
+                  public IUIDUser
 {
     
     public:

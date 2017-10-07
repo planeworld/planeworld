@@ -36,7 +36,7 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CParticle::CParticle() : IGridUser(),
-                     IUniqueIDUser(),
+                     IUIDUser(),
                      m_ParticleType(ParticleTypeType::DOT),
                      m_fTimeFac(1.0)
 {
@@ -61,7 +61,7 @@ CParticle::CParticle() : IGridUser(),
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CParticle::CParticle(const CParticle& _Particle) : IGridUser(_Particle),
-                                                   IUniqueIDUser(_Particle)
+                                                   IUIDUser(_Particle)
                                            
 {
     METHOD_ENTRY("CParticle::CParticle")
@@ -99,7 +99,7 @@ CParticle* CParticle::clone() const
 CParticle& CParticle::operator=(const CParticle& _Particle)
 {
     METHOD_ENTRY("CParticle::operator=")
-    IUniqueIDUser::operator=(_Particle);
+    IUIDUser::operator=(_Particle);
     IGridUser::operator=(_Particle);
     this->copy(_Particle);
     
@@ -201,7 +201,7 @@ std::istream& operator>>(std::istream& _is, CParticle* const _pParticle)
     
     /// \todo Stream data from IGridUser
     
-    // From IUniqueIDUser
+    // From IUIDUser
     _is >> _pParticle->m_UID;
     
     strTmp="";
@@ -243,7 +243,7 @@ std::ostream& operator<<(std::ostream& _os, CParticle* const _pParticle)
     
     /// \todo Stream data from IGridUser
     
-    // From IUniqueIDUser
+    // From IUIDUser
     _os << _pParticle->m_UID << std::endl;
     
     _os << s_ParticleTypeToStringMap.at(_pParticle->getParticleType()) << std::endl;

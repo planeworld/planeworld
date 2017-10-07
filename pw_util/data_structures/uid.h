@@ -20,16 +20,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       unique_id.h
-/// \brief      Prototype of class "CUniqueID"
+/// \file       uid.h
+/// \brief      Prototype of class "CUID"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2016-01-24
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef UNIQUE_ID_H
-#define UNIQUE_ID_H
+#ifndef UID_H
+#define UID_H
 
 //--- Standard header --------------------------------------------------------//
 #include <cstdint>
@@ -46,17 +46,17 @@ using UIDType = std::uint32_t;
 /// \brief Class that manages a unique ID to identify objects etc.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CUniqueID
+class CUID
 {
     
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
-        CUniqueID();
-        CUniqueID(const CUniqueID&);
-        ~CUniqueID();
+        CUID();
+        CUID(const CUID&);
+        ~CUID();
         
-        CUniqueID& operator=(const CUniqueID&);
+        CUID& operator=(const CUID&);
         
         //--- Constant Methods -----------------------------------------------//
         const std::string&  getName() const;
@@ -71,13 +71,13 @@ class CUniqueID
         static const std::unordered_map<UIDType, std::uint32_t>& getReferencedUIDs();
         
         //--- friends --------------------------------------------------------//
-        friend std::istream&    operator>>(std::istream&, CUniqueID&);
-        friend std::ostream&    operator<<(std::ostream&, CUniqueID&);
+        friend std::istream&    operator>>(std::istream&, CUID&);
+        friend std::ostream&    operator<<(std::ostream&, CUID&);
                 
     private:
         
         //--- Methods [private] ----------------------------------------------//
-        void copy(const CUniqueID&);
+        void copy(const CUID&);
         
         //--- Variables [private] --------------------------------------------//
                UIDType             m_nUID;              ///< Unique ID for this instance
@@ -99,9 +99,9 @@ class CUniqueID
 /// \return Name as identifier
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::string& CUniqueID::getName() const
+inline const std::string& CUID::getName() const
 {
-    METHOD_ENTRY("CUniqueID::getName")
+    METHOD_ENTRY("CUID::getName")
     return m_strName;
 }
 
@@ -112,9 +112,9 @@ inline const std::string& CUniqueID::getName() const
 /// \return Unique ID value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const UIDType& CUniqueID::getValue() const
+inline const UIDType& CUID::getValue() const
 {
-    METHOD_ENTRY("CUniqueID::getValue")
+    METHOD_ENTRY("CUID::getValue")
     return m_nUID;
 }
 
@@ -125,9 +125,9 @@ inline const UIDType& CUniqueID::getValue() const
 /// \param _strName Name to be set as identifier
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void CUniqueID::setName(const std::string& _strName)
+inline void CUID::setName(const std::string& _strName)
 {
-    METHOD_ENTRY("CUniqueID::setName")
+    METHOD_ENTRY("CUID::setName")
     m_strName = _strName;
 }
 
@@ -138,9 +138,9 @@ inline void CUniqueID::setName(const std::string& _strName)
 /// \return Unused UIDs
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::deque<UIDType>& CUniqueID::getUnusedUIDs()
+inline const std::deque<UIDType>& CUID::getUnusedUIDs()
 {
-    METHOD_ENTRY("CUniqueID::getUnusedUIDs")
+    METHOD_ENTRY("CUID::getUnusedUIDs")
     return s_UnusedUIDs;
 }
 
@@ -154,10 +154,10 @@ inline const std::deque<UIDType>& CUniqueID::getUnusedUIDs()
 /// \return Referenced UIDs
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::unordered_map<UIDType, std::uint32_t>& CUniqueID::getReferencedUIDs()
+inline const std::unordered_map<UIDType, std::uint32_t>& CUID::getReferencedUIDs()
 {
-    METHOD_ENTRY("CUniqueID::getReferencedUIDs")
+    METHOD_ENTRY("CUID::getReferencedUIDs")
     return s_ReferencedUIDs;
 }
 
-#endif // CUniqueID
+#endif // CUID

@@ -42,7 +42,7 @@
 CCamera::CCamera() : IGridUser(),
                      IKinematicsStateUser(),
                      IObjectReferrer(),
-                     IUniqueIDUser(),
+                     IUIDUser(),
                      m_fViewportWidth(m_Graphics.getViewPort().rightplane-m_Graphics.getViewPort().leftplane),
                      m_fViewportHeight(m_Graphics.getViewPort().topplane-m_Graphics.getViewPort().bottomplane),
                      m_fZoom(1.0)
@@ -68,7 +68,7 @@ CCamera::CCamera(const CCamera& _Camera) : CGraphicsBase(_Camera),
                                            IGridUser(_Camera),
                                            IKinematicsStateUser(_Camera),
                                            IObjectReferrer(_Camera),
-                                           IUniqueIDUser(_Camera)
+                                           IUIDUser(_Camera)
 {
     METHOD_ENTRY("CCamera::CCamera");
     CTOR_CALL("CCamera::CCamera");
@@ -102,7 +102,7 @@ CCamera& CCamera::operator=(const CCamera& _Camera)
     {
         IKinematicsStateUser::operator=(_Camera);
         IObjectReferrer::operator=(_Camera);
-        IUniqueIDUser::operator=(_Camera);
+        IUIDUser::operator=(_Camera);
         IGridUser::operator=(_Camera);
         this->copy(_Camera);
     }

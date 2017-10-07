@@ -40,7 +40,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "joint.h"
 #include "multi_buffer.h"
-#include "unique_id_user.h"
+#include "uid_user.h"
 
 class CParticle;
 class IEmitter;
@@ -75,9 +75,9 @@ typedef CMultiBuffer<BUFFER_QUADRUPLE, ObjectsByValueType, UIDType, CObject*> Bu
 typedef std::unordered_map<UIDType, IShape*> ShapesByValueType;
 
 /// Vector of UID users, accessed by UID value
-typedef std::vector<IUniqueIDUser*> UIDUsersByValueType;
+typedef std::vector<IUIDUser*> UIDUsersByValueType;
 /// Vector of buffered UID users, accessed by UID value
-typedef CMultiBuffer<BUFFER_QUADRUPLE, UIDUsersByValueType, IUniqueIDUser*> BufferedUIDUsersByValueType;
+typedef CMultiBuffer<BUFFER_QUADRUPLE, UIDUsersByValueType, IUIDUser*> BufferedUIDUsersByValueType;
 /// Map of UIDs, accessed by name
 typedef std::unordered_map<std::string, UIDType> UIDsByNameType;
 
@@ -101,7 +101,7 @@ class CWorldDataStorage
         const JointsType&           getJoints() const;
         const double&               getTimeScale() const;
         
-        IUniqueIDUser*              getUIDUserByValueBack() const;
+        IUIDUser*              getUIDUserByValueBack() const;
         
         //--- Methods --------------------------------------------------------//
         bool addEmitter(IEmitter*);
@@ -109,7 +109,7 @@ class CWorldDataStorage
         void addJoint(IJoint*);
         bool addObject(CObject*);
         void addShape(IShape*);
-        bool addUIDUser(IUniqueIDUser*);
+        bool addUIDUser(IUIDUser*);
         
         void updateObject(const UIDType);
         
@@ -145,7 +145,7 @@ class CWorldDataStorage
     private:
         
         //--- Methods [private] ----------------------------------------------//
-        bool addUIDUser(const std::array<IUniqueIDUser*,BUFFER_QUADRUPLE>&);
+        bool addUIDUser(const std::array<IUIDUser*,BUFFER_QUADRUPLE>&);
       
         BufferedParticlesByNameType     m_ParticlesByName;      ///< Buffered particles, accessed by name
         BufferedParticlesByValueType    m_ParticlesByValue;     ///< Buffered particles, accessed by value

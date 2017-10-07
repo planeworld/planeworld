@@ -38,7 +38,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "graphics.h"
-#include "unique_id_user.h"
+#include "uid_user.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -59,7 +59,7 @@ enum class ShapeType
 /// \brief Abstract class representing a simple shape
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IShape : public IUniqueIDUser
+class IShape : public IUIDUser
 {
     
     public:

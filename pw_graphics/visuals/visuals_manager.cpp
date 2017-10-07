@@ -976,7 +976,7 @@ bool CVisualsManager::init()
 //     CWidgetCam* pCameraWidget = static_cast<CWidgetCam*>(m_pVisualsDataStorage->getWidgetByValue(CamWidgetID));
 //     pCameraWidget->setShaderProgram(&m_ShaderProgramMainScreen);
 //     
-//     pCameraWidget->attachTo(m_pVisualsDataStorage->getCamerasByValue().at(CameraID));
+//     pCameraWidget->setRef(m_pVisualsDataStorage->getCamerasByValue().at(CameraID));
 //     
 //     auto CamWindowID = this->createWindow();
 //     CWindow* pCamWindow  = m_pVisualsDataStorage->getWindowByValue(CamWindowID);
@@ -1202,7 +1202,7 @@ void CVisualsManager::processFrame()
     {
         for (auto CamWidget : m_pVisualsDataStorage->getCameraWidgets())
         {
-            if (CamWidget.second->gotRef())
+            if (CamWidget.second->hasRef())
             {
                 CamWidget.second->getRenderTarget()->bind(RENDER_TARGET_CLEAR);
                 //
@@ -1255,13 +1255,13 @@ void CVisualsManager::processFrame()
     
     this->finishFrame();
     
-    // Attach cameras to current front buffer (at the moment, this is needed for the kinematics state)
+    // Attach cameras to current front buffer
     if (bGotCam)
     {
         for (auto pCam : m_pVisualsDataStorage->getCamerasByIndex())
         {
-            if (pCam->gotRef())
-                pCam->attachTo(m_pDataStorage->getObjectsByValueFront()->at(pCam->getUIDRef()));
+            if (pCam->hasRef())
+                pCam->setRef(m_pDataStorage->getObjectsByValueFront()->at(pCam->getUIDRef()));
         }
     }
 }
@@ -1440,7 +1440,7 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsSta
 //             
 //             
 //             
-//             if (_KinematicsState.gotReference())
+//             if (_KinematicsState.hasRef())
 //             {
 //                 Vector2d vecRef = _KinematicsState.getRef()->getOrigin() - _KinematicsState.getOrigin();
 //                 m_Graphics.showVec(
@@ -1931,7 +1931,7 @@ void CVisualsManager::myInitComInterface()
                                             auto it = m_pDataStorage->getObjectsByValueFront()->find(_nUIDObj);
                                             if (it != m_pDataStorage->getObjectsByValueFront()->end())
                                             {
-                                                pCam->attachTo(it->second);
+                                                pCam->setRef(it->second);
                                             }
                                             else
                                             {
@@ -2318,7 +2318,7 @@ void CVisualsManager::myInitComInterface()
                                                         CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(_nUIDCam);
                                                         if (pCam != nullptr)
                                                         {
-                                                            static_cast<CWidgetCam*>(pWidget)->attachTo(pCam);
+                                                            static_cast<CWidgetCam*>(pWidget)->setRef(pCam);
                                                         }
                                                         else
                                                         {
@@ -2327,7 +2327,7 @@ void CVisualsManager::myInitComInterface()
                                                     }
                                                     else
                                                     {
-                                                        WARNING_MSG("Visuals Manager", "Wrong widget type, unknown method <attachTo>.")
+                                                        WARNING_MSG("Visuals Manager", "Wrong widget type, unknown method <setRef>.")
                                                     }
                                                 }
                                                 else

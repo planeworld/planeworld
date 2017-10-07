@@ -846,12 +846,12 @@ void CPhysicsManager::myInitComInterface()
                                                     CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUIDPa);
                                                     if (pParticle != nullptr)
                                                     {
-                                                        static_cast<CParticleEmitter*>(pEmitter)->attachTo(pParticle);
+                                                        static_cast<CParticleEmitter*>(pEmitter)->setRef(pParticle);
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    WARNING_MSG("Physics Manager", "Wrong emitter type, unknown method <attachTo>.")
+                                                    WARNING_MSG("Physics Manager", "Wrong emitter type, unknown method <setRef>.")
                                                 }
                                             }
                                           }),

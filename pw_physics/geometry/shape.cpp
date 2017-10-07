@@ -35,7 +35,7 @@
 /// \brief Constructor
 ///
 ////////////////////////////////////////////////////////////////////////////////
-IShape::IShape() :  IUniqueIDUser(),
+IShape::IShape() :  IUIDUser(),
                     m_bIsValid(false),
                     m_fArea(0.0),
                     m_fInertia(0.0),
@@ -59,7 +59,7 @@ void IShape::copy(const IShape* const _pShape)
 {
     METHOD_ENTRY("IShape::copy")
 
-    // From IUniqueIDUser
+    // From IUIDUser
     m_UID             = _pShape->m_UID;
     
     m_AABB            = _pShape->m_AABB;
@@ -90,7 +90,7 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
     std::string strTmp;
     _is >> strTmp;
     
-    // From IUniqueIDUser
+    // From IUIDUser
     _is >> _pShape->m_UID;
     
     _is >> _pShape->m_AABB;
@@ -127,7 +127,7 @@ std::ostream& operator<<(std::ostream& _os, IShape* const _pShape)
 
     _os << "Shape:" << std::endl;
     
-    // From IUniqueIDUser
+    // From IUIDUser
     _os << _pShape->m_UID << std::endl;
     
     _os << _pShape->m_AABB << std::endl;

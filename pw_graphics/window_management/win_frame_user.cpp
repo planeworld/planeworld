@@ -39,7 +39,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 IWinFrameUser::IWinFrameUser() : CGraphicsBase(),
                                  IUIDVisualsUser(),
-                                 IUniqueIDUser(),
+                                 IUIDUser(),
                                  m_WinColorBG({{0.1, 0.1, 0.1, 0.75}}),
                                  m_WinColorFG({{0.3, 0.3, 0.3, 0.75}}),
                                  m_nFrameBorderX(5),

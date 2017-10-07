@@ -40,7 +40,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "conf_pw.h"
-#include "unique_id.h"
+#include "uid.h"
 
 //--- Misc-Header ------------------------------------------------------------//
 
@@ -57,15 +57,15 @@ void outputInternalUIDData(const std::string& _strAction)
     INFO_BLK(
         std::cout << _strAction << std::endl;
         std::cout << "  Unused UIDs: ";
-        for (auto UnusedUIDs : CUniqueID::getUnusedUIDs())
+        for (auto UnusedUIDs : CUID::getUnusedUIDs())
             std::cout << UnusedUIDs << " ";
         std::cout << std::endl;
         std::cout << "  Referenced UIDs [val]:  ";
-        for (auto ReferencedUIDs : CUniqueID::getReferencedUIDs())
+        for (auto ReferencedUIDs : CUID::getReferencedUIDs())
             std::cout <<  ReferencedUIDs.first << " ";
         std::cout << std::endl;
         std::cout << "  Referenced UIDs [refs]: ";
-        for (auto ReferencedUIDs : CUniqueID::getReferencedUIDs())
+        for (auto ReferencedUIDs : CUID::getReferencedUIDs())
             std::cout <<  ReferencedUIDs.second << " ";
         std::cout << std::endl;
     )
@@ -88,7 +88,7 @@ int main()
     
     INFO_MSG("Unit test", "Starting unit test...")
        
-    CUniqueID UID0;
+    CUID UID0;
     outputInternalUIDData("1x Constructor");
     if (UID0.getValue() != 1u)
     {
@@ -102,8 +102,8 @@ int main()
     }
     // UID 1,2 in local scope
     {
-        CUniqueID UID1;
-        CUniqueID UID2;
+        CUID UID1;
+        CUID UID2;
         outputInternalUIDData("2x Constructor");
         if (UID2.getValue() != 3u)
         {
@@ -119,8 +119,8 @@ int main()
     outputInternalUIDData("2x Destructor");
     
     // UID 1,2 should be used, since they were destroyed when exiting scope
-    CUniqueID UID3;
-    CUniqueID UID4;
+    CUID UID3;
+    CUID UID4;
     outputInternalUIDData("2x Constructor");
     if (UID3.getValue() == 2u)
     {
@@ -165,7 +165,7 @@ int main()
     }
     {
         // Counting should go on, UID 5 should be set to 4
-        CUniqueID UID5;
+        CUID UID5;
         outputInternalUIDData("1x Constructor");
         if (UID5.getValue() != 4u)
         {
@@ -179,7 +179,7 @@ int main()
         }
         // Copy constructor should copy the UID, but start reference counting
         {
-            CUniqueID UID6(UID5);
+            CUID UID6(UID5);
             outputInternalUIDData("1x Copy constructor");
             if (UID6.getValue() != 4u)
             {
@@ -191,7 +191,7 @@ int main()
                 ERROR_MSG("Unit test", "Incorrect default string (uid6=" << UID6.getName() << ")")
                 return EXIT_FAILURE;
             }
-            CUniqueID UID7(UID6);
+            CUID UID7(UID6);
             outputInternalUIDData("1x Copy constructor");
             if (UID7.getValue() != 4u)
             {
@@ -206,7 +206,7 @@ int main()
         }
         outputInternalUIDData("2x Destructor");
         
-        CUniqueID UID8;
+        CUID UID8;
         outputInternalUIDData("1x Constructor");
         if (UID8.getValue() != 5u)
         {
@@ -218,7 +218,7 @@ int main()
             ERROR_MSG("Unit test", "Incorrect default string (uid8=" << UID8.getName() << ")")
             return EXIT_FAILURE;
         }
-        CUniqueID UID9; 
+        CUID UID9; 
         outputInternalUIDData("1x Constructor");
         UID9 = UID8;
         outputInternalUIDData("1x Copy assignment operator");
@@ -235,7 +235,7 @@ int main()
     }
     outputInternalUIDData("2x Destructor");
     // UIDs 3, 4, and 5 should be free by now
-    CUniqueID UID10;
+    CUID UID10;
     outputInternalUIDData("1x Constructor");
     if (UID10.getValue() != 6u)
     {
@@ -247,7 +247,7 @@ int main()
         ERROR_MSG("Unit test", "Incorrect default string (uid10=" << UID10.getName() << ")")
         return EXIT_FAILURE;
     }
-    CUniqueID UID11;
+    CUID UID11;
     outputInternalUIDData("1x Constructor");
     if (UID11.getValue() != 5u)
     {
@@ -259,7 +259,7 @@ int main()
         ERROR_MSG("Unit test", "Incorrect default string (uid11=" << UID11.getName() << ")")
         return EXIT_FAILURE;
     }
-    CUniqueID UID12;
+    CUID UID12;
     outputInternalUIDData("1x Constructor");
     if (UID12.getValue() != 4u)
     {
@@ -273,7 +273,7 @@ int main()
     }
     // Test setting of new IDs
     {
-        CUniqueID UID13;
+        CUID UID13;
         outputInternalUIDData("1x Constructor");
         UID12.setNewID();
         outputInternalUIDData("1x New ID");

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,22 +20,22 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       unique_id_user.h
-/// \brief      Prototype of interface "IUniqueIDUser"
+/// \file       uid_user.h
+/// \brief      Prototype of interface "IUIDUser"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2016-01-28
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef UNIQUE_ID_USER_H
-#define UNIQUE_ID_USER_H
+#ifndef UID_USER_H
+#define UID_USER_H
 
 //--- Standard header --------------------------------------------------------//
 #include <unordered_map>
 
 //--- Program header ---------------------------------------------------------//
-#include "unique_id.h"
+#include "uid.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -44,7 +44,7 @@
 /// \brief Interface for classes that use a engine wide unique id.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IUniqueIDUser
+class IUIDUser
 {
 
     public:
@@ -60,10 +60,10 @@ class IUniqueIDUser
     protected:
         
         //--- Protected variables --------------------------------------------//
-        CUniqueID       m_UID; ///< Identifier
+        CUID       m_UID; ///< Identifier
 };
 
-typedef std::unordered_map<UIDType, IUniqueIDUser*> UIDUserType; ///< Stores entities by UID
+typedef std::unordered_map<UIDType, IUIDUser*> UIDUserType; ///< Stores entities by UID
 
 //--- Implementation is done here for inline optimisation --------------------//
 
@@ -74,9 +74,9 @@ typedef std::unordered_map<UIDType, IUniqueIDUser*> UIDUserType; ///< Stores ent
 /// \return Name of entity
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::string& IUniqueIDUser::getName() const
+inline const std::string& IUIDUser::getName() const
 {
-    METHOD_ENTRY("IUniqueIDUser::getName")
+    METHOD_ENTRY("IUIDUser::getName")
     return m_UID.getName();
 }
 
@@ -87,9 +87,9 @@ inline const std::string& IUniqueIDUser::getName() const
 /// \return Unique id of object
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline UIDType IUniqueIDUser::getUID() const
+inline UIDType IUIDUser::getUID() const
 {
-    METHOD_ENTRY("IUniqueIDUser::getUID")
+    METHOD_ENTRY("IUIDUser::getUID")
     return m_UID.getValue();
 }
 
@@ -100,9 +100,9 @@ inline UIDType IUniqueIDUser::getUID() const
 /// \param _strName Name to be set for entity
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IUniqueIDUser::setName(const std::string& _strName)
+inline void IUIDUser::setName(const std::string& _strName)
 {
-    METHOD_ENTRY("IUniqueIDUser::setName")
+    METHOD_ENTRY("IUIDUser::setName")
     m_UID.setName(_strName);
 }
 
@@ -111,10 +111,10 @@ inline void IUniqueIDUser::setName(const std::string& _strName)
 /// \brief Sets a new ID
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline void IUniqueIDUser::setNewID()
+inline void IUIDUser::setNewID()
 {
-    METHOD_ENTRY("IUniqueIDUser::setNewID")
+    METHOD_ENTRY("IUIDUser::setNewID")
     m_UID.setNewID();
 }
 
-#endif // UNIQUE_ID_USER_H
+#endif // UID_USER_H

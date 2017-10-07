@@ -170,7 +170,7 @@ bool CWorldDataStorage::addParticle(CParticle* _pParticle)
     std::array<CParticle*, BUFFER_QUADRUPLE> aParticle =
     {{_pParticle->clone(),_pParticle->clone(),_pParticle->clone(),_pParticle}};
     
-    std::array<IUniqueIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
+    std::array<IUIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
     {{aParticle[0],aParticle[1],aParticle[2],aParticle[3]}};
     
     m_ParticlesByName.add(_pParticle->getName(), aParticle);
@@ -213,7 +213,7 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
 
     std::array<CObject*, BUFFER_QUADRUPLE> aObjects =
     {{_pObject->clone(),_pObject->clone(),_pObject->clone(),_pObject}};
-    std::array<IUniqueIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
+    std::array<IUIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
     {{aObjects[0], aObjects[1], aObjects[2], aObjects[3]}};
     
     // Initialise new objects
@@ -383,7 +383,7 @@ IShape* CWorldDataStorage::getShapeByValue(const UIDType _nUID)
 /// \return Success?
 ///
 ///////////////////////////////////////////////////////////////////////////////
-bool CWorldDataStorage::addUIDUser(IUniqueIDUser* _pUIDUser)
+bool CWorldDataStorage::addUIDUser(IUIDUser* _pUIDUser)
 {
     METHOD_ENTRY("CWorldDataStorage::addUIDUser")
 
@@ -528,13 +528,13 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 //             _is >> pObjVis;
 //             
 //             UIDType UID = pObjVis->getUIDRef();
-//             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
-//             pObjVis->attachTo(static_cast<CObject*>(pUIDUser));
+//             IUIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
+//             pObjVis->setRef(static_cast<CObject*>(pUIDUser));
 //             _WDS.addObjectVisuals(pObjVis);
 //             
 // //             for (const auto ci : pObjVis->getShapeVisuals())
 // //             {
-// //                 ci->attachTo(UIDShapeRef[ci->getUIDRef()]);
+// //                 ci->setRef(UIDShapeRef[ci->getUIDRef()]);
 // //             }
 //             
 //             Log.progressBar("Loading object visuals", i, nSize);
@@ -556,10 +556,10 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 //         _is >> _WDS.m_pCamera;
 // 
 //         /// \todo Clean up camera hooks via kinematics states and uids.
-//         if (_WDS.m_pCamera->getKinematicsState().gotReference())
+//         if (_WDS.m_pCamera->getKinematicsState().hasReference())
 //         {
 //             UIDType UID = _WDS.m_pCamera->getKinematicsState().getUIDRef();
-//             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
+//             IUIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
 //             _WDS.m_pCamera->hook(static_cast<IKinematicsStateUser*>(static_cast<CObject*>(pUIDUser)));
 //         }
 //     }
@@ -597,8 +597,8 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 //             _is >> pDebVis;
 //             
 //             UIDType UID = pDebVis->getUIDRef();
-//             IUniqueIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
-//             pDebVis->attachTo(static_cast<CParticle*>(pUIDUser));
+//             IUIDUser* pUIDUser = _WDS.m_UIDUserRef[UID];
+//             pDebVis->setRef(static_cast<CParticle*>(pUIDUser));
 //             _WDS.addParticleVisuals(pDebVis);
 //             
 //             Log.progressBar("Loading particle visuals", i, nSize);
@@ -670,7 +670,7 @@ std::ostream& operator<<(std::ostream& _os, CWorldDataStorage& _WDS)
 /// \return Success?
 ///
 ///////////////////////////////////////////////////////////////////////////////
-bool CWorldDataStorage::addUIDUser(const std::array<IUniqueIDUser*, BUFFER_QUADRUPLE>& _aUIDUser)
+bool CWorldDataStorage::addUIDUser(const std::array<IUIDUser*, BUFFER_QUADRUPLE>& _aUIDUser)
 {
     METHOD_ENTRY("CWorldDataStorage::addUIDUser")
 
