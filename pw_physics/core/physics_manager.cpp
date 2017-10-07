@@ -81,22 +81,6 @@ CPhysicsManager::~CPhysicsManager()
         MEM_FREED("CUniverse")
         m_pUniverse = nullptr;
     }
-    
-    for (auto it = m_Components.begin();
-        it != m_Components.end(); ++it)
-    {
-        // Free memory if pointer is still existent
-        if ((*it).second != nullptr)
-        {
-            delete (*it).second;
-            (*it).second = nullptr;
-            MEM_FREED("CThruster")
-        }
-        else
-        {
-            DOM_MEMF(DEBUG_MSG("CThruster", "Memory already freed."))
-        }
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -290,55 +274,22 @@ UIDType CPhysicsManager::createShape(const std::string& _strShapeType)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Add a component to internal list of components
+/// \brief Create a thruster and insert to world data storage
 ///
-/// \param _pComponent Component that should be added to list
+/// \return UID value of thruster
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addComponent(CThruster* const _pComponent)
+UIDType CPhysicsManager::createThruster()
 {
-    METHOD_ENTRY("CPhysicsManager::addComponent")
-    m_Components.insert(std::pair<std::string,CThruster*>(_pComponent->getName(), _pComponent));
-    m_pDataStorage->addUIDUser(_pComponent);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Add a list of components to internal list of components
-///
-/// \param _Components Components that should be added to list
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::addComponents(const ComponentsType& _Components)
-{
-    METHOD_ENTRY("CPhysicsManager::addComponents")
-
-    auto ci = _Components.cbegin();
-  
-    while (ci != _Components.cend())
-    {
-        this->addComponent((*ci).second);
-        ++ci;
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Initialise all components
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::initComponents()
-{
-    METHOD_ENTRY("CPhysicsManager::initComponents")
-
-    INFO_MSG("Physics Manager", "Initialising components.")
-
-//     auto ci = m_Components.cbegin();
-//     while (ci != m_Components.cend())
-//     {
-//         (*ci)->init();
-//         ++ci;
-//     }
+    METHOD_ENTRY("CPhysicsManager::createThruster")
+    
+    CThruster* pThruster = new CThruster();
+    MEM_ALLOC("CThruster")
+    
+//     pThruster->init();
+    m_ThrustersToBeAddedToWorld.enqueue(pThruster);
+    
+    return pThruster->getUID();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -531,10 +482,15 @@ void CPhysicsManager::moveMasses(int nTest) const
 {
     METHOD_ENTRY("CPhysicsManager::moveMasses")
     
-    for (auto ci = m_Components.cbegin();
-        ci != m_Components.cend(); ++ci)
+//     for (auto ci = m_Components.cbegin();
+//         ci != m_Components.cend(); ++ci)
+//     {
+//         (*ci).second->execute();
+//     }
+    
+    for (auto pThruster : *m_pDataStorage->getThrustersByValue())
     {
-        (*ci).second->execute();
+        pThruster.second->execute();
     }
     
     std::vector<UIDType> vecToBeDeleted;
@@ -725,6 +681,12 @@ void CPhysicsManager::myInitComInterface()
                                           "Creates a shape.",
                                           {{ParameterType::INT, "UID of shape"},
                                            {ParameterType::STRING, "Shape type ("+ossShapeType.str()+" )"}},
+                                          "system"
+                                         );
+        m_pComInterface->registerFunction("create_thruster",
+                                          CCommand<int>([&]() -> int {return this->createThruster();}),
+                                          "Creates a default thruster.",
+                                          {{ParameterType::INT, "UID of object"}},
                                           "system"
                                          );
         m_pComInterface->registerFunction("create_universe",
@@ -1001,6 +963,44 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::DOUBLE, "Frequency"}},
                                            "system", "physics");
+        m_pComInterface->registerFunction("thruster_set_emitter",
+                                          CCommand<void, int, int>([&](const int _nUIDThr, const int _nUIDEm)
+                                          {
+                                            CThruster* pThruster = m_pDataStorage->getThrusterByValue(_nUIDThr);
+                                            if (pThruster != nullptr)
+                                            {
+                                                IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUIDEm);
+                                                if (pEmitter != nullptr)
+                                                {
+                                                    pThruster->IEmitterReferrer::setRef(pEmitter);
+                                                }
+                                            }
+                                          }),
+                                          "Attach thruster to emitter.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Thruster UID"},
+                                          {ParameterType::INT, "Emitter UID"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("thruster_set_object",
+                                          CCommand<void, int, int>([&](const int _nUIDThr, const int _nUIDObj)
+                                          {
+                                            CThruster* pThruster = m_pDataStorage->getThrusterByValue(_nUIDThr);
+                                            if (pThruster != nullptr)
+                                            {
+                                                CObject* pObject = m_pDataStorage->getObjectByValueBack(_nUIDObj);
+                                                if (pObject != nullptr)
+                                                {
+                                                    pThruster->IObjectReferrer::setRef(pObject);
+                                                }
+                                            }
+                                          }),
+                                          "Attach thruster to object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Thruster UID"},
+                                          {ParameterType::INT, "Object UID"}},
+                                          "system", "physics"
+                                          );
         m_pComInterface->registerFunction("toggle_pause",
                                           CCommand<void>([&](){this->togglePause();}),
                                           "Pauses or resumes physics simulation.",
@@ -1264,10 +1264,6 @@ void CPhysicsManager::myInitComInterface()
                                                     pObj->setAngle(_fAngle);
                                                     pObj->init();
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                             }),
                                           "Sets rotation angle of a given object.",
                                           {{ParameterType::NONE, "No return value"},
@@ -1283,10 +1279,6 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr)
                                                 {
                                                     pObj->setAngleVelocity(_fAngleVel);
-                                                }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                             }),
                                           "Sets angle velocity of a given object.",
@@ -1304,10 +1296,6 @@ void CPhysicsManager::myInitComInterface()
                                                 {
                                                     pObj->setCell(_nX, _nY);
                                                     pObj->init();
-                                                }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                             }),
                                           "Sets residing grid cell of a given object.",
@@ -1327,10 +1315,6 @@ void CPhysicsManager::myInitComInterface()
                                                     pObj->setOrigin(_fX, _fY);
                                                     pObj->init();
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                             }),
                                           "Sets position of a given object.",
                                           {{ParameterType::NONE, "No return value"},
@@ -1347,10 +1331,6 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr)
                                                 {
                                                     pObj->setVelocity(Vector2d(_fX, _fY));
-                                                }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                             }),
                                           "Sets velocity of a given object.",
@@ -1564,47 +1544,42 @@ void CPhysicsManager::myInitComInterface()
         //----------------------------------------------------------------------
         // Sim package
         //----------------------------------------------------------------------
-        m_pComInterface->registerFunction("activate_thruster",
-                                          CCommand<double,std::string,double>(
-                                            [&](const std::string& _strName, const double& _fThrust) -> double 
+        m_pComInterface->registerFunction("thruster_activate",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fThrust)
                                             {
-                                                auto itThruster  = m_Components.find(_strName);
-                                                if ( itThruster != m_Components.end())
+                                                CThruster* pThruster= m_pDataStorage->getThrusterByValue(_nUID);
+                                                if (pThruster != nullptr)
                                                 {
-                                                    return (*itThruster).second->activate(_fThrust);
-                                                }
-                                                else
-                                                {
-                                                    WARNING_MSG("Physics Manager", "Unknown thruster " << _strName)
-                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+                                                    pThruster->activate(_fThrust);
                                                 }
                                             }),
                                           "Activates thruster with given thrust.",
-                                          {{ParameterType::DOUBLE, "Actually applied thrust"},
-                                           {ParameterType::STRING, "Thruster name"},
-                                           {ParameterType::STRING, "Thrust to be applied when activated"}},
-                                          "sim", "physics"
-                                         );
-        m_pComInterface->registerFunction("deactivate_thruster",
-                                          CCommand<void, std::string>(
-                                            [&](const std::string& _strName)
-                                            {
-                                                auto itThruster  = m_Components.find(_strName);
-                                                if ( itThruster != m_Components.end())
-                                                {
-                                                    return (*itThruster).second->deactivate();
-                                                }
-                                                else
-                                                {
-                                                    WARNING_MSG("Physics Manager", "Unknown thruster " << _strName)
-                                                    throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
-                                                }
-                                            }),
-                                          "Deactivates thruster.",
                                           {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::STRING, "Thrust to be applied when activated"}},
+                                           {ParameterType::INT, "Thruster UID"},
+                                           {ParameterType::DOUBLE, "Thrust to be applied when activated"}},
                                           "sim", "physics"
                                          );
+//         m_pComInterface->registerFunction("deactivate_thruster",
+//                                           CCommand<void, std::string>(
+//                                             [&](const std::string& _strName)
+//                                             {
+//                                                 auto itThruster  = m_Components.find(_strName);
+//                                                 if ( itThruster != m_Components.end())
+//                                                 {
+//                                                     return (*itThruster).second->deactivate();
+//                                                 }
+//                                                 else
+//                                                 {
+//                                                     WARNING_MSG("Physics Manager", "Unknown thruster " << _strName)
+//                                                     throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
+//                                                 }
+//                                             }),
+//                                           "Deactivates thruster.",
+//                                           {{ParameterType::NONE, "No return value"},
+//                                            {ParameterType::STRING, "Thrust to be applied when activated"}},
+//                                           "sim", "physics"
+//                                          );
     }
     else
     {
@@ -1641,6 +1616,11 @@ void CPhysicsManager::processQueues()
     while (m_ShapesToBeAddedToWorld.try_dequeue(pShp))
     {
         m_pDataStorage->addShape(pShp);
+    }
+    CThruster* pThruster = nullptr;
+    while (m_ThrustersToBeAddedToWorld.try_dequeue(pThruster))
+    {
+        m_pDataStorage->addThruster(pThruster);
     }
     m_pComInterface->callWriters("physics");
 }

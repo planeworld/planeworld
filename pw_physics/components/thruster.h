@@ -94,9 +94,6 @@ class CThruster : public IKinematicsStateUser,
        
 };
 
-/// Specifies a list of thruster components
-typedef std::unordered_multimap<std::string, CThruster*> ComponentsType;
-
 //--- Implementation is done here for inline optimisation --------------------//
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,7 +110,10 @@ inline void CThruster::deactivate()
     m_fThrust = 0.0;
     
     m_bActive = false;
-    IEmitterReferrer::m_pRef->deactivate();
+    if (IEmitterReferrer::hasRef())
+    {
+        IEmitterReferrer::m_pRef->deactivate();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

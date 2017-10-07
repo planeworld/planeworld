@@ -34,6 +34,7 @@
 #include "emitter.h"
 #include "particle.h"
 #include "object.h"
+#include "thruster.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -127,6 +128,21 @@ CWorldDataStorage::~CWorldDataStorage()
         else
         {
             DOM_MEMF(DEBUG_MSG("IJoint", "Memory already freed."))
+        }
+    }
+    
+    for (auto pThruster : m_ThrustersByValue)
+    {
+        // Free memory if pointer is still existent
+        if (pThruster.second != nullptr)
+        {
+            delete pThruster.second;
+            pThruster.second = nullptr;
+            MEM_FREED("CThruster")
+        }
+        else
+        {
+            DOM_MEMF(DEBUG_MSG("CThruster", "Memory already freed."))
         }
     }
 }
@@ -247,6 +263,27 @@ void CWorldDataStorage::addShape(IShape* _pShape)
 {
     METHOD_ENTRY("CWorldDataStorage::addShape")
     m_ShapesByValue.insert(std::pair<UIDType, IShape*>(_pShape->getUID(), _pShape));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add a thruster to list
+///
+/// This method adds the given thruster to the list of thrusters.
+///
+/// \param _pThruster Thruster that should be added to list
+///
+/// \return Success?
+///
+///////////////////////////////////////////////////////////////////////////////
+bool CWorldDataStorage::addThruster(CThruster* _pThruster)
+{
+    METHOD_ENTRY("CWorldDataStorage::addThruster")
+
+    m_ThrustersByValue.insert({_pThruster->getUID(), _pThruster});
+    
+    if (!this->addUIDUser(_pThruster)) return false;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -374,6 +411,31 @@ IShape* CWorldDataStorage::getShapeByValue(const UIDType _nUID)
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return thruster, accessed by given UID value
+///
+/// \param _nUID UID of thruster to return
+///
+/// \return Thruster with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+CThruster* CWorldDataStorage::getThrusterByValue(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::getThrusterByValue")
+
+    const auto ci = m_ThrustersByValue.find(_nUID);
+    if (ci != m_ThrustersByValue.end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("World Data Storage", "Unknown thruster with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Add a UID user to buffer
@@ -415,9 +477,8 @@ void CWorldDataStorage::swapBack()
 
     m_ParticlesByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
-    
     m_ParticlesByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
-//     m_EmittersByValue.copyDeep(BUFFER_TRIPLE_BACK, BUFFER_TRIPLE_MIDDLE);
+
     m_ObjectsByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);

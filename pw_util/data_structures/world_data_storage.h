@@ -46,6 +46,7 @@ class CParticle;
 class IEmitter;
 class CObject;
 class IShape;
+class CThruster;
 
 typedef std::list<IJoint*>                      JointsType;                 ///< Specifies a list of joints
 
@@ -60,6 +61,8 @@ typedef CMultiBuffer<BUFFER_QUADRUPLE, ParticlesByValueType, UIDType, CParticle*
 
 /// Map of emitters, accessed by UID value
 typedef std::unordered_map<UIDType, IEmitter*> EmittersByValueType;
+/// Map of emitters, accessed by UID value
+typedef std::unordered_map<UIDType, CThruster*> ThrustersByValueType;
 // /// Map of buffered emitters, accessed by UID value
 // typedef CMultiBuffer<BUFFER_TRIPLE, EmittersByValueType, UIDType, IEmitter*> BufferedEmittersByValueType;
 
@@ -109,6 +112,7 @@ class CWorldDataStorage
         void addJoint(IJoint*);
         bool addObject(CObject*);
         void addShape(IShape*);
+        bool addThruster(CThruster*);
         bool addUIDUser(IUIDUser*);
         
         void updateObject(const UIDType);
@@ -117,6 +121,7 @@ class CWorldDataStorage
         CObject*                    getObjectByValueBack(const UIDType);
         CParticle*                  getParticleByValueBack(const UIDType);
         IShape*                     getShapeByValue(const UIDType);
+        CThruster*                  getThrusterByValue(const UIDType);
         
         EmittersByValueType*        getEmittersByValue();
         BufferedObjectsByNameType&  getObjectsBuffer();
@@ -127,6 +132,7 @@ class CWorldDataStorage
         ObjectsByNameType*          getObjectsByNameBack();
         ObjectsByValueType*         getObjectsByValueBack();
         ObjectsByValueType*         getObjectsByValueFront();
+        ThrustersByValueType*       getThrustersByValue();
         UIDUsersByValueType*        getUIDUsersByValueFront();
         UIDUsersByValueType*        getUIDUsersByValueBack();
 
@@ -147,14 +153,17 @@ class CWorldDataStorage
         //--- Methods [private] ----------------------------------------------//
         bool addUIDUser(const std::array<IUIDUser*,BUFFER_QUADRUPLE>&);
       
+        // Buffered entities, used by graphical clients
         BufferedParticlesByNameType     m_ParticlesByName;      ///< Buffered particles, accessed by name
         BufferedParticlesByValueType    m_ParticlesByValue;     ///< Buffered particles, accessed by value
         BufferedObjectsByNameType       m_ObjectsByName;        ///< Buffered objects, accessed by name
         BufferedObjectsByValueType      m_ObjectsByValue;       ///< Buffered objects, accessed by UID value
         BufferedUIDUsersByValueType     m_UIDUsersByValue;      ///< Buffered UID users, accessed by value
 
+        // Entities of physics engine
         EmittersByValueType         m_EmittersByValue;          ///< Emitters, accessed by value
         ShapesByValueType           m_ShapesByValue;            ///< Shapes, accessed by UID value
+        ThrustersByValueType        m_ThrustersByValue;         ///< Thrusters, accessed by UID value
         UIDsByNameType              m_UIDsByName;               ///< UIDs of entities, accessed by name
         
         JointsType                  m_Joints;                   ///< List of joints
@@ -309,6 +318,19 @@ inline ObjectsByValueType* CWorldDataStorage::getObjectsByValueFront()
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectsByValueFront")
     return m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns thrusters, accessed by value
+///
+/// \return Thrusters, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline ThrustersByValueType* CWorldDataStorage::getThrustersByValue()
+{
+    METHOD_ENTRY("CWorldDataStorage::getThrustersByValue")
+    return &m_ThrustersByValue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

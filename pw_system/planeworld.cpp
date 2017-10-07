@@ -301,8 +301,7 @@ int main(int argc, char *argv[])
     //
     ////////////////////////////////////////////////////////////////////////////
     pPhysicsManager->initObjects();
-//     pPhysicsManager->initEmitters();
-    pPhysicsManager->initComponents();
+
     #ifdef PW_MULTITHREADING    
         pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
         MEM_ALLOC("std::thread")

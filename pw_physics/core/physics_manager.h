@@ -60,7 +60,9 @@ typedef moodycamel::ConcurrentQueue<CObject*> ObjectsQueueType;
 /// Type for concurrent particles queue 
 typedef moodycamel::ConcurrentQueue<CParticle*> ParticlesQueueType;
 /// Type for concurrent shape queue
-typedef moodycamel::ConcurrentQueue<IShape*>  ShapesQueueType;  
+typedef moodycamel::ConcurrentQueue<IShape*>  ShapesQueueType;
+/// Type for concurrent shape queue
+typedef moodycamel::ConcurrentQueue<CThruster*>  ThrustersQueueType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -92,13 +94,11 @@ class CPhysicsManager : public IComInterfaceProvider,
         UIDType createParticles(const std::string&);
         UIDType createShape(const ShapeType);
         UIDType createShape(const std::string&);
+        UIDType createThruster();
         
         void setConstantGravity(const Vector2d&);
         void setFrequencyParticle(const double&);
         
-        void addComponent(CThruster* const);
-        void addComponents(const ComponentsType&);
-        void initComponents();
         void initEmitters();
         void initObjects();
         
@@ -132,6 +132,8 @@ class CPhysicsManager : public IComInterfaceProvider,
         ObjectsQueueType    m_ObjectsToBeAddedToWorld;          ///< Objects already created to be added to world
         ParticlesQueueType  m_ParticlesToBeAddedToWorld;        ///< Particles already created to be added to world
         ShapesQueueType     m_ShapesToBeAddedToWorld;           ///< Shapes already created to be added to world
+        ThrustersQueueType  m_ThrustersToBeAddedToWorld;        ///< Thrusters already created to be added to world
+        
       
         CUniverse*          m_pUniverse;                        ///< The procedurally generated universe
         CCollisionManager   m_CollisionManager;                 ///< Instance for collision handling
@@ -141,8 +143,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         
         Vector2d                    m_vecConstantGravitation;   ///< Vector for constant gravitation
 
-        ComponentsType              m_Components;               ///< List of components
-        
         std::string                 m_strCellUpdateLast;        ///< Last updated object concerning grid cells
         double                      m_fCellUpdateResidual;      ///< Residual for calculation of cell update
         bool                        m_bCellUpdateFirst;         ///< Indicates the first cell update (to initialise access)

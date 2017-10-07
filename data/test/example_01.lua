@@ -60,13 +60,19 @@ idEm01 = pw.system.create_emitter("particle")
 idPa01 = pw.system.create_particles("dot")
 pw.system.emitter_set_particles(idEm01, idPa01)
 pw.system.emitter_set_distribution(idEm01, "point_source")
-pw.system.emitter_set_mode(idEm01, "once")
+pw.system.emitter_set_mode(idEm01, "timed")
 pw.system.emitter_set_frequency(idEm01, 100)
 pw.system.emitter_set_number(idEm01, 2000)
 pw.system.emitter_set_angle(idEm01, 1.57)
 pw.system.emitter_set_angle_std(idEm01, 0.2)
 pw.system.emitter_set_velocity(idEm01, 10.0)
 pw.system.emitter_set_velocity_std(idEm01, 1.0)
+
+-- Create a thruster
+idThruster01 = pw.system.create_thruster()
+pw.system.thruster_set_object(idThruster01, idObj01)
+pw.system.thruster_set_emitter(idThruster01, idEm01)
+pw.sim.thruster_activate(idThruster01)
 
 -- Pause simulation
 pw.system.pause()
@@ -77,10 +83,10 @@ pw.system.register_lua_callback("e_lua_update", "update_earth")
 
 Force = 1.0
 function update()
-    pw.physics.obj_apply_force(idObj01, 0.0, Force, 0.0, 0.0)
-    Force = Force+1.0;
+    pw.sim.thruster_activate(idThruster01, Force);
 end
 
 function update_earth()
     pw.physics.obj_apply_force(idObjEarth, 0.0, -Force, 0.0, 0.0)
+    Force = Force + 1.0
 end

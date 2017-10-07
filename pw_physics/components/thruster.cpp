@@ -66,15 +66,17 @@ const double& CThruster::activate(const double& _fThrust)
     m_fThrust = _fThrust;
     if (m_fThrust > m_fThrustMax)
     {
-      NOTICE_MSG("Thruster", "Exceeding maximum thrust, limiting to " << m_fThrustMax)
-      m_fThrust = m_fThrustMax;
+        m_fThrust = m_fThrustMax;
     }
     if (m_fThrust < 0.0) m_fThrust = 0.0;
-    if (m_fThrust == 0.0) this->deactivate();
-    else
+    if (m_fThrust == 0.0 && m_bActive)
     {
-      m_bActive = true;
-      IEmitterReferrer::m_pRef->activate();
+        this->deactivate();
+    }
+    else if (!m_bActive)
+    {
+        m_bActive = true;
+        if (IEmitterReferrer::hasRef()) IEmitterReferrer::m_pRef->activate();
     }
     
     return m_fThrust;
@@ -95,9 +97,12 @@ void CThruster::execute()
 
     if (m_bActive)
     {
-        IObjectReferrer::m_pRef->addForceLC(Vector2d(0.0,m_fThrust), m_KinematicsState.getLocalOrigin());
+        if (IObjectReferrer::hasRef())
+        {
+            IObjectReferrer::m_pRef->addForceLC(Vector2d(0.0,m_fThrust), m_KinematicsState.getLocalOrigin());
+        }
         
-        if (m_fThrustMax != 0.0)
+        if (IEmitterReferrer::hasRef() && m_fThrustMax != 0.0)
         {
             IEmitterReferrer::m_pRef->setVelocity(m_fThrust/m_fThrustMax * m_fEmitterVelocity);
             IEmitterReferrer::m_pRef->setVelocityStd(m_fThrust/m_fThrustMax * m_fEmitterVelocityStd);
