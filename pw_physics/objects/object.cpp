@@ -360,8 +360,11 @@ void CObject::init()
     this->setCell(m_vecCell);
     
     // Call transform twice to correctly set bounding boxes
-    this->transform();
-    this->transform();
+    // (Otherwise, temporal bbox will always include the origin)
+    m_Geometry.transform(m_KinematicsState.getAngle(), m_KinematicsState.getOrigin());
+    m_KinematicsState.transform(m_pIntPos->getValue(), m_Geometry.getCOM());
+    m_Geometry.transform(m_KinematicsState.getAngle(), m_KinematicsState.getOrigin());
+    m_KinematicsState.transform(m_pIntPos->getValue(), m_Geometry.getCOM());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

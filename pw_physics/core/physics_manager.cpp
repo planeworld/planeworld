@@ -1094,6 +1094,36 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DOUBLE, "Point of attack Y"}},
                                            "physics", "physics"
                                          );
+        m_pComInterface->registerFunction("obj_disable_dynamics",
+                                          CCommand<void, int>(
+                                            [&](const int _nUID)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->disableDynamics();
+                                                }
+                                            }),
+                                          "Disable dynamics for given object (i.e. object is fixed to its world coordinates).",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "UID of object"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_enable_dynamics",
+                                          CCommand<void, int>(
+                                            [&](const int _nUID)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->enableDynamics();
+                                                }
+                                            }),
+                                          "Enable dynamics for given object (i.e. kinetics, object will react on forces).",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "UID of object"}},
+                                           "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("obj_get_angle",
                                           CCommand<double, int>(
                                               [&](const int _nUID) -> double
