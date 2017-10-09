@@ -236,7 +236,11 @@ inline void CThruster::mySetRef()
 {
     METHOD_ENTRY("CThruster::mySetRef")
     if (IEmitterReferrer::m_pRef != nullptr)
+    {
         m_KinematicsState.setRef(&(IEmitterReferrer::m_pRef->getKinematicsState()));
+        m_fEmitterVelocity = IEmitterReferrer::m_pRef->getVelocity();
+        m_fEmitterVelocityStd = IEmitterReferrer::m_pRef->getVelocityStd();
+    }
     if (IObjectReferrer::m_pRef != nullptr)
         m_KinematicsState.setRef(&(IObjectReferrer::m_pRef->getKinematicsState()));
 }

@@ -14,7 +14,7 @@ pw.system.set_frequency_physics(200)
 pw.system.set_frequency_visuals(60)
 pw.system.set_data_path_visuals("../")
 pw.system.create_universe(23479, 10000)
--- pw.physics.set_gravity_vector(0.0, -9.81)
+pw.physics.set_gravity_vector(0.0, -9.81)
 pw.system.win_main_resize(1800, 900)
 idCam01 = pw.system.create_camera()
 pw.visuals.toggle_grid()
@@ -39,11 +39,11 @@ pw.system.obj_add_shp(idObjEarth, pw.system.create_shp("shp_planet"))
 pw.physics.obj_set_position(idObjEarth, 0.0, -1000.0)
 
 -- Create a text window
-idWin01=pw.system.create_window()
-idWdg01=pw.system.create_widget("text")
-pw.system.widget_set_text(idWdg01, "Welcome to planeworld, press p to start")
-pw.system.win_set_widget(idWin01, idWdg01)
-pw.system.win_center_keep(idWin01)
+-- idWin01=pw.system.create_window()
+-- idWdg01=pw.system.create_widget("text")
+-- pw.system.widget_set_text(idWdg01, "Welcome to planeworld, press p to start")
+-- pw.system.win_set_widget(idWin01, idWdg01)
+-- pw.system.win_center_keep(idWin01)
 
 -- Create camera view in new window
 idWin02=pw.system.create_window()
@@ -61,32 +61,38 @@ idPa01 = pw.system.create_particles("dot")
 pw.system.emitter_set_particles(idEm01, idPa01)
 pw.system.emitter_set_distribution(idEm01, "point_source")
 pw.system.emitter_set_mode(idEm01, "timed")
-pw.system.emitter_set_frequency(idEm01, 100)
-pw.system.emitter_set_number(idEm01, 2000)
-pw.system.emitter_set_angle(idEm01, 1.57)
-pw.system.emitter_set_angle_std(idEm01, 0.2)
-pw.system.emitter_set_velocity(idEm01, 10.0)
-pw.system.emitter_set_velocity_std(idEm01, 1.0)
+pw.system.emitter_set_frequency(idEm01, 200)
+pw.system.emitter_set_number(idEm01, 500)
+pw.system.emitter_set_angle(idEm01, math.rad(-90))
+pw.system.emitter_set_angle_std(idEm01, math.rad(5))
+pw.system.emitter_set_velocity(idEm01, 100.0)
+pw.system.emitter_set_velocity_std(idEm01, 5.0)
 
 -- Create a thruster
 idThruster01 = pw.system.create_thruster()
 pw.system.thruster_set_object(idThruster01, idObj01)
 pw.system.thruster_set_emitter(idThruster01, idEm01)
-pw.sim.thruster_activate(idThruster01)
+pw.physics.thruster_set_thrust_max(idThruster01, 100.0)
+pw.sim.thruster_activate(idThruster01, 50.0)
 
 -- Pause simulation
 pw.system.pause()
 
 -- Setup callback functions
 pw.system.register_lua_callback("e_lua_update", "update")
-pw.system.register_lua_callback("e_lua_update", "update_earth")
+-- pw.system.register_lua_callback("e_lua_update", "update_earth")
 
 Force = 1.0
 function update()
-    pw.sim.thruster_activate(idThruster01, Force);
+--     if Force < 50.0 then
+--         pw.sim.thruster_activate(idThruster01, Force)
+--         Force = Force + 1.0
+--     elseif Force > 250.0 then
+--         pw.sim.thruster_deactivate(idThruster01)
+--         Force = 1.0
+--     end
 end
 
 function update_earth()
     pw.physics.obj_apply_force(idObjEarth, 0.0, -Force, 0.0, 0.0)
-    Force = Force + 1.0
 end

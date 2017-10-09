@@ -39,7 +39,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state_user.h"
 #include "uid_user.h"
-#include "uid_referrer.h"
+#include "object_referrer.h"
 #include "world_data_storage_user.h"
 
 //--- Enumerations -----------------------------------------------------------//
@@ -90,6 +90,7 @@ const EmitterType EMITTER_DEFAULT_TYPE = EmitterType::PARTICLE;                 
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class IEmitter : public IKinematicsStateUser,
+                 public IObjectReferrer,
                  public IUIDUser,
                  public IWorldDataStorageUser
 {
@@ -103,6 +104,8 @@ class IEmitter : public IKinematicsStateUser,
         //--- Constant Methods -----------------------------------------------//
         virtual EmitterType         getEmitterType() const;
         
+              double                getAngle() const;
+        const double&               getAngleStd() const;
         EmitterModeType             getMode() const;
         const double&               getVelocity() const;
         const double&               getVelocityStd() const;
@@ -128,6 +131,8 @@ class IEmitter : public IKinematicsStateUser,
         void setVelocityStd(const double&);
         
     protected:
+        
+        void mySetRef() override;
 
         EmitterModeType         m_EmitterMode;              ///< Emit mode
         EmitterDistributionType m_EmitterDistribution;      ///< Distribution of emitter
@@ -291,6 +296,32 @@ inline IEmitter::~IEmitter()
 {
     METHOD_ENTRY("IEmitter::~IEmitter")
     DTOR_CALL("IEmitter::~IEmitter")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the emitters angle
+///
+/// \return Emitter angle
+///
+///////////////////////////////////////////////////////////////////////////////
+inline double IEmitter::getAngle() const
+{
+    METHOD_ENTRY("IEmitter::getAngle")
+    return m_KinematicsState.getAngle();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return the emitters angle standard deviation
+///
+/// \return Emitter angle standard deviation
+///
+///////////////////////////////////////////////////////////////////////////////
+inline const double& IEmitter::getAngleStd() const
+{
+    METHOD_ENTRY("IEmitter::getAngleStd")
+    return m_fAngleStd;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -558,6 +589,17 @@ inline void IEmitter::setVelocityStd(const double& _fVStd)
     {
         m_fVelocityStd = _fVStd;
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Link kinematics, i.e. attach emitter to object
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void IEmitter::mySetRef()
+{
+    METHOD_ENTRY("IEmitter::mySetRef")
+    m_KinematicsState.setRef(&m_pRef->getKinematicsState());
 }
 
 #endif

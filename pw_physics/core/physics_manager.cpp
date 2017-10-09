@@ -808,7 +808,7 @@ void CPhysicsManager::myInitComInterface()
                                                     CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUIDPa);
                                                     if (pParticle != nullptr)
                                                     {
-                                                        static_cast<CParticleEmitter*>(pEmitter)->setRef(pParticle);
+                                                        static_cast<CParticleEmitter*>(pEmitter)->IParticleReferrer::setRef(pParticle);
                                                     }
                                                 }
                                                 else
@@ -973,6 +973,12 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pEmitter != nullptr)
                                                 {
                                                     pThruster->IEmitterReferrer::setRef(pEmitter);
+                                                    
+                                                    // Set referred object also for emitter if object already set
+                                                    if (pThruster->IObjectReferrer::hasRef())
+                                                    {
+                                                        pEmitter->IObjectReferrer::setRef(pThruster->IObjectReferrer::getRef());
+                                                    }
                                                 }
                                             }
                                           }),
@@ -992,6 +998,12 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObject != nullptr)
                                                 {
                                                     pThruster->IObjectReferrer::setRef(pObject);
+                                                    
+                                                    // Set referred object also for emitter if emitter already set
+                                                    if (pThruster->IEmitterReferrer::hasRef())
+                                                    {
+                                                        pThruster->IEmitterReferrer::getRef()->IObjectReferrer::setRef(pObject);
+                                                    }
                                                 }
                                             }
                                           }),
@@ -1439,6 +1451,22 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DYN_ARRAY, "Vertices (x0, y0, x1, y1, ... xN, yN)"}},
                                            "system", "physics"
                                          );
+        m_pComInterface->registerFunction("thruster_set_thrust_max",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fThrustMax)
+                                            {
+                                                CThruster* pThruster= m_pDataStorage->getThrusterByValue(_nUID);
+                                                if (pThruster != nullptr)
+                                                {
+                                                    pThruster->setThrustMax(_fThrustMax);
+                                                }
+                                            }),
+                                          "Sets maximum thrust level to given value.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Thruster UID"},
+                                           {ParameterType::DOUBLE, "Maximum thrust level"}},
+                                          "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("get_time",
                                           CCommand<double>([&]() -> double {return this->m_SimTimer[0].getSecondsRaw();}),
                                           "Provides simulation time (raw seconds, years excluded).",
@@ -1560,26 +1588,21 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DOUBLE, "Thrust to be applied when activated"}},
                                           "sim", "physics"
                                          );
-//         m_pComInterface->registerFunction("deactivate_thruster",
-//                                           CCommand<void, std::string>(
-//                                             [&](const std::string& _strName)
-//                                             {
-//                                                 auto itThruster  = m_Components.find(_strName);
-//                                                 if ( itThruster != m_Components.end())
-//                                                 {
-//                                                     return (*itThruster).second->deactivate();
-//                                                 }
-//                                                 else
-//                                                 {
-//                                                     WARNING_MSG("Physics Manager", "Unknown thruster " << _strName)
-//                                                     throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
-//                                                 }
-//                                             }),
-//                                           "Deactivates thruster.",
-//                                           {{ParameterType::NONE, "No return value"},
-//                                            {ParameterType::STRING, "Thrust to be applied when activated"}},
-//                                           "sim", "physics"
-//                                          );
+        m_pComInterface->registerFunction("thruster_deactivate",
+                                          CCommand<void, int>(
+                                            [&](const int _nUID)
+                                            {
+                                                CThruster* pThruster= m_pDataStorage->getThrusterByValue(_nUID);
+                                                if (pThruster != nullptr)
+                                                {
+                                                    pThruster->deactivate();
+                                                }
+                                            }),
+                                          "Deactivates given thruster.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Thruster UID"}},
+                                          "sim", "physics"
+                                         );
     }
     else
     {

@@ -34,8 +34,8 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "particle.h"
 #include "emitter.h"
+#include "particle_referrer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -43,7 +43,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CParticleEmitter : public IEmitter,
-                         public IUIDReferrer<CParticle>
+                         public IParticleReferrer
 {
     
     public:
@@ -110,7 +110,7 @@ inline void CParticleEmitter::setNumber(const std::uint32_t& _nNrMax)
 {
     METHOD_ENTRY("CParticleEmitter::setMode")
     m_nNr = _nNrMax;
-    m_pRef->setNumber(_nNrMax);
+    IParticleReferrer::m_pRef->setNumber(_nNrMax);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
