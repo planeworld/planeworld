@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \file       parzival.cpp 
-/// \brief      implementation of class "CParzival"
+/// \brief      Implementation of class "CParzival"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2009-10-18
@@ -44,8 +44,6 @@ CParzival::CParzival(const std::string& strFilename) :
         DEBUG_MSG("FileIO", "Directly open file by constructor, calling method open().")
     )
     open(strFilename);
-
-    METHOD_EXIT("CParzival::CParzival")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,8 +65,6 @@ CParzival::~CParzival()
             DEBUG_MSG("FileIO","File closed by destructor.")
         )
     }
-
-    METHOD_EXIT("CParzival::~CParzival")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +83,6 @@ double CParzival::readDouble()
     goNext();
     m_FStream >> fValue;
 
-    METHOD_EXIT("CParzival::readDouble")
     return fValue;
 }
 
@@ -108,7 +103,6 @@ int CParzival::readInt()
     goNext();
     m_FStream >> nValue;
 
-    METHOD_EXIT("CParzival::readInt")
     return nValue;
 }
 
@@ -127,8 +121,7 @@ std::string CParzival::readString()
 
     goNext();
     m_FStream >> str;
-
-    METHOD_EXIT("CParzival::read")
+    
     return str;
 }
 
@@ -149,7 +142,6 @@ std::string CParzival::readLine()
     m_FStream.getline(chLine, PARZIVAL_MAX_COLUMNS);
     strLine = chLine;
 
-    METHOD_EXIT("CParzival::readLine")
     return strLine;
 }
 
@@ -163,10 +155,7 @@ std::string CParzival::readLine()
 void CParzival::writeInt(const int& nValue)
 {
     METHOD_ENTRY("CParzival::writeInt")
-
     m_FStream << nValue;
-
-    METHOD_EXIT("CParzival::writeInt")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -179,10 +168,7 @@ void CParzival::writeInt(const int& nValue)
 void CParzival::writeString(const std::string& _str)
 {
     METHOD_ENTRY("CParzival::writeString")
-
     m_FStream << _str;
-
-    METHOD_EXIT("CParzival::writeString")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -218,13 +204,11 @@ bool CParzival::create(const std::string& strFilename)
     {
         ERROR_MSG("FileIO", "File " + strFilename + " could not be created.")
         m_FStream.clear();
-        METHOD_EXIT("CParzival::create")
         return false;
     }
     else
     {
         DOM_FIO(DEBUG_MSG("FileIO", strFilename + " succesfully created."))
-        METHOD_EXIT("CParzival::create")
         return true;
     }
 }
@@ -262,13 +246,11 @@ bool CParzival::open(const std::string& strFilename)
     {
         ERROR_MSG("FileIO", "File " + strFilename + " could not be opened.")
         m_FStream.clear();
-        METHOD_EXIT("CParzival::open")
         return false;
     }
     else
     {
         DOM_FIO(DEBUG_MSG("FileIO", strFilename + " succesfully opened."))
-        METHOD_EXIT("CParzival::open")
         return true;
     }
 }
@@ -292,8 +274,6 @@ void CParzival::close()
         m_FStream.close();
         DOM_FIO(DEBUG_MSG("FileIO", m_strFilename + " closed."))
     }
-
-    METHOD_EXIT("CParzival::close")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -304,10 +284,7 @@ void CParzival::close()
 void CParzival::goHead()
 {
     METHOD_ENTRY("CParzival::goHead")
-
     m_FStream.seekp(0, std::ios::beg);
-
-    METHOD_EXIT("CParzival::goHead")
 }
 
 
@@ -335,6 +312,4 @@ void CParzival::goNext()
         m_FStream.get(ch);
     }
     m_FStream.putback(ch);
-
-    METHOD_EXIT("CParzival::goNext")
 }

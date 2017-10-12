@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,14 +33,10 @@
 #ifndef XFIG_LOADER_H
 #define XFIG_LOADER_H
 
-// standard-header
-// #include <fstream>
-// #include <iostream>
-#include <list>
-// #include <string>
+//--- Standard header --------------------------------------------------------//
+#include <vector>
 
-// program-header
-// #include "log.h"
+//--- Program header ---------------------------------------------------------//
 #include "parzival.h"
 #include "shape.h"
 
@@ -57,18 +53,16 @@ class CXFigLoader
     public:
 
         //--- Constructor/Destructor -----------------------------------------//
-        CXFigLoader();
-        ~CXFigLoader(){};
 
         //--- Constant Operators ---------------------------------------------//
         
         //--- Operators ------------------------------------------------------//
         
         //--- Constant Methods -----------------------------------------------//
-        const std::list<IShape*>&   getShapes() const;
-        
 
         //--- Methods --------------------------------------------------------//
+        std::vector<IShape*>* const getShapes();
+        
         void load(const std::string&);
 
         //--- friends --------------------------------------------------------//
@@ -76,7 +70,7 @@ class CXFigLoader
     private:
 
         //--- Private Variables ----------------------------------------------//
-        std::list<IShape*>      m_ShapeList;            ///< Stores the shapes
+        std::vector<IShape*>      m_Shapes; ///< Stores the shapes
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -88,12 +82,10 @@ class CXFigLoader
 /// \return Shape list
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::list<IShape*>& CXFigLoader::getShapes() const
+inline std::vector<IShape*>* const CXFigLoader::getShapes()
 {
     METHOD_ENTRY("CXFigLoader::getShapes")
-
-    METHOD_EXIT("CXFigLoader::getShapes")
-    return m_ShapeList;
+    return &m_Shapes;
 }
 
 #endif

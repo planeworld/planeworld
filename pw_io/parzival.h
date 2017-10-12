@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2017 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,10 +31,7 @@
 #define PARZIVAL_H
 
 //--- Standard header --------------------------------------------------------//
-// #include <iostream>
 #include <fstream>
-// #include <sstream>
-// #include <string>
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
@@ -100,10 +97,7 @@ class CParzival
 inline void CParzival::setComment(const char _chComment)
 {
     METHOD_ENTRY("CParzival::setComment(const char)");
-
     m_chComment = _chComment;
-
-    METHOD_EXIT("CParzival::setComment(const char)");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,8 +108,6 @@ inline void CParzival::setComment(const char _chComment)
 inline std::fstream& CParzival::getStream()
 {
     METHOD_ENTRY("CParzival::getStream()");
-
-    METHOD_EXIT("CParzival::getStream()");
     return m_FStream;
 }
 

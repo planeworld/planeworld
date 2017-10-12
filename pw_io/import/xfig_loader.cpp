@@ -35,18 +35,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief constructor
-///
-////////////////////////////////////////////////////////////////////////////////
-CXFigLoader::CXFigLoader()
-{
-    METHOD_ENTRY("CXFigLoader::CXFigLoader()")
-    CTOR_CALL("CXFigLoader::CXFigLoader")
-    METHOD_EXIT("CXFigLoader::CXFigLoader")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Load data from XFig file
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,25 +43,23 @@ void CXFigLoader::load(const std::string& _strFilename)
     METHOD_ENTRY("CXFigLoader::load")
 
     CCircle*            pCircle;
-    CPolygon*          pPolygon;
+    CPolygon*           pPolygon;
     CParzival           File;
     std::string         strTmp;
 
     // Clear the list of possible last call
-    m_ShapeList.clear();
+    m_Shapes.clear();
     
     //Open file if present
     if (!File.open(_strFilename))
     {
         WARNING_MSG("XFig Loader", "No Shape loaded.")
-        METHOD_EXIT("CXFigLoader::load")
     };
 
     //--- Read the header, should be: #FIG X.Y -------------------------------//
     if (File.readString() != "#FIG")
     {
         ERROR_MSG("XFig Loader", "File: " << _strFilename << " doesn't seem to be a valid xfig-file.")
-        METHOD_EXIT("CXFigLoader::load")
     }
     else
     {
@@ -164,7 +150,7 @@ void CXFigLoader::load(const std::string& _strFilename)
                 pCircle->setRadius(double(nRadiusX)/100.0);
                 pCircle->setCenter(double(nCenterX)/100.0, double(-nCenterY)/100.0);
                 pCircle->setDepths(SHAPE_DEPTH_ALL);
-                m_ShapeList.push_back(pCircle);
+                m_Shapes.push_back(pCircle);
                 
                 break;
             case 2:
@@ -215,7 +201,7 @@ void CXFigLoader::load(const std::string& _strFilename)
                     DOM_VAR(DEBUG_MSG("XFig Loader", "Polygon, point " << i+1 << ": " << nX << "," << nY))
                     pPolygon->addVertex(Vector2d(double(nX)/100.0,double(-nY)/100.0));
                 }
-                m_ShapeList.push_back(pPolygon);
+                m_Shapes.push_back(pPolygon);
                 break;
             default:
                 DEBUG_MSG("XFig Loader", "Ignoring unknown shape. ")
@@ -225,6 +211,4 @@ void CXFigLoader::load(const std::string& _strFilename)
     }
 
     File.close();
-
-    METHOD_EXIT("CXFigLoader::load")
 }
