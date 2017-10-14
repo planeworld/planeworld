@@ -292,66 +292,6 @@ UIDType CPhysicsManager::createThruster()
     return pThruster->getUID();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Initialise all emitters
-///
-/// Emitters create objects or particle. Some emitters do just emit objects once,
-/// e.g. if they spatially distribute objects. Others emit on a timely basis.
-/// All emitted objects must be added to the list of objects that is handeled
-/// by the physics manager, so especially emitters that emit only once should
-/// be called before object initialisiation to be in a valid state at the
-/// beginning of the simulation.
-/// After emitation, emitters are destroyed if they are one time emitters. All
-/// others will be called frequently by the physics manager.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::initEmitters()
-{
-    METHOD_ENTRY("CPhysicsManager::initEmitters")
-
-    INFO_MSG("Physics Manager", "Initialising emitters.")
-
-//     auto it = m_Emitters.begin();
-//     while (it != m_Emitters.end())
-//     {
-//         (*it).second->setWorldDataStorage(m_pDataStorage);
-//         (*it).second->init();
-//         if ((*it).second->getMode() == EMITTER_MODE_EMIT_ONCE)
-//         {
-//             (*it).second->emit();
-//             
-//             delete (*it).second;
-//             (*it).second = nullptr;
-//             MEM_FREED("IEmitter")
-//             
-//             it = m_Emitters.erase(it);
-//         }
-//         else
-//         {
-//             ++it;
-//         }
-//         
-//     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Initialise all objects
-///
-/// Initialisiation of all objects resets objects position, speed etc. to
-/// their state at the beginning of the simulation. It has to be called at
-/// least once at start to ensure a proper state of fixed objects.
-///
-///////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::initObjects()
-{
-    METHOD_ENTRY("CPhysicsManager::initObjects")
-
-    //--- Init objects -------------------------------------------------------//
-    INFO_MSG("Physics Manager", "Initialising objects.")
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Toggles physics processing from pause to running
@@ -924,15 +864,36 @@ void CPhysicsManager::myInitComInterface()
                                                     pObj->getGeometry()->addShape(pShp);
                                                     pObj->init();
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                             }),
                                           "Add shape with given UID to object.",
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::INT, "UID of object"},
                                            {ParameterType::INT, "UID of shape to be added"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_add_shps",
+                                          CCommand<void, int, std::vector<double>>(
+                                            [&](const int _nUIDObj, const std::vector<double>& _Shapes)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUIDObj);
+                                                
+                                                if (pObj != nullptr)
+                                                {
+                                                    for (auto nUIDShp : _Shapes)
+                                                    {
+                                                        IShape* pShp = m_pDataStorage->getShapeByValue(nUIDShp);
+                                                        if (pShp != nullptr)
+                                                        {
+                                                            pObj->getGeometry()->addShape(pShp);
+                                                        }
+                                                    }
+                                                    pObj->init();
+                                                }
+                                            }),
+                                          "Add shapes with given UIDs to object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "UID of object"},
+                                           {ParameterType::DYN_ARRAY, "UIDs of shapes to be added"}},
                                            "system", "physics"
                                          );
         m_pComInterface->registerFunction("process_one_frame",

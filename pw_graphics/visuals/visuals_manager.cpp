@@ -482,7 +482,6 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
 
     for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
     {
-        
         if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(_pCamera->getBoundingBox()))
         {
             if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth() * m_Graphics.getResPMX() < 2.0)
@@ -970,30 +969,6 @@ bool CVisualsManager::init()
     pConsoleWindow->resize(800, 150);
     pConsoleWindow->setVisibilty(false);
     pConsoleWindow->setClosability(false);
-    
-    // Testing a camera widget
-//     auto CameraID = this->createCamera();
-    
-//     auto CamWidgetID = this->createWidget(WidgetTypeType::CAMERA);
-//     CWidgetCam* pCameraWidget = static_cast<CWidgetCam*>(m_pVisualsDataStorage->getWidgetByValue(CamWidgetID));
-//     pCameraWidget->setShaderProgram(&m_ShaderProgramMainScreen);
-//     
-//     pCameraWidget->setRef(m_pVisualsDataStorage->getCamerasByValue().at(CameraID));
-//     
-//     auto CamWindowID = this->createWindow();
-//     CWindow* pCamWindow  = m_pVisualsDataStorage->getWindowByValue(CamWindowID);
-//     
-//     pCamWindow->Title.setText("Camera 1");
-//     pCamWindow->Title.setFont(m_strFont);
-//     pCamWindow->Title.setSize(20);
-//     pCamWindow->Title.setColor({{1.0, 1.0, 1.0, 1.0}});
-//     pCamWindow->setWidget(pCameraWidget);
-//     pCamWindow->setColorBG({{0.1, 0.1, 0.1, 0.75}}, WIN_INHERIT);
-//     pCamWindow->setColorFG({{0.3, 0.3, 0.3, 0.75}}, WIN_INHERIT);
-//     pCamWindow->setPosition(10, 500);
-//     pCamWindow->resize(200, 200);
-//     pCamWindow->setVisibilty(true);
-//     pCamWindow->setClosability(true);    
     
     // Initialise UI text objects
     m_TextParticle.setFont(m_strFont);
@@ -1517,6 +1492,7 @@ void CVisualsManager::drawStars()
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
     m_Graphics.beginRenderBatch("stars");
+    if (m_pUniverse != nullptr)
     {
         #ifdef PW_MULTITHREADING
             while (m_pUniverse->isAccessed.test_and_set()) {}
@@ -1633,7 +1609,6 @@ void CVisualsManager::drawWorld()
 
     
     m_Graphics.beginRenderBatch("world");
-    if (m_pUniverse != nullptr)
     
     this->drawObjects(m_pCamera);
     this->drawParticles(m_pCamera);

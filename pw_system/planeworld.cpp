@@ -201,7 +201,6 @@ int main(int argc, char *argv[])
     ////////////////////////////////////////////////////////////////////////////
     CGraphics&          Graphics = CGraphics::getInstance();
     CGameStateManager   GameStateManager;
-    CUniverse           Universe;
     CVisualsDataStorage VisualsDataStorage;
     CWorldDataStorage   WorldDataStorage;
 
@@ -264,30 +263,42 @@ int main(int argc, char *argv[])
     
     //////////////////////////////////////////////////////////////////////////// 
     //
-    // 4. Initialise storage access
+    // 4. Prepare engine managers
     //
     ////////////////////////////////////////////////////////////////////////////
     GameStateManager.setWorldDataStorage(&WorldDataStorage);
     pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
     if (bGraphics)
     {
+        //--------------------------------------------------------------------------
+        // Initialize window and graphics
+        //--------------------------------------------------------------------------
+        
         pVisualsManager->setWorldDataStorage(&WorldDataStorage);
         pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
+        // X11 need special care when for threaded graphics
+        #ifdef __linux__
+            XInitThreads();
+        #endif
+            
+        // Window initialisation has to be done before lua scripting starts, since
+        // GL-based window functions rely on an existing window.
+        pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
+                                       "Planeworld", sf::Style::Default,
+                                       sf::ContextSettings(24,8,4,3,3,sf::ContextSettings::Core)
+                                      );
+        MEM_ALLOC("WindowHandleType")
+        pVisualsManager->setWindow(pWindow);
     }
     
-    pLuaManager->setScript(strArgData);
-
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 5. Start lua
     //
     ////////////////////////////////////////////////////////////////////////////
+    pLuaManager->setScript(strArgData);
     if (!pLuaManager->init())
     {
-        #ifdef PW_MULTITHREADING
-            pPhysicsManager->terminate();
-            pPhysicsThread->join();
-        #endif
         CLEAN_UP; return EXIT_FAILURE;
     }
     #ifdef PW_MULTITHREADING    
@@ -300,8 +311,6 @@ int main(int argc, char *argv[])
     // 6. Start physics
     //
     ////////////////////////////////////////////////////////////////////////////
-    pPhysicsManager->initObjects();
-
     #ifdef PW_MULTITHREADING    
         pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
         MEM_ALLOC("std::thread")
@@ -320,26 +329,11 @@ int main(int argc, char *argv[])
     Timer.start();
     if (bGraphics)
     {
-        // X11 need special care when for threaded graphics
-        #ifdef __linux__
-            XInitThreads();
-        #endif
-            
-        //--------------------------------------------------------------------------
-        // Initialize window and graphics
-        //--------------------------------------------------------------------------
-        pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
-                                       "Planeworld", sf::Style::Default,
-                                       sf::ContextSettings(24,8,4,3,3,sf::ContextSettings::Core)
-                                      );
-        MEM_ALLOC("WindowHandleType")
-
         pVisualsManager->setUniverse(pPhysicsManager->getUniverse());
-        pVisualsManager->setWindow(pWindow);
         pVisualsManager->init();
-        pWindow->setActive(false);
         
-        #ifdef PW_MULTITHREADING    
+        #ifdef PW_MULTITHREADING
+            pWindow->setActive(false);
             pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);
             MEM_ALLOC("std::thread")
         #endif
@@ -349,7 +343,6 @@ int main(int argc, char *argv[])
         // 9. Start input
         //
         ////////////////////////////////////////////////////////////////////////
-        ComInterface.call<void, double>("set_frequency_input", PLANEWORLD_INPUT_FREQUENCY);
         pInputManager->setWindow(pWindow);
 
         while (!g_bDone)

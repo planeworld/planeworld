@@ -99,9 +99,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         void setConstantGravity(const Vector2d&);
         void setFrequencyParticle(const double&);
         
-        void initEmitters();
-        void initObjects();
-        
         void pause();
         void processFrame();
         void processOneFrame();
