@@ -480,6 +480,8 @@ void CLuaManager::myInitComInterface()
                                            {ParameterType::STRING, "Name of function to attach callback to"},
                                            {ParameterType::STRING, "Name of callback function"}},
                                            "system", "lua");
+                                          // Callback registration has to be queued by com interface. Hence,
+                                          // a "register_callback" command has to be implemented
         m_pComInterface->registerFunction("set_frequency_lua",
                                           CCommand<void, double>([&](const double& _fFrequency)
                                           {

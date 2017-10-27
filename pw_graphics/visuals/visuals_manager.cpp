@@ -131,7 +131,6 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* 
         double fInc = CIRCLE_DEFAULT_RESOLUTION * m_Graphics.getResMPX() / fRad; 
         
         if (fInc > 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS) fInc = 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS;
-        fAngEnd += fInc;
         
         if (fAngEnd < fAng)
         {
@@ -141,7 +140,7 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* 
             // std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
         }
         
-        m_Graphics.beginLine();
+        m_Graphics.beginLine(LineT);
 
             while ( fAng < fAngEnd)
             {
@@ -149,7 +148,7 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* 
                                               vecCenter[1]+std::sin(fAng)*fRad));
                 fAng += fInc;
             }
-        m_Graphics.endLine(LineT);
+        m_Graphics.endLine();
     }
 }
 
@@ -262,7 +261,7 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         const double TERRAIN_CROSSOVER = 1.0e-10;
         const double TERRAIN_CROSSOVER_INV = 0.5/(TERRAIN_CROSSOVER);
         m_Graphics.setWidth(3.0);
-        m_Graphics.beginLine();
+        m_Graphics.beginLine(LineT);
 
             while (fAng < fAngEnd)
             {
@@ -320,7 +319,7 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
                 
                 fAng += fInc;
             }
-        m_Graphics.endLine(LineT);
+        m_Graphics.endLine();
         m_Graphics.setWidth(1.0);
         
         // Determine PolygonType
@@ -338,10 +337,10 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         m_Graphics.setColor(0.0,0.0,0.7);
         for (auto i=0u; i<WaterlineList.size(); ++i)
         {
-          m_Graphics.beginLine();
+          m_Graphics.beginLine(LineT);
           for (auto j=0u; j<WaterlineList[i].size(); ++j)
             m_Graphics.addVertex(WaterlineList[i][j]);
-          m_Graphics.endLine(LineT);
+          m_Graphics.endLine();
         }
         m_Graphics.setWidth(1.0);
         
@@ -708,27 +707,27 @@ void CVisualsManager::drawGrid() const
             // Vertical sub grid lines
             while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
             {
-                m_Graphics.beginLine();
+                m_Graphics.beginLine(PolygonType::LINE_SINGLE);
                     m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                 m_pCamera->getBoundingBox().getLowerLeft()[1]-
                                                 m_pCamera->getCenter()[1]);
                     m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                 m_pCamera->getBoundingBox().getUpperRight()[1]-
                                                 m_pCamera->getCenter()[1]);
-                m_Graphics.endLine(PolygonType::LINE_SINGLE);
+                m_Graphics.endLine();
                 fGridLeft += fGrid;
             }
             // Horizontal sub grid lines
             while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
             {
-                m_Graphics.beginLine();
+                m_Graphics.beginLine(PolygonType::LINE_SINGLE);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
                                         m_pCamera->getCenter()[0],
                                         fGridTop-m_pCamera->getCenter()[1]);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
                                         m_pCamera->getCenter()[0],
                                         fGridTop-m_pCamera->getCenter()[1]);
-                m_Graphics.endLine(PolygonType::LINE_SINGLE);
+                m_Graphics.endLine();
                 fGridTop += fGrid;
             }
             
@@ -752,27 +751,27 @@ void CVisualsManager::drawGrid() const
             // Vertical grid lines
             while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
             {
-                m_Graphics.beginLine();
+                m_Graphics.beginLine(PolygonType::LINE_SINGLE);
                     m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                     m_pCamera->getBoundingBox().getLowerLeft()[1]-
                                                     m_pCamera->getCenter()[1]);
                     m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
                                                     m_pCamera->getBoundingBox().getUpperRight()[1]-
                                                     m_pCamera->getCenter()[1]);
-                m_Graphics.endLine(PolygonType::LINE_SINGLE);
+                m_Graphics.endLine();
                 fGridLeft += fGrid;
             }
             // Horizontal grid lines
             while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
             {
-                m_Graphics.beginLine();
+                m_Graphics.beginLine(PolygonType::LINE_SINGLE);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
                                         m_pCamera->getCenter()[0],
                                         fGridTop-m_pCamera->getCenter()[1]);
                     m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
                                         m_pCamera->getCenter()[0],
                                         fGridTop-m_pCamera->getCenter()[1]);
-                m_Graphics.endLine(PolygonType::LINE_SINGLE);
+                m_Graphics.endLine();
                 fGridTop += fGrid;
             }
             
@@ -823,7 +822,7 @@ void CVisualsManager::drawTrajectories() const
         {
             // Draw objects trajectories
             double fColourFade = 0.1;
-            m_Graphics.beginLine();
+            m_Graphics.beginLine(PolygonType::LINE_STRIP);
             
             for (auto i=0u; i<pObj.second->getTrajectory().getPositions().size(); ++i)
             {
@@ -833,7 +832,7 @@ void CVisualsManager::drawTrajectories() const
                 );
                 fColourFade += 0.9/TRAJECTORY_CAPACITY;
             }
-            m_Graphics.endLine(PolygonType::LINE_STRIP);
+            m_Graphics.endLine();
             
             pObj.second->getTrajectory().unlock();
         }
@@ -1803,7 +1802,7 @@ void CVisualsManager::updateUI()
         m_Graphics.beginRenderBatch("world");
         // 
             m_Graphics.setColor(1.0, 1.0, 1.0, 0.8);
-            m_Graphics.beginLine();
+            m_Graphics.beginLine(PolygonType::LINE_SINGLE);
                 m_Graphics.addVertex(m_nCursorX-10, m_nCursorY);
                 m_Graphics.addVertex(m_nCursorX-3, m_nCursorY);
                 m_Graphics.addVertex(m_nCursorX, m_nCursorY-10);
@@ -1812,7 +1811,7 @@ void CVisualsManager::updateUI()
                 m_Graphics.addVertex(m_nCursorX+3, m_nCursorY);
                 m_Graphics.addVertex(m_nCursorX, m_nCursorY+10);
                 m_Graphics.addVertex(m_nCursorX, m_nCursorY+3);
-            m_Graphics.endLine(PolygonType::LINE_SINGLE);
+            m_Graphics.endLine();
             if (m_bMBLeft)
                 m_Graphics.circle(Vector2d(m_nCursorX, m_nCursorY), 5);
         

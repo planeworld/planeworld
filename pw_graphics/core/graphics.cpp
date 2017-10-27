@@ -259,31 +259,42 @@ void CGraphics::swapBuffers()
 /// might use a different configuration, e.g. buffers, shaders, attributes.
 ///
 /// \param _pRenderMode Render mode to use in this batch
+/// \param _bForce Force beginning of new batch, ignore render stack and 
+///                previous batches
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode)
+void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode, const bool _bForce)
 {
     METHOD_ENTRY("CGraphics::beginRenderBatch")
     
     bool bBegin = false;
     
-    // First, check stack for current state.
-    // Begin if stack is empty
-    if (m_RenderModeStack.empty())
+    // First, test if it is a forced call
+    if (_bForce)
     {
         bBegin = true;
     }
-    // Or begin, if render mode changed
-    else if (m_RenderModeStack.top()->getRenderModeType() != _pRenderMode->getRenderModeType())
+    else
     {
-        // In this case, stop current batch first
-        this->endRenderBatch(GRAPHICS_INTERNAL_RENDER_BATCH_CALL);
-        bBegin = true;
+        // First, check stack for current state.
+        // Begin if stack is empty
+        if (m_RenderModeStack.empty())
+        {
+            bBegin = true;
+        }
+        // Or begin, if render mode changed
+        else if (m_RenderModeStack.top()->getRenderModeType() != _pRenderMode->getRenderModeType())
+        {
+            // In this case, stop current batch first
+            this->endRenderBatch(GRAPHICS_RENDER_BATCH_CALL_FORCED);
+            bBegin = true;
+        }
+        
+        m_RenderModeStack.push(_pRenderMode);
     }
     
     m_pRenderMode = _pRenderMode;
     m_RenderModeType = _pRenderMode->getRenderModeType();
-    m_RenderModeStack.push(m_pRenderMode);
 
     if (bBegin)
     {
@@ -375,18 +386,18 @@ bool CGraphics::beginRenderBatch(const std::string& _strRenderModeName)
 /// This method ends the processing of one batch started with \ref beginRenderBatch.
 /// A draw call will be done here.
 ///
-/// \param _bIntern Indicates that the end command has been called internally
+/// \param _bForce Force rendering current batch, ignore render stack 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::endRenderBatch(const bool _bIntern)
+void CGraphics::endRenderBatch(const bool _bForce)
 {
     METHOD_ENTRY("CGraphics::endRenderBatch")
     
     bool bEnd = false;
     bool bBegin = false;
     
-    // First, test if call is internally
-    if (_bIntern)
+    // First, test if it is a forced call
+    if (_bForce)
     {
         bEnd = true;
     }
@@ -872,8 +883,7 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
+        this->restartRenderBatchInternal();
     }
 }
 
@@ -924,8 +934,26 @@ void CGraphics::showVec(const Vector2d& _vecV, const Vector2d& _vecPos) const
 ///////////////////////////////////////////////////////////////////////////////
 void CGraphics::addVertex(const Vector2d& _vecV)
 {
-    METHOD_ENTRY("CGraphics::addVertex(const Vector2d&)");
+    METHOD_ENTRY("CGraphics::addVertex");
 
+    m_uncI += 4;
+    // Test for even number of vertices (%2) 
+    // not to split LINE_SINGLE types
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2 && m_nLineNrOfVerts % 2 == 0)
+    {
+        if (m_bLineBatchFirst)
+        {
+            m_aVertFirst[0] = m_vecVertices[m_unIndexVerts-3*m_nLineNrOfVerts];
+            m_aVertFirst[1] = m_vecVertices[m_unIndexVerts-3*m_nLineNrOfVerts+1];
+            m_bLineBatchFirst = false; 
+        }; 
+        m_bLineBatchCall = true;
+        this->endLine();
+        this->restartRenderBatchInternal();
+        this->beginLine(m_PolyType);
+        m_bLineBatchCall = false;
+    }
+    
     m_vecVertices[m_unIndexVerts++] = _vecV[0];
     m_vecVertices[m_unIndexVerts++] = _vecV[1];
     m_vecVertices[m_unIndexVerts++] = m_fDepth;
@@ -934,14 +962,6 @@ void CGraphics::addVertex(const Vector2d& _vecV)
     m_vecColours[m_unIndexCol++] = m_aColour[2];
     m_vecColours[m_unIndexCol++] = m_aColour[3];
     m_nLineNrOfVerts++;
-    m_uncI += 4;
-    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
-    {
-        this->endLine(PolygonType::LINE_STRIP);
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
-        this->beginLine();
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -957,8 +977,26 @@ void CGraphics::addVertex(const Vector2d& _vecV)
 ///////////////////////////////////////////////////////////////////////////////
 void CGraphics::addVertex(const double& _fX, const double& _fY)
 {
-    METHOD_ENTRY("CGraphics::addVertex(const double&, const double&)");
+    METHOD_ENTRY("CGraphics::addVertex");
 
+    m_uncI += 4;
+    // Test for even number of vertices (%2) 
+    // not to split LINE_SINGLE types
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2 && m_nLineNrOfVerts % 2 == 0)
+    {
+        if (m_bLineBatchFirst)
+        {
+            m_aVertFirst[0] = m_vecVertices[m_unIndexVerts-3*m_nLineNrOfVerts];
+            m_aVertFirst[1] = m_vecVertices[m_unIndexVerts-3*m_nLineNrOfVerts+1];
+            m_bLineBatchFirst = false; 
+        }; 
+        m_bLineBatchCall = true;
+        this->endLine();
+        this->restartRenderBatchInternal();
+        this->beginLine(m_PolyType);
+        m_bLineBatchCall = false;
+    }
+    
     m_vecVertices[m_unIndexVerts++] = _fX;
     m_vecVertices[m_unIndexVerts++] = _fY;
     m_vecVertices[m_unIndexVerts++] = m_fDepth;
@@ -967,14 +1005,6 @@ void CGraphics::addVertex(const double& _fX, const double& _fY)
     m_vecColours[m_unIndexCol++] = m_aColour[2];
     m_vecColours[m_unIndexCol++] = m_aColour[3];
     m_nLineNrOfVerts++;
-    m_uncI += 4;
-    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
-    {
-        this->endLine(PolygonType::LINE_STRIP);
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
-        this->beginLine();
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1000,8 +1030,7 @@ void CGraphics::dot(const Vector2d& _vecV)
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
+        this->restartRenderBatchInternal();
     }
 }
 
@@ -1019,55 +1048,48 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
 {
     METHOD_ENTRY("CGraphics::dots")
     
-    auto nBatches = 0;
-    auto nBatchSize = GRAPHICS_SIZE_OF_INDEX_BUFFER / 8;
+    int nBatches = 0;
+    int nBatchSize = GRAPHICS_SIZE_OF_INDEX_BUFFER / 8;
     
     // Draw smaller batches if larger than buffer size    
     if (m_uncI + 4*_Dots.size() > GRAPHICS_SIZE_OF_INDEX_BUFFER / 2)
     {
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
+        this->restartRenderBatchInternal();
         
-        nBatches = 4*_Dots.size() / GRAPHICS_SIZE_OF_INDEX_BUFFER * 2;
+        nBatches = _Dots.size() / nBatchSize;
         
         for (auto j=0; j<nBatches; ++j)
         {
-            for (auto i=j*nBatchSize; i<(j+1)*nBatchSize; ++i)
+            for (int i=j*nBatchSize; i<(j+1)*nBatchSize; ++i)
             {
                 m_vecVertices[m_unIndexVerts++] = _Dots[i][0]+_vecOffset[0];
                 m_vecVertices[m_unIndexVerts++] = _Dots[i][1]+_vecOffset[1];
                 m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
-                m_vecColours[m_unIndexCol++] = m_aColour[0];
-                m_vecColours[m_unIndexCol++] = m_aColour[1];
-                m_vecColours[m_unIndexCol++] = m_aColour[2];
-                m_vecColours[m_unIndexCol++] = m_aColour[3];
+                m_vecColours[m_unIndexCol++] = m_aColour[0]; // * double(i) / _Dots.size(); Works
+                m_vecColours[m_unIndexCol++] = m_aColour[1]; // * double(i) / _Dots.size(); Works
+                m_vecColours[m_unIndexCol++] = m_aColour[2]; // * double(i) / _Dots.size(); Works
+                m_vecColours[m_unIndexCol++] = m_aColour[3]; // * double(i) / _Dots.size(); Somehow, this doesn't work
                 m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
             }
-            this->endRenderBatch();
-            this->beginRenderBatch(m_pRenderMode);
+            this->restartRenderBatchInternal();
             
         }
     }
 
     // Draw residuum
-    for (auto i=nBatches*nBatchSize; i<_Dots.size(); ++i)
+    for (int i=nBatches*nBatchSize; i<_Dots.size(); ++i)
     {
         m_vecVertices[m_unIndexVerts++] = _Dots[i][0]+_vecOffset[0];
         m_vecVertices[m_unIndexVerts++] = _Dots[i][1]+_vecOffset[1];
         m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
-        m_vecColours[m_unIndexCol++] = m_aColour[0];
-        m_vecColours[m_unIndexCol++] = m_aColour[1];
-        m_vecColours[m_unIndexCol++] = m_aColour[2];
-        m_vecColours[m_unIndexCol++] = m_aColour[3];
+        m_vecColours[m_unIndexCol++] = m_aColour[0]; // * double(i) / _Dots.size(); Works
+        m_vecColours[m_unIndexCol++] = m_aColour[1]; // * double(i) / _Dots.size(); Works
+        m_vecColours[m_unIndexCol++] = m_aColour[2]; // * double(i) / _Dots.size(); Works
+        m_vecColours[m_unIndexCol++] = m_aColour[3]; // * double(i) / _Dots.size(); Somehow, this doesn't work
         m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
     }
 
-    m_uncI += 4*_Dots.size();
-    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
-    {
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
-    }
+    m_uncI += 4*(_Dots.size()-nBatches*nBatchSize);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1174,8 +1196,7 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
     }
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
+        this->restartRenderBatchInternal();
     }
 }
 
@@ -1230,8 +1251,7 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR)
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
+        this->restartRenderBatchInternal();
     }
 }
 
@@ -1251,7 +1271,7 @@ void CGraphics::polygon(const VertexListType& _Vertices,
 {
     METHOD_ENTRY("CGraphics::polygon")
 
-    this->beginLine();
+    this->beginLine(_PolygonType);
     if (_vecOffset.isZero())
     {
         for (const auto Vertex : _Vertices)
@@ -1281,7 +1301,7 @@ void CGraphics::polygon(const VertexListType& _Vertices,
     m_uncI += 4*_Vertices.size();
     
     m_nLineNrOfVerts += _Vertices.size();
-    this->endLine(_PolygonType);
+    this->endLine();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1338,8 +1358,7 @@ void CGraphics::rect(const Vector2d& _vecLL, const Vector2d& _vecUR)
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
+        this->restartRenderBatchInternal();
     }
 }
 
@@ -1401,8 +1420,7 @@ void CGraphics::texturedRect(const Vector2d& _vecLL, const Vector2d& _vecUR,
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
+        this->restartRenderBatchInternal();
     }
 }
 
@@ -1411,31 +1429,31 @@ void CGraphics::texturedRect(const Vector2d& _vecLL, const Vector2d& _vecUR,
 /// \brief Define beginning of line to be drawn
 ///
 /// This method just specifies the start of a line list. The type of the list
-/// defines if it is a closed line loop, a single line etc. This concept is
-/// directly related to OpenGL-syntax.
+/// defines if it is a closed line loop, a single line etc. 
+///
+/// \param _PType Type of line, specifying howto end drawing
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::beginLine()
+void CGraphics::beginLine(const PolygonType& _PType)
 {
     METHOD_ENTRY("CGraphics::beginLine")
+    
     m_nLineNrOfVerts = 0;
+    m_PolyType = _PType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Define end of line to be drawn
 ///
-/// This method just specifies the end of a line list. This concept is
-/// directly related to OpenGL-syntax.
-///
-/// \param _PType Type of line, specifying howto end drawing
+/// This method just specifies the end of a line list. 
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::endLine(const PolygonType& _PType)
+void CGraphics::endLine()
 {
     METHOD_ENTRY("CGraphics::endLine")
     
-    if (_PType == PolygonType::LINE_SINGLE)
+    if (m_PolyType == PolygonType::LINE_SINGLE)
     {
         for (auto i=0; i<m_nLineNrOfVerts-1; i+=2)
         {
@@ -1451,19 +1469,42 @@ void CGraphics::endLine(const PolygonType& _PType)
             m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
         }
         
-        if (_PType == PolygonType::LINE_LOOP || _PType == PolygonType::FILLED)
+        // Close gaps if between batches and not single lines
+        if (m_bLineBatchCall)
         {
-                m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
-                m_vecIndicesLines[m_unIndexLines++] = m_unIndex+1-m_nLineNrOfVerts;
+        }
+        else
+        // Line end intentionally, i.e. not by batch separation
+        {
+            if (m_PolyType == PolygonType::LINE_LOOP || m_PolyType == PolygonType::FILLED)
+            {
+                // No batch separation -> use first index still in buffer
+                if (m_bLineBatchFirst)
+                {
+                    m_vecIndicesLines[m_unIndexLines++] = m_unIndex+1 - m_nLineNrOfVerts;
+                    m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
+                }
+                // Otherwise use stored vertex position
+                else
+                {
+                    m_vecVertices[m_unIndexVerts++] = m_aVertFirst[0];
+                    m_vecVertices[m_unIndexVerts++] = m_aVertFirst[1];
+                    m_vecVertices[m_unIndexVerts++] = m_fDepth;
+                    m_vecColours[m_unIndexCol++] = m_aColour[0];
+                    m_vecColours[m_unIndexCol++] = m_aColour[1];
+                    m_vecColours[m_unIndexCol++] = m_aColour[2];
+                    m_vecColours[m_unIndexCol++] = m_aColour[3];
+                    m_vecIndicesLines[m_unIndexLines++] = m_unIndex++;
+                    m_vecIndicesLines[m_unIndexLines++] = m_unIndex;
+                }
+            }
         }
         m_unIndex++;
     }
     
-    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
-    {
-        this->endRenderBatch();
-        this->beginRenderBatch(m_pRenderMode);
-    }
+    // If the line was ended intentionally, i.e. not by batch separation,
+    // everything starts from scratch
+    if (!m_bLineBatchCall) m_bLineBatchFirst = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1496,4 +1537,86 @@ void CGraphics::resetBufferObjects()
     
     // Clear buffers
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Restart a renderbatch, render mode stays the same (internal, temporary)
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::restartRenderBatchInternal()
+{
+    METHOD_ENTRY("CGraphics::restartRenderBatchInternal")
+    
+    glBindVertexArray(m_unVAO);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexVerts*sizeof(GLfloat), m_vecVertices.data(), GL_STREAM_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexCol*sizeof(GLfloat), m_vecColours.data(), GL_STREAM_DRAW);
+    
+    switch (m_pRenderMode->getRenderModeType())
+    {
+        case RenderModeType::VERT3COL4:
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), m_vecIndicesLines.data(), GL_STREAM_DRAW);
+            glDrawElements(GL_LINES, m_vecIndicesLines.size(), GL_UNSIGNED_INT, 0);
+            
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), m_vecIndicesPoints.data(), GL_STREAM_DRAW);
+            glDrawElements(GL_POINTS, m_vecIndicesPoints.size(), GL_UNSIGNED_INT, 0);
+            
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
+            
+            m_nDrawCalls += 3;
+            
+            break;
+        }
+        case RenderModeType::VERT3COL4TEX2:
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUVs);
+            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+            
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
+            
+            ++m_nDrawCalls;
+            
+            break;
+        }
+    }
+    
+    // Collect some debug information
+    m_nLines     += m_unIndexLines;
+    m_nPoints    += m_unIndexPoints;
+    m_nTriangles += m_unIndexTriangles;
+    m_nVerts     += m_unIndexVerts;
+        
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+        
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+    
+    m_uncI = 0u;
+    m_unIndex = 0u;
+    m_unIndexVerts = 0u;
+    m_unIndexCol = 0u;
+    m_unIndexUV = 0u;
+    m_unIndexLines = 0u;
+    m_unIndexPoints = 0u;
+    m_unIndexTriangles = 0u;
 }

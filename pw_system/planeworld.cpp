@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
     
     //////////////////////////////////////////////////////////////////////////// 
     //
-    // 5. Start lua
+    // 5. Initialise Lua
     //
     ////////////////////////////////////////////////////////////////////////////
     pLuaManager->setScript(strArgData);
@@ -301,11 +301,9 @@ int main(int argc, char *argv[])
     {
         CLEAN_UP; return EXIT_FAILURE;
     }
-    #ifdef PW_MULTITHREADING    
-        pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);
-        MEM_ALLOC("std::thread")
-    #endif
-        
+    pVisualsManager->init();
+    pWindow->setActive(false);
+    
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 6. Start physics
@@ -329,12 +327,16 @@ int main(int argc, char *argv[])
     Timer.start();
     if (bGraphics)
     {
+        pInputManager->setWindow(pWindow);
         pVisualsManager->setUniverse(pPhysicsManager->getUniverse());
-        pVisualsManager->init();
         
         #ifdef PW_MULTITHREADING
-            pWindow->setActive(false);
             pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);
+            MEM_ALLOC("std::thread")
+        #endif
+
+        #ifdef PW_MULTITHREADING    
+            pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);
             MEM_ALLOC("std::thread")
         #endif
         
@@ -343,7 +345,7 @@ int main(int argc, char *argv[])
         // 9. Start input
         //
         ////////////////////////////////////////////////////////////////////////
-        pInputManager->setWindow(pWindow);
+        
 
         while (!g_bDone)
         {

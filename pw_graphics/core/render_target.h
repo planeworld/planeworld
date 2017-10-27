@@ -126,7 +126,7 @@ inline void CRenderTarget::bind(const bool _bClear) const
 {
     METHOD_ENTRY("CRenderTarget::bind")
     glBindFramebuffer(GL_FRAMEBUFFER, m_unIDFBO);
-    if (_bClear) glClear(GL_COLOR_BUFFER_BIT);
+    if (_bClear) glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, m_unResX, m_unResY);
     m_Graphics.setViewPort((-m_unResX >> 1) / GRAPHICS_PX_PER_METER, (m_unResX >> 1) / GRAPHICS_PX_PER_METER,
                            (-m_unResY >> 1) / GRAPHICS_PX_PER_METER, (m_unResY >> 1) / GRAPHICS_PX_PER_METER);

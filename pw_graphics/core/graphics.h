@@ -61,10 +61,10 @@ using namespace Eigen;
 typedef sf::Window WindowHandleType;
 
 // Constants
-const std::uint16_t GRAPHICS_WIDTH_DEFAULT = 1440u;     ///< Default x-resolution
-const std::uint16_t GRAPHICS_HEIGHT_DEFAULT = 900u;     ///< Default y-resolution
+const std::uint16_t GRAPHICS_WIDTH_DEFAULT =  800u;     ///< Default x-resolution
+const std::uint16_t GRAPHICS_HEIGHT_DEFAULT = 600u;     ///< Default y-resolution
 
-const GLuint GRAPHICS_SIZE_OF_INDEX_BUFFER = 10000u;    ///< Size of VBOs/VAOs/IBOs to keep all data
+const GLuint GRAPHICS_SIZE_OF_INDEX_BUFFER = 100000u;   ///< Size of VBOs/VAOs/IBOs to keep all data
 
 const double GRAPHICS_PX_PER_METER = 2.0;               ///< Default resolution, pixel per meter
 const double GRAPHICS_FOV_DEFAULT = 45.0;               ///< Default fov
@@ -89,8 +89,8 @@ const double GRAPHICS_MAX_CACHE_SIZE = 1024;            ///< Maximum size of cac
 
 const bool GRAPHICS_CIRCLE_USE_CACHE = true;            ///< Flag for using sine/cosine cache
 
-const bool GRAPHICS_INTERNAL_RENDER_BATCH_CALL = true;  ///< Indicates the default external call to render batch methods
-const bool GRAPHICS_EXTERNAL_RENDER_BATCH_CALL = false; ///< Indicates an internal render batch call
+const bool GRAPHICS_RENDER_BATCH_CALL_FORCED = true;    ///< Indicates a forced render batch call, ignoring stack
+const bool GRAPHICS_RENDER_BATCH_CALL_NORMAL = false;   ///< Indicates a normal render batch call
 
 /// Specifies the type of polygon to be drawn
 enum class PolygonType
@@ -186,9 +186,9 @@ class CGraphics
         WindowHandleType* getWindow() const;
 
         //--- Methods --------------------------------------------------------//
-        void beginRenderBatch(CRenderMode* const);
+        void beginRenderBatch(CRenderMode* const, const bool = false);
         bool beginRenderBatch(const std::string&);
-        void endRenderBatch(const bool = GRAPHICS_EXTERNAL_RENDER_BATCH_CALL);
+        void endRenderBatch(const bool = GRAPHICS_RENDER_BATCH_CALL_NORMAL);
         bool restartRenderBatch(const std::string&);
         void restartRenderBatch(CRenderMode* const);
         void registerRenderMode(const std::string& _strName, CRenderMode* const);
@@ -251,10 +251,13 @@ class CGraphics
         void rect(const Vector2d&, const Vector2d&);
         void setDepth(const double&);
         void texturedRect(const Vector2d&, const Vector2d&, const std::vector<GLfloat>* const);
-        void beginLine();
-        void endLine(const PolygonType&);
+        void beginLine(const PolygonType&);
+        void endLine();
         
     private:
+        
+        void resetBufferObjects();                      ///< Clear all VAOs, VBOs, IBOs...
+        void restartRenderBatchInternal();
         
         //--- Variables [private] --------------------------------------------//
         WindowHandleType*   m_pWindow;                  ///< Pointer to main window
@@ -276,6 +279,9 @@ class CGraphics
         GLuint              m_unIndexPoints = 0u;       ///< Index of current element in point index buffer
         GLuint              m_unIndexTriangles = 0u;    ///< Index of current element in triangle index buffer
         int                 m_nLineNrOfVerts = 0;       ///< Number of vertices for current line
+        bool                m_bLineBatchCall = false;   ///< Indicates, that only a line segment of current batch is drawn
+        bool                m_bLineBatchFirst = true;   ///< Indicates first call of a line segment of current batch
+        std::array<double,7> m_aVertFirst;              ///< Stores vertex and colour of first element in Polygon for loop type
 
         GLuint              m_unIBOLines = 0u;          ///< Index buffer object for lines
         GLuint              m_unIBOPoints = 0u;         ///< Index buffer object for points
@@ -284,6 +290,8 @@ class CGraphics
         GLuint              m_unVBO = 0u;               ///< Vertex buffer
         GLuint              m_unVBOColours = 0u;        ///< Colour buffer
         GLuint              m_unVBOUVs = 0u;            ///< Texture coordinate buffer
+        
+        PolygonType         m_PolyType = PolygonType::LINE_STRIP; ///< Type of currently drawn polygon
                
         // Basic Debug information:
         int                 m_nDrawCalls;               ///< Basic draw call counter
@@ -329,8 +337,6 @@ class CGraphics
 
         //--- Operators [private] --------------------------------------------//
         CGraphics& operator=(const CGraphics&); ///< empty private operator=
-        
-        void resetBufferObjects();              ///< Clear all VAOs, VBOs, IBOs...
 
 };
 
