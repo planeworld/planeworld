@@ -140,7 +140,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
                         else
                         {
                             WARNING_MSG_QUIET("Com Interface", "Known function with different signature <" << _strName << ">. ")
-                        }
+                            }
                     }
                 );
             }

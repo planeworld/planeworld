@@ -41,6 +41,7 @@
 #include "joint.h"
 #include "multi_buffer.h"
 #include "uid_user.h"
+#include "universe.h"
 
 class CParticle;
 class IEmitter;
@@ -117,6 +118,8 @@ class CWorldDataStorage
         
         void updateObject(const UIDType);
         
+        CUniverse*                  getUniverse();
+        
         IEmitter*                   getEmitterByValue(const UIDType);
         CObject*                    getObjectByValueBack(const UIDType);
         CParticle*                  getParticleByValueBack(const UIDType);
@@ -139,6 +142,8 @@ class CWorldDataStorage
         UIDsByNameType*             getUIDsByName();
         ShapesByValueType*          getShapesByValue();
         
+        void                        setUniverse(CUniverse* const _pUniverse) {m_pUniverse = _pUniverse;}
+        
         void                        swapBack();
         void                        swapFront();
         
@@ -153,6 +158,8 @@ class CWorldDataStorage
         //--- Methods [private] ----------------------------------------------//
         bool addUIDUser(const std::array<IUIDUser*,BUFFER_QUADRUPLE>&);
       
+        CUniverse*                      m_pUniverse;            ///< The procedurally generated universe
+        
         // Buffered entities, used by graphical clients
         BufferedParticlesByNameType     m_ParticlesByName;      ///< Buffered particles, accessed by name
         BufferedParticlesByValueType    m_ParticlesByValue;     ///< Buffered particles, accessed by value
@@ -200,6 +207,19 @@ inline const double& CWorldDataStorage::getTimeScale() const
 {
     METHOD_ENTRY("CWorldDataStorage::getTimeScale")
     return m_fTimeScale;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns procedurally generated universe
+///
+/// \return Procedurally generated universe
+///
+////////////////////////////////////////////////////////////////////////////////
+inline CUniverse* CWorldDataStorage::getUniverse()
+{
+    METHOD_ENTRY("CWorldDataStorage::getUniverse")
+    return m_pUniverse;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

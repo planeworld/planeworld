@@ -152,7 +152,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         CRenderMode         m_RenderModeWorld;              ///< Default render mode
         CRenderTarget       m_RenderTargetScreen;           ///< Render target of screen (final image)
         
-        CUniverse*                      m_pUniverse;        ///< Procedurally generated universe
         int                             m_nVisualisations;  ///< Additional graphical output
         std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star
         std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera
@@ -246,19 +245,6 @@ inline void CVisualsManager::setDataPath(const std::string& _strDataPath)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Sets procedurally generated universe for visualisation
-///
-/// \param _pUniverse Procedurally generated universe
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CVisualsManager::setUniverse(CUniverse* const _pUniverse)
-{
-    METHOD_ENTRY("CVisualsManager::setUniverse")
-    m_pUniverse = _pUniverse;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Set visualisations that shall be displayed
 ///
 /// \param _nVis Bit pattern
@@ -282,18 +268,6 @@ inline void CVisualsManager::setWindow(WindowHandleType* const _pWindow)
     METHOD_ENTRY("CVisualsManager::setWindow")
     m_Graphics.setWindow(_pWindow);
 }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ///
-// /// \brief Toggles a state of console mode
-// ///
-// ////////////////////////////////////////////////////////////////////////////////
-// inline void CVisualsManager::toggleConsoleMode()
-// {
-//     METHOD_ENTRY("CVisualsManager::toggleConsoleMode")
-//     m_bConsoleMode ^= true;
-//     m_pVisualsDataStorage->getWindowsByValue()->at(m_ConsoleWindowID)->toggleVisibility();
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

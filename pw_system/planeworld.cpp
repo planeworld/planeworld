@@ -327,7 +327,6 @@ int main(int argc, char *argv[])
     if (bGraphics)
     {
         pInputManager->setWindow(pWindow);
-        pVisualsManager->setUniverse(pPhysicsManager->getUniverse());
         
         #ifdef PW_MULTITHREADING
             pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);

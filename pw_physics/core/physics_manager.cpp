@@ -40,8 +40,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CPhysicsManager::CPhysicsManager() : m_pUniverse(nullptr),
-                                     m_fG(6.67408e-11),
+CPhysicsManager::CPhysicsManager() : m_fG(6.67408e-11),
                                      m_fFrequencyParticle(PHYSICS_PARTICLE_DEFAULT_FREQUENCY),
                                      m_strCellUpdateLast(""),
                                      m_fCellUpdateResidual(0.0),
@@ -74,13 +73,6 @@ CPhysicsManager::~CPhysicsManager()
 
     // Stop global timer (index 0)
     m_SimTimer[0].stop();
-    
-    if (m_pUniverse != nullptr)
-    {
-        delete m_pUniverse;
-        MEM_FREED("CUniverse")
-        m_pUniverse = nullptr;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -632,14 +624,14 @@ void CPhysicsManager::myInitComInterface()
         m_pComInterface->registerFunction("create_universe",
                                           CCommand<void, int, int>([&](const int& _nSeed, const int& _nNrOfStars)
                                           {
-                                                if (m_pUniverse != nullptr)
+                                                if (m_pDataStorage->getUniverse() != nullptr)
                                                 {
-                                                    delete m_pUniverse;
+                                                    delete m_pDataStorage->getUniverse();
                                                     MEM_FREED("CUniverse")
                                                 }
-                                                m_pUniverse = new CUniverse();
+                                                m_pDataStorage->setUniverse(new CUniverse());
                                                 MEM_ALLOC("CUniverse")
-                                                m_pUniverse->generate(_nSeed, _nNrOfStars);
+                                                m_pDataStorage->getUniverse()->generate(_nSeed, _nNrOfStars);
                                           }),
                                           "Creates a procedurally generated universe.",
                                           {{ParameterType::NONE, "No return value"},

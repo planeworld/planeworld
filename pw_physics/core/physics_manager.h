@@ -40,7 +40,6 @@
 #include "sim_timer.h"
 #include "thread_module.h"
 #include "thruster.h"
-#include "universe.h"
 #include "world_data_storage_user.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -84,7 +83,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         
         //--- Constant Methods -----------------------------------------------//
         const std::array<CSimTimer,4>&    getSimTimer() const;
-        CUniverse*                        getUniverse() const;
 
         //--- Methods --------------------------------------------------------//
         UIDType createEmitter(const EmitterType);
@@ -131,8 +129,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         ShapesQueueType     m_ShapesToBeAddedToWorld;           ///< Shapes already created to be added to world
         ThrustersQueueType  m_ThrustersToBeAddedToWorld;        ///< Thrusters already created to be added to world
         
-      
-        CUniverse*          m_pUniverse;                        ///< The procedurally generated universe
         CCollisionManager   m_CollisionManager;                 ///< Instance for collision handling
 
         double              m_fG;                               ///< Gravitational constant
@@ -163,19 +159,6 @@ inline const std::array<CSimTimer,4>& CPhysicsManager::getSimTimer() const
 {
     METHOD_ENTRY("CPhysicsManager::getSimTimerLocal")
     return m_SimTimer;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the procedurally generated universe
-///
-/// \return Procedurally generated universe
-///
-////////////////////////////////////////////////////////////////////////////////
-inline CUniverse* CPhysicsManager::getUniverse() const
-{
-    METHOD_ENTRY("CPhysicsManager::getUniverse()")
-    return m_pUniverse;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

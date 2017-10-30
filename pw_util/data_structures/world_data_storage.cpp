@@ -41,7 +41,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CWorldDataStorage::CWorldDataStorage() : m_bFrontNew(false),
+CWorldDataStorage::CWorldDataStorage() : m_pUniverse(nullptr),
+                                         m_bFrontNew(false),
                                          m_fTimeScale(1.0)                                 
 {
     METHOD_ENTRY("CWorldDataStorage::CWorldDataStorage")
@@ -63,6 +64,13 @@ CWorldDataStorage::~CWorldDataStorage()
 {
     METHOD_ENTRY("CWorldDataStorage::~CWorldDataStorage")
     DTOR_CALL("CWorldDataStorage::~CWorldDataStorage")
+    
+    if (m_pUniverse != nullptr)
+    {
+        delete m_pUniverse;
+        MEM_FREED("CUniverse")
+        m_pUniverse = nullptr;
+    }
     
     for (auto pEmitter : m_EmittersByValue)
     {

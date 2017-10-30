@@ -40,8 +40,7 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CVisualsManager::CVisualsManager() : m_pUniverse(nullptr),
-                                     m_nVisualisations(0),
+CVisualsManager::CVisualsManager() : m_nVisualisations(0),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
                                      m_pCamera(nullptr),
@@ -1491,14 +1490,14 @@ void CVisualsManager::drawStars()
     METHOD_ENTRY("CVisualsManager::drawWorld")
     
     m_Graphics.beginRenderBatch("stars");
-    if (m_pUniverse != nullptr)
+    if (m_pDataStorage->getUniverse() != nullptr)
     {
         #ifdef PW_MULTITHREADING
-            while (m_pUniverse->isAccessed.test_and_set(std::memory_order_acquire)) {}
+            while (m_pDataStorage->getUniverse()->isAccessed.test_and_set(std::memory_order_acquire)) {}
         #endif
-        for (auto i=0u; i<m_pUniverse->getStarSystems()->size(); ++i)
+        for (auto i=0u; i<m_pDataStorage->getUniverse()->getStarSystems()->size(); ++i)
         {
-            CStarSystem* pStarSystem = m_pUniverse->getStarSystems()->at(i);
+            CStarSystem* pStarSystem = m_pDataStorage->getUniverse()->getStarSystems()->at(i);
             CStar&       Star(pStarSystem->Star());
             Vector2d vecPos = CKinematicsState::clipToWorldLimit(
                                 Star.getOrigin() +
@@ -1528,7 +1527,7 @@ void CVisualsManager::drawStars()
             }
         }
         #ifdef PW_MULTITHREADING
-            m_pUniverse->isAccessed.clear(std::memory_order_release);
+            m_pDataStorage->getUniverse()->isAccessed.clear(std::memory_order_release);
         #endif
     }
     m_Graphics.endRenderBatch();
@@ -1664,15 +1663,15 @@ void CVisualsManager::drawWorld()
             }
         }
         if ((1.0e9 * m_Graphics.getResPMX() < 1.0) &&
-            (m_pUniverse != nullptr))
+            (m_pDataStorage->getUniverse() != nullptr))
         {
             #ifdef PW_MULTITHREADING
-                while (m_pUniverse->isAccessed.test_and_set(std::memory_order_acquire)) {}
+                while (m_pDataStorage->getUniverse()->isAccessed.test_and_set(std::memory_order_acquire)) {}
             #endif
             
-            for (auto i=0u; i<m_pUniverse->getStarSystems()->size(); ++i)
+            for (auto i=0u; i<m_pDataStorage->getUniverse()->getStarSystems()->size(); ++i)
             {
-                CStarSystem* pStarSystem = m_pUniverse->getStarSystems()->at(i);
+                CStarSystem* pStarSystem = m_pDataStorage->getUniverse()->getStarSystems()->at(i);
                 CStar&       Star(pStarSystem->Star());
                 
                 Vector2d vecPos = CKinematicsState::clipToWorldLimit(Star.getOrigin() +
@@ -1695,7 +1694,7 @@ void CVisualsManager::drawWorld()
                 }
             }
             #ifdef PW_MULTITHREADING
-                m_pUniverse->isAccessed.clear(std::memory_order_release);
+                m_pDataStorage->getUniverse()->isAccessed.clear(std::memory_order_release);
             #endif
         }
         
@@ -1703,21 +1702,21 @@ void CVisualsManager::drawWorld()
         m_Graphics.setupWorldSpace();
     }
 
-//     for (auto i=0u; i<m_pUniverse->getStarSystems().size(); ++i)
+//     for (auto i=0u; i<m_pDataStorage->getUniverse()->getStarSystems().size(); ++i)
 //     {
 //         if (m_nStarIndex == i)
 //         {
 //             std::mt19937 LocalGenerator;
 //             std::normal_distribution<double>  OrbitDistribution(0, 1.0e12);
 //             
-//             LocalGenerator.seed(m_pUniverse->getStarSystems()[i]->getSeed());
+//             LocalGenerator.seed(m_pDataStorage->getUniverse()->getStarSystems()[i]->getSeed());
 //             
-//             for (int j=0; j<m_pUniverse->getStarSystems()[i]->getNumberOfPlanets(); ++j)
+//             for (int j=0; j<m_pDataStorage->getUniverse()->getStarSystems()[i]->getNumberOfPlanets(); ++j)
 //             {
 //                 m_Graphics.setColor(0.2,0.2,0.5);
-//                 m_Graphics.circle(m_pUniverse->getStarSystems()[i]->Star().getOrigin()-m_pCamera->getCenter()+
+//                 m_Graphics.circle(m_pDataStorage->getUniverse()->getStarSystems()[i]->Star().getOrigin()-m_pCamera->getCenter()+
 //                                     IGridUser::cellToDouble(
-//                                         m_pUniverse->getStarSystems()[i]->getCell()-
+//                                         m_pDataStorage->getUniverse()->getStarSystems()[i]->getCell()-
 //                                         m_pCamera->getCell()),
 //                                     std::fabs(OrbitDistribution(LocalGenerator))
 //                                     );
