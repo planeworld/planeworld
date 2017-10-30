@@ -1494,7 +1494,7 @@ void CVisualsManager::drawStars()
     if (m_pUniverse != nullptr)
     {
         #ifdef PW_MULTITHREADING
-            while (m_pUniverse->isAccessed.test_and_set()) {}
+            while (m_pUniverse->isAccessed.test_and_set(std::memory_order_acquire)) {}
         #endif
         for (auto i=0u; i<m_pUniverse->getStarSystems()->size(); ++i)
         {
@@ -1528,7 +1528,7 @@ void CVisualsManager::drawStars()
             }
         }
         #ifdef PW_MULTITHREADING
-            m_pUniverse->isAccessed.clear();
+            m_pUniverse->isAccessed.clear(std::memory_order_release);
         #endif
     }
     m_Graphics.endRenderBatch();
@@ -1667,7 +1667,7 @@ void CVisualsManager::drawWorld()
             (m_pUniverse != nullptr))
         {
             #ifdef PW_MULTITHREADING
-                while (m_pUniverse->isAccessed.test_and_set()) {}
+                while (m_pUniverse->isAccessed.test_and_set(std::memory_order_acquire)) {}
             #endif
             
             for (auto i=0u; i<m_pUniverse->getStarSystems()->size(); ++i)
@@ -1695,7 +1695,7 @@ void CVisualsManager::drawWorld()
                 }
             }
             #ifdef PW_MULTITHREADING
-                m_pUniverse->isAccessed.clear();
+                m_pUniverse->isAccessed.clear(std::memory_order_release);
             #endif
         }
         

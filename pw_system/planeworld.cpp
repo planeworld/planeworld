@@ -227,9 +227,6 @@ int main(int argc, char *argv[])
         MEM_ALLOC("CVisualsManager")
     }
     
-    /// Frequency of main program (writer commands) and input module
-    const double PLANEWORLD_INPUT_FREQUENCY = 100.0;
-    
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 3. Initialise com interface
@@ -238,7 +235,6 @@ int main(int argc, char *argv[])
     CComInterface ComInterface;
     
     ComInterface.registerWriterDomain("main");
-    
     
     ComInterface.registerFunction("exit",
                                     CCommand<void>(quit),
@@ -302,7 +298,10 @@ int main(int argc, char *argv[])
         CLEAN_UP; return EXIT_FAILURE;
     }
     pVisualsManager->init();
-    pWindow->setActive(false);
+    
+    #ifdef PW_MULTITHREADING
+        pWindow->setActive(false);
+    #endif
     
     //////////////////////////////////////////////////////////////////////////// 
     //

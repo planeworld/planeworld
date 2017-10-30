@@ -121,25 +121,33 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
         #ifdef LOGLEVEL_DEBUG
             
             // Search for callbacks and execute if exist
+            #ifdef PW_MULTITHREADING
+                while (this->isAccessed.test_and_set(std::memory_order_acquire)) {}
+            #endif
             const auto Range = m_RegisteredCallbacks.equal_range(_strName);
             if (Range.first != m_RegisteredCallbacks.end())
-            for_each(Range.first, Range.second, 
-                [&](RegisteredCallbacksType::value_type& _Com)
-                {
-                    DEBUG_MSG_QUIET("Com Interface", "Callback called.")
-                    
-                    auto pCallback = dynamic_cast<CCommand<TRet, Args...>*>(_Com.second);
-                    if (pCallback != nullptr)
+            {
+                for_each(Range.first, Range.second, 
+                    [&](RegisteredCallbacksType::value_type& _Com)
                     {
-                        return pCallback->call(_Args...);
+                        DEBUG_MSG_QUIET("Com Interface", "Callback called.")
+                        
+                        auto pCallback = dynamic_cast<CCommand<TRet, Args...>*>(_Com.second);
+                        if (pCallback != nullptr)
+                        {
+                            pCallback->call(_Args...);
+                        }
+                        else
+                        {
+                            WARNING_MSG_QUIET("Com Interface", "Known function with different signature <" << _strName << ">. ")
+                        }
                     }
-                    else
-                    {
-                        WARNING_MSG_QUIET("Com Interface", "Known function with different signature <" << _strName << ">. ")
-                        return TRet();
-                    }
-                }
-            );
+                );
+            }
+            #ifdef PW_MULTITHREADING
+                this->isAccessed.clear(std::memory_order_release);
+            #endif
+            
             
             // Execute function if existant
             const auto ci = m_RegisteredFunctions.find(_strName);
@@ -164,14 +172,20 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
             }
         #else
             // Search for callbacks and execute if exist
+            #ifdef PW_MULTITHREADING
+                while (this->isAccessed.test_and_set(std::memory_order_acquire)) {}
+            #endif
             const auto Range = m_RegisteredCallbacks.equal_range(_strName);
             for_each(Range.first, Range.second, 
                 [&](RegisteredCallbacksType::value_type& _Com)
                 {
                     auto pCallback = static_cast<CCommand<TRet, Args...>*>(_Com.second);
-                    return pCallback->call(_Args...);
+                    pCallback->call(_Args...);
                 }
             );
+            #ifdef PW_MULTITHREADING
+                this->isAccessed.clear(std::memory_order_release);
+            #endif
 
             // Execute function if existant
             const auto ci = m_RegisteredFunctions.find(_strName);
@@ -230,20 +244,31 @@ bool CComInterface::registerCallback(const std::string& _strName, const std::fun
                 return false;
             }
         ) // DOM_DEV
-        
+ 
+        #ifdef PW_MULTITHREADING
+            while (this->isAccessed.test_and_set(std::memory_order_acquire)) {}
+        #endif
         m_RegisteredCallbacks.insert({{_strName,
                                         new CCommand<TRet, TArgs...>([this, _strName, _Func, _strWriterDomain](TArgs... _Args) -> TRet
                                         {
                                             auto pCommand = new CCommandToQueueWrapper<TRet, TArgs...>(_Func, _Args...);
                                             m_WriterQueues[_strWriterDomain].enqueue(pCommand);
                                             MEM_ALLOC_QUIET("IBaseCommand")
-                                            return TRet();
                                         })}});
+        #ifdef PW_MULTITHREADING
+            this->isAccessed.clear(std::memory_order_release);
+        #endif
         MEM_ALLOC_QUIET("IBaseCommand")
     }
     else
     {
+        #ifdef PW_MULTITHREADING
+            while (this->isAccessed.test_and_set(std::memory_order_acquire)) {}
+        #endif
         m_RegisteredCallbacks.insert({{_strName, new CCommand<TRet, TArgs...>(_Func)}});
+        #ifdef PW_MULTITHREADING
+            this->isAccessed.clear(std::memory_order_release);
+        #endif
         MEM_ALLOC_QUIET("IBaseCommand")
     }    
     

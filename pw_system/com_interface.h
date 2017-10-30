@@ -32,6 +32,7 @@
 #define COM_INTERFACE_H
 
 //--- Standard header --------------------------------------------------------//
+#include <atomic>
 #include <functional>
 #include <map>
 #include <set>
@@ -39,6 +40,7 @@
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
+#include "conf_pw.h"
 #include "log.h"
 #include "log_listener.h"
 
@@ -293,7 +295,6 @@ class CComInterface : public ILogListener
                               const DomainType& = "",
                               const std::string& = "Reader"
         );
-        
         void registerWriterDomain(const std::string&);
         
         void logEntry(const std::string&, const std::string&,
@@ -304,6 +305,11 @@ class CComInterface : public ILogListener
         friend std::ostream& operator<<(std::ostream&, CComInterface&);
         
     private:
+        
+        #ifdef PW_MULTITHREADING
+            std::atomic_flag isAccessed = ATOMIC_FLAG_INIT;              ///< Indicates access, important for multithreading
+        #endif
+        
         
         RegisteredCallbacksType             m_RegisteredCallbacks;       ///< Callbacks attached to registered functions
         
