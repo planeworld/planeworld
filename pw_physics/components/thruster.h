@@ -32,9 +32,9 @@
 #define THRUSTER_H
 
 //--- Program header ---------------------------------------------------------//
-#include "emitter_referrer.h"
+#include "emitter.h"
+#include "handle.h"
 #include "kinematics_state_user.h"
-#include "object_referrer.h"
 #include "world_data_storage_user.h"
 
 //--- Standard header --------------------------------------------------------//
@@ -45,8 +45,6 @@
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CThruster : public IKinematicsStateUser,
-                  public IEmitterReferrer,
-                  public IObjectReferrer,
                   public IUIDUser,
                   public IWorldDataStorageUser
 {
@@ -66,32 +64,43 @@ class CThruster : public IKinematicsStateUser,
         //--- Methods --------------------------------------------------------//
         const double& activate(const double&);
         void          deactivate();
-        
-        void execute();
+        void          execute();
+
+        void addEmitter(IEmitter* const _pEmitter)
+        {
+            METHOD_ENTRY("CThruster::addEmitter")
+            m_hEmitters.push_back(CHandle<IEmitter>(_pEmitter));
+            if (m_hObject.isValid())
+            {
+                _pEmitter->getKinematicsState().setRef(&m_hObject.get()->getKinematicsState());
+            }
+        }
+        void setObject(CObject* const _pObj)
+        {
+            METHOD_ENTRY("CThruster::setObject")
+            m_hObject = CHandle<CObject>(_pObj);
+            m_KinematicsState.setRef(&(m_hObject.get()->getKinematicsState()));
+            for (auto Emitter : m_hEmitters)
+            {
+                Emitter.get()->getKinematicsState().setRef(&(m_hObject.get()->getKinematicsState()));
+            }
+        }
         
         void setAngle(const double&);
         void setOrigin(const Vector2d&);
         
         void setThrustMax(const double&);
-        void setEmitterVelocity(const double&);
-        void setEmitterVelocityStd(const double&);
          
     protected:
-        
                 
-        //--- Methods [protected ---------------------------------------------//
-        virtual void mySetRef();
-        
-        
         //--- Variables ------------------------------------------------------//
+        std::vector<CHandle<IEmitter>> m_hEmitters; ///< Emitters for thrust particles
+        CHandle<CObject> m_hObject;          ///< Physical object representing thruster
+        
         bool        m_bActive;              ///< Flags if thruster is activated
       
         double      m_fThrust;              ///< Thrust applied to hooked object
         double      m_fThrustMax;           ///< Maximum thrust of this thruster
-        
-        double      m_fEmitterVelocity;     ///< Default emitter velocity
-        double      m_fEmitterVelocityStd;  ///< Default emitter velocity standard deviation
-       
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -110,9 +119,12 @@ inline void CThruster::deactivate()
     m_fThrust = 0.0;
     
     m_bActive = false;
-    if (IEmitterReferrer::hasRef())
+    for (const auto Emitter : m_hEmitters)
     {
-        IEmitterReferrer::m_pRef->deactivate();
+        if (Emitter.isValid())
+        {
+            Emitter.get()->deactivate();
+        }
     }
 }
 
@@ -158,38 +170,6 @@ inline void CThruster::setThrustMax(const double& _fThrustMax)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Stores the default velocity of emitter
-///
-/// The default emitter velocity is stored to enable changing it according to
-/// thrust.
-///
-/// \param _fEmitterVelocity Default velocity of emitter
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CThruster::setEmitterVelocity(const double& _fEmitterVelocity)
-{
-    METHOD_ENTRY("CThruster::setEmitterVelocity")
-    m_fEmitterVelocity = _fEmitterVelocity;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Stores the default velocity standard deviation of emitter
-///
-/// The default emitter velocity standard deviation is stored to enable changing
-/// it according tothrust.
-///
-/// \param _fEmitterVelocityStd Default velocity standard deviation of emitter
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CThruster::setEmitterVelocityStd(const double& _fEmitterVelocityStd)
-{
-    METHOD_ENTRY("CThruster::setEmitterVelocityStd")
-    m_fEmitterVelocityStd = _fEmitterVelocityStd;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Returns angle of thrust vector
 ///
 /// \return Angle of thrust vector
@@ -227,22 +207,20 @@ inline double CThruster::getThrust() const
     return m_fThrust;    
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches thruster to UID user
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CThruster::mySetRef()
-{
-    METHOD_ENTRY("CThruster::mySetRef")
-    if (IEmitterReferrer::m_pRef != nullptr)
-    {
-        m_KinematicsState.setRef(&(IEmitterReferrer::m_pRef->getKinematicsState()));
-        m_fEmitterVelocity = IEmitterReferrer::m_pRef->getVelocity();
-        m_fEmitterVelocityStd = IEmitterReferrer::m_pRef->getVelocityStd();
-    }
-    if (IObjectReferrer::m_pRef != nullptr)
-        m_KinematicsState.setRef(&(IObjectReferrer::m_pRef->getKinematicsState()));
-}
+// ////////////////////////////////////////////////////////////////////////////////
+// ///
+// /// \brief Attaches thruster to UID user
+// ///
+// ////////////////////////////////////////////////////////////////////////////////
+// inline void CThruster::mySetRef()
+// {
+//     METHOD_ENTRY("CThruster::mySetRef")
+//     if (IEmitterReferrer::m_pRef != nullptr)
+//     {
+//         m_KinematicsState.setRef(&(IEmitterReferrer::m_pRef->getKinematicsState()));
+//     }
+//     if (IObjectReferrer::m_pRef != nullptr)
+//         m_KinematicsState.setRef(&(IObjectReferrer::m_pRef->getKinematicsState()));
+// }
 
 #endif // THRUSTER_H

@@ -59,7 +59,7 @@ typedef enum
     PLANET_TERRAIN_TYPE_TERRACES,   // On earth and rocky structures, depends on water?
 } TerrainType;
 
-const double PLANET_DEFAULT_VERTICES_PER_PERIOD = 5.0; ///< Vertices per period for calculation of octaves
+const double PLANET_DEFAULT_VERTICES_PER_PERIOD = 3.0; ///< Vertices per period for calculation of octaves
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

@@ -78,6 +78,8 @@ const double EMITTER_DEFAULT_LIMIT_MIN_Y = -100.0; ///< Default distribution lim
 const double EMITTER_DEFAULT_FREQUENCY = 1.0; ///< Default frequency of emitter
 const double EMITTER_DEFAULT_VELOCITY = 10.0; ///< Default velocity of emitted objects
 const double EMITTER_DEFAULT_VELOCITY_STD = 1.0; ///< Default standard deviation of velocity of emitted objects
+const double EMITTER_DEFAULT_VELOCITY_INHERITANCE = 1.0; ///< Default value for inheriting velocity of parent
+const double EMITTER_DEFAULT_INTENSITY = 1.0; ///< Default intensity of emitter output
 
 const EmitterDistributionType EMITTER_DEFAULT_DISTRIBUTION = EmitterDistributionType::RECTANGULAR_FIELD; ///< Default emitter distribution
 const EmitterModeType EMITTER_DEFAULT_MODE = EmitterModeType::ONCE;                                      ///<  Default emitter mode
@@ -124,11 +126,13 @@ class IEmitter : public IKinematicsStateUser,
         void setAngleStd(const double&);
         void setDistribution(const EmitterDistributionType&);
         void setFrequency(const double&);
+        void setIntensity(const double&);
         void setLimits(const double&, const double&, const double&, const double&);
         void setMode(const EmitterModeType&);
         void setOrigin(const Vector2d&);
         void setVelocity(const double&);
         void setVelocityStd(const double&);
+        void setVelocityInheritance(const double& _fVelInh) {m_fVelocityInheritance = _fVelInh;}
         
     protected:
         
@@ -153,6 +157,8 @@ class IEmitter : public IKinematicsStateUser,
         double                  m_fMaxY;                    ///< Maximum limit y direction, rectangular field
         double                  m_fVelocity;                ///< Velocity of emitted entities
         double                  m_fVelocityStd;             ///< Velocity standard deviation of emitted entities
+        double                  m_fVelocityInheritance;     ///< How much velocity is inherited by parent
+        double                  m_fIntensity;               ///< Intensitiy of output
         
         double                  m_fResidual;                ///< Residual of emitation, since engine frequency differs from emitation frequency
 };
@@ -268,6 +274,8 @@ inline IEmitter::IEmitter() : m_EmitterMode(EMITTER_DEFAULT_MODE),
                               m_fMaxY(EMITTER_DEFAULT_LIMIT_MAX_Y),
                               m_fVelocity(EMITTER_DEFAULT_VELOCITY),
                               m_fVelocityStd(EMITTER_DEFAULT_VELOCITY_STD),
+                              m_fVelocityInheritance(EMITTER_DEFAULT_VELOCITY_INHERITANCE),
+                              m_fIntensity(EMITTER_DEFAULT_INTENSITY),
                               m_fResidual(0.0)
 {
     METHOD_ENTRY("IEmitter::IEmitter")
@@ -397,7 +405,6 @@ inline void IEmitter::setNumber(const std::uint32_t& _nNr)
 inline void IEmitter::activate()
 {
     METHOD_ENTRY("IEmitter::activate")
-    
     m_bActive = true;
 }
 
@@ -409,7 +416,6 @@ inline void IEmitter::activate()
 inline void IEmitter::deactivate()
 {
     METHOD_ENTRY("IEmitter::deactivate")
-    
     m_bActive = false;
 }
 
@@ -490,6 +496,19 @@ inline void IEmitter::setFrequency(const double& _fF)
     {
         m_fFrequency = _fF;
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set intensity of operation
+///
+/// \param _fIntensity Intensity of operation
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void IEmitter::setIntensity(const double& _fIntensity)
+{
+    METHOD_ENTRY("IEmitter::setIntensity")
+    m_fIntensity = _fIntensity;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

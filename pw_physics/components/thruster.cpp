@@ -37,9 +37,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 CThruster::CThruster() : m_bActive(true),
                          m_fThrust(1.0),
-                         m_fThrustMax(1.0),
-                         m_fEmitterVelocity(1.0),
-                         m_fEmitterVelocityStd(0.0)
+                         m_fThrustMax(1.0)
+
 {
     METHOD_ENTRY("CThruster::CThruster")
     CTOR_CALL("CThruster::CThruster")
@@ -64,6 +63,15 @@ const double& CThruster::activate(const double& _fThrust)
     METHOD_ENTRY("CThruster::activate")
     
     m_fThrust = _fThrust;
+    
+    for (const auto Emitter : m_hEmitters)
+    {
+        if (Emitter.isValid())
+        {
+            Emitter.get()->setIntensity(_fThrust/m_fThrustMax);
+        }
+    }
+    
     if (m_fThrust > m_fThrustMax)
     {
         m_fThrust = m_fThrustMax;
@@ -76,7 +84,13 @@ const double& CThruster::activate(const double& _fThrust)
     else if (!m_bActive)
     {
         m_bActive = true;
-        if (IEmitterReferrer::hasRef()) IEmitterReferrer::m_pRef->activate();
+        for (const auto Emitter : m_hEmitters)
+        {
+            if (Emitter.isValid())
+            {
+                Emitter.get()->activate();
+            }
+        }
     }
     
     return m_fThrust;
@@ -97,15 +111,9 @@ void CThruster::execute()
 
     if (m_bActive)
     {
-        if (IObjectReferrer::hasRef())
+        if (m_hObject.isValid())
         {
-            IObjectReferrer::m_pRef->addForceLC(Vector2d(0.0,m_fThrust), m_KinematicsState.getLocalOrigin());
-        }
-        
-        if (IEmitterReferrer::hasRef() && m_fThrustMax != 0.0)
-        {
-            IEmitterReferrer::m_pRef->setVelocity(m_fThrust/m_fThrustMax * m_fEmitterVelocity);
-            IEmitterReferrer::m_pRef->setVelocityStd(m_fThrust/m_fThrustMax * m_fEmitterVelocityStd);
+            m_hObject.get()->addForceLC(Vector2d(0.0,m_fThrust), m_KinematicsState.getLocalOrigin());
         }
     }
 }

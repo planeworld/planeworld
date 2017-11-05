@@ -71,7 +71,7 @@ CObjectEmitter::~CObjectEmitter()
 /// than the frequency the method is called at, the number of particle per emit
 /// is chosen accordingly.
 ///
-/// \param _fF Engine emitation frequency.
+/// \param _fF Engine emitation frequency
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CObjectEmitter::emit(const double& _fF)
@@ -117,7 +117,7 @@ void CObjectEmitter::emit(const double& _fF)
                 for (int i=0; i<nNrOfObjects; ++i)
                 {
                     double fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_KinematicsState.getAngle();;
-                    double fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
+                    double fVelocity = (m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity) * m_fIntensity;
                                     
                     CObject* pObject = m_pTemplate->clone();
                     pObject->setNewID();

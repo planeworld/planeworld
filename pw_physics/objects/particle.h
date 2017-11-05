@@ -34,6 +34,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
 #include "circular_buffer.h"
+#include "graphics.h"
 #include "grid_user.h"
 #include "uid_user.h"
 
@@ -84,6 +85,11 @@ class CParticle : public IGridUser,
         CBoundingBox&           getBoundingBox();
         const ParticleTypeType& getParticleType()  const;
         int                     getDepths() const;
+        
+        const ColorTypeRGBA*    getColorBirth() const {return &m_aColorBirth;}
+        const ColorTypeRGBA*    getColorDeath() const {return &m_aColorDeath;}
+        const double&           getSizeBirth() const {return m_fSizeBirth;}
+        const double&           getSizeDeath() const {return m_fSizeDeath;}
 
         //--- Methods --------------------------------------------------------//
         CCircularBuffer<Vector2d>* getPositions();
@@ -97,6 +103,11 @@ class CParticle : public IGridUser,
         void                setForce(const Vector2d&);
         void                setNumber(const int&);
         void                setTimeFac(const double&);
+        
+        void                setColorBirth(const ColorTypeRGBA& _aColorBirth) {m_aColorBirth = _aColorBirth;}
+        void                setColorDeath(const ColorTypeRGBA& _aColorDeath) {m_aColorDeath = _aColorDeath;}
+        void                setSizeBirth(const double& _fSizeBirth) {m_fSizeBirth = _fSizeBirth;}
+        void                setSizeDeath(const double& _fSizeDeath) {m_fSizeDeath = _fSizeDeath;}
         
         void                dynamics(const double&);
         void                generate(const Vector2d&, const Vector2d&);
@@ -122,6 +133,10 @@ class CParticle : public IGridUser,
         CTimer                  m_Lifetime;                  ///< Lifetime counter
         double                  m_fTimeFac;                  ///< Factor of realtime
         double                  m_fDamping;                  ///< Damping of particle
+        double                  m_fSizeBirth;                ///< Particle size at beginning of lifetime
+        double                  m_fSizeDeath;                ///< Particle size at end of lifetime
+        ColorTypeRGBA           m_aColorBirth;               ///< Particle color at beginning of lifetime
+        ColorTypeRGBA           m_aColorDeath;               ///< Particle color at end of lifetime
         int                     m_nDepthlayers;              ///< Depths in which particle exists
         
         Vector2d                m_vecForce;                  ///< Gravitational force applied

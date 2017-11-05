@@ -42,8 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 CPlanet::CPlanet() : m_PlanetType(PLANET_TYPE_EARTHLIKE),
                      m_fAngle(0.0),
-                     m_fGroundResolution(1.0),
-                     m_fHeightMax(10.0),
+                     m_fGroundResolution(0.001),
+                     m_fHeightMax(1000.0),
                      m_fRadius(1000.0),
                      m_fSeaLevel(0.0),
                      m_fSmoothness(1.0),

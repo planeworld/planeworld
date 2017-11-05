@@ -64,7 +64,7 @@ typedef sf::Window WindowHandleType;
 const std::uint16_t GRAPHICS_WIDTH_DEFAULT =  800u;     ///< Default x-resolution
 const std::uint16_t GRAPHICS_HEIGHT_DEFAULT = 600u;     ///< Default y-resolution
 
-const GLuint GRAPHICS_SIZE_OF_INDEX_BUFFER = 100000u;   ///< Size of VBOs/VAOs/IBOs to keep all data
+const GLuint GRAPHICS_SIZE_OF_INDEX_BUFFER = 10000u;    ///< Size of VBOs/VAOs/IBOs to keep all data
 
 const double GRAPHICS_PX_PER_METER = 2.0;               ///< Default resolution, pixel per meter
 const double GRAPHICS_FOV_DEFAULT = 45.0;               ///< Default fov

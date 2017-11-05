@@ -95,7 +95,7 @@ void CParticleEmitter::init()
 /// than the frequency the method is called at, the number of particle per emit
 /// is chosen accordingly.
 ///
-/// \param _fF Engine emitation frequency.
+/// \param _fF Engine emitation frequency
 ///
 ///////////////////////////////////////////////////////////////////////////////
 void CParticleEmitter::emit(const double& _fF)
@@ -135,11 +135,11 @@ void CParticleEmitter::emit(const double& _fF)
                 for (auto i=0u; i<nNrOfParticle; ++i)
                 {
                     double      fAngle = m_NormalDist(m_Generator)*m_fAngleStd + m_KinematicsState.getAngle();
-                    double      fVelocity = m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity;
+                    double      fVelocity = (m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity)*m_fIntensity;
                     Rotation2Dd Rotation(fAngle);
 
                     (m_pDataStorage->getParticlesByValueBack()->operator[](IParticleReferrer::m_UIDRef))->generate(m_KinematicsState.getOrigin(),
-                                                   fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_KinematicsState.getVelocity());
+                                                   fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_fVelocityInheritance * m_KinematicsState.getVelocity());
                 }
         }
     }

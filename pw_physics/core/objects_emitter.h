@@ -51,11 +51,11 @@ class CObjectEmitter : public IEmitter
         ~CObjectEmitter();
    
         //--- Constant Methods -----------------------------------------------//
-        EmitterType getEmitterType() const;
+        EmitterType getEmitterType() const override;
         
         //--- Methods --------------------------------------------------------//
-        void emit(const double&);
-        void init();
+        void emit(const double&) override;
+        void init() override;
         void setTemplate(CObject* const);
 
     private:

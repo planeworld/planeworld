@@ -1068,7 +1068,7 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
                 m_vecColours[m_unIndexCol++] = m_aColour[0]; // * double(i) / _Dots.size(); Works
                 m_vecColours[m_unIndexCol++] = m_aColour[1]; // * double(i) / _Dots.size(); Works
                 m_vecColours[m_unIndexCol++] = m_aColour[2]; // * double(i) / _Dots.size(); Works
-                m_vecColours[m_unIndexCol++] = m_aColour[3]; // * double(i) / _Dots.size(); Somehow, this doesn't work
+                m_vecColours[m_unIndexCol++] = m_aColour[3] * double(i) / _Dots.size(); // Somehow, this doesn't work
                 m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
             }
             this->restartRenderBatchInternal();
@@ -1085,7 +1085,7 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
         m_vecColours[m_unIndexCol++] = m_aColour[0]; // * double(i) / _Dots.size(); Works
         m_vecColours[m_unIndexCol++] = m_aColour[1]; // * double(i) / _Dots.size(); Works
         m_vecColours[m_unIndexCol++] = m_aColour[2]; // * double(i) / _Dots.size(); Works
-        m_vecColours[m_unIndexCol++] = m_aColour[3]; // * double(i) / _Dots.size(); Somehow, this doesn't work
+        m_vecColours[m_unIndexCol++] = m_aColour[3] * double(i) / _Dots.size(); // Somehow, this doesn't work
         m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
     }
 

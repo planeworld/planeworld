@@ -38,7 +38,12 @@
 CParticle::CParticle() : IGridUser(),
                      IUIDUser(),
                      m_ParticleType(ParticleTypeType::DOT),
-                     m_fTimeFac(1.0)
+                     m_fTimeFac(1.0),
+                     m_fDamping(0.0),
+                     m_aColorBirth({{1.0, 1.0, 1.0, 1.0}}),
+                     m_aColorDeath({{1.0, 1.0, 1.0, 0.0}}),
+                     m_fSizeBirth(1.0),
+                     m_fSizeDeath(1.0)
 {
     METHOD_ENTRY("CParticle::CParticle")
     CTOR_CALL("CParticle::CParticle")
@@ -287,6 +292,10 @@ void CParticle::copy(const CParticle& _Particle)
     m_ParticleType = _Particle.m_ParticleType;
     m_fTimeFac = _Particle.m_fTimeFac;
     m_fDamping = _Particle.m_fDamping;
+    m_aColorBirth = _Particle.m_aColorBirth;
+    m_aColorDeath = _Particle.m_aColorDeath;
+    m_fSizeBirth = _Particle.m_fSizeBirth;
+    m_fSizeDeath = _Particle.m_fSizeDeath;
     m_nDepthlayers = _Particle.m_nDepthlayers;
     m_vecForce = _Particle.m_vecForce;
 }

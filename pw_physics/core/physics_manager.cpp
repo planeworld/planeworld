@@ -735,7 +735,7 @@ void CPhysicsManager::myInitComInterface()
                                             IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUIDEm);
                                             if (pEmitter != nullptr)
                                             {
-                                               if (pEmitter->getEmitterType() == EmitterType::PARTICLE)
+                                                 if (pEmitter->getEmitterType() == EmitterType::PARTICLE)
                                                 {
                                                     CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUIDPa);
                                                     if (pParticle != nullptr)
@@ -755,6 +755,23 @@ void CPhysicsManager::myInitComInterface()
                                           {ParameterType::INT, "Particle UID"}},
                                           "system", "physics"
                                           );
+        m_pComInterface->registerFunction("emitter_set_position",
+                                          CCommand<void, int, double, double>(
+                                            [&](const int _nUID, const double& _fX, const double& _fY)
+                                            {
+                                                IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                                if (pEmitter != nullptr)
+                                                {
+                                                    pEmitter->setOrigin(Vector2d(_fX, _fY));
+                                                }
+                                            }),
+                                          "Sets position of a given emitter.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Emitter UID"},
+                                           {ParameterType::DOUBLE, "Position X"},
+                                           {ParameterType::DOUBLE, "Position Y"}},
+                                           "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("emitter_set_velocity",
                                           CCommand<void, int, double>([&](const int _nUID, const double& _fVelocity)
                                           {
@@ -768,6 +785,21 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                           {ParameterType::INT, "Emittter UID"},
                                           {ParameterType::DOUBLE, "Velocity of entity emitation"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("emitter_set_velocity_inheritance",
+                                          CCommand<void, int, double>([&](const int _nUID, const double& _fVelInh)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUID);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                pEmitter->setVelocityInheritance(_fVelInh);
+                                            }
+                                          }),
+                                          "Set fraction for inheriting velocity of parent object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::DOUBLE, "Fraction for inheriting velocity of parent object"}},
                                           "system", "physics"
                                           );
         m_pComInterface->registerFunction("emitter_set_velocity_std",
@@ -785,18 +817,86 @@ void CPhysicsManager::myInitComInterface()
                                           {ParameterType::DOUBLE, "Standard deviation of velocity of entity emitation"}},
                                           "system", "physics"
                                           );
-        m_pComInterface->registerFunction("particle_set_type",
+        m_pComInterface->registerFunction("particles_set_color_birth",
+                                          CCommand<void, int, double, double, double, double>(
+                                            [&](const int _nUID,
+                                                const double& _fR,
+                                                const double& _fG,
+                                                const double& _fB,
+                                                const double& _fA)
+                                            {
+                                                CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUID);
+                                                if (pParticle != nullptr)
+                                                {
+                                                    pParticle->setColorBirth({{_fR, _fG, _fB, _fA}});
+                                                }
+                                            }),
+                                          "Sets color of given newly created particles.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Particle UID"},
+                                           {ParameterType::DOUBLE, "Color of newly created particles"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("particles_set_color_death",
+                                          CCommand<void, int, double, double, double, double>(
+                                            [&](const int _nUID,
+                                                const double& _fR,
+                                                const double& _fG,
+                                                const double& _fB,
+                                                const double& _fA)
+                                            {
+                                                CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUID);
+                                                if (pParticle != nullptr)
+                                                {
+                                                    pParticle->setColorDeath({{_fR, _fG, _fB, _fA}});
+                                                }
+                                            }),
+                                          "Sets color of oldest particles.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Particle UID"},
+                                           {ParameterType::DOUBLE, "Color of oldest particles"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("particles_set_size_birth",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fSize)
+                                            {
+                                                CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUID);
+                                                if (pParticle != nullptr)
+                                                {
+                                                    pParticle->setSizeBirth(_fSize);
+                                                }
+                                            }),
+                                          "Sets size of given newly created particles.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Particle UID"},
+                                           {ParameterType::DOUBLE, "Size of newly created particles"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("particles_set_size_death",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fSize)
+                                            {
+                                                CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUID);
+                                                if (pParticle != nullptr)
+                                                {
+                                                    pParticle->setSizeDeath(_fSize);
+                                                }
+                                            }),
+                                          "Sets size of oldest particles.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Particle UID"},
+                                           {ParameterType::DOUBLE, "Size of oldest particles"}},
+                                           "system", "physics"
+                                         );
+        m_pComInterface->registerFunction("particles_set_type",
                                           CCommand<void, int, std::string>(
                                             [&](const int _nUID, const std::string& _strType)
                                             {
-                                                const auto ci = m_pDataStorage->getParticlesByValueBack()->find(_nUID);
-                                                if (ci != m_pDataStorage->getParticlesByValueBack()->end())
+                                                CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUID);
+                                                if (pParticle != nullptr)
                                                 {
-                                                    ci->second->setParticleType(mapStringToParticleType(_strType));
-                                                }
-                                                else
-                                                {
-                                                    WARNING_MSG("World Data Storage", "Unknown particle with UID <" << _nUID << ">")
+                                                    pParticle->setParticleType(mapStringToParticleType(_strType));
                                                 }
                                             }),
                                           "Sets type of given particle.",
@@ -864,8 +964,8 @@ void CPhysicsManager::myInitComInterface()
                                            "system", "physics"
                                          );
         m_pComInterface->registerFunction("obj_add_shps",
-                                          CCommand<void, int, std::vector<double>>(
-                                            [&](const int _nUIDObj, const std::vector<double>& _Shapes)
+                                          CCommand<void, int, std::vector<int>>(
+                                            [&](const int _nUIDObj, const std::vector<int>& _Shapes)
                                             {
                                                 CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUIDObj);
                                                 
@@ -916,7 +1016,7 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::DOUBLE, "Frequency"}},
                                            "system", "physics");
-        m_pComInterface->registerFunction("thruster_set_emitter",
+        m_pComInterface->registerFunction("thruster_add_emitter",
                                           CCommand<void, int, int>([&](const int _nUIDThr, const int _nUIDEm)
                                           {
                                             CThruster* pThruster = m_pDataStorage->getThrusterByValue(_nUIDThr);
@@ -925,17 +1025,11 @@ void CPhysicsManager::myInitComInterface()
                                                 IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUIDEm);
                                                 if (pEmitter != nullptr)
                                                 {
-                                                    pThruster->IEmitterReferrer::setRef(pEmitter);
-                                                    
-                                                    // Set referred object also for emitter if object already set
-                                                    if (pThruster->IObjectReferrer::hasRef())
-                                                    {
-                                                        pEmitter->IObjectReferrer::setRef(pThruster->IObjectReferrer::getRef());
-                                                    }
+                                                    pThruster->addEmitter(pEmitter);
                                                 }
                                             }
                                           }),
-                                          "Attach thruster to emitter.",
+                                          "Add an emitter to thruster.",
                                           {{ParameterType::NONE, "No return value"},
                                           {ParameterType::INT, "Thruster UID"},
                                           {ParameterType::INT, "Emitter UID"}},
@@ -950,13 +1044,7 @@ void CPhysicsManager::myInitComInterface()
                                                 CObject* pObject = m_pDataStorage->getObjectByValueBack(_nUIDObj);
                                                 if (pObject != nullptr)
                                                 {
-                                                    pThruster->IObjectReferrer::setRef(pObject);
-                                                    
-                                                    // Set referred object also for emitter if emitter already set
-                                                    if (pThruster->IEmitterReferrer::hasRef())
-                                                    {
-                                                        pThruster->IEmitterReferrer::getRef()->IObjectReferrer::setRef(pObject);
-                                                    }
+                                                    pThruster->setObject(pObject);
                                                 }
                                             }
                                           }),
@@ -1300,6 +1388,24 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Cell Y"}},
                                            "physics", "physics"
                                          );
+//         m_pComInterface->registerFunction("obj_set_name",
+//                                           CCommand<void, int, std::string>(
+//                                             [&](const int _nUID, const std::string& _strName)
+//                                             {
+//                                                 CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+//                                                 if (pObj != nullptr)
+//                                                 {
+//                                                     pObj->setName(_strName);
+//                                                     m_pDataStorage->setObjectName(); // Important for object access via map
+// //                                                     pObj->init();
+//                                                 }
+//                                             }),
+//                                           "Sets name of a given object.",
+//                                           {{ParameterType::NONE, "No return value"},
+//                                            {ParameterType::INT, "Object UID"},
+//                                            {ParameterType::STRING, "Objects name"}},
+//                                            "physics", "physics"
+//                                          );
         m_pComInterface->registerFunction("obj_set_position",
                                           CCommand<void, int, double, double>(
                                             [&](const int _nUID, const double& _fX, const double& _fY)
@@ -1374,14 +1480,21 @@ void CPhysicsManager::myInitComInterface()
                                                 IShape* pShp = m_pDataStorage->getShapesByValue()->at(_nUID);
                                                 if (pShp != nullptr)
                                                 {
-                                                    if (pShp->getShapeType() == ShapeType::CIRCLE)
+                                                    switch (pShp->getShapeType())
                                                     {
-                                                        static_cast<CCircle*>(pShp)->setRadius(_fRad);
-                                                    }
-                                                    else
-                                                    {
-                                                        WARNING_MSG("World Data Storage", "Wrong shape type of shape with UID <" << _nUID << ">")
-                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                        case ShapeType::CIRCLE:
+                                                        {
+                                                            static_cast<CCircle*>(pShp)->setRadius(_fRad);
+                                                            break;
+                                                        }
+                                                        case ShapeType::PLANET:
+                                                        {
+                                                            static_cast<CPlanet*>(pShp)->setRadius(_fRad);
+                                                            break;
+                                                        }
+                                                        default:
+                                                            WARNING_MSG("World Data Storage", "Wrong shape type of shape with UID <" << _nUID << ">")
+                                                            throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                     }
                                                 }
                                                 else
