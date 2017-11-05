@@ -737,10 +737,10 @@ void CPhysicsManager::myInitComInterface()
                                             {
                                                  if (pEmitter->getEmitterType() == EmitterType::PARTICLE)
                                                 {
-                                                    CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUIDPa);
-                                                    if (pParticle != nullptr)
+                                                    CParticle* pParticles = m_pDataStorage->getParticleByValueBack(_nUIDPa);
+                                                    if (pParticles != nullptr)
                                                     {
-                                                        static_cast<CParticleEmitter*>(pEmitter)->IParticleReferrer::setRef(pParticle);
+                                                        static_cast<CParticleEmitter*>(pEmitter)->setParticles(pParticles);
                                                     }
                                                 }
                                                 else

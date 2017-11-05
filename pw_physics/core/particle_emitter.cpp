@@ -42,11 +42,10 @@ CParticleEmitter::CParticleEmitter() : m_ParticleType(ParticleTypeType::DOT)
     METHOD_ENTRY("CParticleEmitter::CParticleEmitter")
     CTOR_CALL("CParticleEmitter::CParticleEmitter")
     
-    IParticleReferrer::m_pRef = new CParticle;
+    m_hParticles.set(new CParticle);
     MEM_ALLOC("CParticle")
-    IParticleReferrer::m_pRef->setNumber(1);
-    this->IParticleReferrer::setRef(IParticleReferrer::m_pRef);
-    
+    m_hParticles.get()->setNumber(10);
+        
     m_Generator.seed(m_unNrOfEmitters++);
 //     IHooker::m_strName += ": Particle_"+ std::to_string(m_unNrOfEmitters++);
 }
@@ -128,7 +127,7 @@ void CParticleEmitter::emit(const double& _fF)
                 {
                     double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
                     double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
-                    IParticleReferrer::m_pRef->generate(Vector2d(fX, fY)+ m_KinematicsState.getOrigin(), Vector2d(0.0, 0.0));
+                    m_hParticles.get()->generate(Vector2d(fX, fY)+ m_KinematicsState.getOrigin(), Vector2d(0.0, 0.0));
                 }
                 break;
             case EmitterDistributionType::POINT_SOURCE:
@@ -138,9 +137,12 @@ void CParticleEmitter::emit(const double& _fF)
                     double      fVelocity = (m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity)*m_fIntensity;
                     Rotation2Dd Rotation(fAngle);
 
-                    (m_pDataStorage->getParticlesByValueBack()->operator[](IParticleReferrer::m_UIDRef))->generate(m_KinematicsState.getOrigin(),
-                                                   fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_fVelocityInheritance * m_KinematicsState.getVelocity());
+                    (m_pDataStorage->getParticleByValueBack(m_hParticles.getUID())->generate(m_KinematicsState.getOrigin(),
+                                                   fVelocity*(Rotation*Vector2d(1.0, 0.0)) + m_fVelocityInheritance * m_KinematicsState.getVelocity()));
                 }
+                break;
+            default:
+                break;
         }
     }
 }

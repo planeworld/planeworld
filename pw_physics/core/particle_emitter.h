@@ -35,15 +35,15 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "emitter.h"
-#include "particle_referrer.h"
+#include "handle.h"
+#include "particle.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for a source that emits particle.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CParticleEmitter : public IEmitter,
-                         public IParticleReferrer
+class CParticleEmitter : public IEmitter
 {
     
     public:
@@ -61,12 +61,19 @@ class CParticleEmitter : public IEmitter,
         void        emit(const double&) override;
         void        init() override;
         void        setNumber(const std::uint32_t&) override;
-              
+             
+        void        setParticles(CParticle* const _pParticle)
+        {
+            METHOD_ENTRY("CParticleEmitter::setParticles")
+            m_hParticles.set(_pParticle);
+        }
         void        setParticleType(const ParticleTypeType&);
 
     private:
         
         //--- Variables [private] --------------------------------------------//
+        CHandle<CParticle>  m_hParticles;       ///< Particles to be emitted
+        
         ParticleTypeType    m_ParticleType;     ///< Type of particle
         static uint32_t     m_unNrOfEmitters;   ///< Static counter for name initialisation and tracking
 };
@@ -110,7 +117,7 @@ inline void CParticleEmitter::setNumber(const std::uint32_t& _nNrMax)
 {
     METHOD_ENTRY("CParticleEmitter::setMode")
     m_nNr = _nNrMax;
-    IParticleReferrer::m_pRef->setNumber(_nNrMax);
+    m_hParticles.get()->setNumber(_nNrMax);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
