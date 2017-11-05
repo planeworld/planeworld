@@ -32,8 +32,8 @@
 #define KINEMATICS_STATE_H
 
 //--- Program header ---------------------------------------------------------//
+#include "handle.h"
 #include "log.h"
-#include "uid_referrer.h"
 #include "uid_user.h"
 
 //--- Standard header --------------------------------------------------------//
@@ -59,8 +59,7 @@ using namespace Eigen;
 /// planet.
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CKinematicsState  : public IUIDUser,
-                          public IUIDReferrer<CKinematicsState>
+class CKinematicsState  : public IUIDUser
 {
     
     public:
@@ -73,7 +72,6 @@ class CKinematicsState  : public IUIDUser,
             
         //--- Constructor/Destructor -----------------------------------------//
         CKinematicsState();
-        virtual ~CKinematicsState(){};
 
         //--- Constant methods -----------------------------------------------//
         Vector2d  getOrigin() const;
@@ -103,6 +101,8 @@ class CKinematicsState  : public IUIDUser,
                                          const double& = 1.0) const;
         
         //--- Methods --------------------------------------------------------//
+        void setRef(CKinematicsState* const);
+                                         
         Vector2d& Origin();
         
         void increaseAngle(const double&);
@@ -126,6 +126,8 @@ class CKinematicsState  : public IUIDUser,
         static double s_fWorldLimitY;   ///< Maximum world coordinate abs(x) before repetition
 
         //--- Variables ------------------------------------------------------//
+        CHandle<CKinematicsState>   m_hKinStateRef; ///< kinematics state reference
+        
         Matrix2d    m_matRot;           ///< Rotation
         Vector2d    m_vecOrigin;        ///< Origin of local coordinates
         Vector2d    m_vecVelocity;      ///< Velocity
@@ -144,7 +146,6 @@ class CKinematicsState  : public IUIDUser,
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline CKinematicsState::CKinematicsState() : IUIDUser(),
-                                              IUIDReferrer< CKinematicsState >(),
                                               m_fAngle(0.0),
                                               m_fAngleVelocity(0.0),
                                               m_fAngleRef(0.0)
@@ -224,9 +225,22 @@ inline Vector2d& CKinematicsState::Origin()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Sets reference for this kinematic state
+///
+/// \param _pRef Kinematics to refer to
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CKinematicsState::setRef(CKinematicsState* const _pRef)
+{
+    METHOD_ENTRY("CKinematicsState::setRef")
+    m_hKinStateRef.set(_pRef);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Increases the angle by given value
 ///
-/// \param _fAngle Value to increase the angel by
+/// \param _fAngle Value to increase the angle by
 ///
 ////////////////////////////////////////////////////////////////////////////////
 inline void CKinematicsState::increaseAngle(const double& _fAngle)
@@ -305,17 +319,17 @@ void CKinematicsState::getPositions(const std::array<Vector2d, T>& _Pos0,
 {
     METHOD_ENTRY("CKinematicsState::getPositions")
     
-    if (m_pRef != nullptr)
+    if (m_hKinStateRef.isValid())
     {
-        if (m_fAngleRef != m_pRef->m_fAngle)
+        if (m_fAngleRef != m_hKinStateRef.get()->m_fAngle)
         {
-            m_fAngleRef = m_pRef->m_fAngle;
-            m_matRotRef = Rotation2Dd(m_pRef->m_fAngle).toRotationMatrix();
+            m_fAngleRef = m_hKinStateRef.get()->m_fAngle;
+            m_matRotRef = Rotation2Dd(m_hKinStateRef.get()->m_fAngle).toRotationMatrix();
         }
         for (auto i=0u; i<T; ++i)
         {
             _Pos1[i] = m_matRotRef * ((m_matRot * (_Pos0[i] / _fZoom)) + m_vecOrigin) +
-                       m_pRef->m_vecOrigin;
+                       m_hKinStateRef.get()->m_vecOrigin;
         }
     }
     else
