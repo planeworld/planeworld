@@ -117,3 +117,38 @@ void CThruster::execute()
         }
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Add an emitter to thruster
+///
+/// \param _pEmitter Emitter to be added to thruster
+///
+///////////////////////////////////////////////////////////////////////////////
+void CThruster::addEmitter(IEmitter* const _pEmitter)
+{
+    METHOD_ENTRY("CThruster::addEmitter")
+    m_hEmitters.push_back(CHandle<IEmitter>(_pEmitter));
+    if (m_hObject.isValid())
+    {
+        _pEmitter->getKinematicsState().setRef(&m_hObject.get()->getKinematicsState());
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set physical object the thruster is bound to
+///
+/// \param _pObj Physical object the thruster is bound to
+///
+///////////////////////////////////////////////////////////////////////////////
+void CThruster::setObject(CObject* const _pObj)
+{
+    METHOD_ENTRY("CThruster::setObject")
+    m_hObject = CHandle<CObject>(_pObj);
+    m_KinematicsState.setRef(&(m_hObject.get()->getKinematicsState()));
+    for (auto Emitter : m_hEmitters)
+    {
+        Emitter.get()->getKinematicsState().setRef(&(m_hObject.get()->getKinematicsState()));
+    }
+}

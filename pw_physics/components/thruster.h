@@ -53,7 +53,6 @@ class CThruster : public IKinematicsStateUser,
     
         //--- Constructor/Destructor -----------------------------------------//
         CThruster();
-        virtual ~CThruster(){}
         
         //--- Constant methods -----------------------------------------------//
         double    getAngle() const;
@@ -66,25 +65,8 @@ class CThruster : public IKinematicsStateUser,
         void          deactivate();
         void          execute();
 
-        void addEmitter(IEmitter* const _pEmitter)
-        {
-            METHOD_ENTRY("CThruster::addEmitter")
-            m_hEmitters.push_back(CHandle<IEmitter>(_pEmitter));
-            if (m_hObject.isValid())
-            {
-                _pEmitter->getKinematicsState().setRef(&m_hObject.get()->getKinematicsState());
-            }
-        }
-        void setObject(CObject* const _pObj)
-        {
-            METHOD_ENTRY("CThruster::setObject")
-            m_hObject = CHandle<CObject>(_pObj);
-            m_KinematicsState.setRef(&(m_hObject.get()->getKinematicsState()));
-            for (auto Emitter : m_hEmitters)
-            {
-                Emitter.get()->getKinematicsState().setRef(&(m_hObject.get()->getKinematicsState()));
-            }
-        }
+        void addEmitter(IEmitter* const);
+        void setObject(CObject* const);
         
         void setAngle(const double&);
         void setOrigin(const Vector2d&);
