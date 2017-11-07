@@ -63,8 +63,6 @@ class IUIDUser
         CUID       m_UID; ///< Identifier
 };
 
-typedef std::unordered_map<UIDType, IUIDUser*> UIDUserType; ///< Stores entities by UID
-
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////

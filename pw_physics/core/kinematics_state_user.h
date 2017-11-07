@@ -42,9 +42,6 @@
 ///
 /// \brief Interface for classes that use a kinematic state
 ///
-/// \todo Get rid of hooking by using a proper implementation of uid user and
-///       its virtual mySetRef method if applicable
-///
 ////////////////////////////////////////////////////////////////////////////////
 class IKinematicsStateUser
 {
@@ -54,9 +51,12 @@ class IKinematicsStateUser
         //--- Constructor/Destructor -----------------------------------------//
 
         //--- Constant methods -----------------------------------------------//
-        CKinematicsState&   getKinematicsState();
+        bool isAttached() const {return m_KinematicsState.getRef()->isValid();}
         
         //--- Methods --------------------------------------------------------//
+        CKinematicsState&   getKinematicsState();
+        
+        void attachTo(IKinematicsStateUser* const);
                 
     protected:
         
@@ -76,6 +76,19 @@ inline CKinematicsState& IKinematicsStateUser::getKinematicsState()
 {
     METHOD_ENTRY("IKinematicsStateUser::getKinematicsState")
     return m_KinematicsState;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Attaches kinematics state user to another one
+///
+/// \param _pKinStateUser Kinematics state user to attach to
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IKinematicsStateUser::attachTo(IKinematicsStateUser* const _pKinStateUser)
+{
+    METHOD_ENTRY("IKinematicsStateUser::attachTo")
+    m_KinematicsState.setRef(&_pKinStateUser->getKinematicsState());
 }
 
 #endif // KINEMATICS_STATE_USER_H

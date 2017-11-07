@@ -38,7 +38,6 @@
 #include "bounding_box.h"
 #include "graphics.h"
 #include "kinematics_state_user.h"
-#include "object_referrer.h"
 #include "uid_user.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -54,7 +53,6 @@
 class CCamera : public CGraphicsBase,
                 public IGridUser,
                 public IKinematicsStateUser,
-                public IObjectReferrer,
                 public IUIDUser
 {
 
@@ -95,8 +93,6 @@ class CCamera : public CGraphicsBase,
     protected:
         
         //--- Methods --------------------------------------------------------//
-        virtual void mySetRef();
-        
         void copy(const CCamera&);
 
         //--- Variables [protected] ------------------------------------------//
@@ -148,17 +144,6 @@ inline const double& CCamera::getZoom() const
 {
     METHOD_ENTRY("CCamera::getZoom")
     return m_fZoom;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches camera to UID user
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCamera::mySetRef()
-{
-    METHOD_ENTRY("CCamera::mySetRef")
-    m_KinematicsState.setRef(&(m_pRef->getKinematicsState()));
 }
 
 #endif

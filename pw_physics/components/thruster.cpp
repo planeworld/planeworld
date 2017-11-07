@@ -131,7 +131,7 @@ void CThruster::addEmitter(IEmitter* const _pEmitter)
     m_hEmitters.push_back(CHandle<IEmitter>(_pEmitter));
     if (m_hObject.isValid())
     {
-        _pEmitter->getKinematicsState().setRef(&m_hObject.get()->getKinematicsState());
+        _pEmitter->attachTo(m_hObject.get());
     }
 }
 
@@ -145,10 +145,10 @@ void CThruster::addEmitter(IEmitter* const _pEmitter)
 void CThruster::setObject(CObject* const _pObj)
 {
     METHOD_ENTRY("CThruster::setObject")
-    m_hObject = CHandle<CObject>(_pObj);
-    m_KinematicsState.setRef(&(m_hObject.get()->getKinematicsState()));
+    m_hObject.set(_pObj);
+    m_KinematicsState.setRef(&(_pObj->getKinematicsState()));
     for (auto Emitter : m_hEmitters)
     {
-        Emitter.get()->getKinematicsState().setRef(&(m_hObject.get()->getKinematicsState()));
+        Emitter.get()->attachTo(_pObj);
     }
 }

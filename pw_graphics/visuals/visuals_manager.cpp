@@ -1189,13 +1189,13 @@ void CVisualsManager::processFrame()
     {
         for (auto CamWidget : m_pVisualsDataStorage->getCameraWidgets())
         {
-            if (CamWidget.second->hasRef())
+            if (CamWidget.second->getCamera()->isValid())
             {
                 CamWidget.second->getRenderTarget()->bind(RENDER_TARGET_CLEAR);
                 //
                     m_Graphics.setupWorldSpace();
                     
-                    m_pCamera = CamWidget.second->getRef();
+                    m_pCamera = CamWidget.second->getCamera()->get();
                     m_pCamera->update();
                     this->drawStars();
                     this->drawWorld();
@@ -1247,8 +1247,8 @@ void CVisualsManager::processFrame()
     {
         for (auto pCam : m_pVisualsDataStorage->getCamerasByIndex())
         {
-            if (pCam->hasRef())
-                pCam->setRef(m_pDataStorage->getObjectsByValueFront()->at(pCam->getUIDRef()));
+            if (pCam->isAttached())
+                pCam->getKinematicsState().setRef(static_cast<CKinematicsState*>(m_pDataStorage->getUIDUsersByValueFront()->at(pCam->getKinematicsState().getRef()->getUID())));
         }
     }
 }
@@ -1915,14 +1915,10 @@ void CVisualsManager::myInitComInterface()
                                           CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(_nUIDCam);
                                           if (pCam != nullptr)
                                           {
-                                            auto it = m_pDataStorage->getObjectsByValueFront()->find(_nUIDObj);
-                                            if (it != m_pDataStorage->getObjectsByValueFront()->end())
+                                            CObject* pObject = m_pDataStorage->getObjectByValueFront(_nUIDObj);
+                                            if (pObject != nullptr)    
                                             {
-                                                pCam->setRef(it->second);
-                                            }
-                                            else
-                                            {
-                                                WARNING_MSG("Visuals Manager", "Unknown object with UID <" << _nUIDObj << ">")
+                                                pCam->attachTo(pObject);
                                             }
                                           }
                                       }),
@@ -2305,7 +2301,7 @@ void CVisualsManager::myInitComInterface()
                                                         CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(_nUIDCam);
                                                         if (pCam != nullptr)
                                                         {
-                                                            static_cast<CWidgetCam*>(pWidget)->setRef(pCam);
+                                                            static_cast<CWidgetCam*>(pWidget)->setCamera(pCam);
                                                         }
                                                         else
                                                         {

@@ -239,6 +239,9 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
     {{_pObject->clone(),_pObject->clone(),_pObject->clone(),_pObject}};
     std::array<IUIDUser*, BUFFER_QUADRUPLE> aUIDUsers =
     {{aObjects[0], aObjects[1], aObjects[2], aObjects[3]}};
+    std::array<IUIDUser*, BUFFER_QUADRUPLE> aUIDUsersKinState =
+    {{&aObjects[0]->getKinematicsState(), &aObjects[1]->getKinematicsState(),
+      &aObjects[2]->getKinematicsState(), &aObjects[3]->getKinematicsState()}};
     
     // Initialise new objects
     for (auto pObj : aObjects) pObj->init();
@@ -251,6 +254,7 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
         m_ShapesByValue.insert(std::pair<UIDType, IShape*>(Shape->getUID(), Shape));
     }
     
+    if (!this->addUIDUser(aUIDUsersKinState));
     if (!this->addUIDUser(aUIDUsers)) return false;
     return true;
 }
@@ -359,6 +363,31 @@ CObject* CWorldDataStorage::getObjectByValueBack(const UIDType _nUID)
 
     const auto ci = m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
     if (ci != m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("World Data Storage", "Unknown object with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return object, accessed by given UID value
+///
+/// \param _nUID UID of object to return
+///
+/// \return Object with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+CObject* CWorldDataStorage::getObjectByValueFront(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectByValueFront")
+
+    const auto ci = m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->find(_nUID);
+    if (ci != m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->end())
     {
         return ci->second;
     }
@@ -482,7 +511,7 @@ void CWorldDataStorage::swapBack()
     METHOD_ENTRY("CWorldDataStorage::swapBack")
 
     std::lock_guard<std::mutex> lock(m_MutexFrontNew);
-
+    
     m_ParticlesByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_ParticlesByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
@@ -492,7 +521,7 @@ void CWorldDataStorage::swapBack()
     m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     
     m_ObjectsByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
-
+    
     m_bFrontNew = true;
 }
 
@@ -511,7 +540,6 @@ void CWorldDataStorage::swapFront()
     {
         m_ParticlesByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
-//         m_EmittersByValue.swap(BUFFER_TRIPLE_MIDDLE, BUFFER_TRIPLE_FRONT);
         m_ObjectsByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
@@ -580,7 +608,7 @@ std::istream& operator>>(std::istream& _is, CWorldDataStorage& _WDS)
 //     }
 //     _WDS.m_ParticleVisuals.clear();
     
-    _WDS.m_UIDUserRef.clear();
+//     _WDS.m_UIDUserRef.clear();
     
     
 //     //-------------------------------------------------------------------------

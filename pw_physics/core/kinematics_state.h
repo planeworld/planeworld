@@ -99,7 +99,8 @@ class CKinematicsState  : public IUIDUser
         void                getPositions(const std::array<Vector2d, T>&,
                                                std::array<Vector2d, T>&,
                                          const double& = 1.0) const;
-        
+        const CHandle<CKinematicsState>* getRef() const {return &m_hKinStateRef;}
+                                         
         //--- Methods --------------------------------------------------------//
         void setRef(CKinematicsState* const);
                                          

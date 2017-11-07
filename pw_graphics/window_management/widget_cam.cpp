@@ -41,7 +41,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 CWidgetCam::CWidgetCam(CFontManager* const _pFontManager) :
                        IWidget(_pFontManager),
-                       IUIDReferrer<CCamera>(),
                        IVisualsDataStorageUser()
 {
     METHOD_ENTRY("CWidgetCam::CWidgetCam");
@@ -100,9 +99,9 @@ void CWidgetCam::draw()
         })
     
     m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, "Widget Camera", m_UID.getValue());
-    if (m_pRef != nullptr)
+    if (m_hCamera.isValid())
     {
-        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY + m_pUIDVisuals->UIDText.getFontSize(), "Camera", m_pRef->getUID());
+        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY + m_pUIDVisuals->UIDText.getFontSize(), "Camera", m_hCamera.get()->getUID());
     }
     
     DOM_DEV(DomDev:)
@@ -122,8 +121,8 @@ void CWidgetCam::myResize(const int _nX, const int _nY)
 
     m_TargetCam.init(_nX, _nY);
     m_RenderMode.setTexture(m_TargetCam.getIDTex());
-    if (m_pRef != nullptr)
+    if (m_hCamera.isValid())
     {
-        static_cast<CCamera*>(m_pRef)->setViewport(double(_nX) / GRAPHICS_PX_PER_METER, double(_nY) / GRAPHICS_PX_PER_METER);
+        m_hCamera.get()->setViewport(double(_nX) / GRAPHICS_PX_PER_METER, double(_nY) / GRAPHICS_PX_PER_METER);
     }
 }

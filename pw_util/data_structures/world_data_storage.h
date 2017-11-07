@@ -105,8 +105,6 @@ class CWorldDataStorage
         const JointsType&           getJoints() const;
         const double&               getTimeScale() const;
         
-        IUIDUser*              getUIDUserByValueBack() const;
-        
         //--- Methods --------------------------------------------------------//
         bool addEmitter(IEmitter*);
         bool addParticle(CParticle*);
@@ -122,6 +120,7 @@ class CWorldDataStorage
         
         IEmitter*                   getEmitterByValue(const UIDType);
         CObject*                    getObjectByValueBack(const UIDType);
+        CObject*                    getObjectByValueFront(const UIDType);
         CParticle*                  getParticleByValueBack(const UIDType);
         IShape*                     getShapeByValue(const UIDType);
         CThruster*                  getThrusterByValue(const UIDType);
@@ -174,7 +173,6 @@ class CWorldDataStorage
         UIDsByNameType              m_UIDsByName;               ///< UIDs of entities, accessed by name
         
         JointsType                  m_Joints;                   ///< List of joints
-        UIDUserType                 m_UIDUserRef;               ///< Store objects referred by their UID
         
         std::mutex                  m_MutexFrontNew;            ///< Mutex for thread safety when swapping
         bool                        m_bFrontNew;                ///< Indicates new information for front buffer

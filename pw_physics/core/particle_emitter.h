@@ -62,11 +62,7 @@ class CParticleEmitter : public IEmitter
         void        init() override;
         void        setNumber(const std::uint32_t&) override;
              
-        void        setParticles(CParticle* const _pParticle)
-        {
-            METHOD_ENTRY("CParticleEmitter::setParticles")
-            m_hParticles.set(_pParticle);
-        }
+        void        setParticles(CParticle* const);
         void        setParticleType(const ParticleTypeType&);
 
     private:
@@ -118,6 +114,19 @@ inline void CParticleEmitter::setNumber(const std::uint32_t& _nNrMax)
     METHOD_ENTRY("CParticleEmitter::setMode")
     m_nNr = _nNrMax;
     m_hParticles.get()->setNumber(_nNrMax);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets particles for this emitter
+///
+/// \param _pParticles Particles to emit
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CParticleEmitter::setParticles(CParticle* const _pParticles)
+{
+    METHOD_ENTRY("CParticleEmitter::setParticles")
+    m_hParticles.set(_pParticles);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

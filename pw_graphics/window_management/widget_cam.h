@@ -36,7 +36,6 @@
 #include "camera.h"
 #include "render_mode.h"
 #include "render_target.h"
-#include "uid_referrer.h"
 #include "visuals_data_storage_user.h"
 #include "widget.h"
 
@@ -48,7 +47,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CWidgetCam : public IWidget,
-                   public IUIDReferrer<CCamera>,
                    public IVisualsDataStorageUser
 {
 
@@ -60,11 +58,12 @@ class CWidgetCam : public IWidget,
         ~CWidgetCam() override;
         
         //--- Constant methods -----------------------------------------------//
-        const CRenderTarget* getRenderTarget() const {return &m_TargetCam;}
+        const CHandle<CCamera>* getCamera() const {return &m_hCamera;}
+        const CRenderTarget*    getRenderTarget() const {return &m_TargetCam;}
         
         //--- Methods --------------------------------------------------------//
         void draw() override;
-        
+        void setCamera(CCamera* const _pCamera) {m_hCamera.set(_pCamera);}
         void setShaderProgram(CShaderProgram* const _pShaderProgram) {m_RenderMode.setShaderProgram(_pShaderProgram);}
         
     private:
@@ -73,6 +72,8 @@ class CWidgetCam : public IWidget,
         void myResize(const int, const int) override;
         
         //--- Variables [private] --------------------------------------------//
+        CHandle<CCamera> m_hCamera;     ///< Camera attached to this widget
+        
         CRenderMode   m_RenderMode;     ///< Render mode to use for rendering
         CRenderTarget m_TargetCam;      ///< Rendertarget for virtual camera
         

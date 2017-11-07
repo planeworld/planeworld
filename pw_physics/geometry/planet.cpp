@@ -402,7 +402,7 @@ void CPlanet::myInitTerrain()
             m_nOctTrTp = ceil(log2(fMaxF/(0.5*100.0/(2.0*M_PI*m_fRadius)))/log2(m_fLacTrTp));
             if (m_nOctTrTp < 1) m_nOctTrTp = 1;
             
-            INFO_MSG("Planet", "Generating Terrain (Mountains)")
+            DEBUG_MSG("Planet", "Generating Terrain (Mountains)")
             DOM_VAR(DEBUG_BLK(
                 double fNrOfPoints = MATH_2PI * m_fRadius / m_fGroundResolution;
                 double fNrOfMountains = MATH_2PI * m_fRadius / (m_fHeightMax*MATH_PI2);
@@ -488,7 +488,7 @@ void CPlanet::myInitTerrain()
             m_nOctTrTp = ceil(log2(fMaxF/(0.5*100.0/(2.0*M_PI*m_fRadius)))/log2(m_fLacTrTp));
             if (m_nOctTrTp < 1) m_nOctTrTp = 1;
             
-            INFO_MSG("Planet", "Generating Terrain (Mountains)")
+            DEBUG_MSG("Planet", "Generating Terrain (Mountains)")
             DOM_VAR(DEBUG_BLK(
                 double fNrOfPoints = MATH_2PI * m_fRadius / m_fGroundResolution;
                 double fNrOfMountains = MATH_2PI * m_fRadius / (m_fHeightMax*MATH_PI2);

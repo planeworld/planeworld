@@ -39,7 +39,6 @@
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state_user.h"
 #include "uid_user.h"
-#include "object_referrer.h"
 #include "world_data_storage_user.h"
 
 //--- Enumerations -----------------------------------------------------------//
@@ -92,7 +91,6 @@ const EmitterType EMITTER_DEFAULT_TYPE = EmitterType::PARTICLE;                 
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class IEmitter : public IKinematicsStateUser,
-                 public IObjectReferrer,
                  public IUIDUser,
                  public IWorldDataStorageUser
 {
@@ -136,8 +134,6 @@ class IEmitter : public IKinematicsStateUser,
         
     protected:
         
-        void mySetRef() override;
-
         EmitterModeType         m_EmitterMode;              ///< Emit mode
         EmitterDistributionType m_EmitterDistribution;      ///< Distribution of emitter
         
@@ -608,17 +604,6 @@ inline void IEmitter::setVelocityStd(const double& _fVStd)
     {
         m_fVelocityStd = _fVStd;
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Link kinematics, i.e. attach emitter to object
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void IEmitter::mySetRef()
-{
-    METHOD_ENTRY("IEmitter::mySetRef")
-    m_KinematicsState.setRef(&m_pRef->getKinematicsState());
 }
 
 #endif
