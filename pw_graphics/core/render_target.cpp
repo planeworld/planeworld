@@ -70,12 +70,15 @@ bool CRenderTarget::init(const uint16_t _unResX, const uint16_t _unResY)
     // Texture
     glGenTextures(1, &m_unIDTex);
     glBindTexture(GL_TEXTURE_2D, m_unIDTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _unResX, _unResY, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, _unResX, _unResY);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _unResX, _unResY, GL_RGBA8, GL_UNSIGNED_BYTE, 0);
+    //  glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
     // Configure frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_unIDTex, 0);
     GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};

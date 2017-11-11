@@ -571,15 +571,18 @@ bool CGraphics::init()
     // Setup OpenGL variables
     //--------------------------------------------------------------------------
     
-    // Enable blending
+//     glEnable(GL_MULTISAMPLE);
+//     
+//     // Enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     // Enable anti-aliasing
-    glEnable(GL_LINE_SMOOTH);
-    glShadeModel(GL_SMOOTH);
+//     glEnable(GL_LINE_SMOOTH);
+//     glShadeModel(GL_SMOOTH);
 //     glEnable(GL_POLYGON_SMOOTH);
-    glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
+//     glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
+    
 
     // Test for depthbuffer and enable if possible
 //     glEnable(GL_DEPTH_TEST);
