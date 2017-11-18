@@ -55,7 +55,7 @@ CFontManager::~CFontManager()
     {
         if (FontMem.second != nullptr)
         {
-            delete FontMem.second;
+            delete[] FontMem.second;
             MEM_FREED("char")
             FontMem.second = nullptr;
         }    
@@ -64,7 +64,7 @@ CFontManager::~CFontManager()
     {
         if (FontMemAtlas.second != nullptr)
         {
-            delete FontMemAtlas.second;
+            delete[] FontMemAtlas.second;
             MEM_FREED("std::uint8_t")
             FontMemAtlas.second = nullptr;
         }    
@@ -73,7 +73,7 @@ CFontManager::~CFontManager()
     {
         if (CharInfo.second != nullptr)
         {
-            delete CharInfo.second;
+            delete[] CharInfo.second;
             MEM_FREED("stbtt_packedchar")
             CharInfo.second = nullptr;
         }    

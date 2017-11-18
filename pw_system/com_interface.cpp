@@ -106,6 +106,22 @@ CComInterface::~CComInterface()
     // be called during destruction
     Log.removeListener("com");
     
+    // Remove all remaining commands from queue
+    for (WriterQueuesType::iterator it = m_WriterQueues.begin();
+         it != m_WriterQueues.end(); ++it)
+    {
+        IBaseCommand* pCommand = nullptr;
+        while (it->second.try_dequeue(pCommand))
+        {
+            if (pCommand != nullptr)
+            {
+                delete pCommand;
+                MEM_FREED_QUIET("IBaseCommand")
+                pCommand = nullptr;
+            }
+        }
+    }
+    
     for (auto pCallback : m_RegisteredCallbacks)
     {
         if (pCallback.second != nullptr)

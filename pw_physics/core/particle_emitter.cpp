@@ -42,9 +42,9 @@ CParticleEmitter::CParticleEmitter() : m_ParticleType(ParticleTypeType::DOT)
     METHOD_ENTRY("CParticleEmitter::CParticleEmitter")
     CTOR_CALL("CParticleEmitter::CParticleEmitter")
     
-    m_hParticles.set(new CParticle);
-    MEM_ALLOC("CParticle")
-    m_hParticles.get()->setNumber(10);
+//     m_hParticles.set(new CParticle);
+//     MEM_ALLOC("CParticle")
+//     m_hParticles.get()->setNumber(10);
         
     m_Generator.seed(m_unNrOfEmitters++);
 //     IHooker::m_strName += ": Particle_"+ std::to_string(m_unNrOfEmitters++);
