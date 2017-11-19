@@ -238,7 +238,7 @@ class CGraphics
 
         //--- Constant methods -----------------------------------------------//
         void circle(const Vector2d&, const double&, const int = 12, const bool = false);
-        void showVec(const Vector2d&, const Vector2d&) const;
+        void showVec(const Vector2d&, const Vector2d&);
 
         //--- Methods --------------------------------------------------------//
         void addVertex(const Vector2d&);
@@ -247,6 +247,7 @@ class CGraphics
         void dots(CCircularBuffer<Vector2d>&, const Vector2d& _vecOffset = Vector2d(0.0,0.0));
         void filledCircle(const Vector2d&, const double&, const int = 12, const bool = false);
         void filledRect(const Vector2d&, const Vector2d&);
+        void filledTriangle(const Vector2d&, const Vector2d&, const Vector2d&);
         void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0));
         void rect(const Vector2d&, const Vector2d&);
         void setDepth(const double&);

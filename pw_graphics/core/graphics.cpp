@@ -900,7 +900,7 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
 /// \todo atan replacement should be written
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::showVec(const Vector2d& _vecV, const Vector2d& _vecPos) const
+void CGraphics::showVec(const Vector2d& _vecV, const Vector2d& _vecPos)
 {
     METHOD_ENTRY("CGraphics::showVec")
 
@@ -913,15 +913,21 @@ void CGraphics::showVec(const Vector2d& _vecV, const Vector2d& _vecPos) const
         Vector2d vecFrontOL = vecFrontT + Vector2d(-vecDir[1],  vecDir[0]) * 2.0/m_fCamZoom;
         Vector2d vecFrontOR = vecFrontT + Vector2d( vecDir[1], -vecDir[0]) * 2.0/m_fCamZoom;
 
-        glBegin(GL_LINE_STRIP);
-            glVertex3d( _vecPos[0],_vecPos[1], -20.0);
-            glVertex3d( vecFrontT[0], vecFrontT[1], -20.0);
-        glEnd();
-        glBegin(GL_TRIANGLE_STRIP);
-            glVertex3d( vecFrontOL[0], vecFrontOL[1], -10.0);
-            glVertex3d( vecFront[0], vecFront[1], -10.0);
-            glVertex3d( vecFrontOR[0], vecFrontOR[1], -10.0);
-        glEnd();
+        this->beginLine(PolygonType::LINE_SINGLE);
+            this->addVertex(_vecPos);
+            this->addVertex(vecFrontT);
+        this->endLine();
+        
+        this->filledTriangle(vecFrontOL, vecFront, vecFrontOR);
+//         glBegin(GL_LINE_STRIP);
+//             glVertex3d( _vecPos[0],_vecPos[1], -20.0);
+//             glVertex3d( vecFrontT[0], vecFrontT[1], -20.0);
+//         glEnd();
+//         glBegin(GL_TRIANGLE_STRIP);
+//             glVertex3d( vecFrontOL[0], vecFrontOL[1], -10.0);
+//             glVertex3d( vecFront[0], vecFront[1], -10.0);
+//             glVertex3d( vecFrontOR[0], vecFrontOR[1], -10.0);
+//         glEnd();
     }
 }
 
@@ -1250,6 +1256,53 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR)
     m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1u;  // 2
     m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex+1u;  // 4
     m_unIndex += 2u;
+    m_uncI += 16;
+    
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
+    {
+        this->restartRenderBatchInternal();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw a filled triangle
+///
+/// \param _vecV1 Vertex 1
+/// \param _vecV2 Vertex 2
+/// \param _vecV3 Vertex 3
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::filledTriangle(const Vector2d& _vecV1,
+                               const Vector2d& _vecV2,
+                               const Vector2d& _vecV3)
+{
+    METHOD_ENTRY("CGraphics::filledRect")
+
+    m_vecVertices[m_unIndexVerts++] = _vecV1[0];
+    m_vecVertices[m_unIndexVerts++] = _vecV1[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecV2[0];
+    m_vecVertices[m_unIndexVerts++] = _vecV2[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecV3[0];
+    m_vecVertices[m_unIndexVerts++] = _vecV3[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 1
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 2
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 3
     m_uncI += 12;
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)

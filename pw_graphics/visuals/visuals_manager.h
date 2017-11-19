@@ -62,6 +62,14 @@ enum class CreationModeType
     QUEUED
 };
 
+/// Specifies type of drawing operation. Visuals might be drawn independently
+/// from text due to different draw spacen (i.e. screen space or world space).
+enum class DrawModeType
+{
+    TEXT,
+    VISUALS
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for managing the visualisation
@@ -132,8 +140,8 @@ class CVisualsManager : virtual public CGraphicsBase,
             
         void            drawDebugInfo();
         void            drawGridHUD();
-        void            drawKinematicsState(const CKinematicsState&, const double&);
-        void            drawKinematicsStates();
+        void            drawKinematicsState(const CKinematicsState* const, const double&, const DrawModeType);
+        void            drawKinematicsStates(const DrawModeType);
         void            drawStars();
         void            drawTimers();
         void            drawWindows();

@@ -1222,6 +1222,7 @@ void CVisualsManager::processFrame()
         this->drawWorld();
         this->drawCOM();
         this->drawBoundingBoxes();
+        this->drawKinematicsStates(DrawModeType::VISUALS);
     }
 
     m_RenderTargetScreen.unbind();
@@ -1233,7 +1234,7 @@ void CVisualsManager::processFrame()
         m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScreen.getTexUV());
     m_Graphics.endRenderBatch();
     
-    this->drawKinematicsStates();
+    this->drawKinematicsStates(DrawModeType::TEXT);
     if (bGotCam) this->drawGridHUD();
     this->drawTimers();
     this->drawWindows();
@@ -1398,69 +1399,74 @@ void CVisualsManager::drawGridHUD()
 /// This method draws information from a kinematics state e.g. the local
 /// coordinate system and references.
 ///
-/// \param _KinematicsState kinematics State to be drawn
+/// \param _pKinematicsState Kinematics State to be drawn
 /// \param _fSize Size of coordinate system that is drawn
+/// \param _DrawMode Draw visuals or text
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsState,
-                                          const double& _fSize)
+void CVisualsManager::drawKinematicsState(const CKinematicsState* const _pKinematicsState,
+                                          const double& _fSize,
+                                          const DrawModeType _DrawMode)
 {
     METHOD_ENTRY("CVisualsManager::drawKinematicsState")
     
     if (_fSize * m_pCamera->getZoom() > 10.0)
     {
-//         m_Graphics.beginRenderBatch();
-//         
-            double fTransparency = 0.5;
-//         
-//             m_Graphics.setColor(1.0, 1.0, 1.0, fTransparency);
-//             m_Graphics.showVec(
-//                 _KinematicsState.getPosition(Vector2d(_fSize, 0.0))-
-//                 _KinematicsState.getOrigin(),
-//                 _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
-//             );
-//             m_Graphics.showVec(
-//                 _KinematicsState.getPosition(Vector2d(0.0, _fSize))-
-//                 _KinematicsState.getOrigin(),
-//                 _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
-//             );
-//             
-//             
-//             
-//             if (_KinematicsState.hasRef())
-//             {
-//                 Vector2d vecRef = _KinematicsState.getRef()->getOrigin() - _KinematicsState.getOrigin();
-//                 m_Graphics.showVec(
-//                     vecRef,
-//                     _KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin()
-//                 );
-//             }
-//             
-//         m_Graphics.endRenderBatch();
+        double fTransparency = 0.5;
         
-        // Now draw the text
-        m_Graphics.beginRenderBatch("font");
-        
-            std::stringstream oss;
+        if (_DrawMode == DrawModeType::VISUALS)
+        {
+            m_Graphics.beginRenderBatch("world");
             
-            CText TextKState(&m_FontManager);
-            oss << "Local angle:    " <<  _KinematicsState.getLocalAngle() << "\n";
-            oss << "Local origin:   " <<  _KinematicsState.getLocalOrigin()[0] << ", "
-                                      <<  _KinematicsState.getLocalOrigin()[1] << "\n";
-            oss << "Angle:          " <<  _KinematicsState.getAngle() << "\n";
-            oss << "Origin:         " <<  _KinematicsState.getOrigin()[0] << ", "
-                                      <<  _KinematicsState.getOrigin()[1] << "\n";
-            TextKState.setText(oss.str());
-            TextKState.setFont(m_strFont);
-            TextKState.setSize(12);
-            TextKState.setColor({{1.0, 1.0, 1.0, fTransparency}});
-            TextKState.setPosition(m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[0],
-                                   m_Graphics.world2Screen(_KinematicsState.getOrigin()-m_pCamera->getKinematicsState().getOrigin())[1]);
+                m_Graphics.setColor(1.0, 1.0, 1.0, fTransparency);
+                m_Graphics.showVec(
+                    _pKinematicsState->getPosition(Vector2d(_fSize, 0.0))-
+                    _pKinematicsState->getOrigin(),
+                    _pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+                );
+                m_Graphics.showVec(
+                    _pKinematicsState->getPosition(Vector2d(0.0, _fSize))-
+                    _pKinematicsState->getOrigin(),
+                    _pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+                );
+                
+                if (_pKinematicsState->getRef()->isValid())
+                {
+                    Vector2d vecRef = _pKinematicsState->getRef()->get()->getOrigin() - _pKinematicsState->getOrigin();
+                    m_Graphics.showVec(
+                        vecRef,
+                        _pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+                    );
+                }
 
-        
-            TextKState.display();
+            m_Graphics.endRenderBatch();
+        }
+        else
+        {
+            // Now draw the text
+            m_Graphics.beginRenderBatch("font");
             
-        m_Graphics.endRenderBatch();
+                std::stringstream oss;
+                
+                CText TextKState(&m_FontManager);
+                oss << "Local angle:    " <<  _pKinematicsState->getLocalAngle() << "\n";
+                oss << "Local origin:   " <<  _pKinematicsState->getLocalOrigin()[0] << ", "
+                                        <<  _pKinematicsState->getLocalOrigin()[1] << "\n";
+                oss << "Angle:          " <<  _pKinematicsState->getAngle() << "\n";
+                oss << "Origin:         " <<  _pKinematicsState->getOrigin()[0] << ", "
+                                        <<  _pKinematicsState->getOrigin()[1] << "\n";
+                TextKState.setText(oss.str());
+                TextKState.setFont(m_strFont);
+                TextKState.setSize(12);
+                TextKState.setColor({{1.0, 1.0, 1.0, fTransparency}});
+                TextKState.setPosition(m_Graphics.world2Screen(_pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin())[0],
+                                       m_Graphics.world2Screen(_pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin())[1]);
+
+            
+                TextKState.display();
+                
+            m_Graphics.endRenderBatch();
+        }
         
         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     }
@@ -1473,8 +1479,10 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState& _KinematicsSta
 /// This method draws information from the kinematics states e.g. the local
 /// coordinate system and references.
 ///
+/// \param _DrawMode Draw visuals or text
+///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawKinematicsStates()
+void CVisualsManager::drawKinematicsStates(const DrawModeType _DrawMode)
 {
     METHOD_ENTRY("CVisualsManager::drawKinematicsStates")
     
@@ -1483,12 +1491,15 @@ void CVisualsManager::drawKinematicsStates()
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
             this->drawKinematicsState(
-                pObj.second->getKinematicsState(),
+                &pObj.second->getKinematicsState(),
                 pObj.second->getGeometry()->getBoundingBox().getHeight() +
-                pObj.second->getGeometry()->getBoundingBox().getWidth() * 0.5 * 0.33
+                pObj.second->getGeometry()->getBoundingBox().getWidth() * 0.5 * 0.33,
+                _DrawMode
             );
         }
-        this->drawKinematicsState(m_pCamera->getKinematicsState(),m_pCamera->getBoundingCircleRadius() * 0.1);
+        this->drawKinematicsState(&m_pCamera->getKinematicsState(),
+                                  m_pCamera->getBoundingCircleRadius() * 0.1,
+                                  _DrawMode);
     }
 }
 
