@@ -919,15 +919,6 @@ void CGraphics::showVec(const Vector2d& _vecV, const Vector2d& _vecPos)
         this->endLine();
         
         this->filledTriangle(vecFrontOL, vecFront, vecFrontOR);
-//         glBegin(GL_LINE_STRIP);
-//             glVertex3d( _vecPos[0],_vecPos[1], -20.0);
-//             glVertex3d( vecFrontT[0], vecFrontT[1], -20.0);
-//         glEnd();
-//         glBegin(GL_TRIANGLE_STRIP);
-//             glVertex3d( vecFrontOL[0], vecFrontOL[1], -10.0);
-//             glVertex3d( vecFront[0], vecFront[1], -10.0);
-//             glVertex3d( vecFrontOR[0], vecFrontOR[1], -10.0);
-//         glEnd();
     }
 }
 

@@ -67,6 +67,7 @@ enum class SignatureType
 {
     UNDEFINED,
     NONE,
+    BOOL_INT,
     DOUBLE,
     DOUBLE_INT,
     DOUBLE_STRING,

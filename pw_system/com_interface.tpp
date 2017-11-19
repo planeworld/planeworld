@@ -383,6 +383,7 @@ using namespace Eigen;
 
 template<class TRet, class... TArgs> void CCommand<TRet, TArgs...>::dispatchSignature() {m_Signature = SignatureType::UNDEFINED;}
 template<> inline void CCommand<void>::dispatchSignature() {m_Signature = SignatureType::NONE;}
+template<> inline void CCommand<bool,int>::dispatchSignature() {m_Signature = SignatureType::BOOL_INT;}
 template<> inline void CCommand<double>::dispatchSignature() {m_Signature = SignatureType::DOUBLE;}
 template<> inline void CCommand<double,int>::dispatchSignature() {m_Signature = SignatureType::DOUBLE_INT;}
 template<> inline void CCommand<double,std::string>::dispatchSignature() {m_Signature = SignatureType::DOUBLE_STRING;}
@@ -417,6 +418,7 @@ template<> inline void CCommand<Vector2i, int>::dispatchSignature() {m_Signature
 
 template<class TRet, class... TArgs> void CCommandToQueueWrapper<TRet, TArgs...>::dispatchSignature() {m_Signature = SignatureType::UNDEFINED;}
 template<> inline void CCommandToQueueWrapper<void>::dispatchSignature() {m_Signature = SignatureType::NONE;}
+template<> inline void CCommandToQueueWrapper<bool,int>::dispatchSignature() {m_Signature = SignatureType::BOOL_INT;}
 template<> inline void CCommandToQueueWrapper<double>::dispatchSignature() {m_Signature = SignatureType::DOUBLE;}
 template<> inline void CCommandToQueueWrapper<double,int>::dispatchSignature() {m_Signature = SignatureType::DOUBLE_INT;}
 template<> inline void CCommandToQueueWrapper<double,std::string>::dispatchSignature() {m_Signature = SignatureType::DOUBLE_STRING;}

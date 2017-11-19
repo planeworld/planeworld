@@ -88,6 +88,13 @@ bool CLuaManager::init()
         
         switch (Function.second->getSignature())
         {
+            case SignatureType::BOOL_INT:
+            {   
+                std::function<bool(int)> Func =
+                    [=](const int _nN) -> bool {return m_pComInterface->call<bool, int>(Function.first, _nN);};
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
+                break;
+            }   
             case SignatureType::INT:
             {   
                 std::function<int()> Func =
@@ -536,6 +543,7 @@ bool CLuaManager::registerCallback(const std::string& _strFunc,
                 m_pComInterface->registerCallback<void>(_strFunc, Func, _strWriterDomain);
                 break;
             }
+            case SignatureType::BOOL_INT:
             case SignatureType::DOUBLE_INT:
             case SignatureType::INT_INT:
             case SignatureType::NONE_INT:

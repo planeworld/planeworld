@@ -170,6 +170,13 @@ const std::string CComInterface::call(const std::string& _strCommand)
     {
         switch (m_RegisteredFunctions[strName]->getSignature())
         {
+            case SignatureType::BOOL_INT:
+            {
+                int nParam(0);
+                iss >> nParam;
+                oss << this->call<bool,int>(strName, nParam);
+                break;
+            }
             case SignatureType::DOUBLE:
             {
                 oss << this->call<double>(strName);
@@ -587,6 +594,7 @@ void CComInterface::callWriters(const std::string& _strQueue)
                                               std::get<2>(pQueuedFunctionConcrete->getParams()));
                 break;
             }
+            case SignatureType::BOOL_INT:
             case SignatureType::DOUBLE:
             case SignatureType::DOUBLE_INT:
             case SignatureType::DOUBLE_STRING:

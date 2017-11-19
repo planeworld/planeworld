@@ -6,6 +6,9 @@
 
 -- KNOWN ISSUES
 ---------------
+        
+-- Import input script
+require('pw_input_default')
 
 -- Setup engine
 pw.system.set_frequency_input(100)
@@ -118,7 +121,6 @@ pw.system.pause()
 -- Setup callback functions
 pw.system.register_lua_callback("e_lua_update", "update")
 pw.system.register_lua_callback("toggle_pause", "start_simulation")
-
 
 function update()
     -- Callback to "e_lua_update" event which is called with 30 Hz

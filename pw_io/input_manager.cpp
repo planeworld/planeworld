@@ -91,8 +91,6 @@ void CInputManager::processFrame()
             }
             case sf::Event::KeyPressed:
             {
-                m_pComInterface->call<void>("e_key_press");
-                
                 if (m_UIMode == UIModeType::UI)
                 {
                     switch (Event.key.code)
@@ -161,13 +159,10 @@ void CInputManager::processFrame()
                 }
                 else
                 {
+                    m_pComInterface->call<void, int>("e_key_pressed", Event.key.code);
+                    
                     switch (Event.key.code)
                     {
-                        case sf::Keyboard::Escape:
-                        {
-                            m_pComInterface->call<void>("quit");
-                            break;
-                        }
                         case sf::Keyboard::Home:
                         {
                             m_UIMode = UIModeType::UI;
@@ -175,113 +170,9 @@ void CInputManager::processFrame()
                             m_pComInterface->call<void>("com_console_on");
                             break;
                         }
-                        case sf::Keyboard::Num0:
-                        {
-                            m_pComInterface->call<void>("toggle_timers");
-                            break;
-                        }
-                        case sf::Keyboard::Num1:
-                        {
-                            m_pComInterface->call<void,int>("toggle_timer", 1);
-                            break;
-                        }
-                        case sf::Keyboard::Num2:
-                        {
-                            m_pComInterface->call<void,int>("toggle_timer", 2);
-                            break;
-                        }
-                        case sf::Keyboard::Num3:
-                        {
-                            m_pComInterface->call<void,int>("toggle_timer", 3);
-                            break;
-                        }
                         case sf::Keyboard::F1:
                         {
                             m_pComInterface->call<void>("toggle_debug");
-                            break;
-                        }
-                        case sf::Keyboard::Add:
-                        case sf::Keyboard::A:
-                        {
-                            if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
-                                sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
-                                m_pComInterface->call<void, bool>("accelerate_time", true);
-                            else
-                                m_pComInterface->call<void, bool>("accelerate_time", false);
-                            break;
-                        }
-                        case sf::Keyboard::Subtract:
-                        case sf::Keyboard::Dash:
-                        case sf::Keyboard::D:
-                        {
-                            m_pComInterface->call<void>("decelerate_time");
-                            break;
-                        }
-                        case sf::Keyboard::Return:
-                        {
-                            m_pComInterface->call<void>("reset_time");
-                            break;
-                        }
-                        case sf::Keyboard::C:
-                        {
-                            m_pComInterface->call<void>("cam_cycle");
-                            break;
-                        }
-                        case sf::Keyboard::B:
-                        {
-                            m_pComInterface->call<void>("toggle_bboxes");
-                            break;
-                        }
-                        case sf::Keyboard::G:
-                        {
-                            m_pComInterface->call<void>("toggle_grid");
-                            break;
-                        }
-                        case sf::Keyboard::K:
-                        {
-                            m_pComInterface->call<void>("toggle_kin_states");
-                            break;
-                        }
-                        case sf::Keyboard::L:
-                        {
-                            /// \todo Really check if physics thread is paused before saving the simulation
-                            m_pComInterface->call<void>("pause");
-//                             GameStateManager.load();
-//                             pCamera=(*VisualsDataStorage.getCamerasByName().cbegin()).second;
-                            m_pComInterface->call<void>("toggle_pause");
-                            break;
-                        }
-                        case sf::Keyboard::M:
-                        {
-                            m_pComInterface->call<void>("toggle_com");
-                            break;
-                        }
-                        case sf::Keyboard::N:
-                        {
-                            m_pComInterface->call<void>("toggle_names");
-                            break;
-                        }
-                        case sf::Keyboard::P:
-                        {
-                            m_pComInterface->call<void>("toggle_pause");
-                            break;
-                        }
-                        case sf::Keyboard::S:
-                        {
-                            /// \todo Really check if physics thread is paused before saving the simulation
-                            m_pComInterface->call<void>("pause");
-//                             GameStateManager.save();
-                            m_pComInterface->call<void>("toggle_pause");
-                            break;
-                        }
-                        case sf::Keyboard::Space:
-                        {
-                            m_pComInterface->call<void>("process_one_frame");
-                            break;
-                        }
-                        case sf::Keyboard::T:
-                        {
-//                             pVisualsManager->toggleVisualisations(VISUALS_OBJECT_TRAJECTORIES);
                             break;
                         }
                         case sf::Keyboard::U:
@@ -401,15 +292,16 @@ void CInputManager::myInitComInterface()
     if (m_pComInterface != nullptr)
     {
         // Events
-        m_pComInterface->registerEvent("e_key_press",
+        m_pComInterface->registerEvent<int>("e_key_pressed",
                                         "Event, indicating that a key was pressed.",
-                                        {{ParameterType::NONE, "No return value"}},
+                                        {{ParameterType::NONE, "No return value"},
+                                         {ParameterType::INT, "Key Code"}},
                                         "system");
         m_pComInterface->registerEvent<double,double>("e_resize",
                                         "Event, indicating that the main window was resized.",
                                         {{ParameterType::NONE, "No return value"},
                                          {ParameterType::DOUBLE, "Size X"},
-                                         {ParameterType::DOUBLE, "SIZE_Y"}},
+                                         {ParameterType::DOUBLE, "Size_Y"}},
                                         "system");
         
         // System package
@@ -417,6 +309,15 @@ void CInputManager::myInitComInterface()
                                           CCommand<double>([&]() -> double {return this->m_fFrequency;}),
                                           "Provides processing frequency of Input module.",
                                           {{ParameterType::DOUBLE, "Processing frequency of Input module"}},
+                                           "system");
+        m_pComInterface->registerFunction("key_is_pressed",
+                                          CCommand<bool, int>([&](const int _nCode) -> bool
+                                          {
+                                              return sf::Keyboard::isKeyPressed(sf::Keyboard::Key(_nCode));
+                                          }),
+                                          "Indicates if given key is pressed.",
+                                          {{ParameterType::BOOL, "Is given key pressed?"},
+                                           {ParameterType::INT, "Key code"}},
                                            "system");
         m_pComInterface->registerFunction("set_frequency_input",
                                           CCommand<void, double>([&](const double& _fFrequency)
