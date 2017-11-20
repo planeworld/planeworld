@@ -1319,7 +1319,7 @@ void CVisualsManager::addWindowsFromQueue()
 void CVisualsManager::drawDebugInfo()
 {
     METHOD_ENTRY("CVisualsManager::drawDebugInfo")
-
+    
     if (m_nVisualisations & VISUALS_DEBUG_INFO)
     {
         std::ostringstream oss;
@@ -1334,21 +1334,58 @@ void CVisualsManager::drawDebugInfo()
         oss << "FONT RENDERER\n\n  Available fonts:\n";
         for (auto strFont : m_FontManager.getFontsAvailable())
         {
-            oss << "   * " << strFont.first << "\n";
+            oss << "   - " << strFont.first << "\n";
         }
         
+        oss << "\n";
+
+        static CCircularBuffer<double> TimeBufferPhysics(m_pComInterface->call<double>("get_frequency_physics") / 4);
+        static CCircularBuffer<double> TimeBufferPhysicsObjects(m_pComInterface->call<double>("get_frequency_physics") / 4);
+        static CCircularBuffer<double> TimeBufferPhysicsParticles(m_pComInterface->call<double>("get_frequency_physics") / 4);
+        static CCircularBuffer<double> TimeBufferVisuals(m_fFrequency / 4);
+        
+        double fTimeProcessedPhysics = this->smoothFrameTime(
+                                        &TimeBufferPhysics,
+                                        m_pComInterface->call<double>("get_time_processed_physics"),
+                                        m_pComInterface->call<double>("get_frequency_physics") / 4);
+        double fTimeProcessedPhysicsObjects = this->smoothFrameTime(
+                                        &TimeBufferPhysicsObjects,
+                                        m_pComInterface->call<double>("get_time_processed_physics_objects"),
+                                        m_pComInterface->call<double>("get_frequency_physics") / 4);
+        double fTimeProcessedPhysicsParticles = this->smoothFrameTime(
+                                        &TimeBufferPhysicsParticles,
+                                        m_pComInterface->call<double>("get_time_processed_physics_particles"),
+                                        m_pComInterface->call<double>("get_frequency_physics") / 4);
+        
+        double fTimeProcessedVisuals = this->smoothFrameTime(
+                                        &TimeBufferVisuals,
+                                        this->getTimeProcessed(),
+                                        m_fFrequency / 4);
+                
+        
+        oss << "PERFORMANCE\n\n";
+        oss << std::fixed << std::setprecision(2);
+        oss << "  Visuals:     " << fTimeProcessedVisuals*1000.0 << " of " <<
+                                this->getTimePerFrame()*1000.0 << " ms\n";
+        oss << "  Physics:     " << fTimeProcessedPhysics*1000.0 << " of " <<
+                                m_pComInterface->call<double>("get_time_per_frame_physics")*1000.0 << " ms\n";
+        oss << "  - Objects:   " << fTimeProcessedPhysicsObjects*1000.0 << " ms\n";
+        oss << "  - Particles: " << fTimeProcessedPhysicsParticles*1000.0 << " ms\n";
+                
         m_TextDebugInfo.setText(oss.str());
-        m_Graphics.setColor({{0.1, 0.0, 0.1, 1.0}});
+        m_Graphics.setColor({{0.1, 0.0, 0.1, 0.8}});
         
         m_Graphics.beginRenderBatch("world");
             double fSizeX = m_TextDebugInfo.getLength()+5.0;
             m_Graphics.filledRect(Vector2d(10, 10),
-                                  Vector2d(10 + fSizeX, 10+m_TextDebugInfo.getFontSize()));
+                                  Vector2d(10 + fSizeX, 20+ 23*m_TextDebugInfo.getFontSize()));
         m_Graphics.endRenderBatch();
         
         m_Graphics.beginRenderBatch("font");
             m_TextDebugInfo.display();
         m_Graphics.endRenderBatch();
+        
+        m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
     }
 }
 
@@ -1841,6 +1878,36 @@ void CVisualsManager::updateUI()
         //
         m_Graphics.endRenderBatch();
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Smoothes frame time, updating with given value
+///
+/// \param _pBuffer Buffer to use for frame time smoothing
+/// \param _fUpdate New value to update Frametime
+/// \param _nBufferSize Current size of buffer 
+///
+/// \return Smoothened value
+///
+////////////////////////////////////////////////////////////////////////////////
+const double CVisualsManager::smoothFrameTime(
+                                CCircularBuffer<double>* const _pBuffer,
+                                const double& _fUpdate,
+                                const int _nBufferSize)
+{
+    METHOD_ENTRY("CVisualsManager::smoothFrameTime")
+    
+    if (_nBufferSize != _pBuffer->size())
+        _pBuffer->reserve(_nBufferSize);
+    
+    _pBuffer->push_back(_fUpdate);
+    double fAvg = 0.0;
+    for (auto i=0u; i<_pBuffer->size(); ++i)
+    {
+        fAvg += (*_pBuffer)[i];
+    }
+    return fAvg / _pBuffer->size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

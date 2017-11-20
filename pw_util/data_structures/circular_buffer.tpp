@@ -264,6 +264,8 @@ void CCircularBuffer<T>::reserve(const std::size_t& _nCapa)
     m_Buffer.resize(_nCapa);
     m_nCapacity = _nCapa;
     m_nEnd = _nCapa - 1;
+    if (m_nSize > _nCapa) m_nSize = _nCapa;
+    if (m_nBegin >= _nCapa) m_nBegin = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

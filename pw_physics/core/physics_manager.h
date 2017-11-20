@@ -82,7 +82,9 @@ class CPhysicsManager : public IComInterfaceProvider,
         ~CPhysicsManager();
         
         //--- Constant Methods -----------------------------------------------//
-        const std::array<CSimTimer,4>&    getSimTimer() const;
+        const std::array<CSimTimer,4>&  getSimTimer() const;
+        const double getTimeProcessedObjects() const {return m_TimeProcessedObjects.getTime();}
+        const double getTimeProcessedParticles() const {return m_TimeProcessedParticles.getTime();}
 
         //--- Methods --------------------------------------------------------//
         UIDType createEmitter(const EmitterType);
@@ -113,12 +115,10 @@ class CPhysicsManager : public IComInterfaceProvider,
 
     private:
         
-        //--- Constant methods [private] -------------------------------------//
-        void moveMasses(int) const;
-        
         //--- Methods [private] ----------------------------------------------//
         void addGlobalForces();
         void collisionDetection();
+        void dynamics(int);
         void myInitComInterface();
         void processQueues();
         void updateCells();
@@ -143,6 +143,9 @@ class CPhysicsManager : public IComInterfaceProvider,
         bool                        m_bProcessOneFrame;         ///< Indicates if physics should be run stepwise
         
         std::array<CSimTimer,4>     m_SimTimer;                 ///< Timer / stop watch in simulation time
+        
+        CTimer              m_TimeProcessedObjects;             ///< Counts processing time for objects
+        CTimer              m_TimeProcessedParticles;           ///< Counts processing time for particles
         
 };
 

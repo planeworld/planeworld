@@ -55,6 +55,8 @@ class IThreadModule
         
         //--- Constant Methods -----------------------------------------------//
         const double&   getFrequency() const;
+        const double    getTimePerFrame() const;
+        const double    getTimeProcessed() const;
                 
         //--- Methods --------------------------------------------------------//
         virtual void    processFrame() = 0;
@@ -93,6 +95,32 @@ inline const double& IThreadModule::getFrequency() const
 {
     METHOD_ENTRY("IThreadModule::getFrequency")
     return (m_fFrequency);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns time per frame
+///
+/// \return Time getTimePerFrame in Hertz
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double IThreadModule::getTimePerFrame() const
+{
+    METHOD_ENTRY("IThreadModule::getTimePerFrame")
+    return (1.0/m_fFrequency);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns current time used for processing
+///
+/// \return Time used for processing in Hertz
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double IThreadModule::getTimeProcessed() const
+{
+    METHOD_ENTRY("IThreadModule::getTimeProcessed")
+    return (1.0/m_fFrequency - m_fTimeSlept);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

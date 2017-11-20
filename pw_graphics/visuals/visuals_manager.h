@@ -148,6 +148,8 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            drawWorld();
         void            updateUI();
         
+        const double    smoothFrameTime(CCircularBuffer<double>* const, const double&, const int);
+                
         void            myInitComInterface();
 
         CShaderProgram      m_ShaderProgramFont;            ///< Shader program for font rendering

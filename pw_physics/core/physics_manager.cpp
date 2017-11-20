@@ -393,7 +393,7 @@ void CPhysicsManager::processFrame()
     
     if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
     {    
-        this->moveMasses(nFrame);
+        this->dynamics(nFrame);
         this->collisionDetection();
         this->updateCells();
         
@@ -403,72 +403,6 @@ void CPhysicsManager::processFrame()
     m_pDataStorage->swapBack();
     DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
     if (++nFrame == 10000) nFrame = 0;    
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Moves and rotates the masses
-///
-////////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::moveMasses(int nTest) const
-{
-    METHOD_ENTRY("CPhysicsManager::moveMasses")
-    
-//     for (auto ci = m_Components.cbegin();
-//         ci != m_Components.cend(); ++ci)
-//     {
-//         (*ci).second->execute();
-//     }
-    
-    for (auto pThruster : *m_pDataStorage->getThrustersByValue())
-    {
-        pThruster.second->execute();
-    }
-    
-    std::vector<UIDType> vecToBeDeleted;
-    for (auto pEmitter : *m_pDataStorage->getEmittersByValue())
-    {
-        if (pEmitter.second->getMode() == EmitterModeType::ONCE)
-        {
-            pEmitter.second->emit();
-            vecToBeDeleted.push_back(pEmitter.second->getUID());
-            
-            delete pEmitter.second;
-            pEmitter.second = nullptr;
-            MEM_FREED("IEmitter")
-        }
-        else
-        {
-            pEmitter.second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        }
-    }
-    for (auto EmDel : vecToBeDeleted)
-    {
-        m_pDataStorage->getEmittersByValue()->erase(EmDel);
-    }
-    for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
-    {
-        Obj.second->dynamics(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
-        Obj.second->transform();
-    }
-//     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyParticle) == 0)
-    {
-        CTimer FrameTimeParticle;
-        FrameTimeParticle.start();
-        
-        for (const auto Particle : *m_pDataStorage->getParticlesByValueBack())
-        {
-            Particle.second->dynamics(1.0/m_fFrequencyParticle*m_pDataStorage->getTimeScale());
-        }
-        
-        FrameTimeParticle.stop();
-        if (FrameTimeParticle.getTime() > 1.0/m_fFrequencyParticle)
-        {
-          NOTICE_MSG("Physics Manager", "Execution time of particle code is too large: " << FrameTimeParticle.getTime() << 
-                                        "s of " << 1.0/m_fFrequencyParticle << "s max.")
-        }
-    }
-    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -552,6 +486,64 @@ void CPhysicsManager::collisionDetection()
 //      (*ci).getObjectA()->disableDynamics();
 //      (*ci).getObjectB()->disableDynamics();
 //  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Dynamics processing the masses
+///
+////////////////////////////////////////////////////////////////////////////////
+void CPhysicsManager::dynamics(int nTest)
+{
+    METHOD_ENTRY("CPhysicsManager::dynamics")
+    
+    for (auto pThruster : *m_pDataStorage->getThrustersByValue())
+    {
+        pThruster.second->execute();
+    }
+    
+    std::vector<UIDType> vecToBeDeleted;
+    for (auto pEmitter : *m_pDataStorage->getEmittersByValue())
+    {
+        if (pEmitter.second->getMode() == EmitterModeType::ONCE)
+        {
+            pEmitter.second->emit();
+            vecToBeDeleted.push_back(pEmitter.second->getUID());
+            
+            delete pEmitter.second;
+            pEmitter.second = nullptr;
+            MEM_FREED("IEmitter")
+        }
+        else
+        {
+            pEmitter.second->emit(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        }
+    }
+    for (auto EmDel : vecToBeDeleted)
+    {
+        m_pDataStorage->getEmittersByValue()->erase(EmDel);
+    }
+    
+    m_TimeProcessedObjects.start();
+    for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
+    {
+        Obj.second->dynamics(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
+        Obj.second->transform();
+    }
+    m_TimeProcessedObjects.stop();
+//     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyParticle) == 0)
+    {
+        
+        m_TimeProcessedParticles.start();
+        
+        for (const auto Particle : *m_pDataStorage->getParticlesByValueBack())
+        {
+            Particle.second->dynamics(1.0/m_fFrequencyParticle*m_pDataStorage->getTimeScale());
+        }
+        
+        m_TimeProcessedParticles.stop();
+    }
+    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -817,6 +809,36 @@ void CPhysicsManager::myInitComInterface()
                                           {ParameterType::DOUBLE, "Standard deviation of velocity of entity emitation"}},
                                           "system", "physics"
                                           );
+        m_pComInterface->registerFunction("get_frequency_physics",
+                                          CCommand<double>([&]() -> double {return m_fFrequency;}),
+                                          "Return processing frequency in Hertz.",
+                                          {{ParameterType::DOUBLE, "processing frequency in Hertz"}},
+                                           "system"
+                                         );
+        m_pComInterface->registerFunction("get_time_per_frame_physics",
+                                          CCommand<double>([&]() -> double {return this->getTimePerFrame();}),
+                                          "Return time available per frame (i.e. 1.0/Frequency).",
+                                          {{ParameterType::DOUBLE, "Time available per frame"}},
+                                           "system"
+                                         );
+        m_pComInterface->registerFunction("get_time_processed_physics",
+                                          CCommand<double>([&]() -> double {return this->getTimeProcessed();}),
+                                          "Return time used for processing.",
+                                          {{ParameterType::DOUBLE, "Time used for processing"}},
+                                           "system"
+                                         );
+        m_pComInterface->registerFunction("get_time_processed_physics_objects",
+                                          CCommand<double>([&]() -> double {return this->getTimeProcessedObjects();}),
+                                          "Return time used for object processing.",
+                                          {{ParameterType::DOUBLE, "Time used for object processing"}},
+                                           "system"
+                                         );
+        m_pComInterface->registerFunction("get_time_processed_physics_particles",
+                                          CCommand<double>([&]() -> double {return this->getTimeProcessedParticles();}),
+                                          "Return time used for particle processing.",
+                                          {{ParameterType::DOUBLE, "Time used for particle processing"}},
+                                           "system"
+                                         );
         m_pComInterface->registerFunction("particles_set_color_birth",
                                           CCommand<void, int, double, double, double, double>(
                                             [&](const int _nUID,
