@@ -1339,23 +1339,24 @@ void CVisualsManager::drawDebugInfo()
         
         oss << "\n";
 
-        static CCircularBuffer<double> TimeBufferPhysics(m_pComInterface->call<double>("get_frequency_physics") / 4);
-        static CCircularBuffer<double> TimeBufferPhysicsObjects(m_pComInterface->call<double>("get_frequency_physics") / 4);
-        static CCircularBuffer<double> TimeBufferPhysicsParticles(m_pComInterface->call<double>("get_frequency_physics") / 4);
+        static double fBufferSizePhysics = m_pComInterface->call<double>("get_frequency_physics") / 4;
+        static CCircularBuffer<double> TimeBufferPhysics(fBufferSizePhysics);
+        static CCircularBuffer<double> TimeBufferPhysicsObjects(fBufferSizePhysics);
+        static CCircularBuffer<double> TimeBufferPhysicsParticles(fBufferSizePhysics);
         static CCircularBuffer<double> TimeBufferVisuals(m_fFrequency / 4);
         
         double fTimeProcessedPhysics = this->smoothFrameTime(
                                         &TimeBufferPhysics,
                                         m_pComInterface->call<double>("get_time_processed_physics"),
-                                        m_pComInterface->call<double>("get_frequency_physics") / 4);
+                                        fBufferSizePhysics);
         double fTimeProcessedPhysicsObjects = this->smoothFrameTime(
                                         &TimeBufferPhysicsObjects,
                                         m_pComInterface->call<double>("get_time_processed_physics_objects"),
-                                        m_pComInterface->call<double>("get_frequency_physics") / 4);
+                                        fBufferSizePhysics);
         double fTimeProcessedPhysicsParticles = this->smoothFrameTime(
                                         &TimeBufferPhysicsParticles,
                                         m_pComInterface->call<double>("get_time_processed_physics_particles"),
-                                        m_pComInterface->call<double>("get_frequency_physics") / 4);
+                                        fBufferSizePhysics);
         
         double fTimeProcessedVisuals = this->smoothFrameTime(
                                         &TimeBufferVisuals,
@@ -1364,7 +1365,7 @@ void CVisualsManager::drawDebugInfo()
                 
         
         oss << "PERFORMANCE\n\n";
-        oss << std::fixed << std::setprecision(2);
+        oss << std::fixed << std::setprecision(1);
         oss << "  Visuals:     " << fTimeProcessedVisuals*1000.0 << " of " <<
                                 this->getTimePerFrame()*1000.0 << " ms\n";
         oss << "  Physics:     " << fTimeProcessedPhysics*1000.0 << " of " <<
