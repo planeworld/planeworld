@@ -152,6 +152,7 @@ class CVisualsManager : virtual public CGraphicsBase,
                 
         void            myInitComInterface();
 
+        CShaderProgram      m_ShaderProgramCamWidget;       ///< Shader program for camera widget rendering
         CShaderProgram      m_ShaderProgramFont;            ///< Shader program for font rendering
         CShaderProgram      m_ShaderProgramMainScreen;      ///< Shader program to put image to screen buffer
         CShaderProgram      m_ShaderProgramStars;           ///< Shader program to render stars

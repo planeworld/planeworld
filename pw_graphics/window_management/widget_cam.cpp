@@ -41,7 +41,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 CWidgetCam::CWidgetCam(CFontManager* const _pFontManager) :
                        IWidget(_pFontManager),
-                       IVisualsDataStorageUser()
+                       IVisualsDataStorageUser(),
+                       m_fTransparency(0.5f)
 {
     METHOD_ENTRY("CWidgetCam::CWidgetCam");
     CTOR_CALL("CWidgetCam::CWidgetCam");
@@ -74,10 +75,6 @@ void CWidgetCam::draw()
 {
     METHOD_ENTRY("CWidgetCam::draw")
 
-    m_Graphics.beginRenderBatch("world");
-        this->drawFrame();
-    m_Graphics.endRenderBatch();
-   
     m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
     
     m_Graphics.beginRenderBatch(m_UID.getName());

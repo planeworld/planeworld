@@ -299,8 +299,6 @@ void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode, const bool _bF
     if (bBegin)
     {
         m_pRenderMode->use();
-        GLint nProjMatLoc=glGetUniformLocation(m_pRenderMode->getShaderProgram()->getID(), "matTransform");
-        glUniformMatrix4fv(nProjMatLoc, 1, GL_FALSE, glm::value_ptr(m_matProjection));
         
         this->applyCamMovement();
         

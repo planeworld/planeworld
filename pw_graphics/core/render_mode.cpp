@@ -20,142 +20,90 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       render_target.h
-/// \brief      Prototype of class "CRenderTarget"
+/// \file       render_mode.h
+/// \brief      Prototype of class "CRenderMode"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2016-04-22
+/// \date       2017-12-01
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef RENDER_TARGET_H
-#define RENDER_TARGET_H
-
-#define GL_GLEXT_PROTOTYPES
-
-//--- Standard header --------------------------------------------------------//
-#include <cstdint>
-#include <vector>
-
-//--- Program header ---------------------------------------------------------//
-#include "log.h"
-
-//--- Misc header ------------------------------------------------------------//
-#include "GL/gl.h"
-#include "GL/glext.h"
+#include "render_mode.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class to define a render target, using a frame buffer object
-///        (render to texture).
+/// \brief Add an integer uniform to this rendermode
+///
+/// \param _strName Name of uniform
+/// \param _pnInt Integer uniform
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CRenderTarget
+void CRenderMode::addUniform(const std::string& _strName, GLint* const _pnInt)
 {
-
-    public:
-      
-        //--- Methods --------------------------------------------------------//
-        bool init(const std::uint16_t, const std::uint16_t);
-        void setTarget(const float, const float,
-                       const float, const float,
-                       const float, const float,
-                       const float, const float
-        );
-
-        //--- Constant Methods -----------------------------------------------//
-              GLuint                getIDTex() const;
-        const std::vector<GLfloat>& getQuad() const;
-        const std::vector<GLfloat>& getTexUV() const;
-        void bind() const;
-        void unbind() const;
-        
-    private:
-        
-        //--- Variables [protected] ------------------------------------------//
-        GLuint m_unIDDeB = 0;   ///< ID of depth buffer
-        GLuint m_unIDFBO = 0;   ///< ID of framebuffer object
-        GLuint m_unIDTex = 0;   ///< ID of texture
-        
-        std::vector<GLfloat> m_vecTarget = {
-                                    -1.0f, -1.0f, -10.0f,
-                                    1.0f, -1.0f,  -10.0f,
-                                    -1.0f,  1.0f, -10.0f,
-                                    -1.0f,  1.0f, -10.0f,
-                                    1.0f, -1.0f,  -10.0f,
-                                    1.0f,  1.0f,  -10.0f,
-                                  }; ///< Target quad to map texture to
-        std::vector<GLfloat> m_vecTexUV = {
-                                    0.0f, 0.0f,
-                                    1.0f, 0.0f,
-                                    0.0f, 1.0f,
-                                    0.0f, 1.0f,
-                                    1.0f, 0.0f,
-                                    1.0f, 1.0f,
-                                  }; ///< Texture coordinates
-};
-
-//--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return id of texture to use as render target
-///
-/// \return ID of texture to use as render target
-///
-////////////////////////////////////////////////////////////////////////////////
-inline GLuint CRenderTarget::getIDTex() const
-{
-    METHOD_ENTRY("CRenderTarget::getIDTex")
-    return m_unIDTex;
+    METHOD_ENTRY("CRenderMode::addUniform")
+    DOM_DEV(
+        if (m_pShaderProgram == nullptr)
+        {
+            WARNING_MSG("Render Mode", "Shader program not set.")
+            goto DomDev;
+        }
+    )
+    
+    m_UniformsInt.insert({{glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str()), _pnInt}});
+    
+    DOM_DEV(DomDev:)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return the quad the texture is rendered on
+/// \brief Add float uniform to this rendermode
 ///
-/// \return The quad the texture is rendered on
+/// \param _strName Name of uniform
+/// \param _pf Float uniform
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::vector<GLfloat>& CRenderTarget::getQuad() const
+void CRenderMode::addUniform(const std::string& _strName, GLfloat* const _pf)
 {
-    METHOD_ENTRY("CRenderTarget::getQuad")
-    return m_vecTarget;
+    METHOD_ENTRY("CRenderMode::addUniform")
+    GLint nUniformLocation = 0;
+    DOM_DEV(
+        if (m_pShaderProgram == nullptr)
+        {
+            WARNING_MSG("Render Mode", "Shader program not set.")
+            goto DomDev;
+        }
+    )
+    
+    nUniformLocation = glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str());
+    if (nUniformLocation != -1)
+    {
+        m_UniformsFloat.insert({{nUniformLocation, _pf}});
+    }
+    else
+    {
+        WARNING_MSG("Render Mode", "Unknown uniform, maybe shader program is not yet linked.")
+    }
+    
+    DOM_DEV(DomDev:)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Return the texture coordinates referred to render target
-///
-/// \return Texture coordinates referred to render target
+/// \brief Set up internals to use this render mode
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline const std::vector<GLfloat>& CRenderTarget::getTexUV() const
+void CRenderMode::use()
 {
-    METHOD_ENTRY("CRenderTarget::getTexUV")
-    return m_vecTexUV;
+    METHOD_ENTRY("CRenderMode::use")
+    m_pShaderProgram->use();
+    for (auto UniformInt : m_UniformsInt)
+    {
+        glUniform1i(UniformInt.first, *UniformInt.second);
+    }
+    for (auto UniformFloat : m_UniformsFloat)
+    {
+        glUniform1f(UniformFloat.first, *UniformFloat.second);
+    }
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_unTexID);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Bind the framebuffer object
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CRenderTarget::bind() const
-{
-    METHOD_ENTRY("CRenderTarget::bind")
-    glBindFramebuffer(GL_FRAMEBUFFER, m_unIDFBO);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Unbind the framebuffer object
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CRenderTarget::unbind() const
-{
-    METHOD_ENTRY("CRenderTarget::unbind")
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-#endif // RENDER_TARGET_H

@@ -34,6 +34,7 @@
 #define GL_GLEXT_PROTOTYPES
 
 //--- Standard header --------------------------------------------------------//
+#include <unordered_map>
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
@@ -70,15 +71,13 @@ class CRenderMode
         GLuint                      getTexture() const {return m_unTexID;}
               
         //--- Methods --------------------------------------------------------//
+        void addUniform(const std::string&, GLint* const);
+        void addUniform(const std::string& _strName, GLfloat* const _pf);
         void setRenderModeType(const RenderModeType _RenderModeType) {m_RenderModeType = _RenderModeType;}
         void setShaderProgram(CShaderProgram* const _pShaderProgram) {m_pShaderProgram = _pShaderProgram;}
         void setTexture(const GLuint _unTexID) {m_unTexID = _unTexID;}
-        void use()
-        {
-            m_pShaderProgram->use();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, m_unTexID);
-        }
+       
+        void use();
         
     private:
         
@@ -87,8 +86,11 @@ class CRenderMode
         CShaderProgram*  m_pShaderProgram{nullptr};                     ///< Referred shader program, active for this mode
         GLuint           m_unTexID = 0;
         
+        std::unordered_map<GLint, GLint*> m_UniformsInt;
+        std::unordered_map<GLint, GLfloat*> m_UniformsFloat;
+        
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-#endif // RENDER_TARGET_H
+#endif // RENDER_MODE_H

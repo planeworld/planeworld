@@ -888,6 +888,7 @@ bool CVisualsManager::init()
     CShader VertexShaderMainScreen;
     CShader VertexShaderStars;
     CShader VertexShaderWorld;
+    CShader FragmentShaderCamWidget;
     CShader FragmentShaderFont;
     CShader FragmentShaderMainScreen;
     CShader FragmentShaderStars;
@@ -900,10 +901,13 @@ bool CVisualsManager::init()
     VertexShaderStars.load(m_strDataPath+"/shader/stars.vert", GL_VERTEX_SHADER);
     VertexShaderWorld.load(m_strDataPath+"/shader/shader.vert", GL_VERTEX_SHADER);
 
+    FragmentShaderCamWidget.load(m_strDataPath+"/shader/cam_widget_default.frag", GL_FRAGMENT_SHADER);
     FragmentShaderFont.load(m_strDataPath+"/shader/font.frag", GL_FRAGMENT_SHADER);
     FragmentShaderMainScreen.load(m_strDataPath+"/shader/main_screen.frag", GL_FRAGMENT_SHADER);
     FragmentShaderStars.load(m_strDataPath+"/shader/stars.frag", GL_FRAGMENT_SHADER);
     FragmentShaderWorld.load(m_strDataPath+"/shader/shader.frag", GL_FRAGMENT_SHADER);
+    
+    m_ShaderProgramCamWidget.create(VertexShaderMainScreen, FragmentShaderCamWidget);
     
     m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
     m_RenderModeFont.setShaderProgram(&m_ShaderProgramFont);
@@ -1067,7 +1071,6 @@ UIDType CVisualsManager::createWidget(const WidgetTypeType _WidgetType,
         {
             CWidgetCam* pCameraWidget = new CWidgetCam(&m_FontManager);
             pCameraWidget->setUIDVisuals(&m_UIDVisuals);
-            pCameraWidget->setShaderProgram(&m_ShaderProgramMainScreen);
             pWidget = pCameraWidget;
             break;
         }
@@ -1289,6 +1292,11 @@ void CVisualsManager::addWidgetsFromQueue()
     while (m_WidgetsQueue.try_dequeue(pWidget))
     {
         m_pVisualsDataStorage->addWidget(pWidget);
+        
+        if (pWidget->getType() == WidgetTypeType::CAMERA)
+        {
+            static_cast<CWidgetCam*>(pWidget)->setShaderProgram(&m_ShaderProgramCamWidget);
+        }
     }
 }
 
@@ -2428,6 +2436,33 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Widget UID"},
                                       {ParameterType::STRING, "Widget text"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("widget_set_display_alpha",
+                                      CCommand<void, int, double>(
+                                          [&](const int _nUID, const double _fT)
+                                            {
+                                                IWidget* pWidget = m_pVisualsDataStorage->getWidgetByValue(_nUID);
+                                                if (pWidget != nullptr)
+                                                {
+                                                    if (pWidget->getType() == WidgetTypeType::CAMERA)
+                                                    {
+                                                        static_cast<CWidgetCam*>(pWidget)->setTransparency(_fT);
+                                                    }
+                                                    else
+                                                    {
+                                                        WARNING_MSG("Visuals Manager", "Wrong widget type, unknown method <setTransparency>.")
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                      "Set transparency of camera display.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Widget UID"},
+                                      {ParameterType::DOUBLE, "Camera display transparency"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("win_set_title",

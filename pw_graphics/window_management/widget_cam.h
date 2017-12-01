@@ -59,12 +59,23 @@ class CWidgetCam : public IWidget,
         
         //--- Constant methods -----------------------------------------------//
         const CHandle<CCamera>* getCamera() const {return &m_hCamera;}
+        const CRenderMode*      getRenderMode() const {return &m_RenderMode;}
         const CRenderTarget*    getRenderTarget() const {return &m_TargetCam;}
         
         //--- Methods --------------------------------------------------------//
         void draw() override;
         void setCamera(CCamera* const _pCamera) {m_hCamera.set(_pCamera);}
-        void setShaderProgram(CShaderProgram* const _pShaderProgram) {m_RenderMode.setShaderProgram(_pShaderProgram);}
+        void setShaderProgram(CShaderProgram* const _pShaderProgram) 
+        {
+            METHOD_ENTRY("CWidgetCam::setShaderProgram")
+            m_RenderMode.setShaderProgram(_pShaderProgram);
+            m_RenderMode.addUniform("transparency", &m_fTransparency);
+        }
+        void setTransparency(const double& _fTransparency)
+        {
+            METHOD_ENTRY("CWidgetCam::setTransparency")
+            m_fTransparency = _fTransparency;
+        }
         
     private:
         
@@ -72,11 +83,12 @@ class CWidgetCam : public IWidget,
         void myResize(const int, const int) override;
         
         //--- Variables [private] --------------------------------------------//
-        CHandle<CCamera> m_hCamera;     ///< Camera attached to this widget
+        CHandle<CCamera> m_hCamera;         ///< Camera attached to this widget
         
-        CRenderMode   m_RenderMode;     ///< Render mode to use for rendering
-        CRenderTarget m_TargetCam;      ///< Rendertarget for virtual camera
+        CRenderMode     m_RenderMode;       ///< Render mode to use for rendering
+        CRenderTarget   m_TargetCam;        ///< Rendertarget for virtual camera
         
+        float           m_fTransparency;    ///< Transparency of virtual camera display    
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
