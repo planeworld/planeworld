@@ -1181,6 +1181,10 @@ void CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
     
+    // Somehow this doesn't work for all machines when initialised during
+    // this->init(). Hence it is set here as a temporary workaround
+    m_RenderModeMainScreen.setTexture(m_RenderTargetScreen.getIDTex());
+    
     bool bGotCam = m_pVisualsDataStorage->getCamerasByIndex().size() > 0;
 
     this->addCamerasFromQueue();
