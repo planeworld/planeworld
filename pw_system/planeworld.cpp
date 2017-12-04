@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
         // GL-based window functions rely on an existing window.
         pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
                                        "Planeworld", sf::Style::Default,
-                                       sf::ContextSettings(24,8,4,4,5,sf::ContextSettings::Core)
+                                       sf::ContextSettings(24,8,4,4,2,sf::ContextSettings::Core)
                                       );
         MEM_ALLOC("WindowHandleType")
         pVisualsManager->setWindow(pWindow);
