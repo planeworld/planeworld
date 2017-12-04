@@ -414,6 +414,7 @@ template<> inline void CCommand<Vector2d, int>::dispatchSignature() {m_Signature
 template<> inline void CCommand<Vector2d, int, int>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2INT;}
 template<> inline void CCommand<Vector2d, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_STRING;}
 template<> inline void CCommand<Vector2d, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2STRING;}
+template<> inline void CCommand<Vector2i>::dispatchSignature() {m_Signature = SignatureType::VEC2DINT;}
 template<> inline void CCommand<Vector2i, int>::dispatchSignature() {m_Signature = SignatureType::VEC2DINT_INT;}
 
 template<class TRet, class... TArgs> void CCommandToQueueWrapper<TRet, TArgs...>::dispatchSignature() {m_Signature = SignatureType::UNDEFINED;}
@@ -449,4 +450,5 @@ template<> inline void CCommandToQueueWrapper<Vector2d, int>::dispatchSignature(
 template<> inline void CCommandToQueueWrapper<Vector2d, int, int>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2INT;}
 template<> inline void CCommandToQueueWrapper<Vector2d, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_STRING;}
 template<> inline void CCommandToQueueWrapper<Vector2d, std::string, std::string>::dispatchSignature() {m_Signature = SignatureType::VEC2DDOUBLE_2STRING;}
+template<> inline void CCommandToQueueWrapper<Vector2i>::dispatchSignature() {m_Signature = SignatureType::VEC2DINT;}
 template<> inline void CCommandToQueueWrapper<Vector2i, int>::dispatchSignature() {m_Signature = SignatureType::VEC2DINT_INT;}

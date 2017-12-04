@@ -177,6 +177,7 @@ class CGraphics
         double          getResPMY() const;
         unsigned short  getWidthScr() const;
         unsigned short  getHeightScr() const;
+        Vector2i        getScreenRes() const;
         void setColor(const ColorTypeRGBA&);
         void setColor(const double&, const double&, const double&);
         void setColor(const double&, const double&, const double&, const double&);
@@ -461,6 +462,19 @@ inline unsigned short CGraphics::getHeightScr() const
 {
     METHOD_ENTRY("CGraphics::getHeightScr()");
     return m_unHeightScr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the screen resolution
+///
+/// \return Screen resolution in pixel (width, height)
+///
+///////////////////////////////////////////////////////////////////////////////
+inline Vector2i CGraphics::getScreenRes() const
+{
+    METHOD_ENTRY("CGraphics::getScreenRes");
+    return Vector2i(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

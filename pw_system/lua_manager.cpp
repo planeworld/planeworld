@@ -339,7 +339,18 @@ bool CLuaManager::init()
                     };
                 TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
                 break;
-            }   
+            }
+            case SignatureType::VEC2DINT:
+            {   
+                std::function<std::tuple<int, int>()> Func =
+                    [=]() -> std::tuple<int, int>
+                    {
+                        Vector2i vecV = m_pComInterface->call<Vector2i>(Function.first);
+                        return std::tie(vecV[0],vecV[1]);
+                    };
+                TablePW[strDomain.c_str()][Function.first.c_str()] = Func;
+                break;
+            }
             case SignatureType::VEC2DINT_INT:
             {   
                 std::function<std::tuple<int, int>(int)> Func =

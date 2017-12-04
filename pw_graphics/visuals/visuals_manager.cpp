@@ -2265,6 +2265,15 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::INT, "Camera UID"}},
                                       "system"
     );
+    m_pComInterface->registerFunction("get_screen_resolution",
+                                      CCommand<Vector2i>([&]() -> Vector2i
+                                      {
+                                          return m_Graphics.getScreenRes();
+                                      }),
+                                      "Return screen resolution.",
+                                      {{ParameterType::VEC2DINT, "Screen resolution (width, height)"}},
+                                      "system"
+    );
     m_pComInterface->registerFunction("mouse_cursor_on",
                                       CCommand<void>([&]() {m_bCursor = true;}),
                                       "Enables mouse cursor.",

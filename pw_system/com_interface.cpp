@@ -427,6 +427,13 @@ const std::string CComInterface::call(const std::string& _strCommand)
                 oss << vecRet[0] << " " << vecRet[1];
                 break;
             }
+            case SignatureType::VEC2DINT:
+            {
+                Vector2i vecRet; vecRet.setZero();
+                vecRet = this->call<Vector2i>(strName);
+                oss << vecRet[0] << " " << vecRet[1];
+                break;
+            }
             case SignatureType::VEC2DINT_INT:
             {
                 int nParam(0);
@@ -608,6 +615,7 @@ void CComInterface::callWriters(const std::string& _strQueue)
             case SignatureType::VEC2DDOUBLE_2INT:
             case SignatureType::VEC2DDOUBLE_STRING:
             case SignatureType::VEC2DDOUBLE_2STRING:
+            case SignatureType::VEC2DINT:
             case SignatureType::VEC2DINT_INT:
             {
                 DOM_DEV(WARNING_MSG("Com Interface", "Something went wrong, writing functions shouldn't have a return value."))

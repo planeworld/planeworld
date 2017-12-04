@@ -99,6 +99,7 @@ enum class SignatureType
     VEC2DDOUBLE_2INT,
     VEC2DDOUBLE_STRING,
     VEC2DDOUBLE_2STRING,
+    VEC2DINT,
     VEC2DINT_INT
 };
 
