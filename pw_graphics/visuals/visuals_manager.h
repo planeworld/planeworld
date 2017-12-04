@@ -126,7 +126,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         void            drawBoundingBoxes() const;
         void            drawCOM() const;
-        void            drawGrid() const;
         void            drawTrajectories() const;
         
         #ifdef PW_MULTITHREADING
@@ -139,7 +138,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            addWindowsFromQueue();
             
         void            drawDebugInfo();
-        void            drawGridHUD();
+        void            drawGrid(const DrawModeType);
         void            drawKinematicsState(const CKinematicsState* const, const double&, const DrawModeType);
         void            drawKinematicsStates(const DrawModeType);
         void            drawStars();
