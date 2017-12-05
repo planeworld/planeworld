@@ -2087,10 +2087,18 @@ void CVisualsManager::myInitComInterface()
                                       "system", "visuals"  
     );
     m_pComInterface->registerFunction("cam_set_resolution_mpx",
-                                      CCommand<void, double>([&](const double& _fR)
-                                      {m_pCamera->zoomTo(m_Graphics.getResMPX()/_fR * m_pCamera->getZoom());}),
-                                      "Set resolution of currently active camera (m/px).",
+                                      CCommand<void, int, double>([&](const int _nUID, const double& _fR)
+                                      {
+                                          
+                                          auto pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);
+                                          if (pCam != nullptr)
+                                          {
+                                            pCam->zoomTo(m_Graphics.getResMPX()/_fR * pCam->getZoom());
+                                          }
+                                      }),
+                                      "Set resolution of camera (m/px) with given UID.",
                                       {{ParameterType::NONE, "No return value"},
+                                       {ParameterType::INT, "Camera UID"},
                                        {ParameterType::DOUBLE, "Resolution in m/px"}},
                                       "system", "visuals"  
     );
