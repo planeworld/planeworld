@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 CPhysicsManager::CPhysicsManager() : m_fG(6.67408e-11),
                                      m_fFrequencyParticle(PHYSICS_PARTICLE_DEFAULT_FREQUENCY),
-                                     m_strCellUpdateLast(""),
+                                     m_nCellUpdateLast(0u),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
                                      m_bPaused(false),
@@ -1796,26 +1796,24 @@ void CPhysicsManager::updateCells()
     
     m_fCellUpdateResidual = fNrOfObj - nNrOfObj;
     
-    // From now on use ObjectsByName since they are ordered by name in a std::map.
-    // Hence, a correct entry point to continue cell update can be found
     if (m_bCellUpdateFirst)
     {
         // Make sure not to try to access ->begin() within empty vector
         if (nNrOfObj > 0)
         {
-            m_strCellUpdateLast = m_pDataStorage->getObjectsByNameBack()->begin()->second->getName();
+            m_nCellUpdateLast = m_pDataStorage->getObjectsByValueBack()->begin()->second->getUID();
             m_bCellUpdateFirst = false;
         }
     }
     else
     {
-        auto it = m_pDataStorage->getObjectsByNameBack()->find(m_strCellUpdateLast);
+        auto it = m_pDataStorage->getObjectsByValueBack()->find(m_nCellUpdateLast);
         for (auto i=0u; i<nNrOfObj; ++i)
         {
             it->second->updateCell();
-            if (++it == m_pDataStorage->getObjectsByNameBack()->end())
-                it =  m_pDataStorage->getObjectsByNameBack()->begin();
+            if (++it == m_pDataStorage->getObjectsByValueBack()->end())
+                it =  m_pDataStorage->getObjectsByValueBack()->begin();
         }
-        m_strCellUpdateLast = it->second->getName();
+        m_nCellUpdateLast = it->second->getUID();
     }
 }

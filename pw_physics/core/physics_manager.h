@@ -136,7 +136,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         
         Vector2d                    m_vecConstantGravitation;   ///< Vector for constant gravitation
 
-        std::string                 m_strCellUpdateLast;        ///< Last updated object concerning grid cells
+        UIDType                     m_nCellUpdateLast;          ///< Last updated object concerning grid cells
         double                      m_fCellUpdateResidual;      ///< Residual for calculation of cell update
         bool                        m_bCellUpdateFirst;         ///< Indicates the first cell update (to initialise access)
         bool                        m_bPaused;                  ///< Indicates if physics caluculations are paused

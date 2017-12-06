@@ -61,8 +61,6 @@ class CCollisionManager : public IWorldDataStorageUser
         //--- Methods --------------------------------------------------------//
         void detectCollisions();
         void setParticle(const ParticleType&);
-        void setDynamicObjects(const ObjectsByNameType&);
-        void setStaticObjects(const ObjectsByNameType&);
         
     private:
         
@@ -92,52 +90,8 @@ class CCollisionManager : public IWorldDataStorageUser
                                           const Vector2d&, const Vector2d&, const Vector2d&);
         
         ParticleType              m_Particle;           ///< List of particle
-        ObjectsByNameType       m_DynamicObjects;   ///< List of dynamic objects
-        ObjectsByNameType       m_StaticObjects;    ///< List of static objects
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Pass list of particle, which are always dynamic
-///
-/// \param _ParticleList List of particle
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setParticle(const ParticleType& _ParticleList)
-{
-    METHOD_ENTRY("CCollisionManager::setParticle")
-
-    m_Particle = _ParticleList;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Pass list of dynamic objects
-///
-/// \param _ObjList List of dynamic objects
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setDynamicObjects(const ObjectsByNameType& _ObjList)
-{
-    METHOD_ENTRY("CCollisionManager::setDynamicObjects")
-
-    m_DynamicObjects = _ObjList;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Pass list of static objects
-///
-/// \param _ObjList List of static objects
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void CCollisionManager::setStaticObjects(const ObjectsByNameType& _ObjList)
-{
-    METHOD_ENTRY("CCollisionManager::setStaticObjects")
-
-    m_StaticObjects = _ObjList;
-}
 
 #endif

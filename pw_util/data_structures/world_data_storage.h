@@ -67,10 +67,6 @@ typedef std::unordered_map<UIDType, CThruster*> ThrustersByValueType;
 // /// Map of buffered emitters, accessed by UID value
 // typedef CMultiBuffer<BUFFER_TRIPLE, EmittersByValueType, UIDType, IEmitter*> BufferedEmittersByValueType;
 
-/// Map of objects, accessed by name
-typedef std::map<std::string, CObject*> ObjectsByNameType;
-/// Map of buffered objects, accessed by name
-typedef CMultiBuffer<BUFFER_QUADRUPLE, ObjectsByNameType, std::string, CObject*> BufferedObjectsByNameType;
 /// Map of objects, accessed by UID value
 typedef std::unordered_map<UIDType, CObject*> ObjectsByValueType;
 /// Map of buffered objects, accessed by UID value
@@ -126,12 +122,10 @@ class CWorldDataStorage
         CThruster*                  getThrusterByValue(const UIDType);
         
         EmittersByValueType*        getEmittersByValue();
-        BufferedObjectsByNameType&  getObjectsBuffer();
         ParticlesByNameType*        getParticlesByNameBack();
         ParticlesByNameType*        getParticlesByNameFront();
         ParticlesByValueType*       getParticlesByValueFront();
         ParticlesByValueType*       getParticlesByValueBack();
-        ObjectsByNameType*          getObjectsByNameBack();
         ObjectsByValueType*         getObjectsByValueBack();
         ObjectsByValueType*         getObjectsByValueFront();
         ThrustersByValueType*       getThrustersByValue();
@@ -162,7 +156,6 @@ class CWorldDataStorage
         // Buffered entities, used by graphical clients
         BufferedParticlesByNameType     m_ParticlesByName;      ///< Buffered particles, accessed by name
         BufferedParticlesByValueType    m_ParticlesByValue;     ///< Buffered particles, accessed by value
-        BufferedObjectsByNameType       m_ObjectsByName;        ///< Buffered objects, accessed by name
         BufferedObjectsByValueType      m_ObjectsByValue;       ///< Buffered objects, accessed by UID value
         BufferedUIDUsersByValueType     m_UIDUsersByValue;      ///< Buffered UID users, accessed by value
 
@@ -283,33 +276,6 @@ inline ParticlesByValueType* CWorldDataStorage::getParticlesByValueFront()
 {
     METHOD_ENTRY("CWorldDataStorage::getParticlesByValueFront")
     return m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns buffer of objects, accessed by name
-///
-/// \return Objects buffer, accessed by name
-///
-////////////////////////////////////////////////////////////////////////////////
-inline BufferedObjectsByNameType& CWorldDataStorage::getObjectsBuffer()
-{
-    METHOD_ENTRY("CWorldDataStorage::getObjectsBuffer")
-    return m_ObjectsByName;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns back buffer of objects, accessed by name
-///
-/// \return Objects back buffer, accessed by name
-///
-////////////////////////////////////////////////////////////////////////////////
-inline ObjectsByNameType* CWorldDataStorage::getObjectsByNameBack()
-{
-    METHOD_ENTRY("CWorldDataStorage::getObjectsByNameBack")
-    return m_ObjectsByName.getBuffer(BUFFER_QUADRUPLE_BACK);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

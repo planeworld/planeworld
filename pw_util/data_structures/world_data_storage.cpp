@@ -246,7 +246,6 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
     // Initialise new objects
     for (auto pObj : aObjects) pObj->init();
     
-    m_ObjectsByName.add(_pObject->getName(),aObjects);
     m_ObjectsByValue.add(_pObject->getUID(), aObjects);
     
     for (auto Shape : _pObject->getGeometry()->getShapes())
@@ -516,7 +515,6 @@ void CWorldDataStorage::swapBack()
     m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_ParticlesByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
 
-    m_ObjectsByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     
@@ -540,7 +538,6 @@ void CWorldDataStorage::swapFront()
     {
         m_ParticlesByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
-        m_ObjectsByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_bFrontNew = false;

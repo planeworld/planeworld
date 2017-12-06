@@ -39,49 +39,47 @@ void CCollisionManager::detectCollisions()
 {
     METHOD_ENTRY("CCollisionManager::detectCollisions")
 
-    ObjectsByNameType::const_iterator cj;
-    
     //--------------------------------------------------------------------------
     // Test dynamic objects
     //--------------------------------------------------------------------------
-    for (ObjectsByNameType::const_iterator ci = m_DynamicObjects.begin();
-        ci != m_DynamicObjects.end(); ++ci)
-    {
-        cj = ci;
-        ++cj;
-        while (cj != m_DynamicObjects.end())
-        {
-            // Test for overlapping depthlayers
-            if ((ci->second->getDepths() & cj->second->getDepths()) > 0)
-            {
-
-                // Test for overlapping bounding boxes
-                if (ci->second->getGeometry()->getBoundingBox().overlaps(cj->second->getGeometry()->getBoundingBox(),1))
-                {
-                    this->test(ci->second, cj->second);
-                    
-//                     CContact Contact;
-//                     Contact = (*ci)->collidesWith((*cj));
-//                     m_ContactList.push_back(Contact);
-//                     m_ContactList.insert(m_ContactList.end(), Contacts.begin(),
-//                                         Contacts.end());
-                }
-            }
-            ++cj;
-        }
-//         for (std::list< CParticle* >::const_iterator cj = m_Particle.begin();
-//             cj != m_Particle.end(); ++cj)
+//     for (ObjectsByNameType::const_iterator ci = m_DynamicObjects.begin();
+//         ci != m_DynamicObjects.end(); ++ci)
+//     {
+//         cj = ci;
+//         ++cj;
+//         while (cj != m_DynamicObjects.end())
 //         {
-//             switch((*ci)->getObjectType())
+//             // Test for overlapping depthlayers
+//             if ((ci->second->getDepths() & cj->second->getDepths()) > 0)
 //             {
-//                 case ObjectType::OBJECT_BODY:
-//                     this->test(static_cast<CObject*>((*ci)), (*cj));
+// 
+//                 // Test for overlapping bounding boxes
+//                 if (ci->second->getGeometry()->getBoundingBox().overlaps(cj->second->getGeometry()->getBoundingBox(),1))
+//                 {
+//                     this->test(ci->second, cj->second);
+//                     
+// //                     CContact Contact;
+// //                     Contact = (*ci)->collidesWith((*cj));
+// //                     m_ContactList.push_back(Contact);
+// //                     m_ContactList.insert(m_ContactList.end(), Contacts.begin(),
+// //                                         Contacts.end());
+//                 }
 //             }
+//             ++cj;
 //         }
-//         m_Graphics.setColor(0.0, 0.8, 0.0);
-//         m_Graphics.showVec((*ci)->getVelocity(), (*ci)->getCOM());
-//         m_Graphics.setColor(1.0, 1.0, 1.0);
-    }
+// //         for (std::list< CParticle* >::const_iterator cj = m_Particle.begin();
+// //             cj != m_Particle.end(); ++cj)
+// //         {
+// //             switch((*ci)->getObjectType())
+// //             {
+// //                 case ObjectType::OBJECT_BODY:
+// //                     this->test(static_cast<CObject*>((*ci)), (*cj));
+// //             }
+// //         }
+// //         m_Graphics.setColor(0.0, 0.8, 0.0);
+// //         m_Graphics.showVec((*ci)->getVelocity(), (*ci)->getCOM());
+// //         m_Graphics.setColor(1.0, 1.0, 1.0);
+//     }
     
 //     //--------------------------------------------------------------------------
 //     // Test static objects against particle
@@ -118,9 +116,6 @@ void CCollisionManager::detectCollisions()
 //             }
 //         }
 //     }
-    
-    
-    METHOD_EXIT("CCollisionManager::detectCollisions")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
