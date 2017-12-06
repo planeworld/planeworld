@@ -1258,7 +1258,8 @@ void CVisualsManager::drawDebugInfo()
         m_Graphics.beginRenderBatch("world");
             double fSizeX = m_TextDebugInfo.getLength()+5.0;
             m_Graphics.filledRect(Vector2d(10, 10),
-                                  Vector2d(10 + fSizeX, 20+ 23*m_TextDebugInfo.getFontSize()));
+                                  Vector2d(10 + fSizeX, 20+
+                                  (18+m_FontManager.getFontsAvailable().size())*m_TextDebugInfo.getFontSize()));
         m_Graphics.endRenderBatch();
         
         m_Graphics.beginRenderBatch("font");
