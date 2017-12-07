@@ -57,9 +57,7 @@ CUniverse::~CUniverse()
     METHOD_ENTRY("CUniverse::~CUniverse");
     DTOR_CALL("CUniverse::~CUniverse");
     
-    #ifdef PW_MULTITHREADING
-        while (isAccessed.test_and_set()) {}
-    #endif
+    Access.lock();
     
     for (auto pStarSystem : m_StarSystems)
     {
@@ -72,9 +70,7 @@ CUniverse::~CUniverse()
     }
     m_StarSystems.clear();
     
-    #ifdef PW_MULTITHREADING
-        isAccessed.clear();
-    #endif
+    Access.unlock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,9 +85,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 {
     METHOD_ENTRY("CUniverse::generate")
     
-    #ifdef PW_MULTITHREADING
-        while (isAccessed.test_and_set()) {}
-    #endif
+    Access.lock();
     
     CNameGenerator StarNameGenerator(_nSeed);
     const int nNrOfStarTypes=7;
@@ -195,9 +189,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         Log.logSeparator();
     ))
     
-    #ifdef PW_MULTITHREADING
-        isAccessed.clear();
-    #endif
+    Access.unlock();
     
     // Reserve memory for star object
 //     m_pStar = new CRigidBody;

@@ -1556,9 +1556,8 @@ void CVisualsManager::drawStars()
     m_Graphics.beginRenderBatch("stars");
     if (m_pDataStorage->getUniverse() != nullptr)
     {
-        #ifdef PW_MULTITHREADING
-            while (m_pDataStorage->getUniverse()->isAccessed.test_and_set(std::memory_order_acquire)) {}
-        #endif
+        m_pDataStorage->getUniverse()->Access.lock();
+
         for (auto i=0u; i<m_pDataStorage->getUniverse()->getStarSystems()->size(); ++i)
         {
             CStarSystem* pStarSystem = m_pDataStorage->getUniverse()->getStarSystems()->at(i);
@@ -1590,9 +1589,7 @@ void CVisualsManager::drawStars()
                     m_Graphics.filledCircle(vecPosRel, (Star.getRadius()), 100.0);
             }
         }
-        #ifdef PW_MULTITHREADING
-            m_pDataStorage->getUniverse()->isAccessed.clear(std::memory_order_release);
-        #endif
+        m_pDataStorage->getUniverse()->Access.unlock();
     }
     m_Graphics.endRenderBatch();
 }    
@@ -1729,9 +1726,7 @@ void CVisualsManager::drawWorld()
         if ((1.0e9 * m_Graphics.getResPMX() < 1.0) &&
             (m_pDataStorage->getUniverse() != nullptr))
         {
-            #ifdef PW_MULTITHREADING
-                while (m_pDataStorage->getUniverse()->isAccessed.test_and_set(std::memory_order_acquire)) {}
-            #endif
+            m_pDataStorage->getUniverse()->Access.lock();
             
             for (auto i=0u; i<m_pDataStorage->getUniverse()->getStarSystems()->size(); ++i)
             {
@@ -1757,9 +1752,7 @@ void CVisualsManager::drawWorld()
                     m_TextStarSystems.display();
                 }
             }
-            #ifdef PW_MULTITHREADING
-                m_pDataStorage->getUniverse()->isAccessed.clear(std::memory_order_release);
-            #endif
+            m_pDataStorage->getUniverse()->Access.unlock();
         }
         
         m_Graphics.endRenderBatch();

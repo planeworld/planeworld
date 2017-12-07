@@ -32,11 +32,11 @@
 #define UNIVERSE_H
 
 //--- Standard header --------------------------------------------------------//
-#include <atomic>
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
 #include "conf_pw.h"
+#include "spinlock.h"
 #include "star_system.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -74,9 +74,7 @@ class CUniverse
         const std::vector<CStarSystem*>* getStarSystems();
         
         //--- Variables ------------------------------------------------------//
-        #ifdef PW_MULTITHREADING
-            std::atomic_flag isAccessed = ATOMIC_FLAG_INIT;    ///< Indicates access, important for multithreading
-        #endif
+        CSpinlock Access;
             
     private:
         
