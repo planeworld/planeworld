@@ -944,6 +944,7 @@ void CPhysicsManager::myInitComInterface()
                                             [&](const std::string& _strName) -> int
                                             {
                                                 int nUID(0);
+                                                m_pDataStorage->AccessNames.lock();
                                                 const auto ci = m_pDataStorage->getUIDsByName()->find(_strName);
                                                 if (ci != m_pDataStorage->getUIDsByName()->end())
                                                 {
@@ -954,6 +955,7 @@ void CPhysicsManager::myInitComInterface()
                                                     WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
                                                     throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
+                                                m_pDataStorage->AccessNames.unlock();
                                                 return nUID;
                                             }),
                                           "Returns UID for entity with given name.",
@@ -1410,24 +1412,28 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Cell Y"}},
                                            "physics", "physics"
                                          );
-//         m_pComInterface->registerFunction("obj_set_name",
-//                                           CCommand<void, int, std::string>(
-//                                             [&](const int _nUID, const std::string& _strName)
-//                                             {
-//                                                 CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
-//                                                 if (pObj != nullptr)
-//                                                 {
-//                                                     pObj->setName(_strName);
-//                                                     m_pDataStorage->setObjectName(); // Important for object access via map
-// //                                                     pObj->init();
-//                                                 }
-//                                             }),
-//                                           "Sets name of a given object.",
-//                                           {{ParameterType::NONE, "No return value"},
-//                                            {ParameterType::INT, "Object UID"},
-//                                            {ParameterType::STRING, "Objects name"}},
-//                                            "physics", "physics"
-//                                          );
+        m_pComInterface->registerFunction("obj_set_name",
+                                          CCommand<void, int, std::string>(
+                                            [&](const int _nUID, const std::string& _strName)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    std::string strNameOld = pObj->getName();
+                                                    pObj->setName(_strName);
+                                                    
+                                                    m_pDataStorage->AccessNames.lock();
+                                                    m_pDataStorage->getUIDsByName()->insert({_strName, pObj->getUID()});
+                                                    m_pDataStorage->getUIDsByName()->erase(strNameOld);
+                                                    m_pDataStorage->AccessNames.unlock();
+                                                }
+                                            }),
+                                          "Sets name of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::STRING, "Objects name"}},
+                                           "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("obj_set_position",
                                           CCommand<void, int, double, double>(
                                             [&](const int _nUID, const double& _fX, const double& _fY)

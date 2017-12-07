@@ -40,6 +40,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "joint.h"
 #include "multi_buffer.h"
+#include "spinlock.h"
 #include "uid_user.h"
 #include "universe.h"
 
@@ -145,6 +146,9 @@ class CWorldDataStorage
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CWorldDataStorage&);
         friend std::ostream& operator<<(std::ostream&, CWorldDataStorage&);
+        
+        //--- Variables ------------------------------------------------------//
+        CSpinlock AccessNames;
         
     private:
         

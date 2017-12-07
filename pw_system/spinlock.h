@@ -40,7 +40,6 @@
 //--- Misc header ------------------------------------------------------------//
 
 //--- Constants --------------------------------------------------------------//
-constexpr int SPINLOCK_CACHELINE_SIZE = 64;
 constexpr int SPINLOCK_MAX_ITER = 100;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +114,6 @@ class CSpinlock
         
         //--- Variables [private] --------------------------------------------//
         #ifdef PW_MULTITHREADING
-            alignas(SPINLOCK_CACHELINE_SIZE)
             std::atomic_flag isAccessed = ATOMIC_FLAG_INIT; ///< Indicates access, important for multithreading
         #endif
 };
