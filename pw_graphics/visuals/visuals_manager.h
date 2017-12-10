@@ -105,7 +105,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            cycleCamera();
 
         void            finishFrame();
-        void            processFrame();
+        bool            processFrame();
         
         void            setDataPath(const std::string&);
         void            setUniverse(CUniverse* const);

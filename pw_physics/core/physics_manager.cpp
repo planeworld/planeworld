@@ -370,8 +370,10 @@ void CPhysicsManager::resetTime()
 ///
 /// \brief Processes one single frame
 ///
+/// \return Success
+///
 ////////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::processFrame()
+bool CPhysicsManager::processFrame()
 {
     METHOD_ENTRY("CPhysicsManager::processFrame")
 
@@ -402,7 +404,9 @@ void CPhysicsManager::processFrame()
     DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
     m_pDataStorage->swapBack();
     DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
-    if (++nFrame == 10000) nFrame = 0;    
+    if (++nFrame == 10000) nFrame = 0;
+
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

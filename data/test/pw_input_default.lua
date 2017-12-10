@@ -154,8 +154,6 @@ pw.system.key_action = {
                     [28] = function() pw.system.toggle_timer(2) end,
     -- Num3     Toggles timer 3 (start/stop)
                     [29] = function() pw.system.toggle_timer(3) end,
-    -- ESC      Quit planeworld
-                    [36] = function() pw.system.quit() end,
     -- Space    Processes a single simulation step 
                     [57] = function() pw.system.process_one_frame() end,
     -- Return   Reset time acceleration to real time (factor 1)

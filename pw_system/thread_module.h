@@ -59,7 +59,7 @@ class IThreadModule
         const double    getTimeProcessed() const;
                 
         //--- Methods --------------------------------------------------------//
-        virtual void    processFrame() = 0;
+        virtual bool    processFrame() = 0;
         void            setFrequency(const double&);
 
         #ifdef PW_MULTITHREADING

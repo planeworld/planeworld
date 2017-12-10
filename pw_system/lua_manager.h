@@ -40,6 +40,7 @@
 #include <sstream>
 
 //--- Misc. header -----------------------------------------------------------//
+#define SOL_CHECK_ARGUMENTS
 #include "sol.hpp"
 
 // Constants
@@ -66,7 +67,7 @@ class CLuaManager : public IComInterfaceProvider,
         
         //--- Methods --------------------------------------------------------//
         bool init();
-        void processFrame();
+        bool processFrame();
         void setScript(const std::string&);
         
         //--- friends --------------------------------------------------------//

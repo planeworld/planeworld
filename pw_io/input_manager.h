@@ -67,7 +67,7 @@ class CInputManager : public IComInterfaceProvider,
         //--- Constant Methods -----------------------------------------------//
                 
         //--- Methods --------------------------------------------------------//
-        void processFrame();
+        bool processFrame();
         void setWindow(sf::Window* const _pWindow);
         
     private:

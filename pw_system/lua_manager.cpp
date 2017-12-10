@@ -411,16 +411,27 @@ bool CLuaManager::init()
 ///
 /// \brief Processes one single frame
 ///
+/// \return Success?
+///
 ////////////////////////////////////////////////////////////////////////////////
-void CLuaManager::processFrame()
+bool CLuaManager::processFrame()
 {
     METHOD_ENTRY("CLuaManager::processFrame")
 
-    if (!m_bPaused)
+    try
     {
-        m_pComInterface->call<void>("e_lua_update");
+        if (!m_bPaused)
+        {
+            m_pComInterface->call<void>("e_lua_update");
+        }
+        m_pComInterface->callWriters("lua");
+        return true;
     }
-    m_pComInterface->callWriters("lua");
+    catch (const std::exception& _E)
+    {
+        ERROR_MSG("Lua Manager", _E.what())
+        return false;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1043,8 +1043,10 @@ void CVisualsManager::finishFrame()
 ///
 /// \brief Processes one visual frame
 ///
+/// \return Success?
+///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::processFrame()
+bool CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
     
@@ -1126,6 +1128,8 @@ void CVisualsManager::processFrame()
                 pCam->getKinematicsState().setRef(static_cast<CKinematicsState*>(m_pDataStorage->getUIDUsersByValueFront()->at(pCam->getKinematicsState().getRef()->getUID())));
         }
     }
+    
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

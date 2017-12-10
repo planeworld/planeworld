@@ -67,7 +67,7 @@ IThreadModule::IThreadModule() : m_fFrequency(THREAD_MODULE_DEFAULT_FREQUENCY),
       ThreadModuleTimer.start();
       while (m_bRunning)
       {
-          this->processFrame();
+          if (!this->processFrame()) m_bRunning = false;
           m_fTimeSlept = ThreadModuleTimer.sleepRemaining(m_fFrequency*m_fTimeAccel);
           
           if (m_fTimeSlept < 0.0)

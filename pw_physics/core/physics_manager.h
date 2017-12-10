@@ -100,7 +100,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         void setFrequencyParticle(const double&);
         
         void pause();
-        void processFrame();
+        bool processFrame();
         void processOneFrame();
         void togglePause();
         

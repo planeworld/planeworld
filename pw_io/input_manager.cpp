@@ -55,8 +55,10 @@ CInputManager::CInputManager() : m_pWindow(nullptr),
 ///
 /// \brief Processes one input frame
 ///
+/// \return Success
+///
 ////////////////////////////////////////////////////////////////////////////////
-void CInputManager::processFrame()
+bool CInputManager::processFrame()
 {
     METHOD_ENTRY("CInputManager::processFrame")
     
@@ -91,6 +93,8 @@ void CInputManager::processFrame()
             }
             case sf::Event::KeyPressed:
             {
+                if (Event.key.code == sf::Keyboard::Escape) m_pComInterface->call<void>("exit");
+                    
                 if (m_UIMode == UIModeType::UI)
                 {
                     switch (Event.key.code)
@@ -277,6 +281,8 @@ void CInputManager::processFrame()
         }
     }
     m_pComInterface->callWriters("input");
+    
+    return true; 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
