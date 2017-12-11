@@ -253,7 +253,7 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
         m_ShapesByValue.insert(std::pair<UIDType, IShape*>(Shape->getUID(), Shape));
     }
     
-    if (!this->addUIDUser(aUIDUsersKinState));
+    if (!this->addUIDUser(aUIDUsersKinState)) {}
     if (!this->addUIDUser(aUIDUsers)) return false;
     return true;
 }

@@ -21,10 +21,6 @@ pw.system.create_universe(23479, 10000)
 pw.system.win_main_resize(1800, 900)
 pw.visuals.toggle_grid()
 
--- Setup camera
-idCam01 = pw.system.create_camera()
-pw.system.cam_set_position(idCam01, -100, 100)
-
 -- Create objects
 idObj01 = pw.system.create_obj()
 idShp01 = pw.system.create_shp("shp_circle")
@@ -39,15 +35,23 @@ pw.system.shp_set_vertices(idShp02,
 
 pw.system.obj_add_shp(idObj01, idShp01)
 pw.system.obj_add_shp(idObj01, idShp02)
-pw.physics.obj_set_position(idObj01, -200.0, -40.0)
+pw.physics.obj_set_position(idObj01, -200.0, 6000010.0)
 
 idObjEarth=pw.system.create_obj()
 idShpEarth=pw.system.create_shp("shp_planet")
 pw.system.obj_add_shp(idObjEarth, idShpEarth)
 pw.physics.shp_set_radius(idShpEarth, 6000000.0)
 -- pw.physics.obj_set_name(idObjEarth, "Earth")
-pw.physics.obj_disable_dynamics(idObjEarth)
-pw.physics.obj_set_position(idObjEarth, 0.0, -6000050.0)
+-- pw.physics.obj_disable_dynamics(idObjEarth)
+pw.physics.obj_set_position(idObjEarth, 0.0, -6000000.0)
+-- pw.physics.obj_set_velocity(idObjEarth, 2000.0, 0.0)
+
+pw.physics.obj_refer_state(idObj01, idObjEarth)
+
+-- Setup main camera
+idCam01 = pw.system.create_camera()
+pw.system.cam_set_position(idCam01, -200.0, 6000100.0)
+pw.system.cam_attach_to(idCam01, idObjEarth)
 
 -- Create a text window
 idWin01=pw.system.create_window()

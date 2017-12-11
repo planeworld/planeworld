@@ -61,7 +61,7 @@ class CXFigLoader
         //--- Constant Methods -----------------------------------------------//
 
         //--- Methods --------------------------------------------------------//
-        std::vector<IShape*>* const getShapes();
+        std::vector<IShape*>* getShapes();
         
         void load(const std::string&);
 
@@ -82,7 +82,7 @@ class CXFigLoader
 /// \return Shape list
 ///
 ////////////////////////////////////////////////////////////////////////////////
-inline std::vector<IShape*>* const CXFigLoader::getShapes()
+inline std::vector<IShape*>* CXFigLoader::getShapes()
 {
     METHOD_ENTRY("CXFigLoader::getShapes")
     return &m_Shapes;

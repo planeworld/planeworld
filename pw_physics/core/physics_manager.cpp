@@ -1365,6 +1365,24 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Reference object's UID (Obj_2)"}},
                                            "physics"
                                          );
+        m_pComInterface->registerFunction("obj_refer_state",
+                                          CCommand<void, int, int>(
+                                            [&](const int _nUID, const int _nUIDRef)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                CObject* pObjRef = m_pDataStorage->getObjectByValueBack(_nUIDRef);
+                                                if (pObj != nullptr && pObjRef != nullptr)
+                                                {
+                                                    pObj->getKinematicsState().referTo(pObjRef->getKinematicsState());
+                                                    pObj->init();
+                                                }
+                                            }),
+                                          "Refer kinematics state to that of the other given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::INT, "Reference object UID"}},
+                                           "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("obj_set_angle",
                                           CCommand<void, int, double>(
                                             [&](const int _nUID, const double& _fAngle)

@@ -147,7 +147,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            drawWorld();
         void            updateUI();
         
-        const double    smoothFrameTime(CCircularBuffer<double>* const, const double&, const int);
+        double          smoothFrameTime(CCircularBuffer<double>* const, const double&, const int);
                 
         void            myInitComInterface();
 

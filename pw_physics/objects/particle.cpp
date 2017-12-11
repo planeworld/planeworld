@@ -40,10 +40,10 @@ CParticle::CParticle() : IGridUser(),
                      m_ParticleType(ParticleTypeType::DOT),
                      m_fTimeFac(1.0),
                      m_fDamping(0.0),
-                     m_aColorBirth({{1.0, 1.0, 1.0, 1.0}}),
-                     m_aColorDeath({{1.0, 1.0, 1.0, 0.0}}),
                      m_fSizeBirth(1.0),
-                     m_fSizeDeath(1.0)
+                     m_fSizeDeath(1.0),
+                     m_aColorBirth({{1.0, 1.0, 1.0, 1.0}}),
+                     m_aColorDeath({{1.0, 1.0, 1.0, 0.0}})
 {
     METHOD_ENTRY("CParticle::CParticle")
     CTOR_CALL("CParticle::CParticle")

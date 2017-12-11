@@ -1892,14 +1892,14 @@ void CVisualsManager::updateUI()
 /// \return Smoothened value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-const double CVisualsManager::smoothFrameTime(
+double CVisualsManager::smoothFrameTime(
                                 CCircularBuffer<double>* const _pBuffer,
                                 const double& _fUpdate,
                                 const int _nBufferSize)
 {
     METHOD_ENTRY("CVisualsManager::smoothFrameTime")
     
-    if (_nBufferSize != _pBuffer->size())
+    if (_nBufferSize != int(_pBuffer->size()))
         _pBuffer->reserve(_nBufferSize);
     
     _pBuffer->push_back(_fUpdate);
@@ -2040,11 +2040,8 @@ void CVisualsManager::myInitComInterface()
                                             {
                                                 return pCam->getZoom();
                                             }
-                                            else
-                                            {
-                                                return 1.0;
-                                            }
                                           }
+                                          return 1.0;
                                       }),
                                       "Returns zoom level of camera with given UID",
                                       {{ParameterType::INT, "Camera UID"},

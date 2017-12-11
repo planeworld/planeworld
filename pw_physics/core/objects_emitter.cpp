@@ -126,6 +126,8 @@ void CObjectEmitter::emit(const double& _fF)
                     pObject->setVelocity(fVelocity*Vector2d(std::cos(fAngle), sin(fAngle)));
                     m_pDataStorage->addObject(pObject);
                 }
+            default:
+                break;
         }
     }
 }

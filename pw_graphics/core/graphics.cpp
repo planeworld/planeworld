@@ -1075,7 +1075,7 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
     }
 
     // Draw residuum
-    for (int i=nBatches*nBatchSize; i<_Dots.size(); ++i)
+    for (int i=nBatches*nBatchSize; i< int(_Dots.size()); ++i)
     {
         m_vecVertices[m_unIndexVerts++] = _Dots[i][0]+_vecOffset[0];
         m_vecVertices[m_unIndexVerts++] = _Dots[i][1]+_vecOffset[1];
