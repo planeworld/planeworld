@@ -449,10 +449,11 @@ void CPhysicsManager::addGlobalForces()
                 if (fCCSqr > 400.0)
                 {
                     vecG = vecCC.normalized() * ((*ci).second->getMass() * (*cj).second->getMass()) / fCCSqr
-//                             * 6.6742e+0;
-                        * m_fG;
+                           * m_fG;
                     if ((*cj).second->getGravitationState() == true)
+                    {
                         (*ci).second->addForce(-vecG, (*ci).second->getCOM());
+                    }
                     (*cj).second->addForce(vecG, (*cj).second->getCOM());
                 }
                 ++cj;
@@ -1178,6 +1179,21 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "UID of object"}},
                                            "physics", "physics"
                                          );
+        m_pComInterface->registerFunction("obj_disable_gravitation",
+                                          CCommand<void, int>(
+                                            [&](const int _nUID)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->disableGravitation();
+                                                }
+                                            }),
+                                          "Disable gravition (object is source of gravitation) for given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "UID of object"}},
+                                           "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("obj_enable_dynamics",
                                           CCommand<void, int>(
                                             [&](const int _nUID)
@@ -1189,6 +1205,21 @@ void CPhysicsManager::myInitComInterface()
                                                 }
                                             }),
                                           "Enable dynamics for given object (i.e. kinetics, object will react on forces).",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "UID of object"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_enable_gravitation",
+                                          CCommand<void, int>(
+                                            [&](const int _nUID)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->enableGravitation();
+                                                }
+                                            }),
+                                          "Enable gravition (object is source of gravitation) for given object.",
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::INT, "UID of object"}},
                                            "physics", "physics"
