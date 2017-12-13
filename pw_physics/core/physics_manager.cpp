@@ -402,7 +402,9 @@ bool CPhysicsManager::processFrame()
         m_bProcessOneFrame = false;
     }
     DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_NOTICE);)
+    m_TimeProcessedBufferCopy.start();
     m_pDataStorage->swapBack();
+    m_TimeProcessedBufferCopy.stop();
     DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
     if (++nFrame == 10000) nFrame = 0;
 
@@ -830,6 +832,12 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<double>([&]() -> double {return this->getTimeProcessed();}),
                                           "Return time used for processing.",
                                           {{ParameterType::DOUBLE, "Time used for processing"}},
+                                           "system"
+                                         );
+        m_pComInterface->registerFunction("get_time_processed_physics_buffer_copy",
+                                          CCommand<double>([&]() -> double {return this->getTimeProcessedBufferCopy();}),
+                                          "Return time used for copying object buffers.",
+                                          {{ParameterType::DOUBLE, "Time used for object buffer copy"}},
                                            "system"
                                          );
         m_pComInterface->registerFunction("get_time_processed_physics_objects",

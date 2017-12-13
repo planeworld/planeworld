@@ -83,6 +83,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         
         //--- Constant Methods -----------------------------------------------//
         const std::array<CSimTimer,4>&  getSimTimer() const;
+        double getTimeProcessedBufferCopy() const {return m_TimeProcessedBufferCopy.getTime();}
         double getTimeProcessedObjects() const {return m_TimeProcessedObjects.getTime();}
         double getTimeProcessedParticles() const {return m_TimeProcessedParticles.getTime();}
 
@@ -143,7 +144,8 @@ class CPhysicsManager : public IComInterfaceProvider,
         bool                        m_bProcessOneFrame;         ///< Indicates if physics should be run stepwise
         
         std::array<CSimTimer,4>     m_SimTimer;                 ///< Timer / stop watch in simulation time
-        
+
+        CTimer              m_TimeProcessedBufferCopy;          ///< Counts processing time for buffer copy
         CTimer              m_TimeProcessedObjects;             ///< Counts processing time for objects
         CTimer              m_TimeProcessedParticles;           ///< Counts processing time for particles
         

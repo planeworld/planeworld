@@ -587,6 +587,7 @@ void CVisualsManager::drawBoundingBoxes() const
 
     if (m_nVisualisations & VISUALS_OBJECT_BBOXES)
     {
+        
         m_Graphics.beginRenderBatch("world");
             m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
             m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
@@ -606,42 +607,45 @@ void CVisualsManager::drawBoundingBoxes() const
             
             for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
             {
-                // Object bounding boxes
-                // Multiframe
-                m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-                m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                                pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
-                m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-                m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                if (m_pCamera->getBoundingBox().isInside(pObj.second->getCOM()))
+                {
+                    // Object bounding boxes
+                    // Multiframe
+                    m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+                    m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
                                     IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
                                     pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
                                     IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
-                // Singleframe
-                m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-                m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
-                                IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                                pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
-                                IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
-                m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-                m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
+                    m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+                    m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
+                                        IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                        pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
+                                        IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                    // Singleframe
+                    m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
+                    m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
                                     IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
                                     pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
                                     IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
-                // Shape bounding boxes
-                for (const auto pShp : pObj.second->getGeometry()->getShapes())
-                {
-                    m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
-                    m_Graphics.rect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                    IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
-                                    pShp->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                    IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
-                    m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
-                    m_Graphics.filledRect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() +
+                    m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
+                    m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
+                                        IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
+                                        pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
+                                        IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                    // Shape bounding boxes
+                    for (const auto pShp : pObj.second->getGeometry()->getShapes())
+                    {
+                        m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
+                        m_Graphics.rect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
                                         IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
-                                        pShp->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
+                                        pShp->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
                                         IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
+                        m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
+                        m_Graphics.filledRect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() +
+                                            IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
+                                            pShp->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
+                                            IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
+                    }
                 }
             }
             for (const auto Particle : *m_pDataStorage->getParticlesByValueFront())
@@ -1224,6 +1228,7 @@ void CVisualsManager::drawDebugInfo()
 
         static double fBufferSizePhysics = m_pComInterface->call<double>("get_frequency_physics") / 4;
         static CCircularBuffer<double> TimeBufferPhysics(fBufferSizePhysics);
+        static CCircularBuffer<double> TimeBufferPhysicsBufferCopy(fBufferSizePhysics);
         static CCircularBuffer<double> TimeBufferPhysicsObjects(fBufferSizePhysics);
         static CCircularBuffer<double> TimeBufferPhysicsParticles(fBufferSizePhysics);
         static CCircularBuffer<double> TimeBufferVisuals(m_fFrequency / 4);
@@ -1231,6 +1236,10 @@ void CVisualsManager::drawDebugInfo()
         double fTimeProcessedPhysics = this->smoothFrameTime(
                                         &TimeBufferPhysics,
                                         m_pComInterface->call<double>("get_time_processed_physics"),
+                                        fBufferSizePhysics);
+        double fTimeProcessedPhysicsBufferCopy = this->smoothFrameTime(
+                                        &TimeBufferPhysicsBufferCopy,
+                                        m_pComInterface->call<double>("get_time_processed_physics_buffer_copy"),
                                         fBufferSizePhysics);
         double fTimeProcessedPhysicsObjects = this->smoothFrameTime(
                                         &TimeBufferPhysicsObjects,
@@ -1249,12 +1258,13 @@ void CVisualsManager::drawDebugInfo()
         
         oss << "PERFORMANCE\n\n";
         oss << std::fixed << std::setprecision(1);
-        oss << "  Visuals:     " << fTimeProcessedVisuals*1000.0 << " of " <<
-                                this->getTimePerFrame()*1000.0 << " ms\n";
-        oss << "  Physics:     " << fTimeProcessedPhysics*1000.0 << " of " <<
-                                m_pComInterface->call<double>("get_time_per_frame_physics")*1000.0 << " ms\n";
-        oss << "  - Objects:   " << fTimeProcessedPhysicsObjects*1000.0 << " ms\n";
-        oss << "  - Particles: " << fTimeProcessedPhysicsParticles*1000.0 << " ms\n";
+        oss << "  Visuals:       " << fTimeProcessedVisuals*1000.0 << " of " <<
+                                      this->getTimePerFrame()*1000.0 << " ms\n";
+        oss << "  Physics:       " << fTimeProcessedPhysics*1000.0 << " of " <<
+                                      m_pComInterface->call<double>("get_time_per_frame_physics")*1000.0 << " ms\n";
+        oss << "  - Objects:     " << fTimeProcessedPhysicsObjects*1000.0 << " ms\n";
+        oss << "  - Particles:   " << fTimeProcessedPhysicsParticles*1000.0 << " ms\n";
+        oss << "  - Buffer Copy: " << fTimeProcessedPhysicsBufferCopy*1000.0 << " ms\n";
                 
         m_TextDebugInfo.setText(oss.str());
         m_Graphics.setColor({{0.1, 0.0, 0.1, 0.8}});
@@ -1263,7 +1273,7 @@ void CVisualsManager::drawDebugInfo()
             double fSizeX = m_TextDebugInfo.getLength()+5.0;
             m_Graphics.filledRect(Vector2d(10, 10),
                                   Vector2d(10 + fSizeX, 20+
-                                  (18+m_FontManager.getFontsAvailable().size())*m_TextDebugInfo.getFontSize()));
+                                  (19+m_FontManager.getFontsAvailable().size())*m_TextDebugInfo.getFontSize()));
         m_Graphics.endRenderBatch();
         
         m_Graphics.beginRenderBatch("font");
@@ -1455,7 +1465,8 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState* const _pKinema
 {
     METHOD_ENTRY("CVisualsManager::drawKinematicsState")
     
-    if (_fSize * m_pCamera->getZoom() > 10.0)
+    if ((_fSize * m_pCamera->getZoom() > 10.0) &&
+            (m_pCamera->getBoundingBox().isInside(_pKinematicsState->getOrigin()))) 
     {
         double fTransparency = 0.5;
         
