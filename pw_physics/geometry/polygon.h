@@ -35,6 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "shape.h"
+#include "shape_subtypes.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include <eigen3/Eigen/Geometry>

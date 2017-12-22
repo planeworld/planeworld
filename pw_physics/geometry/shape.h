@@ -37,7 +37,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "bounding_box.h"
-#include "graphics.h"
+#include "shape_subtypes.h"
 #include "uid_user.h"
 
 //--- Misc header ------------------------------------------------------------//

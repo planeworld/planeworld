@@ -34,12 +34,12 @@
 #include <array>
 #include <list>
 #include <stack>
-#include <vector>
 
 //--- Program header ---------------------------------------------------------//
 #include "circular_buffer.h"
 #include "log.h"
 #include "shader_program.h"
+#include "shape_subtypes.h"
 #include "render_mode.h"
 
 //--- Misc header ------------------------------------------------------------//
@@ -92,21 +92,6 @@ const bool GRAPHICS_CIRCLE_USE_CACHE = true;            ///< Flag for using sine
 const bool GRAPHICS_RENDER_BATCH_CALL_FORCED = true;    ///< Indicates a forced render batch call, ignoring stack
 const bool GRAPHICS_RENDER_BATCH_CALL_NORMAL = false;   ///< Indicates a normal render batch call
 
-/// Specifies the type of polygon to be drawn
-enum class PolygonType
-{
-    FILLED,
-    LINE_SINGLE,
-    LINE_LOOP,
-    LINE_STRIP
-};
-
-/// Specifies the type of circle to be drawn
-enum class CircleType
-{
-    FILLED,
-    OUTLINE
-};
 
 /// Type definition for RGB colours
 typedef std::array<double, 3> ColorTypeRGB;
@@ -115,9 +100,6 @@ typedef std::array<double, 4> ColorTypeRGBA;
 
 /// Type definition of a render modes, accessed by name
 typedef std::unordered_map<std::string, CRenderMode*> RenderModesByNameType;
-
-/// Type definition for vertex list
-typedef std::vector<Vector2d> VertexListType;
 
 // Structure containing viewport information
 struct ViewPort
