@@ -439,10 +439,12 @@ void CPhysicsManager::addGlobalForces()
         cj = ci;
         ++cj;
         
-        if ((*ci).second->getGravitationState() == true)
+        while (cj != m_pDataStorage->getObjectsByValueBack()->cend())
         {
-            while (cj != m_pDataStorage->getObjectsByValueBack()->cend())
+            if ((*ci).second->getGravitationState() == true ||
+                (*cj).second->getGravitationState() == true)
             {
+                
                 vecCC = (*ci).second->getCOM() - (*cj).second->getCOM() +
                         IGridUser::cellToDouble((*ci).second->getCell()-(*cj).second->getCell());
 
@@ -452,18 +454,15 @@ void CPhysicsManager::addGlobalForces()
                 {
                     vecG = vecCC.normalized() * ((*ci).second->getMass() * (*cj).second->getMass()) / fCCSqr
                            * m_fG;
-                    if ((*cj).second->getGravitationState() == true)
-                    {
-                        (*ci).second->addForce(-vecG, (*ci).second->getCOM());
-                    }
+                    (*ci).second->addForce(-vecG, (*ci).second->getCOM());
                     (*cj).second->addForce(vecG, (*cj).second->getCOM());
                 }
-                ++cj;
             }
+            ++cj;
         }
 
         (*ci).second->addAcceleration(m_vecConstantGravitation);
-    };
+    }
     
 //     for (auto ci = m_pDataStorage->getParticle().cbegin();
 //         ci != m_pDataStorage->getParticle().cend(); ++ci)
