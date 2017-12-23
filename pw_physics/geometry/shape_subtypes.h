@@ -43,6 +43,7 @@ enum class CircleType
 /// Specifies the type of polygon to be drawn
 enum class PolygonType
 {
+    NONE,
     FILLED,
     LINE_LOOP,
     LINE_SINGLE,
@@ -66,5 +67,23 @@ const std::unordered_map<std::string, PolygonType> STRING_TO_POLYGON_TYPE_MAP = 
     {"line_single", PolygonType::LINE_SINGLE},
     {"line_strip", PolygonType::LINE_STRIP}
 }; ///< Map from string to PolygonType
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Maps given string to polygon type
+///
+/// \return Polygon type
+///
+////////////////////////////////////////////////////////////////////////////////
+static PolygonType mapStringToPolygonType(const std::string& _strS)
+{
+    METHOD_ENTRY("mapStringToPolygonType")
+    
+    const auto ci = STRING_TO_POLYGON_TYPE_MAP.find(_strS);
+    if (ci != STRING_TO_POLYGON_TYPE_MAP.end())
+        return ci->second;
+    else
+        return PolygonType::NONE;
+}
 
 #endif // SHAPE_SUBTYPES_H

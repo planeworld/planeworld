@@ -573,6 +573,8 @@ void CPhysicsManager::myInitComInterface()
         for (auto EmitterDistributionType : STRING_TO_EMITTER_DISTRIBUTION_TYPE_MAP) ossEmitterDistributionType << " " << EmitterDistributionType.first;
         std::ostringstream ossEmitterModeType("");
         for (auto EmitterModeType : STRING_TO_EMITTER_MODE_TYPE_MAP) ossEmitterModeType << " " << EmitterModeType.first;
+        std::ostringstream ossPolygonType("");
+        for (auto PolyType : STRING_TO_POLYGON_TYPE_MAP) ossPolygonType << " " << PolyType.first;
         std::ostringstream ossShapeType("");
         for (auto ShpType : STRING_TO_SHAPE_TYPE_MAP) ossShapeType << " " << ShpType.first;
 
@@ -1559,6 +1561,34 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::INT, "Shapes UID"},
                                            {ParameterType::DOUBLE, "Mass to be set"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("shp_set_polytype",
+                                          CCommand<void, int, std::string>(
+                                            [&](const int _nUID, const std::string& _strType)
+                                            {
+                                                IShape* pShp = m_pDataStorage->getShapesByValue()->at(_nUID);
+                                                if (pShp != nullptr)
+                                                {
+                                                    if (pShp->getShapeType() == ShapeType::POLYGON)
+                                                    {
+                                                        static_cast<CPolygon*>(pShp)->setPolygonType(mapStringToPolygonType(_strType));
+                                                    }
+                                                    else
+                                                    {
+                                                        WARNING_MSG("World Data Storage", "Wrong shape type (not polygon) of shape with UID <" << _nUID << ">")
+                                                        throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                    }    
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                            }),
+                                          "Set polygon type of shape (if applicable) with given UID.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Shapes UID"},
+                                           {ParameterType::STRING, "Polygon type ("+ossPolygonType.str()+" )"}},
                                            "physics", "physics"
                                          );
         m_pComInterface->registerFunction("shp_set_radius",
