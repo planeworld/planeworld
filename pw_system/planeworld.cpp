@@ -279,8 +279,7 @@ int main(int argc, char *argv[])
             
         // Window initialisation has to be done before lua scripting starts, since
         // GL-based window functions rely on an existing window.
-        pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),
-                                       "Planeworld", sf::Style::Default,
+        pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),"Planeworld", sf::Style::Default,
                                        sf::ContextSettings(24,8,4,4,2,sf::ContextSettings::Core)
                                       );
         MEM_ALLOC("WindowHandleType")

@@ -134,6 +134,8 @@ pw.system.key_action = {
                     [3]  = function() pw.system.decelerate_time() end,
                     [56] = function() pw.system.decelerate_time() end,
                     [68] = function() pw.system.decelerate_time() end,
+    -- f        Toggles bounding box visualisation (on/off)
+                    [5] = function() pw.system.toggle_fullscreen() end,
     -- g        Toggles universe grid visualisation (on/off)
                     [6] = function() pw.visuals.toggle_grid() end,
     -- k        Toggles kinematic states visualisation (on/off)

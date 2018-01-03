@@ -162,6 +162,10 @@ class CVisualsManager : virtual public CGraphicsBase,
         CRenderMode         m_RenderModeWorld;              ///< Default render mode
         CRenderTarget       m_RenderTargetScreen;           ///< Render target of screen (final image)
         
+        bool                            m_bFullscreen;      ///< Indicates fullscreen mode
+        int                             m_nMainWinHeight;   ///< Height of window if not in fullscreen mode
+        int                             m_nMainWinWidth;    ///< Width of window if not in fullscreen mode
+        
         int                             m_nVisualisations;  ///< Additional graphical output
         std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star
         std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera

@@ -40,7 +40,10 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CVisualsManager::CVisualsManager() : m_nVisualisations(0),
+CVisualsManager::CVisualsManager() : m_bFullscreen(false),
+                                     m_nMainWinHeight(600),
+                                     m_nMainWinWidth(800),
+                                     m_nVisualisations(0),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
                                      m_pCamera(nullptr),
@@ -749,7 +752,7 @@ bool CVisualsManager::init()
     
     // Execute calls here, since processFrame hasn't been called yet. This 
     // is needed for calls, such as the setting up the data path.
-    m_pComInterface->callWriters("visuals_init");
+    m_pComInterface->callWriters("visuals_pre_init");
     
     //--------------------------------------------------------------------------
     // Setup rendering
@@ -1058,9 +1061,16 @@ bool CVisualsManager::processFrame()
     // this->init(). Hence it is set here as a temporary workaround
     m_RenderModeMainScreen.setTexture(m_RenderTargetScreen.getIDTex());
     
-    bool bGotCam = m_pVisualsDataStorage->getCamerasByIndex().size() > 0;
-
+    // Setup main camera before calling any commands, to ensure correct
+    // setup when fullscreen is toggled
     this->addCamerasFromQueue();
+    bool bGotCam = m_pVisualsDataStorage->getCamerasByIndex().size() > 0;
+    if (bGotCam)
+    {
+        m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
+        m_pCamera->update();
+    }
+    
     this->addWidgetsFromQueue();
     this->addWindowsFromQueue();
     m_pComInterface->callWriters("visuals");
@@ -1092,7 +1102,7 @@ bool CVisualsManager::processFrame()
     {
         m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
         m_pCamera->update();
-
+        
         this->drawGrid(DrawModeType::VISUALS);
         // this->drawTrajectories();
 
@@ -1934,7 +1944,7 @@ void CVisualsManager::myInitComInterface()
     INFO_MSG("Visuals Manager", "Initialising com interace.")
     
     // Register additional domain for initialisation
-    m_pComInterface->registerWriterDomain("visuals_init");
+    m_pComInterface->registerWriterDomain("visuals_pre_init");
     
     std::ostringstream ossWidgetType("");
     for (auto WidgetType : STRING_TO_WIDGET_TYPE_MAP) ossWidgetType << " " << WidgetType.first;
@@ -1980,7 +1990,6 @@ void CVisualsManager::myInitComInterface()
     std::function<void(double, double)> FuncResize =
         [&](const double& _fX, const double& _fY)
         {
-            m_Graphics.resizeWindow(int(_fX), int(_fY));
             m_RenderTargetScreen.init(std::uint16_t(_fX), std::uint16_t(_fY));
             if (m_pCamera != nullptr)
             {
@@ -1999,6 +2008,44 @@ void CVisualsManager::myInitComInterface()
     //----------------------------------------------------------------------
     // System package
     //----------------------------------------------------------------------
+    m_pComInterface->registerFunction("toggle_fullscreen",
+                                    CCommand<void>(
+                                    [&]()
+                                    {
+                                        if (m_Graphics.getWindow() != nullptr)
+                                        {
+                                            if (m_bFullscreen)
+                                            {
+                                                m_Graphics.getWindow()->create(sf::VideoMode(m_nMainWinWidth, m_nMainWinHeight),"Planeworld", sf::Style::Default,
+                                                sf::ContextSettings(24,8,4,4,2,sf::ContextSettings::Core));
+                                            }
+                                            else
+                                            {
+                                                m_nMainWinHeight = m_Graphics.getWindow()->getSize().y;
+                                                m_nMainWinWidth = m_Graphics.getWindow()->getSize().x;
+                                                m_Graphics.getWindow()->create(sf::VideoMode::getDesktopMode(),"Planeworld", sf::Style::Fullscreen,
+                                                sf::ContextSettings(24,8,4,4,2,sf::ContextSettings::Core));
+                                            }
+                                            m_bFullscreen ^= 1;
+                                            
+                                            // New mode resets GL context, hence, graphics and render targets have to be updated
+                                            m_Graphics.init();
+                                            for (auto CamWidget : m_pVisualsDataStorage->getCameraWidgets())
+                                            {
+                                                CamWidget.second->getRenderTarget()->init(CamWidget.second->getWidth(), CamWidget.second->getHeight());
+                                            }
+                                            // New video mode triggers "e_resize" event which adjusts main render target and viewport
+                                        }
+                                        else
+                                        {
+                                            WARNING_MSG("Visuals Manager", "Cannot switch to fullscreen, no window created yet.")
+                                        }
+                                    }),
+                                    "Toggle fullscreen.",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system", "visuals"
+    );
+    
     m_pComInterface->registerFunction("cam_attach_to",
                                       CCommand<void, int, int>([&](const int _nUIDCam, const int _nUIDObj)
                                       {
@@ -2338,7 +2385,7 @@ void CVisualsManager::myInitComInterface()
                                           "Sets the path where visuals data is located.",
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::DOUBLE, "Location of visuals data (path)"}},
-                                           "system", "visuals_init");
+                                           "system", "visuals_pre_init");
     m_pComInterface->registerFunction("set_frequency_visuals",
                                           CCommand<void, double>([&](const double& _fFrequency)
                                           {
@@ -2613,15 +2660,25 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"}},
                                       "system","visuals"
     );
+    m_pComInterface->registerFunction("win_main_resize_viewport",
+                                      CCommand<void, double, double>([&](const double& _fX,
+                                                                         const double& _fY)
+                                      {
+                                          m_Graphics.resizeViewport(int(_fX), int(_fY));
+                                      }),
+                                      "Resize graphics viewport based on given pixel resolution. This does not actually resize the window, "
+                                      "but only the internal state. Use 'win_main_resize' to resize the window instead.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::DOUBLE, "Window width (x)"},
+                                      {ParameterType::DOUBLE, "Window height (y)"}
+                                      },
+                                      "system", "visuals"
+    );
     m_pComInterface->registerFunction("win_main_resize",
                                       CCommand<void, double, double>([&](const double& _fX,
                                                                          const double& _fY)
                                       {
-                                          // Since resizing the window triggers an additional e_resize event
-                                          // it is important to call in the correct order. Therefore,
-                                          // the queue is flushed to avoid events with alternating parameters.
-                                          m_pComInterface->callWriters("visuals");
-                                          m_pComInterface->call<void,double,double>("e_resize", _fX, _fY);
+                                          m_Graphics.resizeWindow(int(_fX), int(_fY));
                                       }),
                                       "Resize window to given size.",
                                       {{ParameterType::NONE, "No return value"},

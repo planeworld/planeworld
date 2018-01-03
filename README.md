@@ -33,6 +33,8 @@ Usage
 -----
 
     > planeworld ~/bin/share/planeworld/data/solar_system.xml
+    
+Default Commands (see pw_input_default.lua)
 
 | Key/Mouse                | Description                     |
 |--------------------------|---------------------------------|
@@ -40,6 +42,7 @@ Usage
 | 1                        | Toggle timer 1 start/stop       |
 | 2                        | Toggle timer 2 start/stop       |
 | 3                        | Toggle timer 3 start/stop       |
+| f                        | Toggle fullscreen               |
 | g                        | Show grid                       |
 | b                        | Show bounding boxes             |
 | k                        | Show kinematics states          |

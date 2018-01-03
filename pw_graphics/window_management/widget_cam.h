@@ -63,6 +63,8 @@ class CWidgetCam : public IWidget,
         const CRenderTarget*    getRenderTarget() const {return &m_TargetCam;}
         
         //--- Methods --------------------------------------------------------//
+        CRenderTarget* getRenderTarget() {return &m_TargetCam;}
+        
         void draw() override;
         void setCamera(CCamera* const _pCamera) {m_hCamera.set(_pCamera);}
         void setShaderProgram(CShaderProgram* const _pShaderProgram) 

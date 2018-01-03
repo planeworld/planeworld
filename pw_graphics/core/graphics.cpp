@@ -596,6 +596,17 @@ bool CGraphics::init()
     //--------------------------------------------------------------------------
     // Prepare OpenGL buffers (VBO, VAO, IBO, FBO)
     //--------------------------------------------------------------------------
+    // Delete buffers first in case that init was called before. This might
+    // happen e.g. when switching to fullscreen mode
+    
+    glDeleteBuffers(1, &m_unVBO);
+    glDeleteBuffers(1, &m_unVBOColours);
+    glDeleteBuffers(1, &m_unVBOUVs);
+    glDeleteBuffers(1, &m_unIBOLines);
+    glDeleteBuffers(1, &m_unIBOPoints);
+    glDeleteBuffers(1, &m_unIBOTriangles);
+    glDeleteVertexArrays(1, &m_unVAO);
+    
     glGenBuffers(1, &m_unVBO);
     glGenBuffers(1, &m_unVBOColours);
     glGenBuffers(1, &m_unVBOUVs);
@@ -621,6 +632,35 @@ bool CGraphics::init()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Prepare viewport for new resolution
+///
+/// This method adjusts the viewport to new resolution
+///
+/// \param _unWidthScr New x-resolution
+/// \param _unHeightScr New y-resolution
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::resizeViewport(unsigned short _unWidthScr, unsigned short _unHeightScr)
+{
+    METHOD_ENTRY("CGraphics::resizeViewport")
+
+    // Store resolution
+    m_unWidthScr = _unWidthScr;
+    m_unHeightScr = _unHeightScr;
+    
+    m_ViewPort.rightplane = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.topplane   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
+    m_ViewPort.leftplane   = -m_ViewPort.rightplane;
+    m_ViewPort.bottomplane = -m_ViewPort.topplane;
+    
+    this->setupWorldSpace();
+    
+    INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.rightplane - m_ViewPort.leftplane << "m x " <<
+                                                   m_ViewPort.topplane   - m_ViewPort.bottomplane << ".")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Prepare graphics for new resolution
 ///
 /// This method reinitialises the OpenGL-matrices for the new resolution.
@@ -635,22 +675,11 @@ bool CGraphics::resizeWindow(unsigned short _unWidthScr, unsigned short _unHeigh
 {
     METHOD_ENTRY("CGraphics::resizeWindow")
 
-    // Store resolution
-    m_unWidthScr = _unWidthScr;
-    m_unHeightScr = _unHeightScr;
-    
-    m_ViewPort.rightplane = double(_unWidthScr  * (0.5 / GRAPHICS_PX_PER_METER));
-    m_ViewPort.topplane   = double(_unHeightScr * (0.5 / GRAPHICS_PX_PER_METER));
-    m_ViewPort.leftplane   = -m_ViewPort.rightplane;
-    m_ViewPort.bottomplane = -m_ViewPort.topplane;
-    
-    this->setupWorldSpace();
+    this->resizeViewport(_unWidthScr, _unHeightScr);
     
     m_pWindow->setSize(sf::Vector2u(_unWidthScr, _unHeightScr));
     
-    INFO_MSG("Graphics", "Viewport changed to " << m_ViewPort.rightplane - m_ViewPort.leftplane << "m x " <<
-                                                m_ViewPort.topplane   - m_ViewPort.bottomplane << "m (" <<
-                                                _unWidthScr << "x" << _unHeightScr << ").")
+    INFO_MSG("Graphics", "Window resized to " << _unWidthScr << "x" << _unHeightScr << ").")
     return (true);
 }
 

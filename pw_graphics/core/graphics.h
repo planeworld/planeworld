@@ -177,6 +177,7 @@ class CGraphics
         void registerRenderMode(const std::string& _strName, CRenderMode* const);
         
         bool init();
+        void resizeViewport(unsigned short, unsigned short);
         bool resizeWindow(unsigned short, unsigned short);
         void setWidthScr(const unsigned short&);
         void setHeightScr(const unsigned short&);
@@ -238,9 +239,11 @@ class CGraphics
         void beginLine(const PolygonType&);
         void endLine();
         
+        void resetBufferObjects();                      ///< Clear all VAOs, VBOs, IBOs...
+        
     private:
         
-        void resetBufferObjects();                      ///< Clear all VAOs, VBOs, IBOs...
+        
         void restartRenderBatchInternal();
         
         //--- Variables [private] --------------------------------------------//
@@ -252,7 +255,7 @@ class CGraphics
         glm::mat4           m_matRotate;                ///< Rotation matrix
         glm::mat4           m_matScale;                 ///< Scale matrix
         bool                m_bScreenSpace;             ///< Indicates if coordinates are screen space related
-
+        
         std::uint32_t       m_uncI = 0u;                ///< Index counter
         GLuint              m_unIndex = 0u;             ///< Pointer to current index in buffer
         GLuint              m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
