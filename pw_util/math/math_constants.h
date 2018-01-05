@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016, 2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,9 +37,12 @@
 #include <cmath>
 
 //--- Misc header ------------------------------------------------------------//
-const double MATH_PI = 2.0 * std::asin(1.0);
-const double MATH_2PI = 2.0 * MATH_PI;
-const double MATH_PI2 = MATH_PI * 0.5;
-const double MATH_SQRT2 = std::sqrt(2.0);
+// These constants may exist as compiler macros, but due to portability reasons
+// and to avoid ifdef commands, they are redefined here
+constexpr double MATH_PI = 2.0 * std::asin(1.0);
+constexpr double MATH_2PI = 2.0 * MATH_PI;
+constexpr double MATH_PI2 = MATH_PI * 0.5;
+constexpr double MATH_SQRT2 = std::sqrt(2.0);
+constexpr double MATH_E = std::exp(1.0);
 
 #endif // MATH_CONSTANTS_H
