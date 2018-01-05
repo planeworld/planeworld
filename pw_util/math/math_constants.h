@@ -39,10 +39,10 @@
 //--- Misc header ------------------------------------------------------------//
 // These constants may exist as compiler macros, but due to portability reasons
 // and to avoid ifdef commands, they are redefined here
-constexpr double MATH_PI = 2.0 * std::asin(1.0);
-constexpr double MATH_2PI = 2.0 * MATH_PI;
-constexpr double MATH_PI2 = MATH_PI * 0.5;
-constexpr double MATH_SQRT2 = std::sqrt(2.0);
-constexpr double MATH_E = std::exp(1.0);
+const double MATH_PI = 2.0 * std::asin(1.0);
+const double MATH_2PI = 2.0 * MATH_PI;
+const double MATH_PI2 = MATH_PI * 0.5;
+const double MATH_SQRT2 = std::sqrt(2.0);
+const double MATH_E = std::exp(1.0);
 
 #endif // MATH_CONSTANTS_H
