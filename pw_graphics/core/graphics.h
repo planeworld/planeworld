@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2017 Torsten Büschenfeld
+// Copyright (C) 2009-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -61,36 +61,36 @@ using namespace Eigen;
 typedef sf::Window WindowHandleType;
 
 // Constants
-const std::uint16_t GRAPHICS_WIDTH_DEFAULT =  800u;     ///< Default x-resolution
-const std::uint16_t GRAPHICS_HEIGHT_DEFAULT = 600u;     ///< Default y-resolution
+constexpr std::uint16_t GRAPHICS_WIDTH_DEFAULT =  800u;     ///< Default x-resolution
+constexpr std::uint16_t GRAPHICS_HEIGHT_DEFAULT = 600u;     ///< Default y-resolution
 
-const GLuint GRAPHICS_SIZE_OF_INDEX_BUFFER = 10000u;    ///< Size of VBOs/VAOs/IBOs to keep all data
+constexpr GLuint GRAPHICS_SIZE_OF_INDEX_BUFFER = 10000u;    ///< Size of VBOs/VAOs/IBOs to keep all data
 
-const double GRAPHICS_PX_PER_METER = 2.0;               ///< Default resolution, pixel per meter
-const double GRAPHICS_FOV_DEFAULT = 45.0;               ///< Default fov
-const double GRAPHICS_RIGHT_DEFAULT =
-                double(GRAPHICS_WIDTH_DEFAULT)*0.5
-                      /GRAPHICS_PX_PER_METER;           ///< Default right plane
-const double GRAPHICS_LEFT_DEFAULT = 
-                -GRAPHICS_RIGHT_DEFAULT;                ///< Default left plane
-const double GRAPHICS_TOP_DEFAULT =
-                double(GRAPHICS_HEIGHT_DEFAULT)*0.5
-                      /GRAPHICS_PX_PER_METER;           ///< Default top plane
-const double GRAPHICS_BOTTOM_DEFAULT =
-                -GRAPHICS_TOP_DEFAULT;                  ///< Default bottom plane
-const double GRAPHICS_NEAR_DEFAULT = 0.1;               ///< Default min depth
-const double GRAPHICS_FAR_DEFAULT = 1000.0;             ///< Default max depth
+constexpr double GRAPHICS_PX_PER_METER = 2.0;               ///< Default resolution, pixel per meter
+constexpr double GRAPHICS_FOV_DEFAULT = 45.0;               ///< Default fov
+constexpr double GRAPHICS_RIGHT_DEFAULT =
+                    double(GRAPHICS_WIDTH_DEFAULT)*0.5
+                          /GRAPHICS_PX_PER_METER;           ///< Default right plane
+constexpr double GRAPHICS_LEFT_DEFAULT = 
+                    -GRAPHICS_RIGHT_DEFAULT;                ///< Default left plane
+constexpr double GRAPHICS_TOP_DEFAULT =
+                    double(GRAPHICS_HEIGHT_DEFAULT)*0.5
+                          /GRAPHICS_PX_PER_METER;           ///< Default top plane
+constexpr double GRAPHICS_BOTTOM_DEFAULT =
+                    -GRAPHICS_TOP_DEFAULT;                  ///< Default bottom plane
+constexpr double GRAPHICS_NEAR_DEFAULT = 0.1;               ///< Default min depth
+constexpr double GRAPHICS_FAR_DEFAULT = 1000.0;             ///< Default max depth
 
-const double GRAPHICS_DEPTH_DEFAULT = -15.0;            ///< Default drawing depth
+constexpr double GRAPHICS_DEPTH_DEFAULT = -15.0;            ///< Default drawing depth
 
-const double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn-objects
+constexpr double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn-objects
 
-const double GRAPHICS_MAX_CACHE_SIZE = 1024;            ///< Maximum size of cache
+constexpr double GRAPHICS_MAX_CACHE_SIZE = 1024;            ///< Maximum size of cache
 
-const bool GRAPHICS_CIRCLE_USE_CACHE = true;            ///< Flag for using sine/cosine cache
+constexpr bool GRAPHICS_CIRCLE_USE_CACHE = true;            ///< Flag for using sine/cosine cache
 
-const bool GRAPHICS_RENDER_BATCH_CALL_FORCED = true;    ///< Indicates a forced render batch call, ignoring stack
-const bool GRAPHICS_RENDER_BATCH_CALL_NORMAL = false;   ///< Indicates a normal render batch call
+constexpr bool GRAPHICS_RENDER_BATCH_CALL_FORCED = true;    ///< Indicates a forced render batch call, ignoring stack
+constexpr bool GRAPHICS_RENDER_BATCH_CALL_NORMAL = false;   ///< Indicates a normal render batch call
 
 
 /// Type definition for RGB colours
