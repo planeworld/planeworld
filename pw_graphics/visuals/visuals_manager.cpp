@@ -32,6 +32,7 @@
 
 #include <random>
 
+#include "object_planet.h"
 #include "particle.h"
 #include "widget_cam.h"
 
@@ -90,6 +91,48 @@ CVisualsManager::~CVisualsManager()
 ///
 /// \brief Draws a circle using graphics base
 ///
+/// \param _vecCell Cell of circle to be drawn
+/// \param _vecCenter Center of circle to be drawn
+/// \param _fRad Radius to be drawn
+/// \param _pCamera The camera to draw the polygon with
+///
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawCircle(const Vector2i& _vecCell,
+                                 const Vector2d& _vecCenter,
+                                 const double& _fRad,
+                                 CCamera* _pCamera) const
+{
+    METHOD_ENTRY("CVisualsManager::drawCircle")
+    Vector2d vecCenter = _vecCenter - _pCamera->getCenter() +
+                         IGridUser::cellToDouble(_vecCell - _pCamera->getCell());
+
+    if ((vecCenter.norm() <= _fRad+_pCamera->getBoundingCircleRadius()) &&
+        (vecCenter.norm() >  _fRad-_pCamera->getBoundingCircleRadius())
+       )
+    {
+        Vector2d    vecEx(1.0, 0.0);
+        
+        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
+        if (std::isnan(fAlpha))
+        {
+            m_Graphics.drawCircleDyn(vecCenter, _fRad);
+        }
+        else
+        {
+            double fAng0 = std::acos((- vecCenter.dot(vecEx)) / vecCenter.norm());
+            
+            if (vecCenter[1] > 0.0) fAng0 = MATH_2PI - fAng0;
+            
+            m_Graphics.drawArcDyn(vecCenter, _fRad, fAng0-fAlpha, fAng0+fAlpha);
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws a circle using shape \ref CCircle
+///
 /// \param _pObject Object, the polygon belongs to
 /// \param _pCircle The circle to be drawn
 /// \param _pCamera The camera to draw the polygon with
@@ -99,59 +142,7 @@ CVisualsManager::~CVisualsManager()
 void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* _pCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawCircle")
-    double   fRad      = _pCircle->getRadius();
-    Vector2d vecCenter = _pCircle->getCenter() - _pCamera->getCenter() +
-                         IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell());
-
-    if ((vecCenter.norm() <= fRad+_pCamera->getBoundingCircleRadius()) &&
-        (vecCenter.norm() >  fRad-_pCamera->getBoundingCircleRadius())
-       )
-    {
-        Vector2d    vecEx(1.0, 0.0);
-        double      fAng;    
-        double      fAngEnd;
-        PolygonType    LineT;
-        
-        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
-        if (std::isnan(fAlpha))
-        {
-            fAng = 0.0;
-            fAngEnd = 2.0*M_PI;
-            LineT = PolygonType::LINE_LOOP;
-        }
-        else
-        {
-            double fAng0 = std::acos((- vecCenter.dot(vecEx)) / vecCenter.norm());
-            
-            if (vecCenter[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
-            
-            fAng = fAng0-fAlpha;
-            fAngEnd = fAng0+fAlpha;
-            LineT = PolygonType::LINE_STRIP;
-        }
-
-        double fInc = CIRCLE_DEFAULT_RESOLUTION * m_Graphics.getResMPX() / fRad; 
-        
-        if (fInc > 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS) fInc = 2.0*M_PI / CIRCLE_MINIMUM_SEGMENTS;
-        
-        if (fAngEnd < fAng)
-        {
-            double fTmp = fAng;
-            fAng = fAngEnd;
-            fAngEnd = fTmp;
-            // std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
-        }
-        
-        m_Graphics.beginLine(LineT);
-
-            while ( fAng < fAngEnd)
-            {
-                m_Graphics.addVertex(Vector2d(vecCenter[0]+std::cos(fAng)*fRad,
-                                              vecCenter[1]+std::sin(fAng)*fRad));
-                fAng += fInc;
-            }
-        m_Graphics.endLine();
-    }
+    this->drawCircle(_pObject->getCell(), _pCircle->getCenter(), _pCircle->getRadius(), _pCamera);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -193,14 +184,14 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         if (std::isnan(fAlpha))
         {
             fAng = 0.0;
-            fAngEnd = 2.0*M_PI;
+            fAngEnd = MATH_2PI;
             LineT = PolygonType::LINE_LOOP;
         }
         else
         {
             double fAng0 = std::acos((- vecCenter.dot(vecEx)) / vecCenter.norm());
             
-            if (vecCenter[1] > 0.0) fAng0 = 2.0*M_PI - fAng0;
+            if (vecCenter[1] > 0.0) fAng0 = MATH_2PI - fAng0;
             
             fAng = fAng0-fAlpha;
             fAngEnd = fAng0+fAlpha;
@@ -262,7 +253,7 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         
         const double TERRAIN_CROSSOVER = 1.0e-10;
         const double TERRAIN_CROSSOVER_INV = 0.5/(TERRAIN_CROSSOVER);
-        m_Graphics.setWidth(3.0);
+
         m_Graphics.beginLine(LineT);
 
             while (fAng < fAngEnd)
@@ -322,7 +313,6 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
                 fAng += fInc;
             }
         m_Graphics.endLine();
-        m_Graphics.setWidth(1.0);
         
         // Determine PolygonType
         if ((LineT == PolygonType::LINE_LOOP) && (WaterlineList.size() != 0))
@@ -335,7 +325,6 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         }
         
         // Draw sea level
-        m_Graphics.setWidth(2.0);
         m_Graphics.setColor(0.0,0.0,0.7);
         for (auto i=0u; i<WaterlineList.size(); ++i)
         {
@@ -344,7 +333,6 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
             m_Graphics.addVertex(WaterlineList[i][j]);
           m_Graphics.endLine();
         }
-        m_Graphics.setWidth(1.0);
         
 //         // Draw grass
 //         m_Graphics.setColor(0.1,0.2,0.1);
@@ -1396,8 +1384,6 @@ void CVisualsManager::drawGrid(const DrawModeType _DrawMode)
                 else
                     m_Graphics.setColor(0.2, 0.2, 0.2);
                 
-                m_Graphics.setWidth(2.0);
-                
                 // Vertical grid lines
                 while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
                 {
@@ -1426,7 +1412,6 @@ void CVisualsManager::drawGrid(const DrawModeType _DrawMode)
                 }
                 
                 m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
-                m_Graphics.setWidth(1.0);
             m_Graphics.endRenderBatch();
         }
         else
@@ -1576,7 +1561,7 @@ void CVisualsManager::drawKinematicsStates(const DrawModeType _DrawMode)
 ////////////////////////////////////////////////////////////////////////////////
 void CVisualsManager::drawStars()
 {
-    METHOD_ENTRY("CVisualsManager::drawWorld")
+    METHOD_ENTRY("CVisualsManager::drawStars")
     
     m_Graphics.beginRenderBatch("stars");
     if (m_pDataStorage->getUniverse() != nullptr)
@@ -1694,9 +1679,22 @@ void CVisualsManager::drawWorld()
     
     m_Graphics.beginRenderBatch("world");
     
+    for (auto pObjPl : *m_pDataStorage->getObjectsPlanetsByValueFront())
+    {
+        auto fI = pObjPl.second->getRadius();
+        while (fI < pObjPl.second->getRadius()+100000.0)
+        {
+            m_Graphics.setColor(0.0, 0.0, 1.0, pObjPl.second->getPressureAt(fI)/pObjPl.second->getPressureAtGround());
+            this->drawCircle(pObjPl.second->getCell(), pObjPl.second->getCOM(), fI, m_pCamera);
+            if (25.0 * m_pCamera->getZoom() < 2.0)
+                fI += 2.0 / m_pCamera->getZoom();
+            else
+                fI += 25.0;
+        }
+    }
     this->drawObjects(m_pCamera);
     this->drawParticles(m_pCamera);
-
+    
     m_Graphics.endRenderBatch();
     
     //--- Draw names (this is quite hacked and just a proof of concept) ------//

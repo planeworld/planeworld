@@ -38,6 +38,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "circular_buffer.h"
 #include "log.h"
+#include "math_constants.h"
 #include "shader_program.h"
 #include "shape_subtypes.h"
 #include "render_mode.h"
@@ -83,11 +84,12 @@ constexpr double GRAPHICS_FAR_DEFAULT = 1000.0;             ///< Default max dep
 
 constexpr double GRAPHICS_DEPTH_DEFAULT = -15.0;            ///< Default drawing depth
 
-constexpr double GRAPHICS_DYN_PEL_SIZE_DEFAULT = 10.0;      ///< Default size of dyn-objects
-
 constexpr double GRAPHICS_MAX_CACHE_SIZE = 1024;            ///< Maximum size of cache
 
-constexpr bool GRAPHICS_CIRCLE_USE_CACHE = true;            ///< Flag for using sine/cosine cache
+const  double    GRAPHICS_CIRCLE_SEG_ANG = 1.0 / 360.0 * MATH_2PI; ///< Segment angle (increment) of circles
+constexpr double GRAPHICS_CIRCLE_SEG_MAX = 200.0;           ///< Maximum segment size of circles
+constexpr double GRAPHICS_CIRCLE_SEG_MIN = 3.0;             ///< Minimum segment size of circles
+constexpr bool   GRAPHICS_CIRCLE_USE_CACHE = true;          ///< Flag for using sine/cosine cache
 
 constexpr bool GRAPHICS_RENDER_BATCH_CALL_FORCED = true;    ///< Indicates a forced render batch call, ignoring stack
 constexpr bool GRAPHICS_RENDER_BATCH_CALL_NORMAL = false;   ///< Indicates a normal render batch call
@@ -221,6 +223,8 @@ class CGraphics
         //
 
         //--- Constant methods -----------------------------------------------//
+        void drawArcDyn(const Vector2d&, const double&, const double&, const double&);
+        void drawCircleDyn(const Vector2d&, const double&);
         void circle(const Vector2d&, const double&, const int = 12, const bool = false);
         void showVec(const Vector2d&, const Vector2d&);
 
@@ -309,8 +313,6 @@ class CGraphics
         double              m_fDepthMax;                ///< maximum depth of levels
         double              m_fDepthMin;                ///< minimum depth of levels
 
-        double              m_fDynPelSize;              ///< pel-size for dynamically sized shapes
-        
         int                 m_nVideoFlags;              ///< videoflags like fullscreen, resolution
         unsigned short      m_unWidthScr;               ///< Screen width
         unsigned short      m_unHeightScr;              ///< Screen height
@@ -353,19 +355,6 @@ public:
         //--- Protected variables --------------------------------------------//
         CGraphics&  m_Graphics;                 ///< Instance of graphics class
 };
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the element size of dynamically sized shapes
-///
-/// \return The element size set
-///
-///////////////////////////////////////////////////////////////////////////////
-inline double CGraphics::getDynPelSize() const
-{
-    METHOD_ENTRY("CGraphics::getDynPelSize()");
-    return (m_fDynPelSize);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///

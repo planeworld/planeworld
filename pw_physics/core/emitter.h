@@ -38,6 +38,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "kinematics_state_user.h"
+#include "object_planet.h"
 #include "uid_user.h"
 #include "world_data_storage_user.h"
 
@@ -120,6 +121,11 @@ class IEmitter : public IKinematicsStateUser,
         void activate();
         void deactivate();
         
+        void setParent(CObjectPlanet* const _pObjPl)
+        {
+            m_hParent.set(_pObjPl);
+        }
+        
         void setAngle(const double&);
         void setAngleStd(const double&);
         void setDistribution(const EmitterDistributionType&);
@@ -133,6 +139,8 @@ class IEmitter : public IKinematicsStateUser,
         void setVelocityInheritance(const double& _fVelInh) {m_fVelocityInheritance = _fVelInh;}
         
     protected:
+        
+        CHandle<CObjectPlanet>  m_hParent;
         
         EmitterModeType         m_EmitterMode;              ///< Emit mode
         EmitterDistributionType m_EmitterDistribution;      ///< Distribution of emitter

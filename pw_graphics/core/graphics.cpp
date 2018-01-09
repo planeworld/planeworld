@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2017 Torsten Büschenfeld
+// Copyright (C) 2009-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,7 +58,6 @@ CGraphics::CGraphics() : m_pWindow(nullptr),
                         m_fCamAng(0.0),
                         m_fCamZoom(1.0),
                         m_fDepth(GRAPHICS_DEPTH_DEFAULT),
-                        m_fDynPelSize(GRAPHICS_DYN_PEL_SIZE_DEFAULT),
                         m_nVideoFlags(0),
                         m_unWidthScr(GRAPHICS_WIDTH_DEFAULT),
                         m_unHeightScr(GRAPHICS_HEIGHT_DEFAULT)
@@ -830,6 +829,92 @@ void CGraphics::zoomCamTo(const double& _fFac)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draw an arc
+///
+/// \param _vecC    Center of arc
+/// \param _fR      Radius of arc
+/// \param _fAng0   Angle to begin arc
+/// \param _fAngN   Angle to end arc
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::drawArcDyn(const Vector2d& _vecC, const double& _fRad,
+                           const double& _fAng0, const double& _fAngN)
+{
+    METHOD_ENTRY("CGraphics::drawArcDyn")
+    
+    double fInc = GRAPHICS_CIRCLE_SEG_ANG;
+    double fSegPx = GRAPHICS_CIRCLE_SEG_ANG * this->getResPMX() * _fRad; 
+    if (fSegPx < GRAPHICS_CIRCLE_SEG_MIN)
+    {
+        fSegPx = GRAPHICS_CIRCLE_SEG_MIN;
+        double fSurfPx = this->getResPMX() * _fRad /** MATH_2PI*/;
+        fInc = fSegPx/fSurfPx /** MATH_2PI*/;
+    }
+    
+    double fAng  = _fAng0;
+    double fAngN = _fAngN;
+    
+    if (fAngN < fAng)
+    {
+        double fTmp = fAng;
+        fAng  = fAngN;
+        fAngN = fTmp;
+        // std::swap<double>(fAng, fAngEnd); // This doesn't work with VC++
+    }
+    
+    this->beginLine(PolygonType::LINE_STRIP);
+
+        while (fAng < fAngN + fInc)
+        {
+            this->addVertex(Vector2d(_vecC[0]+std::cos(fAng)*_fRad,
+                                     _vecC[1]+std::sin(fAng)*_fRad));
+            fAng += fInc;
+        }
+    this->endLine();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw a circle
+///
+/// \param _vecC Center of circle
+/// \param _fR   Radius of circle
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::drawCircleDyn(const Vector2d& _vecC, const double& _fRad)
+{
+    METHOD_ENTRY("CGraphics::drawCircleDyn")
+    
+    double fInc = GRAPHICS_CIRCLE_SEG_ANG;
+    double fSegPx = GRAPHICS_CIRCLE_SEG_ANG * this->getResPMX() * _fRad; 
+    if (fSegPx < GRAPHICS_CIRCLE_SEG_MIN)
+    {
+        fSegPx = GRAPHICS_CIRCLE_SEG_MIN;
+        double fSurfPx = this->getResPMX() * _fRad /** MATH_2PI*/;
+        fInc = fSegPx/fSurfPx /** MATH_2PI*/;
+    }
+    else if (fSegPx > GRAPHICS_CIRCLE_SEG_MAX)
+    {
+        fSegPx = GRAPHICS_CIRCLE_SEG_MAX;
+        double fSurfPx = this->getResPMX() * _fRad /** MATH_2PI*/;
+        fInc = fSegPx/fSurfPx /** MATH_2PI*/;
+    }
+    
+    double fAng  = 0.0;
+    
+    this->beginLine(PolygonType::LINE_LOOP);
+
+        while (fAng < MATH_2PI)
+        {
+            this->addVertex(Vector2d(_vecC[0]+std::cos(fAng)*_fRad,
+                                     _vecC[1]+std::sin(fAng)*_fRad));
+            fAng += fInc;
+        }
+    this->endLine();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw a circle
 ///
 /// \param _vecC    Center of circle
@@ -893,7 +978,7 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
         
         fAng += fFac;
         
-        while (fAng < MATH_2PI+fFac)
+        while (fAng < MATH_2PI)
         {
             m_vecVertices[m_unIndexVerts++] = _vecC[0]+std::sin(fAng)*_fR;
             m_vecVertices[m_unIndexVerts++] = _vecC[1]+std::cos(fAng)*_fR;
@@ -1205,7 +1290,7 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
         m_uncI += 8;
         fAng += fFac;
 
-        while (fAng < MATH_2PI+fFac)
+        while (fAng < MATH_2PI)
         {
             m_vecVertices[m_unIndexVerts++] = _vecC[0]+std::sin(fAng)*_fR;
             m_vecVertices[m_unIndexVerts++] = _vecC[1]+std::cos(fAng)*_fR;

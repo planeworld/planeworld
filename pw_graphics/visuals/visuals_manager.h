@@ -38,6 +38,7 @@
 #include "com_console.h"
 #include "com_interface_provider.h"
 #include "font_manager.h"
+#include "math_constants.h"
 #include "planet.h"
 #include "polygon.h"
 #include "render_target.h"
@@ -52,7 +53,7 @@
 const double CIRCLE_DEFAULT_RESOLUTION =  5.0;               ///< Default resolution for visual sampling, px/vertex.
 const double CIRCLE_MINIMUM_SEGMENTS = 10.0;                 ///< Minimum number of circle segments
 const double PLANET_VISUALS_DEFAULT_RESOLUTION=3.0;          ///< Default resolution for visual sampling px/vertex
-const double PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE=M_PI*0.01; ///< Default minium of 200 segments if above resolution limit
+const double PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE=MATH_PI*0.01; ///< Default minium of 200 segments if above resolution limit
 
 /// Specifies the type of creation mode. When directly created, entities are
 /// are added to storage directly which should only be done within the same thread
@@ -117,6 +118,7 @@ class CVisualsManager : virtual public CGraphicsBase,
     private:
 
         //--- Constant methods [private] -------------------------------------//
+        void drawCircle(const Vector2i&, const Vector2d&, const double&, CCamera*) const;
         void drawCircle(CObject*, CCircle*, CCamera*) const;
         void drawPlanet(CObject*, CPlanet*, CCamera*) const;
         void drawPolygon(CObject*, CPolygon*, CCamera*) const;

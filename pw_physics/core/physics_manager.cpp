@@ -160,6 +160,35 @@ UIDType CPhysicsManager::createObject()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Create a planetary object and insert to world data storage
+///
+/// \return UID value of planetary object
+///
+///////////////////////////////////////////////////////////////////////////////
+UIDType CPhysicsManager::createObjectPlanet()
+{
+    METHOD_ENTRY("CPhysicsManager::createObjectPlanet")
+    
+    CObjectPlanet* pObjectPlanet= new CObjectPlanet();
+    MEM_ALLOC("CObject")
+    
+    pObjectPlanet->init();
+    
+    CPlanet* pPlanet = new CPlanet();
+    MEM_ALLOC("IShape")
+    pPlanet->setRadius(pObjectPlanet->getRadius()); 
+    m_ShapesToBeAddedToWorld.enqueue(pPlanet);
+    
+    pObjectPlanet->getGeometry()->addShape(pPlanet);
+    
+    m_ObjectsToBeAddedToWorld.enqueue(pObjectPlanet);
+    m_ObjectsPlanetsToBeAddedToWorld.enqueue(pObjectPlanet);
+    
+    return pObjectPlanet->getUID();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Creates a particle group and inserts it to world data storage
 ///
 /// \param _ParticleType Type of particles to be created
@@ -601,6 +630,12 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::INT, "UID of object"}},
                                           "system"
                                          );
+        m_pComInterface->registerFunction("create_obj_planet",
+                                          CCommand<int>([&]() -> int {return this->createObjectPlanet();}),
+                                          "Creates a planetary object.",
+                                          {{ParameterType::INT, "UID of object"}},
+                                          "system"
+                                         );
         m_pComInterface->registerFunction("create_particles",
                                           CCommand<int, std::string>([&](const std::string& _strParticleType) -> int {return this->createParticles(_strParticleType);}),
                                           "Creates a group of particles.",
@@ -727,6 +762,26 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                           {ParameterType::INT, "Emittter UID"},
                                           {ParameterType::INT, "Number of emitted entities"}},
+                                          "system", "physics"
+                                          );
+        m_pComInterface->registerFunction("emitter_set_parent",
+                                          CCommand<void, int, int>([&](const int _nUIDEm, const int _nUIDPa)
+                                          {
+                                            IEmitter* pEmitter = m_pDataStorage->getEmitterByValue(_nUIDEm);
+                                            if (pEmitter != nullptr)
+                                            {
+                                                 
+                                                    CObjectPlanet* pPlanet = m_pDataStorage->getObjectPlanetByValueBack(_nUIDPa);
+                                                    if (pPlanet != nullptr)
+                                                    {
+                                                        pEmitter->setParent(pPlanet);
+                                                    }
+                                            }
+                                          }),
+                                          "Attach particle group to emitter.",
+                                          {{ParameterType::NONE, "No return value"},
+                                          {ParameterType::INT, "Emittter UID"},
+                                          {ParameterType::INT, "Particle UID"}},
                                           "system", "physics"
                                           );
         m_pComInterface->registerFunction("emitter_set_particles",
@@ -1405,6 +1460,23 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Reference object's UID (Obj_2)"}},
                                            "physics"
                                          );
+        m_pComInterface->registerFunction("obj_planet_set_radius",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fRadius)
+                                            {
+                                                CObjectPlanet* pObj = m_pDataStorage->getObjectPlanetByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->setRadius(_fRadius);
+                                                    pObj->init();
+                                                }
+                                            }),
+                                          "Sets radius of given planetary object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Radius of given planetary object"}},
+                                           "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("obj_refer_state",
                                           CCommand<void, int, int>(
                                             [&](const int _nUID, const int _nUIDRef)
@@ -1843,6 +1915,11 @@ void CPhysicsManager::processQueues()
     while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
     {
         m_pDataStorage->addObject(pObj);
+    }
+    CObjectPlanet* pObjPl = nullptr;
+    while (m_ObjectsPlanetsToBeAddedToWorld.try_dequeue(pObjPl))
+    {
+        m_pDataStorage->addObjectPlanet(pObjPl);
     }
     CParticle* pParticle = nullptr;
     while (m_ParticlesToBeAddedToWorld.try_dequeue(pParticle))

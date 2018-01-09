@@ -47,6 +47,7 @@
 class CParticle;
 class IEmitter;
 class CObject;
+class CObjectPlanet;
 class IShape;
 class CThruster;
 
@@ -74,6 +75,11 @@ typedef std::unordered_map<UIDType, CObject*> ObjectsByValueType;
 typedef CMultiBuffer<BUFFER_QUADRUPLE, ObjectsByValueType, UIDType, CObject*> BufferedObjectsByValueType;
 /// Map of shapes, accessed by UID value
 typedef std::unordered_map<UIDType, IShape*> ShapesByValueType;
+
+/// Map of objects, accessed by UID value
+typedef std::unordered_map<UIDType, CObjectPlanet*> ObjectsPlanetsByValueType;
+/// Map of buffered planetary objects, accessed by UID value
+typedef CMultiBuffer<BUFFER_QUADRUPLE, ObjectsPlanetsByValueType, UIDType, CObjectPlanet*> BufferedObjectsPlanetsByValueType;
 
 /// Vector of UID users, accessed by UID value
 typedef std::vector<IUIDUser*> UIDUsersByValueType;
@@ -107,6 +113,7 @@ class CWorldDataStorage
         bool addParticle(CParticle*);
         void addJoint(IJoint*);
         bool addObject(CObject*);
+        bool addObjectPlanet(CObjectPlanet*);
         void addShape(IShape*);
         bool addThruster(CThruster*);
         bool addUIDUser(IUIDUser*);
@@ -118,6 +125,8 @@ class CWorldDataStorage
         IEmitter*                   getEmitterByValue(const UIDType);
         CObject*                    getObjectByValueBack(const UIDType);
         CObject*                    getObjectByValueFront(const UIDType);
+        CObjectPlanet*              getObjectPlanetByValueBack(const UIDType);
+        CObjectPlanet*              getObjectPlanetByValueFront(const UIDType);
         CParticle*                  getParticleByValueBack(const UIDType);
         IShape*                     getShapeByValue(const UIDType);
         CThruster*                  getThrusterByValue(const UIDType);
@@ -129,6 +138,8 @@ class CWorldDataStorage
         ParticlesByValueType*       getParticlesByValueBack();
         ObjectsByValueType*         getObjectsByValueBack();
         ObjectsByValueType*         getObjectsByValueFront();
+        ObjectsPlanetsByValueType*  getObjectsPlanetsByValueBack();
+        ObjectsPlanetsByValueType*  getObjectsPlanetsByValueFront();
         ThrustersByValueType*       getThrustersByValue();
         UIDUsersByValueType*        getUIDUsersByValueFront();
         UIDUsersByValueType*        getUIDUsersByValueBack();
@@ -158,10 +169,11 @@ class CWorldDataStorage
         CUniverse*                      m_pUniverse;            ///< The procedurally generated universe
         
         // Buffered entities, used by graphical clients
-        BufferedParticlesByNameType     m_ParticlesByName;      ///< Buffered particles, accessed by name
-        BufferedParticlesByValueType    m_ParticlesByValue;     ///< Buffered particles, accessed by value
-        BufferedObjectsByValueType      m_ObjectsByValue;       ///< Buffered objects, accessed by UID value
-        BufferedUIDUsersByValueType     m_UIDUsersByValue;      ///< Buffered UID users, accessed by value
+        BufferedParticlesByNameType         m_ParticlesByName;          ///< Buffered particles, accessed by name
+        BufferedParticlesByValueType        m_ParticlesByValue;         ///< Buffered particles, accessed by value
+        BufferedObjectsByValueType          m_ObjectsByValue;           ///< Buffered objects, accessed by UID value+
+        BufferedObjectsPlanetsByValueType   m_ObjectsPlanetsByValue;    ///< Buffered planetary objects, accessed by UID value+
+        BufferedUIDUsersByValueType         m_UIDUsersByValue;          ///< Buffered UID users, accessed by value
 
         // Entities of physics engine
         EmittersByValueType         m_EmittersByValue;          ///< Emitters, accessed by value
@@ -306,6 +318,32 @@ inline ObjectsByValueType* CWorldDataStorage::getObjectsByValueFront()
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectsByValueFront")
     return m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns back buffer of planetary objects, accessed by value
+///
+/// \return Planetary objects back buffer, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline ObjectsPlanetsByValueType* CWorldDataStorage::getObjectsPlanetsByValueBack()
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectsPlanetsByValueBack")
+    return m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns front buffer of planetary objects, accessed by value
+///
+/// \return Planetary objects front buffer, accessed by value
+///
+////////////////////////////////////////////////////////////////////////////////
+inline ObjectsPlanetsByValueType* CWorldDataStorage::getObjectsPlanetsByValueFront()
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectsPlanetsByValueFront")
+    return m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -78,6 +78,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/geometry/terrain.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/joints/spring.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/object.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/object_planet.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/objects/particle.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/universe/star_system.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/universe/universe.cpp

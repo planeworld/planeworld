@@ -37,6 +37,7 @@
 #include "collision_manager.h"
 #include "com_interface_provider.h"
 #include "emitter.h"
+#include "object_planet.h"
 #include "sim_timer.h"
 #include "thread_module.h"
 #include "thruster.h"
@@ -56,6 +57,8 @@ const double      PHYSICS_PARTICLE_DEFAULT_FREQUENCY = 30.0;  ///< Default physi
 typedef moodycamel::ConcurrentQueue<IEmitter*> EmittersQueueType;
 /// Type for concurrent object queue 
 typedef moodycamel::ConcurrentQueue<CObject*> ObjectsQueueType;
+/// Type for concurrent planetary object queue 
+typedef moodycamel::ConcurrentQueue<CObjectPlanet*> ObjectsPlanetsQueueType;
 /// Type for concurrent particles queue 
 typedef moodycamel::ConcurrentQueue<CParticle*> ParticlesQueueType;
 /// Type for concurrent shape queue
@@ -91,6 +94,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         UIDType createEmitter(const EmitterType);
         UIDType createEmitter(const std::string&);
         UIDType createObject();
+        UIDType createObjectPlanet();
         UIDType createParticles(const ParticleTypeType);
         UIDType createParticles(const std::string&);
         UIDType createShape(const ShapeType);
@@ -126,6 +130,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         
         EmittersQueueType   m_EmittersToBeAddedToWorld;         ///< Emitters already created to be added to world
         ObjectsQueueType    m_ObjectsToBeAddedToWorld;          ///< Objects already created to be added to world
+        ObjectsPlanetsQueueType m_ObjectsPlanetsToBeAddedToWorld; ///< Planetary objects already created to be added to world
         ParticlesQueueType  m_ParticlesToBeAddedToWorld;        ///< Particles already created to be added to world
         ShapesQueueType     m_ShapesToBeAddedToWorld;           ///< Shapes already created to be added to world
         ThrustersQueueType  m_ThrustersToBeAddedToWorld;        ///< Thrusters already created to be added to world

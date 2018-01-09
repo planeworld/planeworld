@@ -33,7 +33,7 @@
 #include "camera.h"
 #include "emitter.h"
 #include "particle.h"
-#include "object.h"
+#include "object_planet.h"
 #include "thruster.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -260,6 +260,31 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Add a planetary object to list
+///
+/// This method adds the given planetary objects to the list of planetary objects.
+///
+/// \param _pObjPl Planetary object that should be added to list
+///
+/// \return Success?
+///
+///////////////////////////////////////////////////////////////////////////////
+bool CWorldDataStorage::addObjectPlanet(CObjectPlanet* _pObjectPlanet)
+{
+    METHOD_ENTRY("CWorldDataStorage::addObjectPlanet")
+
+    m_ObjectsPlanetsByValue.add(_pObjectPlanet->getUID(), _pObjectPlanet);
+    
+//     for (auto Shape : _pObjectPlanet->getGeometry()->getShapes())
+//     {
+//         m_ShapesByValue.insert(std::pair<UIDType, IShape*>(Shape->getUID(), Shape));
+//     }
+    
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Explicitely add a shape to data storage
 ///
 /// This method adds the given shape to data storage, which is normally done
@@ -399,6 +424,56 @@ CObject* CWorldDataStorage::getObjectByValueFront(const UIDType _nUID)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Return planetary object, accessed by given UID value
+///
+/// \param _nUID UID of object to return
+///
+/// \return Planetary object with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+CObjectPlanet* CWorldDataStorage::getObjectPlanetByValueBack(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectPlanetByValueBack")
+
+    const auto ci = m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
+    if (ci != m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("World Data Storage", "Unknown planetary object with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return planetary object, accessed by given UID value
+///
+/// \param _nUID UID of object to return
+///
+/// \return Planetary object with given UID value
+///
+////////////////////////////////////////////////////////////////////////////////
+CObjectPlanet* CWorldDataStorage::getObjectPlanetByValueFront(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::getObjectPlanetByValueFront")
+
+    const auto ci = m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->find(_nUID);
+    if (ci != m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->end())
+    {
+        return ci->second;
+    }
+    else
+    {
+        WARNING_MSG("World Data Storage", "Unknown planetary object with UID <" << _nUID << ">")
+        return nullptr;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Return particle, accessed by given UID value
 ///
 /// \param _nUID UID of particle to return
@@ -516,6 +591,7 @@ void CWorldDataStorage::swapBack()
     m_ParticlesByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
 
     m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
+    m_ObjectsPlanetsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
     
     m_ObjectsByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
@@ -539,6 +615,7 @@ void CWorldDataStorage::swapFront()
         m_ParticlesByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
+        m_ObjectsPlanetsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
         m_bFrontNew = false;
     }
