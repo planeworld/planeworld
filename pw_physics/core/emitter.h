@@ -121,10 +121,7 @@ class IEmitter : public IKinematicsStateUser,
         void activate();
         void deactivate();
         
-        void setParent(CObjectPlanet* const _pObjPl)
-        {
-            m_hParent.set(_pObjPl);
-        }
+        void setParent(CObjectPlanet* const _pObjPl) {m_hParent.set(_pObjPl);}
         
         void setAngle(const double&);
         void setAngleStd(const double&);
@@ -140,7 +137,7 @@ class IEmitter : public IKinematicsStateUser,
         
     protected:
         
-        CHandle<CObjectPlanet>  m_hParent;
+        CHandle<CObjectPlanet>  m_hParent;                  ///< Planetary object of reference
         
         EmitterModeType         m_EmitterMode;              ///< Emit mode
         EmitterDistributionType m_EmitterDistribution;      ///< Distribution of emitter

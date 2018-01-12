@@ -519,6 +519,47 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Draw atmospheres of planetary objects
+///
+/// \param _pCamera Draw visuals with respect to this camera
+///
+////////////////////////////////////////////////////////////////////////////////
+void CVisualsManager::drawObjectsPlanetsAtmospheres(CCamera* const _pCamera) const
+{
+    METHOD_ENTRY("CVisualsManager::drawObjectsPlanetsAtmospheres")
+    
+    for (auto pObjPl : *m_pDataStorage->getObjectsPlanetsByValueFront())
+    {
+        if (_pCamera->getZoom() < 1.0)
+        {
+            constexpr double fZoomFacBegin = 10.0;
+            constexpr double fZoomFacEnd = 1.0e-5;
+            
+            double fZoomMax = fZoomFacBegin/(1.0-fZoomFacEnd) * (_pCamera->getZoom() - fZoomFacEnd);
+            if (fZoomMax < 0.0) fZoomMax = 0.0;
+            else if (fZoomMax > 1.0) fZoomMax = 1.0;
+            
+            double fI = pObjPl.second->getRadius();
+            double fAlpha = 1.0;
+            
+            while (fAlpha > 0.1)
+            {
+                fAlpha = (1.0 - fZoomMax) * 
+                         pObjPl.second->getPressureAtRadius(fI)/pObjPl.second->getPressureAtGround();
+                
+                m_Graphics.setColor(0.0, 0.0, 1.0, fAlpha);
+                this->drawCircle(pObjPl.second->getCell(), pObjPl.second->getCOM(), fI, _pCamera);
+                if (1000.0 * _pCamera->getZoom() < 2.0)
+                    fI += 2.0 / _pCamera->getZoom();
+                else
+                    fI += 1000.0;
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Draw center of mass (COM) of all objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -1679,19 +1720,7 @@ void CVisualsManager::drawWorld()
     
     m_Graphics.beginRenderBatch("world");
     
-    for (auto pObjPl : *m_pDataStorage->getObjectsPlanetsByValueFront())
-    {
-        auto fI = pObjPl.second->getRadius();
-        while (fI < pObjPl.second->getRadius()+100000.0)
-        {
-            m_Graphics.setColor(0.0, 0.0, 1.0, pObjPl.second->getPressureAt(fI)/pObjPl.second->getPressureAtGround());
-            this->drawCircle(pObjPl.second->getCell(), pObjPl.second->getCOM(), fI, m_pCamera);
-            if (25.0 * m_pCamera->getZoom() < 2.0)
-                fI += 2.0 / m_pCamera->getZoom();
-            else
-                fI += 25.0;
-        }
-    }
+    this->drawObjectsPlanetsAtmospheres(m_pCamera);
     this->drawObjects(m_pCamera);
     this->drawParticles(m_pCamera);
     

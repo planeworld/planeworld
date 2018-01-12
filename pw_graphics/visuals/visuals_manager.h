@@ -125,6 +125,7 @@ class CVisualsManager : virtual public CGraphicsBase,
 
         void drawParticles(CCamera* const) const;
         void drawObjects(CCamera* const) const;
+        void drawObjectsPlanetsAtmospheres(CCamera* const) const;
         
         void            drawBoundingBoxes() const;
         void            drawCOM() const;

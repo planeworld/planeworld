@@ -1460,6 +1460,64 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Reference object's UID (Obj_2)"}},
                                            "physics"
                                          );
+        m_pComInterface->registerFunction("obj_planet_atmosphere_set_pressure_at_ground",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fPressure)
+                                            {
+                                                CObjectPlanet* pObj = m_pDataStorage->getObjectPlanetByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->setPressureAtGround(_fPressure);
+                                                }
+                                            }),
+                                          "Sets pressure (at ground level) of planetary objects atmosphere.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Pressure (at ground level) of planetary objects atmosphere"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_planet_atmosphere_set_scaleheight",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fScaleheight)
+                                            {
+                                                CObjectPlanet* pObj = m_pDataStorage->getObjectPlanetByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->setScaleHeight(_fScaleheight);
+                                                }
+                                            }),
+                                          "Sets scale height (normalisation, barometric formula) of planetary objects atmosphere.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Scale height of given planetary objects atmosphere"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_planet_set_mass",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fMass)
+                                            {
+                                                CObjectPlanet* pObj = m_pDataStorage->getObjectPlanetByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    // Planetary objects surface should always be the first shape
+                                                    IShape* pShp = pObj->getGeometry()->getShapes().front();
+                                                    if (pShp != nullptr)
+                                                    {
+                                                        pShp->setMass(_fMass);
+                                                    }
+                                                    else
+                                                    {
+                                                        WARNING_MSG("Object Planet", "Planetary object has no geometry (shape).")
+                                                    }
+                                                    pObj->init();
+                                                }
+                                            }),
+                                          "Sets mass of given planetary object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Mass of given planetary object"}},
+                                           "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("obj_planet_set_radius",
                                           CCommand<void, int, double>(
                                             [&](const int _nUID, const double& _fRadius)

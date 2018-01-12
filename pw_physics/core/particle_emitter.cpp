@@ -136,8 +136,8 @@ void CParticleEmitter::emit(const double& _fF)
                 Vector2d vecParentVel; 
                 if (m_hParent.isValid())
                 {
-                    fLocalDrag = m_hParent.get()->getPressureAt(
-                        (m_KinematicsState.getOrigin() - m_hParent.get()->getCOM()).norm()) / 
+                    fLocalDrag = m_hParent.get()->getPressureAtPosition(
+                        m_KinematicsState.getOrigin()) / 
                         m_hParent.get()->getPressureAtGround();
                     vecParentVel = m_hParent.get()->getVelocity();
                 }
@@ -153,9 +153,9 @@ void CParticleEmitter::emit(const double& _fF)
                     
                     m_pDataStorage->getParticleByValueBack(m_hParticles.getUID())->generate(
                         m_KinematicsState.getOrigin(),
-                        fVelocity*(Rotation*Vector2d(1.0, 0.0)) * (1.5 - fLocalDrag) +
-                        (m_KinematicsState.getVelocity()-vecParentVel) * (fLocalDrag)/* +
-                        m_fVelocityInheritance * m_hParent.get()->getVelocity()*/);
+                        fVelocity*(Rotation*Vector2d(1.0, 0.0)) +
+                        m_KinematicsState.getVelocity() * (1.0 - fLocalDrag) +
+                        vecParentVel * fLocalDrag);
                 }
                 break;
             }

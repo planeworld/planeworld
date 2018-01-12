@@ -40,16 +40,14 @@ pw.physics.obj_disable_gravitation(idObj01)
 
 idObjEarth = pw.system.create_obj_planet()
 pw.physics.obj_planet_set_radius(idObjEarth, 6000000.0)
--- pw.physics.shp_set_mass(idShpEarth, 5.972e24)
+pw.physics.obj_planet_set_mass(idObjEarth, 5.972e24)
+pw.physics.obj_planet_atmosphere_set_scaleheight(idObjEarth, 1.0e4) -- Barometric formula, every 1km, pressure is reduced by factor ~2.7 (e)
+pw.physics.obj_planet_atmosphere_set_pressure_at_ground(idObjEarth, 1.0e5) -- 100 kPa
 pw.physics.obj_set_name(idObjEarth, "Earth")
--- pw.physics.obj_disable_dynamics(idObjEarth)
 pw.physics.obj_set_position(idObjEarth, 0.0, -6000000.0)
 pw.physics.obj_set_velocity(idObjEarth, 2000.0, 0.0)
 -- pw.physics.obj_set_angle(idObjEarth, math.rad(20))
 -- pw.physics.obj_set_angle_vel(idObjEarth, 7.292115e-5)
-
-
-
 pw.physics.obj_refer_state(idObj01, idObjEarth)
 
 -- Setup main camera
@@ -116,7 +114,6 @@ pw.system.emitter_set_angle(idEm01, math.rad(-90))
 pw.system.emitter_set_angle_std(idEm01, math.rad(5))
 pw.system.emitter_set_velocity(idEm01, 50.0)
 pw.system.emitter_set_velocity_std(idEm01, 5.0)
--- pw.system.emitter_set_velocity_inheritance(idEm01, 0.3)
 
 -- Create a thruster
 idThruster01 = pw.system.create_thruster()
