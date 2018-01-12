@@ -74,8 +74,14 @@ class CGeometry
         CBoundingBox& getBoundingBox(AABBType = AABBType::MULTIFRAME);
         
         void addShape(IShape* const);
+        void disableAutoCOM() {m_bAutoCOM = false;}
+        void disableAutoInertia() {m_bAutoInertia = false;}
+        void enableAutoCOM() {m_bAutoCOM = true;}
+        void enableAutoInertia() {m_bAutoInertia = true;}
         void updateBoundingBox(const CBoundingBox&);
         void updateBoundingBox(const Vector2d&);
+        void setCOM(const Vector2d& _vecCOM) {m_vecCOM = _vecCOM; m_bAutoCOM=false;}
+        void setInertia(const double& _fInertia) {m_fInertia = _fInertia; m_bAutoInertia=false;}
         void setShapes(const ShapesType&);
         void transform(const double&, const Vector2d&);
         void update();
@@ -96,6 +102,8 @@ class CGeometry
         Vector2d        m_vecCOM;     ///< Center of mass
         double          m_fInertia;   ///< Inertia of whole geometry
         double          m_fMass;      ///< Mass of whole geometry
+        bool            m_bAutoCOM;     ///< Indicates automatic computation of COM
+        bool            m_bAutoInertia; ///< Indicates automatic computation of inertia
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

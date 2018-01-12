@@ -36,7 +36,9 @@
 ///
 ///////////////////////////////////////////////////////////////////////////////
 CGeometry::CGeometry() : m_fInertia(0.0),
-                         m_fMass(1.0)
+                         m_fMass(1.0),
+                         m_bAutoCOM(true),
+                         m_bAutoInertia(true)
 {
     METHOD_ENTRY("CGeometry::CGeometry")
     CTOR_CALL("CGeometry::CGeometry")
@@ -221,27 +223,42 @@ void CGeometry::update()
     }
     if (!bShapesValid)
     {
-        m_vecCOM.setZero();
-        m_fMass = 0.0;
-        for (const auto ci : m_Shapes)
+        if (m_bAutoCOM)
         {
-            m_vecCOM += ci->getMass() *
-                        ci->getCentroid();
-            m_fMass  += ci->getMass();
-            ci->isValid() = true;
+            m_vecCOM.setZero();
+            m_fMass = 0.0;
+            for (const auto ci : m_Shapes)
+            {
+                m_vecCOM += ci->getMass() *
+                            ci->getCentroid();
+                m_fMass  += ci->getMass();
+                ci->isValid() = true;
+            }
+            if (m_fMass > 0.0)
+            {
+                m_vecCOM /= m_fMass;
+            }
         }
-        if (m_fMass > 0.0)
+        else
         {
-            m_vecCOM /= m_fMass;
+            m_fMass = 0.0;
+            for (const auto ci : m_Shapes)
+            {
+                m_fMass  += ci->getMass();
+                ci->isValid() = true;
+            }
         }
         
-        m_fInertia = 0.0;
-        for (const auto ci : m_Shapes)
+        if (m_bAutoInertia)
         {
-            m_fInertia +=  ci->getInertia() + 
-                           ci->getMass() *
-                          (ci->getCentroid() -
-                           m_vecCOM).squaredNorm();
+            m_fInertia = 0.0;
+            for (const auto ci : m_Shapes)
+            {
+                m_fInertia +=  ci->getInertia() + 
+                            ci->getMass() *
+                            (ci->getCentroid() -
+                            m_vecCOM).squaredNorm();
+            }
         }
         DOM_VAR(DEBUG_MSG("Geometry", "Center of mass calculated: " << m_vecCOM[0] << ", " << m_vecCOM[1]))
         DOM_VAR(DEBUG_MSG("Geometry", "Inertia calculated: " << m_fInertia))
@@ -357,4 +374,6 @@ void CGeometry::copy(const CGeometry& _Geom)
     m_vecCOM    = _Geom.m_vecCOM;
     m_fInertia  = _Geom.m_fInertia;
     m_fMass     = _Geom.m_fMass;
+    m_bAutoCOM  = _Geom.m_bAutoCOM;
+    m_bAutoInertia = _Geom.m_bAutoInertia;
 }

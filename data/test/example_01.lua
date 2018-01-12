@@ -23,9 +23,10 @@ pw.system.toggle_fullscreen()
 
 -- Create objects
 idObj01 = pw.system.create_obj()
+
 idShp01 = pw.system.create_shp("shp_circle")
 idShp02 = pw.system.create_shp("shp_polygon")
-
+pw.physics.obj_set_name(idObj01, "Rocket")
 pw.system.shp_set_vertices(idShp02,
     {-2.0, -1.0,
       2.0, -1.0,
@@ -44,6 +45,7 @@ pw.physics.obj_planet_set_mass(idObjEarth, 5.972e24)
 pw.physics.obj_planet_atmosphere_set_scaleheight(idObjEarth, 1.0e4) -- Barometric formula, every 1km, pressure is reduced by factor ~2.7 (e)
 pw.physics.obj_planet_atmosphere_set_pressure_at_ground(idObjEarth, 1.0e5) -- 100 kPa
 pw.physics.obj_set_name(idObjEarth, "Earth")
+pw.physics.obj_set_inertia(idObjEarth, 8.008e37)
 pw.physics.obj_set_position(idObjEarth, 0.0, -6000000.0)
 pw.physics.obj_set_velocity(idObjEarth, 2000.0, 0.0)
 -- pw.physics.obj_set_angle(idObjEarth, math.rad(20))

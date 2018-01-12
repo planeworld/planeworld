@@ -1604,6 +1604,73 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Cell Y"}},
                                            "physics", "physics"
                                          );
+        m_pComInterface->registerFunction("obj_set_com",
+                                          CCommand<void, int, double, double>(
+                                            [&](const int _nUID, const double& _fX, const double& _fY)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->getGeometry()->setCOM(Vector2d(_fX, _fY));
+                                                    pObj->init();
+                                                }
+                                            }),
+                                          "Sets COM (center of mass) of a given object. Disables automatic calculation.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "COM X"},
+                                           {ParameterType::DOUBLE, "COM Y"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_set_com_auto",
+                                          CCommand<void, int>(
+                                            [&](const int _nUID)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->getGeometry()->enableAutoCOM();
+                                                    pObj->init();
+                                                }
+                                            }),
+                                          "Enables automatic calculation of COM (center of mass) of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_set_inertia",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fInertia)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->getGeometry()->setInertia(_fInertia);
+                                                    pObj->init();
+                                                }
+                                            }),
+                                          "Sets inertia of a given object. Disables automatic calculation.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"},
+                                           {ParameterType::DOUBLE, "Inertia"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("obj_set_inertia_auto",
+                                          CCommand<void, int>(
+                                            [&](const int _nUID)
+                                            {
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    pObj->getGeometry()->enableAutoInertia();
+                                                    pObj->init();
+                                                }
+                                            }),
+                                          "Enables automatic calculation of inertia of a given object.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Object UID"}},
+                                           "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("obj_set_name",
                                           CCommand<void, int, std::string>(
                                             [&](const int _nUID, const std::string& _strName)
