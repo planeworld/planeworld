@@ -113,7 +113,8 @@ void CThruster::execute()
     {
         if (m_hObject.isValid())
         {
-            m_hObject.get()->addForceLC(Vector2d(0.0,m_fThrust), m_KinematicsState.getLocalOrigin());
+            Rotation2Dd Rot(m_KinematicsState.getLocalAngle());
+            m_hObject.get()->addForceLC(Rot*Vector2d(0.0,m_fThrust), m_KinematicsState.getLocalOrigin());
         }
     }
 }

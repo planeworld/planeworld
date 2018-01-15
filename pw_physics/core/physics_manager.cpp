@@ -1862,6 +1862,39 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DYN_ARRAY, "Vertices (x0, y0, x1, y1, ... xN, yN)"}},
                                            "system", "physics"
                                          );
+        m_pComInterface->registerFunction("thruster_set_angle",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fAngle)
+                                            {
+                                                CThruster* pThruster= m_pDataStorage->getThrusterByValue(_nUID);
+                                                if (pThruster != nullptr)
+                                                {
+                                                    pThruster->setAngle(_fAngle);
+                                                }
+                                            }),
+                                          "Sets angle for thruster (angle of attack for generated force).",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Thruster UID"},
+                                           {ParameterType::DOUBLE, "Angle"}},
+                                          "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("thruster_set_origin",
+                                          CCommand<void, int, double, double>(
+                                            [&](const int _nUID, const double& _fX, const double& _fY)
+                                            {
+                                                CThruster* pThruster= m_pDataStorage->getThrusterByValue(_nUID);
+                                                if (pThruster != nullptr)
+                                                {
+                                                    pThruster->setOrigin(Vector2d(_fX, _fY));
+                                                }
+                                            }),
+                                          "Sets origin for thruster (point of attack for generated force).",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Thruster UID"},
+                                           {ParameterType::DOUBLE, "Origin X"},
+                                           {ParameterType::DOUBLE, "Origin Y"}},
+                                          "physics", "physics"
+                                         );
         m_pComInterface->registerFunction("thruster_set_thrust_max",
                                           CCommand<void, int, double>(
                                             [&](const int _nUID, const double& _fThrustMax)
