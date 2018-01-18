@@ -1298,10 +1298,6 @@ void CPhysicsManager::myInitComInterface()
                                                 {
                                                     fAngle = pObj->getAngle();
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                                 return fAngle;
                                               }),
                                           "Returns angle of a given object.",
@@ -1318,10 +1314,6 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr)
                                                 {
                                                     fAngVel = pObj->getAngleVelocity();
-                                                }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                                 return fAngVel;
                                               }),
@@ -1340,10 +1332,6 @@ void CPhysicsManager::myInitComInterface()
                                                 {
                                                     vecCell = pObj->getCell();
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                                 return vecCell;
                                               }),
                                           "Returns cell of object with given uid.",
@@ -1360,10 +1348,6 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr)
                                                 {
                                                     vecCOM = pObj->getCOM();
-                                                }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                                 return vecCOM;
                                               }),
@@ -1403,10 +1387,6 @@ void CPhysicsManager::myInitComInterface()
                                                 {
                                                     vecPosition = pObj->getOrigin();
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                                 return vecPosition;
                                               }),
                                           "Returns position of a given object.",
@@ -1424,10 +1404,6 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr && pObjRef != nullptr)
                                                 {
                                                     vecPosition = pObj->getKinematicsState().getOriginReferredTo(pObjRef->getKinematicsState());
-                                                }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                                 return vecPosition;
                                               }),
@@ -1447,10 +1423,6 @@ void CPhysicsManager::myInitComInterface()
                                                 {
                                                     vecVelocity = pObj->getVelocity();
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                                 return vecVelocity;
                                               }),
                                           "Returns velocity of a given object.",
@@ -1468,10 +1440,6 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr && pObjRef != nullptr)
                                                 {
                                                     vecVelocity = pObj->getKinematicsState().getVelocityReferredTo(pObjRef->getKinematicsState());
-                                                }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
                                                 return vecVelocity;
                                               }),
@@ -1770,10 +1738,6 @@ void CPhysicsManager::myInitComInterface()
                                                 {
                                                     pShp->setMass(_fMass);
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                             }),
                                           "Set mass of shape with given UID.",
                                           {{ParameterType::NONE, "No return value"},
@@ -1785,7 +1749,7 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<void, int, std::string>(
                                             [&](const int _nUID, const std::string& _strType)
                                             {
-                                                IShape* pShp = m_pDataStorage->getShapesByValue()->at(_nUID);
+                                                IShape* pShp = m_pDataStorage->getShapeByValue(_nUID);
                                                 if (pShp != nullptr)
                                                 {
                                                     if (pShp->getShapeType() == ShapeType::POLYGON)
@@ -1798,10 +1762,6 @@ void CPhysicsManager::myInitComInterface()
                                                         throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                     }    
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                             }),
                                           "Set polygon type of shape (if applicable) with given UID.",
                                           {{ParameterType::NONE, "No return value"},
@@ -1813,7 +1773,7 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<void, int, double>(
                                             [&](const int _nUID, const double& _fRad)
                                             {
-                                                IShape* pShp = m_pDataStorage->getShapesByValue()->at(_nUID);
+                                                IShape* pShp = m_pDataStorage->getShapeByValue(_nUID);
                                                 if (pShp != nullptr)
                                                 {
                                                     switch (pShp->getShapeType())
@@ -1833,10 +1793,6 @@ void CPhysicsManager::myInitComInterface()
                                                             throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                     }
                                                 }
-                                                else
-                                                {
-                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
-                                                }
                                             }),
                                           "Set radius of shape (if applicable) with given UID.",
                                           {{ParameterType::NONE, "No return value"},
@@ -1848,7 +1804,7 @@ void CPhysicsManager::myInitComInterface()
                                           CCommand<void, int, std::vector<double>>(
                                                 [&](const int _nUID, const std::vector<double>& _vecVerts)
                                                 {
-                                                    IShape* pShp = m_pDataStorage->getShapesByValue()->at(_nUID);
+                                                    IShape* pShp = m_pDataStorage->getShapeByValue(_nUID);
                                                     if (pShp != nullptr)
                                                     {
                                                         if (pShp->getShapeType() == ShapeType::POLYGON)
@@ -1871,10 +1827,6 @@ void CPhysicsManager::myInitComInterface()
                                                             WARNING_MSG("World Data Storage", "Wrong shape type of shape with UID <" << _nUID << ">")
                                                             throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                         }
-                                                    }
-                                                    else
-                                                    {
-                                                        throw CComInterfaceException(ComIntExceptionType::PARAM_ERROR);
                                                     }
                                                 }),
                                           "Set vertices of shape (if applicable) with given UID.",
