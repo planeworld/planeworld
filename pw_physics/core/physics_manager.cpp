@@ -1351,6 +1351,27 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Object's UID"}},
                                            "physics"
                                          );
+        m_pComInterface->registerFunction("obj_get_com",
+                                          CCommand<Vector2d, int>(
+                                              [&](const int _nUID) -> const Vector2d
+                                              {
+                                                Vector2d vecCOM; vecCOM.setZero();
+                                                CObject* pObj = m_pDataStorage->getObjectByValueBack(_nUID);
+                                                if (pObj != nullptr)
+                                                {
+                                                    vecCOM = pObj->getCOM();
+                                                }
+                                                else
+                                                {
+                                                    throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
+                                                }
+                                                return vecCOM;
+                                              }),
+                                          "Returns center of mass (COM) of a given object.",
+                                          {{ParameterType::VEC2DDOUBLE, "Center of mass (COM) (x, y)"},
+                                           {ParameterType::INT, "Object UID"}},
+                                           "physics"
+                                         );
         m_pComInterface->registerFunction("obj_get_inertia",
                                           CCommand<double, int>(
                                               [&](const int _nUID) -> double
