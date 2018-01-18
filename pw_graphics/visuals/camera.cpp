@@ -169,8 +169,20 @@ const double& CCamera::getBoundingCircleRadius()
 void CCamera::setPosition(const double& _fX, const double& _fY)
 {
     METHOD_ENTRY("CCamera::setPosition")
-
     m_KinematicsState.setOrigin(Vector2d(_fX, _fY));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the local position of the camera
+///
+/// \param _vecV Position
+///
+///////////////////////////////////////////////////////////////////////////////
+void CCamera::setPosition(const Vector2d& _vecV)
+{
+    METHOD_ENTRY("CCamera::setPosition")
+    m_KinematicsState.setOrigin(_vecV);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

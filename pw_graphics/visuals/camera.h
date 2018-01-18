@@ -68,6 +68,8 @@ class CCamera : public CGraphicsBase,
         //--- Constant Methods -----------------------------------------------//
         const Vector2d      getCenter() const;
         double              getAngle() const;
+        double              getViewportWidth() const {return 2.0 * m_fViewportWidth;}
+        double              getViewportHeight() const {return 2.0 * m_fViewportHeight;}
         const double&       getZoom() const;
         
         //--- Methods --------------------------------------------------------//
@@ -75,6 +77,7 @@ class CCamera : public CGraphicsBase,
         const double&       getBoundingCircleRadius();
         
         void setPosition(const double&, const double&);
+        void setPosition(const Vector2d&);
         void setViewport(const double&, const double&);
         
         void update();

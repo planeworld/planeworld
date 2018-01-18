@@ -2098,6 +2098,49 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE,"No return value"}},
                                       "system", "visuals"
     );
+    m_pComInterface->registerFunction("cam_fit_object",
+                                      CCommand<void, int>([&](const int _nUID)
+                                      {
+                                          UIDType nUIDCam = 0;
+                                          if (m_pVisualsDataStorage->getCamerasByIndex().size() != 0)
+                                          {
+                                               nUIDCam = (m_pVisualsDataStorage->getCamerasByIndex()[m_unCameraIndex])->getUID();
+                                          }
+                                          CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(nUIDCam);
+                                          if (pCam != nullptr)
+                                          {
+                                            CObject* pObject = m_pDataStorage->getObjectByValueFront(_nUID);
+                                            if (pObject != nullptr)    
+                                            {
+                                                pCam->setCell(pObject->getCell());
+                                                pCam->setPosition(pObject->getKinematicsState().getOriginReferredTo(
+                                                                    *(pCam->getKinematicsState().getRef()->get())) +
+                                                                  pObject->getGeometry()->getCOM());
+                                                double fCam = 1.0;
+                                                double fObj = 1.0;
+                                                if (pCam->getViewportWidth() > pCam->getViewportHeight())
+                                                {
+                                                    fCam = pCam->getViewportHeight();
+                                                }
+                                                else
+                                                {
+                                                    fCam = pCam->getViewportWidth();
+                                                }
+                                                fObj = std::sqrt(
+                                                            pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getHeight()*
+                                                            pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getHeight() + 
+                                                            pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth()*
+                                                            pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth());
+                                                pCam->zoomTo(fCam/fObj);
+                                                
+                                            }
+                                          }
+                                      }),
+                                      "Adjust main camera for given object to fit viewport.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Object UID"}},
+                                      "system", "visuals"  
+    );
     m_pComInterface->registerFunction("cam_get_position",
                                       CCommand<Vector2d>([&]() -> Vector2d{return m_pCamera->getCenter();}),
                                       "Get the global position of currently active camera",
