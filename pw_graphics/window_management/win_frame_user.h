@@ -43,6 +43,14 @@
 const bool WIN_INHERIT = true;
 const bool WIN_NO_INHERIT = false;
 
+/// Specifies the style of the frame
+enum class FrameStyleType
+{
+    BORDERLESS,     // Only background
+    DEFAULT,        // Border and background
+    NO_BACKGROUND,  // Only border
+    PLAIN           // No border, no background
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -69,6 +77,7 @@ class IWinFrameUser : virtual public CGraphicsBase,
         void resize(const int, const int);
         void setColorBG(const ColorTypeRGBA&, const bool);
         void setColorFG(const ColorTypeRGBA&, const bool);
+        void setFrameStyle(const FrameStyleType);
         void setPosition(const int, const int);
         
     protected:
@@ -82,6 +91,7 @@ class IWinFrameUser : virtual public CGraphicsBase,
         //--- Variables [protected] ------------------------------------------//
         ColorTypeRGBA   m_WinColorBG;    ///< Background colour for this window frame
         ColorTypeRGBA   m_WinColorFG;    ///< Foreground colour for this window frame
+        FrameStyleType  m_FrameStyle;    ///< Style of this frame
         int             m_nFrameBorderX; ///< Inner frame, border left/right
         int             m_nFrameBorderY; ///< Inner frame, border top/bottom
         int             m_nFramePosX;    ///< X position of top left corner
@@ -90,6 +100,39 @@ class IWinFrameUser : virtual public CGraphicsBase,
         int             m_nFrameHeight;  ///< Height of window
 
 };
+
+//--- Enum parser ------------------------------------------------------------//
+const std::map<FrameStyleType, std::string> mapFrameStyleToString = {
+    {FrameStyleType::BORDERLESS, "borderless"},
+    {FrameStyleType::DEFAULT, "default"},
+    {FrameStyleType::NO_BACKGROUND, "no_background"},
+    {FrameStyleType::PLAIN, "plain"}
+}; ///< Map from FrameStyleType to string
+
+const std::map<std::string, FrameStyleType> STRING_TO_FRAME_STYLE_TYPE_MAP = {
+    {"borderless", FrameStyleType::BORDERLESS},
+    {"default", FrameStyleType::DEFAULT},
+    {"no_background", FrameStyleType::NO_BACKGROUND},
+    {"plain", FrameStyleType::PLAIN}
+}; ///< Map from string to Emitter
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Maps given string to FrameStyleType
+///
+/// \return FrameStyleType
+///
+////////////////////////////////////////////////////////////////////////////////
+static FrameStyleType mapStringToFrameStyleType(const std::string& _strS)
+{
+    METHOD_ENTRY("mapStringToFrameStyleType")
+    
+    const auto ci = STRING_TO_FRAME_STYLE_TYPE_MAP.find(_strS);
+    if (ci != STRING_TO_FRAME_STYLE_TYPE_MAP.end())
+        return ci->second;
+    else
+        return FrameStyleType::DEFAULT;
+}
 
 //--- Implementation is done here for inline optimisation --------------------//
 
@@ -145,6 +188,20 @@ inline void IWinFrameUser::setColorFG(const ColorTypeRGBA& _RGBA, const bool _bI
         this->mySetColorFG(_RGBA);
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the style of this frame
+///
+/// \param _FrameStyle Frame style
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IWinFrameUser::setFrameStyle(const FrameStyleType _FrameStyle)
+{
+    METHOD_ENTRY("IWinFrameUser::setFrameStyle")
+    m_FrameStyle = _FrameStyle;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

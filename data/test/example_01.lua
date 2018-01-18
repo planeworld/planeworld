@@ -61,8 +61,10 @@ pw.system.cam_attach_to(idCam01, idObjEarth)
 idWin01=pw.system.create_window()
 idWdg01=pw.system.create_widget("text")
 pw.system.widget_set_text(idWdg01, "\n\n\nWelcome to planeworld, press p to start")
+pw.system.widget_set_frame_style(idWdg01, "no_background")
 pw.system.win_set_widget(idWin01, idWdg01)
 pw.system.win_set_title(idWin01, "Start Simulation")
+pw.system.win_set_frame_style(idWin01, "borderless")
 pw.system.win_center_keep(idWin01)
 Win01_Open = true
 

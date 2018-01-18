@@ -1973,6 +1973,8 @@ void CVisualsManager::myInitComInterface()
     // Register additional domain for initialisation
     m_pComInterface->registerWriterDomain("visuals_pre_init");
     
+    std::ostringstream ossFrameStyle("");
+    for (auto FrameStyle : STRING_TO_FRAME_STYLE_TYPE_MAP) ossFrameStyle << " " << FrameStyle.first;
     std::ostringstream ossWidgetType("");
     for (auto WidgetType : STRING_TO_WIDGET_TYPE_MAP) ossWidgetType << " " << WidgetType.first;
     
@@ -2545,6 +2547,22 @@ void CVisualsManager::myInitComInterface()
                                       {ParameterType::INT, "Camera UID"}},
                                       "system","visuals"
     );
+    m_pComInterface->registerFunction("widget_set_frame_style",
+                                      CCommand<void, int, std::string>(
+                                          [&](const int _nUID, const std::string _strFrameStyle)
+                                            {
+                                                IWidget* pWidget = m_pVisualsDataStorage->getWidgetByValue(_nUID);
+                                                if (pWidget != nullptr)
+                                                {
+                                                    pWidget->setFrameStyle(mapStringToFrameStyleType(_strFrameStyle));
+                                                }
+                                            }),
+                                      "Sets frame style of widget.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Widget UID"},
+                                      {ParameterType::STRING, "Frame style  (" + ossFrameStyle.str() + ")"}},
+                                      "system","visuals"
+    );
     m_pComInterface->registerFunction("widget_set_text",
                                       CCommand<void, int, std::string>(
                                           [&](const int _nUID, const std::string _strText)
@@ -2597,6 +2615,22 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"},
                                       {ParameterType::INT, "Widget UID"},
                                       {ParameterType::DOUBLE, "Camera display transparency"}},
+                                      "system","visuals"
+    );
+    m_pComInterface->registerFunction("win_set_frame_style",
+                                      CCommand<void, int, std::string>(
+                                          [&](const int _nUID, const std::string _strFrameStyle)
+                                            {
+                                                CWindow* pWin = m_pVisualsDataStorage->getWindowByValue(_nUID);
+                                                if (pWin != nullptr)
+                                                {
+                                                    pWin->setFrameStyle(mapStringToFrameStyleType(_strFrameStyle));
+                                                }
+                                            }),
+                                      "Sets frame style of window.",
+                                      {{ParameterType::NONE, "No return value"},
+                                      {ParameterType::INT, "Window UID"},
+                                      {ParameterType::STRING, "Frame style  (" + ossFrameStyle.str() + ")"}},
                                       "system","visuals"
     );
     m_pComInterface->registerFunction("win_set_title",

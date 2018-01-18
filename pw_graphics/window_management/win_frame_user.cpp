@@ -42,6 +42,7 @@ IWinFrameUser::IWinFrameUser() : CGraphicsBase(),
                                  IUIDUser(),
                                  m_WinColorBG({{0.1, 0.1, 0.1, 0.75}}),
                                  m_WinColorFG({{0.3, 0.3, 0.3, 0.75}}),
+                                 m_FrameStyle(FrameStyleType::DEFAULT),
                                  m_nFrameBorderX(5),
                                  m_nFrameBorderY(5),
                                  m_nFramePosX(0),
@@ -65,10 +66,16 @@ void IWinFrameUser::drawFrame()
     METHOD_ENTRY("IWinFrameUser::drawFrame")
     
     // Draw frame
-    m_Graphics.setColor(m_WinColorBG);
-    m_Graphics.filledRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                          Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
-    m_Graphics.setColor(m_WinColorFG);
-    m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
-                    Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+    if (m_FrameStyle == FrameStyleType::DEFAULT || m_FrameStyle == FrameStyleType::BORDERLESS)
+    {
+        m_Graphics.setColor(m_WinColorBG);
+        m_Graphics.filledRect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                              Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+    }
+    if (m_FrameStyle == FrameStyleType::DEFAULT || m_FrameStyle == FrameStyleType::NO_BACKGROUND)
+    {
+        m_Graphics.setColor(m_WinColorFG);
+        m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+m_nFrameHeight),
+                        Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+    }
 }

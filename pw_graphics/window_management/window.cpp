@@ -160,10 +160,13 @@ void CWindow::draw()
             this->drawFrame();
             
             // Draw title frame
-            m_Graphics.setColor(m_WinColorFG);
-            int nSpacing = Title.getFontSize();
-            m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
-                            Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+            if (m_FrameStyle == FrameStyleType::DEFAULT || m_FrameStyle == FrameStyleType::NO_BACKGROUND)
+            {
+                m_Graphics.setColor(m_WinColorFG);
+                int nSpacing = Title.getFontSize();
+                m_Graphics.rect(Vector2d(m_nFramePosX, m_nFramePosY+nSpacing),
+                                Vector2d(m_nFramePosX+m_nFrameWidth, m_nFramePosY));
+            }
             
             m_Graphics.setColor(0.7, 0.3, 0.3, 1.0);
             // Draw close button area
