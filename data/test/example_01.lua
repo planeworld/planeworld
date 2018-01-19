@@ -124,6 +124,7 @@ idThruster01 = pw.system.create_thruster()
 pw.system.thruster_set_object(idThruster01, idObj01)
 pw.system.thruster_add_emitter(idThruster01, idEm01)
 pw.system.thruster_add_emitter(idThruster01, idEm02)
+pw.physics.thruster_set_angle(idThruster01, math.rad(90))
 pw.physics.thruster_set_thrust_max(idThruster01, 100.0)
 pw.sim.thruster_activate(idThruster01, 50.0)
 
