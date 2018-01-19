@@ -1,8 +1,0 @@
-<!DOCTYPE PlaneworldML>
-<shape 
-    type="shape_circle"
-    mass="1.0"
-    radius="10.0"
-    center_x="0.0"
-    center_y="0.0">
-</shape>
