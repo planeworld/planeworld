@@ -938,6 +938,7 @@ UIDType CVisualsManager::createCamera(const CreationModeType _pMode)
     }
     else
     {
+        m_CamCreationLock.lock();
         m_CamerasQueue.try_enqueue(pCam);
     }
     return pCam->getUID();
@@ -1192,6 +1193,7 @@ void CVisualsManager::addCamerasFromQueue()
     {
         m_pVisualsDataStorage->addCamera(pCam);
     }
+    m_CamCreationLock.unlock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2103,47 +2105,55 @@ void CVisualsManager::myInitComInterface()
     m_pComInterface->registerFunction("cam_fit_object",
                                       CCommand<void, int>([&](const int _nUID)
                                       {
+                                          m_CamCreationLock.lock();
                                           UIDType nUIDCam = 0;
                                           if (m_pVisualsDataStorage->getCamerasByIndex().size() != 0)
                                           {
                                                nUIDCam = (m_pVisualsDataStorage->getCamerasByIndex()[m_unCameraIndex])->getUID();
                                           }
-                                          CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(nUIDCam);
-                                          if (pCam != nullptr)
+                                          if (nUIDCam != 0)
                                           {
-                                            CObject* pObject = m_pDataStorage->getObjectByValueFront(_nUID);
-                                            if (pObject != nullptr)    
-                                            {
-                                                pCam->setCell(pObject->getCell());
-                                                if (pCam->getKinematicsState().getRef()->isValid())
+                                                CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(nUIDCam);
+                                                if (pCam != nullptr)
                                                 {
-                                                    pCam->setPosition(pObject->getKinematicsState().getOriginReferredTo(
-                                                                        *(pCam->getKinematicsState().getRef()->get())) +
-                                                                        pObject->getGeometry()->getCOM());
+                                                    CObject* pObject = m_pDataStorage->getObjectByValueFront(_nUID);
+                                                    if (pObject != nullptr)    
+                                                    {
+                                                        pCam->setCell(pObject->getCell());
+                                                        if (pCam->getKinematicsState().getRef()->isValid())
+                                                        {
+                                                            pCam->setPosition(pObject->getKinematicsState().getOriginReferredTo(
+                                                                                *(pCam->getKinematicsState().getRef()->get())) +
+                                                                                pObject->getGeometry()->getCOM());
+                                                        }
+                                                        else
+                                                        {
+                                                            pCam->setPosition(pObject->getCOM());
+                                                        }
+                                                        double fCam = 1.0;
+                                                        double fObj = 1.0;
+                                                        if (pCam->getViewportWidth() > pCam->getViewportHeight())
+                                                        {
+                                                            fCam = pCam->getViewportHeight();
+                                                        }
+                                                        else
+                                                        {
+                                                            fCam = pCam->getViewportWidth();
+                                                        }
+                                                        fObj = std::sqrt(
+                                                                    pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getHeight()*
+                                                                    pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getHeight() + 
+                                                                    pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth()*
+                                                                    pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth());
+                                                        pCam->zoomTo(fCam/fObj);
+                                                    }
                                                 }
-                                                else
-                                                {
-                                                    pCam->setPosition(pObject->getCOM());
-                                                }
-                                                double fCam = 1.0;
-                                                double fObj = 1.0;
-                                                if (pCam->getViewportWidth() > pCam->getViewportHeight())
-                                                {
-                                                    fCam = pCam->getViewportHeight();
-                                                }
-                                                else
-                                                {
-                                                    fCam = pCam->getViewportWidth();
-                                                }
-                                                fObj = std::sqrt(
-                                                            pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getHeight()*
-                                                            pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getHeight() + 
-                                                            pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth()*
-                                                            pObject->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth());
-                                                pCam->zoomTo(fCam/fObj);
-                                                
                                             }
-                                          }
+                                            else
+                                            {
+                                                WARNING_MSG("Visuals manager", "No camera defined yet.")
+                                            }
+                                            m_CamCreationLock.unlock();
                                       }),
                                       "Adjust main camera for given object to fit viewport.",
                                       {{ParameterType::NONE, "No return value"},
@@ -2170,6 +2180,7 @@ void CVisualsManager::myInitComInterface()
     m_pComInterface->registerFunction("cam_get_zoom",
                                       CCommand<double, int>([&](const int _nUID) -> double
                                       {
+//                                           while (m_bCamCreation) {}
                                           if (_nUID != 0)
                                           {
                                             CCamera* pCam = m_pVisualsDataStorage->getCameraByValue(_nUID);

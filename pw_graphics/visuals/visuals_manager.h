@@ -183,6 +183,8 @@ class CVisualsManager : virtual public CGraphicsBase,
         bool                            m_bCursor;          ///< Indicates if mouse cursor is enabled
         bool                            m_bMBLeft;          ///< Left mouse button
         
+        CSpinlock                       m_CamCreationLock;
+        
         CamerasQueueType                m_CamerasQueue;     ///< Queue of new cameras to be added to storage
         WidgetsQueueType                m_WidgetsQueue;     ///< Queue of new widgets to be added to storage
         WindowsQueueType                m_WindowsQueue;     ///< Queue of new windows to be added to storage

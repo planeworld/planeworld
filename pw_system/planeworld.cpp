@@ -248,43 +248,68 @@ int main(int argc, char *argv[])
                                     {{ParameterType::NONE, "No return value"}},
                                     "system", "main"
     );
-    
+    ComInterface.registerFunction("init_physics",
+                                    CCommand<void>([&]()
+                                    {
+                                        GameStateManager.setWorldDataStorage(&WorldDataStorage);
+                                        pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
+                                        #ifdef PW_MULTITHREADING    
+                                            pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
+                                            MEM_ALLOC("std::thread")
+                                        #endif
+                                    }
+                                    ),
+                                    "Initialise physics module, start thread if in multithreading mode.",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system"
+    );
+    ComInterface.registerFunction("init_visuals",
+                                    CCommand<void>([&]()
+                                    {
+                                        //--------------------------------------------------------------------------
+                                        // Initialize window and graphics
+                                        //--------------------------------------------------------------------------
+                                        pVisualsManager->setWorldDataStorage(&WorldDataStorage);
+                                        pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
+                                        
+                                        // X11 need special care when for threaded graphics
+                                        #ifdef __linux__
+                                            XInitThreads();
+                                        #endif
+                                            
+                                        // Window initialisation has to be done before lua scripting starts, since
+                                        // GL-based window functions rely on an existing window.
+                                        pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),"Planeworld", sf::Style::Default,
+                                                                    sf::ContextSettings(24,8,4,4,2,sf::ContextSettings::Core)
+                                                                    );
+                                        MEM_ALLOC("WindowHandleType")
+                                        
+                                        pInputManager->setWindow(pWindow);
+                                        pVisualsManager->setWindow(pWindow);
+                                        
+                                        pVisualsManager->init();
+                                        #ifdef PW_MULTITHREADING
+                                            pWindow->setActive(false);
+                                            pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);
+                                            MEM_ALLOC("std::thread")
+                                        #endif
+                                    }
+                                    ),
+                                    "Initialise visuals module, start thread if in multithreading mode.",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system"
+    );
+    pInputManager->initComInterface(&ComInterface, "input");
     pLuaManager->initComInterface(&ComInterface, "lua");
     pPhysicsManager->initComInterface(&ComInterface, "physics");
-    if (bGraphics)
-    {
-        pInputManager->initComInterface(&ComInterface, "input");
-        pVisualsManager->initComInterface(&ComInterface, "visuals");
-    }
+    pVisualsManager->initComInterface(&ComInterface, "visuals");
     
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 4. Prepare engine managers
     //
     ////////////////////////////////////////////////////////////////////////////
-    GameStateManager.setWorldDataStorage(&WorldDataStorage);
-    pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
-    if (bGraphics)
-    {
-        //--------------------------------------------------------------------------
-        // Initialize window and graphics
-        //--------------------------------------------------------------------------
-        
-        pVisualsManager->setWorldDataStorage(&WorldDataStorage);
-        pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
-        // X11 need special care when for threaded graphics
-        #ifdef __linux__
-            XInitThreads();
-        #endif
-            
-        // Window initialisation has to be done before lua scripting starts, since
-        // GL-based window functions rely on an existing window.
-        pWindow = new WindowHandleType(sf::VideoMode(Graphics.getWidthScr(), Graphics.getHeightScr()),"Planeworld", sf::Style::Default,
-                                       sf::ContextSettings(24,8,4,4,2,sf::ContextSettings::Core)
-                                      );
-        MEM_ALLOC("WindowHandleType")
-        pVisualsManager->setWindow(pWindow);
-    }
+    
     
     //////////////////////////////////////////////////////////////////////////// 
     //
@@ -296,27 +321,11 @@ int main(int argc, char *argv[])
     {
         CLEAN_UP; return EXIT_FAILURE;
     }
-    pVisualsManager->init();
-    
-    #ifdef PW_MULTITHREADING
-        pWindow->setActive(false);
-    #endif
-    
-    //////////////////////////////////////////////////////////////////////////// 
-    //
-    // 6. Start physics
-    //
-    ////////////////////////////////////////////////////////////////////////////
     #ifdef PW_MULTITHREADING    
-        pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
+        pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);
         MEM_ALLOC("std::thread")
     #endif
-        
-    //////////////////////////////////////////////////////////////////////////// 
-    //
-    // 7. Start graphcis
-    //
-    ////////////////////////////////////////////////////////////////////////////
+    
     #ifndef PW_MULTITHREADING
         auto nFrame = 0u;
     #endif
@@ -325,17 +334,6 @@ int main(int argc, char *argv[])
     Timer.start();
     if (bGraphics)
     {
-        pInputManager->setWindow(pWindow);
-        
-        #ifdef PW_MULTITHREADING
-            pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);
-            MEM_ALLOC("std::thread")
-        #endif
-
-        #ifdef PW_MULTITHREADING    
-            pLuaThread = new std::thread(&CLuaManager::run, pLuaManager);
-            MEM_ALLOC("std::thread")
-        #endif
         
         //////////////////////////////////////////////////////////////////////// 
         //

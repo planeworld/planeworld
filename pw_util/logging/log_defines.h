@@ -237,9 +237,9 @@
                                     std::ostringstream oss(""); \
                                     oss << a; \
                                     Log.log("Destructor called", oss.str(), LOG_LEVEL_DEBUG, LOG_DOMAIN_DESTRUCTOR, true);)
-    #define METHOD_ENTRY(a)         CLogMethodHelper ___LOGGING_ENTRY_EXIT_(a);
-    #define METHOD_ENTRY_QUIET(a)   CLogMethodHelper ___LOGGING_ENTRY_EXIT_(a, true);
-    #define METHOD_EXIT(a)          ;
+    #define METHOD_ENTRY(a)         DOM_MENT(CLogMethodHelper ___LOGGING_ENTRY_EXIT_(a);)
+    #define METHOD_ENTRY_QUIET(a)   DOM_MENT(CLogMethodHelper ___LOGGING_ENTRY_EXIT_(a, true);)
+    #define METHOD_EXIT(a)          DOM_MEXT(;)
     #define MEM_ALLOC(a)            DOM_MEMA( \
                                     std::ostringstream oss(""); \
                                     oss << a; \

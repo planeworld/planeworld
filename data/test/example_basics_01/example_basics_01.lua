@@ -18,6 +18,10 @@ pw.system.set_frequency_visuals(60)
 pw.system.set_data_path_visuals("../")
 pw.system.create_universe(23479, 10000)
 -- pw.physics.set_gravity_vector(0.0, -9.81)
+
+pw.system.init_visuals()
+pw.system.init_physics()
+
 pw.visuals.toggle_grid()
 pw.system.toggle_fullscreen()
 
