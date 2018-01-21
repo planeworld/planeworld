@@ -2115,9 +2115,16 @@ void CVisualsManager::myInitComInterface()
                                             if (pObject != nullptr)    
                                             {
                                                 pCam->setCell(pObject->getCell());
-                                                pCam->setPosition(pObject->getKinematicsState().getOriginReferredTo(
-                                                                    *(pCam->getKinematicsState().getRef()->get())) +
-                                                                  pObject->getGeometry()->getCOM());
+                                                if (pCam->getKinematicsState().getRef()->isValid())
+                                                {
+                                                    pCam->setPosition(pObject->getKinematicsState().getOriginReferredTo(
+                                                                        *(pCam->getKinematicsState().getRef()->get())) +
+                                                                        pObject->getGeometry()->getCOM());
+                                                }
+                                                else
+                                                {
+                                                    pCam->setPosition(pObject->getCOM());
+                                                }
                                                 double fCam = 1.0;
                                                 double fObj = 1.0;
                                                 if (pCam->getViewportWidth() > pCam->getViewportHeight())
