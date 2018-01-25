@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2017-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,6 +36,8 @@
 #include <chrono>
 
 //--- Program header ---------------------------------------------------------//
+#include "conf_pw.h"
+#include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -82,17 +84,19 @@ class CSpinlock
                 {
                     if (nIter < SPINLOCK_MAX_ITER)
                     {
-                        #if (COMPILER == MVCC)
+                        #if defined(_MSC_VER)
                             _mm_pause();
-                        #elif (COMPILER == GCC || COMPILER == LLVM)
+                        #elif defined(__clang__) || defined(__GNUC__)
                             asm("pause");
                         #endif
                         ++nIter;
+                        DOM_STATS(DEBUG_BLK(++s_Waits;))
                     }
                     else
                     {
                         using namespace std::chrono;
                         std::this_thread::sleep_for(500us);
+                        DOM_STATS(DEBUG_BLK(++s_Sleeps;))
                     }
                 }
             #endif
@@ -110,11 +114,31 @@ class CSpinlock
             #endif
         }
         
+        ////////////////////////////////////////////////////////////////////////
+        ///
+        /// \brief Wait for lock to be released 
+        ///
+        ////////////////////////////////////////////////////////////////////////
+        void wait()
+        {
+            #ifdef PW_MULTITHREADING
+                this->lock();
+                this->unlock();
+            #endif
+        }
+        
+        #ifdef PW_MULTITHREADING
+            static std::uint64_t getSleeps(){return s_Sleeps;}
+            static std::uint64_t getWaits(){return s_Waits;}
+        #endif
+        
     private:
         
         //--- Variables [private] --------------------------------------------//
         #ifdef PW_MULTITHREADING
             std::atomic_flag isAccessed = ATOMIC_FLAG_INIT; ///< Indicates access, important for multithreading
+            static std::uint64_t s_Sleeps;
+            static std::uint64_t s_Waits;
         #endif
 };
 
