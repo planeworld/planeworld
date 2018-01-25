@@ -86,6 +86,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_system/com_interface.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/lua_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/planeworld.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_system/spinlock.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/thread_module.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/uid.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/world_data_storage.cpp

@@ -66,66 +66,9 @@ class CSpinlock
         //--- Constant methods -----------------------------------------------//
 
         //--- Methods --------------------------------------------------------//
-        
-        ////////////////////////////////////////////////////////////////////////
-        ///
-        /// \brief Lock using atomic flag variable. 
-        ///
-        /// If lock is block try again SPINLOCK_MAX_ITER times while giving the
-        /// processor some hint (pause) to optimise pipelining, hyper threading
-        /// and bus frequency. If still blocked, sleep to free resources.
-        ///
-        ////////////////////////////////////////////////////////////////////////
-        void lock()
-        {
-            #ifdef PW_MULTITHREADING
-                int nIter = 0;
-                while (isAccessed.test_and_set(std::memory_order_acquire))
-                {
-                    if (nIter < SPINLOCK_MAX_ITER)
-                    {
-                        #if defined(_MSC_VER)
-                            _mm_pause();
-                        #elif defined(__clang__) || defined(__GNUC__)
-                            asm("pause");
-                        #endif
-                        ++nIter;
-                        DOM_STATS(DEBUG_BLK(++s_Waits;))
-                    }
-                    else
-                    {
-                        using namespace std::chrono;
-                        std::this_thread::sleep_for(500us);
-                        DOM_STATS(DEBUG_BLK(++s_Sleeps;))
-                    }
-                }
-            #endif
-        }
-    
-        ////////////////////////////////////////////////////////////////////////
-        ///
-        /// \brief Unlock using atomic flag variable. 
-        ///
-        ////////////////////////////////////////////////////////////////////////
-        void unlock()
-        {
-            #ifdef PW_MULTITHREADING
-                isAccessed.clear(std::memory_order_release);
-            #endif
-        }
-        
-        ////////////////////////////////////////////////////////////////////////
-        ///
-        /// \brief Wait for lock to be released 
-        ///
-        ////////////////////////////////////////////////////////////////////////
-        void wait()
-        {
-            #ifdef PW_MULTITHREADING
-                this->lock();
-                this->unlock();
-            #endif
-        }
+        void lock();
+        void unlock();
+        void wait();
         
         #ifdef PW_MULTITHREADING
             static std::uint64_t getSleeps(){return s_Sleeps;}
