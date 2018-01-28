@@ -57,7 +57,7 @@ CUniverse::~CUniverse()
     METHOD_ENTRY("CUniverse::~CUniverse");
     DTOR_CALL("CUniverse::~CUniverse");
     
-    Access.lock();
+    Access.acquireLock();
     
     for (auto pStarSystem : m_StarSystems)
     {
@@ -70,7 +70,7 @@ CUniverse::~CUniverse()
     }
     m_StarSystems.clear();
     
-    Access.unlock();
+    Access.releaseLock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
 {
     METHOD_ENTRY("CUniverse::generate")
     
-    Access.lock();
+    Access.acquireLock();
     
     CNameGenerator StarNameGenerator(_nSeed);
     const int nNrOfStarTypes=7;
@@ -189,7 +189,7 @@ void CUniverse::generate(const int& _nSeed, const int& _nNumberOfStars)
         Log.logSeparator();
     ))
     
-    Access.unlock();
+    Access.releaseLock();
     
     // Reserve memory for star object
 //     m_pStar = new CRigidBody;

@@ -183,8 +183,6 @@ class CVisualsManager : virtual public CGraphicsBase,
         bool                            m_bCursor;          ///< Indicates if mouse cursor is enabled
         bool                            m_bMBLeft;          ///< Left mouse button
         
-        CSpinlock                       m_CamCreationLock;
-        
         CamerasQueueType                m_CamerasQueue;     ///< Queue of new cameras to be added to storage
         WidgetsQueueType                m_WidgetsQueue;     ///< Queue of new widgets to be added to storage
         WindowsQueueType                m_WindowsQueue;     ///< Queue of new windows to be added to storage
@@ -199,12 +197,14 @@ class CVisualsManager : virtual public CGraphicsBase,
         
         CFontManager                    m_FontManager;      ///< Font manager for displaying UI text
         CUIDVisuals                     m_UIDVisuals;       ///< Graphical display of UIDs
-        CText                           m_TextParticle;       ///< Text object for particle names
+        CText                           m_TextParticle;     ///< Text object for particle names
         CText                           m_TextDebugInfo;    ///< Text object for debug information
         CText                           m_TextObjects;      ///< Text object for object names
         CText                           m_TextScale;        ///< Text object for universe scale
         CText                           m_TextTimers;       ///< Text object for timers
         CText                           m_TextStarSystems;  ///< Text object for Star Systems
+        
+        CSpinlock                       m_CreatorLock;      ///< Indicates if objects might be created
         
 };
 

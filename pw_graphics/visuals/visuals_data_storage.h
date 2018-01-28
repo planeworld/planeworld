@@ -39,6 +39,7 @@
 #include "camera.h"
 #include "com_console.h"
 #include "com_interface.h"
+#include "spinlock.h"
 #include "uid_visuals_user.h"
 #include "widget.h"
 #include "window.h"
@@ -93,7 +94,6 @@ class CVisualsDataStorage : public IComInterfaceUser,
         const CamerasByValueType&       getCamerasByValue() const;
         const CameraWidgetsByValueType& getCameraWidgets() const {return m_CameraWidgetsByValue;}
         CComConsole*                    getComConsole() const;
-        CCamera*                        getCameraByValue(const UIDType) const;
         IWidget*                        getWidgetByValue(const UIDType) const;
         CWindow*                        getWindowByValue(const UIDType) const;
         const WidgetsByValueType*       getWidgetsByValue() const;
@@ -109,7 +109,8 @@ class CVisualsDataStorage : public IComInterfaceUser,
         void releaseCenteredWindow(const UIDType);
         
         bool closeWindow(const UIDType);
-        
+
+        CCamera*         getCameraByValue(const UIDType);
         WindowOrderType* getWindowUIDsInOrder() {return &m_WindowsOrder;}
 
         void setFontManager(CFontManager* const _pFontManager) {m_pFontManager = _pFontManager;}
@@ -117,6 +118,9 @@ class CVisualsDataStorage : public IComInterfaceUser,
         //--- friends --------------------------------------------------------//
         friend std::istream& operator>>(std::istream&, CVisualsDataStorage&);
         friend std::ostream& operator<<(std::ostream&, CVisualsDataStorage&);
+        
+        //--- Variables ------------------------------------------------------//
+        CSpinlock AccessCameras;
         
     private:
       

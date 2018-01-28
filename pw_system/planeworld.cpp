@@ -406,12 +406,16 @@ int main(int argc, char *argv[])
             }
         #endif
     }
+    
       
     #ifdef PW_MULTITHREADING
         pLuaManager->terminate();
         pLuaThread->join();
         pPhysicsManager->terminate();
         pPhysicsThread->join();
+        DOM_STATS(DEBUG_MSG("main", "Spinlock waits: " << CSpinlock::getWaits()))
+        DOM_STATS(DEBUG_MSG("main", "Spinlock yields: " << CSpinlock::getYields()))
+        DOM_STATS(DEBUG_MSG("main", "Spinlock sleeps: " << CSpinlock::getSleeps() << " * 500us"))
     #endif
 
     CLEAN_UP; return EXIT_SUCCESS;

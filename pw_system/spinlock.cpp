@@ -36,18 +36,20 @@
 
 std::uint64_t CSpinlock::s_Sleeps = 0u;
 std::uint64_t CSpinlock::s_Waits = 0u;
+std::uint64_t CSpinlock::s_Yields = 0u;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Lock using atomic flag variable. 
+/// \brief Acquire lock using atomic flag variable. 
 ///
-/// If lock is block try again SPINLOCK_MAX_ITER times while giving the
+/// If lock is acquired try again SPINLOCK_MAX_ITER times while giving the
 /// processor some hint (pause) to optimise pipelining, hyper threading
 /// and bus frequency. If still blocked, sleep to free resources.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CSpinlock::lock()
+void CSpinlock::acquireLock()
 {
+    METHOD_ENTRY("CSpinlock::acquireLock")
     #ifdef PW_MULTITHREADING
         int nIter = 0;
         while (isAccessed.test_and_set(std::memory_order_acquire))
@@ -62,6 +64,12 @@ void CSpinlock::lock()
                 ++nIter;
                 DOM_STATS(DEBUG_BLK(++s_Waits;))
             }
+            else if (nIter < SPINLOCK_MAX_ITER*2)
+            {
+                std::this_thread::yield();
+                ++nIter;
+                DOM_STATS(DEBUG_BLK(++s_Yields;))
+            }
             else
             {
                 using namespace std::chrono;
@@ -74,13 +82,27 @@ void CSpinlock::lock()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Unlock using atomic flag variable. 
+/// \brief Release lock using atomic flag variable. 
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CSpinlock::unlock()
+void CSpinlock::releaseLock()
 {
+    METHOD_ENTRY("CSpinlock::releaseLock")
     #ifdef PW_MULTITHREADING
         isAccessed.clear(std::memory_order_release);
+    #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Lock without waiting to acquire lock. 
+///
+////////////////////////////////////////////////////////////////////////////////
+void CSpinlock::setLock()
+{
+    METHOD_ENTRY("CSpinlock::setLock")
+    #ifdef PW_MULTITHREADING
+        isAccessed.test_and_set(std::memory_order_release);
     #endif
 }
 
@@ -89,11 +111,37 @@ void CSpinlock::unlock()
 /// \brief Wait for lock to be released 
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CSpinlock::wait()
+void CSpinlock::waitForRelease()
 {
+    METHOD_ENTRY("CSpinlock::waitForRelease")
     #ifdef PW_MULTITHREADING
-        this->lock();
-        this->unlock();
+        int nIter = 0;
+        while (isAccessed.test_and_set(std::memory_order_acquire))
+        {
+            if (nIter < SPINLOCK_MAX_ITER)
+            {
+                #if defined(_MSC_VER)
+                    _mm_pause();
+                #elif defined(__clang__) || defined(__GNUC__)
+                    asm("pause");
+                #endif
+                ++nIter;
+                DOM_STATS(DEBUG_BLK(++s_Waits;))
+            }
+            else if (nIter < SPINLOCK_MAX_ITER*2)
+            {
+                std::this_thread::yield();
+                ++nIter;
+                DOM_STATS(DEBUG_BLK(++s_Yields;))
+            }
+            else
+            {
+                using namespace std::chrono;
+                std::this_thread::sleep_for(500us);
+                DOM_STATS(DEBUG_BLK(++s_Sleeps;))
+            }
+        }
+        isAccessed.clear(std::memory_order_release);
     #endif
 }
 

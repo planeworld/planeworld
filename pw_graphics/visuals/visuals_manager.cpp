@@ -928,6 +928,9 @@ bool CVisualsManager::init()
 UIDType CVisualsManager::createCamera(const CreationModeType _pMode)
 {
     METHOD_ENTRY("CVisualsManager::createCamera")
+
+    m_CreatorLock.acquireLock();
+    m_pVisualsDataStorage->AccessCameras.setLock();
     
     CCamera* pCam = new CCamera();
     MEM_ALLOC("CCamera")
@@ -938,9 +941,10 @@ UIDType CVisualsManager::createCamera(const CreationModeType _pMode)
     }
     else
     {
-        m_CamCreationLock.lock();
-        m_CamerasQueue.try_enqueue(pCam);
+        m_CamerasQueue.enqueue(pCam);
     }
+    m_CreatorLock.releaseLock();
+    
     return pCam->getUID();
 }
 
@@ -1188,12 +1192,16 @@ void CVisualsManager::addCamerasFromQueue()
 {
     METHOD_ENTRY("CVisualsManager::addCamerasFromQueue")
     
+    m_CreatorLock.acquireLock();
+    
     CCamera* pCam = nullptr;
     while (m_CamerasQueue.try_dequeue(pCam))
     {
         m_pVisualsDataStorage->addCamera(pCam);
     }
-    m_CamCreationLock.unlock();
+    m_pVisualsDataStorage->AccessCameras.releaseLock();
+    
+    m_CreatorLock.releaseLock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1609,7 +1617,7 @@ void CVisualsManager::drawStars()
     m_Graphics.beginRenderBatch("stars");
     if (m_pDataStorage->getUniverse() != nullptr)
     {
-        m_pDataStorage->getUniverse()->Access.lock();
+        m_pDataStorage->getUniverse()->Access.acquireLock();
 
         for (auto i=0u; i<m_pDataStorage->getUniverse()->getStarSystems()->size(); ++i)
         {
@@ -1642,7 +1650,7 @@ void CVisualsManager::drawStars()
                     m_Graphics.filledCircle(vecPosRel, (Star.getRadius()), 100.0);
             }
         }
-        m_pDataStorage->getUniverse()->Access.unlock();
+        m_pDataStorage->getUniverse()->Access.releaseLock();
     }
     m_Graphics.endRenderBatch();
 }    
@@ -1780,7 +1788,7 @@ void CVisualsManager::drawWorld()
         if ((1.0e9 * m_Graphics.getResPMX() < 1.0) &&
             (m_pDataStorage->getUniverse() != nullptr))
         {
-            m_pDataStorage->getUniverse()->Access.lock();
+            m_pDataStorage->getUniverse()->Access.acquireLock();
             
             for (auto i=0u; i<m_pDataStorage->getUniverse()->getStarSystems()->size(); ++i)
             {
@@ -1806,7 +1814,7 @@ void CVisualsManager::drawWorld()
                     m_TextStarSystems.display();
                 }
             }
-            m_pDataStorage->getUniverse()->Access.unlock();
+            m_pDataStorage->getUniverse()->Access.releaseLock();
         }
         
         m_Graphics.endRenderBatch();
@@ -2105,7 +2113,6 @@ void CVisualsManager::myInitComInterface()
     m_pComInterface->registerFunction("cam_fit_object",
                                       CCommand<void, int>([&](const int _nUID)
                                       {
-                                          m_CamCreationLock.lock();
                                           UIDType nUIDCam = 0;
                                           if (m_pVisualsDataStorage->getCamerasByIndex().size() != 0)
                                           {
@@ -2153,7 +2160,6 @@ void CVisualsManager::myInitComInterface()
                                             {
                                                 WARNING_MSG("Visuals manager", "No camera defined yet.")
                                             }
-                                            m_CamCreationLock.unlock();
                                       }),
                                       "Adjust main camera for given object to fit viewport.",
                                       {{ParameterType::NONE, "No return value"},

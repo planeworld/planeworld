@@ -360,6 +360,7 @@ IEmitter* CWorldDataStorage::getEmitterByValue(const UIDType _nUID)
 {
     METHOD_ENTRY("CWorldDataStorage::getEmitterByValue")
 
+    AccessEmitters.waitForRelease();
     const auto ci = m_EmittersByValue.find(_nUID);
     if (ci != m_EmittersByValue.end())
     {
@@ -385,6 +386,7 @@ CObject* CWorldDataStorage::getObjectByValueBack(const UIDType _nUID)
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectByValueBack")
 
+    AccessObjects.waitForRelease();
     const auto ci = m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
     if (ci != m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
     {
@@ -410,6 +412,7 @@ CObject* CWorldDataStorage::getObjectByValueFront(const UIDType _nUID)
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectByValueFront")
 
+    AccessObjects.waitForRelease();
     const auto ci = m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->find(_nUID);
     if (ci != m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->end())
     {
@@ -435,6 +438,7 @@ CObjectPlanet* CWorldDataStorage::getObjectPlanetByValueBack(const UIDType _nUID
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectPlanetByValueBack")
 
+    AccessObjectsPlanets.waitForRelease();
     const auto ci = m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
     if (ci != m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
     {
@@ -460,6 +464,7 @@ CObjectPlanet* CWorldDataStorage::getObjectPlanetByValueFront(const UIDType _nUI
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectPlanetByValueFront")
 
+    AccessObjectsPlanets.waitForRelease();
     const auto ci = m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->find(_nUID);
     if (ci != m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->end())
     {
@@ -485,6 +490,7 @@ CParticle* CWorldDataStorage::getParticleByValueBack(const UIDType _nUID)
 {
     METHOD_ENTRY("CWorldDataStorage::getParticleByValueBack")
 
+    AccessParticles.waitForRelease();
     const auto ci = m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
     if (ci != m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
     {
@@ -510,6 +516,7 @@ IShape* CWorldDataStorage::getShapeByValue(const UIDType _nUID)
 {
     METHOD_ENTRY("CWorldDataStorage::getShapeByValue")
 
+    AccessShapes.waitForRelease();
     const auto ci = m_ShapesByValue.find(_nUID);
     if (ci != m_ShapesByValue.end())
     {
@@ -535,6 +542,7 @@ CThruster* CWorldDataStorage::getThrusterByValue(const UIDType _nUID)
 {
     METHOD_ENTRY("CWorldDataStorage::getThrusterByValue")
 
+    AccessThrusters.waitForRelease();
     const auto ci = m_ThrustersByValue.find(_nUID);
     if (ci != m_ThrustersByValue.end())
     {

@@ -154,6 +154,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         CTimer              m_TimeProcessedObjects;             ///< Counts processing time for objects
         CTimer              m_TimeProcessedParticles;           ///< Counts processing time for particles
         
+        CSpinlock           m_CreatorLock;                      ///< Indicates if objects might be created
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

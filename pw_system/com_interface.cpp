@@ -471,6 +471,7 @@ void CComInterface::callWriters(const std::string& _strQueue)
     
     while (m_WriterQueues[_strQueue].try_dequeue(pQueuedFunction))
     {
+        DEBUG_MSG("Com Interface", "Flush writer queue " << _strQueue << ".")
         switch (pQueuedFunction->getSignature())
         {
             case SignatureType::NONE:

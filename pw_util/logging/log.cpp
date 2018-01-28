@@ -325,13 +325,15 @@ void CLog::log( const std::string& _strSrc, const std::string& _strMessage,
         m_MsgBufLevel = _Level;
         m_MsgBufDom = _Domain;
         
-        if (!bAlreadyLogged && !_bNoListener)
-        {
-            for (const auto pListener : m_LogListeners)
+        #ifndef LOGLEVEL_DEBUG // Avoid recursion
+            if (!bAlreadyLogged && !_bNoListener)
             {
-                pListener.second->logEntry(_strSrc, _strMessage, _Level, _Domain);
+                for (const auto pListener : m_LogListeners)
+                {
+                    pListener.second->logEntry(_strSrc, _strMessage, _Level, _Domain);
+                }
             }
-        }
+        #endif
     }
 }
 

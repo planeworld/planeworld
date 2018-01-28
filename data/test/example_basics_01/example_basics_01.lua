@@ -15,15 +15,15 @@ pw.system.set_frequency_input(100)
 pw.system.set_frequency_lua(30)
 pw.system.set_frequency_physics(200)
 pw.system.set_frequency_visuals(60)
-pw.system.set_data_path_visuals("../")
+pw.system.set_data_path_visuals("../../")
 pw.system.create_universe(23479, 10000)
 -- pw.physics.set_gravity_vector(0.0, -9.81)
 
 pw.system.init_visuals()
 pw.system.init_physics()
-
+pw.system.pause()
 pw.visuals.toggle_grid()
-pw.system.toggle_fullscreen()
+-- pw.system.toggle_fullscreen()
 
 -- Create objects
 idObj01 = pw.system.create_obj()
@@ -131,9 +131,6 @@ pw.system.thruster_add_emitter(idThruster01, idEm02)
 pw.physics.thruster_set_angle(idThruster01, math.rad(90))
 pw.physics.thruster_set_thrust_max(idThruster01, 100.0)
 pw.sim.thruster_activate(idThruster01, 50.0)
-
--- Pause simulation
-pw.system.pause()
 
 -- Setup callback functions
 pw.system.register_lua_callback("e_lua_update", "update")

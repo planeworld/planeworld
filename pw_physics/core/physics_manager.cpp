@@ -88,6 +88,9 @@ UIDType CPhysicsManager::createEmitter(const EmitterType _EmitterType)
 {
     METHOD_ENTRY("CPhysicsManager::createEmitter")
     
+    m_CreatorLock.acquireLock();
+    m_pDataStorage->AccessEmitters.setLock();
+    
     UIDType nUID=0u;
     
     switch (_EmitterType)
@@ -119,6 +122,7 @@ UIDType CPhysicsManager::createEmitter(const EmitterType _EmitterType)
             WARNING_MSG("Physics Manager", "Unknown emitter type. Cannot create emitter")
         }
     }
+    m_CreatorLock.releaseLock();
     
     return nUID;
 }
@@ -149,11 +153,15 @@ UIDType CPhysicsManager::createObject()
 {
     METHOD_ENTRY("CPhysicsManager::createObject")
     
+    m_CreatorLock.acquireLock();
+    m_pDataStorage->AccessObjects.setLock();
+    
     CObject* pObject = new CObject();
     MEM_ALLOC("CObject")
     
     pObject->init();
     m_ObjectsToBeAddedToWorld.enqueue(pObject);
+    m_CreatorLock.releaseLock();
     
     return pObject->getUID();
 }
@@ -169,6 +177,11 @@ UIDType CPhysicsManager::createObjectPlanet()
 {
     METHOD_ENTRY("CPhysicsManager::createObjectPlanet")
     
+    m_CreatorLock.acquireLock();
+    m_pDataStorage->AccessObjects.setLock();
+    m_pDataStorage->AccessObjectsPlanets.setLock();
+    m_pDataStorage->AccessShapes.setLock();
+    
     CObjectPlanet* pObjectPlanet= new CObjectPlanet();
     MEM_ALLOC("CObject")
     
@@ -183,6 +196,7 @@ UIDType CPhysicsManager::createObjectPlanet()
     
     m_ObjectsToBeAddedToWorld.enqueue(pObjectPlanet);
     m_ObjectsPlanetsToBeAddedToWorld.enqueue(pObjectPlanet);
+    m_CreatorLock.releaseLock();
     
     return pObjectPlanet->getUID();
 }
@@ -200,6 +214,9 @@ UIDType CPhysicsManager::createParticles(const ParticleTypeType _ParticleType)
 {
     METHOD_ENTRY("CPhysicsManager::createParticles")
     
+    m_CreatorLock.acquireLock();
+    m_pDataStorage->AccessParticles.setLock();
+    
     UIDType nUID=0u;
     
     CParticle* pParticle = new CParticle();
@@ -209,6 +226,7 @@ UIDType CPhysicsManager::createParticles(const ParticleTypeType _ParticleType)
     nUID = pParticle->getUID();
     
     m_ParticlesToBeAddedToWorld.enqueue(pParticle);
+    m_CreatorLock.releaseLock();
     
     return nUID;
 }
@@ -240,6 +258,9 @@ UIDType CPhysicsManager::createParticles(const std::string& _strParticleType)
 UIDType CPhysicsManager::createShape(const ShapeType _ShapeType)
 {
     METHOD_ENTRY("CPhysicsManager::createShape")
+    
+    m_CreatorLock.acquireLock();
+    m_pDataStorage->AccessShapes.setLock();
     
     UIDType nUID=0u;
     
@@ -274,6 +295,7 @@ UIDType CPhysicsManager::createShape(const ShapeType _ShapeType)
             WARNING_MSG("Physics Manager", "Unknown shape type. Cannot create shape")
         }
     }
+    m_CreatorLock.releaseLock();
     
     return nUID;
 }
@@ -304,11 +326,15 @@ UIDType CPhysicsManager::createThruster()
 {
     METHOD_ENTRY("CPhysicsManager::createThruster")
     
+    m_CreatorLock.acquireLock();
+    m_pDataStorage->AccessThrusters.setLock();
+    
     CThruster* pThruster = new CThruster();
     MEM_ALLOC("CThruster")
     
 //     pThruster->init();
     m_ThrustersToBeAddedToWorld.enqueue(pThruster);
+    m_CreatorLock.releaseLock();
     
     return pThruster->getUID();
 }
@@ -1013,7 +1039,7 @@ void CPhysicsManager::myInitComInterface()
                                             [&](const std::string& _strName) -> int
                                             {
                                                 int nUID(0);
-                                                m_pDataStorage->AccessNames.lock();
+                                                m_pDataStorage->AccessNames.acquireLock();
                                                 const auto ci = m_pDataStorage->getUIDsByName()->find(_strName);
                                                 if (ci != m_pDataStorage->getUIDsByName()->end())
                                                 {
@@ -1024,7 +1050,7 @@ void CPhysicsManager::myInitComInterface()
                                                     WARNING_MSG("World Data Storage", "Unknown object <" << _strName << ">")
                                                     throw CComInterfaceException(ComIntExceptionType::INVALID_VALUE);
                                                 }
-                                                m_pDataStorage->AccessNames.unlock();
+                                                m_pDataStorage->AccessNames.releaseLock();
                                                 return nUID;
                                             }),
                                           "Returns UID for entity with given name.",
@@ -1109,6 +1135,20 @@ void CPhysicsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::DOUBLE, "Frequency"}},
                                            "system", "physics");
+        m_pComInterface->registerFunction("sync_to_physics",
+                                          CCommand<void>([&]()
+                                          {
+                                              m_pDataStorage->AccessEmitters.setLock();
+                                              m_pDataStorage->AccessObjects.setLock();
+                                              m_pDataStorage->AccessObjectsPlanets.setLock();
+                                              m_pDataStorage->AccessParticles.setLock();
+                                              m_pDataStorage->AccessShapes.setLock();
+                                              m_pDataStorage->AccessThrusters.setLock();
+                                          }),
+                                          "Waits for physics commands to be processed to ensure a consistent state.",
+                                          {{ParameterType::NONE, "No return value"}},
+                                          "system"
+                                         );
         m_pComInterface->registerFunction("thruster_add_emitter",
                                           CCommand<void, int, int>([&](const int _nUIDThr, const int _nUIDEm)
                                           {
@@ -1670,10 +1710,10 @@ void CPhysicsManager::myInitComInterface()
                                                     std::string strNameOld = pObj->getName();
                                                     pObj->setName(_strName);
                                                     
-                                                    m_pDataStorage->AccessNames.lock();
+                                                    m_pDataStorage->AccessNames.acquireLock();
                                                     m_pDataStorage->getUIDsByName()->insert({_strName, pObj->getUID()});
                                                     m_pDataStorage->getUIDsByName()->erase(strNameOld);
-                                                    m_pDataStorage->AccessNames.unlock();
+                                                    m_pDataStorage->AccessNames.releaseLock();
                                                 }
                                             }),
                                           "Sets name of a given object.",
@@ -2036,12 +2076,16 @@ void CPhysicsManager::processQueues()
 {
     METHOD_ENTRY("CPhysicsManager::processQueues")
     
+    m_CreatorLock.acquireLock();
+    
     // Add new entities to world
     IEmitter* pEmitter = nullptr;
     while (m_EmittersToBeAddedToWorld.try_dequeue(pEmitter))
     {
         m_pDataStorage->addEmitter(pEmitter);
     }
+    m_pDataStorage->AccessEmitters.releaseLock();
+    
     CObject* pObj = nullptr;
     while (m_ObjectsToBeAddedToWorld.try_dequeue(pObj))
     {
@@ -2052,22 +2096,32 @@ void CPhysicsManager::processQueues()
     {
         m_pDataStorage->addObjectPlanet(pObjPl);
     }
+    m_pDataStorage->AccessObjects.releaseLock();
+    m_pDataStorage->AccessObjectsPlanets.releaseLock();
+    
     CParticle* pParticle = nullptr;
     while (m_ParticlesToBeAddedToWorld.try_dequeue(pParticle))
     {
         m_pDataStorage->addParticle(pParticle);
     }
+    m_pDataStorage->AccessParticles.releaseLock();
+    
     IShape* pShp = nullptr;
     while (m_ShapesToBeAddedToWorld.try_dequeue(pShp))
     {
         m_pDataStorage->addShape(pShp);
     }
+    m_pDataStorage->AccessShapes.releaseLock();
+    
     CThruster* pThruster = nullptr;
     while (m_ThrustersToBeAddedToWorld.try_dequeue(pThruster))
     {
         m_pDataStorage->addThruster(pThruster);
     }
+    m_pDataStorage->AccessThrusters.releaseLock();
     m_pComInterface->callWriters("physics");
+    
+    m_CreatorLock.releaseLock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

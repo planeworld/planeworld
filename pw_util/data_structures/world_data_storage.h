@@ -159,7 +159,13 @@ class CWorldDataStorage
         friend std::ostream& operator<<(std::ostream&, CWorldDataStorage&);
         
         //--- Variables ------------------------------------------------------//
+        CSpinlock AccessEmitters;
         CSpinlock AccessNames;
+        CSpinlock AccessObjects;
+        CSpinlock AccessObjectsPlanets;
+        CSpinlock AccessParticles;
+        CSpinlock AccessShapes;
+        CSpinlock AccessThrusters;
         
     private:
         
