@@ -45,7 +45,7 @@ CPhysicsManager::CPhysicsManager() : m_fG(6.67408e-11),
                                      m_nCellUpdateLast(0u),
                                      m_fCellUpdateResidual(0.0),
                                      m_bCellUpdateFirst(true),
-                                     m_bPaused(false),
+                                     m_bPaused(true),
                                      m_bProcessOneFrame(false)
                                    
 {

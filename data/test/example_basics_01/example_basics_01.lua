@@ -21,7 +21,6 @@ pw.system.create_universe(23479, 10000)
 
 pw.system.init_visuals()
 pw.system.init_physics()
-pw.system.pause()
 pw.visuals.toggle_grid()
 -- pw.system.toggle_fullscreen()
 
