@@ -917,19 +917,19 @@ void CPhysicsManager::myInitComInterface()
                                            "system"
                                          );
         m_pComInterface->registerFunction("get_time_processed_physics_buffer_copy",
-                                          CCommand<double>([&]() -> double {return this->getTimeProcessedBufferCopy();}),
+                                          CCommand<double>([&]() -> double {return m_TimeProcessedBufferCopy.getTime();}),
                                           "Return time used for copying object buffers.",
                                           {{ParameterType::DOUBLE, "Time used for object buffer copy"}},
                                            "system"
                                          );
         m_pComInterface->registerFunction("get_time_processed_physics_objects",
-                                          CCommand<double>([&]() -> double {return this->getTimeProcessedObjects();}),
+                                          CCommand<double>([&]() -> double {return m_TimeProcessedObjects.getTime();}),
                                           "Return time used for object processing.",
                                           {{ParameterType::DOUBLE, "Time used for object processing"}},
                                            "system"
                                          );
         m_pComInterface->registerFunction("get_time_processed_physics_particles",
-                                          CCommand<double>([&]() -> double {return this->getTimeProcessedParticles();}),
+                                          CCommand<double>([&]() -> double {return m_TimeProcessedParticles.getTime();}),
                                           "Return time used for particle processing.",
                                           {{ParameterType::DOUBLE, "Time used for particle processing"}},
                                            "system"

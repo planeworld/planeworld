@@ -422,7 +422,9 @@ bool CLuaManager::processFrame()
     {
         if (!m_bPaused)
         {
+            m_TimeProcessed.start();
             m_pComInterface->call<void>("e_lua_update");
+            m_TimeProcessed.stop();
         }
         m_pComInterface->callWriters("lua");
         return true;
@@ -477,11 +479,23 @@ void CLuaManager::myInitComInterface()
         m_pComInterface->registerCallback("toggle_pause", FuncTogglePause, "lua");
         
         // System package
-        m_pComInterface->registerFunction("get_lua_frequency",
+        m_pComInterface->registerFunction("get_frequency_lua",
                                           CCommand<double>([&]() -> double {return this->m_fFrequency;}),
                                           "Provides processing frequency of Lua module.",
                                           {{ParameterType::DOUBLE, "Processing frequency of Lua module"}},
                                            "system");
+        m_pComInterface->registerFunction("get_time_per_frame_lua",
+                                          CCommand<double>([&]() -> double {return this->getTimePerFrame();}),
+                                          "Return time available per frame (i.e. 1.0/Frequency).",
+                                          {{ParameterType::DOUBLE, "Time available per frame"}},
+                                           "system"
+                                         );
+        m_pComInterface->registerFunction("get_time_processed_lua",
+                                          CCommand<double>([&]() -> double {return m_TimeProcessed.getTime();}),
+                                          "Return time used for Lua processing.",
+                                          {{ParameterType::DOUBLE, "Time used for Lua processing"}},
+                                           "system"
+                                         );
         m_pComInterface->registerFunction("execute_lua",
                                           CCommand<void, std::string>([&](const std::string& _strS)
                                           {

@@ -87,6 +87,8 @@ class CLuaManager : public IComInterfaceProvider,
         
         std::string     m_strScript;            ///< Path and filename of main script
         bool            m_bPaused;              ///< Indicates if processing is paused, depends on physics
+        
+        CTimer          m_TimeProcessed;        ///< Counts processing time for one Lua frame
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -1276,12 +1276,18 @@ void CVisualsManager::drawDebugInfo()
         oss << "\n";
 
         static double fBufferSizePhysics = m_pComInterface->call<double>("get_frequency_physics") / 4;
+        static double fBufferSizeLua = m_pComInterface->call<double>("get_frequency_lua") / 4;
+        static CCircularBuffer<double> TimeBufferLua(fBufferSizeLua);
         static CCircularBuffer<double> TimeBufferPhysics(fBufferSizePhysics);
         static CCircularBuffer<double> TimeBufferPhysicsBufferCopy(fBufferSizePhysics);
         static CCircularBuffer<double> TimeBufferPhysicsObjects(fBufferSizePhysics);
         static CCircularBuffer<double> TimeBufferPhysicsParticles(fBufferSizePhysics);
         static CCircularBuffer<double> TimeBufferVisuals(m_fFrequency / 4);
         
+        double fTimeProcessedLua = this->smoothFrameTime(
+                                        &TimeBufferLua,
+                                        m_pComInterface->call<double>("get_time_processed_lua"),
+                                        fBufferSizeLua);
         double fTimeProcessedPhysics = this->smoothFrameTime(
                                         &TimeBufferPhysics,
                                         m_pComInterface->call<double>("get_time_processed_physics"),
@@ -1314,15 +1320,18 @@ void CVisualsManager::drawDebugInfo()
         oss << "  - Objects:     " << fTimeProcessedPhysicsObjects*1000.0 << " ms\n";
         oss << "  - Particles:   " << fTimeProcessedPhysicsParticles*1000.0 << " ms\n";
         oss << "  - Buffer Copy: " << fTimeProcessedPhysicsBufferCopy*1000.0 << " ms\n";
+        oss << "  Lua:           " << fTimeProcessedLua*1000.0 << " of " <<
+                                      m_pComInterface->call<double>("get_time_per_frame_lua")*1000.0 << " ms\n";
                 
         m_TextDebugInfo.setText(oss.str());
         m_Graphics.setColor({{0.1, 0.0, 0.1, 0.8}});
         
         m_Graphics.beginRenderBatch("world");
             double fSizeX = m_TextDebugInfo.getLength()+5.0;
+            int nLines = 20;
             m_Graphics.filledRect(Vector2d(10, 10),
                                   Vector2d(10 + fSizeX, 20+
-                                  (19+m_FontManager.getFontsAvailable().size())*m_TextDebugInfo.getFontSize()));
+                                  (nLines+m_FontManager.getFontsAvailable().size())*m_TextDebugInfo.getFontSize()));
         m_Graphics.endRenderBatch();
         
         m_Graphics.beginRenderBatch("font");

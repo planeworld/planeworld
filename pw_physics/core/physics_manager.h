@@ -86,9 +86,6 @@ class CPhysicsManager : public IComInterfaceProvider,
         
         //--- Constant Methods -----------------------------------------------//
         const std::array<CSimTimer,4>&  getSimTimer() const;
-        double getTimeProcessedBufferCopy() const {return m_TimeProcessedBufferCopy.getTime();}
-        double getTimeProcessedObjects() const {return m_TimeProcessedObjects.getTime();}
-        double getTimeProcessedParticles() const {return m_TimeProcessedParticles.getTime();}
 
         //--- Methods --------------------------------------------------------//
         UIDType createEmitter(const EmitterType);
