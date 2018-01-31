@@ -43,7 +43,8 @@ CParticle::CParticle() : IGridUser(),
                      m_fSizeBirth(1.0),
                      m_fSizeDeath(1.0),
                      m_aColorBirth({{1.0, 1.0, 1.0, 1.0}}),
-                     m_aColorDeath({{1.0, 1.0, 1.0, 0.0}})
+                     m_aColorDeath({{1.0, 1.0, 1.0, 0.0}}),
+                     m_fMaxAge(1.0e300)
 {
     METHOD_ENTRY("CParticle::CParticle")
     CTOR_CALL("CParticle::CParticle")
@@ -51,6 +52,7 @@ CParticle::CParticle() : IGridUser(),
     m_PosList.reserve(PARTICLE_DEFAULT_NUMBER);
     m_VelList.reserve(PARTICLE_DEFAULT_NUMBER);
     m_PosListPrev.reserve(PARTICLE_DEFAULT_NUMBER);
+    m_AgeList.reserve(PARTICLE_DEFAULT_NUMBER);
     m_StateList.reserve(PARTICLE_DEFAULT_NUMBER);
     
     m_vecForce.setZero();
@@ -139,6 +141,8 @@ void CParticle::dynamics(const double& _fStep)
                 m_VelList[i] += vecStep;
                 m_PosList[i] += m_VelList[i] * _fStep;
                 m_BBox.update(m_PosList[i]);
+                m_AgeList[i] += _fStep;
+                if (m_AgeList[i] >= m_fMaxAge) m_StateList[i] = PARTICLE_STATE_INACTIVE;
             }
         }
     }
@@ -163,6 +167,7 @@ void CParticle::generate(const Vector2d& _vecP, const Vector2d& _vecV)
     m_PosList.push_back(_vecP);
     m_PosListPrev.push_back(_vecP);
     m_VelList.push_back(_vecV);
+    m_AgeList.push_back(0u);
     m_StateList.push_back(PARTICLE_STATE_ACTIVE);
 }
 
@@ -180,6 +185,7 @@ void CParticle::setNumber(const int& _nN)
     m_PosList.reserve(_nN);
     m_StateList.reserve(_nN);
     m_PosListPrev.reserve(_nN);
+    m_AgeList.reserve(_nN);
     for (auto i=0u; i<m_PosList.capacity();++i)
     {
         m_StateList.push_back(PARTICLE_STATE_ACTIVE);
@@ -218,11 +224,13 @@ std::istream& operator>>(std::istream& _is, CParticle* const _pParticle)
     _is >> _pParticle->m_PosList;
     _is >> _pParticle->m_PosListPrev;
     _is >> _pParticle->m_VelList;
+    _is >> _pParticle->m_AgeList;
     _is >> _pParticle->m_StateList;
     
     _is >> _pParticle->m_BBox;
     
     _is >> _pParticle->m_fDamping;
+    _is >> _pParticle->m_fMaxAge;
     _is >> _pParticle->m_nDepthlayers;
     _is >> _pParticle->m_vecForce[0] >> _pParticle->m_vecForce[1];
     
@@ -259,11 +267,13 @@ std::ostream& operator<<(std::ostream& _os, CParticle* const _pParticle)
     _os << _pParticle->m_PosList << std::endl;
     _os << _pParticle->m_PosListPrev << std::endl;
     _os << _pParticle->m_VelList << std::endl;
+    _os << _pParticle->m_AgeList << std::endl;
     _os << _pParticle->m_StateList << std::endl;
     
     _os << _pParticle->m_StateList << std::endl;
     
     _os << _pParticle->m_fDamping << std::endl;
+    _os << _pParticle->m_fMaxAge << std::endl;
     _os << _pParticle->m_nDepthlayers << std::endl;
     _os << _pParticle->m_vecForce[0] << " " << _pParticle->m_vecForce[1] << std::endl;
     
@@ -285,6 +295,7 @@ void CParticle::copy(const CParticle& _Particle)
     m_PosList = _Particle.m_PosList;
     m_PosListPrev = _Particle.m_PosListPrev;
     m_VelList = _Particle.m_VelList;
+    m_AgeList = _Particle.m_AgeList;
     m_StateList = _Particle.m_StateList;
     m_BBox = _Particle.m_BBox;
     
@@ -296,6 +307,7 @@ void CParticle::copy(const CParticle& _Particle)
     m_aColorDeath = _Particle.m_aColorDeath;
     m_fSizeBirth = _Particle.m_fSizeBirth;
     m_fSizeDeath = _Particle.m_fSizeDeath;
+    m_fMaxAge = _Particle.m_fMaxAge;
     m_nDepthlayers = _Particle.m_nDepthlayers;
     m_vecForce = _Particle.m_vecForce;
 }

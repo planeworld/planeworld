@@ -251,8 +251,6 @@ int main(int argc, char *argv[])
     ComInterface.registerFunction("init_physics",
                                     CCommand<void>([&]()
                                     {
-                                        GameStateManager.setWorldDataStorage(&WorldDataStorage);
-                                        pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
                                         #ifdef PW_MULTITHREADING    
                                             pPhysicsThread = new std::thread(&CPhysicsManager::run, pPhysicsManager);
                                             MEM_ALLOC("std::thread")
@@ -269,8 +267,6 @@ int main(int argc, char *argv[])
                                         //--------------------------------------------------------------------------
                                         // Initialize window and graphics
                                         //--------------------------------------------------------------------------
-                                        pVisualsManager->setWorldDataStorage(&WorldDataStorage);
-                                        pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
                                         
                                         // X11 need special care when for threaded graphics
                                         #ifdef __linux__
@@ -309,6 +305,10 @@ int main(int argc, char *argv[])
     // 4. Prepare engine managers
     //
     ////////////////////////////////////////////////////////////////////////////
+    GameStateManager.setWorldDataStorage(&WorldDataStorage);
+    pPhysicsManager->setWorldDataStorage(&WorldDataStorage);
+    pVisualsManager->setWorldDataStorage(&WorldDataStorage);
+    pVisualsManager->setVisualsDataStorage(&VisualsDataStorage);
     
     
     //////////////////////////////////////////////////////////////////////////// 
@@ -337,11 +337,9 @@ int main(int argc, char *argv[])
         
         //////////////////////////////////////////////////////////////////////// 
         //
-        // 9. Start input
+        // 6. Start input
         //
         ////////////////////////////////////////////////////////////////////////
-        
-
         while (!g_bDone)
         {
             #ifndef PW_MULTITHREADING
@@ -415,7 +413,7 @@ int main(int argc, char *argv[])
         pPhysicsThread->join();
         DOM_STATS(DEBUG_MSG("main", "Spinlock waits: " << CSpinlock::getWaits()))
         DOM_STATS(DEBUG_MSG("main", "Spinlock yields: " << CSpinlock::getYields()))
-        DOM_STATS(DEBUG_MSG("main", "Spinlock sleeps: " << CSpinlock::getSleeps() << " * 500us"))
+        DOM_STATS(DEBUG_MSG("main", "Spinlock sleeps: " << CSpinlock::getSleeps()*0.5 << " ms"))
     #endif
 
     CLEAN_UP; return EXIT_SUCCESS;

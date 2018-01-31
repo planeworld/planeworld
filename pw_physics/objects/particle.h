@@ -90,11 +90,13 @@ class CParticle : public IGridUser,
         const ColorTypeRGBA*    getColorDeath() const {return &m_aColorDeath;}
         const double&           getSizeBirth() const {return m_fSizeBirth;}
         const double&           getSizeDeath() const {return m_fSizeDeath;}
+        const double&           getMaxAge() const {return m_fMaxAge;}
 
         //--- Methods --------------------------------------------------------//
         CCircularBuffer<Vector2d>* getPositions();
         CCircularBuffer<Vector2d>* getVelocities();
         CCircularBuffer<Vector2d>* getPreviousPositions();
+        CCircularBuffer<double>*   getAge();
         CCircularBuffer<std::uint8_t>*  getStates();
         
         void                setDamping(const double&);
@@ -108,6 +110,7 @@ class CParticle : public IGridUser,
         void                setColorDeath(const ColorTypeRGBA& _aColorDeath) {m_aColorDeath = _aColorDeath;}
         void                setSizeBirth(const double& _fSizeBirth) {m_fSizeBirth = _fSizeBirth;}
         void                setSizeDeath(const double& _fSizeDeath) {m_fSizeDeath = _fSizeDeath;}
+        void                setMaxAge(const double& _fAge) {m_fMaxAge = _fAge;}
         
         void                dynamics(const double&);
         void                generate(const Vector2d&, const Vector2d&);
@@ -125,6 +128,7 @@ class CParticle : public IGridUser,
         CCircularBuffer<Vector2d> m_PosList;                 ///< Position of particle
         CCircularBuffer<Vector2d> m_PosListPrev;             ///< Position of particle in previous time step
         CCircularBuffer<Vector2d> m_VelList;                 ///< Velocity of derbis
+        CCircularBuffer<double>   m_AgeList;                 ///< Age of particles
         CCircularBuffer<std::uint8_t>  m_StateList;          ///< Is the particle active or inactive
         
         CBoundingBox            m_BBox;                      ///< Bounding box of all particle
@@ -135,6 +139,7 @@ class CParticle : public IGridUser,
         double                  m_fDamping;                  ///< Damping of particle
         double                  m_fSizeBirth;                ///< Particle size at beginning of lifetime
         double                  m_fSizeDeath;                ///< Particle size at end of lifetime
+        double                  m_fMaxAge;                   ///< Maximum age of particles
         ColorTypeRGBA           m_aColorBirth;               ///< Particle color at beginning of lifetime
         ColorTypeRGBA           m_aColorDeath;               ///< Particle color at end of lifetime
         int                     m_nDepthlayers;              ///< Depths in which particle exists
@@ -240,6 +245,20 @@ inline CCircularBuffer<Vector2d>* CParticle::getPreviousPositions()
     METHOD_ENTRY("CParticle::getPreviousPositions")
     return &m_PosListPrev;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns age of the particles
+///
+/// \return List of age of the particles
+///
+////////////////////////////////////////////////////////////////////////////////
+inline CCircularBuffer<double>* CParticle::getAge()
+{
+    METHOD_ENTRY("CParticle::getAge")
+    return &m_AgeList;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

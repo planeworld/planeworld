@@ -429,26 +429,27 @@ void CVisualsManager::drawParticles(CCamera* const _pCamera) const
                     ColorTypeRGBA paColDeath = *Particle.second->getColorDeath();
                                       
                     if (Particle.second->getBoundingBox().getWidth()  * m_Graphics.getResPMX() > 2.0 &&
-                        Particle.second->getBoundingBox().getHeight() * m_Graphics.getResPMY() > 2.0 &&
-                        Particle.second->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
+                        Particle.second->getBoundingBox().getHeight() * m_Graphics.getResPMY() > 2.0)
                     {
                         m_Graphics.cacheSinCos(12);
                         for (auto i=0u; i<nSize; ++i)
                         {
-                            double fR = paColBirth[0] * (double(i) / nSize) + paColDeath[0] * (1.0 - double(i) / nSize);
-                            double fG = paColBirth[1] * (double(i) / nSize) + paColDeath[1] * (1.0 - double(i) / nSize);
-                            double fB = paColBirth[2] * (double(i) / nSize) + paColDeath[2] * (1.0 - double(i) / nSize);
-                            double fA = paColBirth[3] * (double(i) / nSize) + paColDeath[3] * (1.0 - double(i) / nSize);
-                            m_Graphics.setColor(fR, fG, fB, fA);
-                            
-                            if (_pCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
+                            if (Particle.second->getStates()->at(i) == PARTICLE_STATE_ACTIVE &&
+                                _pCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
                             {
-                                fSizeR = Particle.second->getSizeBirth() + fGrowth * (1.0 - double(i) / nSize);
+                                double fAge = double(Particle.second->getAge()->at(i)) / Particle.second->getMaxAge();
+                                
+                                double fR = paColBirth[0] * (1.0 - fAge) + paColDeath[0] * fAge;
+                                double fG = paColBirth[1] * (1.0 - fAge) + paColDeath[1] * fAge;
+                                double fB = paColBirth[2] * (1.0 - fAge) + paColDeath[2] * fAge;
+                                double fA = paColBirth[3] * (1.0 - fAge) + paColDeath[3] * fAge;
+                                m_Graphics.setColor(fR, fG, fB, fA);
+                                
+                                fSizeR = Particle.second->getSizeBirth() + fGrowth * fAge;
                                 
                                     m_Graphics.filledCircle(Particle.second->getPositions()->at(i) - _pCamera->getCenter()+
                                                 IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()),
-                                                fSizeR, 12, GRAPHICS_CIRCLE_USE_CACHE
-                                );
+                                                fSizeR, 12, GRAPHICS_CIRCLE_USE_CACHE);
                             }
                         }
                         m_Graphics.setColor(1.0,1.0,1.0);

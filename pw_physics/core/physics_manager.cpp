@@ -974,6 +974,22 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::DOUBLE, "Color of oldest particles"}},
                                            "system", "physics"
                                          );
+        m_pComInterface->registerFunction("particles_set_maximum_age",
+                                          CCommand<void, int, double>(
+                                            [&](const int _nUID, const double& _fAge)
+                                            {
+                                                CParticle* pParticle = m_pDataStorage->getParticleByValueBack(_nUID);
+                                                if (pParticle != nullptr)
+                                                {
+                                                    pParticle->setMaxAge(_fAge);
+                                                }
+                                            }),
+                                          "Sets maximum age of given particles.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Particle UID"},
+                                           {ParameterType::DOUBLE, "Maximum age of given particles"}},
+                                           "system", "physics"
+                                         );
         m_pComInterface->registerFunction("particles_set_size_birth",
                                           CCommand<void, int, double>(
                                             [&](const int _nUID, const double& _fSize)
