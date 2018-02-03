@@ -62,7 +62,8 @@ class CRenderTarget : virtual public CGraphicsBase
         ~CRenderTarget();
         
         //--- Methods --------------------------------------------------------//
-        bool init(const std::uint16_t, const std::uint16_t);
+        bool init(const std::uint16_t, const std::uint16_t,
+                  const std::uint16_t = 1u);
 
         //--- Constant Methods -----------------------------------------------//
               GLuint                getIDTex() const;
@@ -78,6 +79,7 @@ class CRenderTarget : virtual public CGraphicsBase
         
         std::uint16_t m_unResX = 100u; ///< Resolution x
         std::uint16_t m_unResY = 100u; ///< Resolution y
+        std::uint16_t m_unSub  =   1u; ///< Subsampling factor
 
         std::vector<GLfloat> m_vecTexUV = {
                                     0.0f, 0.0f,
@@ -127,7 +129,7 @@ inline void CRenderTarget::bind(const bool _bClear) const
     METHOD_ENTRY("CRenderTarget::bind")
     glBindFramebuffer(GL_FRAMEBUFFER, m_unIDFBO);
     if (_bClear) glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-    glViewport(0, 0, m_unResX, m_unResY);
+    glViewport(0, 0, m_unResX / m_unSub, m_unResY / m_unSub);
     m_Graphics.setViewPort((-m_unResX >> 1) / GRAPHICS_PX_PER_METER, (m_unResX >> 1) / GRAPHICS_PX_PER_METER,
                            (-m_unResY >> 1) / GRAPHICS_PX_PER_METER, (m_unResY >> 1) / GRAPHICS_PX_PER_METER);
 }

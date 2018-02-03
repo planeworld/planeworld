@@ -48,7 +48,8 @@
 enum class RenderModeType
 {
     VERT3COL4,
-    VERT3COL4TEX2
+    VERT3COL4TEX2,
+    VERT3COL4TEX2X2
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -68,14 +69,16 @@ class CRenderMode
         //--- Constant methods -----------------------------------------------//
         RenderModeType              getRenderModeType() const {return m_RenderModeType;}
         const CShaderProgram*       getShaderProgram() const {return m_pShaderProgram;}
-        GLuint                      getTexture() const {return m_unTexID;}
+        GLuint                      getTexture0() const {return m_unTexID0;}
+        GLuint                      getTexture1() const {return m_unTexID1;}
               
         //--- Methods --------------------------------------------------------//
         void addUniform(const std::string&, GLint* const);
-        void addUniform(const std::string& _strName, GLfloat* const _pf);
+        void addUniform(const std::string&, GLfloat* const _pf);
         void setRenderModeType(const RenderModeType _RenderModeType) {m_RenderModeType = _RenderModeType;}
         void setShaderProgram(CShaderProgram* const _pShaderProgram) {m_pShaderProgram = _pShaderProgram;}
-        void setTexture(const GLuint _unTexID) {m_unTexID = _unTexID;}
+        void setTexture0(const std::string&, const GLuint);
+        void setTexture1(const std::string&, const GLuint);
        
         void use();
         
@@ -84,10 +87,11 @@ class CRenderMode
         //--- Variables [private] --------------------------------------------//
         RenderModeType   m_RenderModeType = RenderModeType::VERT3COL4;  ///< Type of this render mode
         CShaderProgram*  m_pShaderProgram{nullptr};                     ///< Referred shader program, active for this mode
-        GLuint           m_unTexID = 0;
+        GLuint           m_unTexID0 = 0;                                ///< Texture 0
+        GLuint           m_unTexID1 = 0;                                ///< Texture 1
         
-        std::unordered_map<GLint, GLint*> m_UniformsInt;
-        std::unordered_map<GLint, GLfloat*> m_UniformsFloat;
+        std::unordered_map<GLint, GLint*> m_UniformsInt;                ///< Uniforms, type int
+        std::unordered_map<GLint, GLfloat*> m_UniformsFloat;            ///< Uniforms, type float
         
 };
 

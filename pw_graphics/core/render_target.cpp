@@ -50,14 +50,16 @@ CRenderTarget::~CRenderTarget()
 ///
 /// \param _unResX Width  (resolution in pixels)
 /// \param _unResY Height (resolution in pixels)
+/// \param _unSub  Subsampling factor
 ///
 /// \return Success?
 ///
 ////////////////////////////////////////////////////////////////////////////////
-bool CRenderTarget::init(const uint16_t _unResX, const uint16_t _unResY)
+bool CRenderTarget::init(const std::uint16_t _unResX, const std::uint16_t _unResY,
+                         const std::uint16_t _unSub)
 {
     METHOD_ENTRY("CRenderTarget::init")
-    
+
     // Delete FBO and texture if already existing (i.e. when init is called
     // multiple times which happens when the buffer is resized)
     glDeleteFramebuffers(1, &m_unIDFBO);
@@ -71,8 +73,8 @@ bool CRenderTarget::init(const uint16_t _unResX, const uint16_t _unResY)
     glGenTextures(1, &m_unIDTex);
     glBindTexture(GL_TEXTURE_2D, m_unIDTex);
     
-    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, _unResX, _unResY);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _unResX, _unResY, GL_RGBA8, GL_UNSIGNED_BYTE, 0);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, _unResX/_unSub, _unResY/_unSub);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _unResX/_unSub, _unResY/_unSub, GL_RGBA8, GL_UNSIGNED_BYTE, 0);
     //  glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -97,6 +99,7 @@ bool CRenderTarget::init(const uint16_t _unResX, const uint16_t _unResY)
     // Store size
     m_unResX = _unResX;
     m_unResY = _unResY;
+    m_unSub  = _unSub;
     
     return true;
 }

@@ -89,6 +89,60 @@ void CRenderMode::addUniform(const std::string& _strName, GLfloat* const _pf)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Set texture for texture unit 0
+///
+/// \param _strName Name of sampler uniform
+/// \param _unTexID Texture ID
+///
+////////////////////////////////////////////////////////////////////////////////
+void CRenderMode::setTexture0(const std::string& _strName, const GLuint _unTexID)
+{
+    METHOD_ENTRY("CRenderMode::setTexture0")
+    GLint nLoc=0;
+    DOM_DEV(
+        if (m_pShaderProgram == nullptr)
+        {
+            WARNING_MSG("Render Mode", "Shader program not set.")
+            goto DomDev;
+        }
+    )
+    
+    m_unTexID0 = _unTexID;
+    nLoc = glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str());
+    glUniform1i(nLoc, 0);
+    
+    DOM_DEV(DomDev:)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set texture for texture unit 1
+///
+/// \param _strName Name of sampler uniform
+/// \param _unTexID Texture ID
+///
+////////////////////////////////////////////////////////////////////////////////
+void CRenderMode::setTexture1(const std::string& _strName, const GLuint _unTexID)
+{
+    METHOD_ENTRY("CRenderMode::setTexture1")
+    GLint nLoc=0;
+    DOM_DEV(
+        if (m_pShaderProgram == nullptr)
+        {
+            WARNING_MSG("Render Mode", "Shader program not set.")
+            goto DomDev;
+        }
+    )
+    
+    m_unTexID1 = _unTexID;
+    nLoc = glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str());
+    glUniform1i(nLoc, 1);
+    
+    DOM_DEV(DomDev:)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Set up internals to use this render mode
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,5 +159,8 @@ void CRenderMode::use()
         glUniform1f(UniformFloat.first, *UniformFloat.second);
     }
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_unTexID);
+    glBindTexture(GL_TEXTURE_2D, m_unTexID0);
+    
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_unTexID1);
 }

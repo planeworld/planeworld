@@ -280,7 +280,8 @@ class CGraphics
         GLuint              m_unVAO = 0u;               ///< Vertex array object
         GLuint              m_unVBO = 0u;               ///< Vertex buffer
         GLuint              m_unVBOColours = 0u;        ///< Colour buffer
-        GLuint              m_unVBOUVs = 0u;            ///< Texture coordinate buffer
+        GLuint              m_unVBOUV0s = 0u;           ///< Texture coordinate buffer, texture 0
+        GLuint              m_unVBOUV1s = 0u;           ///< Texture coordinate buffer, texture 1
         
         PolygonType         m_PolyType = PolygonType::LINE_STRIP; ///< Type of currently drawn polygon
                

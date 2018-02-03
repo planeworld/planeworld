@@ -155,14 +155,20 @@ class CVisualsManager : virtual public CGraphicsBase,
         void            myInitComInterface();
 
         CShaderProgram      m_ShaderProgramCamWidget;       ///< Shader program for camera widget rendering
+        CShaderProgram      m_ShaderProgramComposition;     ///< Shader program for composition of scene and lights
         CShaderProgram      m_ShaderProgramFont;            ///< Shader program for font rendering
         CShaderProgram      m_ShaderProgramMainScreen;      ///< Shader program to put image to screen buffer
         CShaderProgram      m_ShaderProgramStars;           ///< Shader program to render stars
         CShaderProgram      m_ShaderProgramWorld;           ///< Basic shader program
+        CRenderMode         m_RenderModeComposition;        ///< Composition of scene and lights
         CRenderMode         m_RenderModeFont;               ///< Mode for font rendering
+        CRenderMode         m_RenderModeLights;             ///< Mode for rendering lights
         CRenderMode         m_RenderModeMainScreen;         ///< Mode for rendering texture to screen
         CRenderMode         m_RenderModeStars;              ///< Mode for rendering stars
         CRenderMode         m_RenderModeWorld;              ///< Default render mode
+        
+        CRenderTarget       m_RenderTargetLights;           ///< Render target of screen (lights component)
+        CRenderTarget       m_RenderTargetScene;            ///< Render target of screen (scene component)
         CRenderTarget       m_RenderTargetScreen;           ///< Render target of screen (final image)
         
         bool                            m_bFullscreen;      ///< Indicates fullscreen mode

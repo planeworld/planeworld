@@ -320,14 +320,28 @@ void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode, const bool _bF
             case RenderModeType::VERT3COL4:
             {
                 glDisableVertexAttribArray(2);
+                glDisableVertexAttribArray(3);
                 break;
             }
             case RenderModeType::VERT3COL4TEX2:
             {
-                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUVs);
+                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
                 glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
                 glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
                 glEnableVertexAttribArray(2);
+                glDisableVertexAttribArray(3);
+                break;
+            }
+            case RenderModeType::VERT3COL4TEX2X2:
+            {
+                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+                glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+                glEnableVertexAttribArray(2);
+                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV1s);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+                glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+                glEnableVertexAttribArray(3);
                 break;
             }
         }
@@ -454,7 +468,22 @@ void CGraphics::endRenderBatch(const bool _bForce)
             }
             case RenderModeType::VERT3COL4TEX2:
             {
-                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUVs);
+                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+                
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
+                glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
+                
+                ++m_nDrawCalls;
+                
+                break;
+            }
+            case RenderModeType::VERT3COL4TEX2X2:
+            {
+                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV1s);
                 glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
                 
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
@@ -600,7 +629,8 @@ bool CGraphics::init()
     
     glDeleteBuffers(1, &m_unVBO);
     glDeleteBuffers(1, &m_unVBOColours);
-    glDeleteBuffers(1, &m_unVBOUVs);
+    glDeleteBuffers(1, &m_unVBOUV0s);
+    glDeleteBuffers(1, &m_unVBOUV1s);
     glDeleteBuffers(1, &m_unIBOLines);
     glDeleteBuffers(1, &m_unIBOPoints);
     glDeleteBuffers(1, &m_unIBOTriangles);
@@ -608,7 +638,8 @@ bool CGraphics::init()
     
     glGenBuffers(1, &m_unVBO);
     glGenBuffers(1, &m_unVBOColours);
-    glGenBuffers(1, &m_unVBOUVs);
+    glGenBuffers(1, &m_unVBOUV0s);
+    glGenBuffers(1, &m_unVBOUV1s);
     glGenBuffers(1, &m_unIBOLines);
     glGenBuffers(1, &m_unIBOPoints);
     glGenBuffers(1, &m_unIBOTriangles);
@@ -1682,7 +1713,9 @@ void CGraphics::resetBufferObjects()
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUVs);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
+    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV1s);
     glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
@@ -1737,7 +1770,22 @@ void CGraphics::restartRenderBatchInternal()
         }
         case RenderModeType::VERT3COL4TEX2:
         {
-            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUVs);
+            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
+            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+            
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
+            glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
+            
+            ++m_nDrawCalls;
+            
+            break;
+        }
+        case RenderModeType::VERT3COL4TEX2X2:
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
+            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV1s);
             glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
             
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);

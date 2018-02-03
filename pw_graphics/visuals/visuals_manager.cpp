@@ -788,24 +788,30 @@ bool CVisualsManager::init()
     // Setup rendering
     //--------------------------------------------------------------------------
     
+    CShader VertexShaderComposition;
     CShader VertexShaderFont;
     CShader VertexShaderMainScreen;
     CShader VertexShaderStars;
     CShader VertexShaderWorld;
     CShader FragmentShaderCamWidget;
+    CShader FragmentShaderComposition;
     CShader FragmentShaderFont;
     CShader FragmentShaderMainScreen;
     CShader FragmentShaderStars;
     CShader FragmentShaderWorld;
     
+    m_RenderTargetLights.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr(), 8);
+    m_RenderTargetScene.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
     m_RenderTargetScreen.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
 
+    VertexShaderComposition.load(m_strDataPath+"/shader/composition.vert", GL_VERTEX_SHADER);
     VertexShaderFont.load(m_strDataPath+"/shader/font.vert", GL_VERTEX_SHADER);    
     VertexShaderMainScreen.load(m_strDataPath+"/shader/main_screen.vert", GL_VERTEX_SHADER);
     VertexShaderStars.load(m_strDataPath+"/shader/stars.vert", GL_VERTEX_SHADER);
     VertexShaderWorld.load(m_strDataPath+"/shader/shader.vert", GL_VERTEX_SHADER);
 
     FragmentShaderCamWidget.load(m_strDataPath+"/shader/cam_widget_default.frag", GL_FRAGMENT_SHADER);
+    FragmentShaderComposition.load(m_strDataPath+"/shader/composition.frag", GL_FRAGMENT_SHADER);
     FragmentShaderFont.load(m_strDataPath+"/shader/font.frag", GL_FRAGMENT_SHADER);
     FragmentShaderMainScreen.load(m_strDataPath+"/shader/main_screen.frag", GL_FRAGMENT_SHADER);
     FragmentShaderStars.load(m_strDataPath+"/shader/stars.frag", GL_FRAGMENT_SHADER);
@@ -816,11 +822,11 @@ bool CVisualsManager::init()
     m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
     m_RenderModeFont.setShaderProgram(&m_ShaderProgramFont);
     m_RenderModeFont.setRenderModeType(RenderModeType::VERT3COL4TEX2);
-
+    
     m_ShaderProgramMainScreen.create(VertexShaderMainScreen, FragmentShaderMainScreen);
     m_RenderModeMainScreen.setShaderProgram(&m_ShaderProgramMainScreen);
     m_RenderModeMainScreen.setRenderModeType(RenderModeType::VERT3COL4TEX2);
-    m_RenderModeMainScreen.setTexture(m_RenderTargetScreen.getIDTex());
+    m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScreen.getIDTex());
     
     m_ShaderProgramStars.create(VertexShaderStars, FragmentShaderStars);
     m_RenderModeStars.setShaderProgram(&m_ShaderProgramStars);
@@ -830,7 +836,18 @@ bool CVisualsManager::init()
     m_RenderModeWorld.setShaderProgram(&m_ShaderProgramWorld);
     m_RenderModeWorld.setRenderModeType(RenderModeType::VERT3COL4);
     
+    m_RenderModeLights.setShaderProgram(&m_ShaderProgramWorld);
+    m_RenderModeLights.setRenderModeType(RenderModeType::VERT3COL4);
+
+    m_ShaderProgramComposition.create(VertexShaderComposition, FragmentShaderComposition);    
+    m_RenderModeComposition.setShaderProgram(&m_ShaderProgramComposition);
+    m_RenderModeComposition.setRenderModeType(RenderModeType::VERT3COL4TEX2X2);
+    m_RenderModeComposition.setTexture0("SceneTexture", m_RenderTargetScene.getIDTex());
+    m_RenderModeComposition.setTexture1("LightsTexture", m_RenderTargetLights.getIDTex());
+    
+    m_Graphics.registerRenderMode("composition", &m_RenderModeComposition);
     m_Graphics.registerRenderMode("font", &m_RenderModeFont);
+    m_Graphics.registerRenderMode("lights", &m_RenderModeLights);
     m_Graphics.registerRenderMode("main_screen", &m_RenderModeMainScreen);
     m_Graphics.registerRenderMode("stars", &m_RenderModeStars);
     m_Graphics.registerRenderMode("world", &m_RenderModeWorld);
@@ -1094,7 +1111,7 @@ bool CVisualsManager::processFrame()
     
     // Somehow this doesn't work for all machines when initialised during
     // this->init(). Hence it is set here as a temporary workaround
-    m_RenderModeMainScreen.setTexture(m_RenderTargetScreen.getIDTex());
+    m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScreen.getIDTex());
     
     // Setup main camera before calling any commands, to ensure correct
     // setup when fullscreen is toggled
@@ -1129,7 +1146,7 @@ bool CVisualsManager::processFrame()
             }
         }
     }
-    m_RenderTargetScreen.bind(RENDER_TARGET_CLEAR);
+    m_RenderTargetScene.bind(RENDER_TARGET_CLEAR);
     
     m_Graphics.setupWorldSpace();
 
@@ -1150,11 +1167,19 @@ bool CVisualsManager::processFrame()
         this->drawKinematicsStates(DrawModeType::VISUALS);
     }
 
-    m_RenderTargetScreen.unbind();
+    m_RenderTargetScene.unbind();
     
     m_Graphics.setupScreenSpace();
     
     m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
+    glViewport(0, 0, m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
+
+    m_RenderTargetScreen.bind();    
+        m_Graphics.beginRenderBatch("composition");
+            m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScene.getTexUV());
+        m_Graphics.endRenderBatch();
+    m_RenderTargetScreen.unbind();
+    
     m_Graphics.beginRenderBatch("main_screen");
         m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScreen.getTexUV());
     m_Graphics.endRenderBatch();
@@ -2039,6 +2064,8 @@ void CVisualsManager::myInitComInterface()
     std::function<void(double, double)> FuncResize =
         [&](const double& _fX, const double& _fY)
         {
+            m_RenderTargetLights.init(std::uint16_t(_fX), std::uint16_t(_fY), 8);
+            m_RenderTargetScene.init(std::uint16_t(_fX), std::uint16_t(_fY));
             m_RenderTargetScreen.init(std::uint16_t(_fX), std::uint16_t(_fY));
             if (m_pCamera != nullptr)
             {
