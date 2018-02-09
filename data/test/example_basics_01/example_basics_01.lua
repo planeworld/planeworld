@@ -15,7 +15,9 @@ pw.system.set_frequency_input(100)
 pw.system.set_frequency_lua(30)
 pw.system.set_frequency_physics(200)
 pw.system.set_frequency_visuals(60)
-pw.system.set_data_path_visuals("../../")
+
+-- Data path has to be set if modified shaders or fonts shall be used 
+-- pw.system.set_data_path_visuals("../../")
 pw.system.create_universe(23479, 10000)
 -- pw.physics.set_gravity_vector(0.0, -9.81)
 
