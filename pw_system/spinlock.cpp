@@ -34,9 +34,11 @@
 
 //--- Misc header ------------------------------------------------------------//
 
-std::uint64_t CSpinlock::s_Sleeps = 0u;
-std::uint64_t CSpinlock::s_Waits = 0u;
-std::uint64_t CSpinlock::s_Yields = 0u;
+#ifdef PW_MULTITHREADING
+    std::uint64_t CSpinlock::s_Sleeps = 0u;
+    std::uint64_t CSpinlock::s_Waits = 0u;
+    std::uint64_t CSpinlock::s_Yields = 0u;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
