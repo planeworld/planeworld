@@ -1,7 +1,11 @@
+cmake_minimum_required(VERSION 3.1)
+
 SET(CMAKE_CXX_FLAGS "-std=c++14 -mtune=native -Wall -Wextra -pedantic" CACHE STRING "")
 
+SET(DEFAULTDATADIR ${CMAKE_INSTALL_PREFIX}/share/planeworld)
+ADD_DEFINITIONS(-DDEFAULTDATADIR="${DEFAULTDATADIR}")
+
 PROJECT (planeworld)
-cmake_minimum_required(VERSION 3.1)
 
 OPTION(COMPILE_UNIT_TESTS "Compile unit tests. " OFF)
 
@@ -14,5 +18,5 @@ ADD_SUBDIRECTORY(pw_system)
 ADD_SUBDIRECTORY(testing)
 
 
-INSTALL (DIRECTORY ./data DESTINATION share/planeworld)
+INSTALL (DIRECTORY ./data/ DESTINATION share/planeworld)
 #INSTALL (FILES SETENV DESTINATION .)
