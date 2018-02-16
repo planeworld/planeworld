@@ -41,7 +41,8 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CVisualsManager::CVisualsManager() : m_bFullscreen(false),
+CVisualsManager::CVisualsManager() : m_unLightmapSubsampling(32),
+                                     m_bFullscreen(false),
                                      m_nMainWinHeight(600),
                                      m_nMainWinWidth(800),
                                      m_nVisualisations(0),
@@ -62,6 +63,7 @@ CVisualsManager::CVisualsManager() : m_bFullscreen(false),
                                      m_UIDVisuals(&m_FontManager),
                                      m_TextParticle(&m_FontManager),
                                      m_TextDebugInfo(&m_FontManager),
+                                     m_TextDebugRender(&m_FontManager),
                                      m_TextObjects(&m_FontManager),
                                      m_TextScale(&m_FontManager),
                                      m_TextTimers(&m_FontManager),
@@ -419,6 +421,7 @@ void CVisualsManager::drawParticles(CCamera* const _pCamera) const
                         IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()));
                     break;
                 }
+                case ParticleTypeType::SMOKE:
                 case ParticleTypeType::THRUST:
                 {
                     auto   nSize   = Particle.second->getPositions()->size();
@@ -800,7 +803,7 @@ bool CVisualsManager::init()
     CShader FragmentShaderStars;
     CShader FragmentShaderWorld;
     
-    m_RenderTargetLights.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr(), 8);
+    m_RenderTargetLights.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr(), m_unLightmapSubsampling);
     m_RenderTargetScene.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
     m_RenderTargetScreen.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
 
@@ -912,6 +915,9 @@ bool CVisualsManager::init()
     m_TextDebugInfo.setFont(m_strFont);
     m_TextDebugInfo.setPosition(10, 10);
     m_TextDebugInfo.setSize(16);
+    m_TextDebugRender.setColor({{1.0, 0.0, 1.0, 0.8}});
+    m_TextDebugRender.setFont(m_strFont);
+    m_TextDebugRender.setSize(32);
     m_TextObjects.setFont(m_strFont);
     m_TextObjects.setSize(12);
     m_TextScale.setFont(m_strFont);
@@ -1109,10 +1115,6 @@ bool CVisualsManager::processFrame()
 {
     METHOD_ENTRY("CVisualsManager::processFrame")
     
-    // Somehow this doesn't work for all machines when initialised during
-    // this->init(). Hence it is set here as a temporary workaround
-    m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScreen.getIDTex());
-    
     // Setup main camera before calling any commands, to ensure correct
     // setup when fullscreen is toggled
     this->addCamerasFromQueue();
@@ -1147,39 +1149,97 @@ bool CVisualsManager::processFrame()
         }
     }
     m_RenderTargetScene.bind(RENDER_TARGET_CLEAR);
-    
-    m_Graphics.setupWorldSpace();
+        m_Graphics.setupWorldSpace();
+        if (bGotCam)
+        {
+            m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
+            m_pCamera->update();
+            
+            this->drawGrid(DrawModeType::VISUALS);
+            // this->drawTrajectories();
 
-    if (bGotCam)
-    {
-        m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
-        m_pCamera->update();
-        
-        this->drawGrid(DrawModeType::VISUALS);
-        // this->drawTrajectories();
-
-        m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
-        
-        this->drawStars();
-        this->drawWorld();
-        this->drawCOM();
-        this->drawBoundingBoxes();
-        this->drawKinematicsStates(DrawModeType::VISUALS);
-    }
-
+            m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
+            
+            this->drawStars();
+            m_Graphics.setWidth(5.0);
+            this->drawWorld();
+            m_Graphics.setWidth(1.0);
+            this->drawCOM();
+            this->drawBoundingBoxes();
+            this->drawKinematicsStates(DrawModeType::VISUALS);
+        }
     m_RenderTargetScene.unbind();
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // Hacked, just for testing purposes
+    ////////////////////////////////////////////////////////////////////////////
+    m_RenderTargetLights.bind(RENDER_TARGET_CLEAR);
+        m_Graphics.beginRenderBatch("lights");
+        for (auto Particle : *m_pDataStorage->getParticlesByValueFront())
+        {
+            if (Particle.second->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
+            {
+                if (Particle.second->getParticleType() == ParticleTypeType::THRUST)
+                {
+                    auto   nSize   = Particle.second->getPositions()->size();
+                    double fSizeR  = 1.0;
+                    double fGrowth = (Particle.second->getSizeDeath() - Particle.second->getSizeBirth()) * 30.0 *
+                                        nSize/Particle.second->getPositions()->capacity();
+                    ColorTypeRGBA paColBirth = *Particle.second->getColorBirth();
+                    ColorTypeRGBA paColDeath = *Particle.second->getColorDeath();
+                                        
+                    if (Particle.second->getBoundingBox().getWidth()  * m_Graphics.getResPMX() > 2.0 &&
+                        Particle.second->getBoundingBox().getHeight() * m_Graphics.getResPMY() > 2.0)
+                    {
+                        m_Graphics.cacheSinCos(100);
+                        for (auto i=nSize-1; i<nSize; ++i)
+                        {
+                            if (Particle.second->getStates()->at(i) == PARTICLE_STATE_ACTIVE &&
+                                m_pCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
+                            {
+                                double fAge = double(Particle.second->getAge()->at(i)) / Particle.second->getMaxAge();
+                                
+                                double fR = paColBirth[0] * (1.0 - fAge) + paColDeath[0] * fAge;
+                                double fG = paColBirth[1] * (1.0 - fAge) + paColDeath[1] * fAge;
+                                double fB = paColBirth[2] * (1.0 - fAge) + paColDeath[2] * fAge;
+                                double fA = paColBirth[3] * (1.0 - fAge) + paColDeath[3] * fAge;
+                                fA *= 0.1;
+    //                             m_Graphics.setColor(fR, fG, fB, fA);
+                                m_Graphics.setColor(1.0, 0.8, 0.0, 0.5);
+                                
+                                fSizeR = Particle.second->getSizeBirth() * 30.0 + fGrowth * fAge;
+                                
+                                    m_Graphics.filledCircle(Particle.second->getPositions()->at(i) - m_pCamera->getCenter()+
+                                                IGridUser::cellToDouble(Particle.second->getCell() - m_pCamera->getCell()),
+                                                fSizeR, 100, GRAPHICS_CIRCLE_USE_CACHE);
+                            }
+                        }
+                        m_Graphics.setColor(1.0,1.0,1.0);
+                    }
+                }
+            }
+        }
+        m_Graphics.endRenderBatch();
+    m_RenderTargetLights.unbind();
+    ////////////////////////////////////////////////////////////////////////////
+    // End of Hack
+    ////////////////////////////////////////////////////////////////////////////
     
     m_Graphics.setupScreenSpace();
     
     m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
     glViewport(0, 0, m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
 
+    // Compose scene and light information from accordant textures
     m_RenderTargetScreen.bind();    
         m_Graphics.beginRenderBatch("composition");
-            m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScene.getTexUV());
+            m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0),
+                                    &m_RenderTargetScene.getTexUV(), &m_RenderTargetLights.getTexUV());
         m_Graphics.endRenderBatch();
     m_RenderTargetScreen.unbind();
     
+    // Render texture to screen
+    m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScreen.getIDTex());
     m_Graphics.beginRenderBatch("main_screen");
         m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScreen.getTexUV());
     m_Graphics.endRenderBatch();
@@ -1282,6 +1342,57 @@ void CVisualsManager::drawDebugInfo()
 {
     METHOD_ENTRY("CVisualsManager::drawDebugInfo")
     
+    if (m_nVisualisations & VISUALS_DEBUG_RENDER)
+    {
+        auto fBorderX = m_Graphics.getWidthScr() * 0.01;
+        auto fBorderY = m_Graphics.getHeightScr() * 0.01;
+        
+        m_RenderModeMainScreen.setTexture0("LightsTexture", m_RenderTargetLights.getIDTex());
+        m_Graphics.beginRenderBatch("main_screen");
+            m_Graphics.texturedRect(Vector2d(fBorderX, m_Graphics.getHeightScr()>>1), Vector2d(m_Graphics.getWidthScr()>>1, fBorderY),
+                                    &m_RenderTargetLights.getTexUV());
+        m_Graphics.endRenderBatch();
+        
+        m_RenderModeMainScreen.setTexture0("SceneTexture", m_RenderTargetScene.getIDTex());
+        m_Graphics.beginRenderBatch("main_screen");
+            m_Graphics.texturedRect(Vector2d(m_Graphics.getWidthScr()>>1, m_Graphics.getHeightScr()>>1),
+                                    Vector2d(m_Graphics.getWidthScr()-fBorderX, fBorderY),
+                                    &m_RenderTargetScene.getTexUV());
+        m_Graphics.endRenderBatch();
+        m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScreen.getIDTex());
+        m_Graphics.beginRenderBatch("main_screen");
+            m_Graphics.texturedRect(Vector2d(fBorderX, m_Graphics.getHeightScr()-fBorderY),
+                                    Vector2d(m_Graphics.getWidthScr()>>1, m_Graphics.getHeightScr()>>1),
+                                    &m_RenderTargetScreen.getTexUV());
+        m_Graphics.endRenderBatch();
+        
+        m_Graphics.setColor({{1.0, 0.0, 1.0, 0.8}});
+        m_Graphics.beginRenderBatch("world");
+            m_Graphics.rect(Vector2d(fBorderX, m_Graphics.getHeightScr()>>1), Vector2d(m_Graphics.getWidthScr()>>1, fBorderY));
+            m_Graphics.rect(Vector2d(m_Graphics.getWidthScr()>>1, m_Graphics.getHeightScr()>>1),
+                                    Vector2d(m_Graphics.getWidthScr()-fBorderX, fBorderY));
+            m_Graphics.rect(Vector2d(fBorderX, m_Graphics.getHeightScr()-fBorderY),
+                                    Vector2d(m_Graphics.getWidthScr()>>1, m_Graphics.getHeightScr()>>1));
+        m_Graphics.endRenderBatch();
+
+        m_TextDebugRender.setPosition(fBorderX*2.0, fBorderY*2.0);
+        m_TextDebugRender.setText("Lights");
+        m_Graphics.beginRenderBatch("font");
+            m_TextDebugRender.display();
+        m_Graphics.endRenderBatch();
+        
+        m_TextDebugRender.setPosition((m_Graphics.getWidthScr()>>1)+fBorderX*2.0, fBorderY*2.0);
+        m_TextDebugRender.setText("Scene");
+        m_Graphics.beginRenderBatch("font");
+            m_TextDebugRender.display();
+        m_Graphics.endRenderBatch();
+        
+        m_TextDebugRender.setPosition(fBorderX*2.0, (m_Graphics.getHeightScr()>>1)+fBorderY*2.0);
+        m_TextDebugRender.setText("Composition");
+        m_Graphics.beginRenderBatch("font");
+            m_TextDebugRender.display();
+        m_Graphics.endRenderBatch();
+    }
     if (m_nVisualisations & VISUALS_DEBUG_INFO)
     {
         std::ostringstream oss;
@@ -2064,7 +2175,7 @@ void CVisualsManager::myInitComInterface()
     std::function<void(double, double)> FuncResize =
         [&](const double& _fX, const double& _fY)
         {
-            m_RenderTargetLights.init(std::uint16_t(_fX), std::uint16_t(_fY), 8);
+            m_RenderTargetLights.init(std::uint16_t(_fX), std::uint16_t(_fY), m_unLightmapSubsampling);
             m_RenderTargetScene.init(std::uint16_t(_fX), std::uint16_t(_fY));
             m_RenderTargetScreen.init(std::uint16_t(_fX), std::uint16_t(_fY));
             if (m_pCamera != nullptr)
@@ -2519,6 +2630,15 @@ void CVisualsManager::myInitComInterface()
                                           {{ParameterType::NONE, "No return value"},
                                            {ParameterType::DOUBLE, "Location of visuals data (path)"}},
                                            "system", "visuals_pre_init");
+    m_pComInterface->registerFunction("set_lightmap_subsampling",
+                                          CCommand<void, int>([&](const int _nSS)
+                                          {
+                                              this->setLightMapSubsampling(_nSS);
+                                          }),
+                                          "Sets subsampling for lightmap texture.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Subsampling value for lightmap texture"}},
+                                           "system", "visuals");
     m_pComInterface->registerFunction("set_frequency_visuals",
                                           CCommand<void, double>([&](const double& _fFrequency)
                                           {
@@ -3015,9 +3135,15 @@ void CVisualsManager::myInitComInterface()
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals", "visuals"
     );
-    m_pComInterface->registerFunction("toggle_debug",
+    m_pComInterface->registerFunction("toggle_debug_info",
                                       CCommand<void>([&](){this->toggleVisualisations(VISUALS_DEBUG_INFO);}),
                                       "Toggle debug information (e.g. drawcalls) on and off.",
+                                      {{ParameterType::NONE, "No return value"}},
+                                      "visuals", "visuals"
+    );
+    m_pComInterface->registerFunction("toggle_debug_render",
+                                      CCommand<void>([&](){this->toggleVisualisations(VISUALS_DEBUG_RENDER);}),
+                                      "Toggle render debug information (scene, lightmap) on and off.",
                                       {{ParameterType::NONE, "No return value"}},
                                       "visuals", "visuals"
     );

@@ -101,9 +101,14 @@ bool CInputManager::processFrame()
                 {
                     switch (Event.key.code)
                     {
-                        case sf::Keyboard::F1:
+                        case sf::Keyboard::F2:
                         {
-                            m_pComInterface->call<void>("toggle_debug");
+                            m_pComInterface->call<void>("toggle_debug_info");
+                            break;
+                        }
+                        case sf::Keyboard::F3:
+                        {
+                            m_pComInterface->call<void>("toggle_debug_render");
                             break;
                         }
                         case sf::Keyboard::BackSpace:
@@ -176,9 +181,14 @@ bool CInputManager::processFrame()
                             m_pComInterface->call<void>("com_console_on");
                             break;
                         }
-                        case sf::Keyboard::F1:
+                        case sf::Keyboard::F2:
                         {
-                            m_pComInterface->call<void>("toggle_debug");
+                            m_pComInterface->call<void>("toggle_debug_info");
+                            break;
+                        }
+                        case sf::Keyboard::F3:
+                        {
+                            m_pComInterface->call<void>("toggle_debug_render");
                             break;
                         }
                         case sf::Keyboard::U:

@@ -98,7 +98,7 @@ void CRenderMode::addUniform(const std::string& _strName, GLfloat* const _pf)
 void CRenderMode::setTexture0(const std::string& _strName, const GLuint _unTexID)
 {
     METHOD_ENTRY("CRenderMode::setTexture0")
-    GLint nLoc=0;
+    GLint nUniformLocation = 0;
     DOM_DEV(
         if (m_pShaderProgram == nullptr)
         {
@@ -108,8 +108,8 @@ void CRenderMode::setTexture0(const std::string& _strName, const GLuint _unTexID
     )
     
     m_unTexID0 = _unTexID;
-    nLoc = glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str());
-    glUniform1i(nLoc, 0);
+    nUniformLocation = glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str());
+    m_UniformsTextures[0] = nUniformLocation;
     
     DOM_DEV(DomDev:)
 }
@@ -125,7 +125,7 @@ void CRenderMode::setTexture0(const std::string& _strName, const GLuint _unTexID
 void CRenderMode::setTexture1(const std::string& _strName, const GLuint _unTexID)
 {
     METHOD_ENTRY("CRenderMode::setTexture1")
-    GLint nLoc=0;
+    GLint nUniformLocation = 0;
     DOM_DEV(
         if (m_pShaderProgram == nullptr)
         {
@@ -135,8 +135,8 @@ void CRenderMode::setTexture1(const std::string& _strName, const GLuint _unTexID
     )
     
     m_unTexID1 = _unTexID;
-    nLoc = glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str());
-    glUniform1i(nLoc, 1);
+    nUniformLocation = glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str());
+    m_UniformsTextures[1] = nUniformLocation;
     
     DOM_DEV(DomDev:)
 }
@@ -149,7 +149,22 @@ void CRenderMode::setTexture1(const std::string& _strName, const GLuint _unTexID
 void CRenderMode::use()
 {
     METHOD_ENTRY("CRenderMode::use")
+    
     m_pShaderProgram->use();
+    
+    if (m_RenderModeType == RenderModeType::VERT3COL4TEX2)
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_unTexID0);
+    }
+    if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_unTexID0);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, m_unTexID1);
+    }
+    
     for (auto UniformInt : m_UniformsInt)
     {
         glUniform1i(UniformInt.first, *UniformInt.second);
@@ -158,9 +173,13 @@ void CRenderMode::use()
     {
         glUniform1f(UniformFloat.first, *UniformFloat.second);
     }
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_unTexID0);
-    
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_unTexID1);
+    if (m_RenderModeType == RenderModeType::VERT3COL4TEX2)
+    {
+        glUniform1i(m_UniformsTextures[0], 0);
+    }
+    if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
+    {
+        glUniform1i(m_UniformsTextures[0], 0);
+        glUniform1i(m_UniformsTextures[1], 1);
+    }
 }

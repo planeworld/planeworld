@@ -74,7 +74,8 @@ CGraphics::CGraphics() : m_pWindow(nullptr),
     
     m_vecColours.resize(m_unIndexMax);
     m_vecVertices.resize(m_unIndexMax);
-    m_vecUVs.resize(m_unIndexMax);
+    m_vecUV0s.resize(m_unIndexMax);
+    m_vecUV1s.resize(m_unIndexMax);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -340,7 +341,7 @@ void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode, const bool _bF
                 glEnableVertexAttribArray(2);
                 glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV1s);
                 glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-                glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+                glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
                 glEnableVertexAttribArray(3);
                 break;
             }
@@ -357,7 +358,8 @@ void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode, const bool _bF
         m_unIndex = 0u;
         m_unIndexVerts = 0u;
         m_unIndexCol = 0u;
-        m_unIndexUV = 0u;
+        m_unIndexUV0 = 0u;
+        m_unIndexUV1 = 0u;
         m_unIndexLines = 0u;
         m_unIndexPoints = 0u;
         m_unIndexTriangles = 0u;
@@ -469,7 +471,7 @@ void CGraphics::endRenderBatch(const bool _bForce)
             case RenderModeType::VERT3COL4TEX2:
             {
                 glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
-                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV0*sizeof(GLfloat), m_vecUV0s.data(), GL_STREAM_DRAW);
                 
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
@@ -482,9 +484,9 @@ void CGraphics::endRenderBatch(const bool _bForce)
             case RenderModeType::VERT3COL4TEX2X2:
             {
                 glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
-                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV0*sizeof(GLfloat), m_vecUV0s.data(), GL_STREAM_DRAW);
                 glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV1s);
-                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV1*sizeof(GLfloat), m_vecUV1s.data(), GL_STREAM_DRAW);
                 
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
@@ -1596,7 +1598,75 @@ void CGraphics::texturedRect(const Vector2d& _vecLL, const Vector2d& _vecUR,
     m_vecColours[m_unIndexCol++] = m_aColour[3];
     for (const auto UV : *_pUVs)
     {
-        m_vecUVs[m_unIndexUV++] = UV;
+        m_vecUV0s[m_unIndexUV0++] = UV;
+    }
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 1
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 2
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex;     // 3
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex;     // 3
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex-1u;  // 2
+    m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex+1u;  // 4
+    m_unIndex += 2u;
+    
+    m_uncI += 12;
+    
+    if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
+    {
+        this->restartRenderBatchInternal();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draw a multi-textured rectangle
+///
+/// \param _vecLL   Lower left corner
+/// \param _vecUR   Upper right corner
+/// \param _pUV0s   List of texture coordinates (x0, y0, ... xN, yN), texture 0
+/// \param _pUV1s   List of texture coordinates (x0, y0, ... xN, yN), texture 1
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::texturedRect(const Vector2d& _vecLL, const Vector2d& _vecUR,
+                             const std::vector<GLfloat>* _pUV0s,
+                             const std::vector<GLfloat>* _pUV1s)
+{
+    METHOD_ENTRY("CGraphics::texturedRect")
+
+    m_vecVertices[m_unIndexVerts++] = _vecLL[0];
+    m_vecVertices[m_unIndexVerts++] = _vecLL[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecUR[0];
+    m_vecVertices[m_unIndexVerts++] = _vecLL[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecLL[0];
+    m_vecVertices[m_unIndexVerts++] = _vecUR[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecVertices[m_unIndexVerts++] = _vecUR[0];
+    m_vecVertices[m_unIndexVerts++] = _vecUR[1];
+    m_vecVertices[m_unIndexVerts++] = float(m_fDepth);
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    m_vecColours[m_unIndexCol++] = m_aColour[0];
+    m_vecColours[m_unIndexCol++] = m_aColour[1];
+    m_vecColours[m_unIndexCol++] = m_aColour[2];
+    m_vecColours[m_unIndexCol++] = m_aColour[3];
+    for (const auto UV0 : *_pUV0s)
+    {
+        m_vecUV0s[m_unIndexUV0++] = UV0;
+    }
+    for (const auto UV1 : *_pUV1s)
+    {
+        m_vecUV1s[m_unIndexUV1++] = UV1;
     }
     m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 1
     m_vecIndicesTriangles[m_unIndexTriangles++] = m_unIndex++;   // 2
@@ -1771,7 +1841,7 @@ void CGraphics::restartRenderBatchInternal()
         case RenderModeType::VERT3COL4TEX2:
         {
             glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
-            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV0*sizeof(GLfloat), m_vecUV0s.data(), GL_STREAM_DRAW);
             
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
@@ -1784,9 +1854,9 @@ void CGraphics::restartRenderBatchInternal()
         case RenderModeType::VERT3COL4TEX2X2:
         {
             glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
-            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV0*sizeof(GLfloat), m_vecUV0s.data(), GL_STREAM_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV1s);
-            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV*sizeof(GLfloat), m_vecUVs.data(), GL_STREAM_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV1*sizeof(GLfloat), m_vecUV1s.data(), GL_STREAM_DRAW);
             
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
@@ -1822,7 +1892,8 @@ void CGraphics::restartRenderBatchInternal()
     m_unIndex = 0u;
     m_unIndexVerts = 0u;
     m_unIndexCol = 0u;
-    m_unIndexUV = 0u;
+    m_unIndexUV0 = 0u;
+    m_unIndexUV1 = 0u;
     m_unIndexLines = 0u;
     m_unIndexPoints = 0u;
     m_unIndexTriangles = 0u;

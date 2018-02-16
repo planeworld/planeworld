@@ -55,6 +55,7 @@ enum class ParticleTypeType
 {
     NONE,
     DOT,
+    SMOKE,
     THRUST
 };
 
@@ -153,11 +154,13 @@ typedef std::vector<CParticle*>   ParticleType;                  ///< Specifies 
 //--- Enum parser ------------------------------------------------------------//
 static std::map<ParticleTypeType, std::string> s_ParticleTypeToStringMap = {
     {ParticleTypeType::DOT, "dot"},
+    {ParticleTypeType::SMOKE, "smoke"},
     {ParticleTypeType::THRUST, "thrust"}
 }; ///< Map from ParticleTypeType to string
 
 const std::map<std::string, ParticleTypeType> STRING_TO_PARTICLE_TYPE_MAP    = {
     {"dot", ParticleTypeType::DOT},
+    {"smoke", ParticleTypeType::SMOKE},
     {"thrust", ParticleTypeType::THRUST}
 }; ///< Map from string to ParticleTypeType
 

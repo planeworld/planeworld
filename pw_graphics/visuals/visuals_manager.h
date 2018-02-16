@@ -109,6 +109,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         bool            processFrame();
         
         void            setDataPath(const std::string&);
+        void            setLightMapSubsampling(const std::uint16_t);
         void            setUniverse(CUniverse* const);
         void            setVisualisations(const int&);
         void            setWindow(WindowHandleType* const);
@@ -171,6 +172,8 @@ class CVisualsManager : virtual public CGraphicsBase,
         CRenderTarget       m_RenderTargetScene;            ///< Render target of screen (scene component)
         CRenderTarget       m_RenderTargetScreen;           ///< Render target of screen (final image)
         
+        std::uint16_t       m_unLightmapSubsampling;        ///< Set subsampling factor for lights (texture)
+        
         bool                            m_bFullscreen;      ///< Indicates fullscreen mode
         int                             m_nMainWinHeight;   ///< Height of window if not in fullscreen mode
         int                             m_nMainWinWidth;    ///< Width of window if not in fullscreen mode
@@ -205,6 +208,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         CUIDVisuals                     m_UIDVisuals;       ///< Graphical display of UIDs
         CText                           m_TextParticle;     ///< Text object for particle names
         CText                           m_TextDebugInfo;    ///< Text object for debug information
+        CText                           m_TextDebugRender;  ///< Text object for debug render overlays
         CText                           m_TextObjects;      ///< Text object for object names
         CText                           m_TextScale;        ///< Text object for universe scale
         CText                           m_TextTimers;       ///< Text object for timers
@@ -266,6 +270,20 @@ inline void CVisualsManager::setDataPath(const std::string& _strDataPath)
 {
     METHOD_ENTRY("CVisualsManager::setDataPath")
     m_strDataPath = _strDataPath;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets subsampling for light map texture
+///
+/// \param _unSS Subsampling of light map texture
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void CVisualsManager::setLightMapSubsampling(const std::uint16_t _unSS)
+{
+    METHOD_ENTRY("CVisualsManager::setLightMapSubsampling")
+    m_unLightmapSubsampling = _unSS;
+    m_RenderTargetLights.init(m_Graphics.getWidthScr(), m_Graphics.getHeightScr(), m_unLightmapSubsampling);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

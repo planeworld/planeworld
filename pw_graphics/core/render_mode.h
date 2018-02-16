@@ -90,7 +90,8 @@ class CRenderMode
         GLuint           m_unTexID0 = 0;                                ///< Texture 0
         GLuint           m_unTexID1 = 0;                                ///< Texture 1
         
-        std::unordered_map<GLint, GLint*> m_UniformsInt;                ///< Uniforms, type int
+        std::array<GLint, 2>                m_UniformsTextures;         ///< Uniforms of texture channels
+        std::unordered_map<GLint, GLint*>   m_UniformsInt;              ///< Uniforms, type int
         std::unordered_map<GLint, GLfloat*> m_UniformsFloat;            ///< Uniforms, type float
         
 };

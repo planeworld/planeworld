@@ -239,14 +239,19 @@ class CGraphics
         void polygon(const VertexListType&, const PolygonType&, const Vector2d& _vecOffset = Vector2d(0.0,0.0));
         void rect(const Vector2d&, const Vector2d&);
         void setDepth(const double&);
-        void texturedRect(const Vector2d&, const Vector2d&, const std::vector<GLfloat>* const);
+        void texturedRect(const Vector2d&,
+                          const Vector2d&,
+                          const std::vector<GLfloat>* const);
+        void texturedRect(const Vector2d&,
+                          const Vector2d&,
+                          const std::vector<GLfloat>* const,
+                          const std::vector<GLfloat>* const);
         void beginLine(const PolygonType&);
         void endLine();
         
         void resetBufferObjects();                      ///< Clear all VAOs, VBOs, IBOs...
         
     private:
-        
         
         void restartRenderBatchInternal();
         
@@ -265,7 +270,8 @@ class CGraphics
         GLuint              m_unIndexMax = GRAPHICS_SIZE_OF_INDEX_BUFFER; ///< Maximum number of vertices;
         GLuint              m_unIndexVerts = 0u;        ///< Index of current vertex in buffer
         GLuint              m_unIndexCol = 0u;          ///< Index of current colour in buffer
-        GLuint              m_unIndexUV = 0u;           ///< Index of current texture coordinates in buffer
+        GLuint              m_unIndexUV0 = 0u;          ///< Index of current texture coordinates (texture 0) in buffer
+        GLuint              m_unIndexUV1 = 0u;          ///< Index of current texture coordinates (texture 1) in buffer
         GLuint              m_unIndexLines = 0u;        ///< Index of current element in line index buffer
         GLuint              m_unIndexPoints = 0u;       ///< Index of current element in point index buffer
         GLuint              m_unIndexTriangles = 0u;    ///< Index of current element in triangle index buffer
@@ -300,7 +306,8 @@ class CGraphics
         
         std::vector<GLfloat>    m_vecColours;           ///< Temporary buffer for colours of vertices
         std::vector<GLfloat>    m_vecVertices;          ///< Temporary buffer for vertices
-        std::vector<GLfloat>    m_vecUVs;               ///< Temporary buffer for texture coordinates
+        std::vector<GLfloat>    m_vecUV0s;              ///< Temporary buffer for texture coordinates (texture 0)
+        std::vector<GLfloat>    m_vecUV1s;              ///< Temporary buffer for texture coordinates (texture 1)
         
         RenderModesByNameType   m_RenderModesByName;    ///< Map of render modes, accessed by name
         CRenderMode*            m_pRenderMode;          ///< Currently selected render mode

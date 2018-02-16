@@ -75,11 +75,11 @@ bool CRenderTarget::init(const std::uint16_t _unResX, const std::uint16_t _unRes
     
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, _unResX/_unSub, _unResY/_unSub);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _unResX/_unSub, _unResY/_unSub, GL_RGBA8, GL_UNSIGNED_BYTE, 0);
-    //  glGenerateMipmap(GL_TEXTURE_2D);
+    glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
     // Configure frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_unIDTex, 0);
