@@ -12,7 +12,6 @@ ENDIF()
 
 INCLUDE_DIRECTORIES (
     ${LUA_INCLUDE_DIR}
-    ${CMAKE_HOME_DIRECTORY}/3rdparty/pugixml/src
     ${CMAKE_HOME_DIRECTORY}/pw_io
     ${CMAKE_HOME_DIRECTORY}/pw_io/import
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures
