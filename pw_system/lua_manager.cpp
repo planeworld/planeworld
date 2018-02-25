@@ -46,7 +46,7 @@ using namespace Eigen;
 CLuaManager::CLuaManager() : IComInterfaceProvider(),
                              IThreadModule(),
                              m_strScript(""),
-                             m_bPaused(false)
+                             m_bPaused(true)
 {
     METHOD_ENTRY("CLuaManager::CLuaManager")
     CTOR_CALL("CLuaManager::CLuaManager")
