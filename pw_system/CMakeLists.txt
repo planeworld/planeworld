@@ -102,7 +102,6 @@ TARGET_LINK_LIBRARIES (planeworld
     ${LUA_LIBRARIES}
     ${X11LIBRARIES}
     noise2d
-    pugixml
     sfml-system
     sfml-window
     Threads::Threads
