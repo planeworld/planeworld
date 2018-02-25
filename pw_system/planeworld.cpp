@@ -111,9 +111,6 @@
     } \
 }
 
-//--- Global variables -------------------------------------------------------//
-bool g_bDone = false;
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Usage to call program
@@ -125,17 +122,6 @@ void usage()
     std::cout << "Usage: planeworld <LUA_FILE>" << std::endl;
     std::cout << "\nExample: " << std::endl;
     std::cout << "planeworld path/to/scene.lua" << std::endl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Quit program
-///
-////////////////////////////////////////////////////////////////////////////////
-void quit()
-{
-    METHOD_ENTRY("quit")
-    g_bDone = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,6 +191,9 @@ int main(int argc, char *argv[])
     MEM_ALLOC("CPhysicsManager")
     MEM_ALLOC("CVisualsManager")
     
+    bool bExit = false; ///< Exit simulation
+    bool bExitError = false; ///< Exit with error
+    
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 3. Initialise com interface
@@ -215,14 +204,63 @@ int main(int argc, char *argv[])
     ComInterface.registerWriterDomain("main");
     
     ComInterface.registerFunction("exit",
-                                    CCommand<void>(quit),
+                                    CCommand<void>([&]()
+                                    {
+                                        bExit = true;
+                                        bExitError = false;
+                                    }),
                                     "Exit processing, clean up and end simulation. Same as <quit>",
                                     {{ParameterType::NONE, "No return value"}},
                                     "system", "main"
     );
+    ComInterface.registerFunction("exit_success",
+                                    CCommand<void>([&]()
+                                    {
+                                        bExit = true;
+                                        bExitError = false;
+                                    }),
+                                    "Exit processing without error, clean up and end simulation. Same as <exit>/<quit>/<quit_success>",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system", "main"
+    );
+    ComInterface.registerFunction("exit_error",
+                                    CCommand<void>([&]()
+                                    {
+                                        bExit = true;
+                                        bExitError = true;
+                                    }),
+                                    "Exit processing with error, clean up and end simulation. Same as <quit_error>",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system", "main"
+    );
     ComInterface.registerFunction("quit",
-                                    CCommand<void>(quit),
+                                    CCommand<void>([&]()
+                                    {
+                                        bExit = true;
+                                        bExitError = false;
+                                    }),
                                     "Quit processing, clean up and end simulation. Same as <exit>",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system", "main"
+    );
+    
+    ComInterface.registerFunction("quit_success",
+                                    CCommand<void>([&]()
+                                    {
+                                        bExit = true;
+                                        bExitError = false;
+                                    }),
+                                    "Quit processing without error, clean up and end simulation. Same as <quit>/<exit>/<exit_success>",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system", "main"
+    );
+    ComInterface.registerFunction("quit_error",
+                                    CCommand<void>([&]()
+                                    {
+                                        bExit = true;
+                                        bExitError = true;
+                                    }),
+                                    "Quit processing with error, clean up and end simulation. Same as <exit_error>",
                                     {{ParameterType::NONE, "No return value"}},
                                     "system", "main"
     );
@@ -319,7 +357,7 @@ int main(int argc, char *argv[])
         // 6. Start input
         //
         ////////////////////////////////////////////////////////////////////////
-        while (!g_bDone)
+        while (!bExit)
         {
             #ifndef PW_MULTITHREADING
                 //--- Run Physics ---//
@@ -364,7 +402,7 @@ int main(int argc, char *argv[])
     else // if (!bGraphics)
     {
         #ifndef PW_MULTITHREADING
-            while (!g_bDone)
+            while (!bExit)
             {
                 if (nFrame % static_cast<int>(pPhysicsManager->getFrequency() *
                                               pPhysicsManager->getTimeAccel() /
@@ -395,5 +433,15 @@ int main(int argc, char *argv[])
         DOM_STATS(DEBUG_MSG("main", "Spinlock sleeps: " << CSpinlock::getSleeps()*0.5 << " ms"))
     #endif
 
-    CLEAN_UP; return EXIT_SUCCESS;
+    CLEAN_UP;
+    
+    if (bExitError)
+    {
+        ERROR_MSG("Planeworld", "Exiting with failure")
+        return EXIT_FAILURE;
+    }
+    else
+    {
+        return EXIT_SUCCESS;
+    }
 }
