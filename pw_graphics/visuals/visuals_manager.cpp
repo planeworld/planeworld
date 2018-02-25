@@ -1192,7 +1192,7 @@ bool CVisualsManager::processFrame()
                         Particle.second->getBoundingBox().getHeight() * m_Graphics.getResPMY() > 2.0)
                     {
                         m_Graphics.cacheSinCos(100);
-                        for (auto i=nSize-1; i<nSize; ++i)
+                        for (auto i=0u; i<nSize; ++i)
                         {
                             if (Particle.second->getStates()->at(i) == PARTICLE_STATE_ACTIVE &&
                                 m_pCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
@@ -1204,8 +1204,7 @@ bool CVisualsManager::processFrame()
                                 double fB = paColBirth[2] * (1.0 - fAge) + paColDeath[2] * fAge;
                                 double fA = paColBirth[3] * (1.0 - fAge) + paColDeath[3] * fAge;
                                 fA *= 0.1;
-    //                             m_Graphics.setColor(fR, fG, fB, fA);
-                                m_Graphics.setColor(1.0, 0.8, 0.0, 0.5);
+                                m_Graphics.setColor(fR, fG, fB, fA);
                                 
                                 fSizeR = Particle.second->getSizeBirth() * 30.0 + fGrowth * fAge;
                                 

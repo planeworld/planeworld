@@ -122,13 +122,9 @@ bool g_bDone = false;
 void usage()
 {
     METHOD_ENTRY("usage")
-    std::cout << "Usage: planeworld <OPTIONS> <LUA_FILE>" << std::endl;
-    std::cout << "\nOptions: " << std::endl;
-    std::cout << "--no graphics: Start simulation without graphical output." << std::endl;
-    std::cout << "\nExamples: " << std::endl;
+    std::cout << "Usage: planeworld <LUA_FILE>" << std::endl;
+    std::cout << "\nExample: " << std::endl;
     std::cout << "planeworld path/to/scene.lua" << std::endl;
-    std::cout << "planeworld --no-graphics path/to/scene.lua" << std::endl;
-    
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,32 +162,17 @@ int main(int argc, char *argv[])
     // 1. Check for given arguments
     //
     //////////////////////////////////////////////////////////////////////////// 
-    bool bGraphics = true;
-    std::string strArgOptions("");
+    bool bGraphics = false;
     std::string strArgData("");
         
-    if (argc < 2 || argc > 3)
+    if (argc == 2)
     {
-        usage();
-        return EXIT_FAILURE;
-    }
-    if (argc == 3)
-    {
-        strArgOptions = argv[1];
-        strArgData    = argv[2];
-        if (strArgOptions == "--no-graphics")
-        {
-            bGraphics = false;
-            INFO_MSG("Main", "Starting simulation without graphical interface.")
-        }
-        else
-        {
-            WARNING_MSG("Main", "Unknown option " << strArgOptions << ", ignoring.")
-        }
+        strArgData = argv[1];
     }
     else
     {
-        strArgData = argv[1];
+        usage();
+        return EXIT_FAILURE;
     }
     
     //////////////////////////////////////////////////////////////////////////// 
@@ -215,17 +196,14 @@ int main(int argc, char *argv[])
         
     WindowHandleType*   pWindow = nullptr;
     
+    pInputManager   = new CInputManager;
     pLuaManager     = new CLuaManager;
     pPhysicsManager = new CPhysicsManager;
+    pVisualsManager = new CVisualsManager;
+    MEM_ALLOC("CInputManager")
     MEM_ALLOC("CLuaManager")
     MEM_ALLOC("CPhysicsManager")
-    if (bGraphics)
-    {
-        pInputManager   = new CInputManager;
-        pVisualsManager = new CVisualsManager;
-        MEM_ALLOC("CInputManager")
-        MEM_ALLOC("CVisualsManager")
-    }
+    MEM_ALLOC("CVisualsManager")
     
     //////////////////////////////////////////////////////////////////////////// 
     //
@@ -289,6 +267,7 @@ int main(int argc, char *argv[])
                                             pVisualsThread = new std::thread(&CVisualsManager::run, pVisualsManager);
                                             MEM_ALLOC("std::thread")
                                         #endif
+                                        bGraphics = true;
                                     }
                                     ),
                                     "Initialise visuals module, start thread if in multithreading mode.",
