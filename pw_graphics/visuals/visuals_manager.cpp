@@ -825,6 +825,7 @@ bool CVisualsManager::init()
     m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
     m_RenderModeFont.setShaderProgram(&m_ShaderProgramFont);
     m_RenderModeFont.setRenderModeType(RenderModeType::VERT3COL4TEX2);
+    m_RenderModeFont.setTexture0("FontTexture", m_FontManager.getIDTex());
     
     m_ShaderProgramMainScreen.create(VertexShaderMainScreen, FragmentShaderMainScreen);
     m_RenderModeMainScreen.setShaderProgram(&m_ShaderProgramMainScreen);
