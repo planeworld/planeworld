@@ -145,7 +145,7 @@ function update()
     -- Regular updates might be implemented here, additional callbacks
     -- to the update are possible
     pw.physics.obj_apply_force(idObj01, 0.1, 0.0, 0.0, 1.0)
-    print(pw.physics.obj_get_velocity(idObj01))
+--     print(pw.physics.obj_get_velocity(idObj01))
 end
 
 function start_simulation()

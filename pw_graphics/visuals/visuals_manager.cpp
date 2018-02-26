@@ -1346,13 +1346,13 @@ void CVisualsManager::drawDebugInfo()
         auto fBorderX = m_Graphics.getWidthScr() * 0.01;
         auto fBorderY = m_Graphics.getHeightScr() * 0.01;
         
-        m_RenderModeMainScreen.setTexture0("LightsTexture", m_RenderTargetLights.getIDTex());
+        m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetLights.getIDTex());
         m_Graphics.beginRenderBatch("main_screen");
             m_Graphics.texturedRect(Vector2d(fBorderX, m_Graphics.getHeightScr()>>1), Vector2d(m_Graphics.getWidthScr()>>1, fBorderY),
                                     &m_RenderTargetLights.getTexUV());
         m_Graphics.endRenderBatch();
         
-        m_RenderModeMainScreen.setTexture0("SceneTexture", m_RenderTargetScene.getIDTex());
+        m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScene.getIDTex());
         m_Graphics.beginRenderBatch("main_screen");
             m_Graphics.texturedRect(Vector2d(m_Graphics.getWidthScr()>>1, m_Graphics.getHeightScr()>>1),
                                     Vector2d(m_Graphics.getWidthScr()-fBorderX, fBorderY),

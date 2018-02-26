@@ -111,6 +111,8 @@ void CRenderMode::setTexture0(const std::string& _strName, const GLuint _unTexID
     nUniformLocation = glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str());
     m_UniformsTextures[0] = nUniformLocation;
     
+    std::cout << "SET  unit[0] " << "loc[" << nUniformLocation << "] " << "id[" << m_unTexID0 << "] " << _strName <<  std::endl;
+    
     DOM_DEV(DomDev:)
 }
 
@@ -138,6 +140,8 @@ void CRenderMode::setTexture1(const std::string& _strName, const GLuint _unTexID
     nUniformLocation = glGetUniformLocation(m_pShaderProgram->getID(), _strName.c_str());
     m_UniformsTextures[1] = nUniformLocation;
     
+    std::cout << "SET  unit[1] " << "loc[" << nUniformLocation << "] " << "id[" << m_unTexID1 << "] " << _strName <<  std::endl;
+    
     DOM_DEV(DomDev:)
 }
 
@@ -156,13 +160,16 @@ void CRenderMode::use()
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_unTexID0);
+        std::cout << "BIND unit[0] " << "id[" << m_unTexID0 << "]" << std::endl;
     }
     if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_unTexID0);
+        std::cout << "BIND unit[0] " << "id[" << m_unTexID0 << "]" << std::endl;
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, m_unTexID1);
+        std::cout << "BIND unit[1] " << "id[" << m_unTexID1 << "]" << std::endl;
     }
     
     for (auto UniformInt : m_UniformsInt)
@@ -176,10 +183,13 @@ void CRenderMode::use()
     if (m_RenderModeType == RenderModeType::VERT3COL4TEX2)
     {
         glUniform1i(m_UniformsTextures[0], 0);
+        std::cout << "UNI  unit[0] " << "loc[" << m_UniformsTextures[0] << "]" << std::endl;
     }
     if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
     {
         glUniform1i(m_UniformsTextures[0], 0);
         glUniform1i(m_UniformsTextures[1], 1);
+        std::cout << "UNI  unit[0] " << "loc[" << m_UniformsTextures[0] << "]" << std::endl;
+        std::cout << "UNI  unit[1] " << "loc[" << m_UniformsTextures[1] << "]" << std::endl;
     }
 }

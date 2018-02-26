@@ -379,6 +379,8 @@ bool CGraphics::beginRenderBatch(const std::string& _strRenderModeName)
 {
     METHOD_ENTRY("CGraphics::beginRenderBatch")
     
+    std::cout << "MODE " << _strRenderModeName << std::endl;
+    
     auto ci = m_RenderModesByName.find(_strRenderModeName);
     if (ci != m_RenderModesByName.end())
     {
@@ -1809,6 +1811,8 @@ void CGraphics::resetBufferObjects()
 void CGraphics::restartRenderBatchInternal()
 {
     METHOD_ENTRY("CGraphics::restartRenderBatchInternal")
+    
+    std::cout << "MODE RESTART" << std::endl;
     
     glBindVertexArray(m_unVAO);
     
