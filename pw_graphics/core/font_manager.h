@@ -80,11 +80,12 @@ class CFontManager : public CGraphicsBase
         {
             return m_FontsByName;
         }
+        GLuint  getIDTex() const {return m_unTexID;}
         
         //--- Methods --------------------------------------------------------//
         bool    addFont(const std::string&, const std::string&, const int = FONT_MGR_SIZE_DEFAULT);
         void    drawText(const std::string&, const float&, const float&, const bool = false, const int = FONT_MGR_NO_WORD_WRAP);
-        GLuint  getIDTex(const std::string&);
+//         GLuint  getIDTex(const std::string&);
         float   getTextLength(const std::string&, const std::string&, const int);
         bool    setFont(const std::string&);
         void    setRenderModeName(const std::string& _strName) {m_strRenderModeName = _strName;}
@@ -115,29 +116,29 @@ class CFontManager : public CGraphicsBase
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Return id of texture
-///
-/// \param _strFont Font to get texture id from
-///
-/// \return ID of texture of given font
-///
-////////////////////////////////////////////////////////////////////////////////
-inline GLuint CFontManager::getIDTex(const std::string& _strFont)
-{
-    METHOD_ENTRY("CFontManager::getIDTex")
-    
-    DOM_DEV
-    (
-        const auto ci = m_FontsByName.find(_strFont);
-        if (ci == m_FontsByName.end())
-        {
-            ERROR_MSG("Font Manager", "Unknown font with name " << _strFont << ".")
-            return 0;
-        }
-    )
-    return m_FontsByName[_strFont];
-}
+// ////////////////////////////////////////////////////////////////////////////////
+// ///
+// /// \brief Return id of texture
+// ///
+// /// \param _strFont Font to get texture id from
+// ///
+// /// \return ID of texture of given font
+// ///
+// ////////////////////////////////////////////////////////////////////////////////
+// inline GLuint CFontManager::getIDTex(const std::string& _strFont)
+// {
+//     METHOD_ENTRY("CFontManager::getIDTex")
+//     
+//     DOM_DEV
+//     (
+//         const auto ci = m_FontsByName.find(_strFont);
+//         if (ci == m_FontsByName.end())
+//         {
+//             ERROR_MSG("Font Manager", "Unknown font with name " << _strFont << ".")
+//             return 0;
+//         }
+//     )
+//     return m_FontsByName[_strFont];
+// }
 
 #endif // FONT_MANAGER_H
