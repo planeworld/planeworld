@@ -117,6 +117,7 @@ void CWidgetCam::myResize(const int _nX, const int _nY)
     METHOD_ENTRY("CWidgetCam::myResize")
 
     m_TargetCam.init(_nX, _nY);
+    m_RenderMode.getShaderProgram()->use();
     m_RenderMode.setTexture0("ScreenTexture", m_TargetCam.getIDTex());
     if (m_hCamera.isValid())
     {

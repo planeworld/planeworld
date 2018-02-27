@@ -823,11 +823,13 @@ bool CVisualsManager::init()
     m_ShaderProgramCamWidget.create(VertexShaderMainScreen, FragmentShaderCamWidget);
     
     m_ShaderProgramFont.create(VertexShaderFont, FragmentShaderFont);
+    m_ShaderProgramFont.use();
     m_RenderModeFont.setShaderProgram(&m_ShaderProgramFont);
     m_RenderModeFont.setRenderModeType(RenderModeType::VERT3COL4TEX2);
     m_RenderModeFont.setTexture0("FontTexture", m_FontManager.getIDTex());
     
     m_ShaderProgramMainScreen.create(VertexShaderMainScreen, FragmentShaderMainScreen);
+    m_ShaderProgramMainScreen.use();
     m_RenderModeMainScreen.setShaderProgram(&m_ShaderProgramMainScreen);
     m_RenderModeMainScreen.setRenderModeType(RenderModeType::VERT3COL4TEX2);
     m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScreen.getIDTex());
@@ -843,7 +845,8 @@ bool CVisualsManager::init()
     m_RenderModeLights.setShaderProgram(&m_ShaderProgramWorld);
     m_RenderModeLights.setRenderModeType(RenderModeType::VERT3COL4);
 
-    m_ShaderProgramComposition.create(VertexShaderComposition, FragmentShaderComposition);    
+    m_ShaderProgramComposition.create(VertexShaderComposition, FragmentShaderComposition);
+    m_ShaderProgramComposition.use();
     m_RenderModeComposition.setShaderProgram(&m_ShaderProgramComposition);
     m_RenderModeComposition.setRenderModeType(RenderModeType::VERT3COL4TEX2X2);
     m_RenderModeComposition.setTexture0("SceneTexture", m_RenderTargetScene.getIDTex());
@@ -1239,6 +1242,7 @@ bool CVisualsManager::processFrame()
     m_RenderTargetScreen.unbind();
     
     // Render texture to screen
+    m_ShaderProgramMainScreen.use();
     m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScreen.getIDTex());
     m_Graphics.beginRenderBatch("main_screen");
         m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScreen.getTexUV());
@@ -1347,6 +1351,7 @@ void CVisualsManager::drawDebugInfo()
         auto fBorderX = m_Graphics.getWidthScr() * 0.01;
         auto fBorderY = m_Graphics.getHeightScr() * 0.01;
         
+        m_ShaderProgramMainScreen.use();
         m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetLights.getIDTex());
         m_Graphics.beginRenderBatch("main_screen");
             m_Graphics.texturedRect(Vector2d(fBorderX, m_Graphics.getHeightScr()>>1), Vector2d(m_Graphics.getWidthScr()>>1, fBorderY),
