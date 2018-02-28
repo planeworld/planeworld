@@ -143,6 +143,8 @@ int main(int argc, char *argv[])
         Log.setColourScheme(LOG_COLOUR_SCHEME_ONBLACK);
     #endif
         
+    INFO_MSG("Planeworld", "Version " << PW_VERSION_FULL)
+        
     //////////////////////////////////////////////////////////////////////////// 
     //
     // 1. Check for given arguments

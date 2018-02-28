@@ -67,7 +67,8 @@ CVisualsManager::CVisualsManager() : m_unLightmapSubsampling(32),
                                      m_TextObjects(&m_FontManager),
                                      m_TextScale(&m_FontManager),
                                      m_TextTimers(&m_FontManager),
-                                     m_TextStarSystems(&m_FontManager)
+                                     m_TextStarSystems(&m_FontManager),
+                                     m_TextVersion(&m_FontManager)
 {
     METHOD_ENTRY("CVisualsManager::CVisualsManager")
     CTOR_CALL("CVisualsManager::CVisualsManager")
@@ -928,6 +929,11 @@ bool CVisualsManager::init()
     m_TextTimers.setFont(m_strFont);
     m_TextTimers.setPosition(10.0f, 10.0f);
     m_TextTimers.setSize(12);
+    m_TextVersion.setFont(m_strFont);
+    m_TextVersion.setSize(10);
+    m_TextVersion.setColor({{1.0, 1.0, 1.0, 0.75}});
+    m_TextVersion.setText("Version "+PW_VERSION_FULL);
+    m_TextVersion.setPosition(10, m_Graphics.getHeightScr()-m_TextVersion.getFontSize()-10);
     
     return m_Graphics.init();
 }
@@ -1245,6 +1251,11 @@ bool CVisualsManager::processFrame()
     
     this->drawKinematicsStates(DrawModeType::TEXT);
     if (bGotCam) this->drawGrid(DrawModeType::TEXT);
+    
+    m_Graphics.beginRenderBatch("font");
+        m_TextVersion.display();
+    m_Graphics.endRenderBatch();
+    
     this->drawTimers();
     this->drawWindows();
     this->updateUI();
@@ -2184,6 +2195,7 @@ void CVisualsManager::myInitComInterface()
             }
             // Reposition all centered elements
             m_TextScale.setPosition(m_Graphics.getWidthScr()/2, 32.0f, TEXT_POSITION_CENTERED_X);
+            m_TextVersion.setPosition(10, m_Graphics.getHeightScr()-m_TextVersion.getFontSize()-10);
             for (auto pWin : *m_pVisualsDataStorage->getWindowsCenteredByValue())
             {
                 pWin.second->center();

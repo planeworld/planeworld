@@ -34,11 +34,24 @@
 //--- Program header ---------------------------------------------------------//
 
 //--- Standard header --------------------------------------------------------//
+#include <string>
 
 //--- Misc header ------------------------------------------------------------//
 #include <eigen3/Eigen/Geometry>
 
 using namespace Eigen;
+
+/// Planeworld version
+constexpr int       PW_VERSION_MAJOR = 0;
+constexpr int       PW_VERSION_MINOR = 0;
+constexpr int       PW_VERSION_DETAIL_MAJOR = 20180228;
+const char          PW_VERSION_DETAIL_MINOR = 'a';
+const std::string   PW_VERSION_FULL = 
+                    std::to_string(PW_VERSION_MAJOR)+"."+
+                    std::to_string(PW_VERSION_MINOR)+"-"+
+                    std::to_string(PW_VERSION_DETAIL_MAJOR)+
+                    PW_VERSION_DETAIL_MINOR;
+
 
 /// Default depth for drawing
 const double   SHAPE_DEFAULT_DEPTH = -15.0;
