@@ -127,6 +127,9 @@ inline const std::vector<GLfloat>& CRenderTarget::getTexUV() const
 inline void CRenderTarget::bind(const bool _bClear) const
 {
     METHOD_ENTRY("CRenderTarget::bind")
+    
+    std::cout << "RT   [" << std::endl;
+    
     glBindFramebuffer(GL_FRAMEBUFFER, m_unIDFBO);
     if (_bClear) glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, m_unResX / m_unSub, m_unResY / m_unSub);
@@ -142,6 +145,9 @@ inline void CRenderTarget::bind(const bool _bClear) const
 inline void CRenderTarget::unbind() const
 {
     METHOD_ENTRY("CRenderTarget::unbind")
+    
+    std::cout << "RT   ]" << std::endl;
+    
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
