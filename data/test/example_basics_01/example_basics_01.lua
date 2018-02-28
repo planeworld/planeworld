@@ -8,7 +8,7 @@
 ---------------
         
 -- Import input script
-require('pw_input_default')
+require('planeworld.pw_input_default')
 
 -- Setup engine
 pw.system.set_frequency_input(100)

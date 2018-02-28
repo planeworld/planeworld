@@ -213,6 +213,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         CText                           m_TextScale;        ///< Text object for universe scale
         CText                           m_TextTimers;       ///< Text object for timers
         CText                           m_TextStarSystems;  ///< Text object for Star Systems
+        CText                           m_TextVersion;      ///< Text object for planeworld version
         
         CSpinlock                       m_CreatorLock;      ///< Indicates if objects might be created
         
