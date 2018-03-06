@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #define ENGINE_COMMON_H
 
 //--- Program header ---------------------------------------------------------//
+#include "build_time_formatter.h"
 
 //--- Standard header --------------------------------------------------------//
 #include <string>
@@ -44,15 +45,24 @@ using namespace Eigen;
 /// Planeworld version
 constexpr int       PW_VERSION_MAJOR = 0;
 constexpr int       PW_VERSION_MINOR = 0;
-constexpr int       PW_VERSION_DETAIL_MAJOR = 20180228;
-const char          PW_VERSION_DETAIL_MINOR = 'a';
 const std::string   PW_VERSION_FULL = 
                     std::to_string(PW_VERSION_MAJOR)+"."+
                     std::to_string(PW_VERSION_MINOR)+"-"+
-                    std::to_string(PW_VERSION_DETAIL_MAJOR)+
-                    PW_VERSION_DETAIL_MINOR;
-
-
+                    BUILD_YEAR_CH0+
+                    BUILD_YEAR_CH1+
+                    BUILD_YEAR_CH2+
+                    BUILD_YEAR_CH3+
+                    BUILD_MONTH_CH0+
+                    BUILD_MONTH_CH1+
+                    BUILD_DAY_CH0+
+                    BUILD_DAY_CH1+"."+
+                    BUILD_HOUR_CH0+
+                    BUILD_HOUR_CH1+
+                    BUILD_MIN_CH0+
+                    BUILD_MIN_CH1+
+                    BUILD_SEC_CH0+
+                    BUILD_SEC_CH1;
+                    
 /// Default depth for drawing
 const double   SHAPE_DEFAULT_DEPTH = -15.0;
 const double   DEFAULT_CELL_SIZE = 1.0e12;
