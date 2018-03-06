@@ -1241,18 +1241,18 @@ bool CVisualsManager::processFrame()
     m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
     glViewport(0, 0, m_Graphics.getWidthScr(), m_Graphics.getHeightScr());
 
-    // Compose scene and light information from accordant textures
-    m_RenderTargetScreen.bind(RENDER_TARGET_CLEAR);    
-        m_Graphics.beginRenderBatch("composition");
-            m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0),
-                                    &m_RenderTargetScene.getTexUV(), &m_RenderTargetLights.getTexUV());
-        m_Graphics.endRenderBatch();
-    m_RenderTargetScreen.unbind();
+//     // Compose scene and light information from accordant textures
+//     m_RenderTargetScreen.bind(RENDER_TARGET_CLEAR);    
+//         m_Graphics.beginRenderBatch("composition");
+//             m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0),
+//                                     &m_RenderTargetScene.getTexUV(), &m_RenderTargetLights.getTexUV());
+//         m_Graphics.endRenderBatch();
+//     m_RenderTargetScreen.unbind();
     
     // Render texture to screen
-    m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScreen.getIDTex());
+    m_RenderModeMainScreen.setTexture0("ScreenTexture", m_RenderTargetScene.getIDTex());
     m_Graphics.beginRenderBatch("main_screen");
-        m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScreen.getTexUV());
+        m_Graphics.texturedRect(Vector2d(0.0, m_Graphics.getHeightScr()), Vector2d(m_Graphics.getWidthScr(), 0.0), &m_RenderTargetScene.getTexUV());
     m_Graphics.endRenderBatch();
     
     this->drawKinematicsStates(DrawModeType::TEXT);
