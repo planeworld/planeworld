@@ -157,7 +157,7 @@ void CRenderMode::use()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_unTexID0);
     }
-    if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
+    else if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_unTexID0);
@@ -177,7 +177,7 @@ void CRenderMode::use()
     {
         glUniform1i(m_UniformsTextures[0], 0);
     }
-    if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
+    else if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
     {
         glUniform1i(m_UniformsTextures[0], 0);
         glUniform1i(m_UniformsTextures[1], 1);
