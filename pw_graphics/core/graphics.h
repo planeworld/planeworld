@@ -171,10 +171,10 @@ class CGraphics
         WindowHandleType* getWindow() const;
 
         //--- Methods --------------------------------------------------------//
-        void beginRenderBatch(CRenderMode* const, const bool = false);
+        void beginRenderBatch(CRenderMode* const);
         bool beginRenderBatch(const std::string&);
         void endRenderBatch(const bool = GRAPHICS_RENDER_BATCH_CALL_NORMAL);
-        bool restartRenderBatch(const std::string&);
+        void restartRenderBatch();
         void restartRenderBatch(CRenderMode* const);
         void registerRenderMode(const std::string& _strName, CRenderMode* const);
         
@@ -252,8 +252,6 @@ class CGraphics
         void resetBufferObjects();                      ///< Clear all VAOs, VBOs, IBOs...
         
     private:
-        
-        void restartRenderBatchInternal();
         
         //--- Variables [private] --------------------------------------------//
         WindowHandleType*   m_pWindow;                  ///< Pointer to main window

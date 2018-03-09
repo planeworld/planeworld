@@ -67,8 +67,8 @@ class CFontManager : public CGraphicsBase
 
         //--- Constructor/Destructor -----------------------------------------//
         CFontManager() :    m_pFontCharInfo(nullptr),
+                            m_pRenderMode(nullptr),
                             m_strFont(""),
-                            m_strRenderModeName("font"),
                             m_nAtlasSize(FONT_MGR_ATLAS_SIZE_DEFAULT),
                             m_nSize(FONT_MGR_SIZE_DEFAULT),
                             m_unTexID(0u),
@@ -88,7 +88,7 @@ class CFontManager : public CGraphicsBase
 //         GLuint  getIDTex(const std::string&);
         float   getTextLength(const std::string&, const std::string&, const int);
         bool    setFont(const std::string&);
-        void    setRenderModeName(const std::string& _strName) {m_strRenderModeName = _strName;}
+        void    setRenderMode(CRenderMode* const _pRenderMode) {m_pRenderMode = _pRenderMode;}
         void    setSize(const int);
                 
         //--- friends --------------------------------------------------------//
@@ -106,8 +106,8 @@ class CFontManager : public CGraphicsBase
         std::unordered_map<GLuint, int>                 m_AtlasSizes;       ///< Size of font atlases
         std::unordered_map<GLuint, stbtt_packedchar*>   m_FontsCharInfo;    ///< Font information like kerning
         stbtt_packedchar*                               m_pFontCharInfo;    ///< Char info of current font
+        CRenderMode*                                    m_pRenderMode;      ///< Render mode for fonts
         std::string                                     m_strFont;          ///< Current font
-        std::string                                     m_strRenderModeName;///< Name of registered render mode for fonts
         int                                             m_nAtlasSize;       ///< Current Atlas size
         int                                             m_nSize;            ///< Current font size
         GLuint                                          m_unTexID;          ///< Current texture

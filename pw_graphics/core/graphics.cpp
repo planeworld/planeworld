@@ -259,40 +259,31 @@ void CGraphics::swapBuffers()
 /// might use a different configuration, e.g. buffers, shaders, attributes.
 ///
 /// \param _pRenderMode Render mode to use in this batch
-/// \param _bForce Force beginning of new batch, ignore render stack and 
-///                previous batches
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode, const bool _bForce)
+void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode)
 {
     METHOD_ENTRY("CGraphics::beginRenderBatch")
     
+    std::cout << "STCK " << m_RenderModeStack.size() << std::endl;
+    
     bool bBegin = false;
     
-    // First, test if it is a forced call
-    if (_bForce)
+    // First, check stack for current state.
+    // Begin if stack is empty
+    if (m_RenderModeStack.empty())
     {
         bBegin = true;
     }
-    else
+    // Otherwise check, if render mode changed
+    else if (m_RenderModeStack.top()->getRenderModeType() != _pRenderMode->getRenderModeType())
     {
-        // First, check stack for current state.
-        // Begin if stack is empty
-        if (m_RenderModeStack.empty())
-        {
-            bBegin = true;
-        }
-        // Or begin, if render mode changed
-        else if (m_RenderModeStack.top()->getRenderModeType() != _pRenderMode->getRenderModeType())
-        {
-            // In this case, stop current batch first
-            this->endRenderBatch(GRAPHICS_RENDER_BATCH_CALL_FORCED);
-            bBegin = true;
-        }
-        
-        m_RenderModeStack.push(_pRenderMode);
+        // In this case, stop current batch first
+        this->endRenderBatch(GRAPHICS_RENDER_BATCH_CALL_FORCED);
+        bBegin = true;
     }
     
+    m_RenderModeStack.push(_pRenderMode);
     m_pRenderMode = _pRenderMode;
     m_RenderModeType = _pRenderMode->getRenderModeType();
 
@@ -518,6 +509,116 @@ void CGraphics::endRenderBatch(const bool _bForce)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Restart a renderbatch (force restart), render mode stays the same
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::restartRenderBatch()
+{
+    METHOD_ENTRY("CGraphics::restartRenderBatch")
+    
+    // Restart render batch if
+    // * A batch was already started
+    // * A rendermode exists
+    // * Something has been drawn already (otherwise, it is most probable
+    //   that a new render batch was already started manually)
+    if (!m_RenderModeStack.empty() &&
+         m_pRenderMode != nullptr &&
+         m_unIndex != 0u)
+    {
+        std::cout << "MODE RESTART" << std::endl;
+        
+        glBindVertexArray(m_unVAO);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexVerts*sizeof(GLfloat), m_vecVertices.data(), GL_STREAM_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexCol*sizeof(GLfloat), m_vecColours.data(), GL_STREAM_DRAW);
+        
+        switch (m_pRenderMode->getRenderModeType())
+        {
+            case RenderModeType::VERT3COL4:
+            {
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), m_vecIndicesLines.data(), GL_STREAM_DRAW);
+                glDrawElements(GL_LINES, m_vecIndicesLines.size(), GL_UNSIGNED_INT, 0);
+                
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), m_vecIndicesPoints.data(), GL_STREAM_DRAW);
+                glDrawElements(GL_POINTS, m_vecIndicesPoints.size(), GL_UNSIGNED_INT, 0);
+                
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
+                glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
+                
+                m_nDrawCalls += 3;
+                
+                break;
+            }
+            case RenderModeType::VERT3COL4TEX2:
+            {
+                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV0*sizeof(GLfloat), m_vecUV0s.data(), GL_STREAM_DRAW);
+                
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
+                glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
+                
+                ++m_nDrawCalls;
+                
+                break;
+            }
+            case RenderModeType::VERT3COL4TEX2X2:
+            {
+                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV0*sizeof(GLfloat), m_vecUV0s.data(), GL_STREAM_DRAW);
+                glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV1s);
+                glBufferData(GL_ARRAY_BUFFER, m_unIndexUV1*sizeof(GLfloat), m_vecUV1s.data(), GL_STREAM_DRAW);
+                
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
+                glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
+                
+                ++m_nDrawCalls;
+                
+                break;
+            }
+        }
+        
+        // Collect some debug information
+        m_nLines     += m_unIndexLines;
+        m_nPoints    += m_unIndexPoints;
+        m_nTriangles += m_unIndexTriangles;
+        m_nVerts     += m_unIndexVerts;
+            
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
+        glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
+            
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
+        
+        m_uncI = 0u;
+        m_unIndex = 0u;
+        m_unIndexVerts = 0u;
+        m_unIndexCol = 0u;
+        m_unIndexUV0 = 0u;
+        m_unIndexUV1 = 0u;
+        m_unIndexLines = 0u;
+        m_unIndexPoints = 0u;
+        m_unIndexTriangles = 0u;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Begin new render batch if given mode is currently in use
 ///
 /// \param _pRenderMode Mode for which the rendering should be restarted, if
@@ -529,43 +630,11 @@ void CGraphics::restartRenderBatch(CRenderMode* const _pRenderMode)
     METHOD_ENTRY("CGraphics::restartRenderBatch")
 
     // Restart render batch if
-    // * A batch was already started
     // * The mode of the current batch is the one that should be restarted 
     //   (This is important not to restart other active batches)
-    // * Something has been drawn alreay (otherwise, it is most probable
-    //   that a new render batch was already started manually)
-    if (!m_RenderModeStack.empty() &&
-         m_RenderModeType == _pRenderMode->getRenderModeType() &&
-         m_unIndex != 0u)
+    if (m_RenderModeType == _pRenderMode->getRenderModeType())
     {
-        this->endRenderBatch();
-        this->beginRenderBatch(_pRenderMode);
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Restart registered render batch
-///
-/// \param _strRenderModeName Name of render mode to use
-///
-/// \return Success?
-///
-///////////////////////////////////////////////////////////////////////////////
-bool CGraphics::restartRenderBatch(const std::string& _strRenderModeName)
-{
-    METHOD_ENTRY("CGraphics::restartRenderBatch")
-    
-    auto ci = m_RenderModesByName.find(_strRenderModeName);
-    if (ci != m_RenderModesByName.end())
-    {
-        this->restartRenderBatch(ci->second);
-        return true;
-    }
-    else
-    {
-        WARNING_MSG("Graphics", "Render mode \"" << _strRenderModeName << "\" not registered")
-        return false;
+        this->restartRenderBatch();
     }
 }
 
@@ -1033,7 +1102,7 @@ void CGraphics::circle(const Vector2d& _vecC, const double& _fR,
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
     }
 }
 
@@ -1096,7 +1165,7 @@ void CGraphics::addVertex(const Vector2d& _vecV)
         }; 
         m_bLineBatchCall = true;
         this->endLine();
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
         this->beginLine(m_PolyType);
         m_bLineBatchCall = false;
     }
@@ -1139,7 +1208,7 @@ void CGraphics::addVertex(const double& _fX, const double& _fY)
         }; 
         m_bLineBatchCall = true;
         this->endLine();
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
         this->beginLine(m_PolyType);
         m_bLineBatchCall = false;
     }
@@ -1177,7 +1246,7 @@ void CGraphics::dot(const Vector2d& _vecV)
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
     }
 }
 
@@ -1201,7 +1270,7 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
     // Draw smaller batches if larger than buffer size    
     if (m_uncI + 4*_Dots.size() > GRAPHICS_SIZE_OF_INDEX_BUFFER / 2)
     {
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
         
         nBatches = _Dots.size() / nBatchSize;
         
@@ -1218,7 +1287,7 @@ void CGraphics::dots(CCircularBuffer<Vector2d>& _Dots,
                 m_vecColours[m_unIndexCol++] = m_aColour[3] * double(i) / _Dots.size(); // Somehow, this doesn't work
                 m_vecIndicesPoints[m_unIndexPoints++] = m_unIndex++;
             }
-            this->restartRenderBatchInternal();
+            this->restartRenderBatch();
             
         }
     }
@@ -1343,7 +1412,7 @@ void CGraphics::filledCircle(const Vector2d& _vecC, const double& _fR,
     }
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
     }
 }
 
@@ -1398,7 +1467,7 @@ void CGraphics::filledRect(const Vector2d& _vecLL, const Vector2d& _vecUR)
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
     }
 }
 
@@ -1445,7 +1514,7 @@ void CGraphics::filledTriangle(const Vector2d& _vecV1,
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
     }
 }
 
@@ -1552,7 +1621,7 @@ void CGraphics::rect(const Vector2d& _vecLL, const Vector2d& _vecUR)
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
     }
 }
 
@@ -1614,7 +1683,7 @@ void CGraphics::texturedRect(const Vector2d& _vecLL, const Vector2d& _vecUR,
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
     }
 }
 
@@ -1682,7 +1751,7 @@ void CGraphics::texturedRect(const Vector2d& _vecLL, const Vector2d& _vecUR,
     
     if (m_uncI > GRAPHICS_SIZE_OF_INDEX_BUFFER/2)
     {
-        this->restartRenderBatchInternal();
+        this->restartRenderBatch();
     }
 }
 
@@ -1803,102 +1872,4 @@ void CGraphics::resetBufferObjects()
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Restart a renderbatch, render mode stays the same (internal, temporary)
-///
-///////////////////////////////////////////////////////////////////////////////
-void CGraphics::restartRenderBatchInternal()
-{
-    METHOD_ENTRY("CGraphics::restartRenderBatchInternal")
-    
-    std::cout << "MODE RESTART" << std::endl;
-    
-    glBindVertexArray(m_unVAO);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexVerts*sizeof(GLfloat), m_vecVertices.data(), GL_STREAM_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexCol*sizeof(GLfloat), m_vecColours.data(), GL_STREAM_DRAW);
-    
-    switch (m_pRenderMode->getRenderModeType())
-    {
-        case RenderModeType::VERT3COL4:
-        {
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), m_vecIndicesLines.data(), GL_STREAM_DRAW);
-            glDrawElements(GL_LINES, m_vecIndicesLines.size(), GL_UNSIGNED_INT, 0);
-            
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), m_vecIndicesPoints.data(), GL_STREAM_DRAW);
-            glDrawElements(GL_POINTS, m_vecIndicesPoints.size(), GL_UNSIGNED_INT, 0);
-            
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
-            glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
-            
-            m_nDrawCalls += 3;
-            
-            break;
-        }
-        case RenderModeType::VERT3COL4TEX2:
-        {
-            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
-            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV0*sizeof(GLfloat), m_vecUV0s.data(), GL_STREAM_DRAW);
-            
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
-            glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
-            
-            ++m_nDrawCalls;
-            
-            break;
-        }
-        case RenderModeType::VERT3COL4TEX2X2:
-        {
-            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV0s);
-            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV0*sizeof(GLfloat), m_vecUV0s.data(), GL_STREAM_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, m_unVBOUV1s);
-            glBufferData(GL_ARRAY_BUFFER, m_unIndexUV1*sizeof(GLfloat), m_vecUV1s.data(), GL_STREAM_DRAW);
-            
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), m_vecIndicesTriangles.data(), GL_STREAM_DRAW);
-            glDrawElements(GL_TRIANGLES, m_vecIndicesTriangles.size(), GL_UNSIGNED_INT, 0);
-            
-            ++m_nDrawCalls;
-            
-            break;
-        }
-    }
-    
-    // Collect some debug information
-    m_nLines     += m_unIndexLines;
-    m_nPoints    += m_unIndexPoints;
-    m_nTriangles += m_unIndexTriangles;
-    m_nVerts     += m_unIndexVerts;
-        
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, m_unVBOColours);
-    glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
-        
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOLines);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexLines*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOPoints);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexPoints*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_unIBOTriangles);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_unIndexTriangles*sizeof(GLuint), nullptr, GL_STREAM_DRAW);
-    
-    m_uncI = 0u;
-    m_unIndex = 0u;
-    m_unIndexVerts = 0u;
-    m_unIndexCol = 0u;
-    m_unIndexUV0 = 0u;
-    m_unIndexUV1 = 0u;
-    m_unIndexLines = 0u;
-    m_unIndexPoints = 0u;
-    m_unIndexTriangles = 0u;
-}

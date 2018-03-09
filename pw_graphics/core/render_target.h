@@ -135,6 +135,7 @@ inline void CRenderTarget::bind(const bool _bClear) const
     glViewport(0, 0, m_unResX / m_unSub, m_unResY / m_unSub);
     m_Graphics.setViewPort((-m_unResX >> 1) / GRAPHICS_PX_PER_METER, (m_unResX >> 1) / GRAPHICS_PX_PER_METER,
                            (-m_unResY >> 1) / GRAPHICS_PX_PER_METER, (m_unResY >> 1) / GRAPHICS_PX_PER_METER);
+    m_Graphics.restartRenderBatch();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

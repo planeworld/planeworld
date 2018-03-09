@@ -91,6 +91,22 @@ void CRenderMode::addUniform(const std::string& _strName, GLfloat* const _pf)
 ///
 /// \brief Set texture for texture unit 0
 ///
+/// \param _unTexID Texture ID
+///
+////////////////////////////////////////////////////////////////////////////////
+void CRenderMode::setTexture0(const GLuint _unTexID)
+{
+    METHOD_ENTRY("CRenderMode::setTexture0")
+    m_unTexID0 = _unTexID;
+    
+    std::cout << "SET  unit[0] id[" << m_unTexID0 << "] " <<  std::endl;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set texture for texture unit 0, update uniforms
+///
 /// \param _strName Name of sampler uniform
 /// \param _unTexID Texture ID
 ///
@@ -119,6 +135,21 @@ void CRenderMode::setTexture0(const std::string& _strName, const GLuint _unTexID
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Set texture for texture unit 1
+///
+/// \param _unTexID Texture ID
+///
+////////////////////////////////////////////////////////////////////////////////
+void CRenderMode::setTexture1(const GLuint _unTexID)
+{
+    METHOD_ENTRY("CRenderMode::setTexture1")
+    m_unTexID1 = _unTexID;
+    
+    std::cout << "SET  unit[1] id[" << m_unTexID1 << "] " <<  std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set texture for texture unit 1, update uniforms
 ///
 /// \param _strName Name of sampler uniform
 /// \param _unTexID Texture ID

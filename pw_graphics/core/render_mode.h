@@ -77,7 +77,9 @@ class CRenderMode
         void addUniform(const std::string&, GLfloat* const _pf);
         void setRenderModeType(const RenderModeType _RenderModeType) {m_RenderModeType = _RenderModeType;}
         void setShaderProgram(CShaderProgram* const _pShaderProgram) {m_pShaderProgram = _pShaderProgram;}
+        void setTexture0(const GLuint);
         void setTexture0(const std::string&, const GLuint);
+        void setTexture1(const GLuint);
         void setTexture1(const std::string&, const GLuint);
        
         void use();

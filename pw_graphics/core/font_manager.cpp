@@ -156,9 +156,6 @@ void CFontManager::drawText(const std::string& _strText,
     
     if (m_bChanged) this->changeFont();
     
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_unTexID);
-    
     stbtt_aligned_quad GlyphQuad;
     float fOffsetX = 0.0f;
     float fOffsetY = 0.0f;
@@ -333,8 +330,19 @@ void CFontManager::changeFont()
             m_unTexID = m_FontsByName[strFontDesignator];
         }
 
+        DOM_DEV(
+            if (m_pRenderMode == nullptr)
+            {
+                WARNING_MSG("Font Manager", "Render mode not set.")
+                goto DomDevRenderMode;
+            }
+        )
+        
         // End current render batch since it is bound to the font texture
-        m_Graphics.restartRenderBatch(m_strRenderModeName);
+        m_Graphics.restartRenderBatch(m_pRenderMode);
+        m_pRenderMode->setTexture0(m_unTexID);
+        
+        DOM_DEV(DomDevRenderMode:)
         
         m_pFontCharInfo = m_FontsCharInfo[m_unTexID];
         m_nAtlasSize    = m_AtlasSizes[m_unTexID];
@@ -346,6 +354,9 @@ void CFontManager::changeFont()
     {
         WARNING_MSG("Font Manager", "Font <" << m_strFont << "> unknown.")
     }
+    
+    
+    
     m_bChanged = false;
 }
 
