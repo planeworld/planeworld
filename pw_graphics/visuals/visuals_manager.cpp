@@ -1167,9 +1167,9 @@ bool CVisualsManager::processFrame()
             m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
             
             this->drawStars();
-            m_Graphics.setWidth(5.0);
+            m_Graphics.setLineWidth(5.0);
             this->drawWorld();
-            m_Graphics.setWidth(1.0);
+            m_Graphics.setLineWidth(1.0);
             this->drawCOM();
             this->drawBoundingBoxes();
             this->drawKinematicsStates(DrawModeType::VISUALS);

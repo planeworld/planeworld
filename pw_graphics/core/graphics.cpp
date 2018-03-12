@@ -200,6 +200,25 @@ void CGraphics::cacheSinCos(const int _nSeg)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Sets viewport
+///
+/// \param _fLeft Left plane
+/// \param _fRight Right plane
+/// \param _fBottom Bottom plane
+/// \param _fTop Top plane
+///
+///////////////////////////////////////////////////////////////////////////////
+void CGraphics::setViewPort(const double& _fLeft, const double& _fRight, const double& _fBottom, const double& _fTop)
+{
+    METHOD_ENTRY("CGraphics::setViewPort")
+    m_ViewPort.leftplane = _fLeft;
+    m_ViewPort.rightplane = _fRight;
+    m_ViewPort.bottomplane = _fBottom;
+    m_ViewPort.topplane = _fTop;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Sets projection matrix to screen space 
 ///
 ///////////////////////////////////////////////////////////////////////////////
