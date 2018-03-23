@@ -121,9 +121,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
         #ifdef LOGLEVEL_DEBUG
             
             // Search for callbacks and execute if exist
-            #ifdef PW_MULTITHREADING
-                while (this->isAccessed.test_and_set(std::memory_order_acquire)) {}
-            #endif
+            m_AccessData.acquireLock();
             const auto Range = m_RegisteredCallbacks.equal_range(_strName);
             if (Range.first != m_RegisteredCallbacks.end())
             {
@@ -140,14 +138,11 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
                         else
                         {
                             WARNING_MSG_QUIET("Com Interface", "Known function with different signature <" << _strName << ">. ")
-                            }
+                        }
                     }
                 );
             }
-            #ifdef PW_MULTITHREADING
-                this->isAccessed.clear(std::memory_order_release);
-            #endif
-            
+            m_AccessData.releaseLock();            
             
             // Execute function if existant
             const auto ci = m_RegisteredFunctions.find(_strName);
@@ -172,9 +167,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
             }
         #else
             // Search for callbacks and execute if exist
-            #ifdef PW_MULTITHREADING
-                while (this->isAccessed.test_and_set(std::memory_order_acquire)) {}
-            #endif
+            m_AccessData.acquireLock();
             const auto Range = m_RegisteredCallbacks.equal_range(_strName);
             for_each(Range.first, Range.second, 
                 [&](RegisteredCallbacksType::value_type& _Com)
@@ -183,10 +176,7 @@ inline TRet CComInterface::call(const std::string& _strName, Args... _Args)
                     pCallback->call(_Args...);
                 }
             );
-            #ifdef PW_MULTITHREADING
-                this->isAccessed.clear(std::memory_order_release);
-            #endif
-
+            m_AccessData.releaseLock();
             // Execute function if existant
             const auto ci = m_RegisteredFunctions.find(_strName);
             if (ci != m_RegisteredFunctions.end())
@@ -245,9 +235,7 @@ bool CComInterface::registerCallback(const std::string& _strName, const std::fun
             }
         ) // DOM_DEV
  
-        #ifdef PW_MULTITHREADING
-            while (this->isAccessed.test_and_set(std::memory_order_acquire)) {}
-        #endif
+        m_AccessData.acquireLock();
         m_RegisteredCallbacks.insert({{_strName,
                                         new CCommand<TRet, TArgs...>([this, _strName, _Func, _strWriterDomain](TArgs... _Args) -> TRet
                                         {
@@ -255,20 +243,14 @@ bool CComInterface::registerCallback(const std::string& _strName, const std::fun
                                             m_WriterQueues[_strWriterDomain].enqueue(pCommand);
                                             MEM_ALLOC_QUIET("IBaseCommand")
                                         })}});
-        #ifdef PW_MULTITHREADING
-            this->isAccessed.clear(std::memory_order_release);
-        #endif
+        m_AccessData.releaseLock();
         MEM_ALLOC_QUIET("IBaseCommand")
     }
     else
     {
-        #ifdef PW_MULTITHREADING
-            while (this->isAccessed.test_and_set(std::memory_order_acquire)) {}
-        #endif
+        m_AccessData.acquireLock();
         m_RegisteredCallbacks.insert({{_strName, new CCommand<TRet, TArgs...>(_Func)}});
-        #ifdef PW_MULTITHREADING
-            this->isAccessed.clear(std::memory_order_release);
-        #endif
+        m_AccessData.releaseLock();
         MEM_ALLOC_QUIET("IBaseCommand")
     }    
     

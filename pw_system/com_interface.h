@@ -32,7 +32,6 @@
 #define COM_INTERFACE_H
 
 //--- Standard header --------------------------------------------------------//
-#include <atomic>
 #include <functional>
 #include <map>
 #include <set>
@@ -43,6 +42,7 @@
 #include "conf_pw.h"
 #include "log.h"
 #include "log_listener.h"
+#include "spinlock.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include "concurrentqueue.h"
@@ -308,9 +308,7 @@ class CComInterface : public ILogListener
         
     private:
         
-        #ifdef PW_MULTITHREADING
-            std::atomic_flag isAccessed = ATOMIC_FLAG_INIT;              ///< Indicates access, important for multithreading
-        #endif
+        CSpinlock                           m_AccessData;                ///< Indicates access, important for multithreading
         
         
         RegisteredCallbacksType             m_RegisteredCallbacks;       ///< Callbacks attached to registered functions
