@@ -145,6 +145,25 @@ bool CFontManager::addFont(const std::string& _strFontName,
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Draws given text, i.e. buffering textured quads for GL to be called
+///        by graphics update, based on last position.
+///
+/// \param _strText     Text to be drawn
+/// \param _bCentered   Text centered? (Otherwise align left [default])
+/// \param _nWrap       Word wrap position
+///
+////////////////////////////////////////////////////////////////////////////////
+void CFontManager::drawText(const std::string& _strText,
+                            const bool _bCentered,
+                            const int _nWrap
+                           )
+{
+    METHOD_ENTRY("CFontManager::drawText")
+    this->drawText(_strText, m_fLastPosX, m_fLastPosY, _bCentered, _nWrap);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws given text, i.e. buffering textured quads for GL to be called
 ///        by graphics update.
 ///
 /// \param _strText     Text to be drawn
@@ -216,6 +235,9 @@ void CFontManager::drawText(const std::string& _strText,
                                     &vecUVs);
         }
     }
+    
+    m_fLastPosX = fOffsetX + _fPosX;
+    m_fLastPosY = fOffsetY + _fPosY;
     
     m_FontsIdleTime[m_unTexID]->restart();
 }

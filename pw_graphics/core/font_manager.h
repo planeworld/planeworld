@@ -74,7 +74,9 @@ class CFontManager : public CGraphicsBase
                             m_nAtlasSize(FONT_MGR_ATLAS_SIZE_DEFAULT),
                             m_nSize(FONT_MGR_SIZE_DEFAULT),
                             m_unTexID(0u),
-                            m_bChanged(false){}
+                            m_bChanged(false),
+                            m_fLastPosX(0.0),
+                            m_fLastPosY(0.0){}
         ~CFontManager();
 
         //--- Constant Methods -----------------------------------------------//
@@ -89,6 +91,7 @@ class CFontManager : public CGraphicsBase
         
         //--- Methods --------------------------------------------------------//
         bool    addFont(const std::string&, const std::string&, const int = FONT_MGR_SIZE_DEFAULT);
+        void    drawText(const std::string&, const bool = false, const int = FONT_MGR_NO_WORD_WRAP);
         void    drawText(const std::string&, const float&, const float&, const bool = false, const int = FONT_MGR_NO_WORD_WRAP);
         GLuint  getIDTex(const std::string&);
         float   getTextLength(const std::string&, const std::string&, const int);
@@ -120,6 +123,8 @@ class CFontManager : public CGraphicsBase
         int                                             m_nSize;            ///< Current font size
         GLuint                                          m_unTexID;          ///< Current texture
         bool                                            m_bChanged;         ///< Indicates, if current font was changed
+        float                                           m_fLastPosX;        ///< Last position, x coordinate
+        float                                           m_fLastPosY;        ///< Last position, x coordinate
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2017 - 2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -59,21 +59,12 @@ class CText : virtual public CGraphicsBase
         //--- Constant Methods -----------------------------------------------//
         int                 getFontSize() const {return m_nSize;}
         
-        const std::string&  str() const {return m_strText;}
-        
         //--- Methods --------------------------------------------------------//
+        void addTextPart(const std::string&);
+        void clearText();
         void display();
         
-        float getLength()
-        {
-            // Calculate length of text
-            if (m_bNewState)
-            {
-                m_fLength = m_pFontManager->getTextLength(m_strText, m_strFont, m_nSize);
-                m_bNewState = false;
-            }
-            return m_fLength;
-        }
+        float getLength();
         
         void setColor(const ColorTypeRGBA& _Color) {m_Color = _Color;}
         void setFont(const std::string&);
@@ -88,6 +79,12 @@ class CText : virtual public CGraphicsBase
     private:
         
         //--- Variables [private] --------------------------------------------//
+        std::vector<ColorTypeRGBA>  m_PartsColors;  ///< Colors of text parts
+        std::vector<int>            m_PartsSizes;   ///< Sizes of text parts
+        std::vector<std::string>    m_PartsFonts;   ///< Font type of text parts
+        std::vector<std::string>    m_PartsTexts;   ///< Text part
+        
+        
         ColorTypeRGBA   m_Color;        ///< Text color
         int             m_nSize;        ///< Text size
         float           m_fLength;      ///< Text length (px)
