@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2017 - 2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,13 +46,15 @@
 #include "stb_truetype.h"
 
 //-- Constants ---------------------------------------------------------------//
-const int ASCII_FIRST = 32;
-const int ASCII_NR = 95;
-const int FONT_MGR_ATLAS_SIZE_DEFAULT = 512;
-const int FONT_MGR_SIZE_DEFAULT = 16;
-const float FONT_MGR_SCALE = 1.33f;
+constexpr int ASCII_FIRST = 32;
+constexpr int ASCII_NR = 95;
+constexpr int FONT_MGR_ATLAS_SIZE_DEFAULT = 512;
+constexpr int FONT_MGR_SIZE_DEFAULT = 16;
+constexpr int FONT_MGR_MAX_FONTS_BEFORE_REMOVAL = 10;
+constexpr float FONT_MGR_SCALE = 1.33f;
+constexpr double FONT_MGR_MAX_IDLE_TIME_DEFAULT = 180.0;
 
-const int FONT_MGR_NO_WORD_WRAP = -1;
+constexpr int FONT_MGR_NO_WORD_WRAP = -1;
 const std::string FONT_MGR_FONT_DEFAULT = "anka_c87_r";
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,9 +78,13 @@ class CFontManager : public CGraphicsBase
         ~CFontManager();
 
         //--- Constant Methods -----------------------------------------------//
-        std::unordered_map<std::string, GLuint>& getFontsAvailable()
+        const std::unordered_map<std::string, GLuint>* getFontsAvailable()
         {
-            return m_FontsByName;
+            return &m_FontsByName;
+        }
+        /*const*/ std::unordered_map<GLuint, CTimer*>* getFontsIdleTime()
+        {
+            return &m_FontsIdleTime;
         }
         
         //--- Methods --------------------------------------------------------//
@@ -89,6 +95,7 @@ class CFontManager : public CGraphicsBase
         bool    setFont(const std::string&);
         void    setRenderModeName(const std::string& _strName) {m_strRenderModeName = _strName;}
         void    setSize(const int);
+        void    triggerMaintenance();
                 
         //--- friends --------------------------------------------------------//
 
@@ -97,9 +104,11 @@ class CFontManager : public CGraphicsBase
         //--- Methods [private] ----------------------------------------------//
         void    changeFont();
         void    rasterize(const std::string&, const int);
+        bool    removeFont(const GLuint);
         
         //--- Variables [private] --------------------------------------------//
         std::unordered_map<std::string, GLuint>         m_FontsByName;      ///< Fonts GL IDs accessed by name
+        std::unordered_map<GLuint, CTimer*>             m_FontsIdleTime;    ///< Time that a font hasn't been used
         std::unordered_map<std::string, char*>          m_FontsMemByName;   ///< Fonts stored in memory after loading
         std::unordered_map<GLuint, std::uint8_t*>       m_FontsMemAtlas;    ///< Memory of font atlas texture
         std::unordered_map<GLuint, int>                 m_AtlasSizes;       ///< Size of font atlases

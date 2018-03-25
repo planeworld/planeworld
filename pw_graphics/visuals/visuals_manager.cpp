@@ -1263,6 +1263,8 @@ bool CVisualsManager::processFrame()
     
     this->finishFrame();
     
+    m_FontManager.triggerMaintenance();
+    
     // Attach cameras to current front buffer
     if (bGotCam)
     {
@@ -1415,7 +1417,7 @@ void CVisualsManager::drawDebugInfo()
         oss << "\n";
         
         oss << "FONT RENDERER\n\n  Available fonts:\n";
-        for (auto strFont : m_FontManager.getFontsAvailable())
+        for (auto strFont : *m_FontManager.getFontsAvailable())
         {
             oss << "   - " << strFont.first << "\n";
         }
@@ -1478,7 +1480,7 @@ void CVisualsManager::drawDebugInfo()
             int nLines = 20;
             m_Graphics.filledRect(Vector2d(10, 10),
                                   Vector2d(10 + fSizeX, 20+
-                                  (nLines+m_FontManager.getFontsAvailable().size())*m_TextDebugInfo.getFontSize()));
+                                  (nLines+m_FontManager.getFontsAvailable()->size())*m_TextDebugInfo.getFontSize()));
         m_Graphics.endRenderBatch();
         
         m_Graphics.beginRenderBatch("font");

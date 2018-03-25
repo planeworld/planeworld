@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -68,6 +68,17 @@ void CTimer::stop()
     m_Stop = std::chrono::high_resolution_clock::now();
     
     m_fDiffTime = std::chrono::duration<double>(m_Stop - m_Start).count();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Restart the timer
+///
+///////////////////////////////////////////////////////////////////////////////
+void CTimer::restart()
+{
+    this->stop();
+    this->start();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
