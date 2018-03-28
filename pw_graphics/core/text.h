@@ -40,7 +40,22 @@
 //--- Misc header ------------------------------------------------------------//
 
 // Constants
-const bool TEXT_POSITION_CENTERED_X = true;
+constexpr bool TEXT_POSITION_CENTERED_X = true;
+
+/// Some better readable names for text parts
+typedef enum
+{
+    PART_ONE = 0,
+    PART_TWO = 1,
+    PART_THREE = 2,
+    PART_FOUR = 3,
+    PART_FIVE = 4,
+    PART_SIX = 5,
+    PART_SEVEN = 6,
+    PART_EIGHT = 7,
+    PART_NINE = 8,
+    PART_TEN = 9
+} TextPartType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -67,11 +82,15 @@ class CText : virtual public CGraphicsBase
         float getLength();
         
         void setColor(const ColorTypeRGBA& _Color) {m_Color = _Color;}
+        void setColor(const TextPartType, const ColorTypeRGBA&);
         void setFont(const std::string&);
+        void setFont(const TextPartType, const std::string&);
         void setFontManager(CFontManager* _pFontManager) {m_pFontManager = _pFontManager;}
         void setSize(const int);
+        void setSize(const TextPartType, const int);
         void setPosition(const float& _fPosX, const float& _fPosY, const bool _bCentered = false);
         void setText(const std::string&);
+        void setText(const TextPartType, const std::string&);
         void setWordWrap(const int _nWordWrap) {m_nWordWrap = _nWordWrap;}
                 
         //--- friends --------------------------------------------------------//

@@ -177,6 +177,27 @@ float CText::getLength()
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Sets colour for the given text part
+///
+/// \param _TextPart Part of text for new colour setting
+/// \param _Color Color to be set for given text part
+///
+////////////////////////////////////////////////////////////////////////////////
+void CText::setColor(const TextPartType _TextPart, const ColorTypeRGBA& _Color)
+{
+    METHOD_ENTRY("CText::setColor")
+    if (m_PartsColors.size() > _TextPart)
+    {
+        m_PartsColors[_TextPart] = _Color;
+    }
+    else
+    {
+        WARNING_MSG("Text", "Text part index too high, texts consists of less parts, cannot set colour.")
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Sets font to be used for this text
 ///
 /// \param _strFont Font to be used for this text
@@ -193,6 +214,31 @@ void CText::setFont(const std::string& _strFont)
     // already existing. Hence, after this call all font/font size related
     // calls are valid, such as getTextLength.
     m_pFontManager->setFont(_strFont);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets font to be used for this text part
+///
+/// \param _TextPart Part of text for new font setting
+/// \param _strFont Font to be used for this text part
+///
+////////////////////////////////////////////////////////////////////////////////
+void CText::setFont(const TextPartType _TextPart, const std::string& _strFont)
+{
+    METHOD_ENTRY("CText::setFont")
+    
+    if (m_PartsFonts.size() > _TextPart)
+    {
+        m_PartsFonts[_TextPart] = _strFont;
+    }
+    else
+    {
+        WARNING_MSG("Text", "Text part index too high, texts consists of less parts, cannot set font.")
+    }
+
+    m_bNewState = true;
+    m_pFontManager->setFont(_strFont);  // See setFont for explanation why to set font here
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -214,6 +260,31 @@ void CText::setSize(const int _nSize)
     // calls are valid, such as getTextLength.
     m_pFontManager->setSize(_nSize);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets size for the given text part
+///
+/// \param _TextPart Part of text for new size setting
+/// \param _nSize Size to be set for given text part
+///
+////////////////////////////////////////////////////////////////////////////////
+void CText::setSize(const TextPartType _TextPart, const int _nSize)
+{
+    METHOD_ENTRY("CText::setSize")
+    if (m_PartsSizes.size() > _TextPart)
+    {
+        m_PartsSizes[_TextPart] = _nSize;
+    }
+    else
+    {
+        WARNING_MSG("Text", "Text part index too high, texts consists of less parts, cannot set size.")
+    }
+    
+    m_bNewState = true;
+    m_pFontManager->setSize(_nSize); // See setSize for explanation why to set size here
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -263,3 +334,35 @@ void CText::setText(const std::string& _strText)
     DOM_DEV(DomDevTextNoFont:)
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Sets the actual text string to be stored for given text part
+///
+/// \param _strText Text to be stored for given text part
+///
+////////////////////////////////////////////////////////////////////////////////
+void CText::setText(const TextPartType _TextPart, const std::string& _strText)
+{
+    METHOD_ENTRY("CText::setText")
+    
+    DOM_DEV(
+        if (m_strFont == "")
+        {
+            WARNING_MSG("Text", "No font set, yet. Call <setFont> first. Text would have been: " << _strText)
+            goto DomDevTextNoFont;
+        }
+    )
+    
+    if (m_PartsTexts.size() > _TextPart)
+    {
+        m_PartsTexts[_TextPart] = _strText;
+    }
+    else
+    {
+        WARNING_MSG("Text", "Text part index too high, texts consists of less parts, cannot set text.")
+    }
+    
+    m_bNewState = true;
+    
+    DOM_DEV(DomDevTextNoFont:)
+}
