@@ -70,6 +70,7 @@ bool CRenderTarget::init(const std::uint16_t _unResX, const std::uint16_t _unRes
     glBindFramebuffer(GL_FRAMEBUFFER, m_unIDFBO);
     
     // Texture
+    glBindTexture(GL_TEXTURE_2D, 0);
     glGenTextures(1, &m_unIDTex);
     glBindTexture(GL_TEXTURE_2D, m_unIDTex);
     

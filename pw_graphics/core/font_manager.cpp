@@ -444,6 +444,7 @@ void CFontManager::rasterize(const std::string& _strFontName, const int _nSize)
     GLuint unIDTex = 0u;
     if (m_FontsByName.find(strFontDesignator) == m_FontsByName.end())
     {
+        glBindTexture(GL_TEXTURE_2D, 0);
         glGenTextures(1, &unIDTex);
         m_FontsByName[strFontDesignator] = unIDTex;
     }
