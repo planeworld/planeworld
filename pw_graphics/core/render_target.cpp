@@ -73,8 +73,12 @@ bool CRenderTarget::init(const std::uint16_t _unResX, const std::uint16_t _unRes
     glGenTextures(1, &m_unIDTex);
     glBindTexture(GL_TEXTURE_2D, m_unIDTex);
     
-    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, _unResX/_unSub, _unResY/_unSub);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _unResX/_unSub, _unResY/_unSub, GL_RGBA8, GL_UNSIGNED_BYTE, 0);
+//     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, _unResX/_unSub, _unResY/_unSub);
+//     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _unResX/_unSub, _unResY/_unSub, GL_RGBA8, GL_UNSIGNED_BYTE, 0);
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _unResX/_unSub, _unResY/_unSub, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

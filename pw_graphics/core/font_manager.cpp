@@ -560,15 +560,17 @@ void CFontManager::rasterize(const std::string& _strFontName, const int _nSize)
         //--------------------------------------------------------------------------
         glBindTexture(GL_TEXTURE_2D, unIDTex);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexStorage2D(GL_TEXTURE_2D, 4, GL_RGBA8,
-                       FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale,
-                       FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-                        FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale,
-                        FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale,
-                        GL_RED, GL_UNSIGNED_BYTE, m_FontsMemAtlas[unIDTex]);
+//         glTexStorage2D(GL_TEXTURE_2D, 4, GL_RGBA8,
+//                        FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale,
+//                        FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale);
+//         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+//                         FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale,
+//                         FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale,
+//                         GL_RED, GL_UNSIGNED_BYTE, m_FontsMemAtlas[unIDTex]);
         
-        glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale, FONT_MGR_ATLAS_SIZE_DEFAULT*nAtlasScale, 0,
+        GL_RED, GL_UNSIGNED_BYTE, m_FontsMemAtlas[unIDTex]);
+        
         glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

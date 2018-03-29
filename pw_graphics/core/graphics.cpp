@@ -695,6 +695,8 @@ bool CGraphics::init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
+//     glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+    
     // Enable anti-aliasing
 //     glEnable(GL_LINE_SMOOTH);
 //     glShadeModel(GL_SMOOTH);
