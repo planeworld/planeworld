@@ -219,6 +219,64 @@ class CVisualsManager : virtual public CGraphicsBase,
         
 };
 
+inline void APIENTRY openglCallbackFunction(GLenum source,
+                                           GLenum type,
+                                           GLuint id,
+                                           GLenum severity,
+                                           GLsizei length,
+                                           const GLchar* message,
+                                           const void* userParam){
+ 
+//     std::cout << "---------------------opengl-callback-start------------" << std::endl;
+//     std::cout << "message: "<< message << std::endl;
+//     std::cout << "type: ";
+    switch (type) {
+    case GL_DEBUG_TYPE_ERROR:
+        std::cout << "message: "<< message << std::endl;
+//         std::cout << "ERROR" << std::endl;
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        std::cout << "message: "<< message << std::endl;
+//         std::cout << "DEPRECATED_BEHAVIOR" << std::endl;
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        std::cout << "message: "<< message << std::endl;
+//         std::cout << "UNDEFINED_BEHAVIOR" << std::endl;
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+        std::cout << "message: "<< message << std::endl;
+//         std::cout << "PORTABILITY" << std::endl;
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        std::cout << "message: "<< message << std::endl;
+//         std::cout << "PERFORMANCE" << std::endl;
+        break;
+    case GL_DEBUG_TYPE_OTHER:
+//         std::cout << "OTHER";
+        break;
+    }
+//     std::cout << std::endl;
+ 
+//     std::cout << "id: " << id << std::endl;
+//     std::cout << "severity: ";
+//     switch (severity){
+//     case GL_DEBUG_SEVERITY_LOW:
+//         std::cout << "LOW" << std::endl;
+//         break;
+//     case GL_DEBUG_SEVERITY_MEDIUM:
+//         std::cout << "MEDIUM" << std::endl;
+//         break;
+//     case GL_DEBUG_SEVERITY_HIGH:
+//         std::cout << "HIGH" << std::endl;
+//         break;
+//     case GL_DEBUG_SEVERITY_NOTIFICATION:
+//         break;
+//         std::cout << "NOTIFICATION";
+//     }
+//     std::cout << std::endl;
+//     std::cout << "---------------------opengl-callback-end--------------" << std::endl;
+}
+
 //--- Implementation is done here for inline optimisation --------------------//
 
 ////////////////////////////////////////////////////////////////////////////////

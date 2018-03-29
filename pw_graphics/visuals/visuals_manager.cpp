@@ -936,6 +936,9 @@ bool CVisualsManager::init()
     m_TextVersion.setText("Version "+PW_VERSION_FULL);
     m_TextVersion.setPosition(10, m_Graphics.getHeightScr()-m_TextVersion.getFontSize()-10);
     
+    glEnable              ( GL_DEBUG_OUTPUT );
+    glDebugMessageCallback( (GLDEBUGPROC) openglCallbackFunction, 0 );
+    
     return m_Graphics.init();
 }
 
