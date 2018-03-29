@@ -80,11 +80,8 @@ class CFontManager : public CGraphicsBase
         ~CFontManager();
 
         //--- Constant Methods -----------------------------------------------//
-        const std::unordered_map<std::string, GLuint>* getFontsAvailable()
-        {
-            return &m_FontsByName;
-        }
-        /*const*/ std::unordered_map<GLuint, CTimer*>* getFontsIdleTime()
+        const std::unordered_map<std::string, GLuint>* getFontsAvailable() const;
+        const std::unordered_map<GLuint, CTimer*>* getFontsIdleTime() const
         {
             return &m_FontsIdleTime;
         }
@@ -128,6 +125,19 @@ class CFontManager : public CGraphicsBase
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Return map of all currently available fonts, accessed by name
+///
+/// \return Map of all currently available fonts, accessed by name
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const std::unordered_map<std::string, GLuint>* CFontManager::getFontsAvailable() const
+{
+    METHOD_ENTRY("CFontManager::getFontsAvailable")
+    return &m_FontsByName;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
