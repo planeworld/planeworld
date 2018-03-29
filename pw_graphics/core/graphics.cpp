@@ -313,7 +313,7 @@ void CGraphics::beginRenderBatch(CRenderMode* const _pRenderMode)
         this->applyCamMovement();
         
         // Reserve gpu memory for all relevant buffers
-        glBindBuffer(GL_ARRAY_BUFFER, m_unVAO);
+        glBindVertexArray(m_unVAO);
         
         glBufferData(GL_ARRAY_BUFFER, m_unIndexMax * sizeof(float), nullptr, GL_STREAM_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, m_unVBO);
