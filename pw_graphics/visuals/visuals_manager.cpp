@@ -1173,9 +1173,9 @@ bool CVisualsManager::processFrame()
             m_Graphics.setColor({{1.0, 1.0, 1.0, 1.0}});
             
             this->drawStars();
-            m_Graphics.setWidth(5.0);
+            m_Graphics.setLineWidth(5.0);
             this->drawWorld();
-            m_Graphics.setWidth(1.0);
+            m_Graphics.setLineWidth(1.0);
             this->drawCOM();
             this->drawBoundingBoxes();
             this->drawKinematicsStates(DrawModeType::VISUALS);
@@ -1267,6 +1267,8 @@ bool CVisualsManager::processFrame()
     this->drawDebugInfo();
     
     this->finishFrame();
+    
+    m_FontManager.triggerMaintenance();
     
     // Attach cameras to current front buffer
     if (bGotCam)
@@ -1420,7 +1422,7 @@ void CVisualsManager::drawDebugInfo()
         oss << "\n";
         
         oss << "FONT RENDERER\n\n  Available fonts:\n";
-        for (auto strFont : m_FontManager.getFontsAvailable())
+        for (auto strFont : *m_FontManager.getFontsAvailable())
         {
             oss << "   - " << strFont.first << "\n";
         }
@@ -1483,7 +1485,7 @@ void CVisualsManager::drawDebugInfo()
             int nLines = 20;
             m_Graphics.filledRect(Vector2d(10, 10),
                                   Vector2d(10 + fSizeX, 20+
-                                  (nLines+m_FontManager.getFontsAvailable().size())*m_TextDebugInfo.getFontSize()));
+                                  (nLines+m_FontManager.getFontsAvailable()->size())*m_TextDebugInfo.getFontSize()));
         m_Graphics.endRenderBatch();
         
         m_Graphics.beginRenderBatch("font");

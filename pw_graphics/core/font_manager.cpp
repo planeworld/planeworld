@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2017 - 2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -82,6 +82,15 @@ CFontManager::~CFontManager()
     {
         glDeleteTextures(1, &FontID.second);
     }
+    for (auto FontTimer : m_FontsIdleTime)
+    {
+        if (FontTimer.second != nullptr)
+        {
+            delete FontTimer.second;
+            MEM_FREED("CTimer")
+            FontTimer.second = nullptr;
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +140,25 @@ bool CFontManager::addFont(const std::string& _strFontName,
     this->rasterize(_strFontName, _nSize);
     
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Draws given text, i.e. buffering textured quads for GL to be called
+///        by graphics update, based on last position.
+///
+/// \param _strText     Text to be drawn
+/// \param _bCentered   Text centered? (Otherwise align left [default])
+/// \param _nWrap       Word wrap position
+///
+////////////////////////////////////////////////////////////////////////////////
+void CFontManager::drawText(const std::string& _strText,
+                            const bool _bCentered,
+                            const int _nWrap
+                           )
+{
+    METHOD_ENTRY("CFontManager::drawText")
+    this->drawText(_strText, m_fLastPosX, m_fLastPosY, _bCentered, _nWrap);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,6 +232,11 @@ void CFontManager::drawText(const std::string& _strText,
                                     &vecUVs);
         }
     }
+    
+    m_fLastPosX = fOffsetX + _fPosX;
+    m_fLastPosY = fOffsetY + _fPosY;
+    
+    m_FontsIdleTime[m_unTexID]->restart();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -259,6 +292,9 @@ float CFontManager::getTextLength(const std::string& _strText,
         {
             fLengthMax = fLength;
         }
+        
+        m_FontsIdleTime[nID]->restart();
+        
         return fLengthMax;
     }
     else
@@ -307,6 +343,34 @@ void CFontManager::setSize(const int _nSize)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Triggers maintenance which removes unused fonts from memory
+///
+////////////////////////////////////////////////////////////////////////////////
+void CFontManager::triggerMaintenance()
+{
+    METHOD_ENTRY("CFontManager::triggerMaintenance")
+    
+    if (m_FontsByName.size() > FONT_MGR_MAX_FONTS_BEFORE_REMOVAL)
+    {
+        std::vector<GLuint> IDs;
+        for (auto FontTimer : m_FontsIdleTime)
+        {
+            if (FontTimer.second->getSplitTime() > FONT_MGR_MAX_IDLE_TIME_DEFAULT)
+            {
+                DEBUG_MSG("Font Manager", "Removing font with ID " << FontTimer.first)
+                this->removeFont(FontTimer.first);
+                IDs.push_back(FontTimer.first);
+            }
+        }
+        for (auto ID : IDs)
+        {
+            m_FontsIdleTime.erase(ID);
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Changes currently active font, including font size
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -349,6 +413,8 @@ void CFontManager::changeFont()
     
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_unTexID);
+        
+        m_FontsIdleTime[m_unTexID]->restart();
     }
     else
     {
@@ -508,6 +574,65 @@ void CFontManager::rasterize(const std::string& _strFontName, const int _nSize)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        
+        m_FontsIdleTime[unIDTex] = new CTimer;
+        MEM_ALLOC("CTimer")
+        m_FontsIdleTime[unIDTex]->start();
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Removes font from Font Manager
+///
+/// All resources will be released. Notice, that by font a font with a
+/// particular size is meant. Font metrics themselves will stay in memory
+/// until removed manually or at destruction.
+///
+/// \param _unTexID Texture ID, identifying the font
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CFontManager::removeFont(const GLuint _unTexID)
+{
+    METHOD_ENTRY("CFontManager::removeFont")
+    
+    bool bSuccess = true;
+    auto it1 = m_FontsMemAtlas.find(_unTexID);
+    if (it1 != m_FontsMemAtlas.end())
+    {
+        m_FontsMemAtlas.erase(it1);
+    }
+    else bSuccess = false;
+    
+    auto it2 = m_AtlasSizes.find(_unTexID);
+    if (it2 != m_AtlasSizes.end())
+    {
+        m_AtlasSizes.erase(it2);
+    }
+    else bSuccess = false;
+    
+    auto it3 = m_FontsCharInfo.find(_unTexID);
+    if (it3 != m_FontsCharInfo.end())
+    {
+        m_FontsCharInfo.erase(it3);
+    }
+    else bSuccess = false;
+    
+    for (auto it = m_FontsByName.begin(); it != m_FontsByName.end(); ++it)
+    {
+        if (it->second == _unTexID)
+        {
+            m_FontsByName.erase(it);
+            break;
+        }
+        else bSuccess = false;
+    }
+    glDeleteTextures(1, &_unTexID);
+
+    if (!bSuccess)
+    {
+        WARNING_MSG("Font Manager", "Error removing font, this shouldn't happen.")
+    }
+    return bSuccess;
 }
 

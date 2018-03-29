@@ -165,8 +165,8 @@ class CGraphics
         void setColor(const ColorTypeRGBA&);
         void setColor(const double&, const double&, const double&);
         void setColor(const double&, const double&, const double&, const double&);
+        void setLineWidth(const double&) const;
         void setPointSize(const double&) const;
-        void setWidth(const double&) const;
         
         WindowHandleType* getWindow() const;
 
@@ -183,13 +183,7 @@ class CGraphics
         bool resizeWindow(unsigned short, unsigned short);
         void setWidthScr(const unsigned short&);
         void setHeightScr(const unsigned short&);
-        void setViewPort(const double& _fLeft, const double& _fRight, const double& _fBottom, const double& _fTop)
-        {
-            m_ViewPort.leftplane = _fLeft;
-            m_ViewPort.rightplane = _fRight;
-            m_ViewPort.bottomplane = _fBottom;
-            m_ViewPort.topplane = _fTop;
-        }
+        void setViewPort(const double&, const double&, const double&, const double&);
         void setupScreenSpace();
         void setupWorldSpace();
         void swapBuffers();
@@ -505,6 +499,19 @@ inline void CGraphics::setColor(const double& _fR, const double& _fG,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Sets width of lines
+///
+/// \param _fW Width of lines
+///
+///////////////////////////////////////////////////////////////////////////////
+inline void CGraphics::setLineWidth(const double& _fW) const
+{
+    METHOD_ENTRY("CGraphics::setLineWidth")
+    glLineWidth(_fW);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Sets the size of points
 ///
 /// \param _fS Size of points
@@ -514,19 +521,6 @@ inline void CGraphics::setPointSize(const double& _fS) const
 {
     METHOD_ENTRY("CGraphics::setPointSize")
     glPointSize(_fS);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Sets width of lines
-///
-/// \param _fW Width of lines
-///
-///////////////////////////////////////////////////////////////////////////////
-inline void CGraphics::setWidth(const double& _fW) const
-{
-    METHOD_ENTRY("CGraphics::setColor")
-    glLineWidth(_fW);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

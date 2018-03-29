@@ -193,7 +193,7 @@ void CRenderMode::use()
         glBindTexture(GL_TEXTURE_2D, m_unTexID0);
         std::cout << "BIND unit[0] " << "id[" << m_unTexID0 << "]" << std::endl;
     }
-    if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
+    else if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_unTexID0);
@@ -216,7 +216,7 @@ void CRenderMode::use()
         glUniform1i(m_UniformsTextures[0], 0);
         std::cout << "UNI  unit[0] " << "loc[" << m_UniformsTextures[0] << "]" << std::endl;
     }
-    if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
+    else if (m_RenderModeType == RenderModeType::VERT3COL4TEX2X2)
     {
         glUniform1i(m_UniformsTextures[0], 0);
         glUniform1i(m_UniformsTextures[1], 1);

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2017 - 2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,7 +40,22 @@
 //--- Misc header ------------------------------------------------------------//
 
 // Constants
-const bool TEXT_POSITION_CENTERED_X = true;
+constexpr bool TEXT_POSITION_CENTERED_X = true;
+
+/// Some better readable names for text parts
+typedef enum
+{
+    PART_ONE = 0,
+    PART_TWO = 1,
+    PART_THREE = 2,
+    PART_FOUR = 3,
+    PART_FIVE = 4,
+    PART_SIX = 5,
+    PART_SEVEN = 6,
+    PART_EIGHT = 7,
+    PART_NINE = 8,
+    PART_TEN = 9
+} TextPartType;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -59,28 +74,23 @@ class CText : virtual public CGraphicsBase
         //--- Constant Methods -----------------------------------------------//
         int                 getFontSize() const {return m_nSize;}
         
-        const std::string&  str() const {return m_strText;}
-        
         //--- Methods --------------------------------------------------------//
+        void addTextPart(const std::string&);
+        void clearText();
         void display();
         
-        float getLength()
-        {
-            // Calculate length of text
-            if (m_bNewState)
-            {
-                m_fLength = m_pFontManager->getTextLength(m_strText, m_strFont, m_nSize);
-                m_bNewState = false;
-            }
-            return m_fLength;
-        }
+        float getLength();
         
         void setColor(const ColorTypeRGBA& _Color) {m_Color = _Color;}
+        void setColor(const TextPartType, const ColorTypeRGBA&);
         void setFont(const std::string&);
+        void setFont(const TextPartType, const std::string&);
         void setFontManager(CFontManager* _pFontManager) {m_pFontManager = _pFontManager;}
         void setSize(const int);
+        void setSize(const TextPartType, const int);
         void setPosition(const float& _fPosX, const float& _fPosY, const bool _bCentered = false);
         void setText(const std::string&);
+        void setText(const TextPartType, const std::string&);
         void setWordWrap(const int _nWordWrap) {m_nWordWrap = _nWordWrap;}
                 
         //--- friends --------------------------------------------------------//
@@ -88,6 +98,12 @@ class CText : virtual public CGraphicsBase
     private:
         
         //--- Variables [private] --------------------------------------------//
+        std::vector<ColorTypeRGBA>  m_PartsColors;  ///< Colors of text parts
+        std::vector<int>            m_PartsSizes;   ///< Sizes of text parts
+        std::vector<std::string>    m_PartsFonts;   ///< Font type of text parts
+        std::vector<std::string>    m_PartsTexts;   ///< Text part
+        
+        
         ColorTypeRGBA   m_Color;        ///< Text color
         int             m_nSize;        ///< Text size
         float           m_fLength;      ///< Text length (px)
