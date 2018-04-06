@@ -446,12 +446,14 @@ void CFontManager::rasterize(const std::string& _strFontName, const int _nSize)
     {
         glBindTexture(GL_TEXTURE_2D, 0);
         glGenTextures(1, &unIDTex);
+        std::cout << "RAST id[" << unIDTex << "]" << std::endl;
         m_FontsByName[strFontDesignator] = unIDTex;
     }
     else
     {
         WARNING_MSG("Font Manager", "Font with name " << _strFontName << " already existing.")
         unIDTex = m_FontsByName[strFontDesignator];
+        std::cout << "RAST id[" << unIDTex << "]" << std::endl;
     }
     
     DOM_VAR(DEBUG_BLK(

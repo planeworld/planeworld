@@ -509,6 +509,7 @@ void CGraphics::endRenderBatch(const bool _bForce)
                 break;
             }
         }
+        std::cout << "DRAW" << std::endl;
         
         // Collect some debug information
         m_nLines     += m_unIndexLines;
@@ -603,6 +604,7 @@ void CGraphics::restartRenderBatch()
                 break;
             }
         }
+        std::cout << "DRAW" << std::endl;
         
         // Collect some debug information
         m_nLines     += m_unIndexLines;
