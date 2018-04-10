@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2017 Torsten Büschenfeld
+// Copyright (C) 2011-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -1545,10 +1545,10 @@ void CPhysicsManager::myInitComInterface()
                                                 if (pObj != nullptr)
                                                 {
                                                     // Planetary objects surface should always be the first shape
-                                                    IShape* pShp = pObj->getGeometry()->getShapes().front();
-                                                    if (pShp != nullptr)
+                                                    const auto hShp = pObj->getGeometry()->getShapes().front();
+                                                    if (hShp.isValid())
                                                     {
-                                                        pShp->setMass(_fMass);
+                                                        hShp->setMass(_fMass);
                                                     }
                                                     else
                                                     {
@@ -1771,6 +1771,17 @@ void CPhysicsManager::myInitComInterface()
                                            {ParameterType::INT, "Object UID"},
                                            {ParameterType::DOUBLE, "Velocity X"},
                                            {ParameterType::DOUBLE, "Velocity Y"}},
+                                           "physics", "physics"
+                                         );
+        m_pComInterface->registerFunction("remove_shape",
+                                          CCommand<void, int>(
+                                            [&](const int _nUID)
+                                            {
+                                                m_pDataStorage->removeShape(_nUID);
+                                            }),
+                                          "Removes shape with given UID.",
+                                          {{ParameterType::NONE, "No return value"},
+                                           {ParameterType::INT, "Shapes UID"}},
                                            "physics", "physics"
                                          );
         m_pComInterface->registerFunction("set_gravity_vector",

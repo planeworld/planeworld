@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2016 Torsten Büschenfeld
+// Copyright (C) 2010-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -72,12 +72,12 @@ CGeometry::~CGeometry()
     DTOR_CALL("CGeometry::~CGeometry")
 
     // Free memory if pointer is still existent
-    for (auto pShp : m_Shapes)
+    for (auto hShp : m_Shapes)
     {
-        if (pShp != nullptr)
+        if (hShp.ptr() != nullptr)
         {
-            delete pShp;
-            pShp = nullptr;
+            delete hShp.ptr();
+            hShp.setPtr(nullptr);
             MEM_FREED("IShape")
         }
     }
@@ -146,12 +146,12 @@ void CGeometry::setShapes(const ShapesType& _ShapeList)
     METHOD_ENTRY("CGeometry::setShapes")
 
     // Free memory if pointer is still existent
-    for (auto pShp : m_Shapes)
+    for (auto hShp : m_Shapes)
     {
-        if (pShp != nullptr)
+        if (hShp.ptr() != nullptr)
         {
-            delete pShp;
-            pShp = nullptr;
+            delete hShp.ptr();
+            hShp.set(nullptr);
             MEM_FREED("IShape")
         }
     }
@@ -217,9 +217,9 @@ void CGeometry::update()
     
     // Should be global to catch additions or setting of whole shapes
     bool bShapesValid = true;
-    for (const auto ci : m_Shapes)
+    for (const auto& hShp : m_Shapes)
     {
-        bShapesValid &= ci->isValid();
+        bShapesValid &= hShp->isValid();
     }
     if (!bShapesValid)
     {
@@ -227,12 +227,12 @@ void CGeometry::update()
         {
             m_vecCOM.setZero();
             m_fMass = 0.0;
-            for (const auto ci : m_Shapes)
+            for (const auto& hShp : m_Shapes)
             {
-                m_vecCOM += ci->getMass() *
-                            ci->getCentroid();
-                m_fMass  += ci->getMass();
-                ci->isValid() = true;
+                m_vecCOM += hShp->getMass() *
+                            hShp->getCentroid();
+                m_fMass  += hShp->getMass();
+                hShp->isValid() = true;
             }
             if (m_fMass > 0.0)
             {
@@ -242,21 +242,21 @@ void CGeometry::update()
         else
         {
             m_fMass = 0.0;
-            for (const auto ci : m_Shapes)
+            for (const auto& hShp : m_Shapes)
             {
-                m_fMass  += ci->getMass();
-                ci->isValid() = true;
+                m_fMass  += hShp->getMass();
+                hShp->isValid() = true;
             }
         }
         
         if (m_bAutoInertia)
         {
             m_fInertia = 0.0;
-            for (const auto ci : m_Shapes)
+            for (const auto& hShp : m_Shapes)
             {
-                m_fInertia +=  ci->getInertia() + 
-                            ci->getMass() *
-                            (ci->getCentroid() -
+                m_fInertia +=  hShp->getInertia() + 
+                            hShp->getMass() *
+                            (hShp->getCentroid() -
                             m_vecCOM).squaredNorm();
             }
         }
@@ -289,11 +289,11 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
     
     for (auto it : _Geo.m_Shapes)
     {
-        if (it != nullptr)
+        if (it.isValid())
         {
-            delete it;
-            MEM_FREED("CDoubleBufferedShape")
-            it = nullptr;
+            delete it.ptr();
+            MEM_FREED("IShape")
+            it.set(nullptr);
         }
     }
     
@@ -355,20 +355,20 @@ void CGeometry::copy(const CGeometry& _Geom)
     m_AABBS = _Geom.m_AABBS;
 
     // Free memory if pointer is still existent
-    for (auto pShp : m_Shapes)
+    for (auto& hShp : m_Shapes)
     {
-        if (pShp != nullptr)
+        if (hShp.isValid())
         {
-            delete pShp;
-            pShp = nullptr;
+            delete hShp.ptr();
+            hShp.setPtr(nullptr);
             MEM_FREED("IShape")
         }
     }
     m_Shapes.clear();
     
-    for (auto pShp : _Geom.m_Shapes)
+    for (const auto& hShp : _Geom.m_Shapes)
     {
-        m_Shapes.push_back(pShp->clone());
+        m_Shapes.push_back(hShp->clone());
     }
     
     m_vecCOM    = _Geom.m_vecCOM;

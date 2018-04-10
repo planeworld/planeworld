@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2015-2016 Torsten Büschenfeld
+// Copyright (C) 2015-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ const double& CThruster::activate(const double& _fThrust)
     {
         if (Emitter.isValid())
         {
-            Emitter.get()->setIntensity(_fThrust/m_fThrustMax);
+            Emitter->setIntensity(_fThrust/m_fThrustMax);
         }
     }
     
@@ -88,7 +88,7 @@ const double& CThruster::activate(const double& _fThrust)
         {
             if (Emitter.isValid())
             {
-                Emitter.get()->activate();
+                Emitter->activate();
             }
         }
     }
@@ -114,7 +114,7 @@ void CThruster::execute()
         if (m_hObject.isValid())
         {
             Rotation2Dd Rot(m_KinematicsState.getLocalAngle());
-            m_hObject.get()->addForceLC(Rot*Vector2d(m_fThrust, 0.0), m_KinematicsState.getLocalOrigin());
+            m_hObject->addForceLC(Rot*Vector2d(m_fThrust, 0.0), m_KinematicsState.getLocalOrigin());
         }
     }
 }
@@ -132,7 +132,7 @@ void CThruster::addEmitter(IEmitter* const _pEmitter)
     m_hEmitters.push_back(CHandle<IEmitter>(_pEmitter));
     if (m_hObject.isValid())
     {
-        _pEmitter->attachTo(m_hObject.get());
+        _pEmitter->attachTo(m_hObject.ptr());
     }
 }
 
@@ -150,6 +150,6 @@ void CThruster::setObject(CObject* const _pObj)
     m_KinematicsState.setRef(&(_pObj->getKinematicsState()));
     for (auto Emitter : m_hEmitters)
     {
-        Emitter.get()->attachTo(_pObj);
+        Emitter->attachTo(_pObj);
     }
 }

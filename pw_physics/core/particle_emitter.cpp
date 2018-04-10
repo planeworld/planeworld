@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2017 Torsten Büschenfeld
+// Copyright (C) 2014-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -127,7 +127,7 @@ void CParticleEmitter::emit(const double& _fF)
                 {
                     double fX = m_UniformDist(m_Generator)*(m_fMaxX-m_fMinX) + m_fMinX;
                     double fY = m_UniformDist(m_Generator)*(m_fMaxY-m_fMinY) + m_fMinY;
-                    m_hParticles.get()->generate(Vector2d(fX, fY)+ m_KinematicsState.getOrigin(), Vector2d(0.0, 0.0));
+                    m_hParticles->generate(Vector2d(fX, fY)+ m_KinematicsState.getOrigin(), Vector2d(0.0, 0.0));
                 }
                 break;
             case EmitterDistributionType::POINT_SOURCE:
@@ -136,10 +136,10 @@ void CParticleEmitter::emit(const double& _fF)
                 Vector2d vecParentVel; 
                 if (m_hParent.isValid())
                 {
-                    fLocalDrag = m_hParent.get()->getPressureAtPosition(
+                    fLocalDrag = m_hParent->getPressureAtPosition(
                         m_KinematicsState.getOrigin()) / 
-                        m_hParent.get()->getPressureAtGround();
-                    vecParentVel = m_hParent.get()->getVelocity();
+                        m_hParent->getPressureAtGround();
+                    vecParentVel = m_hParent->getVelocity();
                 }
                 else
                 {

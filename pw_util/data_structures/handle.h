@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2017-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,14 +53,18 @@ class CHandle
         CHandle() : m_strName("UID_0"), m_UID(0u), m_pRef(nullptr){}
         CHandle(T* _pT) {this->set(_pT);}
    
+        //--- Operators ------------------------------------------------------//
+        T* operator->() const {return this->ptr();}
+   
         //--- Constant Methods -----------------------------------------------//
         const std::string&  getName() const;
-        T*                  get() const;
         UIDType             getUID() const;
         bool                isValid() const;
+        T*                  ptr() const;
         
         //--- Methods --------------------------------------------------------//
         void set(T* const);
+        void setPtr(T* const _pPtr) {m_pRef = _pPtr;}
         
     private:
         
@@ -104,20 +108,6 @@ inline const std::string& CHandle<T>::getName() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Returns the reference to UID user
-///
-/// \return Reference to UID user
-///
-////////////////////////////////////////////////////////////////////////////////
-template <class T>
-inline T* CHandle<T>::get() const
-{
-    METHOD_ENTRY("CHandle::get")
-    return m_pRef;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
 /// \brief Returns UID
 ///
 /// \return UID
@@ -142,6 +132,20 @@ inline bool CHandle<T>::isValid() const
 {
     METHOD_ENTRY("CHandle::isValid")
     return (m_UID == 0u) ? false : true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns the reference to UID user
+///
+/// \return Reference to UID user
+///
+////////////////////////////////////////////////////////////////////////////////
+template <class T>
+inline T* CHandle<T>::ptr() const
+{
+    METHOD_ENTRY("CHandle::ptr")
+    return m_pRef;
 }
 
 #endif // HANDLE_H

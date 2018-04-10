@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2017-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ void CWidgetCam::draw()
     m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY, "Widget Camera", m_UID.getValue());
     if (m_hCamera.isValid())
     {
-        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY + m_pUIDVisuals->UIDText.getFontSize(), "Camera", m_hCamera.get()->getUID());
+        m_pUIDVisuals->draw(m_nFramePosX, m_nFramePosY + m_pUIDVisuals->UIDText.getFontSize(), "Camera", m_hCamera->getUID());
     }
     
     DOM_DEV(DomDev:)
@@ -120,6 +120,6 @@ void CWidgetCam::myResize(const int _nX, const int _nY)
     m_RenderMode.setTexture0("ScreenTexture", m_TargetCam.getIDTex());
     if (m_hCamera.isValid())
     {
-        m_hCamera.get()->setViewport(double(_nX) / GRAPHICS_PX_PER_METER, double(_nY) / GRAPHICS_PX_PER_METER);
+        m_hCamera->setViewport(double(_nX) / GRAPHICS_PX_PER_METER, double(_nY) / GRAPHICS_PX_PER_METER);
     }
 }

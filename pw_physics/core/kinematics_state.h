@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2015-2016 Torsten Büschenfeld
+// Copyright (C) 2015-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ class CKinematicsState  : public IUIDUser
         void                getPositions(const std::array<Vector2d, T>&,
                                                std::array<Vector2d, T>&,
                                          const double& = 1.0) const;
-        const CHandle<CKinematicsState>* getRef() const {return &m_hKinStateRef;}
+        const CHandle<CKinematicsState>& getRef() const {return m_hKinStateRef;}
                                          
         //--- Methods --------------------------------------------------------//
         void setRef(CKinematicsState* const);
@@ -322,15 +322,15 @@ void CKinematicsState::getPositions(const std::array<Vector2d, T>& _Pos0,
     
     if (m_hKinStateRef.isValid())
     {
-        if (m_fAngleRef != m_hKinStateRef.get()->m_fAngle)
+        if (m_fAngleRef != m_hKinStateRef->m_fAngle)
         {
-            m_fAngleRef = m_hKinStateRef.get()->m_fAngle;
-            m_matRotRef = Rotation2Dd(m_hKinStateRef.get()->m_fAngle).toRotationMatrix();
+            m_fAngleRef = m_hKinStateRef->m_fAngle;
+            m_matRotRef = Rotation2Dd(m_hKinStateRef->m_fAngle).toRotationMatrix();
         }
         for (auto i=0u; i<T; ++i)
         {
             _Pos1[i] = m_matRotRef * ((m_matRot * (_Pos0[i] / _fZoom)) + m_vecOrigin) +
-                       m_hKinStateRef.get()->m_vecOrigin;
+                       m_hKinStateRef->m_vecOrigin;
         }
     }
     else

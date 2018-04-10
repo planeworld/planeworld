@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2016 Torsten Büschenfeld
+// Copyright (C) 2011-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -244,13 +244,13 @@ bool CWorldDataStorage::addObject(CObject* _pObject)
       &aObjects[2]->getKinematicsState(), &aObjects[3]->getKinematicsState()}};
     
     // Initialise new objects
-    for (auto pObj : aObjects) pObj->init();
+    for (const auto& pObj : aObjects) pObj->init();
     
     m_ObjectsByValue.add(_pObject->getUID(), aObjects);
     
-    for (auto Shape : _pObject->getGeometry()->getShapes())
+    for (const auto& hShape : _pObject->getGeometry()->getShapes())
     {
-        m_ShapesByValue.insert(std::pair<UIDType, IShape*>(Shape->getUID(), Shape));
+        m_ShapesByValue.insert(std::pair<UIDType, IShape*>(hShape->getUID(), hShape.ptr()));
     }
     
     if (!this->addUIDUser(aUIDUsersKinState)) {}
@@ -322,6 +322,47 @@ bool CWorldDataStorage::addThruster(CThruster* _pThruster)
     return true;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Remove shape from object identified by uid value
+///
+/// \param _nUID UID of shape to remove
+///
+/// \return Success
+///
+////////////////////////////////////////////////////////////////////////////////
+bool CWorldDataStorage::removeShape(const UIDType _nUID)
+{
+    METHOD_ENTRY("CWorldDataStorage::removeShape")
+
+    AccessShapes.acquireLock();
+    const auto ci = m_ShapesByValue.find(_nUID);
+    if (ci != m_ShapesByValue.end())
+    {
+        if (ci->second != nullptr)
+        {
+            delete ci->second;
+            MEM_FREED("IShape")
+            ci->second = nullptr;
+            m_ShapesByValue.erase(ci);
+            AccessShapes.releaseLock();
+            return true;
+        }
+        else
+        {
+            WARNING_MSG("World Data Storage", "No shape although UID exists.")
+            AccessShapes.releaseLock();
+            return false;
+        }
+    }
+    else
+    {
+        WARNING_MSG("World Data Storage", "Unknown shape with UID <" << _nUID << ">")
+        AccessShapes.releaseLock();
+        return false;
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Updates an object whichs structure was modified externally
@@ -337,11 +378,11 @@ void CWorldDataStorage::updateObject(const UIDType _nUID)
 {
     METHOD_ENTRY("CWorldDataStorage::updateObject")
 
-    for (auto pShape : m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->at(_nUID)->getGeometry()->getShapes())
+    for (const auto& hShape : m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->at(_nUID)->getGeometry()->getShapes())
     {
-        if (m_ShapesByValue.find(pShape->getUID()) == m_ShapesByValue.end())
+        if (m_ShapesByValue.find(hShape->getUID()) == m_ShapesByValue.end())
         {
-            m_ShapesByValue.insert(std::pair<UIDType, IShape*>(pShape->getUID(), pShape));
+            m_ShapesByValue.insert(std::pair<UIDType, IShape*>(hShape->getUID(), hShape.ptr()));
             break;
         }
     }

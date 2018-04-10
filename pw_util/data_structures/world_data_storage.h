@@ -118,6 +118,8 @@ class CWorldDataStorage
         bool addThruster(CThruster*);
         bool addUIDUser(IUIDUser*);
         
+        bool removeShape(const UIDType);
+        
         void updateObject(const UIDType);
         
         CUniverse*                  getUniverse();

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2017 Torsten Büschenfeld
+// Copyright (C) 2010-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -497,18 +497,18 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
             }
             else
             {
-                for (const auto pShape : Obj.second->getGeometry()->getShapes())
+                for (const auto& hShape : Obj.second->getGeometry()->getShapes())
                 {
-                    switch (pShape->getShapeType())
+                    switch (hShape->getShapeType())
                     {
                         case ShapeType::CIRCLE:
-                            this->drawCircle(Obj.second, static_cast<CCircle*>(pShape), _pCamera);
+                            this->drawCircle(Obj.second, static_cast<CCircle*>(hShape.ptr()), _pCamera);
                             break;
                         case ShapeType::PLANET:
-                            this->drawPlanet(Obj.second, static_cast<CPlanet*>(pShape), _pCamera);
+                            this->drawPlanet(Obj.second, static_cast<CPlanet*>(hShape.ptr()), _pCamera);
                             break;
                         case ShapeType::POLYGON:
-                            this->drawPolygon(Obj.second, static_cast<CPolygon*>(pShape), _pCamera);
+                            this->drawPolygon(Obj.second, static_cast<CPolygon*>(hShape.ptr()), _pCamera);
                             break;
                         case ShapeType::TERRAIN:
                             break;
@@ -1145,7 +1145,7 @@ bool CVisualsManager::processFrame()
                 //
                     m_Graphics.setupWorldSpace();
                     
-                    m_pCamera = CamWidget.second->getCamera()->get();
+                    m_pCamera = CamWidget.second->getCamera()->ptr();
                     m_pCamera->update();
                     this->drawStars();
                     this->drawWorld();
@@ -1690,9 +1690,9 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState* const _pKinema
                     _pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin()
                 );
                 
-                if (_pKinematicsState->getRef()->isValid())
+                if (_pKinematicsState->getRef().isValid())
                 {
-                    Vector2d vecRef = _pKinematicsState->getRef()->get()->getOrigin() - _pKinematicsState->getOrigin();
+                    Vector2d vecRef = _pKinematicsState->getRef()->getOrigin() - _pKinematicsState->getOrigin();
                     m_Graphics.showVec(
                         vecRef,
                         _pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin()
@@ -2288,10 +2288,10 @@ void CVisualsManager::myInitComInterface()
                                                     if (pObject != nullptr)    
                                                     {
                                                         pCam->setCell(pObject->getCell());
-                                                        if (pCam->getKinematicsState().getRef()->isValid())
+                                                        if (pCam->getKinematicsState().getRef().isValid())
                                                         {
                                                             pCam->setPosition(pObject->getKinematicsState().getOriginReferredTo(
-                                                                                *(pCam->getKinematicsState().getRef()->get())) +
+                                                                                *(pCam->getKinematicsState().getRef().ptr())) +
                                                                                 pObject->getGeometry()->getCOM());
                                                         }
                                                         else
