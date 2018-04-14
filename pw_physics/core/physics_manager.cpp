@@ -446,10 +446,6 @@ bool CPhysicsManager::processFrame()
             m_SimTimer[i].inc(1.0/m_fFrequency*m_pDataStorage->getTimeScale());
         }
         this->addGlobalForces();
-    }
-    
-    if ((!m_bPaused) || (m_bPaused && m_bProcessOneFrame))
-    {    
         this->dynamics(nFrame);
         this->collisionDetection();
         this->updateCells();
