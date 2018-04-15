@@ -47,12 +47,16 @@ CWorldDataStorage::CWorldDataStorage() : m_pUniverse(nullptr),
 {
     METHOD_ENTRY("CWorldDataStorage::CWorldDataStorage")
     CTOR_CALL("CWorldDataStorage::CWorldDataStorage")
-    for (auto i=0u; i<m_UIDUsersByValue.getBufferSize(); ++i)
-        m_UIDUsersByValue.getBuffer(i)->resize(WDS_DEFAULT_UID_BUFFER_SIZE);
     
-    // Setup a clean environment
-    for (auto i=0u; i<m_UIDUsersByValue.getBufferSize(); ++i)
-        std::fill(m_UIDUsersByValue.getBuffer(i)->begin(), m_UIDUsersByValue.getBuffer(i)->end(), nullptr);
+    m_UIDUsersByValue.resizeBuffer(WDS_DEFAULT_UID_BUFFER_SIZE);
+    m_UIDUsersByValue.fillBuffer(nullptr);
+    
+//     for (auto i=0u; i<m_UIDUsersByValue.getBufferSize(); ++i)
+//         m_UIDUsersByValue.getBuffer<i>()->resize(WDS_DEFAULT_UID_BUFFER_SIZE);
+//     
+//     // Setup a clean environment
+//     for (auto i=0u; i<m_UIDUsersByValue.getBufferSize(); ++i)
+//         std::fill(m_UIDUsersByValue.getBuffer(i)->begin(), m_UIDUsersByValue.getBuffer(i)->end(), nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,42 +92,42 @@ CWorldDataStorage::~CWorldDataStorage()
         }
     }
     
-    for (auto i=0u; i<m_ObjectsByValue.getBufferSize(); ++i)
-    {
-        for (auto pObj : *m_ObjectsByValue.getBuffer(i))
-        {
-            // Free memory if pointer is still existent
-            if (pObj.second != nullptr)
-            {
-                delete pObj.second;
-                pObj.second = nullptr;
-                MEM_FREED("CObject")
-            }
-            else
-            {
-                DOM_MEMF(DEBUG_MSG("CObject", "Memory already freed."))
-            }
-        }
-    }
-    
-    for (auto i=0u; i<m_ParticlesByValue.getBufferSize(); ++i)
-    {
-        for (auto pParticle : *m_ParticlesByValue.getBuffer(i))
-        {
-            // Free memory if pointer is still existent
-            if (pParticle.second != nullptr)
-            {
-                delete pParticle.second;
-                pParticle.second = nullptr;
-                MEM_FREED("CParticle")
-            }
-            else
-            {
-                DOM_MEMF(DEBUG_MSG("CParticle", "Memory already freed."))
-            }
-        }
-    }
-    
+//     for (auto i=0u; i<m_ObjectsByValue.getBufferSize(); ++i)
+//     {
+//         for (auto pObj : *m_ObjectsByValue.getBuffer(i))
+//         {
+//             // Free memory if pointer is still existent
+//             if (pObj.second != nullptr)
+//             {
+//                 delete pObj.second;
+//                 pObj.second = nullptr;
+//                 MEM_FREED("CObject")
+//             }
+//             else
+//             {
+//                 DOM_MEMF(DEBUG_MSG("CObject", "Memory already freed."))
+//             }
+//         }
+//     }
+//     
+//     for (auto i=0u; i<m_ParticlesByValue.getBufferSize(); ++i)
+//     {
+//         for (auto pParticle : *m_ParticlesByValue.getBuffer(i))
+//         {
+//             // Free memory if pointer is still existent
+//             if (pParticle.second != nullptr)
+//             {
+//                 delete pParticle.second;
+//                 pParticle.second = nullptr;
+//                 MEM_FREED("CParticle")
+//             }
+//             else
+//             {
+//                 DOM_MEMF(DEBUG_MSG("CParticle", "Memory already freed."))
+//             }
+//         }
+//     }
+//     
     for (auto pJoint : m_Joints)
     {
         // Free memory if pointer is still existent
@@ -378,7 +382,7 @@ void CWorldDataStorage::updateObject(const UIDType _nUID)
 {
     METHOD_ENTRY("CWorldDataStorage::updateObject")
 
-    for (const auto& hShape : m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->at(_nUID)->getGeometry()->getShapes())
+    for (const auto& hShape : m_ObjectsByValue.getBuffer<BUFFER_QUADRUPLE_BACK>()->at(_nUID)->getGeometry()->getShapes())
     {
         if (m_ShapesByValue.find(hShape->getUID()) == m_ShapesByValue.end())
         {
@@ -428,8 +432,8 @@ CObject* CWorldDataStorage::getObjectByValueBack(const UIDType _nUID)
     METHOD_ENTRY("CWorldDataStorage::getObjectByValueBack")
 
     AccessObjects.waitForRelease();
-    const auto ci = m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
-    if (ci != m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
+    const auto ci = m_ObjectsByValue.getBuffer<BUFFER_QUADRUPLE_BACK>()->find(_nUID);
+    if (ci != m_ObjectsByValue.getBuffer<BUFFER_QUADRUPLE_BACK>()->end())
     {
         return ci->second;
     }
@@ -454,8 +458,8 @@ CObject* CWorldDataStorage::getObjectByValueFront(const UIDType _nUID)
     METHOD_ENTRY("CWorldDataStorage::getObjectByValueFront")
 
     AccessObjects.waitForRelease();
-    const auto ci = m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->find(_nUID);
-    if (ci != m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->end())
+    const auto ci = m_ObjectsByValue.getBuffer<BUFFER_QUADRUPLE_FRONT>()->find(_nUID);
+    if (ci != m_ObjectsByValue.getBuffer<BUFFER_QUADRUPLE_FRONT>()->end())
     {
         return ci->second;
     }
@@ -480,8 +484,8 @@ CObjectPlanet* CWorldDataStorage::getObjectPlanetByValueBack(const UIDType _nUID
     METHOD_ENTRY("CWorldDataStorage::getObjectPlanetByValueBack")
 
     AccessObjectsPlanets.waitForRelease();
-    const auto ci = m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
-    if (ci != m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
+    const auto ci = m_ObjectsPlanetsByValue.getBuffer<BUFFER_QUADRUPLE_BACK>()->find(_nUID);
+    if (ci != m_ObjectsPlanetsByValue.getBuffer<BUFFER_QUADRUPLE_BACK>()->end())
     {
         return ci->second;
     }
@@ -506,8 +510,8 @@ CObjectPlanet* CWorldDataStorage::getObjectPlanetByValueFront(const UIDType _nUI
     METHOD_ENTRY("CWorldDataStorage::getObjectPlanetByValueFront")
 
     AccessObjectsPlanets.waitForRelease();
-    const auto ci = m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->find(_nUID);
-    if (ci != m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT)->end())
+    const auto ci = m_ObjectsPlanetsByValue.getBuffer<BUFFER_QUADRUPLE_FRONT>()->find(_nUID);
+    if (ci != m_ObjectsPlanetsByValue.getBuffer<BUFFER_QUADRUPLE_FRONT>()->end())
     {
         return ci->second;
     }
@@ -532,8 +536,8 @@ CParticle* CWorldDataStorage::getParticleByValueBack(const UIDType _nUID)
     METHOD_ENTRY("CWorldDataStorage::getParticleByValueBack")
 
     AccessParticles.waitForRelease();
-    const auto ci = m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->find(_nUID);
-    if (ci != m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->end())
+    const auto ci = m_ParticlesByValue.getBuffer<BUFFER_QUADRUPLE_BACK>()->find(_nUID);
+    if (ci != m_ParticlesByValue.getBuffer<BUFFER_QUADRUPLE_BACK>()->end())
     {
         return ci->second;
     }
@@ -609,9 +613,9 @@ bool CWorldDataStorage::addUIDUser(IUIDUser* _pUIDUser)
 {
     METHOD_ENTRY("CWorldDataStorage::addUIDUser")
 
-    if (_pUIDUser->getUID() >= m_UIDUsersByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->size())
+    if (_pUIDUser->getUID() >= m_UIDUsersByValue.getBuffer<BUFFER_QUADRUPLE_BACK>()->size())
     {
-        WARNING_MSG("World Data Storage", "Buffer too small, to many UID users, " <<
+        WARNING_MSG("World Data Storage", "Buffer too small, too many UID users, " <<
                                             "cannot add object."
         )
         return false;
@@ -633,19 +637,21 @@ void CWorldDataStorage::swapBack()
 {
     METHOD_ENTRY("CWorldDataStorage::swapBack")
 
-    std::lock_guard<std::mutex> lock(m_MutexFrontNew);
+    m_AccessFront.acquireLock();
     
-    m_ParticlesByName.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
-    m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
-    m_ParticlesByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
+    m_ParticlesByName.swap<BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT>();
+    m_ParticlesByValue.swap<BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT>();
+    m_ParticlesByValue.copyDeep<BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK>();
 
-    m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
-    m_ObjectsPlanetsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
-    m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT);
+    m_ObjectsByValue.swap<BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT>();
+    m_ObjectsPlanetsByValue.swap<BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT>();
+    m_UIDUsersByValue.swap<BUFFER_QUADRUPLE_MIDDLE_BACK, BUFFER_QUADRUPLE_MIDDLE_FRONT>();
     
-    m_ObjectsByValue.copyDeep(BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK);
+    m_ObjectsByValue.copyDeep<BUFFER_QUADRUPLE_BACK, BUFFER_QUADRUPLE_MIDDLE_BACK>();
     
     m_bFrontNew = true;
+    
+    m_AccessFront.releaseLock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -657,17 +663,19 @@ void CWorldDataStorage::swapFront()
 {
     METHOD_ENTRY("CWorldDataStorage::swapFront")
    
-    std::lock_guard<std::mutex> lock(m_MutexFrontNew);
+    m_AccessFront.acquireLock();
     
     if (m_bFrontNew)
     {
-        m_ParticlesByName.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
-        m_ParticlesByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
-        m_ObjectsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
-        m_ObjectsPlanetsByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
-        m_UIDUsersByValue.swap(BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT);
+        m_ParticlesByName.swap<BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT>();
+        m_ParticlesByValue.swap<BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT>();
+        m_ObjectsByValue.swap<BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT>();
+        m_ObjectsPlanetsByValue.swap<BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT>();
+        m_UIDUsersByValue.swap<BUFFER_QUADRUPLE_MIDDLE_FRONT, BUFFER_QUADRUPLE_FRONT>();
         m_bFrontNew = false;
     }
+    
+    m_AccessFront.releaseLock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -894,9 +902,9 @@ bool CWorldDataStorage::addUIDUser(const std::array<IUIDUser*, BUFFER_QUADRUPLE>
 {
     METHOD_ENTRY("CWorldDataStorage::addUIDUser")
 
-    if (_aUIDUser[0]->getUID() >= m_UIDUsersByValue.getBuffer(BUFFER_QUADRUPLE_BACK)->size())
+    if (_aUIDUser[0]->getUID() >= m_UIDUsersByValue.getBuffer<BUFFER_QUADRUPLE_BACK>()->size())
     {
-        WARNING_MSG("World Data Storage", "Buffer too small, to many UID users, " <<
+        WARNING_MSG("World Data Storage", "Buffer too small, too many UID users, " <<
                                             "cannot add object."
         )
         return false;
