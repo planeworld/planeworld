@@ -48,15 +48,9 @@ CWorldDataStorage::CWorldDataStorage() : m_pUniverse(nullptr),
     METHOD_ENTRY("CWorldDataStorage::CWorldDataStorage")
     CTOR_CALL("CWorldDataStorage::CWorldDataStorage")
     
+    // Setup a clean environment
     m_UIDUsersByValue.resizeBuffer(WDS_DEFAULT_UID_BUFFER_SIZE);
     m_UIDUsersByValue.fillBuffer(nullptr);
-    
-//     for (auto i=0u; i<m_UIDUsersByValue.getBufferSize(); ++i)
-//         m_UIDUsersByValue.getBuffer<i>()->resize(WDS_DEFAULT_UID_BUFFER_SIZE);
-//     
-//     // Setup a clean environment
-//     for (auto i=0u; i<m_UIDUsersByValue.getBufferSize(); ++i)
-//         std::fill(m_UIDUsersByValue.getBuffer(i)->begin(), m_UIDUsersByValue.getBuffer(i)->end(), nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,42 +86,44 @@ CWorldDataStorage::~CWorldDataStorage()
         }
     }
     
-//     for (auto i=0u; i<m_ObjectsByValue.getBufferSize(); ++i)
-//     {
-//         for (auto pObj : *m_ObjectsByValue.getBuffer(i))
-//         {
-//             // Free memory if pointer is still existent
-//             if (pObj.second != nullptr)
-//             {
-//                 delete pObj.second;
-//                 pObj.second = nullptr;
-//                 MEM_FREED("CObject")
-//             }
-//             else
-//             {
-//                 DOM_MEMF(DEBUG_MSG("CObject", "Memory already freed."))
-//             }
-//         }
-//     }
-//     
-//     for (auto i=0u; i<m_ParticlesByValue.getBufferSize(); ++i)
-//     {
-//         for (auto pParticle : *m_ParticlesByValue.getBuffer(i))
-//         {
-//             // Free memory if pointer is still existent
-//             if (pParticle.second != nullptr)
-//             {
-//                 delete pParticle.second;
-//                 pParticle.second = nullptr;
-//                 MEM_FREED("CParticle")
-//             }
-//             else
-//             {
-//                 DOM_MEMF(DEBUG_MSG("CParticle", "Memory already freed."))
-//             }
-//         }
-//     }
-//     
+    auto destroyObjects = [](const auto& Buffer)
+    {
+        for (auto Obj : *Buffer)
+        {
+            if (Obj.second != nullptr)
+            {
+                delete Obj.second;
+                Obj.second = nullptr;
+                MEM_FREED("CObject")
+            }
+        }
+        Buffer->clear();
+    };
+    
+    destroyObjects(m_ObjectsByValue.getBuffer<0>());
+    destroyObjects(m_ObjectsByValue.getBuffer<1>());
+    destroyObjects(m_ObjectsByValue.getBuffer<2>());
+    destroyObjects(m_ObjectsByValue.getBuffer<3>());
+    
+    auto destroyParticles = [](const auto& Buffer)
+    {
+        for (auto Particle: *Buffer)
+        {
+            if (Particle.second != nullptr)
+            {
+                delete Particle.second;
+                Particle.second = nullptr;
+                MEM_FREED("CParticle")
+            }
+        }
+        Buffer->clear();
+    };
+    
+    destroyParticles(m_ParticlesByValue.getBuffer<0>());
+    destroyParticles(m_ParticlesByValue.getBuffer<1>());
+    destroyParticles(m_ParticlesByValue.getBuffer<2>());
+    destroyParticles(m_ParticlesByValue.getBuffer<3>());
+
     for (auto pJoint : m_Joints)
     {
         // Free memory if pointer is still existent
