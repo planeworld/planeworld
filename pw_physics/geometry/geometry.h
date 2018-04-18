@@ -36,9 +36,7 @@
 #include "shape.h"
 
 //--- Standard header --------------------------------------------------------//
-#include <list>
-
-typedef std::list<CHandle<IShape>> ShapesType; ///< Specifies a list of  shapes
+typedef std::vector<CHandle<IShape>> ShapesType; ///< Specifies a list of  shapes
 
 /// Specifies the type of bounding box
 enum class AABBType
