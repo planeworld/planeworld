@@ -103,6 +103,7 @@ class CGeometry
         double          m_fMass;      ///< Mass of whole geometry
         bool            m_bAutoCOM;     ///< Indicates automatic computation of COM
         bool            m_bAutoInertia; ///< Indicates automatic computation of inertia
+        bool            m_bShapesValid; ///< Indicates if auto COM/mass/inertia is still valid
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
