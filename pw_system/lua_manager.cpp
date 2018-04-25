@@ -446,99 +446,93 @@ void CLuaManager::myInitComInterface()
     METHOD_ENTRY("CLuaManager::myInitComInterface")
 
     INFO_MSG("Lua Manager", "Initialising com interace.")
-    if (m_pComInterface != nullptr)
+    
+    // Events
+    m_pComInterface->registerEvent("e_lua_update",
+                                    "Update event of the lua main loop",
+                                    {{ParameterType::NONE, "No return value"}},
+                                    "system");
+    
+    // Callback to physics pause
+    std::function<void(void)> FuncPause =
+    [&]()
     {
-        // Events
-        m_pComInterface->registerEvent("e_lua_update",
-                                       "Update event of the lua main loop",
-                                       {{ParameterType::NONE, "No return value"}},
-                                       "system");
-        
-        // Callback to physics pause
-        std::function<void(void)> FuncPause =
-        [&]()
-        {
-            m_bPaused = true;
-        };
-        m_pComInterface->registerCallback("pause", FuncPause, "lua");
-        
-        // Callback to physics resume
-        std::function<void(void)> FuncResume =
-        [&]()
-        {
-            m_bPaused = false;
-        };
-        m_pComInterface->registerCallback("resume", FuncResume, "lua");
-        
-        // Callback to physics toggle pause
-        std::function<void(void)> FuncTogglePause =
-        [&]()
-        {
-            m_bPaused ^= 1;
-        };
-        m_pComInterface->registerCallback("toggle_pause", FuncTogglePause, "lua");
-        
-        // System package
-        m_pComInterface->registerFunction("get_frequency_lua",
-                                          CCommand<double>([&]() -> double {return this->m_fFrequency;}),
-                                          "Provides processing frequency of Lua module.",
-                                          {{ParameterType::DOUBLE, "Processing frequency of Lua module"}},
-                                           "system");
-        m_pComInterface->registerFunction("get_time_per_frame_lua",
-                                          CCommand<double>([&]() -> double {return this->getTimePerFrame();}),
-                                          "Return time available per frame (i.e. 1.0/Frequency).",
-                                          {{ParameterType::DOUBLE, "Time available per frame"}},
-                                           "system"
-                                         );
-        m_pComInterface->registerFunction("get_time_processed_lua",
-                                          CCommand<double>([&]() -> double {return m_TimeProcessed.getTime();}),
-                                          "Return time used for Lua processing.",
-                                          {{ParameterType::DOUBLE, "Time used for Lua processing"}},
-                                           "system"
-                                         );
-        m_pComInterface->registerFunction("execute_lua",
-                                          CCommand<void, std::string>([&](const std::string& _strS)
-                                          {
-                                              try
-                                              {
-                                                 m_LuaState.script(_strS.c_str());
-                                              }
-                                              catch (const std::exception& _E)
-                                              {
-                                                  ERROR_MSG("Lua Manager", _E.what())
-                                              }
-                                          }),
-                                          "Interpretes and executes given string in Lua.",
-                                          {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::STRING, "String to be executed"}},
-                                           "system", "lua");
-        m_pComInterface->registerFunction("register_lua_callback",
-                                          CCommand<void, std::string, std::string>([&](const std::string& _strFunc,
-                                                                                       const std::string& _strCallback)
-                                          {
-                                              this->registerCallback(_strFunc, _strCallback, "lua");
-                                          }),
-                                          "Register a Lua function as  callback.",
-                                          {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::STRING, "Name of function to attach callback to"},
-                                           {ParameterType::STRING, "Name of callback function"}},
-                                           "system", "lua");
-                                          // Callback registration has to be queued by com interface. Hence,
-                                          // a "register_callback" command has to be implemented
-        m_pComInterface->registerFunction("set_frequency_lua",
-                                          CCommand<void, double>([&](const double& _fFrequency)
-                                          {
-                                              this->setFrequency(_fFrequency);
-                                          }),
-                                          "Sets the frequency of the Lua thread.",
-                                          {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::DOUBLE, "Frequency"}},
-                                           "system", "lua");
-    }
-    else
+        m_bPaused = true;
+    };
+    m_pComInterface->registerCallback("pause", FuncPause, "lua");
+    
+    // Callback to physics resume
+    std::function<void(void)> FuncResume =
+    [&]()
     {
-        WARNING_MSG("Lua Manager", "Com interface not set, cannot register functions.")
-    }
+        m_bPaused = false;
+    };
+    m_pComInterface->registerCallback("resume", FuncResume, "lua");
+    
+    // Callback to physics toggle pause
+    std::function<void(void)> FuncTogglePause =
+    [&]()
+    {
+        m_bPaused ^= 1;
+    };
+    m_pComInterface->registerCallback("toggle_pause", FuncTogglePause, "lua");
+    
+    // System package
+    m_pComInterface->registerFunction("get_frequency_lua",
+                                        CCommand<double>([&]() -> double {return this->m_fFrequency;}),
+                                        "Provides processing frequency of Lua module.",
+                                        {{ParameterType::DOUBLE, "Processing frequency of Lua module"}},
+                                        "system");
+    m_pComInterface->registerFunction("get_time_per_frame_lua",
+                                        CCommand<double>([&]() -> double {return this->getTimePerFrame();}),
+                                        "Return time available per frame (i.e. 1.0/Frequency).",
+                                        {{ParameterType::DOUBLE, "Time available per frame"}},
+                                        "system"
+                                        );
+    m_pComInterface->registerFunction("get_time_processed_lua",
+                                        CCommand<double>([&]() -> double {return m_TimeProcessed.getTime();}),
+                                        "Return time used for Lua processing.",
+                                        {{ParameterType::DOUBLE, "Time used for Lua processing"}},
+                                        "system"
+                                        );
+    m_pComInterface->registerFunction("execute_lua",
+                                        CCommand<void, std::string>([&](const std::string& _strS)
+                                        {
+                                            try
+                                            {
+                                                m_LuaState.script(_strS.c_str());
+                                            }
+                                            catch (const std::exception& _E)
+                                            {
+                                                ERROR_MSG("Lua Manager", _E.what())
+                                            }
+                                        }),
+                                        "Interpretes and executes given string in Lua.",
+                                        {{ParameterType::NONE, "No return value"},
+                                        {ParameterType::STRING, "String to be executed"}},
+                                        "system", "lua");
+    m_pComInterface->registerFunction("register_lua_callback",
+                                        CCommand<void, std::string, std::string>([&](const std::string& _strFunc,
+                                                                                    const std::string& _strCallback)
+                                        {
+                                            this->registerCallback(_strFunc, _strCallback, "lua");
+                                        }),
+                                        "Register a Lua function as  callback.",
+                                        {{ParameterType::NONE, "No return value"},
+                                        {ParameterType::STRING, "Name of function to attach callback to"},
+                                        {ParameterType::STRING, "Name of callback function"}},
+                                        "system", "lua");
+                                        // Callback registration has to be queued by com interface. Hence,
+                                        // a "register_callback" command has to be implemented
+    m_pComInterface->registerFunction("set_frequency_lua",
+                                        CCommand<void, double>([&](const double& _fFrequency)
+                                        {
+                                            this->setFrequency(_fFrequency);
+                                        }),
+                                        "Sets the frequency of the Lua thread.",
+                                        {{ParameterType::NONE, "No return value"},
+                                        {ParameterType::DOUBLE, "Frequency"}},
+                                        "system", "lua");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

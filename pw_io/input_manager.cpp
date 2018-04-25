@@ -307,67 +307,61 @@ void CInputManager::myInitComInterface()
     METHOD_ENTRY("CInputManager::myInitComInterface")
 
     INFO_MSG("Input Manager", "Initialising com interace.")
-    if (m_pComInterface != nullptr)
-    {
-        // Events
-        m_pComInterface->registerEvent<int>("e_key_pressed",
-                                        "Event, indicating that a key was pressed.",
-                                        {{ParameterType::NONE, "No return value"},
-                                         {ParameterType::INT, "Key Code"}},
+    
+    // Events
+    m_pComInterface->registerEvent<int>("e_key_pressed",
+                                    "Event, indicating that a key was pressed.",
+                                    {{ParameterType::NONE, "No return value"},
+                                        {ParameterType::INT, "Key Code"}},
+                                    "system");
+    m_pComInterface->registerEvent<double,double>("e_resize",
+                                    "Event, indicating that the main window was resized.",
+                                    {{ParameterType::NONE, "No return value"},
+                                        {ParameterType::DOUBLE, "Size X"},
+                                        {ParameterType::DOUBLE, "Size_Y"}},
+                                    "system");
+    
+    // System package
+    m_pComInterface->registerFunction("get_input_frequency",
+                                        CCommand<double>([&]() -> double {return this->m_fFrequency;}),
+                                        "Provides processing frequency of Input module.",
+                                        {{ParameterType::DOUBLE, "Processing frequency of Input module"}},
                                         "system");
-        m_pComInterface->registerEvent<double,double>("e_resize",
-                                        "Event, indicating that the main window was resized.",
-                                        {{ParameterType::NONE, "No return value"},
-                                         {ParameterType::DOUBLE, "Size X"},
-                                         {ParameterType::DOUBLE, "Size_Y"}},
+    m_pComInterface->registerFunction("key_is_pressed",
+                                        CCommand<bool, int>([&](const int _nCode) -> bool
+                                        {
+                                            return sf::Keyboard::isKeyPressed(sf::Keyboard::Key(_nCode));
+                                        }),
+                                        "Indicates if given key is pressed.",
+                                        {{ParameterType::BOOL, "Is given key pressed?"},
+                                        {ParameterType::INT, "Key code"}},
                                         "system");
-        
-        // System package
-        m_pComInterface->registerFunction("get_input_frequency",
-                                          CCommand<double>([&]() -> double {return this->m_fFrequency;}),
-                                          "Provides processing frequency of Input module.",
-                                          {{ParameterType::DOUBLE, "Processing frequency of Input module"}},
-                                           "system");
-        m_pComInterface->registerFunction("key_is_pressed",
-                                          CCommand<bool, int>([&](const int _nCode) -> bool
-                                          {
-                                              return sf::Keyboard::isKeyPressed(sf::Keyboard::Key(_nCode));
-                                          }),
-                                          "Indicates if given key is pressed.",
-                                          {{ParameterType::BOOL, "Is given key pressed?"},
-                                           {ParameterType::INT, "Key code"}},
-                                           "system");
-        m_pComInterface->registerFunction("set_frequency_input",
-                                          CCommand<void, double>([&](const double& _fFrequency)
-                                          {
-                                              this->setFrequency(_fFrequency);
-                                          }),
-                                          "Sets the frequency of the input thread.",
-                                          {{ParameterType::NONE, "No return value"},
-                                           {ParameterType::DOUBLE, "Frequency"}},
-                                           "system", "input");
-        m_pComInterface->registerFunction("toggle_ui_mode",
-                                          CCommand<void>([&]()
-                                          {
-                                                if (m_UIMode == UIModeType::WORLD)
-                                                {
-                                                    m_UIMode = UIModeType::UI;
-                                                    m_pComInterface->call<void>("mouse_cursor_on");
-                                                }
-                                                else
-                                                {
-                                                    m_UIMode = UIModeType::WORLD;
-                                                    m_pComInterface->call<void>("mouse_cursor_off");
-                                                }
-                                                m_vecMouse.x=0;
-                                                m_vecMouse.y=0;
-                                          }),
-                                          "Toggles user interface mode (UI, WORLD)",
-                                          {{ParameterType::NONE, "No return value"}},
-                                           "system", "input");
-    }
-    else
-    {
-        WARNING_MSG("Input Manager", "Com interface not set, cannot register functions.")
-    }
+    m_pComInterface->registerFunction("set_frequency_input",
+                                        CCommand<void, double>([&](const double& _fFrequency)
+                                        {
+                                            this->setFrequency(_fFrequency);
+                                        }),
+                                        "Sets the frequency of the input thread.",
+                                        {{ParameterType::NONE, "No return value"},
+                                        {ParameterType::DOUBLE, "Frequency"}},
+                                        "system", "input");
+    m_pComInterface->registerFunction("toggle_ui_mode",
+                                        CCommand<void>([&]()
+                                        {
+                                            if (m_UIMode == UIModeType::WORLD)
+                                            {
+                                                m_UIMode = UIModeType::UI;
+                                                m_pComInterface->call<void>("mouse_cursor_on");
+                                            }
+                                            else
+                                            {
+                                                m_UIMode = UIModeType::WORLD;
+                                                m_pComInterface->call<void>("mouse_cursor_off");
+                                            }
+                                            m_vecMouse.x=0;
+                                            m_vecMouse.y=0;
+                                        }),
+                                        "Toggles user interface mode (UI, WORLD)",
+                                        {{ParameterType::NONE, "No return value"}},
+                                        "system", "input");
 }
