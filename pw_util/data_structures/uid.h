@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "spinlock.h"
 
 using UIDType = std::uint32_t;
 
@@ -87,7 +88,7 @@ class CUID
         static std::deque<UIDType> s_UnusedUIDs;        ///< Storage for unused / released IDs
         static std::unordered_map<UIDType, std::uint32_t> s_ReferencedUIDs; ///< Storage for reference counting of uids
         
-        static std::mutex m_Mtx;                        ///< Global mutex
+        static CSpinlock           s_Access;            ///< Global lock
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
