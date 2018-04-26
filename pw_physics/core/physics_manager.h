@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2017 Torsten Büschenfeld
+// Copyright (C) 2011-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ class CPhysicsManager : public IComInterfaceProvider,
         //--- Methods [private] ----------------------------------------------//
         void addGlobalForces();
         void collisionDetection();
-        void dynamics(int);
+        void dynamics(std::uint64_t);
         void myInitComInterface();
         void processQueues();
         void updateCells();

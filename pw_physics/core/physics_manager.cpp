@@ -432,7 +432,7 @@ bool CPhysicsManager::processFrame()
 {
     METHOD_ENTRY("CPhysicsManager::processFrame")
 
-    static auto nFrame = 0u;
+    static std::uint64_t nFrame = 0u;
     
     for (const auto Obj : *m_pDataStorage->getObjectsByValueBack())
         Obj.second->clearForces();
@@ -457,7 +457,6 @@ bool CPhysicsManager::processFrame()
     m_pDataStorage->swapBack();
     m_TimeProcessedBufferCopy.stop();
     DEBUG_BLK(Log.setLoglevel(LOG_LEVEL_DEBUG);)
-    if (++nFrame == 10000) nFrame = 0;
 
     return true;
 }
@@ -550,7 +549,7 @@ void CPhysicsManager::collisionDetection()
 /// \brief Dynamics processing the masses
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CPhysicsManager::dynamics(int nTest)
+void CPhysicsManager::dynamics(std::uint64_t _nStep)
 {
     METHOD_ENTRY("CPhysicsManager::dynamics")
     
@@ -588,7 +587,7 @@ void CPhysicsManager::dynamics(int nTest)
         Obj.second->transform();
     }
     m_TimeProcessedObjects.stop();
-//     if (nTest % static_cast<int>(m_fFrequency/m_fFrequencyParticle) == 0)
+//     if (_nStep % static_cast<int>(m_fFrequency/m_fFrequencyParticle) == 0)
     {
         
         m_TimeProcessedParticles.start();
