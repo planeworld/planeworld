@@ -314,10 +314,10 @@ void CParticle::copy(const CParticle& _Particle)
 
 SERIALIZE_IMPL(CParticle,
     SERIALIZE("positions", &m_PosList);
-    SERIALIZE("positions", &m_PosListPrev);
-    SERIALIZE("positions", &m_VelList);
-    SERIALIZE("positions", &m_AgeList);
-    SERIALIZE("positions", &m_StateList);
+    SERIALIZE("positions_prev", &m_PosListPrev);
+    SERIALIZE("velocities", &m_VelList);
+    SERIALIZE("age", &m_AgeList);
+    SERIALIZE("state", &m_StateList);
     SERIALIZE("bounding_box", &m_BBox)
     SERIALIZE("particle_type", s_ParticleTypeToStringMap.at(m_ParticleType))
     SERIALIZE("time_factor", m_fTimeFac)
