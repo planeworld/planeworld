@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2016 Torsten Büschenfeld
+// Copyright (C) 2010-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -178,60 +178,14 @@ void CBoundingBox::update(const Vector2d& _vecPoint)
     else if (_vecPoint[1] > m_vecUpperRight[1]) m_vecUpperRight[1] = _vecPoint[1];
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Input stream for game state information
-///
-/// \param _is  Source stream
-/// \param _BBox CBoundingBox instance to stream
-///
-/// \return Remaining stream with game state information
-///
-////////////////////////////////////////////////////////////////////////////////
-std::istream& operator>>(std::istream& _is, CBoundingBox& _BBox)
-{
-    METHOD_ENTRY("CBoundingBox::operator>>")
-    
-    std::string strTmp;
-    _is >> strTmp;
-    
-    _is >> _BBox.m_vecLowerLeft[0];
-    _is >> _BBox.m_vecLowerLeft[1];
-    _is >> _BBox.m_vecUpperRight[0];
-    _is >> _BBox.m_vecUpperRight[1];
-    
+SERIALIZE_IMPL(CBoundingBox,
+    SERIALIZE("lower_left_x", m_vecLowerLeft[0])
+    SERIALIZE("lower_left_y", m_vecLowerLeft[1])
+    SERIALIZE("lower_left_x", m_vecUpperRight[0])
+    SERIALIZE("lower_left_x", m_vecUpperRight[1])
     // From IGridUser:
-    _is >> _BBox.m_vecCell[0];
-    _is >> _BBox.m_vecCell[1];
+    SERIALIZE("cell_x", m_vecCell[0])
+    SERIALIZE("cell_y", m_vecCell[1])
+)
 
-    return _is;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Output stream for game state information
-///
-/// \param _os  Source stream
-/// \param _BBox CBoundingBox instance to stream
-///
-/// \return Stream with game state information of CBoundingBox instance
-///
-////////////////////////////////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream& _os, CBoundingBox& _BBox)
-{
-    METHOD_ENTRY("CBoundingBox::operator<<")
-    
-    _os << "BoundingBox:" << std::endl;
-    
-    _os << _BBox.m_vecLowerLeft[0] << " " <<
-           _BBox.m_vecLowerLeft[1] << std::endl;
-    _os << _BBox.m_vecUpperRight[0] << " " <<
-           _BBox.m_vecUpperRight[1] << std::endl;
-    
-    // From IGridUser:
-    _os << _BBox.m_vecCell[0] << " " <<
-           _BBox.m_vecCell[1] << std::endl;
-        
-    return _os;
-}
     

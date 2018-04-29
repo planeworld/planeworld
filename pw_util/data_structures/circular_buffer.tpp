@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -441,3 +441,12 @@ void CCircularBuffer<T>::copy(const CCircularBuffer<T>& _Buf)
     m_Buffer = _Buf.m_Buffer;
     m_Buffer.resize(m_nCapacity);
 }
+
+template<class T>
+SERIALIZE_IMPL(CCircularBuffer<T>,
+    SERIALIZE("capacity", m_nCapacity)
+    SERIALIZE("begin", m_nBegin)
+    SERIALIZE("end", m_nEnd)
+    SERIALIZE("size", m_nSize)
+    SERIALIZE_UNARY("buffer", m_Buffer)
+)

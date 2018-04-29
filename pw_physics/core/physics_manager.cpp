@@ -2162,8 +2162,8 @@ void CPhysicsManager::updateCells()
                         m_fTimeAccel *
                         m_pDataStorage->getObjectsByValueBack()->size()/DEFAULT_CELL_SIZE_2;
                         
-    double      fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
-    uint32_t    nNrOfObj = static_cast<int>(fNrOfObj);
+    double          fNrOfObj = fFreq/m_fFrequency + m_fCellUpdateResidual;
+    std::uint32_t   nNrOfObj = static_cast<std::uint32_t>(fNrOfObj);
 
     if (nNrOfObj > m_pDataStorage->getObjectsByValueBack()->size())
         nNrOfObj = m_pDataStorage->getObjectsByValueBack()->size();

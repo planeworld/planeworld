@@ -427,8 +427,8 @@ std::istream& operator>>(std::istream& _is, CKinematicsState& _KS)
     std::string strTmp;
     _is >> strTmp;
     
-    // From IUIDUser
-    _is >> _KS.m_UID;
+//     // From IUIDUser
+//     _is >> _KS.m_UID;
     
     // From IUIDReferrer
 //     _is >> _KS.m_hKinStateRef.setUID();
@@ -464,8 +464,8 @@ std::ostream& operator<<(std::ostream& _os, CKinematicsState& _KS)
     
     _os << "KinematicsState:" << std::endl;
     
-    // From IUIDUser
-    _os << _KS.m_UID << std::endl;
+//     // From IUIDUser
+//     _os << _KS.m_UID << std::endl;
     
     // From IUIDReferrer
     _os << _KS.m_hKinStateRef.getUID() << std::endl;

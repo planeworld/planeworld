@@ -41,6 +41,7 @@
 #include "joint.h"
 #include "multi_buffer.h"
 #include "spinlock.h"
+#include "serializable.h"
 #include "uid_user.h"
 #include "universe.h"
 
@@ -95,7 +96,7 @@ const std::uint16_t WDS_DEFAULT_UID_BUFFER_SIZE = 32768; ///< Default size of va
 /// \brief Class that stores all physics data
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CWorldDataStorage
+class CWorldDataStorage : public ISerializable
 {
     
     public:
@@ -168,6 +169,8 @@ class CWorldDataStorage
         CSpinlock AccessParticles;
         CSpinlock AccessShapes;
         CSpinlock AccessThrusters;
+        
+        SERIALIZE_DECL
         
     private:
         

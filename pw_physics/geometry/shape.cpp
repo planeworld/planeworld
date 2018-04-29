@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -90,10 +90,10 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
     std::string strTmp;
     _is >> strTmp;
     
-    // From IUIDUser
-    _is >> _pShape->m_UID;
+//     // From IUIDUser
+//     _is >> _pShape->m_UID;
     
-    _is >> _pShape->m_AABB;
+//     _is >> _pShape->m_AABB;
     _is >> _pShape->m_bIsValid;
     _is >> _pShape->m_fArea;
     _is >> _pShape->m_fInertia;
@@ -127,10 +127,10 @@ std::ostream& operator<<(std::ostream& _os, IShape* const _pShape)
 
     _os << "Shape:" << std::endl;
     
-    // From IUIDUser
-    _os << _pShape->m_UID << std::endl;
-    
-    _os << _pShape->m_AABB << std::endl;
+//     // From IUIDUser
+//     _os << _pShape->m_UID << std::endl;
+//     
+//     _os << _pShape->m_AABB << std::endl;
     _os << _pShape->m_bIsValid << std::endl;
     _os << _pShape->m_fArea << std::endl;
     _os << _pShape->m_fInertia << std::endl;

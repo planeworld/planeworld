@@ -183,55 +183,6 @@ void CUID::setNewID()
     s_Access.releaseLock();
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Input stream for game state information
-///
-/// \param _is  Source stream
-/// \param _UID CUID instance to stream
-///
-/// \return Remaining stream with game state information
-///
-////////////////////////////////////////////////////////////////////////////////
-std::istream& operator>>(std::istream& _is, CUID& _UID)
-{
-    METHOD_ENTRY("CUID::operator>>")
-    
-    std::string strTmp;
-    _is >> strTmp;
-    
-    /// \todo Stream static members (queue and uid counter)
-    _is >> _UID.m_nUID;
-    _is >> _UID.s_nUID;
-    _is >> _UID.m_strName;
-    
-    return _is;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Output stream for game state information
-///
-/// \param _os  Source stream
-/// \param _UID CUID instance to stream
-///
-/// \return Stream with game state information of CUID instance
-///
-////////////////////////////////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream& _os, CUID& _UID)
-{
-    METHOD_ENTRY("CUID::operator<<")
-    
-    _os << "UID:" << std::endl;
-    
-    /// \todo Stream static members (queue and uid counter)
-    _os << _UID.m_nUID << std::endl;
-    _os << _UID.s_nUID << std::endl;
-    _os << _UID.m_strName << std::endl;
-    
-    return _os;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Copy data from given UID
@@ -247,4 +198,10 @@ void CUID::copy(const CUID& _UID)
     m_strName = _UID.m_strName;
     s_ReferencedUIDs[_UID.m_nUID] += 1u;
 }
+
+SERIALIZE_IMPL(CUID,
+    SERIALIZE("uid_value", m_nUID)
+    SERIALIZE("uid_value_max", s_nUID)
+    SERIALIZE("uid_name", m_strName)
+)
 

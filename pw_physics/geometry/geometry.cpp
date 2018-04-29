@@ -285,8 +285,8 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
 
     std::string strTmp;
     _is >> strTmp;
-    _is >> _Geo.m_AABB;
-    _is >> _Geo.m_AABBS;
+//     _is >> _Geo.m_AABB;
+//     _is >> _Geo.m_AABBS;
     _is >> _Geo.m_vecCOM[0] >> _Geo.m_vecCOM[1];
     _is >> _Geo.m_fInertia;
     _is >> _Geo.m_fMass;
@@ -333,8 +333,8 @@ std::ostream& operator<<(std::ostream& _os, CGeometry& _Geo)
     METHOD_ENTRY("CGeometry::operator<<")
 
     _os << "Geometry:" << std::endl;
-    _os << _Geo.m_AABB << std::endl;
-    _os << _Geo.m_AABBS << std::endl;
+//     _os << _Geo.m_AABB << std::endl;
+//     _os << _Geo.m_AABBS << std::endl;
     _os << _Geo.m_vecCOM << " " << _Geo.m_vecCOM << std::endl;
     _os << _Geo.m_fInertia << std::endl;
     _os << _Geo.m_fMass << std::endl;

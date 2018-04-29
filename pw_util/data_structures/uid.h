@@ -39,6 +39,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
 #include "spinlock.h"
+#include "serializable.h"
 
 using UIDType = std::uint32_t;
 
@@ -47,7 +48,7 @@ using UIDType = std::uint32_t;
 /// \brief Class that manages a unique ID to identify objects etc.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CUID
+class CUID : public ISerializable
 {
     
     public:
@@ -71,10 +72,6 @@ class CUID
         static const std::deque<UIDType>& getUnusedUIDs();
         static const std::unordered_map<UIDType, std::uint32_t>& getReferencedUIDs();
         
-        //--- friends --------------------------------------------------------//
-        friend std::istream&    operator>>(std::istream&, CUID&);
-        friend std::ostream&    operator<<(std::ostream&, CUID&);
-                
     private:
         
         //--- Methods [private] ----------------------------------------------//
@@ -89,6 +86,8 @@ class CUID
         static std::unordered_map<UIDType, std::uint32_t> s_ReferencedUIDs; ///< Storage for reference counting of uids
         
         static CSpinlock           s_Access;            ///< Global lock
+        
+        SERIALIZE_DECL
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

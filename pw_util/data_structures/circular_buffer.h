@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "serializable.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -43,7 +44,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-class CCircularBuffer
+class CCircularBuffer : public ISerializable
 {
     
     public:
@@ -74,7 +75,7 @@ class CCircularBuffer
         friend std::istream&    operator>>(std::istream&, CCircularBuffer<U>&);
         template <class U>
         friend std::ostream&    operator<<(std::ostream&, const CCircularBuffer<U>&);
-                
+        
     private:
         
         //--- Methods [private] ----------------------------------------------//
@@ -86,6 +87,8 @@ class CCircularBuffer
         size_t              m_nEnd =  0;        ///< Index for last buffer entry
         size_t              m_nSize = 0;        ///< Size from begin to end of buffer
         std::vector<T>      m_Buffer;           ///< Buffer to store U elements of type T
+        
+        SERIALIZE_DECL
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
