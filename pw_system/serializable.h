@@ -57,73 +57,263 @@ class ISerializable
         
 
         //--- Methods --------------------------------------------------------//
-        static void setSerializer(ISerializer* const _pSerializer)
-        {
-            METHOD_ENTRY("ISerializable::setSerializer")
-            s_pSerializer = _pSerializer;
-        }
-        void serialize(const std::string& _strDescr) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-            s_pSerializer->serialize(_strDescr);
-            this->mySerialize(_strDescr);
-        }
+        static void setSerializer(ISerializer* const _pSerializer);
+
+        void serialize(const std::string& _strDescr) const;
         
     protected:
         
         virtual void mySerialize(const std::string&) const {}
 
-        void serialize(const std::string& _strDescr, const ISerializable* const _pSerializable) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-            _pSerializable->serialize(_strDescr);
-        }
-        void serialize(const std::string& _strDescr, bool _bB) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-//             DOM_DEV
-            s_pSerializer->serialize(_strDescr, _bB);
-        }
-        void serialize(const std::string& _strDescr, double _fD) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-            s_pSerializer->serialize(_strDescr, _fD);
-        }
-        void serialize(const std::string& _strDescr, int _nI) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-            s_pSerializer->serialize(_strDescr, _nI);
-        }
-        void serialize(const std::string& _strDescr, unsigned int _unI) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-            s_pSerializer->serialize(_strDescr, _unI);
-        }
-        void serialize(const std::string& _strDescr, std::size_t _nI) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-            s_pSerializer->serialize(_strDescr, _nI);
-        }
-        void serialize(const std::string& _strDescr, const std::string& _strS) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-            s_pSerializer->serialize(_strDescr, _strS);
-        }
-        void serialize(const std::string& _strDescr, const Vector2d& _vecV) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-            s_pSerializer->serialize(_strDescr, _vecV);
-        }
-        void serialize(const std::string& _strDescr, const Vector2i& _vecV) const
-        {
-            METHOD_ENTRY("ISerializable::serialize")
-            s_pSerializer->serialize(_strDescr, _vecV);
-        }
+        void serialize(const std::string&, const ISerializable* const) const;
+        void serialize(const std::string&, bool) const;
+        void serialize(const std::string&, double) const;
+        void serialize(const std::string&, int) const;
+        void serialize(const std::string&, unsigned int) const;
+        void serialize(const std::string&, std::size_t) const;
+        void serialize(const std::string&, const std::string&) const;
+        void serialize(const std::string&, const Vector2d&) const;
+        void serialize(const std::string&, const Vector2i&) const;
     
         static ISerializer* s_pSerializer; ///< Serializer to be used
         
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Set serializer
+///
+/// \param _pSerializer Serializer to use for serialization
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::setSerializer(ISerializer* const _pSerializer)
+{
+    METHOD_ENTRY("ISerializable::setSerializer")
+    s_pSerializer = _pSerializer;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize this object
+///
+/// \param _strDescr Description of serialized object
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    
+    s_pSerializer->serialize(_strDescr);
+    this->mySerialize(_strDescr);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize given serializable
+///
+/// \param _strDescr Description of serialized object
+/// \param _pSerializable Serializable to serialize
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr, const ISerializable* const _pSerializable) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    _pSerializable->serialize(_strDescr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize given bool
+///
+/// \param _strDescr Description of serialized object
+/// \param _bB Bool to serialize
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr, bool _bB) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    s_pSerializer->serialize(_strDescr, _bB);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize given double
+///
+/// \param _strDescr Description of serialized object
+/// \param _fD Double to serialize
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr, double _fD) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    s_pSerializer->serialize(_strDescr, _fD);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize given integer
+///
+/// \param _strDescr Description of serialized object
+/// \param _nI Integer to serialize
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr, int _nI) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    s_pSerializer->serialize(_strDescr, _nI);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize given unsigned integer
+///
+/// \param _strDescr Description of serialized object
+/// \param _unI Unsigned integer to serialize
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr, unsigned int _unI) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    s_pSerializer->serialize(_strDescr, _unI);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize given size_t
+///
+/// \param _strDescr Description of serialized object
+/// \param _nI size_t to serialize
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr, std::size_t _nI) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    s_pSerializer->serialize(_strDescr, _nI);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize given string
+///
+/// \param _strDescr Description of serialized object
+/// \param _strS String to serialize
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr, const std::string& _strS) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    s_pSerializer->serialize(_strDescr, _strS);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize given vector
+///
+/// \param _strDescr Description of serialized object
+/// \param _vecV Vector to serialize
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr, const Vector2d& _vecV) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    s_pSerializer->serialize(_strDescr, _vecV);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Serialize given vector
+///
+/// \param _strDescr Description of serialized object
+/// \param _vecV Vector to serialize
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void ISerializable::serialize(const std::string& _strDescr, const Vector2i& _vecV) const
+{
+    METHOD_ENTRY("ISerializable::serialize")
+    DOM_DEV
+    (
+        if (s_pSerializer == nullptr)
+        {
+            WARNING_MSG("Serializable", "Serializer not defined, use <setSerializer>.")
+            return;
+        }
+    )
+    s_pSerializer->serialize(_strDescr, _vecV);
+}
 
 #endif // SERIALIZABLE_H
