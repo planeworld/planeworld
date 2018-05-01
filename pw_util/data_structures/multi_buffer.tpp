@@ -410,3 +410,30 @@ void CMultiBuffer<N, TContainer, TKey, TVal>::swap()
     METHOD_ENTRY("CMultiBuffer::swap")
     std::swap(m_BufferRef[I], m_BufferRef[J]);
 }
+
+
+SERIALIZE_IMPL_T(template<std::uint8_t N COMMA class T>,
+                 CMultiBuffer<N COMMA T>,
+    for (const auto& Buf : m_Buffer)
+    {
+        SERIALIZE("buffer", Buf)
+    }
+)
+
+
+SERIALIZE_IMPL_T(template<std::uint8_t N COMMA class TContainer COMMA class TVal>,
+                 CMultiBuffer<N COMMA TContainer COMMA TVal>,
+    for (const auto& Buf : m_Buffer)
+    {
+        SERIALIZE_UNARY("buffer", Buf)
+    }
+)
+
+
+SERIALIZE_IMPL_T(template<std::uint8_t N COMMA class TContainer COMMA class TKey COMMA class TVal>,
+                 CMultiBuffer<N COMMA TContainer COMMA TKey COMMA TVal>,
+    for (const auto& Buf : m_Buffer)
+    {
+        SERIALIZE_BINARY("key", "value", Buf)
+    }
+)

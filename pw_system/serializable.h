@@ -63,7 +63,7 @@ class ISerializable
         
     protected:
         
-        virtual void mySerialize(const std::string&) const {}
+        virtual void mySerialize() const {}
 
         void serialize(const std::string&, const ISerializable* const) const;
         void serialize(const std::string&, bool) const;
@@ -114,7 +114,7 @@ inline void ISerializable::serialize(const std::string& _strDescr) const
     )
     
     s_pSerializer->serialize(_strDescr);
-    this->mySerialize(_strDescr);
+    this->mySerialize();
 }
 
 

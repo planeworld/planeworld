@@ -105,11 +105,12 @@ CWorldDataStorage::~CWorldDataStorage()
     destroyObjects(m_ObjectsByValue.getBuffer<2>());
     destroyObjects(m_ObjectsByValue.getBuffer<3>());
     
-    #include "serializable.h"
     #include "serializer_basic.h"
 
     CSerializerBasic Serializer;
     ISerializable::setSerializer(&Serializer);
+    
+    SERIALIZE("particles", &m_ParticlesByValue)
     
     auto destroyParticles = [&](const auto& Buffer)
     {
@@ -117,9 +118,6 @@ CWorldDataStorage::~CWorldDataStorage()
         {
             if (Particle.second != nullptr)
             {
-                SERIALIZE("particle", Particle.second)
-//                 Particle.second->serialize("particle");
-                
                 delete Particle.second;
                 Particle.second = nullptr;
                 MEM_FREED("CParticle")
@@ -923,6 +921,6 @@ bool CWorldDataStorage::addUIDUser(const std::array<IUIDUser*, BUFFER_QUADRUPLE>
 }
 
 SERIALIZE_IMPL(CWorldDataStorage,
-//     SERIALIZE("particles", &m_ParticlesByValue)
+    SERIALIZE("particles", &m_ParticlesByValue)
 )
 

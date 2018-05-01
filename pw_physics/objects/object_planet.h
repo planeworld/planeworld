@@ -34,6 +34,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "object.h"
 #include "planet.h"
+#include "serializable.h"
 
 //--- Standard header --------------------------------------------------------//
 
@@ -62,7 +63,8 @@
 /// \f$\Delta h\f$: \f$h_1 - h_0\f$
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CObjectPlanet : public CObject
+class CObjectPlanet : public CObject,
+                      public ISerializable
 {
     
     public:
@@ -96,11 +98,11 @@ class CObjectPlanet : public CObject
         void copy(const CObjectPlanet&);
 
         //-- Variables [protected] -------------------------------------------//
-//         CHandle<CPlanet> m_hPlanetShape;        ///< Planetary surface, default shape
-        
         double m_fAtmosphericPressure = 1.0e5;  ///< 100 kPa, approximatly atmospheric pressure on earth
         double m_fRadius = 1.0e6;               ///< Arbitrary number, much larger than that of non-celestial objects
         double m_fScaleHeight = 1.0e4;          ///< Arbitrary number, every km pressure is reduced by factor \f$e ~= 2.7\f$
+        
+        SERIALIZE_DECL
         
 };
 

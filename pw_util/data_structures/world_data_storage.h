@@ -170,8 +170,6 @@ class CWorldDataStorage : public ISerializable
         CSpinlock AccessShapes;
         CSpinlock AccessThrusters;
         
-        SERIALIZE_DECL
-        
     private:
         
         //--- Methods [private] ----------------------------------------------//
@@ -197,6 +195,8 @@ class CWorldDataStorage : public ISerializable
         CSpinlock                   m_AccessFront;              ///< Spinlock for thread safety when swapping
         bool                        m_bFrontNew;                ///< Indicates new information for front buffer
         double                      m_fTimeScale;               ///< Factor for global acceleration of time
+        
+        SERIALIZE_DECL
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

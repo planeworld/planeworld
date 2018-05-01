@@ -35,19 +35,27 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \def USE_SERIALIZATION
+/// \def COMMA
+///         Define a comma which is needed for templates
+/// \def SERIALIZE_DECL
 ///         Macro to use overloaded method for serialisation within the header
+/// \def SERIALIZE_IMPL
+///         Macro for declaration of serialisation
 /// \def SERIALIZE(a, b)
 ///         Macro serializing the given object
 /// \def SERIALIZE_UNARY(a, b)
 ///         Macro serializing the given object (unary container)
+/// \def SERIALIZE_BINARY(a, b)
+///         Macro serializing the given object (binary container)
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#define SERIALIZE_DECL void mySerialize(const std::string&) const override;
+#define COMMA ,
+#define SERIALIZE_DECL void mySerialize() const override;
+#define SERIALIZE_IMPL(a, b) void a::mySerialize() const {b}
+#define SERIALIZE_IMPL_T(a, b, c) a void b::mySerialize() const {c}
 #define SERIALIZE(a, b) ISerializable::serialize(a, b);
 #define SERIALIZE_UNARY(a, b) for (const auto& Elem : b) ISerializable::serialize(a, Elem);
-
-#define SERIALIZE_IMPL(c, d) void c::mySerialize(const std::string& _strDescr) const {d}
+#define SERIALIZE_BINARY(a, b, c) for (const auto& Elem : c) { ISerializable::serialize(a, Elem.first); ISerializable::serialize(b, Elem.second); }
 
 #endif // SERIALIZE_MACROS_H

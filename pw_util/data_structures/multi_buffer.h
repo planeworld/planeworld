@@ -36,6 +36,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "serializable.h"
 
 
 //--- Constants for readable access ------------------------------------------//
@@ -71,7 +72,7 @@ class CMultiBuffer{};
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template<std::uint8_t N, class T>
-class CMultiBuffer<N,T>
+class CMultiBuffer<N,T> : public ISerializable
 {
     
     public:
@@ -96,29 +97,25 @@ class CMultiBuffer<N,T>
         template<std::uint8_t I, std::uint8_t J>
         void swap();
 
-//         //--- friends --------------------------------------------------------//
-//         template <class U>
-//         friend std::istream&    operator>>(std::istream&, CMultiBuffer<U>&);
-//         template <class U>
-//         friend std::ostream&    operator<<(std::ostream&, const CMultiBuffer<U>&);
-                
     private:
-        
+
         //--- Variables [private] --------------------------------------------//
         std::array<T*,N>    m_BufferRef;    ///< References to buffers
         std::array<T ,N>    m_Buffer;       ///< Buffers
+        
+        SERIALIZE_DECL
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class that implements a triple buffer
+/// \brief Class that implements a multi buffer
 ///
 /// This is a specialisation for unary containers that implement push_back,
 /// e.g. std::vector
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template<std::uint8_t N, class TContainer, class TVal>
-class CMultiBuffer<N, TContainer, TVal>
+class CMultiBuffer<N, TContainer, TVal> : public ISerializable
 {
     
     public:
@@ -146,18 +143,14 @@ class CMultiBuffer<N, TContainer, TVal>
         void setAt(const std::uint32_t, const std::array<TVal, N>&);
         template<std::uint8_t I, std::uint8_t J>
         void swap();
-
-//         //--- friends --------------------------------------------------------//
-//         template <class U>
-//         friend std::istream&    operator>>(std::istream&, CMultiBuffer<U>&);
-//         template <class U>
-//         friend std::ostream&    operator<<(std::ostream&, const CMultiBuffer<U>&);
                 
     private:
         
         //--- Variables [private] --------------------------------------------//
         std::array<TContainer*,N>   m_BufferRef;    ///< References to buffers
         std::array<TContainer ,N>   m_Buffer;       ///< Buffers
+        
+        SERIALIZE_DECL
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +162,7 @@ class CMultiBuffer<N, TContainer, TVal>
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template<std::uint8_t N, class TContainer, class TKey, class TVal>
-class CMultiBuffer<N, TContainer, TKey, TVal>
+class CMultiBuffer<N, TContainer, TKey, TVal> : public ISerializable
 {
     
     public:
@@ -197,17 +190,13 @@ class CMultiBuffer<N, TContainer, TKey, TVal>
         template<std::uint8_t I, std::uint8_t J>
         void swap();
 
-//         //--- friends --------------------------------------------------------//
-//         template <class U>
-//         friend std::istream&    operator>>(std::istream&, CMultiBuffer<U>&);
-//         template <class U>
-//         friend std::ostream&    operator<<(std::ostream&, const CMultiBuffer<U>&);
-                
     private:
         
         //--- Variables [private] --------------------------------------------//
         std::array<TContainer*,N>   m_BufferRef;    ///< References to buffers
         std::array<TContainer ,N>   m_Buffer;       ///< Buffers
+        
+        SERIALIZE_DECL
 };
 
 

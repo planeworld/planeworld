@@ -108,3 +108,7 @@ void CObjectPlanet::copy(const CObjectPlanet& _ObjPl)
     m_fRadius = _ObjPl.m_fRadius;
     m_fScaleHeight = _ObjPl.m_fScaleHeight;
 }
+
+SERIALIZE_IMPL(CObjectPlanet,
+    
+)
