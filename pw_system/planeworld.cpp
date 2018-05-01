@@ -318,6 +318,7 @@ int main(int argc, char *argv[])
     pLuaManager->initComInterface(&ComInterface, "lua");
     pPhysicsManager->initComInterface(&ComInterface, "physics");
     pVisualsManager->initComInterface(&ComInterface, "visuals");
+    GameStateManager.initComInterface(&ComInterface, "gamestate");
     
     //////////////////////////////////////////////////////////////////////////// 
     //
@@ -394,6 +395,7 @@ int main(int argc, char *argv[])
                 
             //--- Call Commands from com interface ---//
             ComInterface.callWriters("main");
+            ComInterface.callWriters("gamestate");
         }
         #ifdef PW_MULTITHREADING
             pVisualsManager->terminate();

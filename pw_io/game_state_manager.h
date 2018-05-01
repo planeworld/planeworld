@@ -32,6 +32,7 @@
 #define GAME_STATE_MANAGER_H
 
 //--- Program header ---------------------------------------------------------//
+#include "com_interface_provider.h"
 #include "log.h"
 #include "serializer_basic.h"
 #include "world_data_storage_user.h"
@@ -40,31 +41,61 @@
 
 //--- Misc. header -----------------------------------------------------------//
 
+constexpr auto PW_FILENAME_DEFAULT = "pw_simstate";
+
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Class for loading and saving the game state
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CGameStateManager : public IWorldDataStorageUser
+class CGameStateManager : public IComInterfaceProvider,
+                          public IWorldDataStorageUser
 {
     
     public:
     
         //--- Constructor/Destructor -----------------------------------------//
         CGameStateManager();
-        CGameStateManager(const CGameStateManager());
 
         //--- Constant methods -----------------------------------------------//
-        bool load() const;
-        bool save() const;
-        
+        bool load(const std::string& = "") const;
+                
         //--- Methods --------------------------------------------------------//
-        
+        bool save(const std::string& = "");
 
     private:
+        
+        void myInitComInterface() override final
+        {
+            METHOD_ENTRY("CPhysicsManager::myInitComInterface")
+
+            INFO_MSG("Game State Manager", "Initialising com interace.")
+            
+            m_pComInterface->registerFunction("load",
+                                        CCommand<void,std::string>([&](const std::string& _strFile)
+                                        {
+                                            this->load(_strFile);
+                                        }),
+                                        "Loads simulation state from given file.",
+                                        {{ParameterType::NONE, "No return value"},
+                                        {ParameterType::STRING, "File to load simulation state from"}},
+                                        "system", "gamestate"
+                                        );
+            m_pComInterface->registerFunction("save",
+                                        CCommand<void,std::string>([&](const std::string& _strFile)
+                                        {
+                                            this->save(_strFile);
+                                        }),
+                                        "Saves simulation state to given file.",
+                                        {{ParameterType::NONE, "No return value"},
+                                        {ParameterType::STRING, "File to save simulation state to"}},
+                                        "system", "gamestate"
+                                        );
+        }
 
         //--- Variables ------------------------------------------------------//
-        CSerializerBasic m_Serializer; ///< Serializer for saving simulation state
+        CSerializerBasic    m_Serializer; ///< Serializer for saving simulation state
+        std::string         m_strLastFilename; ///< Last filename used for saving
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

@@ -50,7 +50,6 @@ class IComInterfaceProvider
    
         //--- Constructor/Destructor -----------------------------------------//
         IComInterfaceProvider() : m_pComInterface(nullptr){}
-        virtual ~IComInterfaceProvider() {}
 
         //--- Methods --------------------------------------------------------//
         void initComInterface(CComInterface* const, const std::string&);
