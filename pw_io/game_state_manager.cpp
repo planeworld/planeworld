@@ -155,6 +155,8 @@ bool CGameStateManager::save(const std::string& _strFile)
     /// \todo Use std::numeric_limits to set precision
     Filestream << std::setprecision(17) << std::setw(25) << "Test: Serializer should fill this. " << std::endl;
     
+    ISerializable::serialize("world_data", m_pDataStorage);
+    
     // Only close an open stream
     if (Filestream.is_open())
     {

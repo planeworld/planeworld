@@ -40,7 +40,9 @@
 /// \def SERIALIZE_DECL
 ///         Macro to use overloaded method for serialisation within the header
 /// \def SERIALIZE_IMPL
-///         Macro for declaration of serialisation
+///         Macro for implementation of serialisation method
+/// \def SERIALIZE_IMPL_T
+///         Macro for implementation of serialisation method using templates
 /// \def SERIALIZE(a, b)
 ///         Macro serializing the given object
 /// \def SERIALIZE_UNARY(a, b)

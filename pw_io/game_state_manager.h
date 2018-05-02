@@ -49,6 +49,7 @@ constexpr auto PW_FILENAME_DEFAULT = "pw_simstate";
 ///
 ////////////////////////////////////////////////////////////////////////////////
 class CGameStateManager : public IComInterfaceProvider,
+                          public ISerializable,
                           public IWorldDataStorageUser
 {
     

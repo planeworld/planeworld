@@ -105,13 +105,6 @@ CWorldDataStorage::~CWorldDataStorage()
     destroyObjects(m_ObjectsByValue.getBuffer<2>());
     destroyObjects(m_ObjectsByValue.getBuffer<3>());
     
-    #include "serializer_basic.h"
-
-    CSerializerBasic Serializer;
-    ISerializable::setSerializer(&Serializer);
-    
-    SERIALIZE("particles", &m_ParticlesByValue)
-    
     auto destroyParticles = [&](const auto& Buffer)
     {
         for (auto Particle: *Buffer)
