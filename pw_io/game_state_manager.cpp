@@ -29,6 +29,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "game_state_manager.h"
+#include "serializer_basic.h"
 
 #include <fstream>
 
@@ -43,8 +44,6 @@ CGameStateManager::CGameStateManager() : IComInterfaceProvider(),
 {
     METHOD_ENTRY("CGameStateManager::CGameStateManager")
     CTOR_CALL("CGameStateManager::CGameStateManager")
-    
-    ISerializable::setSerializer(&m_Serializer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,11 +107,14 @@ bool CGameStateManager::load(const std::string& _strFile) const
 ///
 /// \param _strFile File name for saving game state information
 ///
+/// \return Success?
+///
 ////////////////////////////////////////////////////////////////////////////////
 bool CGameStateManager::save(const std::string& _strFile)
 {
     METHOD_ENTRY("CGameStateManager::save")
     
+    CSerializerBasic Serializer; ///< Serializer for saving simulation state
     std::string strFilename("");
     if (!_strFile.empty())
     {
@@ -139,30 +141,9 @@ bool CGameStateManager::save(const std::string& _strFile)
     
     m_strLastFilename = strFilename;
     
-    std::ofstream Filestream;
-    Filestream.open(strFilename + "_" + strNumber + ".sav");
-    if (!Filestream)
-    {
-        DOM_FIO(ERROR_MSG("Gamestate Manager", "File " + strFilename + "_" + strNumber + ".sav" + " could not be created."))
-        Filestream.clear();
-        return false;
-    }
-    else
-    {
-        DOM_FIO(DEBUG_MSG("Gamestate Manager", strFilename + "_" + strNumber + ".sav" + " succesfully created."))
-    }
-
-    /// \todo Use std::numeric_limits to set precision
-    Filestream << std::setprecision(17) << std::setw(25) << "Test: Serializer should fill this. " << std::endl;
-    
+    bool bSuccess = Serializer.setFilename(strFilename + "_" + strNumber + ".sav");
+    ISerializable::setSerializer(&Serializer);
     ISerializable::serialize("world_data", m_pDataStorage);
     
-    // Only close an open stream
-    if (Filestream.is_open())
-    {
-        Filestream.close();
-        DOM_FIO(DEBUG_MSG("Gamestate Manager", strFilename + "_" + strNumber + ".sav" + " closed."))
-    }
-    
-    return true;
+    return bSuccess;
 }

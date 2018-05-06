@@ -32,10 +32,10 @@
 #define SERIALIZER_H
 
 //--- Standard header --------------------------------------------------------//
-#include "log.h"
-#include "serialize_macros.h"
 
 //--- Program header ---------------------------------------------------------//
+#include "log.h"
+#include "serialize_macros.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include <eigen3/Eigen/Core>
@@ -55,18 +55,18 @@ class ISerializer
     public:
    
         //--- Constructor/Destructor -----------------------------------------//
-        
+        virtual ~ISerializer(){}
 
         //--- Methods --------------------------------------------------------//
-        virtual void serialize(const std::string&) const {}
-        virtual void serialize(const std::string&, bool) const {}
-        virtual void serialize(const std::string&, double) const {}
-        virtual void serialize(const std::string&, int) const {}
-        virtual void serialize(const std::string&, unsigned int) const {}
-        virtual void serialize(const std::string&, std::size_t) const {}
-        virtual void serialize(const std::string&, const std::string&) const {}
-        virtual void serialize(const std::string&, const Vector2d&) const {}
-        virtual void serialize(const std::string&, const Vector2i&) const {}
+        virtual void serialize(const std::string&) {}
+        virtual void serialize(const std::string&, bool) {}
+        virtual void serialize(const std::string&, double) {}
+        virtual void serialize(const std::string&, int) {}
+        virtual void serialize(const std::string&, unsigned int) {}
+        virtual void serialize(const std::string&, std::size_t) {}
+        virtual void serialize(const std::string&, const std::string&) {}
+        virtual void serialize(const std::string&, const Vector2d&) {}
+        virtual void serialize(const std::string&, const Vector2i&) {}
         
     protected:
         

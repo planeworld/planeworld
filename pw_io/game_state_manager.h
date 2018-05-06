@@ -34,7 +34,6 @@
 //--- Program header ---------------------------------------------------------//
 #include "com_interface_provider.h"
 #include "log.h"
-#include "serializer_basic.h"
 #include "world_data_storage_user.h"
 
 //--- Standard header --------------------------------------------------------//
@@ -95,7 +94,6 @@ class CGameStateManager : public IComInterfaceProvider,
         }
 
         //--- Variables ------------------------------------------------------//
-        CSerializerBasic    m_Serializer; ///< Serializer for saving simulation state
         std::string         m_strLastFilename; ///< Last filename used for saving
 };
 
