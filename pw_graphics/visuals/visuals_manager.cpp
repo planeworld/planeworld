@@ -145,6 +145,7 @@ void CVisualsManager::drawCircle(const Vector2i& _vecCell,
 void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* _pCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawCircle")
+    m_Graphics.setLineWidth(_pCircle->getThickness());
     this->drawCircle(_pObject->getCell(), _pCircle->getCenter(), _pCircle->getRadius(), _pCamera);
 }
 
@@ -174,6 +175,8 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         (vecCenter.norm() >  fRad-fHeight-_pCamera->getBoundingCircleRadius())
        )
     {
+        m_Graphics.setLineWidth(_pPlanet->getThickness());
+                
         Vector2d    vecEx(1.0, 0.0);
         double      fAng;    
         double      fAngEnd;
@@ -394,6 +397,7 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
 void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, CCamera* _pCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawPolygon")
+    m_Graphics.setLineWidth(_pPolygon->getThickness());    
     m_Graphics.polygon(_pPolygon->getVertices(), _pPolygon->getPolygonType(),
                 -_pCamera->getCenter() + 
                 IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell()));

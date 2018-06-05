@@ -38,6 +38,8 @@ pw.system.shp_set_vertices(idShp02,
       1.0,  1.0,
      -1.0,  1.0}
 )
+pw.physics.shp_set_thickness(idShp01, 3.0)
+pw.physics.shp_set_thickness(idShp02, 3.0)
 
 pw.system.obj_add_shp(idObj01, idShp01)
 pw.system.obj_add_shp(idObj01, idShp02)

@@ -1861,6 +1861,22 @@ void CPhysicsManager::myInitComInterface()
                                         {ParameterType::DOUBLE, "Radius to be set"}},
                                         "physics", "physics"
                                         );
+    m_pComInterface->registerFunction("shp_set_thickness",
+                                        CCommand<void, int, double>(
+                                        [&](const int _nUID, const double& _fThickness)
+                                        {
+                                            IShape* pShp = m_pDataStorage->getShapeByValue(_nUID);
+                                            if (pShp != nullptr)
+                                            {
+                                                pShp->setThickness(_fThickness);
+                                            }
+                                        }),
+                                        "Set outline thickness of shape with given UID.",
+                                        {{ParameterType::NONE, "No return value"},
+                                        {ParameterType::INT, "Shapes UID"},
+                                        {ParameterType::DOUBLE, "Shape thickness to be set"}},
+                                        "physics", "physics"
+                                        );
     m_pComInterface->registerFunction("shp_set_vertices",
                                         CCommand<void, int, std::vector<double>>(
                                             [&](const int _nUID, const std::vector<double>& _vecVerts)
