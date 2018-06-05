@@ -58,6 +58,16 @@ class ISerializer
         virtual ~ISerializer(){}
 
         //--- Methods --------------------------------------------------------//
+        virtual void deserialize(const std::string&) {}
+        virtual void deserialize(const std::string&, bool&) {}
+        virtual void deserialize(const std::string&, double&) {}
+        virtual void deserialize(const std::string&, int&) {}
+        virtual void deserialize(const std::string&, unsigned int&) {}
+        virtual void deserialize(const std::string&, std::size_t&) {}
+        virtual void deserialize(const std::string&, std::string&) {}
+        virtual void deserialize(const std::string&, Vector2d&) {}
+        virtual void deserialize(const std::string&, Vector2i&) {}
+        
         virtual void serialize(const std::string&) {}
         virtual void serialize(const std::string&, bool) {}
         virtual void serialize(const std::string&, double) {}
