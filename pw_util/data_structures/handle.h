@@ -55,6 +55,7 @@ class CHandle
    
         //--- Operators ------------------------------------------------------//
         T* operator->() const {return this->ptr();}
+        T& operator*() {return *m_pRef;}
    
         //--- Constant Methods -----------------------------------------------//
         const std::string&  getName() const;

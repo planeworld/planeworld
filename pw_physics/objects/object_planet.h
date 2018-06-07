@@ -204,10 +204,10 @@ inline void CObjectPlanet::setRadius(const double& _fRadius)
 {
     METHOD_ENTRY("CObjectPlanet::setRadius")
     m_fRadius = _fRadius;
-    IShape* pShp = m_Geometry.getShapes().front().ptr();
-    if (pShp != nullptr && pShp->getShapeType() == ShapeType::PLANET)
+    const auto& hShp = m_Geometry.getShapes().front();
+    if (hShp.isValid() && hShp->getShapeType() == ShapeType::PLANET)
     {
-        static_cast<CPlanet*>(pShp)->setRadius(_fRadius);
+        static_cast<CPlanet*>(hShp.ptr())->setRadius(_fRadius);
     }
 }
 
