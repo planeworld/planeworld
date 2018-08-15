@@ -34,7 +34,6 @@
 #include "math_constants.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -755,8 +754,8 @@ void CGraphics::applyCamMovement()
     }
     else
     {
-        m_matScale = glm::scale(glm::vec3(GLfloat(m_fCamZoom), GLfloat(m_fCamZoom), 1.0f));
-        m_matRotate = glm::rotate(float(-m_fCamAng), glm::vec3(0.0f, 0.0f, 1.0f));
+        glm::scale(m_matScale, glm::vec3(GLfloat(m_fCamZoom), GLfloat(m_fCamZoom), 1.0f));
+        glm::rotate(m_matRotate, float(-m_fCamAng), glm::vec3(0.0f, 0.0f, 1.0f));
         m_matTransform = m_matProjection * m_matScale * m_matRotate;
     }
 
