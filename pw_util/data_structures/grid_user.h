@@ -55,15 +55,11 @@ class IGridUser
     
         //--- Constructor/Destructor -----------------------------------------//
         IGridUser(){m_vecCell.setZero();}
-        virtual ~IGridUser(){};
         
         //--- Static methods -------------------------------------------------//
         static const Vector2d   cellToDouble(const Vector2i&);
         static void             separateCenterCell(const Vector2d&,Vector2d&,Vector2i&);
         
-//         //--- Abstract constant methods --------------------------------------//
-//         virtual const Vector2d  getOrigin() const = 0;
-
         //--- Constant methods -----------------------------------------------//
         virtual const Vector2i  getCell() const;
         

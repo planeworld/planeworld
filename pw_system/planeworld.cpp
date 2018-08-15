@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2017 Torsten Büschenfeld
+// Copyright (C) 2009-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -318,6 +318,7 @@ int main(int argc, char *argv[])
     pLuaManager->initComInterface(&ComInterface, "lua");
     pPhysicsManager->initComInterface(&ComInterface, "physics");
     pVisualsManager->initComInterface(&ComInterface, "visuals");
+    GameStateManager.initComInterface(&ComInterface, "gamestate");
     
     //////////////////////////////////////////////////////////////////////////// 
     //
@@ -346,7 +347,7 @@ int main(int argc, char *argv[])
     #endif
     
     #ifndef PW_MULTITHREADING
-        auto nFrame = 0u;
+        std::uint64_t nFrame = 0u;
     #endif
 
     CTimer Timer;
@@ -387,7 +388,6 @@ int main(int argc, char *argv[])
                 pPhysicsManager->setTimeSlept(
                     Timer.sleepRemaining(pPhysicsManager->getFrequency() *
                                          pPhysicsManager->getTimeAccel()));
-                if (++nFrame == 1000u) nFrame = 0u;
             #else
                 pInputManager->processFrame();
                 Timer.sleepRemaining(pInputManager->getFrequency());
@@ -395,6 +395,7 @@ int main(int argc, char *argv[])
                 
             //--- Call Commands from com interface ---//
             ComInterface.callWriters("main");
+            ComInterface.callWriters("gamestate");
         }
         #ifdef PW_MULTITHREADING
             pVisualsManager->terminate();
@@ -419,7 +420,6 @@ int main(int argc, char *argv[])
                 Timer.sleepRemaining(pPhysicsManager->getFrequency() * 
                                      pPhysicsManager->getTimeAccel())
                 );
-                if (++nFrame == 1000u) nFrame = 0u;
             }
         #endif
     }

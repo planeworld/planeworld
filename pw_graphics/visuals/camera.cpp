@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2016 Torsten Büschenfeld
+// Copyright (C) 2011-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -428,7 +428,7 @@ std::istream& operator>>(std::istream& _is, CCamera* const _pCam)
         _is >> _pCam->m_vecFrame0[i][0] >>
                _pCam->m_vecFrame0[i][1];
     }
-    _is >> _pCam->m_BoundingBox;
+//     _is >> _pCam->m_BoundingBox;
     _is >> _pCam->m_vecCenter[0] >> _pCam->m_vecCenter[1];
     _is >> _pCam->m_fBoundingCircleRadius;
     _is >> _pCam->m_fViewportWidth;
@@ -463,7 +463,7 @@ std::ostream& operator<<(std::ostream& _os, CCamera* const _pCam)
         _os << _pCam->m_vecFrame0[i][0] << " " <<
                _pCam->m_vecFrame0[i][1] << std::endl;
     }
-    _os << _pCam->m_BoundingBox << std::endl;
+//     _os << _pCam->m_BoundingBox << std::endl;
     _os << _pCam->m_vecCenter[0] << " " <<
            _pCam->m_vecCenter[1] << std::endl;
     _os << _pCam->m_fBoundingCircleRadius << std::endl;

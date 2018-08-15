@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2017 Torsten Büschenfeld
+// Copyright (C) 2011-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #include "circular_buffer.h"
 #include "graphics.h"
 #include "grid_user.h"
+#include "serializable.h"
 #include "uid_user.h"
 
 //--- Standard header --------------------------------------------------------//
@@ -71,6 +72,7 @@ enum class ParticleTypeType
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 class CParticle : public IGridUser,
+                  public ISerializable,
                   public IUIDUser
 {
     
@@ -146,7 +148,8 @@ class CParticle : public IGridUser,
         int                     m_nDepthlayers;              ///< Depths in which particle exists
         
         Vector2d                m_vecForce;                  ///< Gravitational force applied
-
+        
+        SERIALIZE_DECL
 };
 
 typedef std::vector<CParticle*>   ParticleType;                  ///< Specifies a list of particle

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2016 Torsten Büschenfeld
+// Copyright (C) 2010-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,12 +32,11 @@
 #define GEOMETRY_H
 
 //--- Program header ---------------------------------------------------------//
+#include "handle.h"
 #include "shape.h"
 
 //--- Standard header --------------------------------------------------------//
-#include <list>
-
-typedef std::list<IShape*> ShapesType; ///< Specifies a list of  shapes
+typedef std::vector<CHandle<IShape>> ShapesType; ///< Specifies a list of  shapes
 
 /// Specifies the type of bounding box
 enum class AABBType
@@ -104,6 +103,7 @@ class CGeometry
         double          m_fMass;      ///< Mass of whole geometry
         bool            m_bAutoCOM;     ///< Indicates automatic computation of COM
         bool            m_bAutoInertia; ///< Indicates automatic computation of inertia
+        bool            m_bShapesValid; ///< Indicates if auto COM/mass/inertia is still valid
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

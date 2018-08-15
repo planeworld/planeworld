@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2016 Torsten Büschenfeld
+// Copyright (C) 2010-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "grid_user.h"
+#include "serializable.h"
 
 //--- Misc header ------------------------------------------------------------//
 #include <eigen3/Eigen/Core>
@@ -46,7 +47,8 @@ using namespace Eigen;
 /// \brief Class representing an Axis Aligned Bounding Box
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CBoundingBox : public IGridUser
+class CBoundingBox : public IGridUser,
+                     public ISerializable
 {
     
     public:
@@ -70,16 +72,13 @@ class CBoundingBox : public IGridUser
         void update(const CBoundingBox&);
         void update(const Vector2d&);
         
-        //--- friends --------------------------------------------------------//
-        friend std::istream& operator>>(std::istream&, CBoundingBox&);
-        friend std::ostream& operator<<(std::ostream&, CBoundingBox&);
-
     protected:
 
         //--- Protected Variables --------------------------------------------//
         Vector2d m_vecLowerLeft;
         Vector2d m_vecUpperRight;
-        
+
+        SERIALIZE_DECL
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

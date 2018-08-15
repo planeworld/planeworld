@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2017 Torsten Büschenfeld
+// Copyright (C) 2011-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -213,7 +213,7 @@ std::istream& operator>>(std::istream& _is, CParticle* const _pParticle)
     /// \todo Stream data from IGridUser
     
     // From IUIDUser
-    _is >> _pParticle->m_UID;
+//     _is >> _pParticle->m_UID;
     
     strTmp="";
     _is >> strTmp; _pParticle->m_ParticleType = mapStringToParticleType(strTmp);
@@ -227,7 +227,7 @@ std::istream& operator>>(std::istream& _is, CParticle* const _pParticle)
     _is >> _pParticle->m_AgeList;
     _is >> _pParticle->m_StateList;
     
-    _is >> _pParticle->m_BBox;
+//     _is >> _pParticle->m_BBox;
     
     _is >> _pParticle->m_fDamping;
     _is >> _pParticle->m_fMaxAge;
@@ -257,7 +257,7 @@ std::ostream& operator<<(std::ostream& _os, CParticle* const _pParticle)
     /// \todo Stream data from IGridUser
     
     // From IUIDUser
-    _os << _pParticle->m_UID << std::endl;
+//     _os << _pParticle->m_UID << std::endl;
     
     _os << s_ParticleTypeToStringMap.at(_pParticle->getParticleType()) << std::endl;
     
@@ -311,3 +311,28 @@ void CParticle::copy(const CParticle& _Particle)
     m_nDepthlayers = _Particle.m_nDepthlayers;
     m_vecForce = _Particle.m_vecForce;
 }
+
+SERIALIZE_IMPL(CParticle,
+    SERIALIZE("positions", &m_PosList);
+    SERIALIZE("positions_prev", &m_PosListPrev);
+    SERIALIZE("velocities", &m_VelList);
+    SERIALIZE("age", &m_AgeList);
+    SERIALIZE("state", &m_StateList);
+    SERIALIZE("bounding_box", &m_BBox)
+    SERIALIZE("particle_type", s_ParticleTypeToStringMap.at(m_ParticleType))
+    SERIALIZE("time_factor", m_fTimeFac)
+    SERIALIZE("damping", m_fDamping)
+    SERIALIZE("size_at_birth", m_fSizeBirth)
+    SERIALIZE("size_at_death", m_fSizeDeath)
+    SERIALIZE("maximum_age", m_fMaxAge)
+    SERIALIZE_UNARY("colour_at_birth", m_aColorBirth)
+    SERIALIZE_UNARY("colour_at_death", m_aColorDeath)
+    SERIALIZE("depth_layers", m_nDepthlayers)
+    SERIALIZE("force_x", m_vecForce[0])
+    SERIALIZE("force_y", m_vecForce[1])
+    // From IGridUser:
+    SERIALIZE("cell_x", m_vecCell[0])
+    SERIALIZE("cell_y", m_vecCell[1])
+    // From IUIDUser:
+    SERIALIZE("uid", &m_UID)
+)

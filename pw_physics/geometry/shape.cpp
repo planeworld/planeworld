@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,7 +40,8 @@ IShape::IShape() :  IUIDUser(),
                     m_fArea(0.0),
                     m_fInertia(0.0),
                     m_fMass(1.0),
-                    m_nDepthlayers(SHAPE_DEPTH_ALL)
+                    m_nDepthlayers(SHAPE_DEPTH_ALL),
+                    m_fThickness(1.0)
 {
     METHOD_ENTRY("IShape::IShape")
     CTOR_CALL("IShape::IShape")
@@ -69,6 +70,7 @@ void IShape::copy(const IShape* const _pShape)
     m_fMass           = _pShape->m_fMass;
     m_nDepthlayers    = _pShape->m_nDepthlayers;
     m_vecCentroid     = _pShape->m_vecCentroid;
+    m_fThickness      = _pShape->m_fThickness;
     
     this->myCopy(_pShape);
 }
@@ -90,10 +92,10 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
     std::string strTmp;
     _is >> strTmp;
     
-    // From IUIDUser
-    _is >> _pShape->m_UID;
+//     // From IUIDUser
+//     _is >> _pShape->m_UID;
     
-    _is >> _pShape->m_AABB;
+//     _is >> _pShape->m_AABB;
     _is >> _pShape->m_bIsValid;
     _is >> _pShape->m_fArea;
     _is >> _pShape->m_fInertia;
@@ -101,6 +103,7 @@ std::istream& operator>>(std::istream& _is, IShape* const _pShape)
     _is >> _pShape->m_nDepthlayers;
     _is >> _pShape->m_vecCentroid[0];
     _is >> _pShape->m_vecCentroid[1];
+    _is >> _pShape->m_fThickness;
     
     return _pShape->myStreamIn(_is);
 }
@@ -127,10 +130,10 @@ std::ostream& operator<<(std::ostream& _os, IShape* const _pShape)
 
     _os << "Shape:" << std::endl;
     
-    // From IUIDUser
-    _os << _pShape->m_UID << std::endl;
-    
-    _os << _pShape->m_AABB << std::endl;
+//     // From IUIDUser
+//     _os << _pShape->m_UID << std::endl;
+//     
+//     _os << _pShape->m_AABB << std::endl;
     _os << _pShape->m_bIsValid << std::endl;
     _os << _pShape->m_fArea << std::endl;
     _os << _pShape->m_fInertia << std::endl;
@@ -138,6 +141,7 @@ std::ostream& operator<<(std::ostream& _os, IShape* const _pShape)
     _os << _pShape->m_nDepthlayers << std::endl;
     _os << _pShape->m_vecCentroid[0] << " " << 
            _pShape->m_vecCentroid[1] << std::endl;
+    _os << _pShape->m_fThickness << std::endl;
     
     return _pShape->myStreamOut(_os);
 }

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -77,6 +77,7 @@ class IShape : public IUIDUser
         int                         getDepths() const;
         const double&               getInertia() const;
         const double&               getMass() const;
+        const double&               getThickness() const;
         bool                        isValid() const;
                 
         //--- Methods --------------------------------------------------------//
@@ -88,6 +89,7 @@ class IShape : public IUIDUser
         bool&           isValid();
         
         void            setMass(const double&);
+        void            setThickness(const double&);
         void            copy(const IShape* const);
         void            setDepths(const int&);
         void            unsetDepths(const int&);
@@ -114,6 +116,7 @@ class IShape : public IUIDUser
         double          m_fMass;                    ///< Mass of object part, associated to this shape
         int             m_nDepthlayers;             ///< Depths in which shape exists
         Vector2d        m_vecCentroid;              ///< Centroid of this shape
+        double          m_fThickness;               ///< Thickness of shape outline
 };
 
 //--- Enum parser ------------------------------------------------------------//
@@ -226,6 +229,19 @@ inline const double& IShape::getMass() const
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
+/// \brief Returns thickness of shape outline
+///
+/// \return thickness of shape outline
+///
+////////////////////////////////////////////////////////////////////////////////
+inline const double& IShape::getThickness() const
+{
+    METHOD_ENTRY("IShape::getThickness")
+    return m_fThickness;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
 /// \brief Indicates if shape is still valid.
 ///
 /// Validity might be changed by changing geometry or center of shape, since
@@ -295,6 +311,19 @@ inline void IShape::setMass(const double& _fM)
     METHOD_ENTRY("IShape::setMass")
     m_fMass = _fM;
     m_bIsValid = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief  Sets thickness of shape outline
+///
+/// \param _fThickness Thickness of shape outline
+///
+////////////////////////////////////////////////////////////////////////////////
+inline void IShape::setThickness(const double& _fThickness)
+{
+    METHOD_ENTRY("IShape::setThickness")
+    m_fThickness = _fThickness;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

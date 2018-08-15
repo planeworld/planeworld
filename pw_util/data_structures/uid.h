@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "spinlock.h"
+#include "serializable.h"
 
 using UIDType = std::uint32_t;
 
@@ -46,7 +48,7 @@ using UIDType = std::uint32_t;
 /// \brief Class that manages a unique ID to identify objects etc.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CUID
+class CUID : public ISerializable
 {
     
     public:
@@ -70,10 +72,6 @@ class CUID
         static const std::deque<UIDType>& getUnusedUIDs();
         static const std::unordered_map<UIDType, std::uint32_t>& getReferencedUIDs();
         
-        //--- friends --------------------------------------------------------//
-        friend std::istream&    operator>>(std::istream&, CUID&);
-        friend std::ostream&    operator<<(std::ostream&, CUID&);
-                
     private:
         
         //--- Methods [private] ----------------------------------------------//
@@ -87,7 +85,9 @@ class CUID
         static std::deque<UIDType> s_UnusedUIDs;        ///< Storage for unused / released IDs
         static std::unordered_map<UIDType, std::uint32_t> s_ReferencedUIDs; ///< Storage for reference counting of uids
         
-        static std::mutex m_Mtx;                        ///< Global mutex
+        static CSpinlock           s_Access;            ///< Global lock
+        
+        SERIALIZE_DECL
 };
 
 //--- Implementation is done here for inline optimisation --------------------//

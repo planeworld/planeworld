@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2017 Torsten Büschenfeld
+// Copyright (C) 2014-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -113,7 +113,7 @@ inline void CParticleEmitter::setNumber(const std::uint32_t& _nNrMax)
 {
     METHOD_ENTRY("CParticleEmitter::setMode")
     m_nNr = _nNrMax;
-    m_hParticles.get()->setNumber(_nNrMax);
+    m_hParticles->setNumber(_nNrMax);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

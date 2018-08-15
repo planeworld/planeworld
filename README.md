@@ -31,7 +31,7 @@ Installation
 Usage
 -----
 
-    > planeworld ~/bin/share/planeworld/data/solar_system.xml
+    > planeworld example.lua
     
 Default Commands (see pw_input_default.lua)
 

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2016 Torsten Büschenfeld
+// Copyright (C) 2009-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -520,7 +520,7 @@ std::istream& operator>>(std::istream& _is, CObject* const _pObj)
     _is >> _pObj->m_KinematicsState;
     
     // From IUIDUser
-    _is >> _pObj->m_UID;
+//     _is >> _pObj->m_UID;
     
     _is >> _pObj->m_bGravitation;
     _is >> _pObj->m_bDynamics;
@@ -563,7 +563,7 @@ std::ostream& operator<<(std::ostream& _os, CObject* const _pObj)
     _os << _pObj->m_KinematicsState << std::endl;
     
     // From IUIDUser
-    _os << _pObj->m_UID << std::endl;
+//     _os << _pObj->m_UID << std::endl;
     
     _os << _pObj->m_bGravitation << std::endl;
     _os << _pObj->m_bDynamics << std::endl;

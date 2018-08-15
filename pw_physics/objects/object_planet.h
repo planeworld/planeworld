@@ -34,6 +34,7 @@
 //--- Program header ---------------------------------------------------------//
 #include "object.h"
 #include "planet.h"
+#include "serializable.h"
 
 //--- Standard header --------------------------------------------------------//
 
@@ -62,7 +63,8 @@
 /// \f$\Delta h\f$: \f$h_1 - h_0\f$
 /// 
 ////////////////////////////////////////////////////////////////////////////////
-class CObjectPlanet : public CObject
+class CObjectPlanet : public CObject,
+                      public ISerializable
 {
     
     public:
@@ -96,11 +98,11 @@ class CObjectPlanet : public CObject
         void copy(const CObjectPlanet&);
 
         //-- Variables [protected] -------------------------------------------//
-//         CHandle<CPlanet> m_hPlanetShape;        ///< Planetary surface, default shape
-        
         double m_fAtmosphericPressure = 1.0e5;  ///< 100 kPa, approximatly atmospheric pressure on earth
         double m_fRadius = 1.0e6;               ///< Arbitrary number, much larger than that of non-celestial objects
         double m_fScaleHeight = 1.0e4;          ///< Arbitrary number, every km pressure is reduced by factor \f$e ~= 2.7\f$
+        
+        SERIALIZE_DECL
         
 };
 
@@ -202,10 +204,10 @@ inline void CObjectPlanet::setRadius(const double& _fRadius)
 {
     METHOD_ENTRY("CObjectPlanet::setRadius")
     m_fRadius = _fRadius;
-    IShape* pShp = m_Geometry.getShapes().front();
-    if (pShp != nullptr && pShp->getShapeType() == ShapeType::PLANET)
+    const auto& hShp = m_Geometry.getShapes().front();
+    if (hShp.isValid() && hShp->getShapeType() == ShapeType::PLANET)
     {
-        static_cast<CPlanet*>(pShp)->setRadius(_fRadius);
+        static_cast<CPlanet*>(hShp.ptr())->setRadius(_fRadius);
     }
 }
 

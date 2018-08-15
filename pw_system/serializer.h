@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2015-2018 Torsten Büschenfeld
+// Copyright (C) 2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,75 +20,68 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       kinematics_state_user.h
-/// \brief      Prototype of interface "IKinematicsStateUser"
+/// \file       serializer.h
+/// \brief      Prototype of interface "ISerializer"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
-/// \date       2015-04-19
+/// \date       2018-04-25
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef KINEMATICS_STATE_USER_H
-#define KINEMATICS_STATE_USER_H
+#ifndef SERIALIZER_H
+#define SERIALIZER_H
 
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "kinematics_state.h"
+#include "log.h"
+#include "serialize_macros.h"
 
 //--- Misc header ------------------------------------------------------------//
+#include <eigen3/Eigen/Core>
+
+//--- Forward declarations ---------------------------------------------------//
+
+using namespace Eigen;
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Interface for classes that use a kinematic state
+/// \brief Interface for serializers
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class IKinematicsStateUser
+class ISerializer
 {
 
     public:
    
         //--- Constructor/Destructor -----------------------------------------//
+        virtual ~ISerializer(){}
 
-        //--- Constant methods -----------------------------------------------//
-        bool isAttached() const {return m_KinematicsState.getRef().isValid();}
-        
         //--- Methods --------------------------------------------------------//
-        CKinematicsState&   getKinematicsState();
+        virtual void deserialize(const std::string&) {}
+        virtual void deserialize(const std::string&, bool&) {}
+        virtual void deserialize(const std::string&, double&) {}
+        virtual void deserialize(const std::string&, int&) {}
+        virtual void deserialize(const std::string&, unsigned int&) {}
+        virtual void deserialize(const std::string&, std::size_t&) {}
+        virtual void deserialize(const std::string&, std::string&) {}
+        virtual void deserialize(const std::string&, Vector2d&) {}
+        virtual void deserialize(const std::string&, Vector2i&) {}
         
-        void attachTo(IKinematicsStateUser* const);
-                
+        virtual void serialize(const std::string&) {}
+        virtual void serialize(const std::string&, bool) {}
+        virtual void serialize(const std::string&, double) {}
+        virtual void serialize(const std::string&, int) {}
+        virtual void serialize(const std::string&, unsigned int) {}
+        virtual void serialize(const std::string&, std::size_t) {}
+        virtual void serialize(const std::string&, const std::string&) {}
+        virtual void serialize(const std::string&, const Vector2d&) {}
+        virtual void serialize(const std::string&, const Vector2i&) {}
+        
     protected:
         
-        CKinematicsState    m_KinematicsState;  ///< Kinematics state data
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Returns the kinematics state
-///
-/// \return Kinematics state
-///
-////////////////////////////////////////////////////////////////////////////////
-inline CKinematicsState& IKinematicsStateUser::getKinematicsState()
-{
-    METHOD_ENTRY("IKinematicsStateUser::getKinematicsState")
-    return m_KinematicsState;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Attaches kinematics state user to another one
-///
-/// \param _pKinStateUser Kinematics state user to attach to
-///
-////////////////////////////////////////////////////////////////////////////////
-inline void IKinematicsStateUser::attachTo(IKinematicsStateUser* const _pKinStateUser)
-{
-    METHOD_ENTRY("IKinematicsStateUser::attachTo")
-    m_KinematicsState.setRef(&_pKinStateUser->getKinematicsState());
-}
-
-#endif // KINEMATICS_STATE_USER_H
+#endif // SERIALIZER_H

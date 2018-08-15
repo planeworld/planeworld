@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "game_state_manager.h"
+#include "serializer_basic.h"
 
 #include <fstream>
 
@@ -37,7 +38,9 @@
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CGameStateManager::CGameStateManager() 
+CGameStateManager::CGameStateManager() : IComInterfaceProvider(),
+                                         IWorldDataStorageUser(),
+                                         m_strLastFilename(PW_FILENAME_DEFAULT)
 {
     METHOD_ENTRY("CGameStateManager::CGameStateManager")
     CTOR_CALL("CGameStateManager::CGameStateManager")
@@ -47,6 +50,8 @@ CGameStateManager::CGameStateManager()
 ///
 /// \brief Load game state information from disk
 ///
+/// \param _strFile File name for saving game state information
+///
 /// \bug Something is wrong with cell loading, e.g. commenting out cellUpdate
 ///      fixes one particular problem. Cell handling in visuals manager is 
 ///      concerned, too.
@@ -54,11 +59,11 @@ CGameStateManager::CGameStateManager()
 ///       (stream) members directly but calling superclass::operator<</>>.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-bool CGameStateManager::load() const
+bool CGameStateManager::load(const std::string& _strFile) const
 {
     METHOD_ENTRY("CGameStateManager::load")
     
-    std::string strFilename = "testfile.sav";
+    std::string strFilename = _strFile + ".sav";
     std::ifstream Filestream;
 
     // Close an already open stream
@@ -100,44 +105,45 @@ bool CGameStateManager::load() const
 ///
 /// \brief Save game state information on disk.
 ///
+/// \param _strFile File name for saving game state information
+///
+/// \return Success?
+///
 ////////////////////////////////////////////////////////////////////////////////
-bool CGameStateManager::save() const
+bool CGameStateManager::save(const std::string& _strFile)
 {
     METHOD_ENTRY("CGameStateManager::save")
     
-    std::string strFilename = "testfile.sav";
-    std::ofstream Filestream;
-
-    // Close an already open stream 
-    /// This becomes relevant as soon as the filestream is a member variable
-    if (Filestream.is_open() == true)
+    CSerializerBasic Serializer; ///< Serializer for saving simulation state
+    std::string strFilename("");
+    if (!_strFile.empty())
     {
-        Filestream.close();
-        DOM_FIO(
-        WARNING_MSG("Gamestate Manager", "Warning, there's already an open filestream for this object... closing."))
-    }
-    
-    Filestream.open(strFilename.c_str());
-    if (!Filestream)
-    {
-        DOM_FIO(ERROR_MSG("Gamestate Manager", "File " + strFilename + " could not be created."))
-        Filestream.clear();
-        return false;
+        strFilename = _strFile;
     }
     else
     {
-        DOM_FIO(DEBUG_MSG("Gamestate Manager", strFilename + " succesfully created."))
+        strFilename = m_strLastFilename;
     }
-
-    /// \todo Use std::numeric_limits to set precision
-    Filestream << std::setprecision(17) << std::setw(25) << *m_pDataStorage << std::endl;
-    
-    // Only close an open stream
-    if (Filestream.is_open() == true)
+   
+    // Check for existing files
+    auto nCounter = 1u;
+    std::string strNumber("");
+    std::ifstream ifs;
+    do
     {
-        Filestream.close();
-        DOM_FIO(DEBUG_MSG("Gamestate Manager", strFilename + " closed."))
-    }
+        ifs.close();
+        std::ostringstream oss("");
+        oss << std::setw(3) << std::setfill('0') << nCounter;
+        strNumber = oss.str();
+        ifs.open(strFilename + "_" + strNumber + ".sav");
+        ++nCounter;
+    } while (ifs.good());
     
-    return true;
+    m_strLastFilename = strFilename;
+    
+    bool bSuccess = Serializer.setFilename(strFilename + "_" + strNumber + ".sav");
+    ISerializable::setSerializer(&Serializer);
+    ISerializable::serialize("world_data", m_pDataStorage);
+    
+    return bSuccess;
 }

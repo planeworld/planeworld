@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2017 Torsten Büschenfeld
+// Copyright (C) 2010-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,7 +48,6 @@ CVisualsManager::CVisualsManager() : m_unLightmapSubsampling(32),
                                      m_nVisualisations(0),
                                      m_nStarIndex(-1),
                                      m_unCameraIndex(0u),
-                                     m_pCamera(nullptr),
                                      m_nCursorX(0),
                                      m_nCursorY(0),
                                      m_nCursorX0(0),
@@ -97,26 +96,26 @@ CVisualsManager::~CVisualsManager()
 /// \param _vecCell Cell of circle to be drawn
 /// \param _vecCenter Center of circle to be drawn
 /// \param _fRad Radius to be drawn
-/// \param _pCamera The camera to draw the polygon with
+/// \param _hCamera The camera to draw the polygon with
 ///
 ///
 ////////////////////////////////////////////////////////////////////////////////
 void CVisualsManager::drawCircle(const Vector2i& _vecCell,
                                  const Vector2d& _vecCenter,
                                  const double& _fRad,
-                                 CCamera* _pCamera) const
+                                 const CHandle<CCamera>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawCircle")
-    Vector2d vecCenter = _vecCenter - _pCamera->getCenter() +
-                         IGridUser::cellToDouble(_vecCell - _pCamera->getCell());
+    Vector2d vecCenter = _vecCenter - _hCamera->getCenter() +
+                         IGridUser::cellToDouble(_vecCell - _hCamera->getCell());
 
-    if ((vecCenter.norm() <= _fRad+_pCamera->getBoundingCircleRadius()) &&
-        (vecCenter.norm() >  _fRad-_pCamera->getBoundingCircleRadius())
+    if ((vecCenter.norm() <= _fRad+_hCamera->getBoundingCircleRadius()) &&
+        (vecCenter.norm() >  _fRad-_hCamera->getBoundingCircleRadius())
        )
     {
         Vector2d    vecEx(1.0, 0.0);
         
-        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
+        double fAlpha = fabs(std::asin(_hCamera->getBoundingCircleRadius() / vecCenter.norm()));
         if (std::isnan(fAlpha))
         {
             m_Graphics.drawCircleDyn(vecCenter, _fRad);
@@ -138,14 +137,14 @@ void CVisualsManager::drawCircle(const Vector2i& _vecCell,
 ///
 /// \param _pObject Object, the polygon belongs to
 /// \param _pCircle The circle to be drawn
-/// \param _pCamera The camera to draw the polygon with
+/// \param _hCamera The camera to draw the polygon with
 ///
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* _pCamera) const
+void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, const CHandle<CCamera>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawCircle")
-    this->drawCircle(_pObject->getCell(), _pCircle->getCenter(), _pCircle->getRadius(), _pCamera);
+    this->drawCircle(_pObject->getCell(), _pCircle->getCenter(), _pCircle->getRadius(), _hCamera);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,10 +153,10 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, CCamera* 
 ///
 /// \param _pObject Object, the planet belongs to
 /// \param _pPlanet The planet to be drawn
-/// \param _pCamera The camera to draw the planet with
+/// \param _hCamera The camera to draw the planet with
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* _pCamera) const
+void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, const CHandle<CCamera>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::draw")
 
@@ -167,13 +166,15 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
     double   fSeaLevel = _pPlanet->getSeaLevel();
     //int      nSeed     = _pPlanet->getSeed();
     //double   fSmooth   = _pPlanet->getSmoothness();
-    Vector2d vecCenter = _pPlanet->getCenter()-_pCamera->getCenter() +
-                         IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell());
+    Vector2d vecCenter = _pPlanet->getCenter()-_hCamera->getCenter() +
+                         IGridUser::cellToDouble(_pObject->getCell() - _hCamera->getCell());
     
-    if ((vecCenter.norm() <= fRad+fHeight+_pCamera->getBoundingCircleRadius()) &&
-        (vecCenter.norm() >  fRad-fHeight-_pCamera->getBoundingCircleRadius())
+    if ((vecCenter.norm() <= fRad+fHeight+_hCamera->getBoundingCircleRadius()) &&
+        (vecCenter.norm() >  fRad-fHeight-_hCamera->getBoundingCircleRadius())
        )
     {
+        m_Graphics.setLineWidth(_pPlanet->getThickness());
+                
         Vector2d    vecEx(1.0, 0.0);
         double      fAng;    
         double      fAngEnd;
@@ -183,7 +184,7 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         std::vector<Vector2d> WaterlineTmp;
         bool bInWater = false;
 
-        double fAlpha = fabs(std::asin(_pCamera->getBoundingCircleRadius() / vecCenter.norm()));
+        double fAlpha = fabs(std::asin(_hCamera->getBoundingCircleRadius() / vecCenter.norm()));
         if (std::isnan(fAlpha))
         {
             fAng = 0.0;
@@ -203,7 +204,7 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
         double fInc  = _pPlanet->getGroundResolution() / fRad;
         
         // Subsample planet surface when zooming out.
-        if (_pCamera->getZoom()*_pPlanet->getGroundResolution() <= PLANET_VISUALS_DEFAULT_RESOLUTION)
+        if (_hCamera->getZoom()*_pPlanet->getGroundResolution() <= PLANET_VISUALS_DEFAULT_RESOLUTION)
         {
             // 1. Normalise according to planet's ground resolution
             // 2. Adjust to given visual quality (length of lines)
@@ -213,9 +214,9 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
             // 4. Adjust octaves
             fInc /= _pPlanet->getGroundResolution(); 
             fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION * m_Graphics.getResMPX(); 
-            if (fHeight*_pCamera->getZoom() < PLANET_VISUALS_DEFAULT_RESOLUTION)
+            if (fHeight*_hCamera->getZoom() < PLANET_VISUALS_DEFAULT_RESOLUTION)
             {
-                fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION / (fHeight*_pCamera->getZoom());
+                fInc *= PLANET_VISUALS_DEFAULT_RESOLUTION / (fHeight*_hCamera->getZoom());
                 if (fInc > PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE)
                 {
                     fInc = PLANET_VISUALS_DEFAULT_MINIMUM_ANGLE;
@@ -387,39 +388,40 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, CCamera* 
 ///
 /// \param _pObject Object, the polygon belongs to
 /// \param _pPolygon The polygon to be drawn
-/// \param _pCamera The camera to draw the polygon with
+/// \param _hCamera The camera to draw the polygon with
 ///
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, CCamera* _pCamera) const
+void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, const CHandle<CCamera>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawPolygon")
+    m_Graphics.setLineWidth(_pPolygon->getThickness());    
     m_Graphics.polygon(_pPolygon->getVertices(), _pPolygon->getPolygonType(),
-                -_pCamera->getCenter() + 
-                IGridUser::cellToDouble(_pObject->getCell() - _pCamera->getCell()));
+                -_hCamera->getCenter() + 
+                IGridUser::cellToDouble(_pObject->getCell() - _hCamera->getCell()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Draw all particles
 ///
-/// \param _pCamera Draw visuals with respect to this camera
+/// \param _hCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawParticles(CCamera* const _pCamera) const
+void CVisualsManager::drawParticles(const CHandle<CCamera>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawParticles")
     
     for (auto Particle : *m_pDataStorage->getParticlesByValueFront())
     {
-        if (Particle.second->getBoundingBox().overlaps(_pCamera->getBoundingBox()))
+        if (Particle.second->getBoundingBox().overlaps(_hCamera->getBoundingBox()))
         {
             switch (Particle.second->getParticleType())
             {
                 case ParticleTypeType::DOT:
                 {
-                    m_Graphics.dots((*Particle.second->getPositions()),-_pCamera->getCenter()+
-                        IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()));
+                    m_Graphics.dots((*Particle.second->getPositions()),-_hCamera->getCenter()+
+                        IGridUser::cellToDouble(Particle.second->getCell() - _hCamera->getCell()));
                     break;
                 }
                 case ParticleTypeType::SMOKE:
@@ -439,7 +441,7 @@ void CVisualsManager::drawParticles(CCamera* const _pCamera) const
                         for (auto i=0u; i<nSize; ++i)
                         {
                             if (Particle.second->getStates()->at(i) == PARTICLE_STATE_ACTIVE &&
-                                _pCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
+                                _hCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
                             {
                                 double fAge = double(Particle.second->getAge()->at(i)) / Particle.second->getMaxAge();
                                 
@@ -451,8 +453,8 @@ void CVisualsManager::drawParticles(CCamera* const _pCamera) const
                                 
                                 fSizeR = Particle.second->getSizeBirth() + fGrowth * fAge;
                                 
-                                    m_Graphics.filledCircle(Particle.second->getPositions()->at(i) - _pCamera->getCenter()+
-                                                IGridUser::cellToDouble(Particle.second->getCell() - _pCamera->getCell()),
+                                    m_Graphics.filledCircle(Particle.second->getPositions()->at(i) - _hCamera->getCenter()+
+                                                IGridUser::cellToDouble(Particle.second->getCell() - _hCamera->getCell()),
                                                 fSizeR, 12, GRAPHICS_CIRCLE_USE_CACHE);
                             }
                         }
@@ -479,36 +481,36 @@ void CVisualsManager::drawParticles(CCamera* const _pCamera) const
 ///       camera, otherwise, when zoomed out, a dot is drawn. Bounding Boxes are
 ///       not fully adjusted to cells yet.
 ///
-/// \param _pCamera Draw visuals with respect to this camera
+/// \param _hCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawObjects(CCamera* const _pCamera) const
+void CVisualsManager::drawObjects(const CHandle<CCamera>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawObjects")
 
     for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
     {
-        if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(_pCamera->getBoundingBox()))
+        if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(_hCamera->getBoundingBox()))
         {
             if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getWidth() * m_Graphics.getResPMX() < 2.0)
             {
-                m_Graphics.dot(Obj.second->getCOM()-_pCamera->getCenter() +
-                               IGridUser::cellToDouble(Obj.second->getCell() - _pCamera->getCell()));
+                m_Graphics.dot(Obj.second->getCOM()-_hCamera->getCenter() +
+                               IGridUser::cellToDouble(Obj.second->getCell() - _hCamera->getCell()));
             }
             else
             {
-                for (const auto pShape : Obj.second->getGeometry()->getShapes())
+                for (const auto& hShape : Obj.second->getGeometry()->getShapes())
                 {
-                    switch (pShape->getShapeType())
+                    switch (hShape->getShapeType())
                     {
                         case ShapeType::CIRCLE:
-                            this->drawCircle(Obj.second, static_cast<CCircle*>(pShape), _pCamera);
+                            this->drawCircle(Obj.second, static_cast<CCircle*>(hShape.ptr()), _hCamera);
                             break;
                         case ShapeType::PLANET:
-                            this->drawPlanet(Obj.second, static_cast<CPlanet*>(pShape), _pCamera);
+                            this->drawPlanet(Obj.second, static_cast<CPlanet*>(hShape.ptr()), _hCamera);
                             break;
                         case ShapeType::POLYGON:
-                            this->drawPolygon(Obj.second, static_cast<CPolygon*>(pShape), _pCamera);
+                            this->drawPolygon(Obj.second, static_cast<CPolygon*>(hShape.ptr()), _hCamera);
                             break;
                         case ShapeType::TERRAIN:
                             break;
@@ -526,21 +528,21 @@ void CVisualsManager::drawObjects(CCamera* const _pCamera) const
 ///
 /// \brief Draw atmospheres of planetary objects
 ///
-/// \param _pCamera Draw visuals with respect to this camera
+/// \param _hCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawObjectsPlanetsAtmospheres(CCamera* const _pCamera) const
+void CVisualsManager::drawObjectsPlanetsAtmospheres(const CHandle<CCamera>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawObjectsPlanetsAtmospheres")
     
     for (auto pObjPl : *m_pDataStorage->getObjectsPlanetsByValueFront())
     {
-        if (_pCamera->getZoom() < 1.0)
+        if (_hCamera->getZoom() < 1.0)
         {
             constexpr double fZoomFacBegin = 10.0;
             constexpr double fZoomFacEnd = 1.0e-5;
             
-            double fZoomMax = fZoomFacBegin/(1.0-fZoomFacEnd) * (_pCamera->getZoom() - fZoomFacEnd);
+            double fZoomMax = fZoomFacBegin/(1.0-fZoomFacEnd) * (_hCamera->getZoom() - fZoomFacEnd);
             if (fZoomMax < 0.0) fZoomMax = 0.0;
             else if (fZoomMax > 1.0) fZoomMax = 1.0;
             
@@ -553,9 +555,9 @@ void CVisualsManager::drawObjectsPlanetsAtmospheres(CCamera* const _pCamera) con
                          pObjPl.second->getPressureAtRadius(fI)/pObjPl.second->getPressureAtGround();
                 
                 m_Graphics.setColor(0.0, 0.0, 1.0, fAlpha);
-                this->drawCircle(pObjPl.second->getCell(), pObjPl.second->getCOM(), fI, _pCamera);
-                if (1000.0 * _pCamera->getZoom() < 2.0)
-                    fI += 2.0 / _pCamera->getZoom();
+                this->drawCircle(pObjPl.second->getCell(), pObjPl.second->getCOM(), fI, _hCamera);
+                if (1000.0 * _hCamera->getZoom() < 2.0)
+                    fI += 2.0 / _hCamera->getZoom();
                 else
                     fI += 1000.0;
             }
@@ -578,14 +580,14 @@ void CVisualsManager::drawCOM() const
             for (auto Obj : *m_pDataStorage->getObjectsByValueFront())
             {
                 
-                if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(m_pCamera->getBoundingBox()))
+                if (Obj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).overlaps(m_hCamera->getBoundingBox()))
                 {
                     if (m_Graphics.getResPMX() > 0.5)
                     {
                         m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
-                        m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.5, 36.0);
+                        m_Graphics.filledCircle(Obj.second->getCOM() - m_hCamera->getCenter(), 0.5, 36.0);
                         m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
-                        m_Graphics.filledCircle(Obj.second->getCOM() - m_pCamera->getCenter(), 0.3, 36.0);
+                        m_Graphics.filledCircle(Obj.second->getCOM() - m_hCamera->getCenter(), 0.3, 36.0);
                         
                         m_Graphics.setColor(1.0, 1.0, 0.0, 0.8);
                         // Draw shapes centroids
@@ -594,7 +596,7 @@ void CVisualsManager::drawCOM() const
                             m_Graphics.filledCircle(
                                 Obj.second->getKinematicsState().getPosition(
                                     Shp->getCentroid()
-                                ) - m_pCamera->getCenter(), 0.3, 36.0);
+                                ) - m_hCamera->getCenter(), 0.3, 36.0);
                         }
                         m_Graphics.setColor(0.2, 0.2, 0.0, 1.0);
                         // Draw shapes centroids
@@ -603,7 +605,7 @@ void CVisualsManager::drawCOM() const
                             m_Graphics.filledCircle(
                                 Obj.second->getKinematicsState().getPosition(
                                     Shp->getCentroid()
-                                ) - m_pCamera->getCenter(), 0.2, 36.0);
+                                ) - m_hCamera->getCenter(), 0.2, 36.0);
                         }
                         m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
                     }
@@ -627,72 +629,72 @@ void CVisualsManager::drawBoundingBoxes() const
         
         m_Graphics.beginRenderBatch("world");
             m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
-            m_Graphics.rect(m_pCamera->getBoundingBox().getLowerLeft()-
-                            m_pCamera->getCenter(),
-                            m_pCamera->getBoundingBox().getUpperRight()-
-                            m_pCamera->getCenter());
+            m_Graphics.rect(m_hCamera->getBoundingBox().getLowerLeft()-
+                            m_hCamera->getCenter(),
+                            m_hCamera->getBoundingBox().getUpperRight()-
+                            m_hCamera->getCenter());
             m_Graphics.setColor(0.0, 0.5, 0.0, 0.1);
-    //         m_Graphics.filledRect(m_pCamera->getBoundingBox().getLowerLeft()-
-    //                               m_pCamera->getCenter(),
-    //                               m_pCamera->getBoundingBox().getUpperRight()-
-    //                               m_pCamera->getCenter());
+    //         m_Graphics.filledRect(m_hCamera->getBoundingBox().getLowerLeft()-
+    //                               m_hCamera->getCenter(),
+    //                               m_hCamera->getBoundingBox().getUpperRight()-
+    //                               m_hCamera->getCenter());
             m_Graphics.setColor(0.0, 1.0, 0.0, 0.8);
-            m_Graphics.circle(m_pCamera->getCenter()-m_pCamera->getCenter(),
-                            m_pCamera->getBoundingCircleRadius(),100.0);
+            m_Graphics.circle(m_hCamera->getCenter()-m_hCamera->getCenter(),
+                            m_hCamera->getBoundingCircleRadius(),100.0);
             m_Graphics.setColor(1.0, 1.0, 1.0, 1.0);
             m_Graphics.setDepth(GRAPHICS_DEPTH_DEFAULT);
             
             for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
             {
-                if (m_pCamera->getBoundingBox().isInside(pObj.second->getCOM()))
+                if (m_hCamera->getBoundingBox().isInside(pObj.second->getCOM()))
                 {
                     // Object bounding boxes
                     // Multiframe
                     m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-                    m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                    IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                                    pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                    IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                    m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_hCamera->getCenter() + 
+                                    IGridUser::cellToDouble(pObj.second->getCell()-m_hCamera->getCell()),
+                                    pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_hCamera->getCenter() +
+                                    IGridUser::cellToDouble(pObj.second->getCell()-m_hCamera->getCell()));
                     m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-                    m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                        IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                                        pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                        IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                    m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox().getLowerLeft() - m_hCamera->getCenter() + 
+                                        IGridUser::cellToDouble(pObj.second->getCell()-m_hCamera->getCell()),
+                                        pObj.second->getGeometry()->getBoundingBox().getUpperRight()- m_hCamera->getCenter() +
+                                        IGridUser::cellToDouble(pObj.second->getCell()-m_hCamera->getCell()));
                     // Singleframe
                     m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-                    m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
-                                    IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                                    pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
-                                    IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                    m_Graphics.rect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_hCamera->getCenter() + 
+                                    IGridUser::cellToDouble(pObj.second->getCell()-m_hCamera->getCell()),
+                                    pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_hCamera->getCenter() +
+                                    IGridUser::cellToDouble(pObj.second->getCell()-m_hCamera->getCell()));
                     m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-                    m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_pCamera->getCenter() + 
-                                        IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()),
-                                        pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_pCamera->getCenter() +
-                                        IGridUser::cellToDouble(pObj.second->getCell()-m_pCamera->getCell()));
+                    m_Graphics.filledRect(pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getLowerLeft() - m_hCamera->getCenter() + 
+                                        IGridUser::cellToDouble(pObj.second->getCell()-m_hCamera->getCell()),
+                                        pObj.second->getGeometry()->getBoundingBox(AABBType::SINGLEFRAME).getUpperRight()- m_hCamera->getCenter() +
+                                        IGridUser::cellToDouble(pObj.second->getCell()-m_hCamera->getCell()));
                     // Shape bounding boxes
                     for (const auto pShp : pObj.second->getGeometry()->getShapes())
                     {
                         m_Graphics.setColor(0.0, 0.0, 1.0, 0.8);
-                        m_Graphics.rect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() + 
-                                        IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
-                                        pShp->getBoundingBox().getUpperRight()- m_pCamera->getCenter() +
-                                        IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
+                        m_Graphics.rect(pShp->getBoundingBox().getLowerLeft() - m_hCamera->getCenter() + 
+                                        IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_hCamera->getCell()),
+                                        pShp->getBoundingBox().getUpperRight()- m_hCamera->getCenter() +
+                                        IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_hCamera->getCell()));
                         m_Graphics.setColor(0.0, 0.0, 1.0, 0.2);
-                        m_Graphics.filledRect(pShp->getBoundingBox().getLowerLeft() - m_pCamera->getCenter() +
-                                            IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()),
-                                            pShp->getBoundingBox().getUpperRight() - m_pCamera->getCenter() +
-                                            IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_pCamera->getCell()));
+                        m_Graphics.filledRect(pShp->getBoundingBox().getLowerLeft() - m_hCamera->getCenter() +
+                                            IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_hCamera->getCell()),
+                                            pShp->getBoundingBox().getUpperRight() - m_hCamera->getCenter() +
+                                            IGridUser::cellToDouble(pShp->getBoundingBox().getCell()-m_hCamera->getCell()));
                     }
                 }
             }
             for (const auto Particle : *m_pDataStorage->getParticlesByValueFront())
             {
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.4);
-                m_Graphics.rect(Particle.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
-                                Particle.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
+                m_Graphics.rect(Particle.second->getBoundingBox().getLowerLeft() - m_hCamera->getCenter(),
+                                Particle.second->getBoundingBox().getUpperRight()- m_hCamera->getCenter());
                 m_Graphics.setColor(0.0, 0.0, 1.0, 0.1);
-                m_Graphics.filledRect(Particle.second->getBoundingBox().getLowerLeft() - m_pCamera->getCenter(),
-                                    Particle.second->getBoundingBox().getUpperRight()- m_pCamera->getCenter());
+                m_Graphics.filledRect(Particle.second->getBoundingBox().getLowerLeft() - m_hCamera->getCenter(),
+                                    Particle.second->getBoundingBox().getUpperRight()- m_hCamera->getCenter());
             }
         m_Graphics.endRenderBatch();
     }
@@ -746,8 +748,8 @@ void CVisualsManager::drawTrajectories() const
             for (auto i=0u; i<pObj.second->getTrajectory().getPositions().size(); ++i)
             {
                 m_Graphics.setColor(0.5, 0.0, 0.8, fColourFade);
-                m_Graphics.addVertex(pObj.second->getTrajectory().getPositions().at(i) - m_pCamera->getCenter() +
-                    IGridUser::cellToDouble(pObj.second->getTrajectory().getCells().at(i)-m_pCamera->getCell())
+                m_Graphics.addVertex(pObj.second->getTrajectory().getPositions().at(i) - m_hCamera->getCenter() +
+                    IGridUser::cellToDouble(pObj.second->getTrajectory().getCells().at(i)-m_hCamera->getCell())
                 );
                 fColourFade += 0.9/TRAJECTORY_CAPACITY;
             }
@@ -1136,8 +1138,8 @@ bool CVisualsManager::processFrame()
     bool bGotCam = m_pVisualsDataStorage->getCamerasByIndex().size() > 0;
     if (bGotCam)
     {
-        m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
-        m_pCamera->update();
+        m_hCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
+        m_hCamera->update();
     }
     
     this->addWidgetsFromQueue();
@@ -1154,8 +1156,8 @@ bool CVisualsManager::processFrame()
                 //
                     m_Graphics.setupWorldSpace();
                     
-                    m_pCamera = CamWidget.second->getCamera()->get();
-                    m_pCamera->update();
+                    m_hCamera = *CamWidget.second->getCamera();
+                    m_hCamera->update();
                     this->drawStars();
                     this->drawWorld();
                 //
@@ -1167,8 +1169,8 @@ bool CVisualsManager::processFrame()
         m_Graphics.setupWorldSpace();
         if (bGotCam)
         {
-            m_pCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
-            m_pCamera->update();
+            m_hCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
+            m_hCamera->update();
             
             this->drawGrid(DrawModeType::VISUALS);
             // this->drawTrajectories();
@@ -1192,7 +1194,7 @@ bool CVisualsManager::processFrame()
         m_Graphics.beginRenderBatch("lights");
         for (auto Particle : *m_pDataStorage->getParticlesByValueFront())
         {
-            if (Particle.second->getBoundingBox().overlaps(m_pCamera->getBoundingBox()))
+            if (Particle.second->getBoundingBox().overlaps(m_hCamera->getBoundingBox()))
             {
                 if (Particle.second->getParticleType() == ParticleTypeType::THRUST)
                 {
@@ -1210,7 +1212,7 @@ bool CVisualsManager::processFrame()
                         for (auto i=0u; i<nSize; ++i)
                         {
                             if (Particle.second->getStates()->at(i) == PARTICLE_STATE_ACTIVE &&
-                                m_pCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
+                                m_hCamera->getBoundingBox().isInside(Particle.second->getPositions()->at(i)))
                             {
                                 double fAge = double(Particle.second->getAge()->at(i)) / Particle.second->getMaxAge();
                                 
@@ -1223,8 +1225,8 @@ bool CVisualsManager::processFrame()
                                 
                                 fSizeR = Particle.second->getSizeBirth() * 30.0 + fGrowth * fAge;
                                 
-                                    m_Graphics.filledCircle(Particle.second->getPositions()->at(i) - m_pCamera->getCenter()+
-                                                IGridUser::cellToDouble(Particle.second->getCell() - m_pCamera->getCell()),
+                                    m_Graphics.filledCircle(Particle.second->getPositions()->at(i) - m_hCamera->getCenter()+
+                                                IGridUser::cellToDouble(Particle.second->getCell() - m_hCamera->getCell()),
                                                 fSizeR, 100, GRAPHICS_CIRCLE_USE_CACHE);
                             }
                         }
@@ -1529,9 +1531,9 @@ void CVisualsManager::drawGrid(const DrawModeType _DrawMode)
                 double fGridTopCell;
                 
                 // Automatically scale grid depending on zoom level
-                while ((m_pCamera->getBoundingCircleRadius() / fGrid) > 100.0)
+                while ((m_hCamera->getBoundingCircleRadius() / fGrid) > 100.0)
                     fGrid*=10.0;
-                while ((m_pCamera->getBoundingCircleRadius() / fGrid) < 10.0)
+                while ((m_hCamera->getBoundingCircleRadius() / fGrid) < 10.0)
                     fGrid*=0.1;
                 
                 // If zoomed out to larger grids then universe cell, the bounding box
@@ -1543,14 +1545,14 @@ void CVisualsManager::drawGrid(const DrawModeType _DrawMode)
                 }
                 else
                 {
-                    fGridLeftCell = IGridUser::cellToDouble(m_pCamera->getCell())[0];
-                    fGridTopCell  = IGridUser::cellToDouble(m_pCamera->getCell())[1];
+                    fGridLeftCell = IGridUser::cellToDouble(m_hCamera->getCell())[0];
+                    fGridTopCell  = IGridUser::cellToDouble(m_hCamera->getCell())[1];
                 }
 
                 // Snap sub grid to sub grid size
-                fGridLeft=(std::floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
+                fGridLeft=(std::floor((m_hCamera->getBoundingBox().getLowerLeft()[0] +
                                 fGridLeftCell)/fGrid)+1.0)*fGrid-fGridLeftCell;
-                fGridTop =(std::floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
+                fGridTop =(std::floor((m_hCamera->getBoundingBox().getLowerLeft()[1] + 
                                 fGridTopCell )/fGrid)+1.0)*fGrid-fGridTopCell;
                 
                 // Change colour if on cell grid
@@ -1560,28 +1562,28 @@ void CVisualsManager::drawGrid(const DrawModeType _DrawMode)
                     m_Graphics.setColor(0.1, 0.1, 0.1);
             
                 // Vertical sub grid lines
-                while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
+                while (fGridLeft < m_hCamera->getBoundingBox().getUpperRight()[0])
                 {
                     m_Graphics.beginLine(PolygonType::LINE_SINGLE);
-                        m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
-                                                    m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                                    m_pCamera->getCenter()[1]);
-                        m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
-                                                    m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                                    m_pCamera->getCenter()[1]);
+                        m_Graphics.addVertex(fGridLeft-m_hCamera->getCenter()[0],
+                                                    m_hCamera->getBoundingBox().getLowerLeft()[1]-
+                                                    m_hCamera->getCenter()[1]);
+                        m_Graphics.addVertex(fGridLeft-m_hCamera->getCenter()[0],
+                                                    m_hCamera->getBoundingBox().getUpperRight()[1]-
+                                                    m_hCamera->getCenter()[1]);
                     m_Graphics.endLine();
                     fGridLeft += fGrid;
                 }
                 // Horizontal sub grid lines
-                while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
+                while (fGridTop  < m_hCamera->getBoundingBox().getUpperRight()[1])
                 {
                     m_Graphics.beginLine(PolygonType::LINE_SINGLE);
-                        m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                            m_pCamera->getCenter()[0],
-                                            fGridTop-m_pCamera->getCenter()[1]);
-                        m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                            m_pCamera->getCenter()[0],
-                                            fGridTop-m_pCamera->getCenter()[1]);
+                        m_Graphics.addVertex(m_hCamera->getBoundingBox().getLowerLeft()[0]-
+                                            m_hCamera->getCenter()[0],
+                                            fGridTop-m_hCamera->getCenter()[1]);
+                        m_Graphics.addVertex(m_hCamera->getBoundingBox().getUpperRight()[0]-
+                                            m_hCamera->getCenter()[0],
+                                            fGridTop-m_hCamera->getCenter()[1]);
                     m_Graphics.endLine();
                     fGridTop += fGrid;
                 }
@@ -1590,9 +1592,9 @@ void CVisualsManager::drawGrid(const DrawModeType _DrawMode)
                 fGrid *= 10.0;
                 
                 // Snap grid to grid size
-                fGridLeft=(floor((m_pCamera->getBoundingBox().getLowerLeft()[0] +
+                fGridLeft=(floor((m_hCamera->getBoundingBox().getLowerLeft()[0] +
                                 fGridLeftCell)/fGrid)+1.0)*fGrid - fGridLeftCell;
-                fGridTop =(floor((m_pCamera->getBoundingBox().getLowerLeft()[1] + 
+                fGridTop =(floor((m_hCamera->getBoundingBox().getLowerLeft()[1] + 
                                 fGridTopCell)/fGrid)+1.0)*fGrid - fGridTopCell;
                 
                 // Change colour if on cell grid
@@ -1602,28 +1604,28 @@ void CVisualsManager::drawGrid(const DrawModeType _DrawMode)
                     m_Graphics.setColor(0.2, 0.2, 0.2);
                 
                 // Vertical grid lines
-                while (fGridLeft < m_pCamera->getBoundingBox().getUpperRight()[0])
+                while (fGridLeft < m_hCamera->getBoundingBox().getUpperRight()[0])
                 {
                     m_Graphics.beginLine(PolygonType::LINE_SINGLE);
-                        m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
-                                                        m_pCamera->getBoundingBox().getLowerLeft()[1]-
-                                                        m_pCamera->getCenter()[1]);
-                        m_Graphics.addVertex(fGridLeft-m_pCamera->getCenter()[0],
-                                                        m_pCamera->getBoundingBox().getUpperRight()[1]-
-                                                        m_pCamera->getCenter()[1]);
+                        m_Graphics.addVertex(fGridLeft-m_hCamera->getCenter()[0],
+                                                        m_hCamera->getBoundingBox().getLowerLeft()[1]-
+                                                        m_hCamera->getCenter()[1]);
+                        m_Graphics.addVertex(fGridLeft-m_hCamera->getCenter()[0],
+                                                        m_hCamera->getBoundingBox().getUpperRight()[1]-
+                                                        m_hCamera->getCenter()[1]);
                     m_Graphics.endLine();
                     fGridLeft += fGrid;
                 }
                 // Horizontal grid lines
-                while (fGridTop  < m_pCamera->getBoundingBox().getUpperRight()[1])
+                while (fGridTop  < m_hCamera->getBoundingBox().getUpperRight()[1])
                 {
                     m_Graphics.beginLine(PolygonType::LINE_SINGLE);
-                        m_Graphics.addVertex(m_pCamera->getBoundingBox().getLowerLeft()[0]-
-                                            m_pCamera->getCenter()[0],
-                                            fGridTop-m_pCamera->getCenter()[1]);
-                        m_Graphics.addVertex(m_pCamera->getBoundingBox().getUpperRight()[0]-
-                                            m_pCamera->getCenter()[0],
-                                            fGridTop-m_pCamera->getCenter()[1]);
+                        m_Graphics.addVertex(m_hCamera->getBoundingBox().getLowerLeft()[0]-
+                                            m_hCamera->getCenter()[0],
+                                            fGridTop-m_hCamera->getCenter()[1]);
+                        m_Graphics.addVertex(m_hCamera->getBoundingBox().getUpperRight()[0]-
+                                            m_hCamera->getCenter()[0],
+                                            fGridTop-m_hCamera->getCenter()[1]);
                     m_Graphics.endLine();
                     fGridTop += fGrid;
                 }
@@ -1638,9 +1640,9 @@ void CVisualsManager::drawGrid(const DrawModeType _DrawMode)
             double fGrid = 1.0;
             
             // Automatically scale grid depending on zoom level
-            while ((m_pCamera->getBoundingCircleRadius() / fGrid) > 100.0)
+            while ((m_hCamera->getBoundingCircleRadius() / fGrid) > 100.0)
                 fGrid*=10.0;
-            while ((m_pCamera->getBoundingCircleRadius() / fGrid) < 10.0)
+            while ((m_hCamera->getBoundingCircleRadius() / fGrid) < 10.0)
                 fGrid*=0.1;
             
             // Now draw the text
@@ -1677,8 +1679,8 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState* const _pKinema
 {
     METHOD_ENTRY("CVisualsManager::drawKinematicsState")
     
-    if ((_fSize * m_pCamera->getZoom() > 10.0) &&
-            (m_pCamera->getBoundingBox().isInside(_pKinematicsState->getOrigin()))) 
+    if ((_fSize * m_hCamera->getZoom() > 10.0) &&
+            (m_hCamera->getBoundingBox().isInside(_pKinematicsState->getOrigin()))) 
     {
         double fTransparency = 0.5;
         
@@ -1690,20 +1692,20 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState* const _pKinema
                 m_Graphics.showVec(
                     _pKinematicsState->getPosition(Vector2d(_fSize, 0.0))-
                     _pKinematicsState->getOrigin(),
-                    _pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+                    _pKinematicsState->getOrigin()-m_hCamera->getKinematicsState().getOrigin()
                 );
                 m_Graphics.showVec(
                     _pKinematicsState->getPosition(Vector2d(0.0, _fSize))-
                     _pKinematicsState->getOrigin(),
-                    _pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+                    _pKinematicsState->getOrigin()-m_hCamera->getKinematicsState().getOrigin()
                 );
                 
-                if (_pKinematicsState->getRef()->isValid())
+                if (_pKinematicsState->getRef().isValid())
                 {
-                    Vector2d vecRef = _pKinematicsState->getRef()->get()->getOrigin() - _pKinematicsState->getOrigin();
+                    Vector2d vecRef = _pKinematicsState->getRef()->getOrigin() - _pKinematicsState->getOrigin();
                     m_Graphics.showVec(
                         vecRef,
-                        _pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin()
+                        _pKinematicsState->getOrigin()-m_hCamera->getKinematicsState().getOrigin()
                     );
                 }
 
@@ -1727,8 +1729,8 @@ void CVisualsManager::drawKinematicsState(const CKinematicsState* const _pKinema
                 TextKState.setFont(m_strFont);
                 TextKState.setSize(12);
                 TextKState.setColor({{1.0, 1.0, 1.0, fTransparency}});
-                TextKState.setPosition(m_Graphics.world2Screen(_pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin())[0],
-                                       m_Graphics.world2Screen(_pKinematicsState->getOrigin()-m_pCamera->getKinematicsState().getOrigin())[1]);
+                TextKState.setPosition(m_Graphics.world2Screen(_pKinematicsState->getOrigin()-m_hCamera->getKinematicsState().getOrigin())[0],
+                                       m_Graphics.world2Screen(_pKinematicsState->getOrigin()-m_hCamera->getKinematicsState().getOrigin())[1]);
 
             
                 TextKState.display();
@@ -1765,8 +1767,8 @@ void CVisualsManager::drawKinematicsStates(const DrawModeType _DrawMode)
                 _DrawMode
             );
         }
-        this->drawKinematicsState(&m_pCamera->getKinematicsState(),
-                                  m_pCamera->getBoundingCircleRadius() * 0.1,
+        this->drawKinematicsState(&m_hCamera->getKinematicsState(),
+                                  m_hCamera->getBoundingCircleRadius() * 0.1,
                                   _DrawMode);
     }
 }
@@ -1791,18 +1793,18 @@ void CVisualsManager::drawStars()
             CStar&       Star(pStarSystem->Star());
             Vector2d vecPos = CKinematicsState::clipToWorldLimit(
                                 Star.getOrigin() +
-                                IGridUser::cellToDouble(pStarSystem->getCell()-m_pCamera->getCell())
+                                IGridUser::cellToDouble(pStarSystem->getCell()-m_hCamera->getCell())
                             );
             Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(
-                                    Star.getOrigin() - m_pCamera->getCenter() +
+                                    Star.getOrigin() - m_hCamera->getCenter() +
                                     IGridUser::cellToDouble
                                     (pStarSystem->getCell() -
-                                    m_pCamera->getCell())
+                                    m_hCamera->getCell())
                                 );
             
 
             // Draw stars in original scale
-            if (m_pCamera->getBoundingBox().isInside(vecPos))
+            if (m_hCamera->getBoundingBox().isInside(vecPos))
             {
                 
                 double fColor = 0.1*Star.getStarType()+0.3;
@@ -1896,9 +1898,9 @@ void CVisualsManager::drawWorld()
     
     m_Graphics.beginRenderBatch("world");
     
-    this->drawObjectsPlanetsAtmospheres(m_pCamera);
-    this->drawObjects(m_pCamera);
-    this->drawParticles(m_pCamera);
+    this->drawObjectsPlanetsAtmospheres(m_hCamera);
+    this->drawObjects(m_hCamera);
+    this->drawParticles(m_hCamera);
     
     m_Graphics.endRenderBatch();
     
@@ -1911,17 +1913,17 @@ void CVisualsManager::drawWorld()
 
         for (const auto pObj : *m_pDataStorage->getObjectsByValueFront())
         {
-            if (m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() > 1.0)
+            if (m_hCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() > 1.0)
             {
                 Vector2d vecPosRel = CKinematicsState::clipToWorldLimit( 
                                     pObj.second->getCOM()-
-                                    m_pCamera->getCenter()+
+                                    m_hCamera->getCenter()+
                                     IGridUser::cellToDouble
                                     (pObj.second->getCell()-
-                                    m_pCamera->getCell()));
+                                    m_hCamera->getCell()));
                 
                 // Now draw the text
-                double fColor = m_pCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() - 1.0;
+                double fColor = m_hCamera->getZoom() * pObj.second->getGeometry()->getBoundingBox().getWidth() - 1.0;
                 if (fColor > 1.0) fColor = 1.0;
                 
                 m_TextObjects.setColor({{1.0, 1.0, 1.0, fColor}});
@@ -1932,17 +1934,17 @@ void CVisualsManager::drawWorld()
         }
         for (const auto Particle : *m_pDataStorage->getParticlesByValueFront())
         {
-            if (m_pCamera->getZoom() * Particle.second->getBoundingBox().getWidth() > 1.0)
+            if (m_hCamera->getZoom() * Particle.second->getBoundingBox().getWidth() > 1.0)
             {
                 Vector2d vecPosRel = CKinematicsState::clipToWorldLimit( 
                                     Particle.second->getBoundingBox().getUpperRight()-
-                                    m_pCamera->getCenter()+
+                                    m_hCamera->getCenter()+
                                     IGridUser::cellToDouble
                                     (Particle.second->getCell()-
-                                    m_pCamera->getCell()));
+                                    m_hCamera->getCell()));
                 
                 // Now draw the text
-                double fColor = m_pCamera->getZoom() * Particle.second->getBoundingBox().getWidth() - 1.0;
+                double fColor = m_hCamera->getZoom() * Particle.second->getBoundingBox().getWidth() - 1.0;
                 if (fColor > 1.0) fColor = 1.0;
                 
                 m_TextParticle.setColor({{1.0, 1.0, 1.0, fColor}});
@@ -1962,14 +1964,14 @@ void CVisualsManager::drawWorld()
                 CStar&       Star(pStarSystem->Star());
                 
                 Vector2d vecPos = CKinematicsState::clipToWorldLimit(Star.getOrigin() +
-                                  IGridUser::cellToDouble(pStarSystem->getCell()-m_pCamera->getCell()));
-                if (m_pCamera->getBoundingBox().isInside(vecPos))
+                                  IGridUser::cellToDouble(pStarSystem->getCell()-m_hCamera->getCell()));
+                if (m_hCamera->getBoundingBox().isInside(vecPos))
                 {
                     Vector2d vecPosRel = CKinematicsState::clipToWorldLimit(Star.getOrigin()-
-                                        m_pCamera->getCenter()+
+                                        m_hCamera->getCenter()+
                                         IGridUser::cellToDouble
                                         (pStarSystem->getCell()-
-                                          m_pCamera->getCell()));
+                                          m_hCamera->getCell()));
                     
                     // Now draw the text
                     double fColor=0.1*Star.getStarType()+0.3;
@@ -1999,10 +2001,10 @@ void CVisualsManager::drawWorld()
 //             for (int j=0; j<m_pDataStorage->getUniverse()->getStarSystems()[i]->getNumberOfPlanets(); ++j)
 //             {
 //                 m_Graphics.setColor(0.2,0.2,0.5);
-//                 m_Graphics.circle(m_pDataStorage->getUniverse()->getStarSystems()[i]->Star().getOrigin()-m_pCamera->getCenter()+
+//                 m_Graphics.circle(m_pDataStorage->getUniverse()->getStarSystems()[i]->Star().getOrigin()-m_hCamera->getCenter()+
 //                                     IGridUser::cellToDouble(
 //                                         m_pDataStorage->getUniverse()->getStarSystems()[i]->getCell()-
-//                                         m_pCamera->getCell()),
+//                                         m_hCamera->getCell()),
 //                                     std::fabs(OrbitDistribution(LocalGenerator))
 //                                     );
 //                          std::cout << "Orbit with radius " << std::fabs(OrbitDistribution(LocalGenerator)) << std::endl;
@@ -2198,9 +2200,9 @@ void CVisualsManager::myInitComInterface()
             m_RenderTargetLights.init(std::uint16_t(_fX), std::uint16_t(_fY), m_unLightmapSubsampling);
             m_RenderTargetScene.init(std::uint16_t(_fX), std::uint16_t(_fY));
             m_RenderTargetScreen.init(std::uint16_t(_fX), std::uint16_t(_fY));
-            if (m_pCamera != nullptr)
+            if (m_hCamera.isValid())
             {
-                m_pCamera->setViewport(m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane,
+                m_hCamera->setViewport(m_Graphics.getViewPort().rightplane - m_Graphics.getViewPort().leftplane,
                                        m_Graphics.getViewPort().topplane   - m_Graphics.getViewPort().bottomplane);
             }
             // Reposition all centered elements
@@ -2296,10 +2298,10 @@ void CVisualsManager::myInitComInterface()
                                                     if (pObject != nullptr)    
                                                     {
                                                         pCam->setCell(pObject->getCell());
-                                                        if (pCam->getKinematicsState().getRef()->isValid())
+                                                        if (pCam->getKinematicsState().getRef().isValid())
                                                         {
                                                             pCam->setPosition(pObject->getKinematicsState().getOriginReferredTo(
-                                                                                *(pCam->getKinematicsState().getRef()->get())) +
+                                                                                *(pCam->getKinematicsState().getRef().ptr())) +
                                                                                 pObject->getGeometry()->getCOM());
                                                         }
                                                         else
@@ -2336,7 +2338,7 @@ void CVisualsManager::myInitComInterface()
                                       "system", "visuals"  
     );
     m_pComInterface->registerFunction("cam_get_position",
-                                      CCommand<Vector2d>([&]() -> Vector2d{return m_pCamera->getCenter();}),
+                                      CCommand<Vector2d>([&]() -> Vector2d{return m_hCamera->getCenter();}),
                                       "Get the global position of currently active camera",
                                       {{ParameterType::VEC2DDOUBLE, "Position (x, y)"}},
                                       "system"

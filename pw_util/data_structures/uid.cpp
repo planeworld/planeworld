@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@ std::deque<UIDType> CUID::s_UnusedUIDs;
 /// Global list for reference counting of uids
 std::unordered_map<UIDType, std::uint32_t> CUID::s_ReferencedUIDs;
 
-/// Global mutex
-std::mutex CUID::m_Mtx;
+/// Global lock
+CSpinlock CUID::s_Access;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
@@ -55,7 +55,7 @@ CUID::CUID()
     METHOD_ENTRY("CUID::CUID")
     DTOR_CALL("CUID::CUID")
     
-    std::lock_guard<std::mutex> lock(m_Mtx);
+    s_Access.acquireLock();
     
     if (s_UnusedUIDs.empty())
     {
@@ -68,6 +68,8 @@ CUID::CUID()
     }
     s_ReferencedUIDs[m_nUID] = 1u;
     m_strName = "UID_"+std::to_string(m_nUID);
+    
+    s_Access.releaseLock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,9 +87,11 @@ CUID::CUID(const CUID& _UID)
     METHOD_ENTRY("CUID::CUID")
     DTOR_CALL("CUID::CUID")
     
-    std::lock_guard<std::mutex> lock(m_Mtx);
+    s_Access.acquireLock();
     
     this->copy(_UID);
+    
+    s_Access.releaseLock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,7 +108,7 @@ CUID::~CUID()
     METHOD_ENTRY("CUID::~CUID")
     DTOR_CALL("CUID::~CUID")
     
-    std::lock_guard<std::mutex> lock(m_Mtx);
+    s_Access.acquireLock();
     
     s_ReferencedUIDs[m_nUID] -= 1u;
     if (s_ReferencedUIDs[m_nUID] == 0u)
@@ -112,6 +116,8 @@ CUID::~CUID()
         s_UnusedUIDs.push_back(m_nUID);
         s_ReferencedUIDs.erase(m_nUID);
     }
+    
+    s_Access.releaseLock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,7 +133,7 @@ CUID& CUID::operator=(const CUID& _UID)
     
     if (this != &_UID)
     {
-        std::lock_guard<std::mutex> lock(m_Mtx);
+        s_Access.acquireLock();
         
         s_ReferencedUIDs[m_nUID] -= 1u;
         if (s_ReferencedUIDs[m_nUID] == 0u)
@@ -137,6 +143,8 @@ CUID& CUID::operator=(const CUID& _UID)
         }
             
         this->copy(_UID);
+        
+        s_Access.releaseLock();
     }
     return *this;
 }
@@ -150,7 +158,7 @@ void CUID::setNewID()
 {
     METHOD_ENTRY("CUID::setNewID")
     
-    std::lock_guard<std::mutex> lock(m_Mtx);
+    s_Access.acquireLock();
     
     UIDType nTmp;
     if (s_UnusedUIDs.empty())
@@ -171,55 +179,8 @@ void CUID::setNewID()
     s_ReferencedUIDs[nTmp] = 1u;
     m_nUID = nTmp;
     m_strName = "UID_"+std::to_string(m_nUID);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Input stream for game state information
-///
-/// \param _is  Source stream
-/// \param _UID CUID instance to stream
-///
-/// \return Remaining stream with game state information
-///
-////////////////////////////////////////////////////////////////////////////////
-std::istream& operator>>(std::istream& _is, CUID& _UID)
-{
-    METHOD_ENTRY("CUID::operator>>")
     
-    std::string strTmp;
-    _is >> strTmp;
-    
-    /// \todo Stream static members (queue and uid counter)
-    _is >> _UID.m_nUID;
-    _is >> _UID.s_nUID;
-    _is >> _UID.m_strName;
-    
-    return _is;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief Output stream for game state information
-///
-/// \param _os  Source stream
-/// \param _UID CUID instance to stream
-///
-/// \return Stream with game state information of CUID instance
-///
-////////////////////////////////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream& _os, CUID& _UID)
-{
-    METHOD_ENTRY("CUID::operator<<")
-    
-    _os << "UID:" << std::endl;
-    
-    /// \todo Stream static members (queue and uid counter)
-    _os << _UID.m_nUID << std::endl;
-    _os << _UID.s_nUID << std::endl;
-    _os << _UID.m_strName << std::endl;
-    
-    return _os;
+    s_Access.releaseLock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -237,4 +198,10 @@ void CUID::copy(const CUID& _UID)
     m_strName = _UID.m_strName;
     s_ReferencedUIDs[_UID.m_nUID] += 1u;
 }
+
+SERIALIZE_IMPL(CUID,
+    SERIALIZE("uid_value", m_nUID)
+    SERIALIZE("uid_value_max", s_nUID)
+    SERIALIZE("uid_name", m_strName)
+)
 

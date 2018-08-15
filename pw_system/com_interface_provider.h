@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2017-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,7 +50,6 @@ class IComInterfaceProvider
    
         //--- Constructor/Destructor -----------------------------------------//
         IComInterfaceProvider() : m_pComInterface(nullptr){}
-        virtual ~IComInterfaceProvider() {}
 
         //--- Methods --------------------------------------------------------//
         void initComInterface(CComInterface* const, const std::string&);
@@ -79,15 +78,26 @@ inline void IComInterfaceProvider::initComInterface(CComInterface* const _pComIn
                                                    const std::string& _strWriterDomain)
 {
     METHOD_ENTRY("IComInterfaceProvider::initComInterface")
+
+    DOM_DEV(    
+        if (_pComInterface == nullptr)
+        {
+            WARNING_MSG("Com Interface Provider", "No valid com interface set")
+            goto DomDevNoComInterface;
+        }
+    )
     
     if (m_pComInterface != nullptr)
     {
         NOTICE_MSG("Com Interface Provider", "Com interface instance already given, overwriting.")
     }
+    
     m_pComInterface = _pComInterface;
     m_pComInterface->registerWriterDomain(_strWriterDomain);
     
     this->myInitComInterface();
+    
+    DOM_DEV(DomDevNoComInterface:)
 }
 
 #endif // COM_INTERFACE_PROVIDER_H

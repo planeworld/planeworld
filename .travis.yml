@@ -19,8 +19,8 @@ install:
   - mkdir buildlibnoise
   - cd buildlibnoise
   - cmake -DCMAKE_BUILD_TYPE=Release ../libnoise2d
-  - make
-  - sudo make install
+  - make -j8
+  - sudo make -j8 install
   - cd ..
   - wget https://www.sfml-dev.org/files/SFML-2.4.2-linux-gcc-64-bit.tar.gz
   - tar xf SFML-2.4.2-linux-gcc-64-bit.tar.gz
@@ -33,4 +33,6 @@ script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Release ../
-  - make
+  - make -j8
+  - sudo make -j8 install
+

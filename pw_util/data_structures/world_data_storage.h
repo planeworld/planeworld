@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2016 Torsten Büschenfeld
+// Copyright (C) 2014-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@
 #include "joint.h"
 #include "multi_buffer.h"
 #include "spinlock.h"
+#include "serializable.h"
 #include "uid_user.h"
 #include "universe.h"
 
@@ -95,7 +96,7 @@ const std::uint16_t WDS_DEFAULT_UID_BUFFER_SIZE = 32768; ///< Default size of va
 /// \brief Class that stores all physics data
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CWorldDataStorage
+class CWorldDataStorage : public ISerializable
 {
     
     public:
@@ -117,6 +118,8 @@ class CWorldDataStorage
         void addShape(IShape*);
         bool addThruster(CThruster*);
         bool addUIDUser(IUIDUser*);
+        
+        bool removeShape(const UIDType);
         
         void updateObject(const UIDType);
         
@@ -189,9 +192,11 @@ class CWorldDataStorage
         
         JointsType                  m_Joints;                   ///< List of joints
         
-        std::mutex                  m_MutexFrontNew;            ///< Mutex for thread safety when swapping
+        CSpinlock                   m_AccessFront;              ///< Spinlock for thread safety when swapping
         bool                        m_bFrontNew;                ///< Indicates new information for front buffer
         double                      m_fTimeScale;               ///< Factor for global acceleration of time
+        
+        SERIALIZE_DECL
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
@@ -258,7 +263,7 @@ inline EmittersByValueType* CWorldDataStorage::getEmittersByValue()
 inline ParticlesByNameType* CWorldDataStorage::getParticlesByNameFront()
 {
     METHOD_ENTRY("CWorldDataStorage::getParticlesByNameFront")
-    return m_ParticlesByName.getBuffer(BUFFER_QUADRUPLE_FRONT);
+    return m_ParticlesByName.getBuffer<BUFFER_QUADRUPLE_FRONT>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -271,7 +276,7 @@ inline ParticlesByNameType* CWorldDataStorage::getParticlesByNameFront()
 inline ParticlesByNameType* CWorldDataStorage::getParticlesByNameBack()
 {
     METHOD_ENTRY("CWorldDataStorage::getParticlesByNameBack")
-    return m_ParticlesByName.getBuffer(BUFFER_QUADRUPLE_BACK);
+    return m_ParticlesByName.getBuffer<BUFFER_QUADRUPLE_BACK>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +289,7 @@ inline ParticlesByNameType* CWorldDataStorage::getParticlesByNameBack()
 inline ParticlesByValueType* CWorldDataStorage::getParticlesByValueBack()
 {
     METHOD_ENTRY("CWorldDataStorage::getParticlesByValueBack")
-    return m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+    return m_ParticlesByValue.getBuffer<BUFFER_QUADRUPLE_BACK>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -297,7 +302,7 @@ inline ParticlesByValueType* CWorldDataStorage::getParticlesByValueBack()
 inline ParticlesByValueType* CWorldDataStorage::getParticlesByValueFront()
 {
     METHOD_ENTRY("CWorldDataStorage::getParticlesByValueFront")
-    return m_ParticlesByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
+    return m_ParticlesByValue.getBuffer<BUFFER_QUADRUPLE_FRONT>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -310,7 +315,7 @@ inline ParticlesByValueType* CWorldDataStorage::getParticlesByValueFront()
 inline ObjectsByValueType* CWorldDataStorage::getObjectsByValueBack()
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectsByValueBack")
-    return m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+    return m_ObjectsByValue.getBuffer<BUFFER_QUADRUPLE_BACK>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -323,7 +328,7 @@ inline ObjectsByValueType* CWorldDataStorage::getObjectsByValueBack()
 inline ObjectsByValueType* CWorldDataStorage::getObjectsByValueFront()
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectsByValueFront")
-    return m_ObjectsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
+    return m_ObjectsByValue.getBuffer<BUFFER_QUADRUPLE_FRONT>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -336,7 +341,7 @@ inline ObjectsByValueType* CWorldDataStorage::getObjectsByValueFront()
 inline ObjectsPlanetsByValueType* CWorldDataStorage::getObjectsPlanetsByValueBack()
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectsPlanetsByValueBack")
-    return m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+    return m_ObjectsPlanetsByValue.getBuffer<BUFFER_QUADRUPLE_BACK>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -349,7 +354,7 @@ inline ObjectsPlanetsByValueType* CWorldDataStorage::getObjectsPlanetsByValueBac
 inline ObjectsPlanetsByValueType* CWorldDataStorage::getObjectsPlanetsByValueFront()
 {
     METHOD_ENTRY("CWorldDataStorage::getObjectsPlanetsByValueFront")
-    return m_ObjectsPlanetsByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
+    return m_ObjectsPlanetsByValue.getBuffer<BUFFER_QUADRUPLE_FRONT>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -375,7 +380,7 @@ inline ThrustersByValueType* CWorldDataStorage::getThrustersByValue()
 inline UIDUsersByValueType* CWorldDataStorage::getUIDUsersByValueBack()
 {
     METHOD_ENTRY("CWorldDataStorage::getUIDUsersByValueBack")
-    return m_UIDUsersByValue.getBuffer(BUFFER_QUADRUPLE_BACK);
+    return m_UIDUsersByValue.getBuffer<BUFFER_QUADRUPLE_BACK>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -414,7 +419,7 @@ inline ShapesByValueType* CWorldDataStorage::getShapesByValue()
 inline UIDUsersByValueType* CWorldDataStorage::getUIDUsersByValueFront()
 {
     METHOD_ENTRY("CWorldDataStorage::getUIDUsersByValueFront")
-    return m_UIDUsersByValue.getBuffer(BUFFER_QUADRUPLE_FRONT);
+    return m_UIDUsersByValue.getBuffer<BUFFER_QUADRUPLE_FRONT>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

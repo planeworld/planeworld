@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2016-2018 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,26 +33,26 @@
 
 //--- Standard header --------------------------------------------------------//
 #include <array>
-#include <mutex>
 
 //--- Program header ---------------------------------------------------------//
 #include "log.h"
+#include "serializable.h"
 
 
 //--- Constants for readable access ------------------------------------------//
-const std::uint8_t BUFFER_DOUBLE = 2u;          ///< Number of buffers in double buffer
-const std::uint8_t BUFFER_TRIPLE = 3u;          ///< Number of buffers in triple buffer
-const std::uint8_t BUFFER_QUADRUPLE = 4u;       ///< Number of buffers in quadruple buffer
-const std::uint8_t BUFFER_FRONT = 0u;           ///< Index front buffer
-const std::uint8_t BUFFER_DOUBLE_FRONT = 0u;    ///< Index front buffer in double buffer
-const std::uint8_t BUFFER_TRIPLE_FRONT = 0u;    ///< Index front buffer in triple buffer
-const std::uint8_t BUFFER_QUADRUPLE_FRONT = 0u; ///< Index front buffer in quadruple buffer
-const std::uint8_t BUFFER_DOUBLE_BACK = 1u;     ///< Index back buffer in double buffer
-const std::uint8_t BUFFER_TRIPLE_BACK = 2u;     ///< Index back buffer in triple buffer
-const std::uint8_t BUFFER_QUADRUPLE_BACK = 3u;  ///< Index back buffer in quadruple buffer
-const std::uint8_t BUFFER_TRIPLE_MIDDLE = 1u;   ///< Index middle buffer in triple buffer
-const std::uint8_t BUFFER_QUADRUPLE_MIDDLE_BACK = 2u;   ///< Index second middle buffer in quadruple buffer
-const std::uint8_t BUFFER_QUADRUPLE_MIDDLE_FRONT = 1u;  ///< Index first middle buffer in quadruple buffer
+constexpr std::uint8_t BUFFER_DOUBLE = 2u;          ///< Number of buffers in double buffer
+constexpr std::uint8_t BUFFER_TRIPLE = 3u;          ///< Number of buffers in triple buffer
+constexpr std::uint8_t BUFFER_QUADRUPLE = 4u;       ///< Number of buffers in quadruple buffer
+constexpr std::uint8_t BUFFER_FRONT = 0u;           ///< Index front buffer
+constexpr std::uint8_t BUFFER_DOUBLE_FRONT = 0u;    ///< Index front buffer in double buffer
+constexpr std::uint8_t BUFFER_TRIPLE_FRONT = 0u;    ///< Index front buffer in triple buffer
+constexpr std::uint8_t BUFFER_QUADRUPLE_FRONT = 0u; ///< Index front buffer in quadruple buffer
+constexpr std::uint8_t BUFFER_DOUBLE_BACK = 1u;     ///< Index back buffer in double buffer
+constexpr std::uint8_t BUFFER_TRIPLE_BACK = 2u;     ///< Index back buffer in triple buffer
+constexpr std::uint8_t BUFFER_QUADRUPLE_BACK = 3u;  ///< Index back buffer in quadruple buffer
+constexpr std::uint8_t BUFFER_TRIPLE_MIDDLE = 1u;   ///< Index middle buffer in triple buffer
+constexpr std::uint8_t BUFFER_QUADRUPLE_MIDDLE_BACK = 2u;   ///< Index second middle buffer in quadruple buffer
+constexpr std::uint8_t BUFFER_QUADRUPLE_MIDDLE_FRONT = 1u;  ///< Index first middle buffer in quadruple buffer
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -72,7 +72,7 @@ class CMultiBuffer{};
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template<std::uint8_t N, class T>
-class CMultiBuffer<N,T>
+class CMultiBuffer<N,T> : public ISerializable
 {
     
     public:
@@ -85,39 +85,37 @@ class CMultiBuffer<N,T>
         std::size_t  getContainerSize() const {return 1;}
         
         //--- Methods --------------------------------------------------------//
-        T* getBuffer(const std::uint8_t);
+        template<std::uint8_t I>
+        T* getBuffer();
         
         void add(const T&);
         void add(const std::array<T, N>&);
+        
+        void resizeBuffer(const std::size_t _nSize);
                 
         void buffer(const T&);
-        void swap(const std::uint8_t, const std::uint8_t);
+        template<std::uint8_t I, std::uint8_t J>
+        void swap();
 
-//         //--- friends --------------------------------------------------------//
-//         template <class U>
-//         friend std::istream&    operator>>(std::istream&, CMultiBuffer<U>&);
-//         template <class U>
-//         friend std::ostream&    operator<<(std::ostream&, const CMultiBuffer<U>&);
-                
     private:
-        
+
         //--- Variables [private] --------------------------------------------//
         std::array<T*,N>    m_BufferRef;    ///< References to buffers
         std::array<T ,N>    m_Buffer;       ///< Buffers
         
-        std::mutex          m_Mutex;        ///< Mutex for thread safety
+        SERIALIZE_DECL
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Class that implements a triple buffer
+/// \brief Class that implements a multi buffer
 ///
 /// This is a specialisation for unary containers that implement push_back,
 /// e.g. std::vector
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template<std::uint8_t N, class TContainer, class TVal>
-class CMultiBuffer<N, TContainer, TVal>
+class CMultiBuffer<N, TContainer, TVal> : public ISerializable
 {
     
     public:
@@ -130,22 +128,21 @@ class CMultiBuffer<N, TContainer, TVal>
         std::size_t         getContainerSize() const {return m_Buffer[0].size();}
         
         //--- Methods --------------------------------------------------------//
-        TContainer*         getBuffer(const std::uint8_t);
+        template<std::uint8_t I>
+        TContainer*         getBuffer();
         std::array<TVal,N>  getElementAll(const std::uint32_t&);
                 
         void add(const TVal&);
         void add(const std::array<TVal, N>&);
-//         void buffer(const TContainer&);
-        void copyDeep(const std::uint8_t, const std::uint8_t);
+        template<std::uint8_t I, std::uint8_t J>
+        void copyDeep();
+        void fillBuffer(const TVal&);
+        void resizeBuffer(const std::size_t _nSize);
+        
         void setAt(const std::uint32_t, const TVal&);
         void setAt(const std::uint32_t, const std::array<TVal, N>&);
-        void swap(const std::uint8_t, const std::uint8_t);
-
-//         //--- friends --------------------------------------------------------//
-//         template <class U>
-//         friend std::istream&    operator>>(std::istream&, CMultiBuffer<U>&);
-//         template <class U>
-//         friend std::ostream&    operator<<(std::ostream&, const CMultiBuffer<U>&);
+        template<std::uint8_t I, std::uint8_t J>
+        void swap();
                 
     private:
         
@@ -153,7 +150,7 @@ class CMultiBuffer<N, TContainer, TVal>
         std::array<TContainer*,N>   m_BufferRef;    ///< References to buffers
         std::array<TContainer ,N>   m_Buffer;       ///< Buffers
         
-        std::mutex                  m_Mutex;        ///< Mutex for thread safety
+        SERIALIZE_DECL
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +162,7 @@ class CMultiBuffer<N, TContainer, TVal>
 ///
 ////////////////////////////////////////////////////////////////////////////////
 template<std::uint8_t N, class TContainer, class TKey, class TVal>
-class CMultiBuffer<N, TContainer, TKey, TVal>
+class CMultiBuffer<N, TContainer, TKey, TVal> : public ISerializable
 {
     
     public:
@@ -178,28 +175,28 @@ class CMultiBuffer<N, TContainer, TKey, TVal>
         std::size_t  getContainerSize() const {return m_Buffer[0].size();}
         
         //--- Methods --------------------------------------------------------//
-        TContainer*         getBuffer(const std::uint8_t);
+        template<std::uint8_t I>
+        TContainer*         getBuffer();
         std::array<TVal,N>  getElementAll(const TKey&);
         
         void add(const TKey&, const TVal&);
         void add(const TKey&, const std::array<TVal, N>&);
-        void copyDeep(const std::uint8_t, const std::uint8_t);
-//         void buffer(const TContainer&);
-        void swap(const std::uint8_t, const std::uint8_t);
+        template<std::uint8_t I, std::uint8_t J>
+        void copyDeep();
+        
+        void fillBuffer(const TVal&);
+        void resizeBuffer(const std::size_t _nSize);
+        
+        template<std::uint8_t I, std::uint8_t J>
+        void swap();
 
-//         //--- friends --------------------------------------------------------//
-//         template <class U>
-//         friend std::istream&    operator>>(std::istream&, CMultiBuffer<U>&);
-//         template <class U>
-//         friend std::ostream&    operator<<(std::ostream&, const CMultiBuffer<U>&);
-                
     private:
         
         //--- Variables [private] --------------------------------------------//
         std::array<TContainer*,N>   m_BufferRef;    ///< References to buffers
         std::array<TContainer ,N>   m_Buffer;       ///< Buffers
         
-        std::mutex    m_Mutex;        ///< Mutex for thread safety
+        SERIALIZE_DECL
 };
 
 
