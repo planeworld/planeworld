@@ -1,7 +1,6 @@
 SET(THREADS_PREFER_PTHREAD_FLAG ON)
 
 FIND_PACKAGE(OpenGL REQUIRED)
-# FIND_PACKAGE(glm REQUIRED)
 
 INCLUDE_DIRECTORIES (
     ${OPENGL_INCLUDE_DIR}
@@ -53,22 +52,26 @@ ADD_EXECUTABLE (pw_gl_test_buffers ${BUFFERS_SRCS})
 ADD_EXECUTABLE (pw_gl_test_font_rendering ${FONT_RENDERING_SRCS})
 ADD_EXECUTABLE (pw_gl_test_render_to_texture ${RENDER_TO_TEXTURE_SRCS})
 
+add_dependencies (pw_gl_test_buffers OpenGL::OpenGL)
+add_dependencies (pw_gl_test_font_rendering OpenGL::OpenGL)
+add_dependencies (pw_gl_test_render_to_texture OpenGL::OpenGL)
+
 TARGET_LINK_LIBRARIES (pw_gl_test_buffers
-    ${OPENGL_gl_LIBRARY}
+    OpenGL::OpenGL
     sfml-system
     sfml-window
     sfml-graphics
 )
 
 TARGET_LINK_LIBRARIES (pw_gl_test_font_rendering
-    ${OPENGL_gl_LIBRARY}
+    OpenGL::OpenGL
     sfml-system
     sfml-window
     sfml-graphics
 )
 
 TARGET_LINK_LIBRARIES (pw_gl_test_render_to_texture
-    ${OPENGL_gl_LIBRARY}
+    OpenGL::OpenGL
     sfml-system
     sfml-window
     sfml-graphics
