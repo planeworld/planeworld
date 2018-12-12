@@ -103,7 +103,7 @@ IF (UNIX)
         ${X11_X11_LIB})
 ENDIF()
 
-add_dependencies (planeworld OpenGL::OpenGL)
+add_dependencies (planeworld OpenGL::GL)
 
 TARGET_LINK_LIBRARIES (planeworld
     OpenGL::GL

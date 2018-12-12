@@ -52,9 +52,9 @@ ADD_EXECUTABLE (pw_gl_test_buffers ${BUFFERS_SRCS})
 ADD_EXECUTABLE (pw_gl_test_font_rendering ${FONT_RENDERING_SRCS})
 ADD_EXECUTABLE (pw_gl_test_render_to_texture ${RENDER_TO_TEXTURE_SRCS})
 
-add_dependencies (pw_gl_test_buffers OpenGL::OpenGL)
-add_dependencies (pw_gl_test_font_rendering OpenGL::OpenGL)
-add_dependencies (pw_gl_test_render_to_texture OpenGL::OpenGL)
+add_dependencies (pw_gl_test_buffers OpenGL::GL)
+add_dependencies (pw_gl_test_font_rendering OpenGL::GL)
+add_dependencies (pw_gl_test_render_to_texture OpenGL::GL)
 
 TARGET_LINK_LIBRARIES (pw_gl_test_buffers
     OpenGL::GL
