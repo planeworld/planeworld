@@ -57,21 +57,21 @@ add_dependencies (pw_gl_test_font_rendering OpenGL::OpenGL)
 add_dependencies (pw_gl_test_render_to_texture OpenGL::OpenGL)
 
 TARGET_LINK_LIBRARIES (pw_gl_test_buffers
-    OpenGL::OpenGL
+    OpenGL::GL
     sfml-system
     sfml-window
     sfml-graphics
 )
 
 TARGET_LINK_LIBRARIES (pw_gl_test_font_rendering
-    OpenGL::OpenGL
+    OpenGL::GL
     sfml-system
     sfml-window
     sfml-graphics
 )
 
 TARGET_LINK_LIBRARIES (pw_gl_test_render_to_texture
-    OpenGL::OpenGL
+    OpenGL::GL
     sfml-system
     sfml-window
     sfml-graphics
