@@ -106,7 +106,7 @@ ENDIF()
 add_dependencies (planeworld OpenGL::OpenGL)
 
 TARGET_LINK_LIBRARIES (planeworld
-    OpenGL::OpenGL
+    OpenGL::GL
     ${LUA_LIBRARIES}
     ${X11LIBRARIES}
     noise2d
