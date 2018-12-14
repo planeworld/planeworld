@@ -98,8 +98,15 @@ SET(SRCS
 
 ADD_EXECUTABLE (planeworld ${SRCS})
 
+IF (UNIX)
+    TARGET_LINK_LIBRARIES (planeworld
+        ${X11_X11_LIB})
+ENDIF()
+
+add_dependencies (planeworld OpenGL::GL)
+
 TARGET_LINK_LIBRARIES (planeworld
-    ${OPENGL_gl_LIBRARY}
+    OpenGL::GL
     ${LUA_LIBRARIES}
     ${X11LIBRARIES}
     noise2d
@@ -107,10 +114,6 @@ TARGET_LINK_LIBRARIES (planeworld
     sfml-window
     Threads::Threads
 )
-IF (UNIX)
-    TARGET_LINK_LIBRARIES (planeworld
-        ${X11_X11_LIB})
-ENDIF()
 
 INSTALL (TARGETS planeworld
     RUNTIME DESTINATION bin

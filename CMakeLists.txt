@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
+SET(OpenGL_GL_PREFERENCE "GLVND")
 SET(CMAKE_CXX_FLAGS "-std=c++14 -mtune=native -Wall -Wextra -pedantic" CACHE STRING "")
 
 SET(DEFAULTDATADIR ${CMAKE_INSTALL_PREFIX}/share/planeworld)
