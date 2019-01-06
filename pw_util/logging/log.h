@@ -251,15 +251,8 @@ inline bool CLog::removeListener(const std::string& _strListener)
 {
     METHOD_ENTRY("CLog::removeListener")
     
-    DOM_DEV(
-        auto nRes = m_LogListeners.erase(_strListener);
-        if (nRes == 0)
-        {
-            ERROR_MSG("Log", "Listener <" << _strListener << "> unknown, cannot remove.")
-            return false;
-        }
-        return true;
-    )
+    PW_ASSERT(m_LogListeners.erase(_strListener) != 0);
+    
     m_LogListeners.erase(_strListener);
     return true;
 }
