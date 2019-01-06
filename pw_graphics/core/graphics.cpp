@@ -754,9 +754,11 @@ void CGraphics::applyCamMovement()
     }
     else
     {
-        glm::scale(m_matScale, glm::vec3(GLfloat(m_fCamZoom), GLfloat(m_fCamZoom), 1.0f));
-        glm::rotate(m_matRotate, float(-m_fCamAng), glm::vec3(0.0f, 0.0f, 1.0f));
-        m_matTransform = m_matProjection * m_matScale * m_matRotate;
+        glm::mat4  matScaledAndRotated;
+        glm::mat4  matScaled;
+        matScaled = glm::scale(m_matProjection, glm::vec3(GLfloat(m_fCamZoom), GLfloat(m_fCamZoom), 1.0f));
+        matScaledAndRotated = glm::rotate(matScaled, float(-m_fCamAng), glm::vec3(0.0f, 0.0f, 1.0f));
+        m_matTransform = matScaledAndRotated;
     }
 
     if (m_pRenderMode)
