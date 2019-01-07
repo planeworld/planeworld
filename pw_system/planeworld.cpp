@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2009-2018 Torsten Büschenfeld
+// Copyright (C) 2009-2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,14 +44,10 @@
 #include "log.h"
 
 #include "conf_pw.h"
-#include "circular_buffer.h"
-#include "particle_emitter.h"
 #include "game_state_manager.h"
 #include "input_manager.h"
 #include "lua_manager.h"
 #include "physics_manager.h"
-#include "objects_emitter.h"
-#include "thruster.h"
 #include "visuals_manager.h"
 
 //--- Misc-Header ------------------------------------------------------------//
