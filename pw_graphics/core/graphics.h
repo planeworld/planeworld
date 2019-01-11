@@ -253,8 +253,6 @@ class CGraphics
         ViewPort            m_ViewPort;                 ///< Viewport for graphics
         glm::mat4           m_matTransform;             ///< Final transformation matrix
         glm::mat4           m_matProjection;            ///< Projection matrix
-        glm::mat4           m_matRotate;                ///< Rotation matrix
-        glm::mat4           m_matScale;                 ///< Scale matrix
         bool                m_bScreenSpace;             ///< Indicates if coordinates are screen space related
         
         std::uint32_t       m_uncI = 0u;                ///< Index counter

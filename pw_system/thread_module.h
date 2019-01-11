@@ -52,6 +52,7 @@ class IThreadModule
 
         //--- Constructor/Destructor -----------------------------------------//
         IThreadModule();
+        virtual ~IThreadModule() {}
         
         //--- Constant Methods -----------------------------------------------//
         const double&   getFrequency() const;

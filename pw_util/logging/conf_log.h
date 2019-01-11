@@ -66,7 +66,7 @@
 /// \def DOMAIN_MEMORY_FREED
 ///			Defines if memory deallocation should be logged
 /// \def DOMAIN_DEV_LOGIC
-///         Defines if development logic should be checked
+///         [DEPRECATED, use PW_ASSERT] Defines if development logic should be checked
 /// \def DOMAIN_STATS 
 ///         Defines if statistics should be printed out
 /// \def DOMAIN_VAR	
@@ -105,7 +105,7 @@
 #define DOMAIN_DESTRUCTOR
 #define DOMAIN_MEMORY_ALLOCATED
 #define DOMAIN_MEMORY_FREED
-#define DOMAIN_DEV_LOGIC
+// #define DOMAIN_DEV_LOGIC
 #define DOMAIN_STATS
 #define DOMAIN_VAR
 #define DOMAIN_FILEIO

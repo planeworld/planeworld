@@ -449,6 +449,7 @@ bool CPhysicsManager::processFrame()
         this->dynamics(nFrame);
         this->collisionDetection();
         this->updateCells();
+        std::cout << "TIME " << m_SimTimer[0].getSecondsRaw() << std::endl;
         
         m_bProcessOneFrame = false;
     }
