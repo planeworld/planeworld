@@ -145,6 +145,8 @@ int main()
     std::thread ReadThread(read);
     std::thread ReadAtomicThread(readAtomic);
     
+    INFO_MSG("Multithreading Evaluation", "Running...")
+    
     IncrementThread.join();
     IncrementAtomicThread.join();
     ReadThread.join();

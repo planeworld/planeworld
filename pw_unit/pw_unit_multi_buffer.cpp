@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2016 Torsten Büschenfeld
+// Copyright (C) 2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,14 +47,6 @@
 
 //--- Misc-Header ------------------------------------------------------------//
 
-/// Data for unit tests
-class CObject
-{
-    public: 
-        std::string strName = "";
-        std::uint32_t nVal = 0;
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Main function
@@ -73,32 +65,32 @@ int main()
     INFO_MSG("Unit test", "Starting unit test...")
     INDENT()
     
-    CMultiBuffer<BUFFER_DOUBLE, CObject> DoubleBufferSingle;
-    CMultiBuffer<BUFFER_DOUBLE, std::vector<CObject>, CObject> DoubleBufferUnary;
-    CMultiBuffer<BUFFER_DOUBLE, std::unordered_map<std::string, CObject>, std::string, CObject> DoubleBufferBinary;
+    CMultiBuffer<BUFFER_DOUBLE, int> DoubleBufferSingle;
+    CMultiBuffer<BUFFER_DOUBLE, std::vector<int>, int> DoubleBufferUnary;
+    CMultiBuffer<BUFFER_DOUBLE, std::unordered_map<std::string, int>, std::string, int> DoubleBufferBinary;
     
    
-    CObject Obj0; Obj0.nVal=0; Obj0.strName="Obj0";
-    CObject Obj1; Obj1.nVal=1; Obj1.strName="Obj1";
-    CObject Obj2; Obj2.nVal=2; Obj2.strName="Obj2";
-    CObject Obj3; Obj3.nVal=3; Obj3.strName="Obj3";
+    int n0=0; std::string str0="zero";
+    int n1=1; std::string str1="one";
+    int n2=2; std::string str2="two";
+    int n3=3; std::string str3="three";
 
     INFO_MSG("Unit test", "Testing double buffer")
     
     INDENT()
     INFO_MSG("Unit test", "Insertion")
     
-    DoubleBufferSingle.add(Obj0);
+    DoubleBufferSingle.add(n0);
     
-    DoubleBufferUnary.add(Obj0);
-    DoubleBufferUnary.add(Obj1);
-    DoubleBufferUnary.add(Obj2);
-    DoubleBufferUnary.add(Obj3);
+    DoubleBufferUnary.add(n0);
+    DoubleBufferUnary.add(n1);
+    DoubleBufferUnary.add(n2);
+    DoubleBufferUnary.add(n3);
     
-    DoubleBufferBinary.add(Obj0.strName, Obj0);
-    DoubleBufferBinary.add(Obj1.strName, Obj1);
-    DoubleBufferBinary.add(Obj2.strName, Obj2);
-    DoubleBufferBinary.add(Obj3.strName, Obj3);
+    DoubleBufferBinary.add(str0, n0);
+    DoubleBufferBinary.add(str1, n1);
+    DoubleBufferBinary.add(str2, n2);
+    DoubleBufferBinary.add(str3, n3);
     
     if (DoubleBufferSingle.getBufferSize() != 2u)
     {
@@ -134,29 +126,28 @@ int main()
     
     
     INFO_MSG("Unit test", "Swapping")
-    DoubleBufferSingle.swap(BUFFER_DOUBLE_BACK, BUFFER_DOUBLE_FRONT);
-    DoubleBufferUnary.swap(BUFFER_DOUBLE_BACK, BUFFER_DOUBLE_FRONT);
-    DoubleBufferBinary.swap(BUFFER_DOUBLE_BACK, BUFFER_DOUBLE_FRONT);
+    DoubleBufferSingle.swap<BUFFER_DOUBLE_BACK, BUFFER_DOUBLE_FRONT>();
+    DoubleBufferUnary.swap<BUFFER_DOUBLE_BACK, BUFFER_DOUBLE_FRONT>();
+    DoubleBufferBinary.swap<BUFFER_DOUBLE_BACK, BUFFER_DOUBLE_FRONT>();
     
 
-    if ((DoubleBufferSingle.getBuffer(BUFFER_DOUBLE_FRONT)->nVal != 0u) ||
-        (DoubleBufferSingle.getBuffer(BUFFER_DOUBLE_FRONT)->strName != "Obj0"))
+    if (*DoubleBufferSingle.getBuffer<BUFFER_DOUBLE_FRONT>() != 0)
     {
-        ERROR_MSG("Unit test", "DoubleBufferBinary has wrong entry.")
+        ERROR_MSG("Unit test", "DoubleBufferSingle has wrong entry.")
         return EXIT_FAILURE;
     }
-    if ((DoubleBufferUnary.getBuffer(BUFFER_DOUBLE_FRONT)->at(0).nVal != 0u) ||
-        (DoubleBufferUnary.getBuffer(BUFFER_DOUBLE_FRONT)->at(1).nVal != 1u) ||
-        (DoubleBufferUnary.getBuffer(BUFFER_DOUBLE_FRONT)->at(2).nVal != 2u) ||
-        (DoubleBufferUnary.getBuffer(BUFFER_DOUBLE_FRONT)->at(3).nVal != 3u))
+    if ((DoubleBufferUnary.getBuffer<BUFFER_DOUBLE_FRONT>()->at(0) != 0) ||
+        (DoubleBufferUnary.getBuffer<BUFFER_DOUBLE_FRONT>()->at(1) != 1) ||
+        (DoubleBufferUnary.getBuffer<BUFFER_DOUBLE_FRONT>()->at(2) != 2) ||
+        (DoubleBufferUnary.getBuffer<BUFFER_DOUBLE_FRONT>()->at(3) != 3))
     {
-        ERROR_MSG("Unit test", "DoubleBufferBinary has wrong entry.")
+        ERROR_MSG("Unit test", "DoubleBufferUnary has wrong entry.")
         return EXIT_FAILURE;
     }
-    if ((DoubleBufferBinary.getBuffer(BUFFER_DOUBLE_FRONT)->at("Obj0").nVal != 0u) ||
-        (DoubleBufferBinary.getBuffer(BUFFER_DOUBLE_FRONT)->at("Obj1").nVal != 1u) ||
-        (DoubleBufferBinary.getBuffer(BUFFER_DOUBLE_FRONT)->at("Obj2").nVal != 2u) ||
-        (DoubleBufferBinary.getBuffer(BUFFER_DOUBLE_FRONT)->at("Obj3").nVal != 3u))
+    if ((DoubleBufferBinary.getBuffer<BUFFER_DOUBLE_FRONT>()->at("zero") != 0) ||
+        (DoubleBufferBinary.getBuffer<BUFFER_DOUBLE_FRONT>()->at("one") != 1) ||
+        (DoubleBufferBinary.getBuffer<BUFFER_DOUBLE_FRONT>()->at("two") != 2) ||
+        (DoubleBufferBinary.getBuffer<BUFFER_DOUBLE_FRONT>()->at("three") != 3))
     {
         ERROR_MSG("Unit test", "DoubleBufferBinary has wrong entry.")
         return EXIT_FAILURE;
