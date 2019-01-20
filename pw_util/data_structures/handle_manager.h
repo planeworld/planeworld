@@ -32,12 +32,65 @@
 #define HANDLE_MANAGER_H
 
 //--- Standard header --------------------------------------------------------//
+#include <cstdint>
 #include <deque>
 #include <vector>
 
 //--- Program header ---------------------------------------------------------//
+#include "log.h"
 
 //--- Misc header ------------------------------------------------------------//
+
+constexpr std::uint32_t MAX_HANDLES = 32768;
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Struct defining components of the numeric handle value
+///
+/// The Index is the actual handle id, the Counter is used to manage stale
+/// handles while the Free component is not used, yet.
+///
+////////////////////////////////////////////////////////////////////////////////
+struct HandleIDComposition
+{
+    std::uint32_t   Index;      ///< Actual handle id
+    std::uint16_t   Counter;    ///< Counter to manage stale handles
+    std::uint16_t   Free;       ///< Not used, yet
+    
+    HandleIDComposition() : Index(0u), Counter(0u), Free(0u) {}
+};
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief This struct defines the numeric handle value
+///
+/// The handle id can either be used as raw 64 bit value or allows for access
+/// to individual components given by \ref HandleIDComposition .
+///
+////////////////////////////////////////////////////////////////////////////////
+struct HandleID
+{
+    union
+    {
+        HandleIDComposition  C;     ///< Components of handle id
+        std::uint64_t        Raw;   ///< 64 bit raw value
+    };
+    
+    HandleID() : Raw(0) {}
+};
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Handle map entry for actual mapping from handle to pointer
+///
+////////////////////////////////////////////////////////////////////////////////
+struct HandleMapEntry
+{
+    HandleID ID;        ///< Numeric handle id consisting of index and internal data
+    void*    pEntry;    ///< Pointer represented by handle
+    
+    HandleMapEntry() : pEntry(nullptr) {}
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -50,21 +103,87 @@ class CHandleManager
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
-   
-        //--- Operators ------------------------------------------------------//
+        CHandleManager() {m_HandleMap.reserve(MAX_HANDLES);}
    
         //--- Constant Methods -----------------------------------------------//
+        bool isValid(const HandleID) const;
 
         //--- Methods --------------------------------------------------------//
+        HandleID                add(void* const);
+        template<class T> T*    get(const HandleID);
+        bool                    remove(const HandleID);
+        template<class T> void  update(HandleID&, T* const);
+        
+        const std::deque<std::uint32_t>* getFreeHandles();
+        const std::vector<HandleMapEntry>* getHandleMap();
+        
         
     private:
         
         //--- Variables [protected] ------------------------------------------//
-        std::vector<void*>  m_vecHandles;
-        std::deque<int>     m_vecHandlesFree;
+        std::vector<HandleMapEntry> m_HandleMap;    ///< Handle map, mapping handle id's to pointers
+        std::deque<std::uint32_t>   m_HandlesFree;  ///< Free handles to be reused
         
 };
 
 //--- Implementation is done here for inline optimisation --------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests given handle for validity
+///
+/// \param _ID Handle id to test for validity
+///
+/// \return Handle valid (true/false)?
+///
+////////////////////////////////////////////////////////////////////////////////
+inline bool CHandleManager::isValid(const HandleID _ID) const
+{
+    METHOD_ENTRY("CHandleManager::isValid")
+    return (_ID.C.Index && (_ID.C.Counter == m_HandleMap[_ID.C.Index-1].ID.C.Counter));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns pointer which is represented by handle
+///
+/// \param _ID Handle id of pointer to be returned
+///
+/// \return Pointer represented by handle
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+inline T* CHandleManager::get(const HandleID _ID)
+{
+    METHOD_ENTRY("CHandleManager::get")
+    
+    PW_ASSERT(_ID.C.Index > 0u);
+    PW_ASSERT(m_HandleMap[_ID.C.Index-1].pEntry != nullptr);
+    
+    return static_cast<T*>(m_HandleMap[_ID.C.Index-1].pEntry);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Updates handle with new pointer, all other instances of this handle 
+///        will become invalid.
+///
+/// \param _ID Handle id of pointer to be updated
+/// \param _ptr Pointer to update handle with
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+inline void CHandleManager::update(HandleID& _ID, T* const _ptr)
+{
+    METHOD_ENTRY("CHandleManager::update")
+    
+    PW_ASSERT(_ptr != nullptr);
+    if (this->isValid(_ID))
+    {
+        m_HandleMap[_ID.C.Index-1].pEntry = _ptr;
+        m_HandleMap[_ID.C.Index-1].ID.C.Counter += 1;
+        _ID.C.Counter += 1;
+    }
+}
 
 #endif // HANDLE_MANAGER_H

@@ -41,65 +41,159 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief This struct defines the numeric handle value
+/// \brief Helper class for providing one handle manager instance for all handles
 ///
-/// The index is the actual handle id, the counter is used to manage stale
-/// handles while the type is used for casting, defining the pointer type.
+/// Since CHandle is a templated class, a static member would be instanciated
+/// for each template parameter. Therefore, this helper instanciates exactly one
+/// Handle manager that all CHandle instanciation will inherit from.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-struct HanldeID
+class CHandleBase
 {
-    union
-    {
-        struct
-        {
-            std::uint32_t   Index;
-            std::uint8_t    Counter;
-            std::uint8_t    Type;
-        };
-        std::uint64_t       Value;
-    }
-}
+    public:
+        static const std::deque<std::uint32_t>*     getFreeHandles();
+        static const std::vector<HandleMapEntry>*   getHandleMap();
+    
+    protected:
+        //--- Variables [static, private] ------------------------------------//
+        static CHandleManager   s_HandleManager; ///< Static handle manager instance
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \brief Interface for classes that refer to an unique id.
+/// \brief Class implementing a handle to templated objects
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CHandle
+template<class T>
+class CHandle : public CHandleBase
 {
 
     public:
         
         //--- Constructor/Destructor -----------------------------------------//
-        CHandle() : m_strName("UID_0"), m_UID(0u), m_pRef(nullptr){}
-        CHandle(T* _pT) {this->set(_pT);}
+        CHandle(T*);
+        CHandle(void){}
    
         //--- Operators ------------------------------------------------------//
-        T* operator->() const {return this->ptr();}
-        T& operator*() {return *m_pRef;}
+        T* operator->() const;
+        T& operator*() const;
    
         //--- Constant Methods -----------------------------------------------//
-        const std::string&  getName() const;
-        UIDType             getUID() const;
-        bool                isValid() const;
-        T*                  ptr() const;
+        HandleID ID() const {return m_ID;}
+        
+        bool isValid() const;
+        T*   ptr() const;
         
         //--- Methods --------------------------------------------------------//
-        void set(T* const);
-        void setPtr(T* const _pPtr) {m_pRef = _pPtr;}
+        bool remove();
+        void update(T* const);
         
     private:
         
-        //--- Variables [static, private] ------------------------------------//
-        static CHandleManager   ms_Handlemanager; ///< Static handle manager instance
-        
         //--- Variables [private] --------------------------------------------//
-        
-        
-        UIDType         m_UID;        ///< Reference to unique identifier 
+        HandleID m_ID;   ///< Numeric value coding id (index) and internal meta data
 };
 
-//--- Implementation is done here for inline optimisation --------------------//
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Constructor, initialising handle with given pointer
+///
+/// \param _ptr Pointer to initialise data with
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+inline CHandle<T>::CHandle(T* _ptr)
+{
+    METHOD_ENTRY("CHandle::CHandle")
+    m_ID = s_HandleManager.add(_ptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Tests handle for validity
+///
+/// \return Handle valid (true/false)?
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+inline bool CHandle<T>::isValid() const
+{
+    METHOD_ENTRY("CHandle::isValid")
+    return s_HandleManager.isValid(m_ID);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns pointer which is represented by handle
+///
+/// \return Pointer represented by handle
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+inline T* CHandle<T>::operator->() const
+{
+    METHOD_ENTRY("CHandle::operator->")
+    return s_HandleManager.get<T>(m_ID);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Derefences pointer returning the content/value
+///
+/// \return Content/value referenced by handle
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+inline T& CHandle<T>::operator*() const
+{
+    METHOD_ENTRY("CHandle::operator*")
+    return *s_HandleManager.get<T>(m_ID);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Returns pointer which is represented by handle
+///
+/// Since access is given by \ref operator-> and \ref operator* this method is
+/// typically not needed. If used to copy the pointer, only use it locally and
+/// with caution, if you definitely know about the pointers validity.
+///
+/// \return Pointer represented by handle
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+inline T* CHandle<T>::ptr() const
+{
+    METHOD_ENTRY("CHandle::ptr")
+    return s_HandleManager.get<T>(m_ID);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Removes handle from handle manager, all other instances of this 
+///        handle will become invalid.
+///
+/// \return Success?
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+inline bool CHandle<T>::remove()
+{
+    METHOD_ENTRY("CHandle::remove")
+    return CHandleBase::s_HandleManager.remove(m_ID);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Updates handle with new pointer, all other instances of this handle 
+///        will become invalid.
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+inline void CHandle<T>::update(T* const _ptr)
+{
+    METHOD_ENTRY("CHandle::update")
+    CHandleBase::s_HandleManager.update<T>(m_ID, _ptr);
+}
 
 #endif // HANDLE_H

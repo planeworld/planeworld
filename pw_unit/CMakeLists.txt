@@ -31,6 +31,8 @@ INCLUDE_DIRECTORIES (
 SET(SRCS_HANDLE
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/timer.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/handle_new.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/handle_manager.cpp
     pw_unit_handle.cpp
 )
 
