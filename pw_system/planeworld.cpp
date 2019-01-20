@@ -433,6 +433,8 @@ int main(int argc, char *argv[])
 
     CLEAN_UP;
     
+    TestBadBuilt
+    
     if (bExitError)
     {
         ERROR_MSG("Planeworld", "Exiting with failure")
