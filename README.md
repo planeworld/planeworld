@@ -1,11 +1,10 @@
-![Last commit](https://img.shields.io/github/last-commit/planeworld/planeworld.svg)
 ![Code size](https://img.shields.io/github/languages/code-size/planeworld/planeworld.svg)
 ![license](https://img.shields.io/github/license/planeworld/planeworld.svg)
 
-| branch | state |
-|--------|-------|
-| master | [![Build Status](https://travis-ci.org/planeworld/planeworld.svg?branch=master)](https://travis-ci.org/planeworld/planeworld) |
-| dev    | [![Build Status](https://travis-ci.org/planeworld/planeworld.svg?branch=dev)](https://travis-ci.org/planeworld/planeworld)
+| branch | state | commits |
+|--------|-------|---------|
+| master | [![Build Status](https://travis-ci.org/planeworld/planeworld.svg?branch=master)](https://travis-ci.org/planeworld/planeworld) | ![Last commit](https://img.shields.io/github/last-commit/planeworld/planeworld.svg?branch=master) |
+| dev    | [![Build Status](https://travis-ci.org/planeworld/planeworld.svg?branch=dev)](https://travis-ci.org/planeworld/planeworld)  | ![Last commit](https://img.shields.io/github/last-commit/planeworld/planeworld.svg?branch=dev) 
 
 planeworld
 ==========
