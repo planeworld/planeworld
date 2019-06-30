@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2016 Torsten Büschenfeld
+// Copyright (C) 2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,26 +20,40 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       conf_pw.h
-/// \brief      Configuration for planeworld main program "planeworld.cpp"
+/// \file       entity.h
+/// \brief      Prototype of class "CEntity"
 ///
-/// \date       2014-10-26
-/// \author     Torsten Bueschenfeld (planeworld@bfeld.eu)
-///
-////////////////////////////////////////////////////////////////////////////////
-
-#ifndef CONF_PW_H
-#define CONF_PW_H
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \def PW_MULTITHREADING
-///         Defines if multithreading is enabled
+/// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
+/// \date       2019-01-21
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-// #define PW_MULTITHREADING
+#ifndef ENTITY_H
+#define ENTITY_H
 
-//--- End of configuration ---------------------------------------------------//
+//--- Standard header --------------------------------------------------------//
+#include <cstdint>
 
-#endif
+//--- Program header ---------------------------------------------------------//
+#include "handle.h"
+
+//--- Misc header ------------------------------------------------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Basic entity class
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+class CEntity
+{
+    public:
+        CEntity() : m_hHandle(this) {}
+    
+    protected:
+        
+        //--- Variables [protected] ------------------------------------------//
+        CHandle<CEntity<T>> m_hHandle;
+};
+
+#endif // ENTITY_H

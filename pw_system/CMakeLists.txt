@@ -89,6 +89,8 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_system/spinlock.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/serializable.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_system/thread_module.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/handle.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/handle_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/uid.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/data_structures/world_data_storage.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_util/logging/log.cpp

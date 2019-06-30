@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2015-2018 Torsten Büschenfeld
+// Copyright (C) 2015-2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ void CThruster::addEmitter(IEmitter* const _pEmitter)
 void CThruster::setObject(CObject* const _pObj)
 {
     METHOD_ENTRY("CThruster::setObject")
-    m_hObject.set(_pObj);
+    m_hObject.update(_pObj);
     m_KinematicsState.setRef(&(_pObj->getKinematicsState()));
     for (auto Emitter : m_hEmitters)
     {

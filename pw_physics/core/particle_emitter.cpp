@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2018 Torsten Büschenfeld
+// Copyright (C) 2014-2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -103,8 +103,23 @@ void CParticleEmitter::emit(const double& _fF)
     
     /// \todo Activation could be checked in interface class IEmitter, calling
     ///       a myEmit method if activated
+    
+//     std::cout << "Handles: ";
+//     for (auto Entry : *m_hSelf.getHandleMap())
+//     {
+//         std::cout << Entry.ID.C.Index << " ";
+//     }
+//     std::cout << "\n\n\n" << std::endl;
+//     std::cout << "Free: ";
+//     for (auto Entry : *m_hSelf.getFreeHandles())
+//     {
+//         std::cout << Entry << " ";
+//     }
+//     std::cout << "\n\n\n" << std::endl;
+    
     if (m_bActive)
     {
+               
         uint32_t nNrOfParticle;
         
         if (_fF < 0.0)
@@ -151,11 +166,11 @@ void CParticleEmitter::emit(const double& _fF)
                     double      fVelocity = (m_NormalDist(m_Generator)*m_fVelocityStd + m_fVelocity)*m_fIntensity;
                     Rotation2Dd Rotation(fAngle);
                     
-                    m_pDataStorage->getParticleByValueBack(m_hParticles.getUID())->generate(
-                        m_KinematicsState.getOrigin(),
-                        fVelocity*(Rotation*Vector2d(1.0, 0.0)) +
-                        m_KinematicsState.getVelocity() * (1.0 - fLocalDrag) +
-                        vecParentVel * fLocalDrag);
+//                     m_pDataStorage->getParticleByValueBack(m_hParticles.ID().C.Index)->generate(
+//                         m_KinematicsState.getOrigin(),
+//                         fVelocity*(Rotation*Vector2d(1.0, 0.0)) +
+//                         m_KinematicsState.getVelocity() * (1.0 - fLocalDrag) +
+//                         vecParentVel * fLocalDrag);
                 }
                 break;
             }

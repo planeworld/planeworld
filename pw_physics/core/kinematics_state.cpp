@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2015-2018 Torsten Büschenfeld
+// Copyright (C) 2015-2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -468,7 +468,7 @@ std::ostream& operator<<(std::ostream& _os, CKinematicsState& _KS)
 //     _os << _KS.m_UID << std::endl;
     
     // From IUIDReferrer
-    _os << _KS.m_hKinStateRef.getUID() << std::endl;
+    _os << _KS.m_hKinStateRef.ID().Raw << std::endl;
     
     
     _os << _KS.s_fWorldLimitX << std::endl;

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2016 Torsten Büschenfeld
+// Copyright (C) 2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,26 +20,24 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       conf_pw.h
-/// \brief      Configuration for planeworld main program "planeworld.cpp"
+/// \file       emitter_handled.h
+/// \brief      Class "IEmitter" with handle mixin
 ///
-/// \date       2014-10-26
-/// \author     Torsten Bueschenfeld (planeworld@bfeld.eu)
-///
-////////////////////////////////////////////////////////////////////////////////
-
-#ifndef CONF_PW_H
-#define CONF_PW_H
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \def PW_MULTITHREADING
-///         Defines if multithreading is enabled
+/// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
+/// \date       2019-01-25
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-// #define PW_MULTITHREADING
+#ifndef EMITTER_HANDLED_H
+#define EMITTER_HANDLED_H
 
-//--- End of configuration ---------------------------------------------------//
+//--- Standard header --------------------------------------------------------//
 
-#endif
+//--- Program header ---------------------------------------------------------//
+#include "emitter.h"
+#include "handle_mixin.h"
+
+/// Type definition for an emitter interface with handle
+typedef CHandleMixin<IEmitter> IEmitterHandled;
+
+#endif // EMITTER_HANDLED_H

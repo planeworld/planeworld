@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2016 Torsten Büschenfeld
+// Copyright (C) 2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,26 +20,46 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       conf_pw.h
-/// \brief      Configuration for planeworld main program "planeworld.cpp"
+/// \file       handle_mixin.h
+/// \brief      Prototype of class "CHandleMixin"
 ///
-/// \date       2014-10-26
-/// \author     Torsten Bueschenfeld (planeworld@bfeld.eu)
-///
-////////////////////////////////////////////////////////////////////////////////
-
-#ifndef CONF_PW_H
-#define CONF_PW_H
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \def PW_MULTITHREADING
-///         Defines if multithreading is enabled
+/// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
+/// \date       2019-01-25
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-// #define PW_MULTITHREADING
+#ifndef HANDLE_MIXIN_H
+#define HANDLE_MIXIN_H
 
-//--- End of configuration ---------------------------------------------------//
+//--- Standard header --------------------------------------------------------//
+#include <cstdint>
 
-#endif
+//--- Program header ---------------------------------------------------------//
+#include "handle.h"
+
+//--- Misc header ------------------------------------------------------------//
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Mixin providing a handle and access to it
+///
+////////////////////////////////////////////////////////////////////////////////
+template<class T>
+class CHandleMixin : public T
+{
+    public:
+        
+        //--- Constructor/Destructor -----------------------------------------//
+        CHandleMixin<T>() : m_hSelf(this) {}
+        
+        //--- Constant Methods -----------------------------------------------//
+        CHandle<T>& getSelf() {return m_hSelf;}
+        
+    
+    protected:
+        
+        //--- Variables [protected] ------------------------------------------//
+        CHandle<CHandleMixin<T>> m_hSelf;
+};
+
+#endif // HANDLE_MIXIN_H

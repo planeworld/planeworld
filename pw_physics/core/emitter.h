@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2016 Torsten Büschenfeld
+// Copyright (C) 2014-2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -121,7 +121,7 @@ class IEmitter : public IKinematicsStateUser,
         void activate();
         void deactivate();
         
-        void setParent(CObjectPlanet* const _pObjPl) {m_hParent.set(_pObjPl);}
+        void setParent(CObjectPlanet* const _pObjPl) {m_hParent.update(_pObjPl);}
         
         void setAngle(const double&);
         void setAngleStd(const double&);

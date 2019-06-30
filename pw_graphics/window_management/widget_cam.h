@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2017 Torsten Büschenfeld
+// Copyright (C) 2017, 2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ class CWidgetCam : public IWidget,
         CRenderTarget* getRenderTarget() {return &m_TargetCam;}
         
         void draw() override;
-        void setCamera(CCamera* const _pCamera) {m_hCamera.set(_pCamera);}
+        void setCamera(CCamera* const _pCamera) {m_hCamera.update(_pCamera);}
         void setShaderProgram(CShaderProgram* const _pShaderProgram) 
         {
             METHOD_ENTRY("CWidgetCam::setShaderProgram")

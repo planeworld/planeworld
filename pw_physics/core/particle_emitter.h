@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2014-2018 Torsten Büschenfeld
+// Copyright (C) 2014-2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 //--- Standard header --------------------------------------------------------//
 
 //--- Program header ---------------------------------------------------------//
-#include "emitter.h"
+#include "emitter_handled.h"
 #include "handle.h"
 #include "particle.h"
 
@@ -43,7 +43,7 @@
 /// \brief Class for a source that emits particle.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CParticleEmitter : public IEmitter
+class CParticleEmitter : public IEmitterHandled
 {
     
     public:
@@ -126,7 +126,7 @@ inline void CParticleEmitter::setNumber(const std::uint32_t& _nNrMax)
 inline void CParticleEmitter::setParticles(CParticle* const _pParticles)
 {
     METHOD_ENTRY("CParticleEmitter::setParticles")
-    m_hParticles.set(_pParticles);
+    m_hParticles.update(_pParticles);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2015-2018 Torsten Büschenfeld
+// Copyright (C) 2015-2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -234,7 +234,7 @@ inline Vector2d& CKinematicsState::Origin()
 inline void CKinematicsState::setRef(CKinematicsState* const _pRef)
 {
     METHOD_ENTRY("CKinematicsState::setRef")
-    m_hKinStateRef.set(_pRef);
+    m_hKinStateRef.update(_pRef);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

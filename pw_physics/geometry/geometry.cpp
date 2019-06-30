@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2010-2018 Torsten Büschenfeld
+// Copyright (C) 2010-2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ CGeometry::~CGeometry()
         if (hShp.ptr() != nullptr)
         {
             delete hShp.ptr();
-            hShp.setPtr(nullptr);
+            hShp.remove();
             MEM_FREED("IShape")
         }
     }
@@ -153,7 +153,7 @@ void CGeometry::setShapes(const ShapesType& _ShapeList)
         if (hShp.ptr() != nullptr)
         {
             delete hShp.ptr();
-            hShp.set(nullptr);
+            hShp.remove();
             MEM_FREED("IShape")
         }
     }
@@ -300,7 +300,7 @@ std::istream& operator>>(std::istream& _is, CGeometry& _Geo)
         {
             delete it.ptr();
             MEM_FREED("IShape")
-            it.set(nullptr);
+            it.remove();
         }
     }
 
@@ -369,8 +369,25 @@ void CGeometry::copy(const CGeometry& _Geom)
     {
         if (hShp.isValid())
         {
+            for (auto Entry : *hShp.getHandleMap())
+            {
+                std::cout << Entry.ID.C.Index << " ";
+            }
+            std::cout << std::endl;
+            std::cout << "Size: " << hShp.getFreeHandles()->size() << std::endl;
+            
             delete hShp.ptr();
-            hShp.setPtr(nullptr);
+            hShp.remove();
+            
+            std::cout << "Removed" << std::endl;
+            
+            for (auto Entry : *hShp.getFreeHandles())
+            {
+                std::cout << Entry << " ";
+            }
+            std::cout << std::endl;
+            std::cout << "Size: " << hShp.getFreeHandles()->size() << std::endl;
+            
             MEM_FREED("IShape")
         }
     }
@@ -379,6 +396,8 @@ void CGeometry::copy(const CGeometry& _Geom)
     for (const auto& hShp : _Geom.m_Shapes)
     {
         m_Shapes.push_back(hShp->clone());
+        std::cout << "Created" << std::endl;
+        std::cout << "Size: " << hShp.getFreeHandles()->size() << std::endl;
     }
 
     m_vecCOM    = _Geom.m_vecCOM;
