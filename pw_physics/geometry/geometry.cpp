@@ -132,7 +132,7 @@ CGeometry* CGeometry::clone() const
 void CGeometry::addShape(IShape* const _pShape)
 {
     METHOD_ENTRY("CGeometry::addShape")
-    m_Shapes.push_back(_pShape);
+    m_Shapes.push_back(CHandle<IShape>(_pShape));
     m_bShapesValid = false;
 }
 
@@ -395,8 +395,9 @@ void CGeometry::copy(const CGeometry& _Geom)
 
     for (const auto& hShp : _Geom.m_Shapes)
     {
-        m_Shapes.push_back(hShp->clone());
-        std::cout << "Created" << std::endl;
+        auto hTmp = CHandle<IShape>(hShp->clone());
+        m_Shapes.push_back(hTmp);
+        std::cout << "Created: " << hTmp.ID().C.Index << std::endl;
         std::cout << "Size: " << hShp.getFreeHandles()->size() << std::endl;
     }
 

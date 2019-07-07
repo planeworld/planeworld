@@ -77,6 +77,13 @@ class CHandle : public CHandleBase
         //--- Operators ------------------------------------------------------//
         T* operator->() const;
         T& operator*() const;
+        CHandle<T>& operator=(T* const _t){
+    METHOD_ENTRY("CHandle::operator=")
+    std::cout << "REDIRECTED" << std::endl;
+    this->update(_t);
+    return *this;
+}
+
    
         //--- Constant Methods -----------------------------------------------//
         HandleID ID() const {return m_ID;}
@@ -106,7 +113,6 @@ inline CHandle<T>::CHandle(T* _ptr)
 {
     METHOD_ENTRY("CHandle::CHandle")
     m_ID = s_HandleManager.add(_ptr);
-    std::cout << "CHandle::CHandle(T* _ptr) calls CHandleManager::add" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,6 +156,31 @@ inline T& CHandle<T>::operator*() const
     METHOD_ENTRY("CHandle::operator*")
     return *s_HandleManager.get<T>(m_ID);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \brief Redirects the assignment of a templated class to a handle update
+///
+/// If this operator= was not defined, an assignment of type CHandle<T> = t
+/// would result in an implicit construction: CHandle<T> = CHandle<T>(t). This
+/// assignment is mostly due to programming errors and creates an additional 
+/// handle that will never be removed, and is hard to debug. Hence, the number 
+/// of handles steadily increases. With this helper method, the assignment will
+/// be caught by redirecting assignment to handle update.
+///
+/// \param _t Templated class instance
+///
+/// \return Updated handle
+///
+////////////////////////////////////////////////////////////////////////////////
+// template<class T>
+// inline CHandle<T>& CHandle<T>::operator=( T& _t)
+// {
+//     METHOD_ENTRY("CHandle::operator*")
+//     std::cout << "REDIRECTED" << std::endl;
+//     this->update(_t);
+//     return this;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -197,12 +228,10 @@ inline void CHandle<T>::update(T* const _ptr)
     if (m_ID.C.Index > 0u)
     {
         CHandleBase::s_HandleManager.update<T>(m_ID, _ptr);
-        std::cout << "CHandle::update calls s_HandleManager::update" << std::endl;
     }
     else
     {
         m_ID = CHandleBase::s_HandleManager.add(_ptr);
-        std::cout << "CHandle::update calls s_HandleManager::add" << std::endl;
     }
 }
 

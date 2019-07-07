@@ -35,7 +35,7 @@
 #include <cstdint>
 
 //--- Program header ---------------------------------------------------------//
-#include "handle.h"
+#include "handle_mixin.h"
 
 //--- Misc header ------------------------------------------------------------//
 
@@ -44,16 +44,7 @@
 /// \brief Basic entity class
 ///
 ////////////////////////////////////////////////////////////////////////////////
-template<class T>
-class CEntity
-{
-    public:
-        CEntity() : m_hHandle(this) {}
-    
-    protected:
-        
-        //--- Variables [protected] ------------------------------------------//
-        CHandle<CEntity<T>> m_hHandle;
-};
+template<typename T>
+using CEntity = CHandleMixin<T>;
 
 #endif // ENTITY_H

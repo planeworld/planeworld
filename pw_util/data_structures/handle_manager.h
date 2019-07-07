@@ -55,9 +55,9 @@ struct HandleIDComposition
 {
     std::uint32_t   Index;      ///< Actual handle id
     std::uint16_t   Counter;    ///< Counter to manage stale handles
-    std::uint16_t   Free;       ///< Not used, yet
+    std::uint16_t   Type;       ///< Not used, yet
     
-    HandleIDComposition() : Index(0u), Counter(0u), Free(0u) {}
+    HandleIDComposition() : Index(0u), Counter(0u), Type(0u) {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -181,8 +181,8 @@ inline void CHandleManager::update(HandleID& _ID, T* const _ptr)
     if (this->isValid(_ID))
     {
         m_HandleMap[_ID.C.Index-1].pEntry = _ptr;
-        m_HandleMap[_ID.C.Index-1].ID.C.Counter += 1;
-        _ID.C.Counter += 1;
+//         m_HandleMap[_ID.C.Index-1].ID.C.Counter += 1; // Really needed?
+//         _ID.C.Counter += 1; // Really needed?
     }
 }
 

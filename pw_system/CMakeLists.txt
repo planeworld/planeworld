@@ -65,7 +65,7 @@ SET(SRCS
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/collision_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/kinematics_state.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/objects_emitter.cpp
-    ${CMAKE_HOME_DIRECTORY}/pw_physics/core/particle_emitter.cpp
+    ${CMAKE_HOME_DIRECTORY}/pw_physics/core/particle_emitter_base.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/physics_manager.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/core/sim_timer.cpp
     ${CMAKE_HOME_DIRECTORY}/pw_physics/components/thruster.cpp

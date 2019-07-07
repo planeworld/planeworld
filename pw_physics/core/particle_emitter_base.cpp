@@ -20,27 +20,27 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file       particle_emitter.cpp
-/// \brief      Implementation of class "CParticleEmitter"
+/// \file       particle_emitter_base.cpp
+/// \brief      Implementation of class "CParticleEmitterBase"
 ///
 /// \author     Torsten Büschenfeld (planeworld@bfeld.eu)
 /// \date       2014-02-18
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "particle_emitter.h"
+#include "particle_emitter_base.h"
 
-uint32_t CParticleEmitter::m_unNrOfEmitters = 0;
+uint32_t CParticleEmitterBase::m_unNrOfEmitters = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///
 /// \brief Constructor
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CParticleEmitter::CParticleEmitter() : m_ParticleType(ParticleTypeType::DOT)
+CParticleEmitterBase::CParticleEmitterBase() : m_ParticleType(ParticleTypeType::DOT)
 {
-    METHOD_ENTRY("CParticleEmitter::CParticleEmitter")
-    CTOR_CALL("CParticleEmitter::CParticleEmitter")
+    METHOD_ENTRY("CParticleEmitterBase::CParticleEmitterBase")
+    CTOR_CALL("CParticleEmitterBase::CParticleEmitterBase")
     
 //     m_hParticles.set(new CParticle);
 //     MEM_ALLOC("CParticle")
@@ -55,10 +55,10 @@ CParticleEmitter::CParticleEmitter() : m_ParticleType(ParticleTypeType::DOT)
 /// \brief Destructor, deletes objects
 ///
 ///////////////////////////////////////////////////////////////////////////////
-CParticleEmitter::~CParticleEmitter()
+CParticleEmitterBase::~CParticleEmitterBase()
 {
-    METHOD_ENTRY("CParticleEmitter::~CParticleEmitter")
-    DTOR_CALL("CParticleEmitter::~CParticleEmitter")
+    METHOD_ENTRY("CParticleEmitterBase::~CParticleEmitterBase")
+    DTOR_CALL("CParticleEmitterBase::~CParticleEmitterBase")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,9 +66,9 @@ CParticleEmitter::~CParticleEmitter()
 /// \brief Initialises the emitter
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CParticleEmitter::init()
+void CParticleEmitterBase::init()
 {
-    METHOD_ENTRY("CParticleEmitter::init")
+    METHOD_ENTRY("CParticleEmitterBase::init")
     
 //     if (m_pRef)
 //     // Add particle
@@ -97,9 +97,9 @@ void CParticleEmitter::init()
 /// \param _fF Engine emitation frequency
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CParticleEmitter::emit(const double& _fF)
+void CParticleEmitterBase::emit(const double& _fF)
 {
-    METHOD_ENTRY("CParticleEmitter::emit")
+    METHOD_ENTRY("CParticleEmitterBase::emit")
     
     /// \todo Activation could be checked in interface class IEmitter, calling
     ///       a myEmit method if activated
@@ -119,7 +119,6 @@ void CParticleEmitter::emit(const double& _fF)
     
     if (m_bActive)
     {
-               
         uint32_t nNrOfParticle;
         
         if (_fF < 0.0)

@@ -61,7 +61,7 @@ CThruster::CThruster() : m_bActive(true),
 const double& CThruster::activate(const double& _fThrust)
 {
     METHOD_ENTRY("CThruster::activate")
-    
+
     m_fThrust = _fThrust;
     
     for (const auto Emitter : m_hEmitters)

@@ -1129,7 +1129,9 @@ bool CVisualsManager::processFrame()
     bool bGotCam = m_pVisualsDataStorage->getCamerasByIndex().size() > 0;
     if (bGotCam)
     {
+//         m_hCamera.remove();
         m_hCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
+//         m_hCamera.update(m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex));
         m_hCamera->update();
     }
     
@@ -1160,7 +1162,9 @@ bool CVisualsManager::processFrame()
         m_Graphics.setupWorldSpace();
         if (bGotCam)
         {
+//             m_hCamera.remove();
             m_hCamera = m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex);
+//             m_hCamera.update(m_pVisualsDataStorage->getCamerasByIndex().operator[](m_unCameraIndex));
             m_hCamera->update();
             
             this->drawGrid(DrawModeType::VISUALS);

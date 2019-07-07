@@ -51,9 +51,13 @@ class CHandleMixin : public T
         
         //--- Constructor/Destructor -----------------------------------------//
         CHandleMixin<T>() : m_hSelf(this) {}
+        ~CHandleMixin<T>() override
+        {
+            m_hSelf.remove();
+        }
         
         //--- Constant Methods -----------------------------------------------//
-        CHandle<T>& getSelf() {return m_hSelf;}
+        CHandle<CHandleMixin<T>>& getSelf() {return m_hSelf;}
         
     
     protected:

@@ -98,7 +98,7 @@
 //--- Uncomment all domains that should be used for logging ---//
 //=============================================================//
 
-// #define DOMAIN_NONE
+#define DOMAIN_NONE
 #define DOMAIN_METHOD_ENTRY
 #define DOMAIN_METHOD_EXIT
 // #define DOMAIN_CONSTRUCTOR
