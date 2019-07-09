@@ -43,6 +43,10 @@
 ///
 /// \brief Basic entity class
 ///
+/// An entity is the most common information all engine objects share, which is
+/// a unique identifier. By using the \ref CHandleMixin class, all entities are
+/// automatically registered in the handle manager.
+///
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
 using CEntity = CHandleMixin<T>;

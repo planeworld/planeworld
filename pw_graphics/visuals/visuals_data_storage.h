@@ -36,7 +36,7 @@
 #include <unordered_map>
 
 //--- Program header ---------------------------------------------------------//
-#include "camera.h"
+#include "camera_entity.h"
 #include "com_console.h"
 #include "com_interface.h"
 #include "spinlock.h"
@@ -47,11 +47,11 @@
 class CWidgetCam;
 
 /// Map of cameras, accessed by name
-typedef std::unordered_map<std::string, CCamera*> CamerasByNameType;
+typedef std::unordered_map<std::string, CCameraEntity*> CamerasByNameType;
 /// Map of cameras, accessed by UID value
-typedef std::unordered_map<UIDType, CCamera*> CamerasByValueType;
+typedef std::unordered_map<UIDType, CCameraEntity*> CamerasByValueType;
 /// Vector of cameras, accessed by index to cycle through cameras
-typedef std::vector<CCamera*> CamerasByIndexType;
+typedef std::vector<CCameraEntity*> CamerasByIndexType;
 
 /// Map of window frame users, accessed by UID value
 typedef std::unordered_map<UIDType, IWinFrameUser*> WinFrameUsersByValueType;
@@ -65,7 +65,7 @@ typedef std::unordered_map<UIDType, CWidgetCam*> CameraWidgetsByValueType;
 typedef std::list<UIDType> WindowOrderType;
 
 /// Concurrent queue of widgets
-typedef moodycamel::ConcurrentQueue<CCamera*> CamerasQueueType;
+typedef moodycamel::ConcurrentQueue<CCameraEntity*> CamerasQueueType;
 /// Concurrent queue of widgets
 typedef moodycamel::ConcurrentQueue<IWidget*> WidgetsQueueType;
 /// Concurrent queue of windows
@@ -101,7 +101,7 @@ class CVisualsDataStorage : public IComInterfaceUser,
         const WindowsByValueType*       getWindowsCenteredByValue() const;
         
         //--- Methods --------------------------------------------------------//
-        void addCamera(CCamera*);
+        void addCamera(CCameraEntity*);
         void addWidget(IWidget*);
         void addWindow(CWindow*);
         
@@ -110,7 +110,7 @@ class CVisualsDataStorage : public IComInterfaceUser,
         
         bool closeWindow(const UIDType);
 
-        CCamera*         getCameraByValue(const UIDType);
+        CCameraEntity*   getCameraByValue(const UIDType);
         WindowOrderType* getWindowUIDsInOrder() {return &m_WindowsOrder;}
 
         void setFontManager(CFontManager* const _pFontManager) {m_pFontManager = _pFontManager;}

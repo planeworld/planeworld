@@ -57,7 +57,7 @@ class CHandleMixin : public T
         }
         
         //--- Constant Methods -----------------------------------------------//
-        CHandle<CHandleMixin<T>>& getSelf() {return m_hSelf;}
+        CHandle<CHandleMixin<T>>& getHandle() {return m_hSelf;}
         
     
     protected:

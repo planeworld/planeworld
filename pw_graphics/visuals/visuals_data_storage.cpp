@@ -147,7 +147,7 @@ CWindow* CVisualsDataStorage::getWindowByValue(const UIDType _nUID) const
 /// \param _pCamera Camera to be added
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CVisualsDataStorage::addCamera(CCamera* _pCamera)
+void CVisualsDataStorage::addCamera(CCameraEntity* _pCamera)
 {
     METHOD_ENTRY("CVisualsDataStorage::addCamera")
     
@@ -320,7 +320,7 @@ bool CVisualsDataStorage::closeWindow(const UIDType _nUID)
 /// \return Camera with given UID value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-CCamera* CVisualsDataStorage::getCameraByValue(const UIDType _nUID)
+CCameraEntity* CVisualsDataStorage::getCameraByValue(const UIDType _nUID)
 {
     METHOD_ENTRY("CVisualsDataStorage::getCameraByValue")
 

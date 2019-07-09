@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of planeworld, a 2D simulation of physics and much more.
-// Copyright (C) 2011-2016 Torsten Büschenfeld
+// Copyright (C) 2011-2019 Torsten Büschenfeld
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,10 +50,10 @@
 ///       setPosition.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-class CCamera : public CGraphicsBase,
-                public IGridUser,
-                public IKinematicsStateUser,
-                public IUIDUser
+class CCamera : virtual public CGraphicsBase,
+                        public IGridUser,
+                        public IKinematicsStateUser,
+                        public IUIDUser
 {
 
     public:
@@ -61,7 +61,7 @@ class CCamera : public CGraphicsBase,
         //--- Constructor/Destructor -----------------------------------------//
         CCamera();
         CCamera(const CCamera&);
-        ~CCamera();
+        virtual ~CCamera();
         CCamera& operator=(const CCamera&);
         CCamera* clone() const;
 
@@ -149,4 +149,4 @@ inline const double& CCamera::getZoom() const
     return m_fZoom;
 }
 
-#endif
+#endif // CAMERA_H

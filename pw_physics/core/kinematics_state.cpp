@@ -468,7 +468,7 @@ std::ostream& operator<<(std::ostream& _os, CKinematicsState& _KS)
 //     _os << _KS.m_UID << std::endl;
     
     // From IUIDReferrer
-    _os << _KS.m_hKinStateRef.ID().Raw << std::endl;
+    _os << _KS.m_hKinStateRef.ID().Raw() << std::endl;
     
     
     _os << _KS.s_fWorldLimitX << std::endl;

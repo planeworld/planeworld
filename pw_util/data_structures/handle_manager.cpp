@@ -52,14 +52,14 @@ HandleID CHandleManager::add(void* const _ptr)
     {
         std::uint32_t IndexFree = m_HandlesFree.front();
         m_HandlesFree.pop_front();
-        HMap.ID.C.Index = IndexFree;
-        HMap.ID.C.Counter = m_HandleMap[IndexFree-1].ID.C.Counter+1;
+        HMap.ID.Index = IndexFree;
+        HMap.ID.Counter = m_HandleMap[IndexFree-1].ID.Counter+1;
         m_HandleMap[IndexFree-1] = HMap;
     }
     else
     {
-        HMap.ID.C.Index = m_HandleMap.size()+1;
-        HMap.ID.C.Counter = 1;
+        HMap.ID.Index = m_HandleMap.size()+1;
+        HMap.ID.Counter = 1;
         m_HandleMap.push_back(HMap);
     }
     
@@ -80,18 +80,18 @@ bool CHandleManager::remove(const HandleID _ID)
 {
     METHOD_ENTRY("CHandleManager::remove")
     
-    if (_ID.C.Index <= m_HandleMap.size() &&
-        _ID.C.Index != 0)
+    if (_ID.Index <= m_HandleMap.size() &&
+        _ID.Index != 0)
     {
-        m_HandleMap[_ID.C.Index-1].ID.C.Index = 0;
-        m_HandleMap[_ID.C.Index-1].ID.C.Counter += 1;
-        m_HandleMap[_ID.C.Index-1].pEntry = nullptr;
-        m_HandlesFree.push_back(_ID.C.Index);
+        m_HandleMap[_ID.Index-1].ID.Index = 0;
+        m_HandleMap[_ID.Index-1].ID.Counter += 1;
+        m_HandleMap[_ID.Index-1].pEntry = nullptr;
+        m_HandlesFree.push_back(_ID.Index);
         return true;
     }
     else
     {
-        WARNING_MSG("Handle Manager", "Handle " << _ID.C.Index << " not valid.")
+        WARNING_MSG("Handle Manager", "Handle " << _ID.Index << " not valid.")
         return false;
     }
 }

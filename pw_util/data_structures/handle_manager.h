@@ -49,34 +49,20 @@ constexpr std::uint32_t MAX_HANDLES = 32768;
 ///
 /// The Index is the actual handle id, the Counter is used to manage stale
 /// handles while the Free component is not used, yet.
-///
-////////////////////////////////////////////////////////////////////////////////
-struct HandleIDComposition
-{
-    std::uint32_t   Index;      ///< Actual handle id
-    std::uint16_t   Counter;    ///< Counter to manage stale handles
-    std::uint16_t   Type;       ///< Not used, yet
-    
-    HandleIDComposition() : Index(0u), Counter(0u), Type(0u) {}
-};
-
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \brief This struct defines the numeric handle value
-///
-/// The handle id can either be used as raw 64 bit value or allows for access
-/// to individual components given by \ref HandleIDComposition .
+/// A bitset is used instead of a union provide more flexibility and avoid
+/// another indirection when accessing the components. 32bit were used
+/// to make sure external modules like Lua can handle the Raw handle value.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 struct HandleID
 {
-    union
-    {
-        HandleIDComposition  C;     ///< Components of handle id
-        std::uint64_t        Raw;   ///< 64 bit raw value
-    };
+    std::uint32_t   Index :  16,    ///< Actual handle id
+                    Counter : 8,    ///< Counter to manage stale handles
+                    Free :    8;    ///< Not used, yet
     
-    HandleID() : Raw(0) {}
+    std::uint32_t Raw() const {return std::uint32_t(Counter) << 16 | std::uint32_t(Index);}
+    
+    HandleID() : Index(0u), Counter(0u), Free(0u) {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +126,7 @@ class CHandleManager
 inline bool CHandleManager::isValid(const HandleID _ID) const
 {
     METHOD_ENTRY("CHandleManager::isValid")
-    return (_ID.C.Index && (_ID.C.Counter == m_HandleMap[_ID.C.Index-1].ID.C.Counter));
+    return (_ID.Index && (_ID.Counter == m_HandleMap[_ID.Index-1].ID.Counter));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,10 +143,10 @@ inline T* CHandleManager::get(const HandleID _ID)
 {
     METHOD_ENTRY("CHandleManager::get")
     
-    PW_ASSERT(_ID.C.Index > 0u);
-    PW_ASSERT(m_HandleMap[_ID.C.Index-1].pEntry != nullptr);
+    PW_ASSERT(_ID.Index > 0u);
+    PW_ASSERT(m_HandleMap[_ID.Index-1].pEntry != nullptr);
     
-    return static_cast<T*>(m_HandleMap[_ID.C.Index-1].pEntry);
+    return static_cast<T*>(m_HandleMap[_ID.Index-1].pEntry);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,9 +166,7 @@ inline void CHandleManager::update(HandleID& _ID, T* const _ptr)
     PW_ASSERT(_ptr != nullptr);
     if (this->isValid(_ID))
     {
-        m_HandleMap[_ID.C.Index-1].pEntry = _ptr;
-//         m_HandleMap[_ID.C.Index-1].ID.C.Counter += 1; // Really needed?
-//         _ID.C.Counter += 1; // Really needed?
+        m_HandleMap[_ID.Index-1].pEntry = _ptr;
     }
 }
 

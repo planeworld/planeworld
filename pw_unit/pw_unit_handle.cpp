@@ -110,18 +110,18 @@ void outputInternalHandleData(const std::string& _strAction)
         for (auto Handle : *CHandleBase::getHandleMap())
         {
             indent(INDENTION_L2);
-            if (Handle.ID.C.Index != 0u)
+            if (Handle.ID.Index != 0u)
             {
-                std::cout << std::setw(WIDTH_COL_01) << Handle.ID.C.Index << " | "
-                          << std::setw(WIDTH_COL_02) << Handle.ID.C.Counter << " | "
+                std::cout << std::setw(WIDTH_COL_01) << Handle.ID.Index << " | "
+                          << std::setw(WIDTH_COL_02) << Handle.ID.Counter << " | "
                           << std::setw(WIDTH_COL_03) << "valid" << " | "
                           << std::setw(WIDTH_COL_05) << Handle.pEntry
                           << std::endl;
             }
             else
             {
-                std::cout << std::setw(WIDTH_COL_01) << Handle.ID.C.Index << " | "
-                          << std::setw(WIDTH_COL_02) << Handle.ID.C.Counter << " | "
+                std::cout << std::setw(WIDTH_COL_01) << Handle.ID.Index << " | "
+                          << std::setw(WIDTH_COL_02) << Handle.ID.Counter << " | "
                           << std::setw(WIDTH_COL_03) << "invalid" << " | "
                           << std::setw(WIDTH_COL_05) << Handle.pEntry
                           << std::endl;
@@ -185,16 +185,16 @@ bool outputHandleData(const CHandle<T>& _h, const int _nHeaderFooter = 0)
         indent(INDENTION_L2);
         if (_h.isValid())
         {
-            std::cout << std::setw(WIDTH_COL_01) << _h.ID().C.Index << " | "
-                      << std::setw(WIDTH_COL_02) << _h.ID().C.Counter << " | "
+            std::cout << std::setw(WIDTH_COL_01) << _h.ID().Index << " | "
+                      << std::setw(WIDTH_COL_02) << _h.ID().Counter << " | "
                       << std::setw(WIDTH_COL_03) << "valid" << " | "
                       << std::setw(WIDTH_COL_04) << *_h
                       << std::endl;
         }
         else
         {
-            std::cout << std::setw(WIDTH_COL_01) << _h.ID().C.Index << " | "
-                      << std::setw(WIDTH_COL_02) << _h.ID().C.Counter << " | "
+            std::cout << std::setw(WIDTH_COL_01) << _h.ID().Index << " | "
+                      << std::setw(WIDTH_COL_02) << _h.ID().Counter << " | "
                       << std::setw(WIDTH_COL_03) << "invalid" << " | "
                       << std::setw(WIDTH_COL_04) << "-"
                       << std::endl;
@@ -232,20 +232,20 @@ int main()
     std::string* pThree = &strThree;
     
     CHandle<int> hOne(pOne);
-    outputInternalHandleData("Created handle <int> " + std::to_string(hOne.ID().C.Index));
+    outputInternalHandleData("Created handle <int> " + std::to_string(hOne.ID().Index));
     outputHandleData<int>(hOne, SHOW_HEADER | SHOW_FOOTER);
     PW_UNIT_CHECK(hOne.isValid() == true);
     
     CHandle<int> hCopy;
     hCopy = hOne;
-    outputInternalHandleData("Copied handle <int> " + std::to_string(hOne.ID().C.Index));
+    outputInternalHandleData("Copied handle <int> " + std::to_string(hOne.ID().Index));
     outputHandleData<int>(hOne, SHOW_HEADER);
     outputHandleData<int>(hCopy, SHOW_FOOTER);
     PW_UNIT_CHECK(hOne.isValid() == true);
     PW_UNIT_CHECK(hCopy.isValid() == true);
     
     CHandle<double> hTwo(pTwo);
-    outputInternalHandleData("Created handle <double> " + std::to_string(hTwo.ID().C.Index));
+    outputInternalHandleData("Created handle <double> " + std::to_string(hTwo.ID().Index));
     outputHandleData<int>(hOne, SHOW_HEADER);
     outputHandleData<int>(hCopy);
     outputHandleData<double>(hTwo, SHOW_FOOTER);
@@ -254,7 +254,7 @@ int main()
     PW_UNIT_CHECK(hTwo.isValid() == true);
     
     CHandle<std::string> hThree(pThree);
-    outputInternalHandleData("Created handle <std::string> " + std::to_string(hThree.ID().C.Index));
+    outputInternalHandleData("Created handle <std::string> " + std::to_string(hThree.ID().Index));
     outputHandleData<int>(hOne, SHOW_HEADER);
     outputHandleData<int>(hCopy);
     outputHandleData<double>(hTwo);
@@ -265,7 +265,7 @@ int main()
     PW_UNIT_CHECK(hThree.isValid() == true);
     
     hOne.remove();
-    outputInternalHandleData("Removed handle <int> " + std::to_string(hOne.ID().C.Index));
+    outputInternalHandleData("Removed handle <int> " + std::to_string(hOne.ID().Index));
     outputHandleData<int>(hOne, SHOW_HEADER);
     outputHandleData<int>(hCopy);
     outputHandleData<double>(hTwo);
@@ -278,7 +278,7 @@ int main()
     double f1 = 23.479;
     double* pf1 = &f1;;
     CHandle<double> hFour(pf1);
-    outputInternalHandleData("Created handle <double> " + std::to_string(hFour.ID().C.Index));
+    outputInternalHandleData("Created handle <double> " + std::to_string(hFour.ID().Index));
     outputHandleData<int>(hOne, SHOW_HEADER);
     outputHandleData<int>(hCopy);
     outputHandleData<double>(hTwo);
@@ -292,7 +292,7 @@ int main()
     
     CHandle<std::string> hCopyStr;
     hCopyStr = hThree;
-    outputInternalHandleData("Copied handle <std::string> " + std::to_string(hThree.ID().C.Index));
+    outputInternalHandleData("Copied handle <std::string> " + std::to_string(hThree.ID().Index));
     outputHandleData<int>(hOne, SHOW_HEADER);
     outputHandleData<int>(hCopy);
     outputHandleData<double>(hTwo);
@@ -309,7 +309,7 @@ int main()
     std::string strUpdate("update");
     std::string* pstrUpdate = &strUpdate;
     hThree.update(pstrUpdate);
-    outputInternalHandleData("Updated handle <std::string> " + std::to_string(hThree.ID().C.Index));
+    outputInternalHandleData("Updated handle <std::string> " + std::to_string(hThree.ID().Index));
     outputHandleData<int>(hOne, SHOW_HEADER);
     outputHandleData<int>(hCopy);
     outputHandleData<double>(hTwo);
@@ -320,7 +320,7 @@ int main()
     PW_UNIT_CHECK(hCopy.isValid() == false);
     PW_UNIT_CHECK(hTwo.isValid() == true);
     PW_UNIT_CHECK(hThree.isValid() == true);
-    PW_UNIT_CHECK(hCopyStr.isValid() == false);
+    PW_UNIT_CHECK(hCopyStr.isValid() == true);
     PW_UNIT_CHECK(hFour.isValid() == true);
     
                 

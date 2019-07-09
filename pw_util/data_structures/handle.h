@@ -225,7 +225,7 @@ template<class T>
 inline void CHandle<T>::update(T* const _ptr)
 {
     METHOD_ENTRY("CHandle::update")
-    if (m_ID.C.Index > 0u)
+    if (m_ID.Index > 0u)
     {
         CHandleBase::s_HandleManager.update<T>(m_ID, _ptr);
     }

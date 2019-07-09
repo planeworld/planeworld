@@ -35,6 +35,7 @@
 
 //--- Program header ---------------------------------------------------------//
 #include "circle.h"
+#include "camera_entity.h"
 #include "com_console.h"
 #include "com_interface_provider.h"
 #include "font_manager.h"
@@ -119,14 +120,14 @@ class CVisualsManager : virtual public CGraphicsBase,
     private:
 
         //--- Constant methods [private] -------------------------------------//
-        void drawCircle(const Vector2i&, const Vector2d&, const double&, const CHandle<CCamera>&) const;
-        void drawCircle(CObject*, CCircle*, const CHandle<CCamera>&) const;
-        void drawPlanet(CObject*, CPlanet*, const CHandle<CCamera>&) const;
-        void drawPolygon(CObject*, CPolygon*, const CHandle<CCamera>&) const;
+        void drawCircle(const Vector2i&, const Vector2d&, const double&, const CHandle<CCameraEntity>&) const;
+        void drawCircle(CObject*, CCircle*, const CHandle<CCameraEntity>&) const;
+        void drawPlanet(CObject*, CPlanet*, const CHandle<CCameraEntity>&) const;
+        void drawPolygon(CObject*, CPolygon*, const CHandle<CCameraEntity>&) const;
 
-        void drawParticles(const CHandle<CCamera>&) const;
-        void drawObjects(const CHandle<CCamera>&) const;
-        void drawObjectsPlanetsAtmospheres(const CHandle<CCamera>&) const;
+        void drawParticles(const CHandle<CCameraEntity>&) const;
+        void drawObjects(const CHandle<CCameraEntity>&) const;
+        void drawObjectsPlanetsAtmospheres(const CHandle<CCameraEntity>&) const;
         
         void            drawBoundingBoxes() const;
         void            drawCOM() const;
@@ -181,7 +182,7 @@ class CVisualsManager : virtual public CGraphicsBase,
         int                             m_nVisualisations;  ///< Additional graphical output
         std::uint32_t                   m_nStarIndex;       ///< Indicates procedurally generated star
         std::uint32_t                   m_unCameraIndex;    ///< Index of currently used camera
-        CHandle<CCamera>                m_hCamera;          ///< Handle on camera for player view
+        CHandle<CCameraEntity>          m_hCamera;          ///< Handle on camera for player view
         
         int                             m_nCursorX;         ///< Mouse cursor position x
         int                             m_nCursorY;         ///< Mouse cursor position y

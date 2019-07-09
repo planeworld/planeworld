@@ -371,7 +371,7 @@ void CGeometry::copy(const CGeometry& _Geom)
         {
             for (auto Entry : *hShp.getHandleMap())
             {
-                std::cout << Entry.ID.C.Index << " ";
+                std::cout << Entry.ID.Index << " ";
             }
             std::cout << std::endl;
             std::cout << "Size: " << hShp.getFreeHandles()->size() << std::endl;
@@ -397,7 +397,7 @@ void CGeometry::copy(const CGeometry& _Geom)
     {
         auto hTmp = CHandle<IShape>(hShp->clone());
         m_Shapes.push_back(hTmp);
-        std::cout << "Created: " << hTmp.ID().C.Index << std::endl;
+        std::cout << "Created: " << hTmp.ID().Index << std::endl;
         std::cout << "Size: " << hShp.getFreeHandles()->size() << std::endl;
     }
 

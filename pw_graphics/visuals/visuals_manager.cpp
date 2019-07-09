@@ -103,7 +103,7 @@ CVisualsManager::~CVisualsManager()
 void CVisualsManager::drawCircle(const Vector2i& _vecCell,
                                  const Vector2d& _vecCenter,
                                  const double& _fRad,
-                                 const CHandle<CCamera>& _hCamera) const
+                                 const CHandle<CCameraEntity>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawCircle")
     Vector2d vecCenter = _vecCenter - _hCamera->getCenter() +
@@ -141,7 +141,7 @@ void CVisualsManager::drawCircle(const Vector2i& _vecCell,
 ///
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, const CHandle<CCamera>& _hCamera) const
+void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, const CHandle<CCameraEntity>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawCircle")
     this->drawCircle(_pObject->getCell(), _pCircle->getCenter(), _pCircle->getRadius(), _hCamera);
@@ -156,7 +156,7 @@ void CVisualsManager::drawCircle(CObject* _pObject, CCircle* _pCircle, const CHa
 /// \param _hCamera The camera to draw the planet with
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, const CHandle<CCamera>& _hCamera) const
+void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, const CHandle<CCameraEntity>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::draw")
 
@@ -392,7 +392,7 @@ void CVisualsManager::drawPlanet(CObject* _pObject, CPlanet* _pPlanet, const CHa
 ///
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, const CHandle<CCamera>& _hCamera) const
+void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, const CHandle<CCameraEntity>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawPolygon")
     m_Graphics.setLineWidth(_pPolygon->getThickness());    
@@ -408,7 +408,7 @@ void CVisualsManager::drawPolygon(CObject* _pObject, CPolygon* _pPolygon, const 
 /// \param _hCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawParticles(const CHandle<CCamera>& _hCamera) const
+void CVisualsManager::drawParticles(const CHandle<CCameraEntity>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawParticles")
     
@@ -484,7 +484,7 @@ void CVisualsManager::drawParticles(const CHandle<CCamera>& _hCamera) const
 /// \param _hCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawObjects(const CHandle<CCamera>& _hCamera) const
+void CVisualsManager::drawObjects(const CHandle<CCameraEntity>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawObjects")
 
@@ -531,7 +531,7 @@ void CVisualsManager::drawObjects(const CHandle<CCamera>& _hCamera) const
 /// \param _hCamera Draw visuals with respect to this camera
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void CVisualsManager::drawObjectsPlanetsAtmospheres(const CHandle<CCamera>& _hCamera) const
+void CVisualsManager::drawObjectsPlanetsAtmospheres(const CHandle<CCameraEntity>& _hCamera) const
 {
     METHOD_ENTRY("CVisualsManager::drawObjectsPlanetsAtmospheres")
     
@@ -964,8 +964,10 @@ UIDType CVisualsManager::createCamera(const CreationModeType _pMode)
     m_CreatorLock.acquireLock();
     m_pVisualsDataStorage->AccessCameras.setLock();
     
-    CCamera* pCam = new CCamera();
-    MEM_ALLOC("CCamera")
+    CCameraEntity* pCam = new CCameraEntity();
+    MEM_ALLOC("CCameraEntity")
+    
+    std::cout << "Camera ID: " <<  pCam->getHandle().ID().Raw() << std::endl;
     
     if (_pMode == CreationModeType::DIRECT)
     {
@@ -1149,7 +1151,7 @@ bool CVisualsManager::processFrame()
                 //
                     m_Graphics.setupWorldSpace();
                     
-                    m_hCamera = *CamWidget.second->getCamera();
+//                     m_hCamera = *CamWidget.second->getCamera();
                     m_hCamera->update();
                     this->drawStars();
                     this->drawWorld();
@@ -1298,7 +1300,7 @@ void CVisualsManager::addCamerasFromQueue()
     
     m_CreatorLock.acquireLock();
     
-    CCamera* pCam = nullptr;
+    CCameraEntity* pCam = nullptr;
     while (m_CamerasQueue.try_dequeue(pCam))
     {
         m_pVisualsDataStorage->addCamera(pCam);
