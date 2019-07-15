@@ -1,7 +1,7 @@
 | branch | state |
 |--------|-------|
-| master | [![Build Status](https://travis-ci.org/planeworld/planeworld.svg?branch=master)](https://travis-ci.org/planeworld/planeworld) ![Last commit](https://img.shields.io/github/last-commit/planeworld/planeworld.svg?branch=master) ![Code size](https://img.shields.io/github/languages/code-size/planeworld/planeworld.svg?branch=master) |
-| dev    | [![Build Status](https://travis-ci.org/planeworld/planeworld.svg?branch=dev)](https://travis-ci.org/planeworld/planeworld) ![Last commit](https://img.shields.io/github/last-commit/planeworld/planeworld.svg?branch=dev) ![Code size](https://img.shields.io/github/languages/code-size/planeworld/planeworld.svg?branch=dev) |
+| master | ![Build Status](https://img.shields.io/travis/planeworld/planeworld/master.svg) ![Codacy Badge](https://img.shields.io/codacy/grade/71e87f3e8e3e4c0a969196a4cef2f918/master.svg) ![Last commit](https://img.shields.io/github/last-commit/planeworld/planeworld/master.svg) |
+| dev    | ![Build Status](https://img.shields.io/travis/planeworld/planeworld/dev.svg) ![Codacy Badge](https://img.shields.io/codacy/grade/71e87f3e8e3e4c0a969196a4cef2f918/dev.svg) ![Last commit](https://img.shields.io/github/last-commit/planeworld/planeworld/dev.svg) |
 
 ![license](https://img.shields.io/github/license/planeworld/planeworld.svg)
 
