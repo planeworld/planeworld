@@ -5,6 +5,10 @@
 
 ![license](https://img.shields.io/github/license/planeworld/planeworld.svg)
 
+# Head over to Planeworld Next Generation
+
+**This project evolved over round about two decades, one of them revisioned with svn and eventually git. But time went on, I made a lot of experiences, with Planeworld and with 3rdparty libraries, so head over to** [Planeworld Next Generation (PWNG) ](https://github.com/planeworld/pwng-server)
+
 planeworld
 ==========
 
